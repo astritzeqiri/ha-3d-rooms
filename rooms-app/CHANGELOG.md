@@ -1,3 +1,7 @@
+# 0.7.1
+
+- Bundle an original teal and blue isometric room icon, with standard/high-resolution and light/dark assets for Home Assistant 2026.3 and newer.
+
 # 0.7.0
 
 - Allow direct orbit, pan and zoom in the component preview, synchronizing the fields and saved camera without reloading the model.

@@ -76,3 +76,13 @@ Verified the rebuilt cube in the isolated Home Assistant Core 2026.10.2 manager:
 ## 0.7.0 release artifact check
 
 All six application version fields agree on 0.7.0. The production manager/card build, formatting and 34 JavaScript tests passed. Extracted the generated integration ZIP into a separate package directory and ran it in official Home Assistant Core 2026.10.2 on port 18124 with the existing isolated library. All 11 Python tests and the authenticated catalog/scene/export/frontend/demo-light smoke checks passed. Both release archives were inspected for correct structure and absence of private models, runtime data and credentials. The user's production VM and HACS download remain outside these local checks.
+
+## 0.7.1 — integration branding
+
+- Added original isometric room artwork in the integration’s `brand/` directory: 256px and 512px RGBA PNGs, with explicit dark variants.
+- Visually inspected the mark; verified all four PNGs decode, have the expected dimensions and transparent corners.
+- Reviewed the release packager: its recursive integration copy includes `brand/` without changes. No frontend/backend behavior changed, so no frontend rebuild was needed.
+- Local brand support requires Home Assistant 2026.3 or newer. HACS views and the repair notice in the user’s installation have not been verified.
+
+- Release checks: all 34 Node tests and formatting passed; production manager/card rebuilt. Python tests passed (8), with 3 native-runtime tests skipped because Home Assistant is not installed in the host Python environment.
+- All six application version values agree at 0.7.1. Generated release ZIP verified for version, package structure, four valid icon PNGs and exclusion of private model archives. No fresh native HA/HACS visual verification was performed for this asset-only change.

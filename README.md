@@ -1,8 +1,14 @@
 # 3D Rooms
 
-**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.7.0.
+**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.7.1.
 
 Upload a prepared room or floor ZIP, connect its declared lights to Home Assistant light/switch entities, and view it on a dashboard. Click the physical modeled fixture to open Home Assistant's own light controls. Brightness, RGB color and white temperature follow the entity's reported state. All walls stay visible; a minimum ambient level keeps unlit rooms readable.
+
+## Integration icon
+
+![3D Rooms icon](custom_components/three_d_rooms/brand/icon.png)
+
+The integration bundles its own transparent icon for light and dark themes. Home Assistant 2026.3 and newer supports these local brand images; older versions and some HACS views may still display a placeholder. The editable icon generator is in `branding/generate-icons.py` (Pillow required).
 
 ## Install
 
