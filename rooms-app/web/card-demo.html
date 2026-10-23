@@ -66,7 +66,8 @@
           model,
           height: 620,
           preview_url: location.origin + "/",
-          tilt: 8,
+          view: "front",
+          tilt: 28,
         });
         card.hass = { states: {}, user: { is_admin: true } };
       }
@@ -74,7 +75,12 @@
       document.getElementById("kitchen").onclick = () => select("kitchen");
       document.getElementById("sample").onclick = () => select("sample-floor");
       document.getElementById("dark").onclick = () => {
-        card._preview = false;
+        for (const control of card._model.controls)
+          card._previewStates.set(control.id, {
+            on: false,
+            brightness: 255,
+            rgb: [255, 240, 212],
+          });
         card._signature = null;
         card.hass = { states: {}, user: { is_admin: true } };
       };

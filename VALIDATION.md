@@ -1,6 +1,6 @@
 # Validation — 2026-10-23
 
-Version: 0.3.0 early build.
+Version: 0.3.1 early build.
 
 ## Passed
 
@@ -23,7 +23,7 @@ Version: 0.3.0 early build.
 - Actual HA-managed cold backup/restore and upgrade behavior.
 - Home Assistant companion app on the physical iPhone and performance on a representative full-floor model.
 
-No real Home Assistant credentials were used and no real device commands were sent. No deployment or repository publication was performed.
+No real Home Assistant credentials were used and no real device commands were sent. The source and card bundle are published to the private project repository; no deployment to Home Assistant was performed.
 
 ## Color-control verification (0.2.0)
 
@@ -43,3 +43,9 @@ No real Home Assistant credentials were used and no real device commands were se
 
 - Browser checked the model-specific dashboard configuration dialog, multiple models, and light-off readability; no console errors. Narrow kitchen-card preview fits without horizontal document overflow.
 - HACS packaging uses root hacs.json and the self-contained root dist/ha-3d-rooms.js bundle; private model textures/GLBs are excluded. HACS installation itself still needs verification on the user's HA instance.
+
+## Front perspective and fixture controls (0.3.1)
+
+- Sixteen tests pass, including perspective bounds across narrow/wide viewports, headings and tilts. Production viewer and card builds pass.
+- Browser clicking the physical kitchen pendant opens its local preview controls; power and warm-temperature changes visibly update the room. Off retains low ambient visibility.
+- Mapped lights dispatch the native Home Assistant more-info event. Real Home Assistant dialog/device behavior remains to be checked on the user’s instance.

@@ -49,7 +49,8 @@
           lamp.userData.noMerge = true;
           for (const wall of room.walls)
             wall.group.userData.wallNormal = wall.def.n.toArray();
-          for (const ceiling of room.ceiling) ceiling.userData.ceiling = true;
+          for (const ceiling of room.ceiling)
+            if (ceiling !== lamp) ceiling.userData.ceiling = true;
           room.optimize?.({ static: true });
           room.group.traverse((o) => {
             if (o.geometry && !o.geometry.getAttribute("normal"))

@@ -109,3 +109,33 @@ test("dashboard refuses cross-origin preview URLs, non-admin access and ambiguou
   );
   await assert.rejects(c.load(), /Model not found/);
 });
+
+test("front perspective keeps all bounds inside the viewport across screen shapes and headings", async () => {
+  const { perspectiveFrame } = await import("../shared/floor-view.mjs");
+  for (const aspect of [0.45, 1, 2.4])
+    for (const heading of [0, 45, 90, 180])
+      for (const tilt of [0, 28, 35]) {
+        const min = [-5, 0, -8],
+          max = [5, 3, 8],
+          f = perspectiveFrame(min, max, aspect, tilt, heading);
+        const offset = f.position.map((v, i) => v - f.target[i]),
+          distance = Math.hypot(...offset),
+          normal = offset.map((v) => v / distance);
+        const right = [
+          f.up[1] * normal[2] - f.up[2] * normal[1],
+          f.up[2] * normal[0] - f.up[0] * normal[2],
+          f.up[0] * normal[1] - f.up[1] * normal[0],
+        ];
+        const dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0),
+          tangent = Math.tan((f.fov * Math.PI) / 360);
+        for (let corner = 0; corner < 8; corner++) {
+          const v = min.map(
+              (value, i) => ((corner >> i) & 1 ? max[i] : value) - f.target[i],
+            ),
+            depth = distance - dot(v, normal);
+          assert.ok(depth > f.near);
+          assert.ok(Math.abs(dot(v, right)) / (depth * tangent * aspect) < 1);
+          assert.ok(Math.abs(dot(v, f.up)) / (depth * tangent) < 1);
+        }
+      }
+});

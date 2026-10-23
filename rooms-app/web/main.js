@@ -316,7 +316,7 @@ $("floor-view").onclick = () => {
 };
 $("dashboard").onclick = () => {
   $("dashboard-yaml").value =
-    `type: custom:three-d-rooms-card\nmodel: ${selected.id}\nheight: 500\ntilt: 8\nheading: 0`;
+    `type: custom:three-d-rooms-card\nmodel: ${selected.id}\nheight: 500\nview: front\ntilt: 28\nheading: 0`;
   $("dashboard-dialog").showModal();
 };
 $("copy-dashboard").onclick = async () => {

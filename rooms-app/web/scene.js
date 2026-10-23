@@ -1,4 +1,4 @@
-import { floorFrame } from "../shared/floor-view.mjs";
+import { floorFrame, perspectiveFrame } from "../shared/floor-view.mjs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -43,7 +43,7 @@ export class SceneView {
       this.renderer.setSize(width, height);
       if (!width || !height) return;
       this.camera.aspect = width / height;
-      if (this.options.mode === "floor" && this.model) this.fitFloor();
+      if (this.options.mode !== "dollhouse" && this.model) this.fitFloor();
       this.camera.updateProjectionMatrix();
       this.render();
     });
@@ -67,6 +67,10 @@ export class SceneView {
       );
       for (const hit of ray.intersectObjects(this.scene.children, true)) {
         let o = hit.object;
+        let visible = true;
+        for (let parent = o; parent; parent = parent.parent)
+          if (!parent.visible) visible = false;
+        if (!visible) continue;
         while (o) {
           if (o.userData.pickControl) {
             onPick(o.userData.pickControl);
@@ -176,19 +180,24 @@ export class SceneView {
     return true;
   }
   setView(mode) {
-    this.options.mode = mode === "floor" ? "floor" : "dollhouse";
+    this.options.mode = ["floor", "front"].includes(mode) ? mode : "dollhouse";
     this.scene.background.set(
-      this.options.mode === "floor" ? "#1c1c1c" : "#0b100e",
+      this.options.mode !== "dollhouse" ? "#1c1c1c" : "#0b100e",
     );
     if (this.fill)
-      this.fill.intensity = this.options.mode === "floor" ? 0.35 : 0.25;
+      this.fill.intensity = this.options.mode !== "dollhouse" ? 0.35 : 0.25;
     this.camera =
       this.options.mode === "floor"
         ? new THREE.OrthographicCamera()
-        : new THREE.PerspectiveCamera(45, 1, 0.05, 500);
+        : new THREE.PerspectiveCamera(
+            this.options.mode === "front" ? 35 : 45,
+            1,
+            0.05,
+            500,
+          );
     // OrbitControls caches the camera up-axis when constructed.
     // Build it again after setting the floor camera orientation.
-    if (this.options.mode === "floor") this.fitFloor();
+    if (this.options.mode !== "dollhouse") this.fitFloor();
     this.orbit.dispose();
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
     this.orbit.enableDamping = false;
@@ -204,7 +213,9 @@ export class SceneView {
       "aria-label",
       this.options.mode === "floor"
         ? "3D floor plan with a slight overhead tilt. No device icons."
-        : "3D model. Drag to orbit; use the Lights controls below for keyboard access.",
+        : this.options.mode === "front"
+          ? "3D room from the front. Select the pendant light to control it."
+          : "3D model. Drag to orbit; use the Lights controls below for keyboard access.",
     );
     this.reset();
   }
@@ -212,14 +223,15 @@ export class SceneView {
     if (!this.bounds) return;
     const { width, height } = this.container.getBoundingClientRect();
     if (!width || !height) return;
-    const f = floorFrame(
+    const f = (this.options.mode === "front" ? perspectiveFrame : floorFrame)(
       this.bounds.min.toArray(),
       this.bounds.max.toArray(),
       width / height,
-      this.options.tilt ?? 8,
+      this.options.tilt ?? (this.options.mode === "front" ? 28 : 8),
       this.options.heading ?? 0,
     );
     Object.assign(this.camera, {
+      aspect: width / height,
       left: f.left,
       right: f.right,
       top: f.top,
@@ -236,7 +248,7 @@ export class SceneView {
   }
   reset() {
     if (!this.model) return;
-    if (this.options.mode === "floor") {
+    if (this.options.mode !== "dollhouse") {
       this.fitFloor();
       this.orbit.update();
       this.cutaway();
@@ -254,7 +266,7 @@ export class SceneView {
   }
   cutaway() {
     this.asset?.traverse((o) => {
-      if (o.userData.ceiling) o.visible = false;
+      if (o.userData.ceiling) o.visible = !!o.userData.controlId;
       if (o.userData.wallNormal && this.options.mode === "floor") {
         o.visible = true;
       } else if (o.userData.wallNormal) {
@@ -286,7 +298,7 @@ export class SceneView {
       }
     }
     this.ambient.intensity =
-      this.options.mode === "floor"
+      this.options.mode !== "dollhouse"
         ? Math.max(this.model.ambient ?? 0.22, 0.55)
         : (this.model.ambient ?? 0.22);
     for (const [m, color] of this.materials)

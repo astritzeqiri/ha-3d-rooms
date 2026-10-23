@@ -39,3 +39,39 @@ export function floorFrame(min, max, aspect, tilt = 8, heading = 0) {
     far: distance + diagonal * 4 + 100,
   };
 }
+
+/** Fit every bounds corner inside a front-facing perspective camera. */
+export function perspectiveFrame(min, max, aspect, tilt = 28, heading = 0) {
+  const frame = floorFrame(min, max, aspect, tilt, heading);
+  const t = (Math.max(0, Math.min(35, tilt)) * Math.PI) / 180,
+    h = (heading * Math.PI) / 180;
+  const normal = [
+    Math.sin(t) * Math.sin(h),
+    Math.cos(t),
+    Math.sin(t) * Math.cos(h),
+  ];
+  const right = [Math.cos(h), 0, -Math.sin(h)],
+    dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
+  const tangent = Math.tan((35 * Math.PI) / 360);
+  let distance = 1;
+  for (let corner = 0; corner < 8; corner++) {
+    const v = min.map(
+      (value, i) => ((corner >> i) & 1 ? max[i] : value) - frame.target[i],
+    );
+    distance = Math.max(
+      distance,
+      dot(v, normal) +
+        1.12 *
+          Math.max(
+            Math.abs(dot(v, right)) / (tangent * aspect),
+            Math.abs(dot(v, frame.up)) / tangent,
+          ),
+    );
+  }
+  return {
+    ...frame,
+    fov: 35,
+    aspect,
+    position: frame.target.map((v, i) => v + normal[i] * distance),
+  };
+}
