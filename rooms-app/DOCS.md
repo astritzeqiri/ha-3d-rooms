@@ -37,3 +37,7 @@ Each device card has an entity-settings cog. Use it to change or disconnect that
 Select a room, then use Devices, Saved views or Room settings. Create and edit dashboard views in one shared camera editor. Save a view, then use it in the Home Assistant visual card editor; YAML is optional under Advanced. Existing cards copy view settings, so reselect a view after changing it.
 
 Room settings can rename the room and assign an existing Home Assistant area. Refresh areas after creating one in HA. This association does not change device entity assignments and stays local to this installation rather than being included in portable exports. Existing room uploads, mappings and saved-view JSON files remain compatible.
+
+## Form fields — 0.11.1
+
+Room-name and plain text/number inputs now match the dark form controls, with padded 44px fields, rounded borders and consistent room-settings spacing. Update the HACS integration, restart Home Assistant and refresh your browser.

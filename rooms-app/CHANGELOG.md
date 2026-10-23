@@ -1,3 +1,7 @@
+# 0.11.1
+
+- Style room-name and other plain text/number inputs consistently with the dark form controls, with rounded borders, readable padding and a 44px minimum height. Align room-name and area-field spacing.
+
 # 0.11.0
 
 - Organize the manager around rooms with Devices, Saved views and Room settings tabs.

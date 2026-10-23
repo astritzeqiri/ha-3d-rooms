@@ -146,3 +146,10 @@ All six application version fields agree on 0.7.0. The production manager/card b
 - Formatting checks and production builds passed. All six application versions agree at 0.11.0; both release archives were inspected for correct contents and exclusion of private assets and credentials.
 - The exact integration ZIP was extracted into /tmp/three-d-rooms-room-workspace-artifact and loaded by a separate disposable Core container on port 18125. Existing kitchen geometry, three mappings, Kitchen area association and saved camera view survived the switch/restart. Native APIs also accepted a real dashboard card configuration from the saved view.
 - Browser observations verified native room tabs, area assignment and reopening a clean saved view through its deep link. The final 390px layout has no horizontal overflow (390px viewport and scroll width); the temporary viewport was reset. After the Mac was unlocked, native clicks verified room tabs, opening/saving/closing the shared view editor, dashboard handoff instructions, area settings save and separate room-scoped saved-view lists. Production HACS installation, the user's VM and physical devices remain untested.
+
+## Form input consistency — 0.11.1
+
+- Plain text and number fields now share the manager's dark field styles; Room settings uses aligned label spacing. The room-name field has an explicit text type and a 44px minimum height.
+- 57 Node tests and 11 pure Python tests passed; the six native Python tests skipped on the host. No backend/service behavior changed in this patch. Formatting, production build and diff checks passed; all six application versions agree at 0.11.1.
+- Inspected both archives for private asset/credential exclusion. Loaded the exact integration ZIP in the disposable official Core 2026.10.2 instance on port 18125. Browser verified corrected input appearance, editing, keyboard Tab navigation and room settings save. At 390px, viewport and scroll width both measure 390px; temporary viewport reset afterward.
+- Production HACS installation remains a user-side check. Existing room, area and device mappings loaded unchanged in the disposable runtime.
