@@ -1,6 +1,6 @@
 # Validation — 2026-10-23
 
-Version: 0.2.0 early build.
+Version: 0.3.0 early build.
 
 ## Passed
 
@@ -33,3 +33,13 @@ No real Home Assistant credentials were used and no real device commands were se
 - Browser checked a combined RGB/white simulated light (2200–6500 K) and white-only light (2700–6000 K). Only the combined light shows a color picker/effects/fade. Color preset, 2700 K white and advertised effect selections confirmed against the simulated backend.
 - Existing private kitchen package displays color/white controls in preview without re-export.
 - No real Home Assistant device commands were sent.
+
+## Dashboard verification (0.3.0)
+
+- Fifteen tests pass, adding floor-bounds framing across portrait/landscape aspects and rotations, authenticated Ingress model transport, missing models, ambiguous add-ons, and cross-origin preview denial.
+- Both the regular viewer and the standalone native-card bundle build.
+- Browser preview uses the private kitchen model with hidden ceiling, all floor walls, overhead orthographic camera and hidden markers. The sample floor also loads through the same card.
+- Native card uses current Home Assistant frontend session endpoints; actual HA OS resource registration, Supervisor sessions and companion-app rendering still need validation on the user's installation.
+
+- Browser checked the model-specific dashboard configuration dialog, multiple models, and light-off readability; no console errors. Narrow kitchen-card preview fits without horizontal document overflow.
+- HACS packaging uses root hacs.json and the self-contained root dist/ha-3d-rooms.js bundle; private model textures/GLBs are excluded. HACS installation itself still needs verification on the user's HA instance.

@@ -91,3 +91,15 @@ await writeFile(
 );
 await writeFile("examples/manifest.json", JSON.stringify(manifest, null, 2));
 console.log("Created examples/sample-floor.zip with two independent lights.");
+
+// Keep the upload-ready sample beside personal model exports in the local app project.
+const exportDirectory = new URL("../../model-exports/", import.meta.url);
+await mkdir(exportDirectory, { recursive: true });
+await writeFile(
+  new URL("sample-floor.zip", exportDirectory),
+  zipSync({
+    "manifest.json": strToU8(JSON.stringify(manifest, null, 2)),
+    "scene.glb": new Uint8Array(buffer),
+  }),
+);
+console.log("Upload-ready copy saved to model-exports/sample-floor.zip.");

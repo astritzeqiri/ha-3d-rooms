@@ -1,12 +1,16 @@
 import { readFile, mkdir, writeFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { join, dirname } from "node:path";
 import { zipSync, strToU8 } from "fflate";
-const [id, output] = process.argv.slice(2);
-if (!output) {
-  console.error("Usage: node tools/export-model.mjs model-id output.zip");
+const [id, requestedOutput] = process.argv.slice(2);
+const appRoot = fileURLToPath(new URL("..", import.meta.url));
+if (!id) {
+  console.error("Usage: node tools/export-model.mjs model-id [output.zip]");
   process.exit(1);
 }
-const data = process.env.DATA_DIR || ".data",
+const output =
+  requestedOutput || join(appRoot, "../model-exports", `${id}.zip`);
+const data = process.env.DATA_DIR || join(appRoot, ".data"),
   catalog = JSON.parse(await readFile(join(data, "catalog.json"), "utf8"));
 const model = catalog.models.find((m) => m.id === id);
 if (!model) throw new Error("Model not found");

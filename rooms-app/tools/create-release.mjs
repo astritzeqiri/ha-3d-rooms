@@ -2,7 +2,16 @@ import { readFile, readdir, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { zipSync } from "fflate";
 const files = {};
-const include = ["server", "shared", "web", "tools", "test", "examples"];
+const { version } = JSON.parse(await readFile("package.json", "utf8"));
+const include = [
+  "server",
+  "shared",
+  "web",
+  "dashboard",
+  "tools",
+  "test",
+  "examples",
+];
 async function add(path) {
   for (const entry of await readdir(path, { withFileTypes: true })) {
     const file = join(path, entry.name);
@@ -19,6 +28,7 @@ for (const file of [
   "package.json",
   "package-lock.json",
   "vite.config.mjs",
+  "vite.card.config.mjs",
   "LICENSE",
   "DOCS.md",
   "CHANGELOG.md",
@@ -29,9 +39,13 @@ files["three_d_rooms/README.md"] = new Uint8Array(
 );
 await mkdir("../releases", { recursive: true });
 await writeFile(
-  "../releases/3d-rooms-0.2.0-source.zip",
+  `../releases/3d-rooms-${version}-source.zip`,
   zipSync(files, { level: 6 }),
 );
+await writeFile(
+  `../releases/three-d-rooms-card-${version}.js`,
+  await readFile("dist/card/three-d-rooms-card.js"),
+);
 console.log(
-  "Prepared ../releases/3d-rooms-0.2.0-source.zip (no household model files or credentials).",
+  `Prepared 3d-rooms-${version}-source.zip and three-d-rooms-card-${version}.js in releases/.`,
 );

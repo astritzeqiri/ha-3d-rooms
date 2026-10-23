@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>3D Rooms dashboard preview</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #1c1c1c;
+        color: #eee;
+        font: 16px system-ui;
+        --card-background-color: #1c1c1c;
+        --primary-text-color: #eee;
+      }
+      main {
+        max-width: 720px;
+        margin: auto;
+      }
+      h1 {
+        font-size: 18px;
+        font-weight: 500;
+      }
+      p {
+        color: #aaa;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      three-d-rooms-card {
+        display: block;
+      }
+      button {
+        min-height: 44px;
+        padding: 10px 16px;
+        background: #303a32;
+        color: #eee;
+        border: 1px solid #536258;
+        border-radius: 8px;
+        margin: 8px 4px;
+      }
+      button:focus-visible {
+        outline: 2px solid #c3dbab;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>3D Rooms · Dashboard preview</h1>
+      <p>
+        Local model preview. Same card as Home Assistant, without device icons.
+        No real device commands.
+      </p>
+      <three-d-rooms-card></three-d-rooms-card
+      ><button id="kitchen">Your kitchen</button
+      ><button id="sample">Example floor</button
+      ><button id="dark">Simulated lights off</button>
+    </main>
+    <script type="module">
+      import "../dashboard/card.js";
+      const card = document.querySelector("three-d-rooms-card");
+      const model =
+        new URL(location.href).searchParams.get("model") || "kitchen";
+      function select(model) {
+        card.setConfig({
+          model,
+          height: 620,
+          preview_url: location.origin + "/",
+          tilt: 8,
+        });
+        card.hass = { states: {}, user: { is_admin: true } };
+      }
+      select(model);
+      document.getElementById("kitchen").onclick = () => select("kitchen");
+      document.getElementById("sample").onclick = () => select("sample-floor");
+      document.getElementById("dark").onclick = () => {
+        card._preview = false;
+        card._signature = null;
+        card.hass = { states: {}, user: { is_admin: true } };
+      };
+    </script>
+  </body>
+</html>

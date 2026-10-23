@@ -34,6 +34,10 @@ let models = [],
   simulated = new Map(),
   selection = 0;
 const fades = new Map();
+let viewMode =
+  new URL(location.href).searchParams.get("view") === "floor"
+    ? "floor"
+    : "dollhouse";
 const toast = (message) => {
   $("toast").textContent = message;
   $("toast").hidden = false;
@@ -262,6 +266,9 @@ async function choose(id) {
   $("model-type").textContent = selected.floor || "YOUR MODEL";
   $("settings").hidden = false;
   $("home-view").hidden = false;
+  $("floor-view").hidden = false;
+  $("dashboard").hidden = false;
+  $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
   $("preview-label").hidden = false;
   $("controls-section").hidden = false;
   $("control-count").textContent = `${selected.controls.length} declared`;
@@ -271,10 +278,14 @@ async function choose(id) {
   $("scene-status").textContent = "Loading your model…";
   try {
     const { SceneView } = await import("./scene");
-    view ??= new SceneView($("viewport"), (id) => {
-      view.highlight(id);
-      document.querySelector(`[data-toggle="${id}"]`)?.focus();
-    });
+    view ??= new SceneView(
+      $("viewport"),
+      (id) => {
+        view.highlight(id);
+        document.querySelector(`[data-toggle="${id}"]`)?.focus();
+      },
+      { mode: viewMode },
+    );
     const loaded = await view.load(
       selected,
       new URL(`api/models/${id}/scene.glb`, location.href).href,
@@ -294,6 +305,29 @@ $("models").addEventListener("click", (e) => {
   if (b) choose(b.dataset.model);
 });
 $("home-view").onclick = () => view?.reset();
+$("floor-view").onclick = () => {
+  viewMode = viewMode === "floor" ? "dollhouse" : "floor";
+  view?.setView(viewMode);
+  $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
+  const url = new URL(location.href);
+  if (viewMode === "floor") url.searchParams.set("view", "floor");
+  else url.searchParams.delete("view");
+  history.replaceState(null, "", url);
+};
+$("dashboard").onclick = () => {
+  $("dashboard-yaml").value =
+    `type: custom:three-d-rooms-card\nmodel: ${selected.id}\nheight: 500\ntilt: 8\nheading: 0`;
+  $("dashboard-dialog").showModal();
+};
+$("copy-dashboard").onclick = async () => {
+  try {
+    await navigator.clipboard.writeText($("dashboard-yaml").value);
+    toast("Dashboard configuration copied.");
+  } catch {
+    $("dashboard-yaml").select();
+    toast("Select and copy the configuration above.");
+  }
+};
 $("preview").onchange = () => {
   preview = $("preview").checked;
   drawControls();
@@ -421,6 +455,8 @@ $("confirm-delete").onclick = async () => {
       $("controls-section").hidden = true;
       $("settings").hidden = true;
       $("home-view").hidden = true;
+      $("floor-view").hidden = true;
+      $("dashboard").hidden = true;
       $("preview-label").hidden = true;
       $("title").textContent = "Bring your home into view";
       $("scene-status").hidden = true;

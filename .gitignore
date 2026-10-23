@@ -5,3 +5,5 @@ private-models/
 *.log
 rooms-app/.data-mock/
 releases/
+model-exports/
+.DS_Store

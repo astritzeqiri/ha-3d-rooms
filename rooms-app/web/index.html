@@ -41,7 +41,10 @@
             <h1 id="title">Bring your home into view</h1>
           </div>
           <div class="toolbar-actions">
-            <button id="home-view" hidden>Reset view</button
+            <button id="floor-view" aria-pressed="false" hidden>
+              Floor view</button
+            ><button id="dashboard" hidden>Add to dashboard</button
+            ><button id="home-view" hidden>Reset view</button
             ><button id="settings" hidden>Model settings</button>
           </div>
         </div>
@@ -90,6 +93,60 @@
         </section>
       </section>
     </main>
+    <dialog id="dashboard-dialog">
+      <div class="dialog-top">
+        <div>
+          <span class="eyebrow">HOME ASSISTANT DASHBOARD</span>
+          <h2>Your floor, at a glance</h2>
+        </div>
+        <button class="close" aria-label="Close dashboard setup">×</button>
+      </div>
+      <p>
+        A clean overhead view with live lighting and no device icons. Your
+        models stay inside the installed 3D Rooms add-on.
+      </p>
+      <p class="notice">
+        <strong>Using HACS?</strong> Add
+        <code>astritzeqiri/ha-3d-rooms</code> as a
+        <strong>Dashboard</strong> repository, download
+        <strong>3D Rooms Dashboard</strong>, and reload your browser. Then use
+        the configuration below.
+      </p>
+      <details>
+        <summary>Install the card manually instead</summary>
+        <ol class="setup-steps">
+          <li>
+            Download the card and copy it to Home Assistant’s
+            <code>config/www/</code> folder.
+          </li>
+          <li>
+            Add a dashboard resource: <code>/local/three-d-rooms-card.js</code>,
+            type <strong>JavaScript module</strong>.
+          </li>
+          <li>Add a Manual card using this configuration.</li>
+        </ol>
+      </details>
+      <label for="dashboard-yaml">Dashboard card configuration</label
+      ><textarea
+        id="dashboard-yaml"
+        readonly
+        rows="6"
+        spellcheck="false"
+      ></textarea>
+      <p class="muted small">
+        Requires the updated add-on on your Home Assistant server. This first
+        version uses an administrator login and automatically finds the
+        installed add-on.
+      </p>
+      <div class="dialog-actions">
+        <a
+          class="download-card"
+          href="./card/three-d-rooms-card.js"
+          download="three-d-rooms-card.js"
+          >Download card</a
+        ><button id="copy-dashboard" class="primary">Copy configuration</button>
+      </div>
+    </dialog>
     <dialog id="import-dialog">
       <form id="import-form">
         <div class="dialog-top">

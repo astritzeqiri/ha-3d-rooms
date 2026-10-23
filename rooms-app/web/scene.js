@@ -1,8 +1,15 @@
+import { floorFrame } from "../shared/floor-view.mjs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 export class SceneView {
-  constructor(container, onPick) {
+  constructor(container, onPick = () => {}, options = {}) {
+    this.options = {
+      mode: "dollhouse",
+      markers: true,
+      interactive: true,
+      ...options,
+    };
     this.container = container;
     this.onPick = onPick;
     this.materials = [];
@@ -26,6 +33,7 @@ export class SceneView {
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
     this.orbit.enableDamping = false;
+    this.orbit.enabled = this.options.interactive;
     this.orbit.addEventListener("change", () => {
       this.cutaway();
       this.render();
@@ -33,7 +41,9 @@ export class SceneView {
     this.resize = new ResizeObserver(() => {
       const { width, height } = container.getBoundingClientRect();
       this.renderer.setSize(width, height);
+      if (!width || !height) return;
       this.camera.aspect = width / height;
+      if (this.options.mode === "floor" && this.model) this.fitFloor();
       this.camera.updateProjectionMatrix();
       this.render();
     });
@@ -131,6 +141,7 @@ export class SceneView {
         new THREE.SphereGeometry(0.065, 12, 8),
         new THREE.MeshBasicMaterial({ color: "#c3dbab", depthTest: false }),
       );
+      marker.visible = this.options.markers && this.options.mode !== "floor";
       marker.position.fromArray(c.position);
       marker.userData.pickControl = c.id;
       marker.renderOrder = 10;
@@ -153,6 +164,7 @@ export class SceneView {
     const box = new THREE.Box3().setFromObject(this.asset),
       center = box.getCenter(new THREE.Vector3()),
       size = box.getSize(new THREE.Vector3()).length();
+    this.bounds = box;
     this.defaultTarget = model.camera?.target || center.toArray();
     this.defaultPosition =
       model.camera?.position ||
@@ -160,11 +172,80 @@ export class SceneView {
         .clone()
         .add(new THREE.Vector3(size * 0.7, size * 0.65, size * 0.7))
         .toArray();
-    this.reset();
+    this.setView(this.options.mode);
     return true;
+  }
+  setView(mode) {
+    this.options.mode = mode === "floor" ? "floor" : "dollhouse";
+    this.scene.background.set(
+      this.options.mode === "floor" ? "#1c1c1c" : "#0b100e",
+    );
+    if (this.fill)
+      this.fill.intensity = this.options.mode === "floor" ? 0.35 : 0.25;
+    this.camera =
+      this.options.mode === "floor"
+        ? new THREE.OrthographicCamera()
+        : new THREE.PerspectiveCamera(45, 1, 0.05, 500);
+    // OrbitControls caches the camera up-axis when constructed.
+    // Build it again after setting the floor camera orientation.
+    if (this.options.mode === "floor") this.fitFloor();
+    this.orbit.dispose();
+    this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
+    this.orbit.enableDamping = false;
+    this.orbit.enabled = this.options.interactive;
+    this.orbit.addEventListener("change", () => {
+      this.cutaway();
+      this.render();
+    });
+    this.orbit.enableRotate = this.options.mode !== "floor";
+    for (const f of this.fixtures.values())
+      f.marker.visible = this.options.markers && this.options.mode !== "floor";
+    this.renderer.domElement.setAttribute(
+      "aria-label",
+      this.options.mode === "floor"
+        ? "3D floor plan with a slight overhead tilt. No device icons."
+        : "3D model. Drag to orbit; use the Lights controls below for keyboard access.",
+    );
+    this.reset();
+  }
+  fitFloor() {
+    if (!this.bounds) return;
+    const { width, height } = this.container.getBoundingClientRect();
+    if (!width || !height) return;
+    const f = floorFrame(
+      this.bounds.min.toArray(),
+      this.bounds.max.toArray(),
+      width / height,
+      this.options.tilt ?? 8,
+      this.options.heading ?? 0,
+    );
+    Object.assign(this.camera, {
+      left: f.left,
+      right: f.right,
+      top: f.top,
+      bottom: f.bottom,
+      near: f.near,
+      far: f.far,
+      zoom: 1,
+    });
+    this.camera.position.fromArray(f.position);
+    this.camera.up.fromArray(f.up);
+    this.orbit.target.fromArray(f.target);
+    this.camera.lookAt(this.orbit.target);
+    this.camera.updateProjectionMatrix();
   }
   reset() {
     if (!this.model) return;
+    if (this.options.mode === "floor") {
+      this.fitFloor();
+      this.orbit.update();
+      this.cutaway();
+      this.render();
+      return;
+    }
+    const { width, height } = this.container.getBoundingClientRect();
+    this.camera.aspect = width / Math.max(height, 1);
+    this.camera.updateProjectionMatrix();
     this.camera.position.fromArray(this.defaultPosition);
     this.orbit.target.fromArray(this.defaultTarget);
     this.orbit.update();
@@ -174,7 +255,9 @@ export class SceneView {
   cutaway() {
     this.asset?.traverse((o) => {
       if (o.userData.ceiling) o.visible = false;
-      if (o.userData.wallNormal) {
+      if (o.userData.wallNormal && this.options.mode === "floor") {
+        o.visible = true;
+      } else if (o.userData.wallNormal) {
         const n = new THREE.Vector3().fromArray(o.userData.wallNormal);
         const at = o.getWorldPosition(new THREE.Vector3());
         o.visible = n.dot(this.camera.position.clone().sub(at)) > 0;
@@ -202,7 +285,10 @@ export class SceneView {
         m.emissiveIntensity = intensity * amount;
       }
     }
-    this.ambient.intensity = this.model.ambient ?? 0.22;
+    this.ambient.intensity =
+      this.options.mode === "floor"
+        ? Math.max(this.model.ambient ?? 0.22, 0.55)
+        : (this.model.ambient ?? 0.22);
     for (const [m, color] of this.materials)
       m.color.copy(color).multiplyScalar(0.5);
     this.render();
@@ -218,6 +304,14 @@ export class SceneView {
     this.scene.clear();
     this.model = null;
     this.render();
+  }
+  dispose() {
+    ++this.generation;
+    this.resize.disconnect();
+    this.orbit.dispose();
+    this.disposeScene(this.scene);
+    this.renderer.dispose();
+    this.renderer.domElement.remove();
   }
   render() {
     this.renderer.render(this.scene, this.camera);

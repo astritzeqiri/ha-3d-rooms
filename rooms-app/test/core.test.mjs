@@ -144,12 +144,13 @@ async function running(fn, options = {}) {
       dataDir: dir,
       bridge,
       production: true,
+      exportDir: join(dir, "exports"),
       ...options,
     });
   await new Promise((r) => app.server.listen(0, "127.0.0.1", r));
   const base = `http://127.0.0.1:${app.server.address().port}`;
   try {
-    await fn({ app, bridge, base });
+    await fn({ app, bridge, base, dir });
   } finally {
     await app.close();
     await rm(dir, { recursive: true, force: true });
@@ -157,13 +158,17 @@ async function running(fn, options = {}) {
 }
 const headers = { "X-Rooms-Request": "1" };
 test("API imports, maps and restricts commands to mapped controls; no simulated real actions", async () =>
-  running(async ({ base, bridge }) => {
+  running(async ({ base, bridge, dir }) => {
     let r = await fetch(base + "/api/models", {
       method: "POST",
       headers,
       body: sample,
     });
     assert.equal(r.status, 201);
+    assert.deepEqual(
+      await readFile(join(dir, "exports/sample-floor.zip")),
+      sample,
+    );
     r = await fetch(base + "/api/models/sample-floor/command", {
       method: "POST",
       headers,

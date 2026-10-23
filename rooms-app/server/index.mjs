@@ -1,5 +1,12 @@
 import http from "node:http";
-import { readFile, rm, mkdtemp } from "node:fs/promises";
+import {
+  readFile,
+  rm,
+  mkdtemp,
+  mkdir,
+  writeFile,
+  rename,
+} from "node:fs/promises";
 import { join, resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Store } from "./store.mjs";
@@ -12,6 +19,7 @@ export async function createApp({
   bridge = new HABridge(),
   production = process.env.NODE_ENV === "production",
   ingress = !!process.env.SUPERVISOR_TOKEN,
+  exportDir = ingress ? null : join(root, "../model-exports"),
 } = {}) {
   const store = await new Store(dataDir).open();
   bridge.start();
@@ -125,7 +133,23 @@ export async function createApp({
         try {
           const manifest = await extractPackage(buffer, stage);
           const model = await store.install(stage, manifest);
-          json(res, 201, { id: model.id });
+          let exportWarning;
+          if (!ingress && exportDir) {
+            try {
+              await mkdir(exportDir, { recursive: true });
+              const destination = join(exportDir, `${manifest.id}.zip`);
+              await writeFile(destination + ".tmp", buffer);
+              await rename(destination + ".tmp", destination);
+            } catch {
+              exportWarning =
+                "Model imported, but the upload-ready ZIP could not be saved to model-exports.";
+              console.warn(exportWarning);
+            }
+          }
+          json(res, 201, {
+            id: model.id,
+            ...(exportWarning ? { exportWarning } : {}),
+          });
         } finally {
           await rm(stage, { recursive: true, force: true });
         }
@@ -204,6 +228,18 @@ export async function createApp({
           json(res, 200, { ok: true });
           return;
         }
+      }
+      if (path === "/card/three-d-rooms-card.js" && req.method === "GET") {
+        const resource = await readFile(
+          join(root, "dist/card/three-d-rooms-card.js"),
+        );
+        res.writeHead(200, {
+          "Content-Type": "text/javascript",
+          "Cache-Control": "no-cache",
+          "X-Content-Type-Options": "nosniff",
+        });
+        res.end(resource);
+        return;
       }
       if (path.startsWith("/api/")) {
         json(res, 404, { error: "Not found." });
