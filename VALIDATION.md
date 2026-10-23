@@ -32,3 +32,14 @@ The local integration test uses disposable credentials saved only in `/tmp`; nei
 - Client tests verify concurrent/shared downloads, isolation by HA connection, revision invalidation, mapping-only reuse, and failure/retry. The sidebar and dashboard share bytes through the native panel bridge.
 - Browser timings on the local test machine were approximately 112 ms to prepare the GLB and 190 ms for its first render. GPU/browser performance elsewhere will vary.
 - Original files and mappings remain unchanged; compressed derivatives are generated for existing rooms without re-uploading.
+
+## 0.5.0 — saved dashboard components and compact light controls
+
+- Prepared in an isolated checkout at 2230e34, excluding concurrent unfinished camera-snapshot edits.
+- Node tests, formatting, production manager/card builds, and Python storage/archive/component tests passed.
+- Native permission and service tests passed inside official Home Assistant Core 2026.10.2.
+- A separate disposable container on localhost:18124 used a copy of the existing test configuration. Its existing kitchen upload and mappings loaded without re-upload. Setup, private compressed scenes, authenticated ETag validation, export, demo light services and invalid command rejection passed.
+- Browser verified automatic card loading, the 32 px button, click-to-toggle and hold-to-open native more info. The bundled native manager created and saved a kitchen component at 90° rotation and 1.25× zoom with matching dashboard configuration.
+- Component persistence, independent views and portable configuration round trips are covered by storage and component tests.
+- All application versions agree at 0.5.0. Release ZIP contents were inspected for correct layout and exclusion of private room data and credentials.
+- Production Home Assistant, physical lights and HACS download remain user-side checks. Room merging and current-camera snapshot export are not included.

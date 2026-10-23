@@ -1,3 +1,10 @@
+# 0.5.0
+
+- Add saved Home Assistant components with names, live room previews, independent rotation, tilt, zoom and card height, duplication and deletion.
+- Export and import portable component settings, and copy dashboard configurations. Components share the original room model and device mappings.
+- Add a compact 32 px bulb button beside each dashboard light. Click to toggle; hold to open Home Assistant more info. Keep a 44 px touch area.
+- Save components in both the native integration and legacy add-on. Preserve existing models, mappings and component catalogs. Room merging remains a future feature.
+
 # 0.4.1
 
 Reduce model loading delays: compressed authenticated scene responses, private ETag revalidation, and a bounded session cache shared by the dashboard and model manager. Reuse concurrent downloads, invalidate after model replacement, retry failed requests, and show download/preparation progress. Preserve scene quality and existing uploads.
@@ -25,10 +32,3 @@ Add capability-aware RGB color, Kelvin white temperature, device effects and fad
 # 0.1.0
 
 Initial model library, prepared ZIP/GLB imports, stable light metadata, entity mapping, preview lighting and Home Assistant WebSocket bridge. Includes Ingress packaging and persistent model storage. This is an early build pending HA OS device validation.
-
-### Unreleased — saved Home Assistant components
-
-- Added a Components section with named room views, live previews, save, duplicate,
-  delete, portable JSON import/export, and dashboard configuration copying.
-- Added per-card zoom from 0.5× to 3× alongside rotation, tilt and card height.
-- Persisted component settings in the native integration and add-on catalogs.

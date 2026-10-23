@@ -1,7 +1,7 @@
 {
   "domain": "three_d_rooms",
   "name": "3D Rooms",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "codeowners": ["@astritzeqiri"],
   "config_flow": true,
   "dependencies": ["frontend", "http", "websocket_api", "panel_custom"],

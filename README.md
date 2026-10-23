@@ -136,3 +136,7 @@ native integration and survive restarts.
 This release supports one room per component. The versioned component format
 stores room references as layers to allow future room composition; room merging
 is not available yet.
+
+### Updating to 0.5.0
+
+In **HACS → 3D Rooms**, download/update to **0.5.0**, restart Home Assistant itself, then refresh the browser. The bundled manager and card update together. Existing room uploads, entity mappings and saved components remain in place; no model re-upload is needed.
