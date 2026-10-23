@@ -25,6 +25,8 @@ This release requires a Home Assistant administrator account for both the model 
 
 Choose **Edit dashboard → Add card → By card → 3D Rooms**. Select a room or a saved view, adjust the title, view, rotation, tilt, zoom and height, then click **Save**. Home Assistant shows a live preview. Existing cards also open in this visual editor.
 
+The editor also has a **Time of day** switch (Automatic, Always day, Always night) for the selected room. It is saved with the room rather than the card, so every dashboard and the manager share it; it appears for rooms with daylight windows.
+
 Selecting a saved view copies its current configuration into the card; later edits to the original view do not change that dashboard card. Title and height edits preserve exact saved camera framing. Changing the room or projection, or choosing **Reset camera framing**, starts a new framing.
 
 For manual configuration, **Edit dashboard → Add card → Manual** still supports:
@@ -130,7 +132,7 @@ Choose a room in **Your rooms**. Its workspace has three tabs:
 
 - **Devices**: control lights and shades and use each device’s cog to assign a compatible entity.
 - **Saved views**: create, edit, duplicate, import or export dashboard views for this room. All views share the room’s device mappings.
-- **Room settings**: rename the room, assign an existing **Home Assistant area**, configure daylight, and find advanced entity mapping/export/removal actions.
+- **Room settings**: rename the room, assign an existing **Home Assistant area**, configure daylight, replace the room model, and find advanced entity mapping/export/removal actions.
 
 Assign an area under **Room settings → Home Assistant area → Save room settings**. Create areas in Home Assistant first, then use **Refresh areas** if needed. This links the imported 3D room to an area; it does not move or automatically reassign devices. Area IDs remain local to this HA installation and are excluded from portable room exports.
 
@@ -161,6 +163,10 @@ Prepared models can declare `type: "cover"` controls alongside lights. Connect e
 Re-export existing static rooms to add movable shades. Each cover needs stable `id`/`nodeIds`, a world-space marker `position`, `defaultPosition` (0–100), and `capabilities: ["open_close", "position", "stop"]`. Its GLB node carries `extras.controlId` and `extras.rollerShade: {top, height, defaultPosition}`. Slat children carry `extras.rollerShadePart: {center, height}` in local coordinates; the bottom rail adds `rail: true`. Export all parts fully closed so none are lost by visibility filtering. The original room viewer supplies this metadata automatically. Existing light-only packages and mappings remain compatible.
 
 Dashboard circles use Home Assistant’s entity/state icons, including custom entity icons. Badges show light On/Off, shade opening percentage and movement arrows, or unavailable/unmapped status. Marker state follows the entity; clicks retain the existing light toggle and native cover dialog behavior.
+
+### Replace a room model
+
+To publish an updated model without redoing your setup, open **Room settings → Replace room model**, choose the new room ZIP and confirm. The room keeps its ID, name, Home Assistant area, daylight mode and sun entity, saved views and dashboard cards, plus every device mapping whose control still exists with the same type (light or cover). Mappings for removed or type-changed controls are dropped and the manager reports how many; new controls start unmapped. A `bindings.json` in the ZIP only fills controls you haven't mapped. The ZIP's own model ID and title are ignored, so choose the room you mean to replace. Nothing changes if the ZIP is invalid.
 
 ## Daylight
 

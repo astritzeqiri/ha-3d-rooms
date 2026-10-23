@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-D-wiGEKb.js"></script>
+    <script type="module" crossorigin src="./assets/index-BjXi48vy.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/view-cube-B97d5y4T.js">
     <link rel="modulepreload" crossorigin href="./assets/camera-view-BL6u3TKn.js">
     <link rel="modulepreload" crossorigin href="./assets/component-CxbERJOA.js">
@@ -379,6 +379,33 @@
               lights.
             </p>
           </section>
+
+          <form
+            id="replace-form"
+            class="room-settings-card"
+            aria-labelledby="replace-heading"
+            hidden
+          >
+            <h3 id="replace-heading">Replace room model</h3>
+            <p class="muted small">
+              Upload an updated room ZIP to swap the 3D model. The room keeps
+              its name, area, daylight setting, saved views and the device
+              mappings that still match.
+            </p>
+            <label for="replace-package"
+              >Updated room ZIP (.zip)<input
+                id="replace-package"
+                type="file"
+                accept=".zip,application/zip"
+                required
+            /></label>
+            <div class="room-settings-actions">
+              <button id="replace-submit" class="primary" type="submit">
+                Replace model
+              </button>
+            </div>
+            <p id="replace-error" class="error" role="alert"></p>
+          </form>
 
           <details class="room-advanced">
             <summary>Advanced room settings</summary>

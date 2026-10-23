@@ -490,6 +490,8 @@ function drawRoomSettings() {
     add(selected.areaId, "Previously assigned area (unavailable)");
   $("room-area").value = selected.areaId || "";
   $("room-area").disabled = !status.connected;
+  $("replace-form").hidden = !native;
+  $("replace-error").textContent = "";
   $("room-area-note").textContent =
     areasError ||
     (!status.connected
@@ -554,6 +556,50 @@ $("room-settings-form").onsubmit = async (event) => {
     $("room-settings-error").textContent = error.message;
   } finally {
     $("save-room-settings").disabled = false;
+  }
+};
+$("replace-form").onsubmit = async (event) => {
+  event.preventDefault();
+  const model = selected;
+  const file = $("replace-package").files[0];
+  if (!file) return;
+  if (file.size > 100 * 1024 * 1024) {
+    $("replace-error").textContent = "Choose a ZIP smaller than 100 MB.";
+    return;
+  }
+  if (
+    !confirm(
+      `Replace the 3D model for ${model.title}? Its name, area, daylight setting, saved views and matching device mappings are kept.`,
+    )
+  )
+    return;
+  $("replace-submit").disabled = true;
+  $("replace-submit").textContent = "Replacing…";
+  $("replace-error").textContent = "";
+  try {
+    const result = await api(`models/${model.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/zip" },
+      body: file,
+    });
+    models = await api("models");
+    $("replace-form").reset();
+    await choose(model.id, "settings");
+    const notes = [];
+    if (result.removedBindings.length)
+      notes.push(
+        `${result.removedBindings.length} mapping${result.removedBindings.length === 1 ? "" : "s"} removed because the device changed or no longer exists`,
+      );
+    if (result.unmappedControls.length)
+      notes.push(
+        `${result.unmappedControls.length} device${result.unmappedControls.length === 1 ? " needs" : "s need"} an entity`,
+      );
+    toast(["Room model replaced.", ...notes].join(" · "));
+  } catch (error) {
+    $("replace-error").textContent = error.message;
+  } finally {
+    $("replace-submit").disabled = false;
+    $("replace-submit").textContent = "Replace model";
   }
 };
 $("room-export").onclick = () => $("export-model").click();

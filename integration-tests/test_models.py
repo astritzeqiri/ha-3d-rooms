@@ -129,6 +129,68 @@ class PackageTests(unittest.TestCase):
         self.store.update_room("kitchen", {"areaId": ""})
         self.assertEqual(self.store.find("kitchen")["areaId"], "")
 
+    def test_replace_keeps_room_setup_and_drops_only_incompatible_mappings(self):
+        window = {"id": "window", "nodeId": "glass", "position": [0, 2, 1], "inward": [0, 0, -1], "width": 1, "height": 1}
+        daylight = {"mode": "night", "entity": "sun.sun", "windows": [window]}
+        lamp = {"id": "lamp", "label": "Lamp", "type": "light", "position": [1, 1, 0],
+                "capabilities": ["on_off"], "nodeIds": ["lamp-node"]}
+        shade = {"id": "shade", "label": "Shade", "type": "cover", "position": [0, 2, 0], "nodeIds": ["shade-node"],
+                 "defaultPosition": 50, "capabilities": ["open_close"]}
+        ceiling = package()  # reads the default control for reuse below
+        with zipfile.ZipFile(BytesIO(ceiling)) as archive:
+            ceiling = json.loads(archive.read("manifest.json"))["controls"][0]
+        first_document = {"asset": {"version": "2.0"}, "nodes": [
+            {"extras": {"controlId": "fixture", "daylightWindowId": "glass"}},
+            {"extras": {"controlId": "shade-node"}}]}
+        self.store.install(package(manifest_change={"daylight": daylight, "controls": [ceiling, shade]}, document=first_document))
+        self.store.bind("kitchen", "ceiling", "light.kitchen")
+        self.store.bind("kitchen", "shade", "cover.kitchen")
+        self.store.update_room("kitchen", {"title": "My kitchen", "areaId": "kitchen"})
+        self.store.set_daylight("kitchen", {"mode": "auto", "entity": "sun.home"})
+        self.store.put_component({"schemaVersion": 1, "id": "kitchen-view", "title": "Kitchen overview", "height": 500,
+                                  "layers": [{"model": "kitchen", "view": "front", "heading": 90, "tilt": 28, "zoom": 1.5}]})
+        old_folder, revision = self.store.find("kitchen")["folder"], self.store.revision("kitchen")
+        # The updated export renames its title, removes the shade and adds a lamp.
+        second_document = {"asset": {"version": "2.0"}, "nodes": [
+            {"extras": {"controlId": "fixture", "daylightWindowId": "glass"}},
+            {"extras": {"controlId": "lamp-node"}}]}
+        result = self.store.replace("kitchen", package(
+            manifest_change={"title": "Export title", "daylight": daylight, "controls": [ceiling, lamp]},
+            document=second_document, bindings={"lamp": "light.lamp", "ceiling": "light.other"}))
+        self.assertEqual(result["removedBindings"], ["shade"])
+        self.assertEqual(result["unmappedControls"], [])
+        reopened = models.ModelStore(self.temp.name).open()
+        room = reopened.find("kitchen")
+        self.assertEqual(room["title"], "My kitchen")
+        self.assertEqual(room["areaId"], "kitchen")
+        self.assertEqual(room["daylight"]["mode"], "auto")
+        self.assertEqual(room["daylight"]["entity"], "sun.home")
+        self.assertEqual(room["bindings"], {"ceiling": "light.kitchen", "lamp": "light.lamp"})
+        self.assertEqual([c["id"] for c in room["controls"]], ["ceiling", "lamp"])
+        self.assertEqual(reopened.components[0]["layers"][0]["model"], "kitchen")
+        self.assertNotEqual(reopened.revision("kitchen"), revision)
+        self.assertFalse((Path(self.temp.name) / "models" / old_folder).exists())
+        self.assertEqual(len(reopened.models), 1)
+
+    def test_replace_ignores_manifest_id_and_failures_leave_room_untouched(self):
+        self.store.install(package(bindings={"ceiling": "light.kitchen"}))
+        self.store.replace("kitchen", package(manifest_change={"id": "different"}))
+        self.assertEqual([m["id"] for m in self.store.models], ["kitchen"])
+        self.assertEqual(self.store.find("kitchen")["bindings"], {"ceiling": "light.kitchen"})
+        before, folder = self.store.catalog(), self.store.find("kitchen")["folder"]
+        with self.assertRaises(ValueError):
+            self.store.replace("missing", package())
+        with self.assertRaises(ValueError):
+            self.store.replace("kitchen", package(manifest_change={"scene": "other.glb"}))
+        with patch.object(self.store, "save", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError):
+                self.store.replace("kitchen", package())
+        self.assertEqual(self.store.catalog(), before)
+        self.assertTrue((Path(self.temp.name) / "models" / folder / "scene.glb").exists())
+        self.assertEqual(
+            sorted(p.name for p in (Path(self.temp.name) / "models").iterdir()), [folder])
+        self.assertFalse([p for p in Path(self.temp.name).iterdir() if p.name.startswith("import-")])
+
     def test_model_roundtrip_preserves_mappings_and_private_storage(self):
         self.store.install(package(bindings={"ceiling": "light.kitchen"}))
         exported = self.store.export("kitchen")

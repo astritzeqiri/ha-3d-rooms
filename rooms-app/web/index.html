@@ -375,6 +375,33 @@
             </p>
           </section>
 
+          <form
+            id="replace-form"
+            class="room-settings-card"
+            aria-labelledby="replace-heading"
+            hidden
+          >
+            <h3 id="replace-heading">Replace room model</h3>
+            <p class="muted small">
+              Upload an updated room ZIP to swap the 3D model. The room keeps
+              its name, area, daylight setting, saved views and the device
+              mappings that still match.
+            </p>
+            <label for="replace-package"
+              >Updated room ZIP (.zip)<input
+                id="replace-package"
+                type="file"
+                accept=".zip,application/zip"
+                required
+            /></label>
+            <div class="room-settings-actions">
+              <button id="replace-submit" class="primary" type="submit">
+                Replace model
+              </button>
+            </div>
+            <p id="replace-error" class="error" role="alert"></p>
+          </form>
+
           <details class="room-advanced">
             <summary>Advanced room settings</summary>
             <div class="room-settings-actions">

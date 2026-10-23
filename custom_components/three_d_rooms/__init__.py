@@ -4,7 +4,13 @@ from pathlib import Path
 
 from homeassistant.components import frontend, panel_custom, websocket_api
 from homeassistant.components.http import StaticPathConfig
-from .api import ModelAssetView, ModelUploadView, RoomsRuntime, websocket_request
+from .api import (
+    ModelAssetView,
+    ModelReplaceView,
+    ModelUploadView,
+    RoomsRuntime,
+    websocket_request,
+)
 from .const import DOMAIN, STATIC_URL, VERSION
 from .models import ModelStore
 
@@ -15,6 +21,7 @@ async def async_setup(hass, config):
         [StaticPathConfig(STATIC_URL, str(Path(__file__).parent / "frontend"), False)]
     )
     hass.http.register_view(ModelUploadView(hass))
+    hass.http.register_view(ModelReplaceView(hass))
     hass.http.register_view(ModelAssetView(hass))
     websocket_api.async_register_command(hass, websocket_request)
     hass.data.setdefault(DOMAIN, {})

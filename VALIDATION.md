@@ -153,3 +153,10 @@ All six application version fields agree on 0.7.0. The production manager/card b
 - 57 Node tests and 11 pure Python tests passed; the six native Python tests skipped on the host. No backend/service behavior changed in this patch. Formatting, production build and diff checks passed; all six application versions agree at 0.11.1.
 - Inspected both archives for private asset/credential exclusion. Loaded the exact integration ZIP in the disposable official Core 2026.10.2 instance on port 18125. Browser verified corrected input appearance, editing, keyboard Tab navigation and room settings save. At 390px, viewport and scroll width both measure 390px; temporary viewport reset afterward.
 - Production HACS installation remains a user-side check. Existing room, area and device mappings loaded unchanged in the disposable runtime.
+
+## Time of day switch and room model replacement — 0.12.0
+
+- The card editor gains a Time of day switch that writes the room's existing daylight setting through the administrator-only API; it is hidden for rooms without daylight windows and reverts with an error if saving fails. Room Settings gains Replace room model, backed by an authenticated `PUT /api/three_d_rooms/models/{id}`. The room keeps its ID, name, area, daylight mode/entity and matching mappings; the catalog commits atomically and the old model folder is removed only afterward.
+- 59 Node tests, formatting and production builds passed. The host Python run passed 13 pure tests and skipped the six native ones; new tests cover kept versus dropped mappings, ID/title handling, failed writes and cleanup.
+- In the pinned official Core 2026.10.2 container, six native tests passed. `integration-tests/live-check.mjs` now also checks, against the disposable instance only: unauthenticated replace returns 401, a valid replace keeps the renamed room and mappings and changes the scene revision, the new scene downloads, and an invalid ZIP returns 400 without changing the room.
+- Not browser-verified: clicking the Replace form and the card editor's Time of day switch in the native UI. Production HACS installation, the user's VM and physical devices remain untested.

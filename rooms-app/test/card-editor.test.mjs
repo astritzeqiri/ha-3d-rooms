@@ -133,3 +133,56 @@ test("library load errors allow explicit retry and do not erase existing config"
   assert.equal(field("retry").hidden, true);
   assert.equal(field("model").value, "kitchen");
 });
+test("time of day is saved to the room's daylight settings, not the card", async () => {
+  const { editor, field, events } = harness();
+  const calls = [];
+  editor._hass = {
+    callWS: async (message) => {
+      calls.push(message);
+      return { daylight: { mode: message.data.mode, entity: "sun.sun" } };
+    },
+  };
+  editor._models = [
+    {
+      id: "kitchen",
+      daylight: { mode: "auto", entity: "sun.sun", windows: [] },
+    },
+  ];
+  editor._sync();
+  assert.equal(field("daylight-setting").hidden, false);
+  assert.equal(field("daylight").value, "auto");
+  field("daylight").value = "night";
+  await editor._daylight();
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [
+    {
+      type: "three_d_rooms/request",
+      operation: "daylight",
+      data: { model: "kitchen", mode: "night", entity: "sun.sun" },
+    },
+  ]);
+  assert.equal(events.length, 0);
+  assert.equal(editor._models[0].daylight.mode, "night");
+  assert.equal(editor._models[0].daylight.windows.length, 0);
+});
+test("time of day is hidden without daylight windows and reverts on failure", async () => {
+  const { editor, field } = harness();
+  editor._models = [{ id: "kitchen" }];
+  editor._sync();
+  assert.equal(field("daylight-setting").hidden, true);
+  editor._models = [
+    {
+      id: "kitchen",
+      daylight: { mode: "day", entity: "sun.sun", windows: [] },
+    },
+  ];
+  editor._hass = {
+    callWS: async () => {
+      throw new Error("Choose an existing sun entity for Auto daylight.");
+    },
+  };
+  editor._sync();
+  field("daylight").value = "auto";
+  await editor._daylight();
+  assert.equal(field("daylight").value, "day");
+  assert.equal(field("error").hidden, false);
+});

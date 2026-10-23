@@ -1,3 +1,8 @@
+# 0.12.0
+
+- Add a Time of day switch (Automatic, Always day, Always night) to the dashboard card editor. It saves to the room's daylight settings, so the card, other dashboards and the manager stay in sync.
+- Add Replace room model in Room settings. Upload an updated room ZIP to swap the 3D model while keeping the room's ID, name, area, daylight setting, saved views and every device mapping that still matches; mappings for removed or type-changed devices are dropped and reported.
+
 # 0.11.1
 
 - Style room-name and other plain text/number inputs consistently with the dark form controls, with rounded borders, readable padding and a 44px minimum height. Align room-name and area-field spacing.

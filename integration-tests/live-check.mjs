@@ -105,8 +105,24 @@ try {
  const exported=await fetch(base+'/api/three_d_rooms/models/kitchen/export.zip',{headers:{Authorization:`Bearer ${session.access_token}`}});
  assert.equal(exported.status,200);
  await writeFile('/tmp/three-d-rooms-migration-test.zip',Buffer.from(await exported.arrayBuffer()));
+ await call({type:'three_d_rooms/request',operation:'room',data:{model:'kitchen',title:'Replace check kitchen'}});
+ const beforeReplace=(await call({type:'three_d_rooms/request',operation:'models'})).find(m=>m.id==='kitchen');
+ const replaceURL=base+'/api/three_d_rooms/models/kitchen';
+ const replacement=await readFile(new URL('../model-exports/kitchen.zip',import.meta.url));
+ assert.equal((await fetch(replaceURL,{method:'PUT',body:replacement})).status,401,'replacing a model requires authentication');
+ const replaced=await fetch(replaceURL,{method:'PUT',headers:{Authorization:`Bearer ${session.access_token}`},body:replacement});
+ assert.equal(replaced.status,200,await replaced.text());
+ const afterReplace=(await call({type:'three_d_rooms/request',operation:'models'})).find(m=>m.id==='kitchen');
+ assert.equal(afterReplace.title,'Replace check kitchen','replacement keeps the local room name');
+ assert.deepEqual(afterReplace.bindings,beforeReplace.bindings,'replacement keeps matching device mappings');
+ assert.notEqual(afterReplace.sceneRevision,beforeReplace.sceneRevision,'replacement invalidates the cached scene');
+ const replacedScene=await fetch(base+'/api/three_d_rooms/models/kitchen/scene.glb',{headers:{Authorization:`Bearer ${session.access_token}`}});
+ assert.equal(replacedScene.status,200);
+ const bad=await fetch(replaceURL,{method:'PUT',headers:{Authorization:`Bearer ${session.access_token}`},body:'not a zip'});
+ assert.equal(bad.status,400,'invalid replacement is rejected');
+ assert.equal((await call({type:'three_d_rooms/request',operation:'models'})).find(m=>m.id==='kitchen').sceneRevision,afterReplace.sceneRevision,'failed replacement leaves the room unchanged');
  const dashboards=await call({type:'lovelace/dashboards/list'});
  if (!dashboards.some(d=>d.url_path==='rooms-check')) await call({type:'lovelace/dashboards/create',url_path:'rooms-check',title:'3D Rooms Check',show_in_sidebar:true,require_admin:true});
  await call({type:'lovelace/config/save',url_path:'rooms-check',config:{views:[{title:'Kitchen',path:'kitchen',type:'masonry',cards:[{type:'custom:three-d-rooms-card',model:'kitchen',height:600,view:'front',tilt:28,heading:0}]}]}});
- console.log('PASS: setup, sidebar, bundled module, private upload/scene/export, RGB/brightness/off/temperature service updates and invalid settings rejected.');
+ console.log('PASS: setup, sidebar, bundled module, private upload/scene/export/replace, RGB/brightness/off/temperature service updates and invalid settings rejected.');
 } finally {ws.close();}

@@ -38,6 +38,11 @@ export async function connectNative() {
     async api(path, options = {}) {
       if (path === "models" && options.method === "POST")
         return (await response("/api/three_d_rooms/models", options)).json();
+      const replacement = path.match(/^models\/([a-z0-9_-]+)$/);
+      if (replacement && options.method === "PUT")
+        return (
+          await response(`/api/three_d_rooms/models/${replacement[1]}`, options)
+        ).json();
       if (path === "components")
         return bridge.request(
           options.method === "PUT" ? "save_component" : "components",

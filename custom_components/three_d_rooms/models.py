@@ -483,6 +483,66 @@ class ModelStore:
         finally:
             shutil.rmtree(stage, ignore_errors=True)
 
+    def replace(self, model_id, data):
+        """Swap a room's geometry and controls while keeping its local setup.
+
+        The room keeps its ID (so saved views and dashboards still resolve),
+        name, area and daylight mode. Mappings survive for controls that still
+        exist with a compatible type; the commit is atomic like ``install``.
+        """
+        stage = Path(tempfile.mkdtemp(prefix="import-", dir=self.directory))
+        installed = None
+        try:
+            manifest, package_bindings = extract_package(data, stage)
+            models = deepcopy(self.models)
+            index = next((i for i, m in enumerate(models) if m["id"] == model_id), None)
+            if index is None:
+                raise ValueError("Model not found.")
+            previous = models[index]
+            manifest = {**manifest, "id": model_id, "title": previous["title"]}
+            if "daylight" in manifest and "daylight" in previous:
+                manifest["daylight"] = validate_daylight(
+                    {
+                        **manifest["daylight"],
+                        "mode": previous["daylight"]["mode"],
+                        "entity": previous["daylight"]["entity"],
+                    },
+                    manifest["controls"],
+                )
+            controls = {c["id"]: c for c in manifest["controls"]}
+            bindings = {
+                control_id: entity_id
+                for control_id, entity_id in previous["bindings"].items()
+                if control_id in controls and compatible_entity(controls[control_id], entity_id)
+            }
+            removed = sorted(set(previous["bindings"]) - set(bindings))
+            for control_id, entity_id in package_bindings.items():
+                bindings.setdefault(control_id, entity_id)
+            folder = uuid4().hex
+            models[index] = {
+                **manifest,
+                "bindings": bindings,
+                "folder": folder,
+                "importedAt": datetime.now(timezone.utc).isoformat(),
+                **({"areaId": previous["areaId"]} if "areaId" in previous else {}),
+            }
+            installed = self.directory / "models" / folder
+            os.replace(stage, installed)
+            self.save(models)
+            shutil.rmtree(self.directory / "models" / previous["folder"], ignore_errors=True)
+            return {
+                "id": model_id,
+                "keptBindings": len(bindings),
+                "removedBindings": removed,
+                "unmappedControls": [c["id"] for c in manifest["controls"] if c["id"] not in bindings],
+            }
+        except Exception:
+            if installed is not None:
+                shutil.rmtree(installed, ignore_errors=True)
+            raise
+        finally:
+            shutil.rmtree(stage, ignore_errors=True)
+
     def set_daylight(self, model_id, settings):
         models = deepcopy(self.models)
         model = next((m for m in models if m["id"] == model_id), None)

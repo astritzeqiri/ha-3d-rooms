@@ -278,6 +278,19 @@ def runtime_for(request, hass):
     return runtime
 
 
+async def read_upload(request):
+    """Collect a bounded ZIP body, or return None when it exceeds the limit."""
+    data = bytearray()
+    async for piece in request.content.iter_chunked(1024 * 1024):
+        data.extend(piece)
+        if len(data) > MAX_UPLOAD:
+            return None
+    return bytes(data)
+
+
+UPLOAD_ERRORS = (ValueError, KeyError, TypeError, UnicodeError, zipfile.BadZipFile)
+
+
 class ModelUploadView(HomeAssistantView):
     url = "/api/three_d_rooms/models"
     name = "api:three_d_rooms:upload"
@@ -288,23 +301,38 @@ class ModelUploadView(HomeAssistantView):
 
     async def post(self, request):
         runtime = runtime_for(request, self.hass)
-        data = bytearray()
-        async for piece in request.content.iter_chunked(1024 * 1024):
-            data.extend(piece)
-            if len(data) > MAX_UPLOAD:
-                return self.json({"error": "Upload exceeds 100 MB."}, 413)
+        data = await read_upload(request)
+        if data is None:
+            return self.json({"error": "Upload exceeds 100 MB."}, 413)
         try:
-            result = await runtime.work(runtime.store.install, bytes(data))
-        except (
-            ValueError,
-            KeyError,
-            TypeError,
-            UnicodeError,
-            zipfile.BadZipFile,
-        ) as error:
+            result = await runtime.work(runtime.store.install, data)
+        except UPLOAD_ERRORS as error:
             return self.json({"error": str(error)}, 400)
         self.hass.bus.async_fire("three_d_rooms_updated")
         return self.json(result, 201)
+
+
+class ModelReplaceView(HomeAssistantView):
+    """Replace one room's model package without losing its configuration."""
+
+    url = "/api/three_d_rooms/models/{model_id}"
+    name = "api:three_d_rooms:replace"
+    requires_auth = True
+
+    def __init__(self, hass):
+        self.hass = hass
+
+    async def put(self, request, model_id):
+        runtime = runtime_for(request, self.hass)
+        data = await read_upload(request)
+        if data is None:
+            return self.json({"error": "Upload exceeds 100 MB."}, 413)
+        try:
+            result = await runtime.work(runtime.store.replace, model_id, data)
+        except UPLOAD_ERRORS as error:
+            return self.json({"error": str(error)}, 400)
+        self.hass.bus.async_fire("three_d_rooms_updated")
+        return self.json(result)
 
 
 class ModelAssetView(HomeAssistantView):

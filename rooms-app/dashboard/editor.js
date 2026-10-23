@@ -25,6 +25,12 @@ export class ThreeDRoomsEditor extends HTMLElement {
       <label>Height (px)<input id="height" type="number" min="180" max="1600" step="1"></label>
     </div>
     <label class="check"><input id="interactive" type="checkbox">Allow camera movement on the dashboard</label>
+    <label id="daylight-setting" hidden>Time of day<select id="daylight">
+      <option value="auto">Automatic · follow the Home Assistant sun</option>
+      <option value="day">Always day</option>
+      <option value="night">Always night</option>
+    </select></label>
+    <p id="daylight-note" hidden>Saved with this room, so every dashboard and the 3D Rooms manager use the same setting.</p>
     <button id="reset">Reset camera framing</button>
     <p id="error" role="alert" hidden></p>
     <p>Upload rooms and manage device mappings in the 3D Rooms sidebar. Save this card with Home Assistant’s Save button.</p>`;
@@ -41,6 +47,7 @@ export class ThreeDRoomsEditor extends HTMLElement {
     ])
       this._field(key).addEventListener("change", () => this._change(key));
     this._field("component").onchange = () => this._component();
+    this._field("daylight").addEventListener("change", () => this._daylight());
     this._field("retry").onclick = () => this._load();
     this._field("reset").onclick = () => {
       const config = {
@@ -91,6 +98,10 @@ export class ThreeDRoomsEditor extends HTMLElement {
       select.add(new Option(`${model} (not in room library)`, model));
       select.value = model;
     }
+    const daylight = this._models?.find((m) => m.id === model)?.daylight;
+    this._field("daylight-setting").hidden = !daylight;
+    this._field("daylight-note").hidden = !daylight;
+    if (daylight) this._field("daylight").value = daylight.mode;
   }
   async _load() {
     if (!this._hass) return;
@@ -106,6 +117,7 @@ export class ThreeDRoomsEditor extends HTMLElement {
       ]);
       if (hass.connection !== this._hass.connection) return;
       this._components = components;
+      this._models = models;
       const modelSelect = this._field("model");
       modelSelect.replaceChildren(new Option("Choose a room", ""));
       for (const model of models)
@@ -181,6 +193,30 @@ export class ThreeDRoomsEditor extends HTMLElement {
     }
     this._field("component").value = "";
     this._emit(config);
+  }
+  async _daylight() {
+    const model = this._models?.find((m) => m.id === this._config?.model);
+    const select = this._field("daylight");
+    if (!model?.daylight || !this._hass) return;
+    const previous = model.daylight.mode;
+    this._field("error").hidden = true;
+    try {
+      const result = await this._hass.callWS({
+        type: "three_d_rooms/request",
+        operation: "daylight",
+        data: {
+          model: model.id,
+          mode: select.value,
+          entity: model.daylight.entity,
+        },
+      });
+      model.daylight = { ...model.daylight, ...result.daylight };
+    } catch (error) {
+      select.value = previous;
+      this._field("error").hidden = false;
+      this._field("error").textContent =
+        error.message || "Could not save the time of day for this room.";
+    }
   }
   _emit(config) {
     this._field("error").hidden = true;

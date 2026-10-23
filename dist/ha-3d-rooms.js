@@ -275,7 +275,7 @@ var _ = {
 	zoom: 1
 }, v = class extends HTMLElement {
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>\n      :host{display:block;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}\n      label{display:grid;gap:6px;margin:16px 0}input,select,button{box-sizing:border-box;min-height:44px;width:100%;font:inherit;color:var(--primary-text-color);background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:10px}\n      input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}\n      .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.check{display:flex;align-items:center}.check input{width:22px;margin-right:8px}\n      p{color:var(--secondary-text-color)}[role=alert]{color:var(--error-color)}[hidden]{display:none!important}\n      @media(max-width:360px){.grid{grid-template-columns:1fr}}\n    </style>\n    <p>Choose a room or start from a saved view. Changes appear in Home Assistant’s preview.</p>\n    <p id=\"status\" role=\"status\">Loading rooms…</p><button id=\"retry\" hidden>Retry loading rooms</button>\n    <label>Saved view<select id=\"component\"><option value=\"\">Choose a saved view (optional)</option></select></label>\n    <label>Room<select id=\"model\"><option value=\"\">Choose a room</option></select></label>\n    <label>Title<input id=\"title\" type=\"text\" maxlength=\"160\"></label>\n    <label>View<select id=\"view\"><option value=\"front\">Perspective</option><option value=\"floor\">Floor</option></select></label>\n    <div class=\"grid\">\n      <label>Rotation (°)<input id=\"heading\" type=\"number\" min=\"0\" max=\"359.99\" step=\"0.01\"></label>\n      <label>Tilt (°)<input id=\"tilt\" type=\"number\" min=\"0\" max=\"180\" step=\"0.01\"></label>\n      <label>Zoom<input id=\"zoom\" type=\"number\" min=\"0.01\" max=\"100\" step=\"0.01\"></label>\n      <label>Height (px)<input id=\"height\" type=\"number\" min=\"180\" max=\"1600\" step=\"1\"></label>\n    </div>\n    <label class=\"check\"><input id=\"interactive\" type=\"checkbox\">Allow camera movement on the dashboard</label>\n    <button id=\"reset\">Reset camera framing</button>\n    <p id=\"error\" role=\"alert\" hidden></p>\n    <p>Upload rooms and manage device mappings in the 3D Rooms sidebar. Save this card with Home Assistant’s Save button.</p>", this._field = (e) => this.shadowRoot.getElementById(e);
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>\n      :host{display:block;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}\n      label{display:grid;gap:6px;margin:16px 0}input,select,button{box-sizing:border-box;min-height:44px;width:100%;font:inherit;color:var(--primary-text-color);background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:10px}\n      input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}\n      .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.check{display:flex;align-items:center}.check input{width:22px;margin-right:8px}\n      p{color:var(--secondary-text-color)}[role=alert]{color:var(--error-color)}[hidden]{display:none!important}\n      @media(max-width:360px){.grid{grid-template-columns:1fr}}\n    </style>\n    <p>Choose a room or start from a saved view. Changes appear in Home Assistant’s preview.</p>\n    <p id=\"status\" role=\"status\">Loading rooms…</p><button id=\"retry\" hidden>Retry loading rooms</button>\n    <label>Saved view<select id=\"component\"><option value=\"\">Choose a saved view (optional)</option></select></label>\n    <label>Room<select id=\"model\"><option value=\"\">Choose a room</option></select></label>\n    <label>Title<input id=\"title\" type=\"text\" maxlength=\"160\"></label>\n    <label>View<select id=\"view\"><option value=\"front\">Perspective</option><option value=\"floor\">Floor</option></select></label>\n    <div class=\"grid\">\n      <label>Rotation (°)<input id=\"heading\" type=\"number\" min=\"0\" max=\"359.99\" step=\"0.01\"></label>\n      <label>Tilt (°)<input id=\"tilt\" type=\"number\" min=\"0\" max=\"180\" step=\"0.01\"></label>\n      <label>Zoom<input id=\"zoom\" type=\"number\" min=\"0.01\" max=\"100\" step=\"0.01\"></label>\n      <label>Height (px)<input id=\"height\" type=\"number\" min=\"180\" max=\"1600\" step=\"1\"></label>\n    </div>\n    <label class=\"check\"><input id=\"interactive\" type=\"checkbox\">Allow camera movement on the dashboard</label>\n    <label id=\"daylight-setting\" hidden>Time of day<select id=\"daylight\">\n      <option value=\"auto\">Automatic · follow the Home Assistant sun</option>\n      <option value=\"day\">Always day</option>\n      <option value=\"night\">Always night</option>\n    </select></label>\n    <p id=\"daylight-note\" hidden>Saved with this room, so every dashboard and the 3D Rooms manager use the same setting.</p>\n    <button id=\"reset\">Reset camera framing</button>\n    <p id=\"error\" role=\"alert\" hidden></p>\n    <p>Upload rooms and manage device mappings in the 3D Rooms sidebar. Save this card with Home Assistant’s Save button.</p>", this._field = (e) => this.shadowRoot.getElementById(e);
 		for (let e of [
 			"model",
 			"title",
@@ -286,7 +286,7 @@ var _ = {
 			"height",
 			"interactive"
 		]) this._field(e).addEventListener("change", () => this._change(e));
-		this._field("component").onchange = () => this._component(), this._field("retry").onclick = () => this._load(), this._field("reset").onclick = () => {
+		this._field("component").onchange = () => this._component(), this._field("daylight").addEventListener("change", () => this._daylight()), this._field("retry").onclick = () => this._load(), this._field("reset").onclick = () => {
 			let e = {
 				...this._config,
 				view: "front",
@@ -315,6 +315,8 @@ var _ = {
 		}
 		let e = this._config.model, t = this._field("model");
 		e && ![...t.options].some((t) => t.value === e) && (t.add(new Option(`${e} (not in room library)`, e)), t.value = e);
+		let n = this._models?.find((t) => t.id === e)?.daylight;
+		this._field("daylight-setting").hidden = !n, this._field("daylight-note").hidden = !n, n && (this._field("daylight").value = n.mode);
 	}
 	async _load() {
 		if (!this._hass) return;
@@ -330,7 +332,7 @@ var _ = {
 				operation: "components"
 			})]);
 			if (e.connection !== this._hass.connection) return;
-			this._components = n;
+			this._components = n, this._models = t;
 			let r = this._field("model");
 			r.replaceChildren(new Option("Choose a room", ""));
 			for (let e of t) r.add(new Option(e.title || e.name || e.id, e.id));
@@ -380,6 +382,29 @@ var _ = {
 			tilt: r.view === "floor" ? 8 : 28,
 			zoom: 1
 		})), this._field("component").value = "", this._emit(r);
+	}
+	async _daylight() {
+		let e = this._models?.find((e) => e.id === this._config?.model), t = this._field("daylight");
+		if (!e?.daylight || !this._hass) return;
+		let n = e.daylight.mode;
+		this._field("error").hidden = !0;
+		try {
+			let n = await this._hass.callWS({
+				type: "three_d_rooms/request",
+				operation: "daylight",
+				data: {
+					model: e.id,
+					mode: t.value,
+					entity: e.daylight.entity
+				}
+			});
+			e.daylight = {
+				...e.daylight,
+				...n.daylight
+			};
+		} catch (e) {
+			t.value = n, this._field("error").hidden = !1, this._field("error").textContent = e.message || "Could not save the time of day for this room.";
+		}
 	}
 	_emit(e) {
 		this._field("error").hidden = !0, this._config = {
