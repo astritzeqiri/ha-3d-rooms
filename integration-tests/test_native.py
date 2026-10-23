@@ -44,6 +44,34 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         await self.hass.async_stop()
 
+    async def test_cover_services_reported_height_and_capability_gating(self):
+        calls = []
+        async def handle(call):
+            calls.append(call)
+            if "position" in call.data:
+                self.hass.states.async_set("cover.shade", "open", {"supported_features": 15, "current_position": call.data["position"]})
+        for service in ("open_cover", "close_cover", "set_cover_position", "stop_cover"):
+            self.hass.services.async_register("cover", service, handle)
+        self.store.models[0]["controls"].append({"id": "shade", "type": "cover", "capabilities": ["open_close", "position", "stop"]})
+        self.store.models[0]["bindings"]["shade"] = "cover.shade"
+        self.hass.states.async_set("cover.shade", "closed", {"supported_features": 15, "current_position": 0})
+        base = {"model": "kitchen", "controlId": "shade"}
+        for action in ("open", "position", "stop", "close"):
+            await self.runtime.request("command", {**base, "action": action, "position": 43, "entityId": "cover.injected"}, "test-user")
+        self.assertEqual([c.service for c in calls], ["open_cover", "set_cover_position", "stop_cover", "close_cover"])
+        self.assertTrue(all(c.data["entity_id"] == "cover.shade" and c.context.user_id == "test-user" for c in calls))
+        self.assertEqual(next(e for e in self.runtime.status()["entities"] if e["entity_id"] == "cover.shade")["attributes"]["current_position"], 43)
+        for value in (-1, 101, 50.5, True, "50"):
+            with self.assertRaises(ValueError):
+                await self.runtime.request("command", {**base, "action": "position", "position": value}, "test-user")
+        self.hass.states.async_set("cover.shade", "open", {"supported_features": 3})
+        with self.assertRaises(ValueError):
+            await self.runtime.request("command", {**base, "action": "position", "position": 50}, "test-user")
+        self.hass.states.async_set("cover.shade", "unavailable", {"supported_features": 15})
+        with self.assertRaises(ValueError):
+            await self.runtime.request("command", {**base, "action": "open"}, "test-user")
+        self.assertEqual(len(calls), 4)
+
     async def test_native_view_and_websocket_deny_non_admin(self):
         from aiohttp import web
         from homeassistant.exceptions import Unauthorized

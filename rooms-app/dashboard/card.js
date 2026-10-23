@@ -1,3 +1,4 @@
+import { coverState } from "../shared/cover.mjs";
 import { validateCameraSnapshot } from "../shared/camera-view.mjs";
 import "./panel.js";
 import "./editor.js";
@@ -213,10 +214,21 @@ export class ThreeDRoomsCard extends HTMLElement {
       const button = document.createElement("button");
       const label = control.label || control.name || "light";
       button.dataset.control = control.id;
-      button.setAttribute("aria-label", `Toggle ${label}. Hold for more info.`);
-      button.title = `${label}: click to toggle, hold for more info`;
+      button.setAttribute(
+        "aria-label",
+        control.type === "cover"
+          ? `Control ${label}`
+          : `Toggle ${label}. Hold for more info.`,
+      );
+      button.title =
+        control.type === "cover"
+          ? `${label}: opening height controls`
+          : `${label}: click to toggle, hold for more info`;
       button.innerHTML =
         '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
+      if (control.type === "cover")
+        button.innerHTML =
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>';
       let timer,
         origin,
         held = false;
@@ -278,6 +290,10 @@ export class ThreeDRoomsCard extends HTMLElement {
   async _toggle(id) {
     const control = this._model.controls.find((c) => c.id === id);
     if (!control) return;
+    if (control.type === "cover") {
+      this._pick(id);
+      return;
+    }
     if (this._preview) {
       const state = this._previewStates.get(id) || {
         on: true,
@@ -324,6 +340,10 @@ export class ThreeDRoomsCard extends HTMLElement {
           composed: true,
         }),
       );
+      return;
+    }
+    if (control.type === "cover") {
+      this._coverPreview(control);
       return;
     }
     this._dialog?.remove();
@@ -385,11 +405,51 @@ export class ThreeDRoomsCard extends HTMLElement {
     this.shadowRoot.append(dialog);
     dialog.showModal();
   }
+  _coverPreview(control) {
+    this._dialog?.remove();
+    const dialog = document.createElement("dialog");
+    this._dialog = dialog;
+    dialog.innerHTML =
+      '<form method="dialog"><h2></h2><p></p><label>Opening <output></output><input type="range" min="0" max="100" step="1" aria-label="Shade opening"></label><button>Close</button></form>';
+    dialog.querySelector("h2").textContent = control.label;
+    dialog.querySelector("p").textContent = this._preview
+      ? "Local preview · no real device commands"
+      : "Connect this shade to a cover entity in 3D Rooms → Model settings.";
+    const input = dialog.querySelector("input");
+    input.disabled = !this._preview;
+    input.value =
+      this._previewStates.get(control.id)?.position ??
+      control.defaultPosition ??
+      0;
+    const update = () => {
+      dialog.querySelector("output").textContent = input.value + "% open";
+      if (this._preview) {
+        this._previewStates.set(control.id, { position: Number(input.value) });
+        this._states();
+      }
+    };
+    input.oninput = update;
+    update();
+    dialog.addEventListener("close", () => dialog.remove());
+    this.shadowRoot.append(dialog);
+    dialog.showModal();
+  }
   _states() {
     if (!this._model || !this._view) return;
     const states = new Map();
     for (const control of this._model.controls) {
       const entity = this._hass.states?.[this._model.bindings[control.id]];
+      if (control.type === "cover") {
+        states.set(
+          control.id,
+          this._preview
+            ? this._previewStates?.get(control.id) || {
+                position: control.defaultPosition ?? 0,
+              }
+            : coverState(entity),
+        );
+        continue;
+      }
       states.set(
         control.id,
         this._preview

@@ -42,7 +42,7 @@ class ThreeDRoomsPanel extends HTMLElement {
       connected: this._hass.connected !== false,
       mode: "homeassistant",
       entities: Object.values(this._hass.states).filter((e) =>
-        /^(light|switch)\./.test(e.entity_id),
+        /^(light|switch|cover)\./.test(e.entity_id),
       ),
     });
   }

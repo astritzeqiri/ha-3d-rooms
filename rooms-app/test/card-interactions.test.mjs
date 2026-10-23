@@ -69,3 +69,16 @@ test("preview toggle changes local state without device commands", async () => {
   await card._toggle("lamp");
   assert.equal(card._previewStates.get("lamp").on, true);
 });
+
+test("cover click opens its position controls without sending a light toggle", async () => {
+  const card = cardHarness();
+  card._model.controls = [{ id: "shade", type: "cover" }];
+  let picked;
+  card._pick = (id) => {
+    picked = id;
+  };
+  card._hass.callService = () =>
+    assert.fail("cover must not send light.toggle");
+  await card._toggle("shade");
+  assert.equal(picked, "shade");
+});

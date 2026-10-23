@@ -41,7 +41,9 @@ export async function createApp({
         ? "homeassistant"
         : "preview",
     entities: bridge.connected
-      ? bridge.entities.filter((e) => /^(light|switch)\./.test(e.entity_id))
+      ? bridge.entities.filter((e) =>
+          /^(light|switch|cover)\./.test(e.entity_id),
+        )
       : [],
   });
   const changed = () => {
@@ -256,6 +258,7 @@ export async function createApp({
               b.brightness,
               c,
               {
+                ...(b.position !== undefined ? { position: b.position } : {}),
                 ...(b.rgb_color !== undefined
                   ? { rgb_color: b.rgb_color }
                   : {}),

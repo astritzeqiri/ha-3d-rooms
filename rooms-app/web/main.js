@@ -1,3 +1,4 @@
+import { coverFeatures, coverState, coverCommand } from "../shared/cover.mjs";
 import "./style.css";
 import { initDashboardEditor } from "./dashboard-editor.js";
 import { connectNative } from "./native.js";
@@ -53,6 +54,23 @@ const toast = (message) => {
   toast.timer = setTimeout(() => ($("toast").hidden = true), 5000);
 };
 function state(c) {
+  if (c.type === "cover") {
+    if (preview)
+      return (
+        simulated.get(c.id) || {
+          position: c.defaultPosition ?? 0,
+          unavailable: false,
+        }
+      );
+    const entity = status.entities.find(
+      (e) => e.entity_id === selected.bindings[c.id],
+    );
+    return {
+      ...coverState(entity),
+      entity,
+      unavailable: !status.connected || coverState(entity).unavailable,
+    };
+  }
   if (preview)
     return (
       simulated.get(c.id) || {
@@ -89,6 +107,8 @@ function drawControls() {
   if (!selected) return;
   const active = document.activeElement;
   const focusKind = [
+    "cover",
+    "position",
     "toggle",
     "brightness",
     "color",
@@ -99,15 +119,41 @@ function drawControls() {
     "white",
   ].find((k) => active?.dataset?.[k]);
   const focusId = focusKind ? active.dataset[focusKind] : null;
-  const focusExtra = active?.dataset?.hex
-    ? `[data-hex="${active.dataset.hex}"]`
-    : active?.dataset?.kelvin
-      ? `[data-kelvin="${active.dataset.kelvin}"]`
-      : "";
+  const focusExtra = active?.dataset?.action
+    ? `[data-action="${active.dataset.action}"]`
+    : active?.dataset?.hex
+      ? `[data-hex="${active.dataset.hex}"]`
+      : active?.dataset?.kelvin
+        ? `[data-kelvin="${active.dataset.kelvin}"]`
+        : "";
   const states = new Map(selected.controls.map((c) => [c.id, state(c)]));
   if (view?.model?.id === selected.id) view.setStates(states);
   $("controls").innerHTML = selected.controls
     .map((c) => {
+      if (c.type === "cover") {
+        const s = states.get(c.id),
+          f = preview
+            ? { open: true, close: true, position: true, stop: true }
+            : coverFeatures(s.entity);
+        const disabled = !preview && s.unavailable ? "disabled" : "";
+        const label = esc(c.label);
+        return `<article class="light-card"><div class="light-label">${label}</div><p class="light-state">${preview ? `${Math.round(s.position)}% open · preview` : esc(s.label)}</p>
+          <div class="white-presets">${["open", "stop", "close"]
+            .filter(
+              (action) =>
+                f[action] &&
+                c.capabilities.includes(
+                  action === "stop" ? "stop" : "open_close",
+                ),
+            )
+            .map(
+              (action) =>
+                `<button data-cover="${c.id}" data-action="${action}" aria-label="${action} ${label}" ${disabled}>${action[0].toUpperCase() + action.slice(1)}</button>`,
+            )
+            .join("")}</div>
+          ${f.position && c.capabilities.includes("position") ? `<label class="brightness"><span>Opening <output>${s.position === undefined ? "Unknown" : Math.round(s.position) + "%"}</output></span><input type="range" min="0" max="100" step="1" value="${s.position ?? c.defaultPosition ?? 0}" data-position="${c.id}" aria-label="${label} opening" ${disabled}></label>` : ""}
+          <span class="muted small">${preview ? "Simulation only" : esc(selected.bindings[c.id] || "Map this shade in Model settings")}</span></article>`;
+      }
       const s = states.get(c.id),
         f = preview
           ? {
@@ -216,7 +262,44 @@ async function command(id, on, settings = {}) {
     drawControls();
   }
 }
+async function moveCover(id, action, position) {
+  const model = selected,
+    c = model.controls.find((c) => c.id === id);
+  if (preview) {
+    simulated.set(id, {
+      ...state(c),
+      position:
+        action === "open"
+          ? 100
+          : action === "close"
+            ? 0
+            : action === "position"
+              ? position
+              : state(c).position,
+    });
+    drawControls();
+    return;
+  }
+  try {
+    coverCommand(state(c).entity, c, action, position);
+    await api(`models/${model.id}/command`, {
+      method: "POST",
+      body: JSON.stringify({
+        controlId: id,
+        action,
+        ...(action === "position" ? { position } : {}),
+      }),
+    });
+    // Render reported state only; travel continues to arrive through HA state events.
+    status = await api("status");
+    drawControls();
+  } catch (error) {
+    toast(error.message);
+  }
+}
 $("controls").addEventListener("click", (e) => {
+  const cover = e.target.closest("[data-cover]");
+  if (cover) moveCover(cover.dataset.cover, cover.dataset.action);
   const toggle = e.target.closest("[data-toggle]"),
     color = e.target.closest("[data-preset]"),
     white = e.target.closest("[data-white]");
@@ -235,6 +318,9 @@ $("controls").addEventListener("click", (e) => {
     });
 });
 $("controls").addEventListener("input", (e) => {
+  if (e.target.dataset.position)
+    e.target.closest("label").querySelector("output").textContent =
+      e.target.value + "%";
   if (e.target.dataset.temperature)
     e.target.closest("label").querySelector("output").textContent =
       e.target.value + " K";
@@ -242,6 +328,7 @@ $("controls").addEventListener("input", (e) => {
 $("controls").addEventListener("change", (e) => {
   const input = e.target,
     d = input.dataset;
+  if (d.position) moveCover(d.position, "position", Number(input.value));
   if (d.brightness)
     command(d.brightness, true, { brightness: Number(input.value) });
   if (d.color) command(d.color, true, { rgb_color: hexToRgb(input.value) });
@@ -255,7 +342,7 @@ function drawModels() {
   $("models").innerHTML = models
     .map(
       (m) =>
-        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${m.controls.length} ${m.controls.length === 1 ? "light" : "lights"} · ${esc(m.floor || "Room")}</small></button>`,
+        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${m.controls.length} ${m.controls.length === 1 ? "device" : "devices"} · ${esc(m.floor || "Room")}</small></button>`,
     )
     .join("");
 }
@@ -288,7 +375,7 @@ async function choose(id) {
   $("controls-section").hidden = false;
   $("control-count").textContent = `${selected.controls.length} declared`;
   $("view-hint").textContent =
-    "Drag to orbit · Scroll to zoom · Select a light to highlight";
+    "Drag to orbit · Scroll to zoom · Select a device to highlight";
   $("scene-status").hidden = false;
   $("scene-status").textContent = "Loading your model…";
   try {
@@ -298,7 +385,11 @@ async function choose(id) {
       $("viewport"),
       (id) => {
         view.highlight(id);
-        document.querySelector(`[data-toggle="${id}"]`)?.focus();
+        document
+          .querySelector(
+            `[data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"]`,
+          )
+          ?.focus();
       },
       { mode: viewMode },
     );
@@ -384,7 +475,7 @@ $("import-form").onsubmit = async (e) => {
     $("import-dialog").close();
     $("import-form").reset();
     await choose(result.id);
-    toast("Model imported. Its lights are ready to connect.");
+    toast("Model imported. Its devices are ready to connect.");
   } catch (e) {
     $("import-error").textContent = e.message;
   } finally {
@@ -395,23 +486,29 @@ $("import-form").onsubmit = async (e) => {
 function drawMappings() {
   $("settings-title").textContent = selected.title + " · Devices";
   $("mapping-note").textContent = status.connected
-    ? "Choose an entity for each light. Preview mode never sends real commands."
+    ? "Choose an entity for each light or shade. Preview mode never sends real commands."
     : "Home Assistant is not connected. You can preview the model now; entity mapping becomes available inside the installed add-on.";
   $("mappings").innerHTML = selected.controls
     .map(
       (c) =>
-        `<div class="mapping"><div class="mapping-head"><label for="map-${c.id}">${esc(c.label)}</label><button data-highlight="${c.id}">Highlight</button></div><input type="search" aria-label="Find entity for ${esc(c.label)}" placeholder="Find a light or switch…" data-filter="${c.id}" ${status.connected ? "" : "disabled"}><select id="map-${c.id}" data-map="${c.id}" ${status.connected ? "" : "disabled"}>${options(c, "")}</select><p class="muted">${esc(c.room || "This model")} · ${c.capabilities.includes("brightness") ? "On/off, brightness, color and white temperature when supported" : "On/off"}</p></div>`,
+        `<div class="mapping"><div class="mapping-head"><label for="map-${c.id}">${esc(c.label)}</label><button data-highlight="${c.id}">Highlight</button></div><input type="search" aria-label="Find entity for ${esc(c.label)}" placeholder="${c.type === "cover" ? "Find a cover…" : "Find a light or switch…"}" data-filter="${c.id}" ${status.connected ? "" : "disabled"}><select id="map-${c.id}" data-map="${c.id}" ${status.connected ? "" : "disabled"}>${options(c, "")}</select><p class="muted">${esc(c.room || "This model")} · ${c.type === "cover" ? "Opening height, open/close and stop when supported" : c.capabilities.includes("brightness") ? "On/off, brightness, color and white temperature when supported" : "On/off"}</p></div>`,
     )
     .join("");
 }
 function options(c, filter) {
   const saved = selected.bindings[c.id],
-    entities = status.entities.filter(
-      (e) =>
-        `${e.attributes?.friendly_name} ${e.entity_id}`
-          .toLowerCase()
-          .includes(filter.toLowerCase()) || e.entity_id === saved,
-    );
+    entities = status.entities
+      .filter((e) =>
+        (c.type === "cover" ? /^cover\./ : /^(light|switch)\./).test(
+          e.entity_id,
+        ),
+      )
+      .filter(
+        (e) =>
+          `${e.attributes?.friendly_name} ${e.entity_id}`
+            .toLowerCase()
+            .includes(filter.toLowerCase()) || e.entity_id === saved,
+      );
   return (
     `<option value="">Not connected</option>` +
     (saved && !entities.some((e) => e.entity_id === saved)

@@ -1,4 +1,4 @@
-"""Authenticated native Home Assistant model and light APIs."""
+"""Authenticated native Home Assistant model and device APIs."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ class RoomsRuntime:
             "entities": [
                 s.as_dict()
                 for s in self.hass.states.async_all()
-                if s.domain in ("light", "switch")
+                if s.domain in ("light", "switch", "cover")
             ],
         }
 
@@ -59,7 +59,7 @@ class RoomsRuntime:
             if not isinstance(entity_id, str) or (
                 entity_id and not self.hass.states.get(entity_id)
             ):
-                raise ValueError("Choose an existing light or switch entity.")
+                raise ValueError("Choose an existing light, switch or cover entity.")
             result = await self.work(
                 self.store.bind, data.get("model"), data.get("controlId"), entity_id
             )
@@ -76,20 +76,56 @@ class RoomsRuntime:
             )
             entity_id = model["bindings"].get(data.get("controlId"))
             if not control or not entity_id or not ENTITY.fullmatch(entity_id):
-                raise ValueError("Connect this light to an entity first.")
+                raise ValueError("Connect this control to an entity first.")
             entity = self.hass.states.get(entity_id)
             if not entity or entity.state in ("unavailable", "unknown"):
                 raise ValueError("This entity is unavailable.")
-            settings = light_command(data, control, entity)
+            is_cover = control.get("type") == "cover"
+            if (entity.domain == "cover") != is_cover:
+                raise ValueError("Entity does not match this control type.")
+            if is_cover:
+                service, settings = cover_command(data, control, entity)
+            else:
+                settings = light_command(data, control, entity)
+                service = "turn_on" if data["action"] == "on" else "turn_off"
             await self.hass.services.async_call(
                 entity.domain,
-                "turn_on" if data["action"] == "on" else "turn_off",
+                service,
                 {"entity_id": entity_id, **settings},
                 blocking=True,
                 context=Context(user_id=user_id),
             )
             return {"ok": True}
         raise ValueError("Unknown 3D Rooms operation.")
+
+
+def cover_command(data, control, entity):
+    """Gate cover services on both declared and actual device capabilities."""
+    action = data.get("action")
+    actions = {
+        "open": (1, "open_close", "open_cover"),
+        "close": (2, "open_close", "close_cover"),
+        "position": (4, "position", "set_cover_position"),
+        "stop": (8, "stop", "stop_cover"),
+    }
+    if action not in actions or entity.domain != "cover":
+        raise ValueError("Choose an explicit cover action.")
+    bit, capability, service = actions[action]
+    if (
+        not entity.attributes.get("supported_features", 0) & bit
+        or capability not in control["capabilities"]
+    ):
+        raise ValueError("This cover does not support that action.")
+    position = data.get("position")
+    if action == "position":
+        if (
+            isinstance(position, bool)
+            or not isinstance(position, int)
+            or not 0 <= position <= 100
+        ):
+            raise ValueError("Cover position must be an integer from 0 to 100.")
+        return service, {"position": position}
+    return service, {}
 
 
 def light_command(data, control, entity):

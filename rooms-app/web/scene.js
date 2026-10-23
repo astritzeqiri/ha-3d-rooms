@@ -1,3 +1,4 @@
+import { setShadePosition } from "../shared/cover.mjs";
 import { cameraPreset } from "../shared/camera-presets.mjs";
 import {
   captureCameraView,
@@ -29,7 +30,7 @@ export class SceneView {
     this.renderer.toneMappingExposure = 1.1;
     this.renderer.domElement.setAttribute(
       "aria-label",
-      "3D model. Drag to orbit; use the Lights controls below for keyboard access.",
+      "3D model. Drag to orbit; use the device controls below for keyboard access.",
     );
     this.renderer.domElement.setAttribute("role", "img");
     container.append(this.renderer.domElement);
@@ -139,7 +140,7 @@ export class SceneView {
     for (const c of model.controls) {
       const light = new THREE.PointLight(
         c.color || "#fff0d4",
-        c.intensity ?? 12,
+        c.type === "cover" ? 0 : (c.intensity ?? 12),
         20,
         2,
       );
@@ -171,7 +172,19 @@ export class SceneView {
                 mats.push([m, m.emissiveIntensity]);
           });
       }
-      this.fixtures.set(c.id, { light, marker, mats, base: c.intensity ?? 12 });
+      const coverNodes =
+        c.type === "cover"
+          ? (c.nodeIds || []).map((id) => this.nodes.get(id)).filter(Boolean)
+          : [];
+      for (const node of coverNodes)
+        setShadePosition(node, c.defaultPosition ?? 0);
+      this.fixtures.set(c.id, {
+        light,
+        marker,
+        mats,
+        coverNodes,
+        base: c.intensity ?? 12,
+      });
     }
     const box = new THREE.Box3().setFromObject(this.asset),
       center = box.getCenter(new THREE.Vector3()),
@@ -234,8 +247,8 @@ export class SceneView {
       this.options.mode === "floor"
         ? "3D floor plan with a slight overhead tilt. No device icons."
         : this.options.mode === "front"
-          ? "3D room from the front. Select the pendant light to control it."
-          : "3D model. Drag to orbit; use the Lights controls below for keyboard access.",
+          ? "3D room from the front. Select the modeled device to control it."
+          : "3D model. Drag to orbit; use the device controls below for keyboard access.",
     );
     this.reset();
   }
@@ -325,6 +338,11 @@ export class SceneView {
     if (!this.model) return;
     for (const [id, f] of this.fixtures) {
       const s = states.get(id) || { on: false };
+      if (f.coverNodes.length) {
+        for (const node of f.coverNodes) setShadePosition(node, s.position);
+        f.marker.material.color.set(s.unavailable ? "#858b86" : "#c3dbab");
+        continue;
+      }
       const amount = s.on ? (s.brightness ?? 255) / 255 : 0;
       const color = s.rgb
         ? new THREE.Color().setRGB(

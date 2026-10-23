@@ -21,3 +21,7 @@ The live component sidebar and exact camera saving are included in the integrati
 ## Version 0.7.0
 
 Adds interactive component previews and a compact camera cube with face, edge and corner views. Normal installations update only the HACS Integration, restart Home Assistant and refresh the browser.
+
+## Roller shades
+
+Version 0.9.0 accepts prepared movable `cover` controls alongside lights. Map each shade to a Home Assistant `cover.*` entity. The manager and dashboard follow reported opening height; device-supported Open, Close, Stop and percentage commands use native cover services. Re-export a static room with shade metadata before importing it. Old light-only rooms continue to work.

@@ -64,6 +64,29 @@ class PackageTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.store = models.ModelStore(self.temp.name).open()
 
+    def test_cover_import_binding_export_roundtrip_and_domain_validation(self):
+        control = {"id": "shade", "label": "Shade", "type": "cover", "position": [0, 2, 0],
+                   "nodeIds": ["fixture"], "defaultPosition": 85, "capabilities": ["open_close", "position", "stop"]}
+        manifest = {"controls": [control]}
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package(manifest_change=manifest))
+            store.bind("kitchen", "shade", "cover.demo")
+            with self.assertRaises(ValueError):
+                store.bind("kitchen", "shade", "light.demo")
+            self.assertEqual(models.ModelStore(directory).open().find("kitchen")["bindings"], {"shade": "cover.demo"})
+            with tempfile.TemporaryDirectory() as restored:
+                migrated = models.ModelStore(restored).open()
+                migrated.install(store.export("kitchen"))
+                self.assertEqual(migrated.find("kitchen")["bindings"], {"shade": "cover.demo"})
+        with self.assertRaises(ValueError):
+            models.validate_bindings({"shade": "light.demo"}, manifest)
+        with zipfile.ZipFile(BytesIO(package(manifest_change=manifest))) as archive:
+            valid_manifest = json.loads(archive.read("manifest.json"))
+        for bad in (True, -1, 101, "85"):
+            with self.assertRaises(ValueError):
+                models.validate_manifest({**valid_manifest, "controls": [{**control, "defaultPosition": bad}]})
+
     def test_model_roundtrip_preserves_mappings_and_private_storage(self):
         self.store.install(package(bindings={"ceiling": "light.kitchen"}))
         exported = self.store.export("kitchen")

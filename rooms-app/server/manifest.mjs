@@ -1,3 +1,4 @@
+import { coverCommand } from "../shared/cover.mjs";
 import { lightFeatures } from "../shared/light.mjs";
 export const ID = /^[a-z0-9][a-z0-9_-]{0,79}$/;
 export function validateManifest(m) {
@@ -35,7 +36,16 @@ export function validateManifest(m) {
     )
       fail("Every control needs a unique stable ID.");
     ids.add(c.id);
-    if (c.type !== "light") fail("This release supports light controls only.");
+    if (
+      c.type === "cover" &&
+      (!c.nodeIds?.length ||
+        !Number.isFinite(c.defaultPosition ?? 0) ||
+        (c.defaultPosition ?? 0) < 0 ||
+        (c.defaultPosition ?? 0) > 100)
+    )
+      fail("Covers need nodes and a default position from 0 to 100.");
+    if (!["light", "cover"].includes(c.type))
+      fail("Use light or cover controls.");
     if (typeof c.label !== "string" || !c.label.trim() || c.label.length > 160)
       fail("Every light needs a label.");
     if (!vector(c.position)) fail("Each light needs a position in meters.");
@@ -51,9 +61,14 @@ export function validateManifest(m) {
       fail("Light node IDs must be stable IDs.");
     if (
       !Array.isArray(c.capabilities) ||
-      !c.capabilities.includes("on_off") ||
+      !c.capabilities.includes(c.type === "cover" ? "open_close" : "on_off") ||
       c.capabilities.some(
-        (v) => !["on_off", "brightness", "color", "color_temp"].includes(v),
+        (v) =>
+          !(
+            c.type === "cover"
+              ? ["open_close", "position", "stop"]
+              : ["on_off", "brightness", "color", "color_temp"]
+          ).includes(v),
       )
     )
       fail("Unsupported light capabilities.");
@@ -67,8 +82,9 @@ export function validateManifest(m) {
 export function compatible(control, entity) {
   return (
     entity &&
-    control.type === "light" &&
-    /^(light|switch)\./.test(entity.entity_id)
+    (control.type === "cover" ? /^cover\./ : /^(light|switch)\./).test(
+      entity.entity_id,
+    )
   );
 }
 export function validateBinding(control, entity) {
@@ -84,6 +100,8 @@ export function commandFor(
   settings = {},
   entity,
 ) {
+  if (control.type === "cover")
+    return coverCommand(entity, control, action, settings.position);
   if (!["on", "off"].includes(action))
     throw new Error("Only explicit on/off commands are supported.");
   const domain = entityId.split(".")[0];

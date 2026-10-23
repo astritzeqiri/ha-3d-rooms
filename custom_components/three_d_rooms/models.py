@@ -26,7 +26,7 @@ import zipfile
 MAX_UPLOAD = 100 * 1024 * 1024
 MAX_EXPANDED = 300 * 1024 * 1024
 ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,79}\Z")
-ENTITY = re.compile(r"(?:light|switch)\.[a-z0-9_]+\Z")
+ENTITY = re.compile(r"(?:light|switch|cover)\.[a-z0-9_]+\Z")
 SAFE_FILE = re.compile(
     r"(?:manifest\.json|bindings\.json|scene\.glb|thumbnail\.(?:png|jpg|webp)|textures/[a-zA-Z0-9_./-]+)\Z"
 )
@@ -78,21 +78,21 @@ def validate_manifest(m):
         raise ValueError("Models must use meters, Y up, and scene.glb.")
     controls = m.get("controls")
     if not isinstance(controls, list) or len(controls) > 200:
-        raise ValueError("Provide up to 200 light controls.")
+        raise ValueError("Provide up to 200 controls.")
     seen = set()
     for c in controls:
         if not isinstance(c, dict) or not valid_id(c.get("id")) or c["id"] in seen:
-            raise ValueError("Every light needs a unique stable ID.")
+            raise ValueError("Every control needs a unique stable ID.")
         seen.add(c["id"])
         if (
-            c.get("type") != "light"
+            c.get("type") not in ("light", "cover")
             or not isinstance(c.get("label"), str)
             or not c["label"].strip()
             or len(c["label"]) > 160
         ):
-            raise ValueError("Every control must be a labeled light.")
+            raise ValueError("Every control must be a labeled light or cover.")
         if not vector(c.get("position")):
-            raise ValueError("Every light needs a position in meters.")
+            raise ValueError("Every control needs a position in meters.")
         if "intensity" in c and (
             not number(c["intensity"]) or not 0 <= c["intensity"] <= 100
         ):
@@ -107,15 +107,24 @@ def validate_manifest(m):
             or not all(valid_id(n) for n in c["nodeIds"])
         ):
             raise ValueError("Invalid light scene node IDs.")
+        if c["type"] == "cover" and (
+            not c.get("nodeIds")
+            or not number(c.get("defaultPosition", 0))
+            or not 0 <= c.get("defaultPosition", 0) <= 100
+        ):
+            raise ValueError("Covers need scene nodes and a default position from 0 to 100.")
         caps = c.get("capabilities")
         if (
             not isinstance(caps, list)
-            or "on_off" not in caps
+            or ("open_close" if c["type"] == "cover" else "on_off") not in caps
             or any(
-                v not in ("on_off", "brightness", "color", "color_temp") for v in caps
+                v not in (
+                    ("open_close", "position", "stop") if c["type"] == "cover"
+                    else ("on_off", "brightness", "color", "color_temp")
+                ) for v in caps
             )
         ):
-            raise ValueError("Unsupported light capabilities.")
+            raise ValueError("Unsupported control capabilities.")
     if "camera" in m and (
         not isinstance(m["camera"], dict)
         or not vector(m["camera"].get("position"))
@@ -221,18 +230,26 @@ def validate_glb(data, manifest):
     nodes = {n.get("extras", {}).get("controlId") for n in doc.get("nodes", [])}
     for control in manifest["controls"]:
         if any(node not in nodes for node in control.get("nodeIds", [])):
-            raise ValueError("A light references a missing scene node.")
+            raise ValueError("A control references a missing scene node.")
+
+
+def compatible_entity(control, entity_id):
+    """Light/switch mappings stay compatible; covers require cover entities."""
+    return (
+        isinstance(entity_id, str)
+        and bool(ENTITY.fullmatch(entity_id))
+        and entity_id.startswith("cover.") == (control.get("type") == "cover")
+    )
 
 
 def validate_bindings(bindings, manifest):
+    controls = {c["id"]: c for c in manifest["controls"]}
     if not isinstance(bindings, dict) or any(
-        key not in {c["id"] for c in manifest["controls"]}
-        or not isinstance(value, str)
-        or not ENTITY.fullmatch(value)
+        key not in controls or not compatible_entity(controls[key], value)
         for key, value in bindings.items()
     ):
         raise ValueError(
-            "Bindings must connect declared controls to light or switch entities."
+            "Bindings must connect declared controls to matching light, switch or cover entities."
         )
     return dict(bindings)
 
@@ -401,8 +418,9 @@ class ModelStore:
         if model is None or control_id not in {c["id"] for c in model["controls"]}:
             raise ValueError("Unknown model control.")
         if entity_id:
-            if not ENTITY.fullmatch(entity_id):
-                raise ValueError("Choose a light or switch entity.")
+            control = next(c for c in model["controls"] if c["id"] == control_id)
+            if not compatible_entity(control, entity_id):
+                raise ValueError("Choose an entity matching the control type.")
             model["bindings"][control_id] = entity_id
         else:
             model["bindings"].pop(control_id, None)
