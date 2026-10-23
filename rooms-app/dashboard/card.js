@@ -1,3 +1,4 @@
+import "./panel.js";
 import { SceneView } from "../web/scene.js";
 import { entityAppearance, hexToRgb, kelvinToRgb } from "../shared/light.mjs";
 import { connectModel } from "./transport.mjs";
@@ -73,6 +74,8 @@ export class ThreeDRoomsCard extends HTMLElement {
   disconnectedCallback() {
     ++this._generation;
     clearInterval(this._keepalive);
+    this._unsubModels?.();
+    this._unsubModels = null;
     this._dialog?.remove();
     this._view?.dispose();
     this._view = null;
@@ -84,6 +87,8 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._loading = true;
     this._reload = false;
     clearInterval(this._keepalive);
+    this._unsubModels?.();
+    this._unsubModels = null;
     this._message.hidden = false;
     this._message.querySelector("span").textContent = "Loading your floor…";
     this._message.querySelector("button").hidden = true;
@@ -96,8 +101,11 @@ export class ThreeDRoomsCard extends HTMLElement {
       if (generation !== this._generation) return;
       if (connection.session)
         document.cookie = `ingress_session=${connection.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`;
-      const { model, sceneURL } = await connection.load();
-      if (generation !== this._generation) return;
+      const { model, sceneURL, release } = await connection.load();
+      if (generation !== this._generation) {
+        release?.();
+        return;
+      }
       this._view?.dispose();
       this._view = new SceneView(this._container, (id) => this._pick(id), {
         mode: this._config.view,
@@ -107,7 +115,11 @@ export class ThreeDRoomsCard extends HTMLElement {
         heading: this._config.heading,
       });
       const view = this._view;
-      await view.load(model, sceneURL);
+      try {
+        await view.load(model, sceneURL);
+      } finally {
+        release?.();
+      }
       if (generation !== this._generation) return;
       this._model = model;
       this._previewStates = new Map();
@@ -116,6 +128,21 @@ export class ThreeDRoomsCard extends HTMLElement {
       this._signature = null;
       this._states();
       this._message.hidden = true;
+      if (
+        !this._preview &&
+        !this._config.addon &&
+        this._hass.connection?.subscribeEvents
+      ) {
+        const unsubscribe = await this._hass.connection.subscribeEvents(
+          () => this._load(),
+          "three_d_rooms_updated",
+        );
+        if (generation !== this._generation) {
+          unsubscribe();
+          return;
+        }
+        this._unsubModels = unsubscribe;
+      }
       if (connection.session)
         this._keepalive = setInterval(async () => {
           if (document.hidden || !this.isConnected) return;

@@ -103,29 +103,14 @@
       </div>
       <p>
         An angled front view with live lighting and clickable fixtures. Your
-        models stay inside the installed 3D Rooms add-on.
+        models stay in Home Assistant.
       </p>
       <p class="notice">
-        <strong>Using HACS?</strong> Add
-        <code>astritzeqiri/ha-3d-rooms</code> as a
-        <strong>Dashboard</strong> repository, download
-        <strong>3D Rooms Dashboard</strong>, and reload your browser. Then use
-        the configuration below.
+        The dashboard card is included with the
+        <strong>3D Rooms integration</strong>. Add a Manual card to your
+        dashboard using the configuration below. No separate HACS card download
+        or resource entry is required.
       </p>
-      <details>
-        <summary>Install the card manually instead</summary>
-        <ol class="setup-steps">
-          <li>
-            Download the card and copy it to Home Assistant’s
-            <code>config/www/</code> folder.
-          </li>
-          <li>
-            Add a dashboard resource: <code>/local/three-d-rooms-card.js</code>,
-            type <strong>JavaScript module</strong>.
-          </li>
-          <li>Add a Manual card using this configuration.</li>
-        </ol>
-      </details>
       <label for="dashboard-yaml">Dashboard card configuration</label
       ><textarea
         id="dashboard-yaml"
@@ -133,18 +118,9 @@
         rows="6"
         spellcheck="false"
       ></textarea>
-      <p class="muted small">
-        Requires the updated add-on on your Home Assistant server. This first
-        version uses an administrator login and automatically finds the
-        installed add-on.
-      </p>
+      <p class="muted small">Use an administrator account for this release.</p>
       <div class="dialog-actions">
-        <a
-          class="download-card"
-          href="./card/three-d-rooms-card.js"
-          download="three-d-rooms-card.js"
-          >Download card</a
-        ><button id="copy-dashboard" class="primary">Copy configuration</button>
+        <button id="copy-dashboard" class="primary">Copy configuration</button>
       </div>
     </dialog>
     <dialog id="import-dialog">
@@ -198,7 +174,9 @@
       <div id="mappings"></div>
       <p id="mapping-error" class="error" role="alert"></p>
       <div class="dialog-actions">
-        <button id="delete-model" class="danger">Remove model</button
+        <button id="export-model" type="button">
+          Export room &amp; mappings</button
+        ><button id="delete-model" class="danger">Remove model</button
         ><button class="close primary">Done</button>
       </div>
     </dialog>

@@ -1,3 +1,9 @@
+# Current direction — 0.4.0
+
+The single HACS integration in custom_components/three_d_rooms supersedes the original add-on architecture below. It stores models in Home Assistant Core, includes the sidebar manager and dashboard card, and uses the current HA session. See README.md and VALIDATION.md for installation and tested behavior. The add-on remains only for migration and local authoring.
+
+---
+
 # 3D Rooms: Home Assistant app implementation plan
 
 Status: proposed implementation plan, 2026-10-23. No Home Assistant deployment or real-device changes have been made.

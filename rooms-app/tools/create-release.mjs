@@ -49,3 +49,25 @@ await writeFile(
 console.log(
   `Prepared 3d-rooms-${version}-source.zip and three-d-rooms-card-${version}.js in releases/.`,
 );
+
+const integrationFiles = {};
+async function addIntegration(
+  path,
+  prefix = "custom_components/three_d_rooms",
+) {
+  for (const entry of await readdir(path, { withFileTypes: true })) {
+    if (entry.name === "__pycache__" || entry.name.endsWith(".pyc")) continue;
+    const file = join(path, entry.name),
+      key = prefix + "/" + entry.name;
+    if (entry.isDirectory()) await addIntegration(file, key);
+    else integrationFiles[key] = new Uint8Array(await readFile(file));
+  }
+}
+await addIntegration("../custom_components/three_d_rooms");
+await writeFile(
+  `../releases/3d-rooms-${version}-integration.zip`,
+  zipSync(integrationFiles, { level: 6 }),
+);
+console.log(
+  "Prepared single-install integration ZIP with its bundled frontend.",
+);

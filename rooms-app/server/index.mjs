@@ -1,3 +1,4 @@
+import { zipSync, strToU8 } from "fflate";
 import http from "node:http";
 import {
   readFile,
@@ -156,7 +157,7 @@ export async function createApp({
         return;
       }
       const match = path.match(
-        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|scene\.glb))?$/,
+        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|scene\.glb|export\.zip))?$/,
       );
       if (match) {
         const m = store.find(match[1]);
@@ -164,6 +165,33 @@ export async function createApp({
         if (req.method === "DELETE" && !op) {
           await store.remove(m.id);
           json(res, 200, { ok: true });
+          return;
+        }
+        if (req.method === "GET" && op === "export.zip") {
+          if (
+            ingress &&
+            !(await bridge.isAdmin(req.headers["x-remote-user-id"]))
+          ) {
+            json(res, 403, { error: "Administrator access is required." });
+            return;
+          }
+          const { folder, bindings, importedAt, ...manifest } = m;
+          const buffer = zipSync(
+            {
+              "manifest.json": strToU8(JSON.stringify(manifest)),
+              "bindings.json": strToU8(JSON.stringify(bindings)),
+              "scene.glb": await readFile(
+                join(dataDir, "models", folder, "scene.glb"),
+              ),
+            },
+            { level: 0 },
+          );
+          res.writeHead(200, {
+            "Content-Type": "application/zip",
+            "Content-Disposition": `attachment; filename="${m.id}.zip"`,
+            "Cache-Control": "no-store",
+          });
+          res.end(buffer);
           return;
         }
         if (req.method === "GET" && op === "scene.glb") {

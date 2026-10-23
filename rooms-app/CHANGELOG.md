@@ -1,3 +1,7 @@
+# 0.4.0
+
+Consolidate model storage, upload, entity mappings, lighting controls, sidebar manager and dashboard card into a single HACS Integration. Automatically load the bundled card through Home Assistant. Add room exports carrying mappings for migration from the old add-on. Retain the add-on as a migration/development path.
+
 # 0.3.2
 
 Keep every wall visible from every camera angle in both the dashboard card and app viewer.

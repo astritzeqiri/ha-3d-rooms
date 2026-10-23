@@ -7,3 +7,6 @@ rooms-app/.data-mock/
 releases/
 model-exports/
 .DS_Store
+
+__pycache__/
+*.pyc

@@ -1,4 +1,10 @@
 import "./style.css";
+import { connectNative } from "./native.js";
+const native = await connectNative().catch((error) => {
+  document.getElementById("connection").textContent = error.message;
+  throw error;
+});
+if (native) document.querySelector(".brand").href = "./index.html?native=1";
 import {
   lightFeatures,
   entityAppearance,
@@ -17,6 +23,7 @@ const esc = (s) =>
       ],
   );
 const api = async (path, options = {}) => {
+  if (native) return native.api(path, options);
   const res = await fetch(new URL("api/" + path, location.href), {
     ...options,
     headers: { "X-Rooms-Request": "1", ...options.headers },
@@ -286,10 +293,15 @@ async function choose(id) {
       },
       { mode: viewMode },
     );
-    const loaded = await view.load(
-      selected,
-      new URL(`api/models/${id}/scene.glb`, location.href).href,
-    );
+    const sceneURL = native
+      ? await native.sceneURL(id)
+      : new URL(`api/models/${id}/scene.glb`, location.href).href;
+    let loaded;
+    try {
+      loaded = await view.load(selected, sceneURL);
+    } finally {
+      if (native) URL.revokeObjectURL(sceneURL);
+    }
     if (!loaded || current !== selection) return;
     $("scene-status").hidden = true;
     drawControls();
@@ -490,10 +502,31 @@ try {
         (m) => m.id === new URL(location.href).searchParams.get("model"),
       )?.id || models[0].id,
     );
-  const events = new EventSource(new URL("api/events", location.href));
-  events.onmessage = (e) => updateStatus(JSON.parse(e.data));
-  events.onerror = () => updateStatus({ ...status, connected: false });
+  if (native) {
+    const unsubscribe = native.subscribe(updateStatus);
+    window.addEventListener("pagehide", unsubscribe, { once: true });
+  } else {
+    const events = new EventSource(new URL("api/events", location.href));
+    events.onmessage = (e) => updateStatus(JSON.parse(e.data));
+    events.onerror = () => updateStatus({ ...status, connected: false });
+    window.addEventListener("pagehide", () => events.close(), { once: true });
+  }
 } catch (e) {
   toast(e.message);
   $("connection").textContent = "Could not connect to server";
 }
+
+$("export-model").onclick = async () => {
+  try {
+    const url = native
+      ? await native.exportURL(selected.id)
+      : new URL(`api/models/${selected.id}/export.zip`, location.href).href;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${selected.id}.zip`;
+    link.click();
+    if (native) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    toast(error.message);
+  }
+};

@@ -1,51 +1,25 @@
 # Validation — 2026-10-23
 
-Version: 0.3.1 early build.
+## Version 0.4.0: single HACS integration
 
-## Passed
+Implemented a local Python integration, one-entry config flow, administrator-only sidebar, auto-loaded bundled card, native authenticated WebSocket/HTTP APIs, private scene loading, persistent model library, safe imports, and ZIP export/import with saved mappings. The Node add-on is retained as a migration/development path.
 
-- Production Vite build and source formatting check. The Three.js renderer is lazy-loaded; the 637 KB renderer chunk still produces a build-size advisory.
-- Twelve focused Node tests: manifest/control validation; service/brightness allowlists; scene references/external resource rejection; archive traversal/executable/size rejection; durable catalog/bindings and duplicate protection; import/map/control API behavior; direct-access Ingress denial; simulated HA WebSocket authentication/state/administrator checks; reconnect/resnapshot without replaying commands.
-- Docker image builds locally from the pinned multi-architecture Node base. Tested locally on amd64; aarch64 is declared but has not been built or exercised here.
-- Container health endpoint, sample ZIP import, scene download, and model persistence across a container restart.
-- Production app loads through a localhost proxy at `/api/hassio_ingress/test/`, including its scripts, stylesheet, GLB and event stream; no browser errors in that test. This checks URL handling, not actual Supervisor authorization.
-- Private kitchen exported with embedded textures, stable ceiling-light metadata and cutaway groups; imported into the standalone model library.
-- Sample floor imported through the browser file picker and displayed alongside the kitchen.
-- Independent preview lights: kitchen sample light off while living room light stays on.
-- Browser mapping to two simulated entities; mapped on/off command confirmed; saved mapping survives page reload.
-- 375-pixel portrait and 812-pixel landscape layouts checked; no horizontal document overflow. Phone mapping dialog scrolls to its actions.
-- Light-off mode retains ambient visibility. Lights do not change the floor's ambient baseline.
+### Verified locally
 
-## Still requires the user's HA OS VM
+- Isolated official Home Assistant Core **2026.10.2** container, separate from the user's live VM.
+- Native config flow creates the integration, which survives a full HA restart with its catalog and uploaded kitchen intact.
+- Sidebar model manager renders the kitchen and uses current HA entity state through its authenticated frontend connection.
+- The dashboard card loads on a dashboard-only navigation with no Lovelace resource entry or separate card installation.
+- Clicking the modeled pendant opens HA's native light dialog. Switching its built-in demo light off updates the room while retaining low ambient visibility. All walls stay visible.
+- Native API checks: ZIP upload, private model catalog, authenticated GLB and ZIP export, and unauthenticated scene requests rejected.
+- Native demo-light service checks: explicit on/off, brightness, RGB, white temperature, and invalid RGB/Kelvin rejection. No real devices were controlled.
+- Pure Python tests cover catalog persistence, ZIP/mapping export/import round-trip, duplicate IDs, unsafe archive paths, external assets, unknown control nodes, invalid bindings, size caps, duplicate archive entries, failed-write rollback and deletion.
+- JavaScript tests cover existing light behavior, legacy migration ZIP export, native authenticated card transport/blob cleanup, and perspective/orthographic framing across screen sizes.
 
-- Real Supervisor installation/startup and authenticated Ingress user identity/administrator checks.
-- Real entity discovery and device command/state behavior.
-- Actual HA-managed cold backup/restore and upgrade behavior.
-- Home Assistant companion app on the physical iPhone and performance on a representative full-floor model.
+### Remaining checks
 
-No real Home Assistant credentials were used and no real device commands were sent. The source and card bundle are published to the private project repository; no deployment to Home Assistant was performed.
+- HACS download/category transition on the user's own HA installation.
+- User's HA OS/Proxmox VM, physical lights, iPhone companion app and GPU performance on a large floor model.
+- User-managed HA backup/restore of the library. Storage lives under `config/.storage/three_d_rooms/` and must be included in backups.
 
-## Color-control verification (0.2.0)
-
-- Backend tests cover RGB byte validation, mutually exclusive color/temperature modes, Kelvin bounds, unsupported features, advertised effects and transition limits.
-- Shared tests cover color-mode discovery, warm/cool visualization, authoritative active modes and confirmation tolerances.
-- API integration verifies validated color/temperature/effect values reach only the mapped light.
-- Browser checked a combined RGB/white simulated light (2200–6500 K) and white-only light (2700–6000 K). Only the combined light shows a color picker/effects/fade. Color preset, 2700 K white and advertised effect selections confirmed against the simulated backend.
-- Existing private kitchen package displays color/white controls in preview without re-export.
-- No real Home Assistant device commands were sent.
-
-## Dashboard verification (0.3.0)
-
-- Fifteen tests pass, adding floor-bounds framing across portrait/landscape aspects and rotations, authenticated Ingress model transport, missing models, ambiguous add-ons, and cross-origin preview denial.
-- Both the regular viewer and the standalone native-card bundle build.
-- Browser preview uses the private kitchen model with hidden ceiling, all floor walls, overhead orthographic camera and hidden markers. The sample floor also loads through the same card.
-- Native card uses current Home Assistant frontend session endpoints; actual HA OS resource registration, Supervisor sessions and companion-app rendering still need validation on the user's installation.
-
-- Browser checked the model-specific dashboard configuration dialog, multiple models, and light-off readability; no console errors. Narrow kitchen-card preview fits without horizontal document overflow.
-- HACS packaging uses root hacs.json and the self-contained root dist/ha-3d-rooms.js bundle; private model textures/GLBs are excluded. HACS installation itself still needs verification on the user's HA instance.
-
-## Front perspective and fixture controls (0.3.1)
-
-- Sixteen tests pass, including perspective bounds across narrow/wide viewports, headings and tilts. Production viewer and card builds pass.
-- Browser clicking the physical kitchen pendant opens its local preview controls; power and warm-temperature changes visibly update the room. Off retains low ambient visibility.
-- Mapped lights dispatch the native Home Assistant more-info event. Real Home Assistant dialog/device behavior remains to be checked on the user’s instance.
+The local integration test uses disposable credentials saved only in `/tmp`; neither these nor private model assets are committed. `integration-tests/live-check.mjs` explicitly targets only `127.0.0.1:18123` and exercises the disposable test instance. It is not a command to run against production.

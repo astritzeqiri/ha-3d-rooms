@@ -51,7 +51,7 @@ test("dashboard uses an authenticated Ingress session and model-specific scene U
     };
   const connection = await connectModel(
     hass,
-    { model: "kitchen" },
+    { model: "kitchen", addon: "local_three_d_rooms" },
     "https://home.example",
     async (url, options) => {
       assert.equal(
@@ -72,7 +72,7 @@ test("dashboard uses an authenticated Ingress session and model-specific scene U
   );
   assert.equal(calls.at(-1).endpoint, "/ingress/session");
 });
-test("dashboard refuses cross-origin preview URLs, non-admin access and ambiguous add-ons", async () => {
+test("dashboard refuses cross-origin preview URLs, non-admin access and missing models", async () => {
   await assert.rejects(
     connectModel(
       {},
@@ -88,18 +88,6 @@ test("dashboard refuses cross-origin preview URLs, non-admin access and ambiguou
       "https://home.example",
     ),
     /administrator/,
-  );
-  await assert.rejects(
-    connectModel(
-      {
-        callWS: async () => ({
-          addons: [{ slug: "a_three_d_rooms" }, { slug: "b_three_d_rooms" }],
-        }),
-      },
-      { model: "kitchen" },
-      "https://home.example",
-    ),
-    /Set addon/,
   );
   const c = await connectModel(
     {},
@@ -138,4 +126,39 @@ test("front perspective keeps all bounds inside the viewport across screen shape
           assert.ok(Math.abs(dot(v, f.up)) / (depth * tangent) < 1);
         }
       }
+});
+
+test("native integration transport uses HA session authentication and releases private scene URLs", async () => {
+  const calls = [];
+  const hass = {
+    user: { is_admin: true },
+    callWS: async (msg) => {
+      calls.push(msg);
+      return [{ id: "kitchen", controls: [], bindings: {} }];
+    },
+    fetchWithAuth: async (path) => {
+      calls.push(path);
+      return new Response(new Blob(["scene"]));
+    },
+  };
+  const connection = await connectModel(
+    hass,
+    { model: "kitchen" },
+    "https://home.example",
+  );
+  const { model, sceneURL, release } = await connection.load();
+  assert.equal(model.id, "kitchen");
+  assert.deepEqual(calls, [
+    { type: "three_d_rooms/request", operation: "models" },
+    "/api/three_d_rooms/models/kitchen/scene.glb",
+  ]);
+  assert.ok(sceneURL.startsWith("blob:"));
+  release();
+  await assert.rejects(fetch(sceneURL));
+  await assert.rejects(
+    (
+      await connectModel(hass, { model: "missing" }, "https://home.example")
+    ).load(),
+    /Model not found/,
+  );
 });

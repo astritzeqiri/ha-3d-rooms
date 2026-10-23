@@ -1,0 +1,13 @@
+{
+  "domain": "three_d_rooms",
+  "name": "3D Rooms",
+  "version": "0.4.0",
+  "codeowners": ["@astritzeqiri"],
+  "config_flow": true,
+  "dependencies": ["frontend", "http", "websocket_api", "panel_custom"],
+  "documentation": "https://github.com/astritzeqiri/ha-3d-rooms",
+  "issue_tracker": "https://github.com/astritzeqiri/ha-3d-rooms/issues",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "requirements": []
+}

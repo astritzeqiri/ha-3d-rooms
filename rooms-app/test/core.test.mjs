@@ -4,7 +4,7 @@ import { mkdtemp, rm, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { EventEmitter } from "node:events";
-import { zipSync, strToU8 } from "fflate";
+import { unzipSync, zipSync, strToU8 } from "fflate";
 import { WebSocketServer } from "ws";
 import { validateManifest, commandFor } from "../server/manifest.mjs";
 import { extractPackage, validateGLB } from "../server/import.mjs";
@@ -196,6 +196,16 @@ test("API imports, maps and restricts commands to mapped controls; no simulated 
     });
     assert.equal(r.status, 200);
     assert.equal(bridge.calls[0].target.entity_id, "light.kitchen");
+    const exported = await fetch(base + "/api/models/sample-floor/export.zip");
+    assert.equal(exported.status, 200);
+    const zip = unzipSync(new Uint8Array(await exported.arrayBuffer()));
+    assert.equal(
+      JSON.parse(new TextDecoder().decode(zip["bindings.json"]))[
+        "kitchen-ceiling"
+      ],
+      "light.kitchen",
+    );
+    assert.ok(zip["scene.glb"].length);
     bridge.entities[0].state = "unavailable";
     r = await fetch(base + "/api/models/sample-floor/command", {
       method: "POST",

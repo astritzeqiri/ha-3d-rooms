@@ -1,4 +1,35 @@
 export async function connectModel(hass, config, origin, fetcher = fetch) {
+  if (!config.preview_url && !config.addon) {
+    if (hass.user?.is_admin === false)
+      throw new Error("This release requires a Home Assistant administrator.");
+    return {
+      preview: false,
+      async load() {
+        const models = await hass.callWS({
+          type: "three_d_rooms/request",
+          operation: "models",
+        });
+        const model = models.find((m) => m.id === config.model);
+        if (!model)
+          throw new Error(
+            "Model not found. Upload it in the 3D Rooms sidebar first.",
+          );
+        const response = await hass.fetchWithAuth(
+          `/api/three_d_rooms/models/${encodeURIComponent(model.id)}/scene.glb`,
+        );
+        if (!response.ok)
+          throw new Error(
+            "Could not load your room. Check your login and the 3D Rooms integration.",
+          );
+        const sceneURL = URL.createObjectURL(await response.blob());
+        return {
+          model,
+          sceneURL,
+          release: () => URL.revokeObjectURL(sceneURL),
+        };
+      },
+    };
+  }
   let base, session;
   if (config.preview_url) {
     const url = new URL(config.preview_url, origin);
