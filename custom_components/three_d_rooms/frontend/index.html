@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-g9kg6rZu.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BsE23_0m.css">
+    <script type="module" crossorigin src="./assets/index-5wLBJHI4.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/preload-helper-cJChJQ8a.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-D2DNdCbJ.css">
   </head>
   <body>
     <header>
@@ -23,6 +24,12 @@
     </header>
     <main>
       <aside>
+        <nav class="library-sections" aria-label="Library sections">
+          <button id="show-models" aria-pressed="true">Models</button>
+          <button id="show-components" aria-pressed="false">
+            HA components
+          </button>
+        </nav>
         <div class="section-title">
           <h2>Your models</h2>
           <span id="model-count">0</span>
@@ -36,7 +43,7 @@
           <p class="muted">Models stay on this server.</p>
         </div>
       </aside>
-      <section class="workspace">
+      <section class="workspace" id="models-workspace">
         <div class="toolbar">
           <div>
             <span class="eyebrow" id="model-type">YOUR SPACE</span>
@@ -94,6 +101,152 @@
           <div id="controls"></div>
         </section>
       </section>
+      <section class="workspace" id="components-workspace" hidden>
+        <div class="toolbar">
+          <div>
+            <span class="eyebrow">HOME ASSISTANT</span>
+            <h1>Components</h1>
+          </div>
+          <div class="toolbar-actions">
+            <button id="import-component">Import component</button
+            ><button id="new-component" class="primary">
+              Create component
+            </button>
+          </div>
+        </div>
+        <p class="muted">
+          One room, many views. Save an overview, a close-up, or a different
+          angle for each dashboard.
+        </p>
+        <input
+          id="component-file"
+          type="file"
+          accept=".json,application/json"
+          hidden
+        />
+        <p id="component-error" class="error" role="alert"></p>
+        <div class="component-layout">
+          <nav id="component-list" aria-label="Saved components"></nav>
+          <div>
+            <div id="component-empty" class="component-empty">
+              <h2>Your rooms, ready for your dashboard</h2>
+              <p class="muted">
+                Create your first component from an imported model. Each view
+                shares its room’s lights and device mappings.
+              </p>
+            </div>
+            <form id="component-editor" hidden>
+              <div class="component-fields">
+                <label
+                  >Name<input id="component-title" maxlength="160" required
+                /></label>
+                <label
+                  >Room model<select id="component-model" required></select
+                ></label>
+                <label
+                  >View<select id="component-view">
+                    <option value="front">Perspective</option>
+                    <option value="floor">Floor plan</option>
+                  </select></label
+                >
+                <label
+                  >Card height (px)<input
+                    id="component-height"
+                    type="number"
+                    min="180"
+                    max="1600"
+                    step="1"
+                    value="500"
+                    required
+                /></label>
+                <label
+                  >Rotation <output id="component-heading-value"></output
+                  ><input
+                    aria-label="Room rotation"
+                    id="component-heading"
+                    type="range"
+                    min="0"
+                    max="359"
+                    step="1"
+                /></label>
+                <label
+                  >Tilt <output id="component-tilt-value"></output
+                  ><input
+                    aria-label="Room tilt"
+                    id="component-tilt"
+                    type="range"
+                    min="0"
+                    max="35"
+                    step="1"
+                /></label>
+                <label
+                  >Zoom <output id="component-zoom-value"></output
+                  ><input
+                    aria-label="Room zoom"
+                    id="component-zoom"
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.05"
+                /></label>
+              </div>
+              <div class="component-actions">
+                <button class="primary" id="save-component" type="submit">
+                  Save component</button
+                ><button id="duplicate-component" type="button">
+                  Duplicate</button
+                ><button id="delete-component" type="button" class="danger">
+                  Delete</button
+                ><span
+                  id="component-save-state"
+                  class="muted"
+                  role="status"
+                ></span>
+              </div>
+              <div class="section-title">
+                <h2>Dashboard preview</h2>
+                <span class="muted small"
+                  >Preview lighting · no device commands</span
+                >
+              </div>
+              <p class="muted small">
+                Zoom above 1× crops into the room. The preview uses the selected
+                card height.
+              </p>
+              <div id="component-preview">
+                <span id="component-preview-status" role="status"
+                  >Loading room…</span
+                >
+              </div>
+              <label for="component-yaml"
+                >Home Assistant card configuration</label
+              >
+              <textarea
+                id="component-yaml"
+                rows="9"
+                readonly
+                spellcheck="false"
+              ></textarea>
+              <p class="muted small">
+                In Home Assistant, edit your dashboard, add a Manual card, and
+                paste this configuration. The 3D Rooms integration must be
+                installed.
+              </p>
+              <div class="component-actions">
+                <button id="copy-component" type="button">
+                  Copy dashboard configuration</button
+                ><button id="export-component" type="button">
+                  Export component
+                </button>
+              </div>
+              <p class="muted small">
+                Component files contain view settings. To use them on another
+                installation, import the room model there first.
+              </p>
+            </form>
+          </div>
+        </div>
+      </section>
     </main>
     <dialog id="dashboard-dialog">
       <div class="dialog-top">
@@ -112,6 +265,38 @@
         <strong>3D Rooms integration</strong>. Add a Manual card to your
         dashboard using the configuration below. No separate HACS card download
         or resource entry is required.
+      </p>
+      <label for="dashboard-view">Room view</label>
+      <select id="dashboard-view">
+        <option value="front">Perspective</option>
+        <option value="floor">Floor plan</option>
+      </select>
+      <label for="dashboard-heading"
+        >Room rotation: <output id="dashboard-heading-value">0°</output></label
+      >
+      <input
+        id="dashboard-heading"
+        type="range"
+        min="0"
+        max="359"
+        value="0"
+        step="1"
+      />
+      <label for="dashboard-tilt"
+        >Room tilt: <output id="dashboard-tilt-value">28°</output></label
+      >
+      <input
+        id="dashboard-tilt"
+        type="range"
+        min="0"
+        max="35"
+        value="28"
+        step="1"
+      />
+      <p class="muted small">
+        Adjust the angle, then copy the configuration into your dashboard card.
+        Rotation turns the room; tilt changes how far it leans from an overhead
+        view.
       </p>
       <label for="dashboard-yaml">Dashboard card configuration</label
       ><textarea

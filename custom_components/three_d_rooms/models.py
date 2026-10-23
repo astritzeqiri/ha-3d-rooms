@@ -145,6 +145,31 @@ def validate_manifest(m):
     }
 
 
+def validate_component(value, model_ids):
+    """Validate portable room views without accepting executable configuration."""
+    if not isinstance(value, dict) or value.get("schemaVersion") != 1 or not valid_id(value.get("id")):
+        raise ValueError("Use a version 1 component with a valid ID.")
+    title = value.get("title")
+    if not isinstance(title, str) or not title.strip() or len(title) > 160:
+        raise ValueError("Give the component a name up to 160 characters.")
+    layers = value.get("layers")
+    if not isinstance(layers, list) or len(layers) != 1 or not isinstance(layers[0], dict):
+        raise ValueError("This release supports one room per component.")
+    layer = layers[0]
+    if layer.get("model") not in model_ids:
+        raise ValueError("Import the referenced room model first.")
+    if layer.get("view") not in ("front", "floor"):
+        raise ValueError("Choose perspective or floor view.")
+    for key, minimum, maximum in (("heading", 0, 359), ("tilt", 0, 35), ("zoom", .5, 3)):
+        if not number(layer.get(key)) or not minimum <= layer[key] <= maximum:
+            raise ValueError(f"Invalid {key}.")
+    height = value.get("height")
+    if not isinstance(height, int) or isinstance(height, bool) or not 180 <= height <= 1600:
+        raise ValueError("Height must be 180–1600 pixels.")
+    return {"schemaVersion": 1, "id": value["id"], "title": title.strip(), "height": height,
+            "layers": [{key: layer[key] for key in ("model", "view", "heading", "tilt", "zoom")}]}
+
+
 def validate_glb(data, manifest):
     """Require glTF 2 with embedded resources and referenced control nodes."""
     if len(data) < 20 or data[:4] != b"glTF":
@@ -241,6 +266,7 @@ class ModelStore:
     def __init__(self, directory):
         self.directory = Path(directory)
         self.models = []
+        self.components = []
 
     def open(self):
         (self.directory / "models").mkdir(parents=True, exist_ok=True)
@@ -263,6 +289,7 @@ class ModelStore:
                     }
                 )
             self.models = models
+            self.components = catalog.get("components", [])
         return self
 
     def revision(self, model_id):
@@ -286,11 +313,32 @@ class ModelStore:
     def save(self, models):
         temporary = self.directory / "catalog.json.tmp"
         with temporary.open("w") as output:
-            json.dump({"version": 1, "models": models}, output)
+            json.dump({"version": 1, "models": models, "components": self.components}, output)
             output.flush()
             os.fsync(output.fileno())
         os.replace(temporary, self.directory / "catalog.json")
         self.models = models
+
+    def put_component(self, value):
+        component = validate_component(value, [m["id"] for m in self.models])
+        previous = self.components
+        self.components = [c for c in previous if c["id"] != component["id"]] + [component]
+        try:
+            self.save(self.models)
+        except Exception:
+            self.components = previous
+            raise
+        return deepcopy(component)
+
+    def remove_component(self, component_id):
+        previous = self.components
+        self.components = [c for c in previous if c["id"] != component_id]
+        try:
+            self.save(self.models)
+        except Exception:
+            self.components = previous
+            raise
+        return {"ok": True}
 
     def install(self, data):
         stage = Path(tempfile.mkdtemp(prefix="import-", dir=self.directory))

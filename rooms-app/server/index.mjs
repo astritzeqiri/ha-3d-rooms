@@ -120,6 +120,23 @@ export async function createApp({
         req.on("close", () => clients.delete(res));
         return;
       }
+      if (path === "/api/components" && req.method === "GET") {
+        json(res, 200, store.state.components);
+        return;
+      }
+      if (path === "/api/components" && req.method === "PUT") {
+        json(
+          res,
+          200,
+          await store.putComponent(JSON.parse(await body(req, 16384))),
+        );
+        return;
+      }
+      const componentMatch = path.match(/^\/api\/components\/([a-z0-9_-]+)$/);
+      if (componentMatch && req.method === "DELETE") {
+        json(res, 200, await store.removeComponent(componentMatch[1]));
+        return;
+      }
       if (path === "/api/models" && req.method === "GET") {
         json(
           res,

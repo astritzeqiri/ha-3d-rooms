@@ -324,7 +324,10 @@ async function choose(id) {
 }
 $("models").addEventListener("click", (e) => {
   const b = e.target.closest("[data-model]");
-  if (b) choose(b.dataset.model);
+  if (b) {
+    $("show-models").click();
+    choose(b.dataset.model);
+  }
 });
 $("home-view").onclick = () => view?.reset();
 $("floor-view").onclick = () => {
@@ -336,9 +339,16 @@ $("floor-view").onclick = () => {
   else url.searchParams.delete("view");
   history.replaceState(null, "", url);
 };
-$("dashboard").onclick = () => {
+const updateDashboardConfig = () => {
+  $("dashboard-heading-value").textContent = `${$("dashboard-heading").value}°`;
+  $("dashboard-tilt-value").textContent = `${$("dashboard-tilt").value}°`;
   $("dashboard-yaml").value =
-    `type: custom:three-d-rooms-card\nmodel: ${selected.id}\nheight: 500\nview: front\ntilt: 28\nheading: 0`;
+    `type: custom:three-d-rooms-card\nmodel: ${selected.id}\nheight: 500\nview: ${$("dashboard-view").value}\ntilt: ${$("dashboard-tilt").value}\nheading: ${$("dashboard-heading").value}`;
+};
+for (const id of ["dashboard-heading", "dashboard-tilt", "dashboard-view"])
+  $(id).oninput = updateDashboardConfig;
+$("dashboard").onclick = () => {
+  updateDashboardConfig();
   $("dashboard-dialog").showModal();
 };
 $("copy-dashboard").onclick = async () => {
@@ -540,3 +550,6 @@ $("export-model").onclick = async () => {
     toast(error.message);
   }
 };
+
+const { initComponents } = await import("./components.js");
+initComponents({ api, models: () => models, native, toast });

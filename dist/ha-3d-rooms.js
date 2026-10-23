@@ -6376,7 +6376,7 @@ function ns(e) {
 	throw Error(`THREE.TextureUtils: Unknown texture type ${e}.`);
 }
 typeof __THREE_DEVTOOLS__ < "u" && __THREE_DEVTOOLS__.dispatchEvent(new CustomEvent("register", { detail: { revision: "186" } })), typeof window < "u" && (window.__THREE__ ? B("WARNING: Multiple instances of Three.js being imported.") : window.__THREE__ = "186");
-// ../../../../Users/astritzeqiri/Sites/localhost/personal/personal-apps/3dmodelanything/ha-3d-rooms/rooms-app/node_modules/three/build/three.module.js
+// node_modules/three/build/three.module.js
 function rs() {
 	let e = null, t = !1, n = null, r = null;
 	function i(t, a) {
@@ -12728,7 +12728,7 @@ function Vu(e) {
 		capture: !0
 	}));
 }
-// ../../../../Users/astritzeqiri/Sites/localhost/personal/personal-apps/3dmodelanything/ha-3d-rooms/rooms-app/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+// node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
 function Hu(e, t) {
 	if (t === 0) return console.warn("THREE.BufferGeometryUtils.toTrianglesDrawMode(): Geometry already defined as triangles."), e;
 	if (t === 2 || t === 1) {
@@ -12747,7 +12747,7 @@ function Hu(e, t) {
 	}
 	return console.error("THREE.BufferGeometryUtils.toTrianglesDrawMode(): Unknown draw mode:", t), e;
 }
-// ../../../../Users/astritzeqiri/Sites/localhost/personal/personal-apps/3dmodelanything/ha-3d-rooms/rooms-app/node_modules/three/examples/jsm/utils/SkeletonUtils.js
+// node_modules/three/examples/jsm/utils/SkeletonUtils.js
 function Uu(e) {
 	let t = /* @__PURE__ */ new Map(), n = /* @__PURE__ */ new Map(), r = e.clone();
 	return Wu(e, r, function(e, r) {
@@ -12764,7 +12764,7 @@ function Wu(e, t, n) {
 	n(e, t);
 	for (let r = 0; r < e.children.length; r++) Wu(e.children[r], t.children[r], n);
 }
-// ../../../../Users/astritzeqiri/Sites/localhost/personal/personal-apps/3dmodelanything/ha-3d-rooms/rooms-app/node_modules/three/examples/jsm/loaders/GLTFLoader.js
+// node_modules/three/examples/jsm/loaders/GLTFLoader.js
 var Gu = class extends eo {
 	constructor(e) {
 		super(e), this.dracoLoader = null, this.ktx2Loader = null, this.meshoptDecoder = null, this.pluginCallbacks = [], this.register(function(e) {
@@ -14214,7 +14214,7 @@ var Wd = class {
 			bottom: n.bottom,
 			near: n.near,
 			far: n.far,
-			zoom: 1
+			zoom: this.options.zoom ?? 1
 		}), this.camera.position.fromArray(n.position), this.camera.up.fromArray(n.up), this.orbit.target.fromArray(n.target), this.camera.lookAt(this.orbit.target), this.camera.updateProjectionMatrix();
 	}
 	reset() {
@@ -14253,8 +14253,18 @@ var Wd = class {
 	dispose() {
 		++this.generation, this.resize.disconnect(), this.orbit.dispose(), this.disposeScene(this.scene), this.renderer.dispose(), this.renderer.domElement.remove();
 	}
+	fixtureScreenPosition(e) {
+		let t = this.fixtures.get(e);
+		if (!t) return null;
+		let n = t.marker.position.clone().project(this.camera);
+		return {
+			x: (n.x + 1) * this.container.clientWidth / 2,
+			y: (1 - n.y) * this.container.clientHeight / 2,
+			visible: n.z >= -1 && n.z <= 1 && Math.abs(n.x) <= 1 && Math.abs(n.y) <= 1
+		};
+	}
 	render() {
-		this.renderer.render(this.scene, this.camera);
+		this.renderer.render(this.scene, this.camera), this.options.onRender?.();
 	}
 }, Gd = (e) => /^#[0-9a-f]{6}$/i.test(e) ? [
 	1,
@@ -14383,11 +14393,12 @@ var Yd = class extends HTMLElement {
 		};
 	}
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;left:12px;bottom:12px}.fixture-access button{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);padding:0;white-space:nowrap}.fixture-access button:focus-visible{position:relative;width:auto;height:auto;clip-path:none;padding:10px 18px;background:#28352b}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}[hidden]{display:none!important}</style><ha-card><header hidden></header><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this.shadowRoot.querySelector("button").onclick = () => this._load(), this._generation = 0;
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;width:44px;height:44px;padding:10px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button[aria-pressed=\"true\"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled=\"true\"]{opacity:.55}.fixture-access button svg{width:24px;height:24px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}[hidden]{display:none!important}</style><ha-card><header hidden></header><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this.shadowRoot.querySelector("button").onclick = () => this._load(), this._generation = 0;
 	}
 	setConfig(e) {
 		if (typeof e.model != "string" || !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(e.model)) throw Error("Choose a model ID, for example kitchen.");
 		if (e.height !== void 0 && (!Number.isFinite(e.height) || e.height < 180 || e.height > 1600)) throw Error("Card height must be between 180 and 1600 pixels.");
+		if (e.zoom !== void 0 && (!Number.isFinite(e.zoom) || e.zoom < .5 || e.zoom > 3)) throw Error("Zoom must be between 0.5 and 3.");
 		for (let t of ["tilt", "heading"]) if (e[t] !== void 0 && !Number.isFinite(e[t])) throw Error(`${t} must be a number.`);
 		if (e.tilt !== void 0 && (e.tilt < 0 || e.tilt > 35)) throw Error("Tilt must be between 0 and 35 degrees.");
 		if (e.view !== void 0 && !["front", "floor"].includes(e.view)) throw Error("Choose front or floor view.");
@@ -14440,7 +14451,9 @@ var Yd = class extends HTMLElement {
 				markers: !1,
 				interactive: this._config.interactive,
 				tilt: this._config.tilt,
-				heading: this._config.heading
+				heading: this._config.heading,
+				zoom: this._config.zoom ?? 1,
+				onRender: () => this._positionButtons()
 			});
 			let a = this._view;
 			try {
@@ -14481,10 +14494,61 @@ var Yd = class extends HTMLElement {
 		let e = document.createElement("div");
 		e.className = "fixture-access";
 		for (let t of this._model.controls) {
-			let n = document.createElement("button");
-			n.textContent = `Control ${t.label || t.name || "light"}`, n.onclick = () => this._pick(t.id), e.append(n);
+			let n = document.createElement("button"), r = t.label || t.name || "light";
+			n.dataset.control = t.id, n.setAttribute("aria-label", `Toggle ${r}. Hold for more info.`), n.title = `${r}: click to toggle, hold for more info`, n.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z\"/></svg>";
+			let i, a, o = !1, s = () => {
+				clearTimeout(i), a = null;
+			};
+			n.onpointerdown = (e) => {
+				e.button === 0 && (o = !1, a = [e.clientX, e.clientY], n.setPointerCapture(e.pointerId), i = setTimeout(() => {
+					o = !0, this._pick(t.id);
+				}, 500));
+			}, n.onpointermove = (e) => {
+				a && Math.hypot(e.clientX - a[0], e.clientY - a[1]) > 8 && (o = !0, s());
+			}, n.onpointerup = s, n.onpointercancel = () => {
+				o = !0, s();
+			}, n.onlostpointercapture = s, n.oncontextmenu = (e) => e.preventDefault(), n.onclick = () => {
+				o || this._toggle(t.id), o = !1;
+			}, n.onkeydown = (e) => {
+				(e.key === "F2" || e.shiftKey && e.key === "Enter") && (e.preventDefault(), this._pick(t.id));
+			}, e.append(n);
 		}
-		this._container.append(e);
+		this._container.append(e), this._positionButtons();
+	}
+	_positionButtons() {
+		for (let e of this.shadowRoot.querySelectorAll("[data-control]")) {
+			let t = this._view?.fixtureScreenPosition(e.dataset.control);
+			e.hidden = !t?.visible, t && (e.style.left = `${Math.max(0, Math.min(this._container.clientWidth - 44, t.x + 24))}px`, e.style.top = `${Math.max(0, Math.min(this._container.clientHeight - 44, t.y - 22))}px`);
+		}
+	}
+	async _toggle(e) {
+		let t = this._model.controls.find((t) => t.id === e);
+		if (!t) return;
+		if (this._preview) {
+			let n = this._previewStates.get(e) || {
+				on: !0,
+				brightness: 255,
+				rgb: Gd(t.color || "#fff0d4")
+			};
+			this._previewStates.set(e, {
+				...n,
+				on: !n.on
+			}), this._states();
+			return;
+		}
+		let n = this._model.bindings[e], r = this._hass.states?.[n];
+		if (!r || ["unavailable", "unknown"].includes(r.state) || (this._pendingToggles ||= /* @__PURE__ */ new Set(), this._pendingToggles.has(e))) return;
+		this._pendingToggles.add(e);
+		let i = [...this.shadowRoot.querySelectorAll("[data-control]")].find((t) => t.dataset.control === e);
+		i?.setAttribute("aria-busy", "true"), this.shadowRoot.querySelector(".fixture-feedback")?.remove();
+		try {
+			await this._hass.callService("light", "toggle", { entity_id: n });
+		} catch {
+			let e = document.createElement("div");
+			e.className = "fixture-feedback", e.setAttribute("role", "alert"), e.textContent = "Could not change the light. Try again.", this._container.append(e);
+		} finally {
+			this._pendingToggles.delete(e), i?.removeAttribute("aria-busy");
+		}
 	}
 	_pick(e) {
 		let t = this._model.controls.find((t) => t.id === e);
@@ -14533,6 +14597,10 @@ var Yd = class extends HTMLElement {
 				brightness: n?.attributes?.brightness ?? 255,
 				...qd(n, t.color)
 			});
+		}
+		for (let t of this.shadowRoot.querySelectorAll("[data-control]")) {
+			let n = e.get(t.dataset.control);
+			t.setAttribute("aria-pressed", String(!!n?.on)), t.setAttribute("aria-disabled", String(!!n?.unavailable));
 		}
 		let t = JSON.stringify([...e]);
 		t !== this._signature && (this._signature = t, this._view.setStates(e));

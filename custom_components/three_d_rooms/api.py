@@ -43,6 +43,13 @@ class RoomsRuntime:
         }
 
     async def request(self, operation, data, user_id):
+        if operation == "components":
+            from copy import deepcopy
+            return deepcopy(self.store.components)
+        if operation == "save_component":
+            return await self.work(self.store.put_component, data)
+        if operation == "delete_component":
+            return await self.work(self.store.remove_component, data.get("id"))
         if operation == "models":
             return self.store.catalog()
         if operation == "status":

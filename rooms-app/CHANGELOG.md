@@ -25,3 +25,10 @@ Add capability-aware RGB color, Kelvin white temperature, device effects and fad
 # 0.1.0
 
 Initial model library, prepared ZIP/GLB imports, stable light metadata, entity mapping, preview lighting and Home Assistant WebSocket bridge. Includes Ingress packaging and persistent model storage. This is an early build pending HA OS device validation.
+
+### Unreleased — saved Home Assistant components
+
+- Added a Components section with named room views, live previews, save, duplicate,
+  delete, portable JSON import/export, and dashboard configuration copying.
+- Added per-card zoom from 0.5× to 3× alongside rotation, tilt and card height.
+- Persisted component settings in the native integration and add-on catalogs.

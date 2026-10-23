@@ -1,3 +1,4 @@
+import { validateComponent } from "../shared/component.mjs";
 import { mkdir, readFile, writeFile, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -19,6 +20,7 @@ export class Store {
     } catch (e) {
       if (e.code !== "ENOENT") throw e;
     }
+    this.state.components ||= [];
     return this;
   }
   async save() {
@@ -34,6 +36,39 @@ export class Store {
     const next = this.mutations.then(fn);
     this.mutations = next.catch(() => {});
     return next;
+  }
+  async putComponent(value) {
+    return this.transaction(async () => {
+      const component = validateComponent(
+        value,
+        this.state.models.map((m) => m.id),
+      );
+      const previous = this.state.components;
+      this.state.components = [
+        ...previous.filter((c) => c.id !== component.id),
+        component,
+      ];
+      try {
+        await this.save();
+      } catch (error) {
+        this.state.components = previous;
+        throw error;
+      }
+      return component;
+    });
+  }
+  async removeComponent(id) {
+    return this.transaction(async () => {
+      const previous = this.state.components;
+      this.state.components = previous.filter((c) => c.id !== id);
+      try {
+        await this.save();
+      } catch (error) {
+        this.state.components = previous;
+        throw error;
+      }
+      return { ok: true };
+    });
   }
   async install(stage, manifest) {
     return this.transaction(async () => {

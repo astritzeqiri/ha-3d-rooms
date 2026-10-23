@@ -103,3 +103,36 @@ The legacy card can temporarily use an explicit `addon: YOUR_ADDON_SLUG` while m
 Scene downloads are gzip-compressed and use private authenticated ETag revalidation. A session cache shared by the sidebar manager and dashboard deduplicates requests for the same model revision (up to 64 MB retained, five-minute expiry). Replaced models get a new revision; failed downloads can retry. Scene files remain authenticated; the original model and textures are unchanged. The server creates a compressed derivative beside each original scene on first use.
 
 The first load still transfers the model and prepares it for the GPU. Subsequent visits reuse it when possible. Existing uploaded rooms do not need to be uploaded again after updating.
+
+### Light shortcuts and room angle
+
+Each dashboard light has a bulb button beside its modeled position. Click the
+button to toggle its bound light; hold for half a second to open Home Assistant's
+more-info dialog. Clicking the fixture itself still opens more info. Keyboard
+users can toggle with Enter or Space and open more info with Shift+Enter or F2.
+Unavailable or unbound lights do not send commands.
+
+In the model manager, open **Add to dashboard** and choose the room view,
+rotation (0–359°), and tilt (0–35°). Copy the generated configuration into a
+Manual dashboard card, or update an existing card's `view`, `heading`, and `tilt`
+settings. Each card can use its own room angle.
+
+### Home Assistant components
+
+Open **HA components** beside **Models** to create reusable dashboard views. Choose
+an imported room, name the component, then adjust its view, rotation, tilt, zoom
+(0.5–3×), and height. The room preview updates as you edit. Save several components
+for the same kitchen, or duplicate one to start from its settings.
+
+**Copy dashboard configuration** produces a Manual card configuration with all
+view settings included. Existing cards keep their copied settings; copy the
+configuration again after changing a component. **Export component** downloads a
+small `.component.json` file; **Import component** opens it as a new draft for
+review and saving. Component files reference room IDs and do not include the GLB
+or device mappings: import the corresponding room package first when moving to a
+different installation. Components are saved server-side in both the add-on and
+native integration and survive restarts.
+
+This release supports one room per component. The versioned component format
+stores room references as layers to allow future room composition; room merging
+is not available yet.

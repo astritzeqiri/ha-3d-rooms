@@ -244,7 +244,7 @@ export class SceneView {
       bottom: f.bottom,
       near: f.near,
       far: f.far,
-      zoom: 1,
+      zoom: this.options.zoom ?? 1,
     });
     this.camera.position.fromArray(f.position);
     this.camera.up.fromArray(f.up);
@@ -325,7 +325,22 @@ export class SceneView {
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
+  fixtureScreenPosition(id) {
+    const fixture = this.fixtures.get(id);
+    if (!fixture) return null;
+    const point = fixture.marker.position.clone().project(this.camera);
+    return {
+      x: ((point.x + 1) * this.container.clientWidth) / 2,
+      y: ((1 - point.y) * this.container.clientHeight) / 2,
+      visible:
+        point.z >= -1 &&
+        point.z <= 1 &&
+        Math.abs(point.x) <= 1 &&
+        Math.abs(point.y) <= 1,
+    };
+  }
   render() {
     this.renderer.render(this.scene, this.camera);
+    this.options.onRender?.();
   }
 }

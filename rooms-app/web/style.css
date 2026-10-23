@@ -645,3 +645,107 @@ textarea {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
+
+.library-sections {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.library-sections button {
+  flex: 1;
+  padding: 10px;
+}
+.library-sections [aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.component-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+#component-list {
+  display: grid;
+  gap: 8px;
+}
+.component-empty {
+  padding: 40px 24px;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+}
+.component-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.component-fields label {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.component-fields input:not([type="range"]) {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 8px;
+}
+.component-fields output {
+  color: var(--accent);
+}
+.component-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+#component-preview {
+  position: relative;
+  height: 500px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #1c1c1c;
+  margin: 12px 0 24px;
+}
+#component-preview canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+#component-preview-status {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+}
+#component-error:empty {
+  display: none;
+}
+@media (max-width: 1000px) {
+  .component-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #component-list {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .component-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+.component-layout > * {
+  min-width: 0;
+}
+#component-preview canvas {
+  max-width: 100%;
+}

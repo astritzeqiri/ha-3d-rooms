@@ -35,6 +35,13 @@ export async function connectNative() {
     async api(path, options = {}) {
       if (path === "models" && options.method === "POST")
         return (await response("/api/three_d_rooms/models", options)).json();
+      if (path === "components")
+        return bridge.request(
+          options.method === "PUT" ? "save_component" : "components",
+          JSON.parse(options.body || "{}"),
+        );
+      if (path.startsWith("components/") && options.method === "DELETE")
+        return bridge.request("delete_component", { id: path.split("/")[1] });
       if (path === "models" || path === "status") return bridge.request(path);
       const match = path.match(
         /^models\/([a-z0-9_-]+)(?:\/(bindings|command))?$/,

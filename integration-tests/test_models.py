@@ -137,3 +137,45 @@ class PackageTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ComponentTests(unittest.TestCase):
+    def component(self):
+        return {"schemaVersion": 1, "id": "kitchen-view", "title": "Kitchen overview", "height": 500,
+                "layers": [{"model": "kitchen", "view": "front", "heading": 90, "tilt": 28, "zoom": 1.5}]}
+
+    def test_component_persistence_and_independent_views(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package())
+            first = self.component()
+            store.put_component(first)
+            second = {**first, "id": "kitchen-close", "title": "Close-up"}
+            store.put_component(second)
+            reopened = models.ModelStore(directory).open()
+            self.assertEqual(len(reopened.components), 2)
+            self.assertEqual(reopened.components[0]["layers"][0]["zoom"], 1.5)
+            reopened.bind("kitchen", "ceiling", "light.kitchen")
+            self.assertEqual(len(models.ModelStore(directory).open().components), 2)
+            reopened.remove_component(first["id"])
+            self.assertEqual(len(models.ModelStore(directory).open().components), 1)
+            self.assertEqual(len(reopened.models), 1)
+
+    def test_invalid_components_and_failed_write_preserve_catalog(self):
+        from copy import deepcopy
+        for key, value in (("zoom", 0), ("heading", float("nan")), ("tilt", 36)):
+            component = self.component()
+            component["layers"][0][key] = value
+            with self.assertRaises(ValueError):
+                models.validate_component(component, ["kitchen"])
+        with self.assertRaises(ValueError):
+            models.validate_component(self.component(), [])
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package())
+            store.put_component(self.component())
+            previous = deepcopy(store.components)
+            with patch.object(store, "save", side_effect=OSError("disk unavailable")):
+                with self.assertRaises(OSError):
+                    store.put_component({**self.component(), "title": "Changed"})
+            self.assertEqual(store.components, previous)
