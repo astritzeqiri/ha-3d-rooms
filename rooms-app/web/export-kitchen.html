@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Export private kitchen</title>
+    <style>
+      body {
+        font: 18px system-ui;
+        background: #18221d;
+        color: #e5eddf;
+        padding: 40px;
+      }
+      button {
+        font: inherit;
+        padding: 16px;
+      }
+      p {
+        max-width: 640px;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Export your kitchen</h1>
+    <p>
+      This local authoring tool exports the rebuilt kitchen with its ceiling
+      light, embedded textures and cutaway walls. Raw scan photos and depth
+      frames are excluded. Some textures contain personal imagery, so the model
+      stays private.
+    </p>
+    <button id="export">Export and import kitchen</button>
+    <p id="status" role="status"></p>
+    <script type="module">
+      import * as THREE from "three";
+      import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
+      import { zipSync, strToU8 } from "fflate";
+      import kitchen from "../../../3d-model-anything/demos/local-kitchen/index.ts";
+      const button = document.getElementById("export"),
+        status = document.getElementById("status");
+      button.onclick = async () => {
+        button.disabled = true;
+        try {
+          status.textContent = "Building your kitchen…";
+          const room = await kitchen.build();
+          const lamp = room.group.getObjectByName("actual-scalloped-pendant");
+          if (!lamp)
+            throw new Error("Could not find the modeled ceiling fixture.");
+          lamp.userData.controlId = "kitchen-fixture";
+          lamp.userData.noMerge = true;
+          for (const wall of room.walls)
+            wall.group.userData.wallNormal = wall.def.n.toArray();
+          for (const ceiling of room.ceiling) ceiling.userData.ceiling = true;
+          room.optimize?.({ static: true });
+          room.group.traverse((o) => {
+            if (o.geometry && !o.geometry.getAttribute("normal"))
+              o.geometry.computeVertexNormals();
+          });
+          status.textContent =
+            "Embedding textures and preserving light metadata…";
+          const glb = await new GLTFExporter().parseAsync(room.group, {
+            binary: true,
+            onlyVisible: false,
+            maxTextureSize: 2048,
+          });
+          const manifest = {
+            schemaVersion: 1,
+            id: "kitchen",
+            revision: "1",
+            title: "Kitchen · your scan",
+            floor: "Kitchen",
+            units: "meters",
+            up: "Y",
+            scene: "scene.glb",
+            ambient: 0.22,
+            camera: { position: room.camera.orbit, target: room.camera.target },
+            controls: [
+              {
+                id: "kitchen-ceiling",
+                label: "Ceiling light",
+                type: "light",
+                room: "Kitchen",
+                position: [0, 1.965, -0.06],
+                intensity: 6,
+                color: "#fff1d5",
+                capabilities: ["on_off", "brightness", "color", "color_temp"],
+                nodeIds: ["kitchen-fixture"],
+              },
+            ],
+          };
+          const zip = zipSync(
+            {
+              "manifest.json": strToU8(JSON.stringify(manifest, null, 2)),
+              "scene.glb": new Uint8Array(glb),
+            },
+            { level: 6 },
+          );
+          status.textContent = "Importing private model…";
+          const response = await fetch("./api/models", {
+            method: "POST",
+            headers: {
+              "X-Rooms-Request": "1",
+              "Content-Type": "application/zip",
+            },
+            body: zip,
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error);
+          status.textContent = "Kitchen imported. Open 3D Rooms to view it.";
+          const link = document.createElement("a");
+          link.href = "./";
+          link.textContent = "Open 3D Rooms";
+          link.style.color = "#c3dbab";
+          document.body.append(link);
+        } catch (e) {
+          status.textContent = e.message;
+          button.disabled = false;
+          console.error(e);
+        }
+      };
+    </script>
+  </body>
+</html>

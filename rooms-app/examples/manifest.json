@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "sample-floor",
+  "revision": "1",
+  "title": "Example floor",
+  "floor": "Ground floor · sample",
+  "units": "meters",
+  "up": "Y",
+  "scene": "scene.glb",
+  "ambient": 0.22,
+  "camera": {
+    "position": [
+      7,
+      7,
+      9
+    ],
+    "target": [
+      0,
+      0.6,
+      0
+    ]
+  },
+  "controls": [
+    {
+      "id": "kitchen-ceiling",
+      "label": "Kitchen ceiling light",
+      "type": "light",
+      "room": "Kitchen",
+      "position": [
+        -1.8,
+        2.35,
+        0
+      ],
+      "intensity": 20,
+      "color": "#fff0d4",
+      "capabilities": [
+        "on_off",
+        "brightness",
+        "color",
+        "color_temp"
+      ],
+      "nodeIds": [
+        "kitchen-fixture"
+      ]
+    },
+    {
+      "id": "living-ceiling",
+      "label": "Living room light",
+      "type": "light",
+      "room": "Living room",
+      "position": [
+        1.8,
+        2.35,
+        0
+      ],
+      "intensity": 20,
+      "color": "#fff0d4",
+      "capabilities": [
+        "on_off",
+        "brightness",
+        "color",
+        "color_temp"
+      ],
+      "nodeIds": [
+        "living-fixture"
+      ]
+    }
+  ]
+}
