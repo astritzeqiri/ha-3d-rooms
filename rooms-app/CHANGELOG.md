@@ -1,3 +1,10 @@
+# 0.11.0
+
+- Organize the manager around rooms with Devices, Saved views and Room settings tabs.
+- Replace duplicate camera editors with one shared editor, basic presets and advanced precise controls. Add a clear Save view → Use in dashboard flow, with optional YAML.
+- Rename rooms and link them to existing Home Assistant areas. Validate area IDs and preserve room geometry, mappings and saved views; keep area associations installation-local.
+- Preserve room navigation across refreshes, protect unsaved changes and retain portable saved-view JSON compatibility.
+
 # 0.10.1
 
 - Add an entity-settings cog on every device card, opening a focused editor with compatible entity choices and automatic saving.

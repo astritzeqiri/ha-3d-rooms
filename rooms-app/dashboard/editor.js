@@ -12,9 +12,9 @@ export class ThreeDRoomsEditor extends HTMLElement {
       p{color:var(--secondary-text-color)}[role=alert]{color:var(--error-color)}[hidden]{display:none!important}
       @media(max-width:360px){.grid{grid-template-columns:1fr}}
     </style>
-    <p>Choose a room or start from a saved component. Changes appear in Home Assistant’s preview.</p>
+    <p>Choose a room or start from a saved view. Changes appear in Home Assistant’s preview.</p>
     <p id="status" role="status">Loading rooms…</p><button id="retry" hidden>Retry loading rooms</button>
-    <label>Saved component<select id="component"><option value="">Choose a saved component (optional)</option></select></label>
+    <label>Saved view<select id="component"><option value="">Choose a saved view (optional)</option></select></label>
     <label>Room<select id="model"><option value="">Choose a room</option></select></label>
     <label>Title<input id="title" type="text" maxlength="160"></label>
     <label>View<select id="view"><option value="front">Perspective</option><option value="floor">Floor</option></select></label>
@@ -27,7 +27,7 @@ export class ThreeDRoomsEditor extends HTMLElement {
     <label class="check"><input id="interactive" type="checkbox">Allow camera movement on the dashboard</label>
     <button id="reset">Reset camera framing</button>
     <p id="error" role="alert" hidden></p>
-    <p>Upload rooms and manage light mappings in the 3D Rooms sidebar. Save this card with Home Assistant’s Save button.</p>`;
+    <p>Upload rooms and manage device mappings in the 3D Rooms sidebar. Save this card with Home Assistant’s Save button.</p>`;
     this._field = (id) => this.shadowRoot.getElementById(id);
     for (const key of [
       "model",
@@ -114,10 +114,15 @@ export class ThreeDRoomsEditor extends HTMLElement {
         );
       const componentSelect = this._field("component");
       componentSelect.replaceChildren(
-        new Option("Choose a saved component (optional)", ""),
+        new Option("Choose a saved view (optional)", ""),
       );
       for (const component of components)
-        componentSelect.add(new Option(component.title, component.id));
+        componentSelect.add(
+          new Option(
+            `${models.find((m) => m.id === component.layers[0].model)?.title || "Room unavailable"} · ${component.title}`,
+            component.id,
+          ),
+        );
       this._loaded = true;
       this._field("status").textContent = models.length
         ? ""

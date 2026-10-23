@@ -1,3 +1,4 @@
+import { roomRoute } from "../shared/room-route.mjs";
 import { sceneBlob } from "../shared/scene-download.mjs";
 /** Native HA sidebar wrapper for the existing room manager. No token copying. */
 class ThreeDRoomsPanel extends HTMLElement {
@@ -14,6 +15,19 @@ class ThreeDRoomsPanel extends HTMLElement {
       )
         return;
       const bridge = {
+        navigate: (search) => {
+          if (
+            roomRoute(search).toString() ===
+            roomRoute(location.search).toString()
+          )
+            return;
+          const url = new URL(location.href);
+          for (const key of ["model", "tab", "saved_view", "view"])
+            url.searchParams.delete(key);
+          for (const [key, value] of roomRoute(search))
+            url.searchParams.set(key, value);
+          history.replaceState(history.state, "", url);
+        },
         request: (operation, data = {}) =>
           this._hass.callWS({ type: "three_d_rooms/request", operation, data }),
         asset: (path, options) => this._hass.fetchWithAuth(path, options),
@@ -48,9 +62,12 @@ class ThreeDRoomsPanel extends HTMLElement {
   }
   connectedCallback() {
     window.addEventListener("message", this._ready);
+    const query = roomRoute(location.search);
+    query.set("native", "1");
     this._frame.src =
       new URL(/* @vite-ignore */ ".", import.meta.url).href +
-      "index.html?native=1";
+      "index.html?" +
+      query;
   }
   disconnectedCallback() {
     window.removeEventListener("message", this._ready);

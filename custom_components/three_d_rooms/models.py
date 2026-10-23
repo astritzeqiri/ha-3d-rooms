@@ -380,6 +380,7 @@ class ModelStore:
                         "folder": model["folder"],
                         "bindings": validate_bindings(model["bindings"], manifest),
                         "importedAt": model["importedAt"],
+                        **({"areaId": model["areaId"]} if "areaId" in model else {}),
                     }
                 )
             self.models = models
@@ -412,6 +413,27 @@ class ModelStore:
             os.fsync(output.fileno())
         os.replace(temporary, self.directory / "catalog.json")
         self.models = models
+
+    def update_room(self, model_id, settings):
+        """Store local room identity without altering geometry or device bindings."""
+        if not isinstance(settings, dict) or set(settings) - {"title", "areaId"}:
+            raise ValueError("Unsupported room setting.")
+        models = deepcopy(self.models)
+        model = next((m for m in models if m["id"] == model_id), None)
+        if model is None:
+            raise ValueError("Model not found.")
+        if "title" in settings:
+            title = settings["title"]
+            if not isinstance(title, str) or not title.strip() or len(title) > 160:
+                raise ValueError("Give the room a name up to 160 characters.")
+            model["title"] = title.strip()
+        if "areaId" in settings:
+            area_id = settings["areaId"]
+            if not isinstance(area_id, str) or len(area_id) > 128:
+                raise ValueError("Invalid Home Assistant area.")
+            model["areaId"] = area_id
+        self.save(models)
+        return {"title": model["title"], "areaId": model.get("areaId", "")}
 
     def put_component(self, value):
         component = validate_component(value, [m["id"] for m in self.models])

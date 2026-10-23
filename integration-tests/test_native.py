@@ -84,6 +84,26 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
             await self.runtime.request("command", {**base, "action": "open"}, "test-user")
         self.assertEqual(len(calls), 4)
 
+    async def test_existing_area_assignment_and_area_rename(self):
+        from homeassistant.helpers import area_registry
+        await area_registry.async_load(self.hass)
+        registry = area_registry.async_get(self.hass)
+        area = registry.async_create("Kitchen")
+        areas = await self.runtime.request("areas", {}, "test-user")
+        self.assertTrue(any(a["area_id"] == area.id for a in areas))
+        before = dict(self.store.models[0]["bindings"])
+        result = await self.runtime.request("room", {"model": "kitchen", "title": "Kitchen room", "areaId": area.id}, "test-user")
+        self.assertEqual(result["areaId"], area.id)
+        self.assertEqual(self.store.models[0]["bindings"], before)
+        registry.async_update(area.id, name="Renamed kitchen")
+        renamed = await self.runtime.request("areas", {}, "test-user")
+        self.assertTrue(any(a["area_id"] == area.id and a["name"] == "Renamed kitchen" for a in renamed))
+        for invalid in ("missing_area", 42, True, None):
+            with self.assertRaises(ValueError):
+                await self.runtime.request("room", {"model": "kitchen", "areaId": invalid}, "test-user")
+        result = await self.runtime.request("room", {"model": "kitchen", "areaId": ""}, "test-user")
+        self.assertEqual(result["areaId"], "")
+
     async def test_native_view_and_websocket_deny_non_admin(self):
         from aiohttp import web
         from homeassistant.exceptions import Unauthorized

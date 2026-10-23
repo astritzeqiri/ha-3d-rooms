@@ -1,6 +1,6 @@
 # 3D Rooms
 
-**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.10.0.
+**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required.
 
 Upload a prepared room or floor ZIP, connect its declared lights to Home Assistant light/switch entities, and view it on a dashboard. Click the physical modeled fixture to open Home Assistant's own light controls. Brightness, RGB color and white temperature follow the entity's reported state. All walls stay visible; a minimum ambient level keeps unlit rooms readable.
 
@@ -16,16 +16,16 @@ The integration bundles its own transparent icon for light and dark themes. Home
 2. Restart Home Assistant.
 3. Open **Settings → Devices & services → Add integration → 3D Rooms**, then confirm setup.
 4. Refresh the browser and open **3D Rooms** in the sidebar.
-5. Choose **Add a model**, upload your model ZIP, and connect its controls under **Model settings**.
+5. Choose **Import room**, upload your room ZIP, and connect its controls under **Devices** using each device’s cog.
 6. Add the dashboard card through the visual editor below. Its code loads automatically with the integration; do not install a second HACS Dashboard repository or create a separate resource entry.
 
 This release requires a Home Assistant administrator account for both the model manager and dashboard. Tested in Home Assistant Core **2026.10.2** in a separate container; the user's HA OS/Proxmox VM and physical lights still need installation checks. It uses native Core APIs and does not require Supervisor.
 
 ## Dashboard card
 
-Choose **Edit dashboard → Add card → By card → 3D Rooms**. Select a room or a saved component, adjust the title, view, rotation, tilt, zoom and height, then click **Save**. Home Assistant shows a live preview. Existing cards also open in this visual editor.
+Choose **Edit dashboard → Add card → By card → 3D Rooms**. Select a room or a saved view, adjust the title, view, rotation, tilt, zoom and height, then click **Save**. Home Assistant shows a live preview. Existing cards also open in this visual editor.
 
-Selecting a saved component copies its current configuration into the card; later edits to the original component do not change that dashboard card. Title and height edits preserve exact saved camera framing. Changing the room or projection, or choosing **Reset camera framing**, starts a new framing.
+Selecting a saved view copies its current configuration into the card; later edits to the original view do not change that dashboard card. Title and height edits preserve exact saved camera framing. Changing the room or projection, or choosing **Reset camera framing**, starts a new framing.
 
 For manual configuration, **Edit dashboard → Add card → Manual** still supports:
 
@@ -38,12 +38,12 @@ tilt: 28
 heading: 0
 ```
 
-Use the actual model ID shown in **3D Rooms → Model settings**, or copy a ready-made configuration from **Add to dashboard** in the manager. Add another card with another model ID to show a different room or floor.
+Use the actual model ID from your room package, or copy a ready-made configuration from **Saved views → Use in dashboard → Advanced YAML**. Add another card with another model ID to show a different room or floor.
 
 - `view: front` is the angled perspective. `view: floor` is orthographic.
 - `tilt` is degrees away from overhead (0–180). `heading` rotates around the floor's vertical axis.
 - `zoom` scales the room (0.01–100; default 1).
-- **Add to dashboard** opens an editor beside the room. Drag the room or use the sliders and numeric fields to change rotation, tilt and zoom live. Name the view and choose **Save component** to find it under **HA components**, or **Copy configuration** for a Manual dashboard card. Keep its generated `camera` object to preserve panning and projection; narrower cards fit the saved composition. Older configurations without `camera` continue to use automatic fitting.
+- **Create dashboard view** opens the shared camera editor beside your room. Choose a preset or drag, pan and zoom, name the view, and choose **Save view → Use in dashboard**. Precise camera controls, navigation cube and card height are under **Advanced camera settings**. Keep the generated `camera` object when copying YAML to preserve framing. Older configurations without `camera` continue to use automatic fitting.
 - `height` is pixels (180–1600). Optional `title` adds a heading.
 - `interactive: true` enables camera movement. Fixtures remain clickable when camera movement is locked.
 - The room reads entity mappings from the integration; there are no floating entity icons.
@@ -124,46 +124,35 @@ more-info dialog. Clicking the fixture itself still opens more info. Keyboard
 users can toggle with Enter or Space and open more info with Shift+Enter or F2.
 Unavailable or unbound lights do not send commands.
 
-In the model manager, open **Add to dashboard** and choose the room view,
-rotation (0–359.99°), tilt (0–180°), and zoom. Copy the generated configuration into a
-Manual dashboard card, or update an existing card's `view`, `heading`, and `tilt`
-settings. Each card can use its own room angle.
+## Room workspace and Home Assistant areas
 
-### Home Assistant components
+Choose a room in **Your rooms**. Its workspace has three tabs:
 
-Open **HA components** beside **Models** to create reusable dashboard views. Choose
-an imported room, name the component, then adjust its view, rotation, tilt, zoom
-(0.01–100×), and height. The room preview updates as you edit. Save several components
-for the same kitchen, or duplicate one to start from its settings.
+- **Devices**: control lights and shades and use each device’s cog to assign a compatible entity.
+- **Saved views**: create, edit, duplicate, import or export dashboard views for this room. All views share the room’s device mappings.
+- **Room settings**: rename the room, assign an existing **Home Assistant area**, configure daylight, and find advanced entity mapping/export/removal actions.
 
-**Copy dashboard configuration** produces a Manual card configuration with all
-view settings included. Existing cards keep their copied settings; copy the
-configuration again after changing a component. **Export component** downloads a
-small `.component.json` file; **Import component** opens it as a new draft for
-review and saving. Component files reference room IDs and do not include the GLB
-or device mappings: import the corresponding room package first when moving to a
-different installation. Components are saved server-side in both the add-on and
-native integration and survive restarts.
+Assign an area under **Room settings → Home Assistant area → Save room settings**. Create areas in Home Assistant first, then use **Refresh areas** if needed. This links the imported 3D room to an area; it does not move or automatically reassign devices. Area IDs remain local to this HA installation and are excluded from portable room exports.
 
-This release supports one room per component. The versioned component format
-stores room references as layers to allow future room composition; room merging
-is not available yet.
+To create a dashboard card, choose **Create dashboard view**, frame the room, and save it. **Use in dashboard** explains how to select it in **Edit dashboard → Add card → 3D Rooms → Saved view**. YAML is available under Advanced for manual cards. Existing cards keep their copied settings; reselect the saved view after editing it to update a card.
+
+**Export view** downloads a small `.component.json` file. **Import saved view** opens a new draft for review and saving. These files reference room IDs and do not include geometry or entity mappings: import the matching room first on another installation. The existing versioned JSON format and saved view IDs remain compatible. Saved views persist on the server across restarts; optional preview thumbnails stay in the current browser.
 
 ### Updating to 0.5.0
 
-In **HACS → 3D Rooms**, download/update to **0.5.0**, restart Home Assistant itself, then refresh the browser. The bundled manager and card update together. Existing room uploads, entity mappings and saved components remain in place; no model re-upload is needed.
+In **HACS → 3D Rooms**, download/update to **0.5.0**, restart Home Assistant itself, then refresh the browser. The bundled manager and card update together. Existing room uploads, entity mappings and saved views remain in place; no model re-upload is needed.
 
 ### Updating to 0.6.0
 
-Update **3D Rooms** in HACS, restart Home Assistant, then refresh the browser. **Add to dashboard** opens the live component sidebar. Existing rooms, mappings, and saved components remain compatible; no re-upload is needed.
+Update **3D Rooms** in HACS, restart Home Assistant, then refresh the browser. **Add to dashboard** opens the live component sidebar. Existing rooms, mappings, and saved views remain compatible; no re-upload is needed.
 
 ### Editing the camera directly
 
-The saved component preview supports dragging to rotate, scrolling to zoom and right-dragging to pan. These changes update its fields and exported configuration; choose **Save component** to persist them. Both editors have a compact, camera-linked view cube on the left. Click a face for a straight-on view, an edge for a two-axis diagonal, or a corner for a three-axis diagonal. The cube rotates with the room. The home button fits and resets the room; **Views** offers the same six faces, twelve edges and eight corners in a keyboard- and touch-friendly picker.
+The saved view preview supports dragging to rotate, scrolling to zoom and right-dragging to pan. These changes update its fields and exported configuration; choose **Save view** to persist them. The shared camera editor has a compact, camera-linked view cube under Advanced camera settings. Click a face for a straight-on view, an edge for a two-axis diagonal, or a corner for a three-axis diagonal. The cube rotates with the room. The home button fits and resets the room; **Views** offers the same six faces, twelve edges and eight corners in a keyboard- and touch-friendly picker.
 
 ### Updating to 0.7.0
 
-Update **3D Rooms** in HACS, restart Home Assistant itself, then refresh the browser. Component previews now support direct camera movement. Use the compact cube's faces, edges and corners for fixed views, or its Home button to reset. Existing rooms, mappings and saved components remain compatible.
+Update **3D Rooms** in HACS, restart Home Assistant itself, then refresh the browser. Component previews now support direct camera movement. Use the compact cube's faces, edges and corners for fixed views, or its Home button to reset. Existing rooms, mappings and saved views remain compatible.
 
 ## Roller shades
 

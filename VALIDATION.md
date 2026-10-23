@@ -137,3 +137,12 @@ All six application version fields agree on 0.7.0. The production manager/card b
 - Application versions are synchronized at 0.10.1. Production HA, physical devices and actual HACS install/download remain untested. Private room assets and test credentials stay outside releases.
 
 - The exact 0.10.1 ZIP was extracted under `/tmp/three-d-rooms-device-cards-artifact` and run in a new Core container with the same disposable config; package version, saved room and both cover mappings were verified after restart.
+
+## Room workspace and area assignment — 0.11.0
+
+- Room-first navigation with Devices, Saved views and Room settings, a shared camera editor, progressive disclosure and dashboard handoff instructions. Existing saved-view IDs and component JSON format remain compatible.
+- 57 Node regression tests passed, including editing existing views in place, independent draft IDs, unsaved-change cancellation, resize normalization, route validation and legacy room/area persistence/export. Sandbox-restricted HTTP listeners were rerun with localhost access enabled.
+- 11 pure Python storage/archive tests passed. Six native tests passed in pinned official Home Assistant Core 2026.10.2, covering actual area registry assignment/rename, unknown-area rejection, administrator authorization and existing light/cover/daylight behavior. The host-only run skips those six native tests explicitly.
+- Formatting checks and production builds passed. All six application versions agree at 0.11.0; both release archives were inspected for correct contents and exclusion of private assets and credentials.
+- The exact integration ZIP was extracted into /tmp/three-d-rooms-room-workspace-artifact and loaded by a separate disposable Core container on port 18125. Existing kitchen geometry, three mappings, Kitchen area association and saved camera view survived the switch/restart. Native APIs also accepted a real dashboard card configuration from the saved view.
+- Browser observations verified native room tabs, area assignment and reopening a clean saved view through its deep link. The final 390px layout has no horizontal overflow (390px viewport and scroll width); the temporary viewport was reset. After the Mac was unlocked, native clicks verified room tabs, opening/saving/closing the shared view editor, dashboard handoff instructions, area settings save and separate room-scoped saved-view lists. Production HACS installation, the user's VM and physical devices remain untested.

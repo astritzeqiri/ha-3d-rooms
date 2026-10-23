@@ -1,340 +1,145 @@
-import { mountCameraNavigation } from "./camera-navigation.js";
 import { validateComponent, componentYaml } from "../shared/component.mjs";
-import { hexToRgb } from "../shared/light.mjs";
 
-export function initComponents({ api, models, native, toast }) {
+/** A room-scoped library; every view opens the same camera editor and scene. */
+export function initComponents({ api, room, editor, toast }) {
   const $ = (id) => document.getElementById(id);
   let components = [],
-    draftId,
-    savedCamera,
-    saved = false,
-    preview,
-    loadedModel,
-    generation = 0,
-    active = false,
-    deleteArmed = false,
-    applyingCamera = false;
-  const error = (message) => {
+    generation = 0;
+  const fail = (message) => {
     $("component-error").textContent = message || "";
   };
-  const read = () =>
-    validateComponent(
-      {
-        schemaVersion: 1,
-        id: draftId,
-        title: $("component-title").value,
-        height: Number($("component-height").value),
-        layers: [
-          {
-            model: $("component-model").value,
-            view: $("component-view").value,
-            heading: Number($("component-heading").value),
-            tilt: Number($("component-tilt").value),
-            zoom: Number($("component-zoom").value),
-            ...(savedCamera ? { camera: savedCamera } : {}),
-          },
-        ],
-      },
-      models().map((m) => m.id),
-    );
-  function syncCamera(event = {}) {
-    if (
-      applyingCamera ||
-      !active ||
-      !preview?.model ||
-      loadedModel !== preview.model.id
-    )
-      return;
-    const captured = preview.captureView();
-    savedCamera = captured.camera;
-    $("component-zoom").max = Math.max(3, Math.ceil(captured.zoom));
-    $("component-zoom").min = Math.min(0.25, captured.zoom);
-    for (const key of ["view", "heading", "tilt", "zoom"])
-      $("component-" + key).value = captured[key];
-    Object.assign(preview.options, captured);
-    $("component-heading-value").textContent = `${captured.heading}°`;
-    $("component-tilt-value").textContent = `${captured.tilt}°`;
-    $("component-zoom-value").textContent = `${captured.zoom}×`;
-    try {
-      $("component-yaml").value = componentYaml(read());
-      error();
-    } catch (e) {
-      error(e.message);
-    }
-    if (event.source !== "resize") {
-      deleteArmed = false;
-      $("delete-component").textContent = "Delete";
-      $("component-save-state").textContent = "Unsaved changes";
-    }
+  function use(component) {
+    $("use-view-name").textContent = `Saved view: ${component.title}`;
+    $("use-view-yaml").value = componentYaml(component);
+    $("use-view-dialog").showModal();
   }
-  mountCameraNavigation($("component-preview"), () => preview);
-  const refreshModels = () => {
-    const selected = $("component-model").value;
-    $("component-model").replaceChildren(
-      ...models().map((model) => {
-        const option = document.createElement("option");
-        option.value = model.id;
-        option.textContent = model.title;
-        return option;
-      }),
-    );
-    if (models().some((m) => m.id === selected))
-      $("component-model").value = selected;
-  };
-  function drawList() {
-    $("component-list").replaceChildren();
-    if (!components.length) {
-      const p = document.createElement("p");
-      p.className = "muted";
-      p.textContent = "No saved components yet.";
-      $("component-list").append(p);
+  function draw() {
+    const host = $("component-list");
+    host.replaceChildren();
+    const views = components.filter((c) => c.layers[0].model === room()?.id);
+    if (!views.length) {
+      const empty = document.createElement("div");
+      empty.className = "saved-views-empty";
+      const title = document.createElement("h3");
+      title.textContent = "Save your first dashboard view";
+      const text = document.createElement("p");
+      text.className = "muted";
+      text.textContent =
+        "Frame the room above, then save an overview, floor plan or close-up.";
+      empty.append(title, text);
+      host.append(empty);
+      return;
     }
-    for (const c of components) {
-      const button = document.createElement("button");
-      const title = document.createElement("span");
+    for (const c of views) {
+      const card = document.createElement("article");
+      card.className = "saved-view-card";
+      const title = document.createElement("h3");
       title.textContent = c.title;
-      const detail = document.createElement("small");
-      detail.textContent = `${models().find((m) => m.id === c.layers[0].model)?.title || "Missing room"} · ${c.layers[0].heading}° · ${c.layers[0].zoom}×`;
-      button.append(title, detail);
-      button.classList.toggle("active", c.id === draftId);
-      if (c.id === draftId) button.setAttribute("aria-current", "true");
-      button.onclick = () => edit(c, true);
-      $("component-list").append(button);
-    }
-  }
-  function edit(c, exists = false) {
-    refreshModels();
-    draftId = c.id;
-    savedCamera = c.layers[0].camera;
-    saved = exists;
-    deleteArmed = false;
-    error();
-    $("component-editor").hidden = false;
-    $("component-empty").hidden = true;
-    $("component-title").value = c.title;
-    $("component-height").value = c.height;
-    $("component-zoom").max = Math.max(3, Math.ceil(c.layers[0].zoom));
-    $("component-zoom").min = Math.min(0.25, c.layers[0].zoom);
-    for (const key of ["model", "view", "heading", "tilt", "zoom"])
-      $("component-" + key).value = c.layers[0][key];
-    $("delete-component").hidden = !saved;
-    $("delete-component").textContent = "Delete";
-    $("component-save-state").textContent = saved ? "Saved" : "Not saved yet";
-    drawList();
-    update();
-  }
-  function create() {
-    if (!models().length) {
-      error("Add a room in Models before creating a component.");
-      return;
-    }
-    edit({
-      id: crypto.randomUUID(),
-      title: `${models()[0].title} overview`,
-      height: 500,
-      layers: [
-        { model: models()[0].id, view: "front", heading: 0, tilt: 28, zoom: 1 },
-      ],
-    });
-    $("component-title").focus();
-  }
-  async function update() {
-    $("component-heading-value").textContent =
-      `${$("component-heading").value}°`;
-    $("component-tilt-value").textContent = `${$("component-tilt").value}°`;
-    $("component-zoom-value").textContent =
-      `${Number($("component-zoom").value).toFixed(2)}×`;
-    let component;
-    try {
-      component = read();
-      $("component-yaml").value = componentYaml(component);
-    } catch (e) {
-      $("component-yaml").value = "";
-      error(e.message);
-      return;
-    }
-    error();
-    const current = ++generation,
-      layer = component.layers[0],
-      model = models().find((m) => m.id === layer.model);
-    $("component-preview").style.height = `${component.height}px`;
-    try {
-      const { SceneView } = await import("./scene.js");
-      if (current !== generation || !active) return;
-      if (loadedModel !== model.id || !preview) {
-        loadedModel = null;
-        preview?.dispose();
-        preview = new SceneView($("component-preview"), () => {}, {
-          mode: layer.view,
-          markers: false,
-          interactive: true,
-          allowRotate: true,
-          onCameraChange: syncCamera,
-          ...layer,
-        });
-        const view = preview;
-        $("component-preview-status").hidden = false;
-        $("component-preview-status").textContent = "Loading room…";
-        const url = native
-          ? await native.sceneURL(model)
-          : new URL(`api/models/${model.id}/scene.glb`, location.href).href;
-        try {
-          if (current !== generation) return;
-          await view.load(model, url);
-        } finally {
-          if (native) URL.revokeObjectURL(url);
-        }
-        if (current !== generation) return;
-        loadedModel = model.id;
-        preview.setStates(
-          new Map(
-            model.controls.map((c) => [
-              c.id,
-              {
-                on: true,
-                brightness: 255,
-                rgb: hexToRgb(c.color || "#fff0d4"),
-              },
-            ]),
+      const detail = document.createElement("p");
+      detail.className = "muted small";
+      detail.textContent = `${c.layers[0].view === "floor" ? "Floor plan" : "Perspective"} · ${c.height}px card`;
+      const actions = document.createElement("div");
+      actions.className = "saved-view-actions";
+      const button = (text, action, primary = false) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = text;
+        if (primary) b.className = "primary";
+        b.onclick = action;
+        return b;
+      };
+      actions.append(
+        button("Edit view", () => editor.open(c)),
+        button("Use in dashboard", () => use(c), true),
+      );
+      const more = document.createElement("details");
+      more.className = "saved-view-more";
+      const summary = document.createElement("summary");
+      summary.textContent = "More actions";
+      more.append(summary);
+      more.append(
+        button("Duplicate", () =>
+          editor.open(
+            {
+              ...structuredClone(c),
+              id: crypto.randomUUID(),
+              title: `${c.title.slice(0, 150)} copy`,
+            },
+            { draft: true },
           ),
-        );
-      }
-      if (current !== generation) return;
-      Object.assign(preview.options, { camera: undefined }, layer);
-      applyingCamera = true;
+        ),
+        button("Export view", () => {
+          const url = URL.createObjectURL(
+            new Blob([JSON.stringify(c, null, 2)], {
+              type: "application/json",
+            }),
+          );
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${c.id}.component.json`;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }),
+      );
+      const remove = button("Delete view", async () => {
+        if (!confirm(`Delete the saved view “${c.title}”?`)) return;
+        if (!editor.close()) return;
+        remove.disabled = true;
+        try {
+          await api(`components/${c.id}`, { method: "DELETE" });
+          components = components.filter((v) => v.id !== c.id);
+          draw();
+          toast("Saved view deleted.");
+        } catch (e) {
+          fail(e.message);
+          remove.disabled = false;
+        }
+      });
+      remove.className = "danger";
+      more.append(remove);
       try {
-        preview.setView(layer.view);
-      } finally {
-        applyingCamera = false;
+        const src = localStorage.getItem(`3d-rooms-view-preview:${c.id}`);
+        if (src?.startsWith("data:image/jpeg;base64,")) {
+          const img = document.createElement("img");
+          img.className = "saved-view-thumb";
+          img.src = src;
+          img.alt = `${c.title} preview`;
+          img.loading = "lazy";
+          card.append(img);
+        }
+      } catch {
+        /* Browser storage is optional. */
       }
-      $("component-preview-status").hidden = true;
-    } catch (e) {
-      if (current === generation) {
-        loadedModel = null;
-        $("component-preview-status").hidden = false;
-        $("component-preview-status").textContent = e.message;
-      }
+      card.append(title, detail, actions, more);
+      host.append(card);
     }
   }
-  $("show-components").onclick = async () => {
-    active = true;
-    $("models-workspace").hidden = true;
-    $("components-workspace").hidden = false;
-    $("show-models").setAttribute("aria-pressed", "false");
-    $("show-components").setAttribute("aria-pressed", "true");
+  async function refresh({ openLink = false } = {}) {
+    const current = ++generation;
+    fail("");
     try {
-      components = await api("components");
-      refreshModels();
-      drawList();
-      if (!draftId && components.length) edit(components[0], true);
-      else if (draftId) update();
-    } catch (e) {
-      error(e.message);
-    }
-  };
-  $("show-models").onclick = () => {
-    active = false;
-    ++generation;
-    preview?.dispose();
-    preview = null;
-    loadedModel = null;
-    $("models-workspace").hidden = false;
-    $("components-workspace").hidden = true;
-    $("show-models").setAttribute("aria-pressed", "true");
-    $("show-components").setAttribute("aria-pressed", "false");
-  };
-  $("new-component").onclick = create;
-  $("component-editor").oninput = (e) => {
-    if (["component-view", "component-model"].includes(e.target.id))
-      savedCamera = undefined;
-    deleteArmed = false;
-    $("delete-component").textContent = "Delete";
-    $("component-save-state").textContent = "Unsaved changes";
-    update();
-  };
-  $("component-editor").onsubmit = async (event) => {
-    event.preventDefault();
-    $("save-component").disabled = true;
-    try {
-      const snapshot = read();
-      const c = await api("components", {
-        method: "PUT",
-        body: JSON.stringify(snapshot),
-      });
-      components = [...components.filter((v) => v.id !== c.id), c];
-      saved = true;
-      $("delete-component").hidden = false;
-      $("component-save-state").textContent =
-        JSON.stringify(read()) === JSON.stringify(snapshot)
-          ? "Saved"
-          : "Unsaved changes";
-      drawList();
-      toast("Component saved.");
-    } catch (e) {
-      error(e.message);
-    } finally {
-      $("save-component").disabled = false;
-    }
-  };
-  $("duplicate-component").onclick = () => {
-    try {
-      const c = read();
-      edit({
-        ...c,
-        id: crypto.randomUUID(),
-        title: `${c.title.slice(0, 150)} copy`,
-      });
-    } catch (e) {
-      error(e.message);
-    }
-  };
-  $("delete-component").onclick = async () => {
-    if (!deleteArmed) {
-      deleteArmed = true;
-      $("delete-component").textContent = "Confirm delete";
-      return;
-    }
-    $("delete-component").disabled = true;
-    try {
-      await api(`components/${draftId}`, { method: "DELETE" });
-      components = components.filter((c) => c.id !== draftId);
-      draftId = null;
-      ++generation;
-      preview?.dispose();
-      preview = null;
-      loadedModel = null;
-      $("component-editor").hidden = true;
-      $("component-empty").hidden = false;
-      drawList();
-      toast("Component deleted.");
-    } catch (e) {
-      error(e.message);
-    } finally {
-      $("delete-component").disabled = false;
-    }
-  };
-  $("copy-component").onclick = async () => {
-    try {
-      await navigator.clipboard.writeText(componentYaml(read()));
-      toast("Dashboard configuration copied.");
-    } catch (e) {
-      $("component-yaml").select();
-      toast("Select and copy the configuration.");
-    }
-  };
-  $("export-component").onclick = () => {
-    try {
-      const c = read(),
-        url = URL.createObjectURL(
-          new Blob([JSON.stringify(c, null, 2)], { type: "application/json" }),
+      const next = await api("components");
+      if (current !== generation) return;
+      components = next;
+      draw();
+      const id = new URL(location.href).searchParams.get("saved_view");
+      if (openLink && id) {
+        const c = components.find(
+          (c) => c.id === id && c.layers[0].model === room()?.id,
         );
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${c.id}.component.json`;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+        if (c) editor.open(c);
+      }
     } catch (e) {
-      error(e.message);
+      if (current === generation) fail(e.message);
+    }
+  }
+  $("copy-view-yaml").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText($("use-view-yaml").value);
+      toast("Dashboard configuration copied.");
+    } catch {
+      $("use-view-yaml").select();
+      toast("Select and copy the configuration.");
     }
   };
   $("import-component").onclick = () => $("component-file").click();
@@ -343,22 +148,26 @@ export function initComponents({ api, models, native, toast }) {
       const file = $("component-file").files[0];
       if (!file) return;
       if (file.size > 16384)
-        throw new Error("Component files must be smaller than 16 KB.");
-      const c = validateComponent(
-        JSON.parse(await file.text()),
-        models().map((m) => m.id),
+        throw new Error("Choose a saved view smaller than 16 KB.");
+      const imported = JSON.parse(await file.text());
+      if (imported?.layers?.[0]?.model !== room()?.id)
+        throw new Error(
+          "This view belongs to another room. Select that room before importing it.",
+        );
+      const c = validateComponent(imported, [room()?.id]);
+      editor.open(
+        { ...c, id: crypto.randomUUID(), title: c.title },
+        { draft: true },
       );
-      // Import creates a draft and never silently overwrites a saved component.
-      edit({ ...c, id: crypto.randomUUID() });
-      toast("Component imported. Review the preview and save.");
+      toast("View imported as a new draft. Review and save it.");
     } catch (e) {
-      error(e.message);
+      fail(e.message);
     } finally {
       $("component-file").value = "";
     }
   };
-  window.addEventListener("pagehide", () => {
-    ++generation;
-    preview?.dispose();
-  });
+  window.addEventListener("rooms-view-saved", () => refresh());
+  window.addEventListener("rooms-view-use", (event) => use(event.detail));
+  refresh({ openLink: true });
+  return { refresh };
 }

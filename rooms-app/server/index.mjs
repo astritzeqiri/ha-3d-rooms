@@ -122,6 +122,16 @@ export async function createApp({
         req.on("close", () => clients.delete(res));
         return;
       }
+      if (path === "/api/areas" && req.method === "GET") {
+        json(
+          res,
+          200,
+          bridge.connected && !bridge.simulated && bridge.request
+            ? await bridge.request("config/area_registry/list")
+            : [],
+        );
+        return;
+      }
       if (path === "/api/components" && req.method === "GET") {
         json(res, 200, store.state.components);
         return;
@@ -176,7 +186,7 @@ export async function createApp({
         return;
       }
       const match = path.match(
-        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|scene\.glb|export\.zip))?$/,
+        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|scene\.glb|export\.zip))?$/,
       );
       if (match) {
         const m = store.find(match[1]);
@@ -194,7 +204,7 @@ export async function createApp({
             json(res, 403, { error: "Administrator access is required." });
             return;
           }
-          const { folder, bindings, importedAt, ...manifest } = m;
+          const { folder, bindings, importedAt, areaId, ...manifest } = m;
           const buffer = zipSync(
             {
               "manifest.json": strToU8(JSON.stringify(manifest)),
@@ -221,6 +231,39 @@ export async function createApp({
           res.end(
             await readFile(join(dataDir, "models", m.folder, "scene.glb")),
           );
+          return;
+        }
+        if (req.method === "PUT" && op === "room") {
+          const data = JSON.parse(await body(req, 16384));
+          if (
+            typeof data.title !== "string" ||
+            !data.title.trim() ||
+            data.title.length > 160 ||
+            typeof data.areaId !== "string" ||
+            data.areaId.length > 128
+          )
+            throw new Error("Invalid room settings.");
+          if (data.areaId) {
+            const areas =
+              bridge.connected && !bridge.simulated && bridge.request
+                ? await bridge.request("config/area_registry/list")
+                : [];
+            if (!areas.some((a) => a.area_id === data.areaId))
+              throw new Error("Choose an existing Home Assistant area.");
+          }
+          await store.transaction(async () => {
+            const previous = { ...m };
+            m.title = data.title.trim();
+            m.areaId = data.areaId;
+            try {
+              await store.save();
+            } catch (error) {
+              Object.assign(m, previous);
+              if (!("areaId" in previous)) delete m.areaId;
+              throw error;
+            }
+          });
+          json(res, 200, { title: m.title, areaId: m.areaId });
           return;
         }
         if (req.method === "PUT" && op === "daylight") {

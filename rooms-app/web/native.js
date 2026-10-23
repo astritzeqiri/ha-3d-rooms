@@ -20,6 +20,9 @@ export async function connectNative() {
     window.addEventListener("three-d-rooms-connected", ready);
     window.parent.postMessage({ type: "three-d-rooms-ready" }, location.origin);
   });
+  window.addEventListener("rooms-route-change", () =>
+    bridge.navigate?.(location.search),
+  );
   const response = async (path, options) => {
     const res = await bridge.asset(path, options);
     if (!res.ok) {
@@ -42,9 +45,10 @@ export async function connectNative() {
         );
       if (path.startsWith("components/") && options.method === "DELETE")
         return bridge.request("delete_component", { id: path.split("/")[1] });
-      if (path === "models" || path === "status") return bridge.request(path);
+      if (path === "models" || path === "status" || path === "areas")
+        return bridge.request(path);
       const match = path.match(
-        /^models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight))?$/,
+        /^models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room))?$/,
       );
       if (!match) throw new Error("Unknown room request.");
       return bridge.request(match[2] || "delete", {

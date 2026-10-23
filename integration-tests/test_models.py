@@ -105,6 +105,30 @@ class PackageTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 models.validate_manifest({**valid_manifest, "controls": [{**control, "defaultPosition": bad}]})
 
+    def test_room_area_identity_is_local_persistent_and_atomic(self):
+        self.store.install(package(bindings={"ceiling": "light.kitchen"}))
+        revision = self.store.revision("kitchen")
+        self.store.update_room("kitchen", {"title": "My kitchen", "areaId": "kitchen"})
+        reopened = models.ModelStore(self.temp.name).open()
+        self.assertEqual(reopened.find("kitchen")["areaId"], "kitchen")
+        self.assertEqual(reopened.find("kitchen")["title"], "My kitchen")
+        self.assertEqual(reopened.find("kitchen")["bindings"], {"ceiling": "light.kitchen"})
+        self.assertEqual(reopened.revision("kitchen"), revision)
+        with zipfile.ZipFile(BytesIO(reopened.export("kitchen"))) as archive:
+            exported = json.loads(archive.read("manifest.json"))
+            self.assertEqual(exported["title"], "My kitchen")
+            self.assertNotIn("areaId", exported)
+        before = self.store.catalog()
+        with patch.object(self.store, "save", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError):
+                self.store.update_room("kitchen", {"areaId": "other"})
+        self.assertEqual(self.store.catalog(), before)
+        for invalid in ({"title": ""}, {"areaId": 42}, {"areaId": True}, {"id": "other"}):
+            with self.assertRaises(ValueError):
+                self.store.update_room("kitchen", invalid)
+        self.store.update_room("kitchen", {"areaId": ""})
+        self.assertEqual(self.store.find("kitchen")["areaId"], "")
+
     def test_model_roundtrip_preserves_mappings_and_private_storage(self):
         self.store.install(package(bindings={"ceiling": "light.kitchen"}))
         exported = self.store.export("kitchen")

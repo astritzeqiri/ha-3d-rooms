@@ -2,7 +2,13 @@ import { mountCameraNavigation } from "./camera-navigation.js";
 import { componentYaml, validateComponent } from "../shared/component.mjs";
 
 /** Edit the camera in the same scene that will be saved to the dashboard. */
-export function initDashboardEditor({ api, model, scene, toast }) {
+export function initDashboardEditor({
+  api,
+  model,
+  scene,
+  toast,
+  onOpen = () => {},
+}) {
   const $ = (id) => document.getElementById(id);
   const panel = $("dashboard-panel");
   const navigation = mountCameraNavigation($("viewport"), scene);
@@ -12,7 +18,8 @@ export function initDashboardEditor({ api, model, scene, toast }) {
     busy = false,
     applying = false,
     saved = false,
-    savedSnapshot;
+    savedSnapshot,
+    baseline;
   const fields = ["heading", "tilt", "zoom"];
   const read = () =>
     validateComponent(
@@ -34,14 +41,23 @@ export function initDashboardEditor({ api, model, scene, toast }) {
       $("dashboard-error").textContent = e.message;
       $("dashboard-yaml").value = "";
     }
-    $("dashboard-save-state").textContent = saved
-      ? $("dashboard-yaml").value && JSON.stringify(read()) === savedSnapshot
-        ? "Saved in HA components"
-        : "Unsaved changes"
-      : "Not saved yet";
+    const unchanged = !!(
+      saved &&
+      $("dashboard-yaml").value &&
+      JSON.stringify(read()) === savedSnapshot
+    );
+    $("dashboard-save-state").textContent = unchanged
+      ? "Saved view"
+      : saved
+        ? "Unsaved changes"
+        : "Not saved yet";
+    $("use-saved-view").hidden = !unchanged;
+    $("save-dashboard-component").classList.toggle("primary", !unchanged);
   }
-  function sync() {
+  function sync(event = {}) {
     if (panel.hidden || applying || !scene()?.model) return;
+    const resizeOnly = event.source === "resize" && !dirty();
+    const wasSaved = saved && baseline === savedSnapshot;
     current = scene().captureView();
     if (!current) return;
     $("dashboard-view").value = current.view;
@@ -58,6 +74,10 @@ export function initDashboardEditor({ api, model, scene, toast }) {
     }
     // Preserve drag/pan changes when the preview or window resizes.
     Object.assign(scene().options, current);
+    if (resizeOnly) {
+      baseline = JSON.stringify(read());
+      if (wasSaved) savedSnapshot = baseline;
+    }
     update();
   }
   function apply() {
@@ -84,37 +104,60 @@ export function initDashboardEditor({ api, model, scene, toast }) {
     }
     sync();
   }
-  function close() {
-    if (panel.hidden) return;
+  function dirty() {
+    if (panel.hidden || !baseline) return false;
+    try {
+      return JSON.stringify(read()) !== baseline;
+    } catch {
+      return true;
+    }
+  }
+  function close({ force = false } = {}) {
+    if (panel.hidden) return true;
+    if (!force && dirty() && !confirm("Discard unsaved view changes?"))
+      return false;
     scene().options.onCameraChange = undefined;
     panel.hidden = true;
     navigation.hidden = true;
     document.body.classList.remove("dashboard-editing");
     $("viewport").style.height = "";
     $("dashboard").setAttribute("aria-expanded", "false");
+    const url = new URL(location.href);
+    url.searchParams.delete("saved_view");
+    history.replaceState(null, "", url);
+    window.dispatchEvent(new CustomEvent("rooms-route-change"));
+    return true;
   }
   $("dashboard").setAttribute("aria-controls", "dashboard-panel");
   $("dashboard").setAttribute("aria-expanded", "false");
-  $("dashboard").onclick = () => {
-    if (!panel.hidden) {
-      close();
-      return;
-    }
-    current = scene()?.captureView();
+  function open(component, { draft = false } = {}) {
+    if (!panel.hidden && !close()) return false;
+    current = component
+      ? structuredClone(component.layers[0])
+      : scene()?.captureView();
     if (!current) {
       toast("Wait for the room to finish loading.");
       return;
     }
-    draftId = crypto.randomUUID();
-    saved = false;
-    savedSnapshot = undefined;
-    $("dashboard-title").value = `${model().title} view`;
-    $("dashboard-height").value = Math.max(
-      180,
-      Math.min(1600, Math.round($("viewport").getBoundingClientRect().height)),
-    );
+    if (component && component.layers[0].model !== model().id)
+      throw new Error("Choose the view’s room first.");
+    draftId = component?.id || crypto.randomUUID();
+    saved = !!component && !draft;
+    savedSnapshot = saved ? JSON.stringify(component) : undefined;
+    $("dashboard-title").value =
+      component?.title || `${model().title} overview`;
+    $("dashboard-height").value =
+      component?.height ??
+      Math.max(
+        180,
+        Math.min(
+          1600,
+          Math.round($("viewport").getBoundingClientRect().height),
+        ),
+      );
     panel.hidden = false;
-    navigation.hidden = false;
+    $("dashboard-advanced").open = false;
+    navigation.hidden = true;
     scene().options.allowRotate = true;
     applying = true;
     Object.assign(scene().options, current);
@@ -124,7 +167,28 @@ export function initDashboardEditor({ api, model, scene, toast }) {
     $("dashboard").setAttribute("aria-expanded", "true");
     applying = false;
     sync();
+    baseline = JSON.stringify(read());
+    if (saved) savedSnapshot = baseline;
+    update();
+    $("dashboard-panel-title").textContent = saved
+      ? "Edit saved view"
+      : "Create dashboard view";
+    onOpen();
+    const url = new URL(location.href);
+    if (component && !draft) url.searchParams.set("saved_view", component.id);
+    else url.searchParams.delete("saved_view");
+    history.replaceState(null, "", url);
+    window.dispatchEvent(new CustomEvent("rooms-route-change"));
+    if (saved) cachePreview();
     $("dashboard-title").focus({ preventScroll: true });
+    return true;
+  }
+  $("dashboard").onclick = () => open();
+  $("dashboard-preset").onchange = () => {
+    if (!$("dashboard-preset").value) return;
+    scene().setCameraPreset($("dashboard-preset").value);
+    sync();
+    $("dashboard-preset").value = "";
   };
   $("close-dashboard").onclick = () => {
     close();
@@ -166,11 +230,19 @@ export function initDashboardEditor({ api, model, scene, toast }) {
       });
       saved = true;
       savedSnapshot = JSON.stringify(snapshot);
+      baseline = savedSnapshot;
+      cachePreview();
+      update();
+      window.dispatchEvent(
+        new CustomEvent("rooms-view-saved", { detail: snapshot }),
+      );
       $("dashboard-save-state").textContent =
         JSON.stringify(read()) === JSON.stringify(snapshot)
-          ? "Saved in HA components"
+          ? "Saved view"
           : "Unsaved changes";
-      toast("Component saved. Find it under HA components.");
+      toast(
+        "View saved. Choose it in Saved views or the Home Assistant card editor.",
+      );
     } catch (error) {
       $("dashboard-error").textContent = error.message;
     } finally {
@@ -188,5 +260,41 @@ export function initDashboardEditor({ api, model, scene, toast }) {
       toast("Select and copy the configuration.");
     }
   };
-  return { close };
+  function cachePreview() {
+    try {
+      const view = scene();
+      view.render();
+      const canvas = document.createElement("canvas");
+      canvas.width = 320;
+      canvas.height = 200;
+      canvas
+        .getContext("2d")
+        .drawImage(view.renderer.domElement, 0, 0, 320, 200);
+      localStorage.setItem(
+        `3d-rooms-view-preview:${draftId}`,
+        canvas.toDataURL("image/jpeg", 0.65),
+      );
+    } catch {
+      /* Thumbnails are optional and remain private to this browser. */
+    }
+  }
+  $("dashboard-advanced").addEventListener("toggle", () => {
+    navigation.hidden = panel.hidden || !$("dashboard-advanced").open;
+  });
+  $("use-saved-view").onclick = () => {
+    try {
+      window.dispatchEvent(
+        new CustomEvent("rooms-view-use", { detail: read() }),
+      );
+    } catch (error) {
+      toast(error.message);
+    }
+  };
+  window.addEventListener("beforeunload", (event) => {
+    if (dirty()) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
+  return { close, open, dirty };
 }

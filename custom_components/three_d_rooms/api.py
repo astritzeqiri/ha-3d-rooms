@@ -43,6 +43,23 @@ class RoomsRuntime:
         }
 
     async def request(self, operation, data, user_id):
+        if operation == "areas":
+            from homeassistant.helpers import area_registry
+            registry = area_registry.async_get(self.hass)
+            return [{"area_id": a.id, "name": a.name, "floor_id": a.floor_id}
+                    for a in registry.async_list_areas()]
+        if operation == "room":
+            from homeassistant.helpers import area_registry
+            settings = {k: data[k] for k in ("title", "areaId") if k in data}
+            if "areaId" in settings:
+                area_id = settings["areaId"]
+                if not isinstance(area_id, str) or (
+                    area_id and not area_registry.async_get(self.hass).async_get_area(area_id)
+                ):
+                    raise ValueError("Choose an existing Home Assistant area.")
+            result = await self.work(self.store.update_room, data.get("model"), settings)
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "components":
             from copy import deepcopy
             return deepcopy(self.store.components)

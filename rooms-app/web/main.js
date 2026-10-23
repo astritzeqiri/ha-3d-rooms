@@ -34,6 +34,12 @@ const api = async (path, options = {}) => {
   if (!res.ok) throw new Error(data.error || "Request failed.");
   return data;
 };
+let areas = [],
+  savedViews,
+  areasError = "";
+const initialRoomTab =
+  new URL(location.href).searchParams.get("tab") || "devices";
+let activeRoomTab = "devices";
 let models = [],
   selected = null,
   status = { connected: false, mode: "preview", entities: [] },
@@ -46,7 +52,7 @@ const fades = new Map();
 let viewMode =
   new URL(location.href).searchParams.get("view") === "floor"
     ? "floor"
-    : "dollhouse";
+    : "front";
 const toast = (message) => {
   $("toast").textContent = message;
   $("toast").hidden = false;
@@ -107,6 +113,7 @@ const deviceSettingsButton = (c) =>
   `<button class="device-settings" data-device-settings="${c.id}" aria-label="Edit entity for ${esc(c.label)}" title="Change entity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 3-1 3-3 1-2 5 2 5 3 1 1 3h6l1-3 3-1 2-5-2-5-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
 function drawControls() {
   if (!selected) return;
+  updateRoomSummary();
   const active = document.activeElement;
   const focusKind = [
     "deviceSettings",
@@ -163,7 +170,7 @@ function drawControls() {
             )
             .join("")}</div>
           ${f.position && c.capabilities.includes("position") ? `<div class="shade-position"><label class="shade-position-label" for="shade-position-${c.id}"><span>Opening</span><output>${s.position === undefined ? "Unknown" : Math.round(s.position) + "%"}</output></label><input id="shade-position-${c.id}" style="--shade-fill:${s.position ?? c.defaultPosition ?? 0}%" type="range" min="0" max="100" step="1" value="${s.position ?? c.defaultPosition ?? 0}" data-position="${c.id}" aria-label="${label} opening" aria-valuetext="${s.position === undefined ? "Position unknown" : Math.round(s.position) + " percent open"}" ${disabled}><div class="shade-endpoints"><span>Closed</span><span>Open</span></div></div>` : ""}
-          <span class="muted small device-entity">${preview ? "Simulation only" : esc(selected.bindings[c.id] || "Map this shade in Model settings")}</span></article>`;
+          <span class="muted small device-entity">${preview ? "Simulation only" : esc(selected.bindings[c.id] || "Connect an entity using the cog")}</span></article>`;
       }
       const s = states.get(c.id),
         f = preview
@@ -211,7 +218,7 @@ function drawControls() {
     ${f.temperature ? `<div class="white-controls">${slider(`White temperature <output>${temperature} K</output>`, "temperature", f.minKelvin, f.maxKelvin, temperature)}<div class="temperature-labels"><span>Warm · ${f.minKelvin} K</span><span>Cool · ${f.maxKelvin} K</span></div><div class="white-presets">${presets.map(([name, k]) => `<button data-white="${id}" data-kelvin="${k}" aria-label="Set ${label} to ${name.toLowerCase()} white" ${disabled}>${name}</button>`).join("")}</div><span class="muted small">${s.colorMode === "color_temp" ? "White temperature active" : "Select white to switch from color"}</span></div>` : ""}
     ${f.effects.length ? `<label class="light-option">Effect<select data-effect="${id}" aria-label="${label} effect" ${disabled}><option value="">Choose an effect</option>${f.effects.map((effect) => `<option value="${esc(effect)}" ${s.effect === effect ? "selected" : ""}>${esc(effect)}</option>`).join("")}</select></label>` : ""}
     ${f.transition ? `<label class="light-option">Fade on next change<select data-transition="${id}" aria-label="${label} fade" ${disabled}>${[0, 0.5, 1, 2, 5, 10].map((t) => `<option value="${t}" ${t === (fades.get(id) || 0) ? "selected" : ""}>${t ? t + " seconds" : "Instant"}</option>`).join("")}</select></label>` : ""}
-    <span class="muted small device-entity">${preview ? "Simulation only" : esc(selected.bindings[id] || "Map this light in Model settings")}</span></article>`;
+    <span class="muted small device-entity">${preview ? "Simulation only" : esc(selected.bindings[id] || "Connect an entity using the cog")}</span></article>`;
     })
     .join("");
   if (focusId)
@@ -358,10 +365,11 @@ $("controls").addEventListener("change", (e) => {
 });
 function drawModels() {
   $("model-count").textContent = models.length;
+  document.querySelector(".aside-bottom").hidden = !!models.length;
   $("models").innerHTML = models
     .map(
       (m) =>
-        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${m.controls.length} ${m.controls.length === 1 ? "device" : "devices"} · ${esc(m.floor || "Room")}</small></button>`,
+        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${m.controls.length} ${m.controls.length === 1 ? "device" : "devices"} · ${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "Area not assigned")}</small></button>`,
     )
     .join("");
 }
@@ -417,8 +425,148 @@ for (const id of ["daylight-mode", "sun-entity"])
       drawDaylight();
     }
   };
-async function choose(id) {
-  dashboardEditor.close();
+function roomSettingsDirty() {
+  return (
+    selected &&
+    activeRoomTab === "settings" &&
+    ($("room-name").value !== selected.title ||
+      $("room-area").value !== (selected.areaId || ""))
+  );
+}
+function updateRoomSummary() {
+  if (!selected) return;
+  const area = areas.find((a) => a.area_id === selected.areaId);
+  const assigned = selected.controls.filter(
+    (c) => selected.bindings[c.id],
+  ).length;
+  $("room-summary").textContent =
+    `${area ? "Area: " + area.name : selected.areaId ? "Assigned area unavailable" : "Area not assigned"} · ${assigned} of ${selected.controls.length} devices assigned`;
+}
+function setRoomTab(tab, { keepEditor = false } = {}) {
+  if (!["devices", "views", "settings"].includes(tab)) tab = "devices";
+  if (
+    tab !== activeRoomTab &&
+    roomSettingsDirty() &&
+    !confirm("Discard unsaved room settings?")
+  )
+    return false;
+  if (!keepEditor && tab !== activeRoomTab && !dashboardEditor.close())
+    return false;
+  activeRoomTab = tab;
+  document.body.dataset.roomTab = tab;
+  $("dashboard").hidden = !selected || tab === "settings";
+  $("floor-view").hidden = $("home-view").hidden =
+    !selected || tab === "settings";
+  document.querySelector(".room-tabs").hidden = !selected;
+  for (const b of document.querySelectorAll("[data-room-tab]"))
+    b.setAttribute("aria-pressed", String(b.dataset.roomTab === tab));
+  $("controls-section").hidden = !selected || tab !== "devices";
+  $("saved-views-section").hidden = !selected || tab !== "views";
+  $("room-settings-section").hidden = !selected || tab !== "settings";
+  if (tab === "settings") drawRoomSettings();
+  if (tab === "views") savedViews?.refresh();
+  const url = new URL(location.href);
+  url.searchParams.set("tab", tab);
+  history.replaceState(null, "", url);
+  window.dispatchEvent(new CustomEvent("rooms-route-change"));
+  return true;
+}
+for (const b of document.querySelectorAll("[data-room-tab]"))
+  b.onclick = () => setRoomTab(b.dataset.roomTab);
+function drawRoomSettings() {
+  if (!selected) return;
+  $("room-name").value = selected.title;
+  $("room-area").replaceChildren();
+  const add = (value, label) => {
+    const o = document.createElement("option");
+    o.value = value;
+    o.textContent = label;
+    $("room-area").append(o);
+  };
+  add("", "Not assigned");
+  for (const area of [...areas].sort((a, b) => a.name.localeCompare(b.name)))
+    add(area.area_id, area.name);
+  if (selected.areaId && !areas.some((a) => a.area_id === selected.areaId))
+    add(selected.areaId, "Previously assigned area (unavailable)");
+  $("room-area").value = selected.areaId || "";
+  $("room-area").disabled = !status.connected;
+  $("room-area-note").textContent =
+    areasError ||
+    (!status.connected
+      ? "Open 3D Rooms inside Home Assistant to assign an area."
+      : !areas.length
+        ? "No areas found. Create an area in Home Assistant, then refresh this list."
+        : "Link this 3D room to its Home Assistant area. Assign device entities separately.");
+  $("room-settings-error").textContent = "";
+  $("room-save-status").textContent = "";
+  updateRoomSummary();
+}
+async function refreshAreas({ quiet = false } = {}) {
+  const editing = roomSettingsDirty()
+    ? {
+        id: selected.id,
+        title: $("room-name").value,
+        areaId: $("room-area").value,
+      }
+    : null;
+  try {
+    areas = await api("areas");
+    areasError = "";
+    drawModels();
+    drawRoomSettings();
+  } catch (error) {
+    areasError =
+      "Could not load Home Assistant areas. Use Refresh areas to try again.";
+    if (!quiet) toast(error.message);
+    drawRoomSettings();
+  }
+  if (editing && selected?.id === editing.id) {
+    $("room-name").value = editing.title;
+    $("room-area").value = editing.areaId;
+  }
+}
+$("refresh-areas").onclick = () => refreshAreas();
+$("room-settings-form").onsubmit = async (event) => {
+  event.preventDefault();
+  const model = selected;
+  const data = {
+    title: $("room-name").value.trim(),
+    areaId: $("room-area").value,
+  };
+  $("save-room-settings").disabled = true;
+  $("room-settings-error").textContent = "";
+  try {
+    const result = await api(`models/${model.id}/room`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    Object.assign(model, result);
+    drawModels();
+    if (selected === model) {
+      $("title").textContent = model.title;
+      $("model-type").textContent =
+        areas.find((a) => a.area_id === model.areaId)?.name || "3D ROOM";
+      drawRoomSettings();
+      $("room-save-status").textContent = "Saved";
+    }
+    toast("Room settings saved.");
+  } catch (error) {
+    $("room-settings-error").textContent = error.message;
+  } finally {
+    $("save-room-settings").disabled = false;
+  }
+};
+$("room-export").onclick = () => $("export-model").click();
+$("room-remove").onclick = () => $("delete-model").click();
+window.addEventListener("beforeunload", (event) => {
+  if (roomSettingsDirty()) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+});
+async function choose(id, tab = "devices") {
+  if (roomSettingsDirty() && !confirm("Discard unsaved room settings?")) return;
+  if (!dashboardEditor.close()) return;
   if (view) {
     for (const key of ["camera", "heading", "tilt", "zoom"])
       delete view.options[key];
@@ -428,24 +576,33 @@ async function choose(id) {
   selected = models.find((m) => m.id === id);
   const model = selected;
   const url = new URL(location.href);
+  if (url.searchParams.get("model") !== id)
+    url.searchParams.delete("saved_view");
   url.searchParams.set("model", id);
   history.replaceState(null, "", url);
+  window.dispatchEvent(new CustomEvent("rooms-route-change"));
   simulated.clear();
   pending.clear();
   drawModels();
   $("empty").hidden = true;
   $("controls").replaceChildren();
   drawDaylight();
+  drawRoomSettings();
+  setRoomTab(tab, { keepEditor: true });
+  savedViews?.refresh();
   $("title").textContent = selected.title;
-  $("model-type").textContent = selected.floor || "YOUR MODEL";
+  $("model-type").textContent =
+    areas.find((a) => a.area_id === selected.areaId)?.name ||
+    selected.floor ||
+    "3D ROOM";
   $("settings").hidden = false;
-  $("home-view").hidden = false;
-  $("floor-view").hidden = false;
-  $("dashboard").hidden = false;
+  $("home-view").hidden = activeRoomTab === "settings";
+  $("floor-view").hidden = activeRoomTab === "settings";
+  $("dashboard").hidden = activeRoomTab === "settings";
   $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
   $("preview-label").hidden = false;
-  $("controls-section").hidden = false;
-  $("control-count").textContent = `${selected.controls.length} declared`;
+  $("controls-section").hidden = activeRoomTab !== "devices";
+  $("control-count").textContent = `${selected.controls.length} devices`;
   $("view-hint").textContent =
     "Drag to orbit · Scroll to zoom · Select a device to highlight";
   $("scene-status").hidden = false;
@@ -495,25 +652,30 @@ async function choose(id) {
 $("models").addEventListener("click", (e) => {
   const b = e.target.closest("[data-model]");
   if (b) {
-    $("show-models").click();
     choose(b.dataset.model);
   }
 });
 $("home-view").onclick = () => view?.setCameraPreset("reset");
 $("floor-view").onclick = () => {
-  viewMode = viewMode === "floor" ? "dollhouse" : "floor";
+  viewMode = viewMode === "floor" ? "front" : "floor";
   view?.setView(viewMode);
   $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
   const url = new URL(location.href);
   if (viewMode === "floor") url.searchParams.set("view", "floor");
   else url.searchParams.delete("view");
   history.replaceState(null, "", url);
+  window.dispatchEvent(new CustomEvent("rooms-route-change"));
 };
 const dashboardEditor = initDashboardEditor({
   api,
   model: () => selected,
   scene: () => view,
   toast,
+  onOpen: () => {
+    setRoomTab("views", { keepEditor: true });
+    viewMode = view.options.mode;
+    $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
+  },
 });
 $("preview").onchange = () => {
   preview = $("preview").checked;
@@ -547,12 +709,12 @@ $("import-form").onsubmit = async (e) => {
     $("import-dialog").close();
     $("import-form").reset();
     await choose(result.id);
-    toast("Model imported. Its devices are ready to connect.");
+    toast("Room imported. Connect its devices, then save a dashboard view.");
   } catch (e) {
     $("import-error").textContent = e.message;
   } finally {
     $("import-submit").disabled = false;
-    $("import-submit").textContent = "Import model";
+    $("import-submit").textContent = "Import room";
   }
 };
 function drawMappings(controlId) {
@@ -660,6 +822,10 @@ $("confirm-delete").onclick = async () => {
       drawModels();
       $("empty").hidden = false;
       $("controls-section").hidden = true;
+      $("saved-views-section").hidden = true;
+      $("room-settings-section").hidden = true;
+      document.querySelector(".room-tabs").hidden = true;
+      $("room-summary").textContent = "";
       $("daylight-controls").hidden = true;
       $("settings").hidden = true;
       $("home-view").hidden = true;
@@ -688,6 +854,7 @@ function updateStatus(s) {
 }
 try {
   models = await api("models");
+  await refreshAreas({ quiet: true });
   updateStatus(await api("status"));
   preview = status.mode === "preview";
   $("preview").checked = preview;
@@ -697,6 +864,7 @@ try {
       models.find(
         (m) => m.id === new URL(location.href).searchParams.get("model"),
       )?.id || models[0].id,
+      initialRoomTab,
     );
   if (native) {
     const unsubscribe = native.subscribe(updateStatus);
@@ -728,4 +896,9 @@ $("export-model").onclick = async () => {
 };
 
 const { initComponents } = await import("./components.js");
-initComponents({ api, models: () => models, native, toast });
+savedViews = initComponents({
+  api,
+  room: () => selected,
+  editor: dashboardEditor,
+  toast,
+});

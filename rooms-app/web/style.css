@@ -1256,3 +1256,211 @@ textarea {
 .light-label {
   overflow-wrap: anywhere;
 }
+
+/* One room workspace, one preview and one camera editor. */
+.room-summary {
+  margin: 20px 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.room-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  margin-bottom: 24px;
+}
+.room-tabs button {
+  background: transparent;
+  border-color: transparent;
+}
+.room-tabs button[aria-pressed="true"] {
+  background: var(--raised);
+  border-color: var(--line);
+  color: var(--accent);
+}
+#saved-views-section,
+#room-settings-section {
+  min-width: 0;
+}
+.saved-view-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+.saved-view-card,
+.saved-views-empty,
+.room-settings-card {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  min-width: 0;
+}
+.saved-view-card h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+.saved-view-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+.saved-view-actions button {
+  flex: 1;
+}
+.saved-view-more {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.saved-view-more button {
+  margin: 10px 6px 0 0;
+  font-size: 13px;
+}
+summary {
+  min-height: 44px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.room-settings-card {
+  display: grid;
+  gap: 16px;
+  max-width: 680px;
+  margin: 20px 0;
+}
+.room-settings-card label {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+}
+.room-settings-card label input,
+.room-settings-card label select {
+  width: 100%;
+  min-width: 0;
+}
+.room-settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+#room-settings-section #daylight-controls {
+  max-width: 680px;
+  margin: 20px 0;
+}
+.room-advanced {
+  max-width: 680px;
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+}
+.room-danger {
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+  padding-top: 8px;
+}
+.room-danger h3 {
+  font-size: 15px;
+}
+.view-advanced,
+.dashboard-config {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+}
+.view-advanced .camera-fields {
+  border: 0;
+  padding: 0;
+}
+.dashboard-steps {
+  line-height: 1.7;
+  padding-left: 22px;
+}
+.dashboard-steps li {
+  margin: 12px 0;
+}
+body.dashboard-editing #dashboard {
+  display: none;
+}
+#controls-section > .section-title .eyebrow {
+  display: none;
+}
+#controls-section > .section-title h2 {
+  font-size: 18px;
+}
+@media (max-width: 600px) {
+  .room-tabs {
+    gap: 4px;
+  }
+  .room-tabs button {
+    min-width: 0;
+    flex: 1;
+    padding: 10px 6px;
+    font-size: 13px;
+  }
+  .room-settings-card,
+  .saved-view-card {
+    padding: 18px;
+  }
+  .saved-view-actions {
+    flex-direction: column;
+  }
+}
+main,
+.dashboard-editing main {
+  grid-template-columns: 224px minmax(0, 1fr);
+}
+.dashboard-editing main > aside {
+  display: flex;
+}
+#viewport {
+  height: clamp(280px, 42dvh, 520px);
+}
+.room-summary {
+  margin: 0 0 12px;
+}
+#controls-section,
+#saved-views-section {
+  margin-top: 24px;
+}
+body[data-room-tab="settings"] .room-layout {
+  display: none;
+}
+@media (max-width: 900px) {
+  .dashboard-editing .room-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 850px) {
+  main,
+  .dashboard-editing main {
+    grid-template-columns: 210px minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  #viewport {
+    height: 280px;
+  }
+  .room-tabs {
+    overflow: visible;
+  }
+  .room-tabs button {
+    white-space: normal;
+  }
+}
+.saved-view-thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background: var(--bg);
+}
