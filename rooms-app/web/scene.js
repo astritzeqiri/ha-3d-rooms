@@ -267,13 +267,7 @@ export class SceneView {
   cutaway() {
     this.asset?.traverse((o) => {
       if (o.userData.ceiling) o.visible = !!o.userData.controlId;
-      if (o.userData.wallNormal && this.options.mode === "floor") {
-        o.visible = true;
-      } else if (o.userData.wallNormal) {
-        const n = new THREE.Vector3().fromArray(o.userData.wallNormal);
-        const at = o.getWorldPosition(new THREE.Vector3());
-        o.visible = n.dot(this.camera.position.clone().sub(at)) > 0;
-      }
+      if (o.userData.wallNormal) o.visible = true;
     });
   }
   setStates(states) {

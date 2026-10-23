@@ -1,3 +1,7 @@
+# 0.3.2
+
+Keep every wall visible from every camera angle in both the dashboard card and app viewer.
+
 # 0.3.1
 
 Use a front-facing perspective by default, keep the actual pendant visible in cutaway views, and open native Home Assistant controls when clicking mapped fixtures. Include keyboard access and a local light-control preview. Keep the previous floor camera available with view: floor.

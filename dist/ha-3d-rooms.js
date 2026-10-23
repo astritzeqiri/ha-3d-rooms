@@ -14157,11 +14157,7 @@ var zd = class {
 	}
 	cutaway() {
 		this.asset?.traverse((e) => {
-			if (e.userData.ceiling && (e.visible = !!e.userData.controlId), e.userData.wallNormal && this.options.mode === "floor") e.visible = !0;
-			else if (e.userData.wallNormal) {
-				let t = new K().fromArray(e.userData.wallNormal), n = e.getWorldPosition(new K());
-				e.visible = t.dot(this.camera.position.clone().sub(n)) > 0;
-			}
+			e.userData.ceiling && (e.visible = !!e.userData.controlId), e.userData.wallNormal && (e.visible = !0);
 		});
 	}
 	setStates(e) {
