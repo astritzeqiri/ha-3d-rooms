@@ -1099,3 +1099,160 @@ textarea {
     left: 8px;
   }
 }
+
+/* Device cards keep long entity names and touch controls inside their grid cell. */
+#controls {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  align-items: start;
+}
+.light-card {
+  min-width: 0;
+  align-content: start;
+}
+.device-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+.device-heading > div {
+  min-width: 0;
+}
+.device-heading > .device-settings:only-child {
+  margin-left: auto;
+}
+.device-settings {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 11px;
+  background: transparent;
+}
+.device-settings svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.device-entity {
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+.shade-card .light-state {
+  margin-bottom: 0;
+}
+.shade-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+}
+.shade-actions button {
+  min-width: 0;
+  padding: 8px 4px;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-color: transparent;
+  background: transparent;
+  font-size: 12px;
+}
+.shade-actions button:hover:not(:disabled) {
+  background: var(--raised);
+  border-color: var(--line);
+}
+.shade-actions svg {
+  width: 18px;
+  height: 18px;
+}
+.shade-position {
+  min-width: 0;
+}
+.shade-position-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.shade-position-label output {
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.shade-position input[type="range"] {
+  appearance: none;
+  display: block;
+  background: transparent;
+  width: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.shade-position input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(
+    to right,
+    var(--accent) var(--shade-fill),
+    var(--line) var(--shade-fill)
+  );
+}
+.shade-position input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -7px;
+  border-radius: 50%;
+  border: 3px solid var(--panel);
+  background: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.shade-position input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 6px;
+  background: var(--line);
+}
+.shade-position input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 6px;
+  background: var(--accent);
+}
+.shade-position input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid var(--panel);
+  background: var(--accent);
+}
+.shade-position input:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.shade-endpoints {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: -4px;
+}
+
+.device-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.light-heading > div:first-child {
+  min-width: 0;
+}
+.light-label {
+  overflow-wrap: anywhere;
+}

@@ -1,3 +1,8 @@
+# 0.10.1
+
+- Add an entity-settings cog on every device card, opening a focused editor with compatible entity choices and automatic saving.
+- Redesign shade actions and percentage sliders; keep controls and long entity names inside responsive cards.
+
 # 0.10.0
 
 - Add independent Day/Night/Auto window daylight, shade-dependent illumination, sun-entity state updates and persistent room environment settings.

@@ -126,3 +126,14 @@ All six application version fields agree on 0.7.0. The production manager/card b
 - This is approximate diffuse window lighting with a plain sky backdrop; compass-accurate sunlight/exterior reconstruction, production HA/HACS installation and physical-device/iPhone GPU checks remain untested.
 
 - Release artifact check: the exact 0.10.0 integration ZIP was extracted under `/tmp/three-d-rooms-daylight-010-artifact` and loaded in a new official Core 2026.10.2 container using the existing disposable config. Auto/sun.sun, both windows and all three controls persisted; all five native API/service tests passed against the extracted package. Six application versions agree at 0.10.0. Integration/source ZIPs exclude private room exports and sessions.
+
+## Version 0.10.1 — device card settings and shade controls (2026-10-23)
+
+- Added an accessible settings cog to every light/cover card. The focused entity editor reuses the existing compatible picker and authenticated mapping API; automatic saving and full Model settings continue to work. Closing the focused editor returns keyboard focus to the refreshed cog.
+- Shade cards now have grouped icon/text Open/Stop/Close actions, a full-width filled slider, separate opening percentage, and Closed/Open endpoints. Responsive cards constrain button/input widths and wrap entity IDs.
+- 50 JavaScript regression tests, formatting checks and production manager/card builds passed. Python host run: 10 pure tests passed, five native service tests skipped. No backend/service code changed in this patch.
+- Verified in isolated native Home Assistant Core 2026.10.2 on port 18125: cogs opened the correct one-device editor for both light and shade; cover choices contained only cover entities. Changing the shade’s entity saved and updated its controls, persisted across a full page reload, and the original test mapping was restored. Keyboard shade interaction and focus return were checked.
+- Measured native card layouts at desktop and 390px-wide phone viewport: all button/slider bounds stayed inside their cards; the phone manager had no horizontal page overflow. The viewport override was reset. Private screenshots record the final native UI.
+- Application versions are synchronized at 0.10.1. Production HA, physical devices and actual HACS install/download remain untested. Private room assets and test credentials stay outside releases.
+
+- The exact 0.10.1 ZIP was extracted under `/tmp/three-d-rooms-device-cards-artifact` and run in a new Core container with the same disposable config; package version, saved room and both cover mappings were verified after restart.

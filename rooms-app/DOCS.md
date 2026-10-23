@@ -29,3 +29,5 @@ Version 0.9.0 accepts prepared movable `cover` controls alongside lights. Map ea
 ## Daylight — 0.10.0
 
 Import a daylight-ready room ZIP to enable Day, Night and Auto. Select a sun entity (normally sun.sun) for Auto; its reported elevation provides dawn/dusk transitions. Each shade's opening controls its window's light independently of indoor lights. Settings persist per model and are used by the sidebar and dashboard. Existing rooms retain their previous behavior; a new export is needed only to add daylight aperture metadata. This is diffuse window lighting rather than compass-accurate sunlight.
+
+Each device card has an entity-settings cog. Use it to change or disconnect that one device without opening the complete Model settings list. Choices use the same compatible entity filtering and save automatically. Shade controls use grouped action buttons, a filled opening slider and a percentage readout, with responsive cards that wrap long entity identifiers.

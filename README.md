@@ -176,3 +176,5 @@ Dashboard circles use Home Assistant’s entity/state icons, including custom en
 ## Daylight
 
 Daylight-ready model ZIPs add Day, Night and Auto settings in the manager. Auto follows a selected `sun.*` entity, using elevation for dawn/dusk; the dashboard uses the same saved setting. Each window's daylight follows its cover's reported opening, independently of indoor lights. Existing models keep their previous rendering until re-exported with aperture metadata. This is approximate diffuse window lighting, not compass-accurate solar simulation.
+
+Device cards have a settings cog for changing that device’s entity directly. The focused editor shows compatible entities, saves changes automatically, and returns keyboard focus to the cog when closed. Shade cards provide grouped Open/Stop/Close actions and a full-width percentage slider with Closed/Open endpoints.
