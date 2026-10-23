@@ -1,3 +1,9 @@
+# 0.8.0
+
+- Add a Home Assistant visual dashboard card editor: select a room or copy a saved component, change title, projection, rotation, tilt, zoom, height and camera interaction, and save without pasting YAML.
+- Preserve existing saved camera snapshots and custom configuration while editing. Reset camera framing explicitly or when changing rooms/projections.
+- Replace the hard-coded kitchen default with a choose-room prompt.
+
 # 0.7.1
 
 - Bundle an original teal and blue isometric room icon, with standard/high-resolution and light/dark assets for Home Assistant 2026.3 and newer.

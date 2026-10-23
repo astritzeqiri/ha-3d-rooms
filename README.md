@@ -1,6 +1,6 @@
 # 3D Rooms
 
-**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.7.1.
+**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.8.0.
 
 Upload a prepared room or floor ZIP, connect its declared lights to Home Assistant light/switch entities, and view it on a dashboard. Click the physical modeled fixture to open Home Assistant's own light controls. Brightness, RGB color and white temperature follow the entity's reported state. All walls stay visible; a minimum ambient level keeps unlit rooms readable.
 
@@ -17,13 +17,17 @@ The integration bundles its own transparent icon for light and dark themes. Home
 3. Open **Settings → Devices & services → Add integration → 3D Rooms**, then confirm setup.
 4. Refresh the browser and open **3D Rooms** in the sidebar.
 5. Choose **Add a model**, upload your model ZIP, and connect its controls under **Model settings**.
-6. Add the dashboard card below. Its code loads automatically with the integration; do not install a second HACS Dashboard repository or create a separate resource entry.
+6. Add the dashboard card through the visual editor below. Its code loads automatically with the integration; do not install a second HACS Dashboard repository or create a separate resource entry.
 
 This release requires a Home Assistant administrator account for both the model manager and dashboard. Tested in Home Assistant Core **2026.10.2** in a separate container; the user's HA OS/Proxmox VM and physical lights still need installation checks. It uses native Core APIs and does not require Supervisor.
 
 ## Dashboard card
 
-Choose **Edit dashboard → Add card → Manual**:
+Choose **Edit dashboard → Add card → By card → 3D Rooms**. Select a room or a saved component, adjust the title, view, rotation, tilt, zoom and height, then click **Save**. Home Assistant shows a live preview. Existing cards also open in this visual editor.
+
+Selecting a saved component copies its current configuration into the card; later edits to the original component do not change that dashboard card. Title and height edits preserve exact saved camera framing. Changing the room or projection, or choosing **Reset camera framing**, starts a new framing.
+
+For manual configuration, **Edit dashboard → Add card → Manual** still supports:
 
 ```yaml
 type: custom:three-d-rooms-card

@@ -1,11 +1,15 @@
 import { validateCameraSnapshot } from "../shared/camera-view.mjs";
 import "./panel.js";
+import "./editor.js";
 import { SceneView } from "../web/scene.js";
 import { entityAppearance, hexToRgb, kelvinToRgb } from "../shared/light.mjs";
 import { connectModel } from "./transport.mjs";
 export class ThreeDRoomsCard extends HTMLElement {
+  static getConfigElement() {
+    return document.createElement("three-d-rooms-editor");
+  }
   static getStubConfig() {
-    return { model: "kitchen", height: 500, view: "front", tilt: 28 };
+    return { height: 500, view: "front", tilt: 28 };
   }
   constructor() {
     super();
@@ -18,8 +22,9 @@ export class ThreeDRoomsCard extends HTMLElement {
   }
   setConfig(config) {
     if (
-      typeof config.model !== "string" ||
-      !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(config.model)
+      config.model !== undefined &&
+      (typeof config.model !== "string" ||
+        !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(config.model))
     )
       throw new Error("Choose a model ID, for example kitchen.");
     if (
@@ -111,6 +116,11 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._message.querySelector("span").textContent = "Downloading your room…";
     this._message.querySelector("button").hidden = true;
     try {
+      if (!this._config.model) {
+        this._message.querySelector("span").textContent =
+          "Choose a room in the visual editor.";
+        return;
+      }
       const connection = await connectModel(
         this._hass,
         this._config,

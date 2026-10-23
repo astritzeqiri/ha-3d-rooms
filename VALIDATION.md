@@ -86,3 +86,11 @@ All six application version fields agree on 0.7.0. The production manager/card b
 
 - Release checks: all 34 Node tests and formatting passed; production manager/card rebuilt. Python tests passed (8), with 3 native-runtime tests skipped because Home Assistant is not installed in the host Python environment.
 - All six application version values agree at 0.7.1. Generated release ZIP verified for version, package structure, four valid icon PNGs and exclusion of private model archives. No fresh native HA/HACS visual verification was performed for this asset-only change.
+
+## 0.8.0 — Home Assistant visual card editor
+
+- Verified in the existing disposable official HA Core 2026.10.2 instance on localhost:18123; inspected the mount to confirm it uses this checkout’s integration package. Production HA was not accessed.
+- Browser followed Add card → By card → 3D Rooms, selected the uploaded kitchen, changed title and rotation, saved through HA, then reopened the card and confirmed the exact title and 90° rotation persisted. The real room rendered in the native preview.
+- All 39 Node tests passed, including editor tests for preserving camera/unknown config, projection/model reset, independent saved component copies, invalid inputs, and library failure/retry. Formatting passed.
+- Saved component selection is regression-tested; native selection with an existing saved component and narrow/mobile layouts remain unverified. No storage or backend API changes.
+- Final production rebuild and release ZIP checks passed: versions agree at 0.8.0, editor and four branding assets included, no private model archives. Python host tests: 8 passed, 3 native tests skipped. No browser console errors observed in the native editor check.
