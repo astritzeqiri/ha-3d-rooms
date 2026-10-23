@@ -892,9 +892,12 @@ const pickerContext = (controlId) => {
 const pickerFor = (c) =>
   pickerHTML({ ...pickerContext(c.id), enabled: status.connected });
 const mappingRow = (c) =>
-  `<div class="mapping" data-mapping="${c.id}"><div class="mapping-head"><span class="mapping-icon">${deviceIcon(c)}</span><div class="mapping-title"><div class="mapping-name">${esc(c.label)}</div><div class="mapping-sub">${esc(c.room ? c.room + " · " : "")}${capabilityText(c)}</div></div><button type="button" class="icon-btn" data-highlight="${c.id}" aria-label="Show ${esc(c.label)} in the room" title="Show in room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></button></div>${pickerFor(c)}</div>`;
+  `<div class="mapping" data-mapping="${c.id}"><div class="mapping-head"><span class="mapping-icon">${deviceIcon(c)}</span><div class="mapping-title"><div class="mapping-name">${esc(c.label)}</div><div class="mapping-sub">${esc(c.room ? c.room + " · " : "")}${capabilityText(c)}</div></div><button type="button" class="locate-btn" data-highlight="${c.id}" title="Close this window and highlight the device in the 3D room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Show in room</button></div>${pickerFor(c)}</div>`;
 function drawMappings(controlId) {
   $("settings-eyebrow").textContent = selected.title;
+  $("settings-sub").textContent = controlId
+    ? "Choose the Home Assistant entity that controls this device. Changes save automatically."
+    : "Choose the Home Assistant entity that controls each device. Changes save automatically.";
   $("settings-title").textContent = controlId
     ? "Connect " + selected.controls.find((c) => c.id === controlId).label
     : "Connect devices";

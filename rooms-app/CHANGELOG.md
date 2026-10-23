@@ -1,3 +1,9 @@
+# 0.14.1
+
+- Fix the entity list in the connect-devices dialog being clipped to about one item in the single-device dialog. The list now floats over the dialog, matches the field's width, can extend past the dialog edge, opens upward when there is no room below, and no longer makes the dialog resize or jump.
+- Replace the unlabeled crosshair button with a labeled **Show in room** button, and keep the disconnect (×) button on the field. The single-device dialog now says "this device" instead of "each device".
+- No storage, API or backend changes.
+
 # 0.14.0
 
 - Redesign the room manager with a new Slate & Teal look: soft rounded surfaces, light and dark themes that follow the system setting, and teal marking anything that is on, active or focused. Lit lights glow on their device card, and on/off is a sliding toggle.

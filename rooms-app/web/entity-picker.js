@@ -99,6 +99,7 @@ export function initEntityPicker({ root, context, onSelect }) {
       html ||
       `<li class="picker-empty" role="presentation">${query ? "No entities match your search." : "No compatible entities found in Home Assistant."}</li>`;
     const pop = picker.querySelector(".picker-pop");
+    place(picker);
     setActive(
       pop,
       Math.max(
@@ -107,16 +108,39 @@ export function initEntityPicker({ root, context, onSelect }) {
       ),
     );
   }
+  /** Float the list under (or above) its field; it may extend past the dialog. */
+  function place(picker) {
+    const pop = picker.querySelector(".picker-pop");
+    if (pop.hidden) return;
+    const ul = pop.querySelector("ul");
+    const r = picker.querySelector(".picker-field").getBoundingClientRect();
+    const gap = 6,
+      margin = 12,
+      chrome = pop.querySelector(".picker-search").offsetHeight + 14;
+    const below = innerHeight - r.bottom - gap - margin;
+    const above = r.top - gap - margin;
+    if (!pop.dataset.dir) {
+      const wanted = Math.min(ul.scrollHeight + chrome, 260);
+      pop.dataset.dir = below < wanted && above > below ? "up" : "down";
+    }
+    const up = pop.dataset.dir === "up";
+    ul.style.maxHeight = `${Math.max(120, Math.min(300, (up ? above : below) - chrome))}px`;
+    pop.style.left = `${r.left}px`;
+    pop.style.width = `${r.width}px`;
+    pop.style.top = up ? "auto" : `${r.bottom + gap}px`;
+    pop.style.bottom = up ? `${innerHeight - r.top + gap}px` : "auto";
+  }
   function open(picker) {
     close();
     const pop = picker.querySelector(".picker-pop");
+    delete pop.dataset.dir;
+    picker.querySelector(".picker-field").scrollIntoView({ block: "nearest" });
     pop.hidden = false;
     picker.querySelector(".picker-field").setAttribute("aria-expanded", "true");
     const input = pop.querySelector("input");
     input.value = "";
     renderList(picker);
     input.focus();
-    picker.scrollIntoView({ block: "start" });
   }
   async function choose(picker, entityId) {
     const field = picker.querySelector(".picker-field");
@@ -179,6 +203,12 @@ export function initEntityPicker({ root, context, onSelect }) {
     e.preventDefault();
     e.stopPropagation();
   });
+  const reposition = () => {
+    const pop = openPicker();
+    if (pop) place(pop.closest(".entity-picker"));
+  };
+  window.addEventListener("resize", reposition);
+  root.closest(".sheet-body")?.addEventListener("scroll", reposition);
   document.addEventListener("pointerdown", (e) => {
     const pop = openPicker();
     if (pop && !pop.closest(".entity-picker").contains(e.target)) close(pop);

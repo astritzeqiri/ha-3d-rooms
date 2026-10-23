@@ -1990,8 +1990,7 @@ dialog:focus-visible {
   background: var(--raised);
   color: var(--accent-ink);
 }
-.mapping-icon svg,
-.icon-btn svg {
+.mapping-icon svg {
   width: 22px;
   height: 22px;
 }
@@ -2009,18 +2008,23 @@ dialog:focus-visible {
   font-size: 12px;
   color: var(--muted);
 }
-.icon-btn {
+.locate-btn {
   flex: none;
-  width: 40px;
-  min-height: 40px;
-  height: 40px;
-  padding: 8px;
-  border-color: transparent;
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 14px 6px 10px;
+  font-size: 12px;
   color: var(--muted);
+}
+.locate-btn svg {
+  width: 18px;
+  height: 18px;
 }
 .entity-picker {
   position: relative;
+  scroll-margin-top: 8px;
 }
 .picker-field {
   width: 100%;
@@ -2091,8 +2095,8 @@ dialog:focus-visible {
 .picker-clear {
   position: absolute;
   right: 44px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 30px;
+  margin-top: -16px;
   width: 32px;
   min-height: 32px;
   height: 32px;
@@ -2102,22 +2106,19 @@ dialog:focus-visible {
   color: var(--muted);
 }
 .picker-clear:active:not(:disabled) {
-  transform: translateY(-50%) scale(0.95);
+  transform: scale(0.95);
 }
 .picker-clear svg {
   width: 18px;
   height: 18px;
 }
 .picker-pop {
-  position: absolute;
-  z-index: 5;
-  left: 0;
-  right: 0;
-  top: calc(100% + 6px);
+  position: fixed;
+  z-index: 100;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 16px;
-  box-shadow: 0 16px 40px rgb(0 0 0 / 0.3);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.35);
   overflow: hidden;
 }
 .picker-search {
@@ -2148,7 +2149,7 @@ dialog:focus-visible {
   list-style: none;
   margin: 0;
   padding: 6px;
-  max-height: 240px;
+  max-height: 280px;
   overflow: auto;
 }
 .picker-pop li[role="option"] {
