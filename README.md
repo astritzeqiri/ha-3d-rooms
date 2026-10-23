@@ -1,6 +1,6 @@
 # 3D Rooms
 
-**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.6.0.
+**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.7.0.
 
 Upload a prepared room or floor ZIP, connect its declared lights to Home Assistant light/switch entities, and view it on a dashboard. Click the physical modeled fixture to open Home Assistant's own light controls. Brightness, RGB color and white temperature follow the entity's reported state. All walls stay visible; a minimum ambient level keeps unlit rooms readable.
 
@@ -146,3 +146,11 @@ In **HACS → 3D Rooms**, download/update to **0.5.0**, restart Home Assistant i
 ### Updating to 0.6.0
 
 Update **3D Rooms** in HACS, restart Home Assistant, then refresh the browser. **Add to dashboard** opens the live component sidebar. Existing rooms, mappings, and saved components remain compatible; no re-upload is needed.
+
+### Editing the camera directly
+
+The saved component preview supports dragging to rotate, scrolling to zoom and right-dragging to pan. These changes update its fields and exported configuration; choose **Save component** to persist them. Both editors have a compact, camera-linked view cube on the left. Click a face for a straight-on view, an edge for a two-axis diagonal, or a corner for a three-axis diagonal. The cube rotates with the room. The home button fits and resets the room; **Views** offers the same six faces, twelve edges and eight corners in a keyboard- and touch-friendly picker.
+
+### Updating to 0.7.0
+
+Update **3D Rooms** in HACS, restart Home Assistant itself, then refresh the browser. Component previews now support direct camera movement. Use the compact cube's faces, edges and corners for fixed views, or its Home button to reset. Existing rooms, mappings and saved components remain compatible.

@@ -61,3 +61,18 @@ The local integration test uses disposable credentials saved only in `/tmp`; nei
 ## 0.6.0 release artifact check
 
 Built from the published 0.5.0 baseline with all six application versions synchronized to 0.6.0. Extracted the generated integration ZIP and loaded that exact package in a separate official Home Assistant Core 2026.10.2 container on port 18124, retaining the isolated kitchen library and component data. Authenticated setup/catalog, scene/export, bundled frontend and demo-light checks passed. All 11 Python tests passed in that runtime without skips; all 30 JavaScript tests, formatting and build checks passed. Inspected both release archives for matching version/structure and absence of private models, credentials, runtime data, dependencies and Python caches. This does not validate the user's production VM or a HACS download on their device.
+
+## Interactive component camera — 0.7.0
+
+- Browser verified that dragging and zooming the component preview change its angle/zoom fields and YAML. Saving and reopening a temporary component preserved the exact camera configuration. Top, Bottom and Reset updated the camera and settings; pole captures retained stable heading.
+- Camera preset tests cover all six axis directions and both projection types, valid up vectors, reset fitting, and unknown names. Camera capture tests cover stable heading at the poles.
+- Rebuilt the integration and verified the native HA manager on the isolated Core 2026.10.2 instance: the component preview drag changed its generated configuration, and the Save this view navigator applied Top and Reset while updating the sidebar fields. No browser console errors. All 32 JavaScript tests, formatting and production builds passed. Included in version 0.7.0.
+
+## Compact view cube — 0.7.0
+
+Replaced the large direction-button panel with a 104px SVG cube and compact Home/Views controls, without adding a second WebGL renderer. The cube uses the real camera basis and only updates when orientation changes. Unit tests cover all 26 directions, visible faces and projected corner/edge hit regions. Browser checks verified a corner click (45° heading, 54.74° tilt), an edge click and the equivalent picker; camera fields followed correctly, with no console errors. All 34 JavaScript tests passed.
+Verified the rebuilt cube in the isolated Home Assistant Core 2026.10.2 manager: selecting a corner updated the real sidebar to 45° heading and 54.74° tilt. At 375px viewport width the cube stayed 104px wide with no horizontal page overflow. The native view was not tested against the user's production VM.
+
+## 0.7.0 release artifact check
+
+All six application version fields agree on 0.7.0. The production manager/card build, formatting and 34 JavaScript tests passed. Extracted the generated integration ZIP into a separate package directory and ran it in official Home Assistant Core 2026.10.2 on port 18124 with the existing isolated library. All 11 Python tests and the authenticated catalog/scene/export/frontend/demo-light smoke checks passed. Both release archives were inspected for correct structure and absence of private models, runtime data and credentials. The user's production VM and HACS download remain outside these local checks.

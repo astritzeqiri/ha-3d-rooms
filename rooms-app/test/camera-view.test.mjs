@@ -109,3 +109,20 @@ test("invalid camera snapshots are rejected before rendering", () => {
       /Invalid/,
     );
 });
+
+test("top and bottom captures keep a stable heading at the camera poles", () => {
+  for (const sign of [-1, 1]) {
+    const saved = captureCameraView({
+      position: [0, sign * 10, -1e-15],
+      target: [0, 0, 0],
+      up: [0, 0, -sign],
+      aspect: 1.5,
+      zoom: 1,
+      fov: 35,
+      min: [-3, 0, -4],
+      max: [3, 3, 4],
+    });
+    assert.equal(saved.heading, 0);
+    assert.equal(saved.tilt, sign === 1 ? 0 : 180);
+  }
+});

@@ -17,3 +17,7 @@ The retained add-on also supports named room components with angle, tilt, zoom a
 ## Version 0.6.0
 
 The live component sidebar and exact camera saving are included in the integration and retained development add-on. Normal installations should update the HACS Integration; no separate card or add-on update is required.
+
+## Version 0.7.0
+
+Adds interactive component previews and a compact camera cube with face, edge and corner views. Normal installations update only the HACS Integration, restart Home Assistant and refresh the browser.

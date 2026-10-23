@@ -1,3 +1,8 @@
+# 0.7.0
+
+- Allow direct orbit, pan and zoom in the component preview, synchronizing the fields and saved camera without reloading the model.
+- Add a compact camera-linked view cube to both editors. Click six faces, twelve edges or eight corners; use Home to reset or the Views picker for keyboard/touch access. Fit and recenter on selection, with stable Top/Bottom orientation.
+
 # 0.6.0
 
 - Replace Add to dashboard's covering modal with a live component sidebar. Keep the room visible while adjusting its camera; on small screens, keep the preview above the controls.

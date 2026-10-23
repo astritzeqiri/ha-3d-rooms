@@ -1,9 +1,12 @@
+import { mountCameraNavigation } from "./camera-navigation.js";
 import { componentYaml, validateComponent } from "../shared/component.mjs";
 
 /** Edit the camera in the same scene that will be saved to the dashboard. */
 export function initDashboardEditor({ api, model, scene, toast }) {
   const $ = (id) => document.getElementById(id);
   const panel = $("dashboard-panel");
+  const navigation = mountCameraNavigation($("viewport"), scene);
+  navigation.hidden = true;
   let current,
     draftId,
     busy = false,
@@ -85,6 +88,7 @@ export function initDashboardEditor({ api, model, scene, toast }) {
     if (panel.hidden) return;
     scene().options.onCameraChange = undefined;
     panel.hidden = true;
+    navigation.hidden = true;
     document.body.classList.remove("dashboard-editing");
     $("viewport").style.height = "";
     $("dashboard").setAttribute("aria-expanded", "false");
@@ -110,6 +114,8 @@ export function initDashboardEditor({ api, model, scene, toast }) {
       Math.min(1600, Math.round($("viewport").getBoundingClientRect().height)),
     );
     panel.hidden = false;
+    navigation.hidden = false;
+    scene().options.allowRotate = true;
     applying = true;
     Object.assign(scene().options, current);
     scene().setView(current.view);

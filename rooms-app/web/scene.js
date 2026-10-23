@@ -1,3 +1,4 @@
+import { cameraPreset } from "../shared/camera-presets.mjs";
 import {
   captureCameraView,
   restoreCameraView,
@@ -41,7 +42,7 @@ export class SceneView {
     this.orbit.addEventListener("change", () => {
       this.cutaway();
       this.render();
-      this.options.onCameraChange?.();
+      this.options.onCameraChange?.({ source: "orbit" });
     });
     this.resize = new ResizeObserver(() => {
       const { width, height } = container.getBoundingClientRect();
@@ -51,7 +52,7 @@ export class SceneView {
       if (this.options.mode !== "dollhouse" && this.model) this.fitFloor();
       this.camera.updateProjectionMatrix();
       this.render();
-      if (this.model) this.options.onCameraChange?.();
+      if (this.model) this.options.onCameraChange?.({ source: "resize" });
     });
     this.resize.observe(container);
     const ray = new THREE.Raycaster();
@@ -222,9 +223,10 @@ export class SceneView {
     this.orbit.addEventListener("change", () => {
       this.cutaway();
       this.render();
-      this.options.onCameraChange?.();
+      this.options.onCameraChange?.({ source: "orbit" });
     });
-    this.orbit.enableRotate = this.options.mode !== "floor";
+    this.orbit.enableRotate =
+      this.options.allowRotate ?? this.options.mode !== "floor";
     for (const f of this.fixtures.values())
       f.marker.visible = this.options.markers && this.options.mode !== "floor";
     this.renderer.domElement.setAttribute(
@@ -236,6 +238,13 @@ export class SceneView {
           : "3D model. Drag to orbit; use the Lights controls below for keyboard access.",
     );
     this.reset();
+  }
+  setCameraPreset(name) {
+    if (!this.model) return;
+    const preset = cameraPreset(name, this.options.mode);
+    Object.assign(this.options, preset);
+    this.setView(preset.view);
+    this.options.onCameraChange?.({ source: "preset" });
   }
   fitFloor() {
     if (!this.bounds) return;
@@ -378,5 +387,13 @@ export class SceneView {
   render() {
     this.renderer.render(this.scene, this.camera);
     this.options.onRender?.();
+    const e = this.camera.matrixWorld.elements;
+    const vector = (offset) =>
+      e.slice(offset, offset + 3).map((n) => Math.round(n * 1e5) / 1e5);
+    this.container.dispatchEvent(
+      new CustomEvent("room-camera-orientation", {
+        detail: { right: vector(0), up: vector(4), normal: vector(8) },
+      }),
+    );
   }
 }

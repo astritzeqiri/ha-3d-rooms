@@ -65,8 +65,21 @@ export function captureCameraView({
 }) {
   const delta = position.map((v, i) => v - target[i]),
     radius = Math.hypot(...delta);
+  // At the poles, tiny floating-point offsets cannot define a stable heading.
+  const atPole =
+    Math.hypot(delta[0], delta[2]) / radius < 1e-8 &&
+    Math.hypot(up[0], up[2]) > 1e-8;
+  const direction = delta[1] >= 0 ? -1 : 1;
   const heading =
-    displayed((degrees(Math.atan2(delta[0], delta[2])) + 360) % 360) % 360;
+    displayed(
+      (degrees(
+        atPole
+          ? Math.atan2(direction * up[0], direction * up[2])
+          : Math.atan2(delta[0], delta[2]),
+      ) +
+        360) %
+        360,
+    ) % 360;
   const tilt = displayed(
     degrees(Math.acos(Math.max(-1, Math.min(1, delta[1] / radius)))),
   );

@@ -336,7 +336,7 @@ $("models").addEventListener("click", (e) => {
     choose(b.dataset.model);
   }
 });
-$("home-view").onclick = () => view?.reset();
+$("home-view").onclick = () => view?.setCameraPreset("reset");
 $("floor-view").onclick = () => {
   viewMode = viewMode === "floor" ? "dollhouse" : "floor";
   view?.setView(viewMode);

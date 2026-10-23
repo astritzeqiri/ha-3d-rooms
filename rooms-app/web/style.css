@@ -950,3 +950,152 @@ textarea {
     display: block;
   }
 }
+
+.camera-navigation {
+  position: absolute;
+  z-index: 5;
+  top: 12px;
+  left: 12px;
+  width: 104px;
+  display: grid;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  user-select: none;
+}
+.camera-navigation .view-cube {
+  display: block;
+  width: 104px;
+  height: 104px;
+  overflow: visible;
+  filter: drop-shadow(0 3px 4px #0004);
+}
+.cube-face {
+  fill: #d4ddd5;
+  stroke: #718178;
+  stroke-width: 0.65;
+  stroke-linejoin: round;
+}
+.cube-face-front,
+.cube-face-back {
+  fill: #e8eee8;
+}
+.cube-face-right,
+.cube-face-left {
+  fill: #a7b7ae;
+}
+.cube-face-top {
+  fill: #dce6dd;
+}
+.cube-face-bottom {
+  fill: #becbc2;
+}
+.cube-outline {
+  fill: none;
+  stroke: #6d8073;
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.cube-region {
+  cursor: pointer;
+  outline: none;
+}
+.cube-region polygon {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 0.5;
+  pointer-events: all;
+}
+.cube-region:hover polygon,
+.cube-region:focus-visible polygon {
+  fill: var(--accent);
+  stroke: #688a58;
+}
+.cube-region:active polygon {
+  fill: #94b57b;
+}
+.cube-label {
+  fill: #25382d;
+  font: 650 11px system-ui;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+.cube-axes {
+  pointer-events: none;
+}
+.cube-axes line {
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.cube-axes text {
+  font: 600 8px system-ui;
+  stroke: none;
+}
+.cube-axes .axis-X {
+  stroke: #db857e;
+  fill: #db857e;
+}
+.cube-axes .axis-Y {
+  stroke: #a7c887;
+  fill: #a7c887;
+}
+.cube-axes .axis-Z {
+  stroke: #8caedf;
+  fill: #8caedf;
+}
+.camera-navigation .cube-controls {
+  display: grid;
+  grid-template-columns: 32px 64px;
+  justify-content: center;
+  gap: 4px;
+}
+.camera-navigation .camera-home,
+.camera-navigation .cube-view-picker {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--panel) 85%, transparent);
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+.camera-navigation .camera-home {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.camera-navigation .cube-view-picker {
+  padding-left: 8px;
+}
+.camera-navigation .camera-home:hover,
+.camera-navigation .cube-view-picker:hover {
+  color: var(--text);
+  border-color: var(--line);
+}
+@media (pointer: coarse) {
+  .camera-navigation .camera-home,
+  .camera-navigation .cube-view-picker {
+    height: 44px;
+    min-height: 44px;
+  }
+  .camera-navigation .cube-controls {
+    grid-template-columns: 44px 64px;
+    gap: 0;
+  }
+}
+@media (max-width: 760px) {
+  .camera-navigation {
+    top: 8px;
+    left: 8px;
+  }
+}

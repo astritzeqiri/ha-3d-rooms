@@ -1,3 +1,4 @@
+import { mountCameraNavigation } from "./camera-navigation.js";
 import { validateComponent, componentYaml } from "../shared/component.mjs";
 import { hexToRgb } from "../shared/light.mjs";
 
@@ -11,7 +12,8 @@ export function initComponents({ api, models, native, toast }) {
     loadedModel,
     generation = 0,
     active = false,
-    deleteArmed = false;
+    deleteArmed = false,
+    applyingCamera = false;
   const error = (message) => {
     $("component-error").textContent = message || "";
   };
@@ -35,6 +37,37 @@ export function initComponents({ api, models, native, toast }) {
       },
       models().map((m) => m.id),
     );
+  function syncCamera(event = {}) {
+    if (
+      applyingCamera ||
+      !active ||
+      !preview?.model ||
+      loadedModel !== preview.model.id
+    )
+      return;
+    const captured = preview.captureView();
+    savedCamera = captured.camera;
+    $("component-zoom").max = Math.max(3, Math.ceil(captured.zoom));
+    $("component-zoom").min = Math.min(0.25, captured.zoom);
+    for (const key of ["view", "heading", "tilt", "zoom"])
+      $("component-" + key).value = captured[key];
+    Object.assign(preview.options, captured);
+    $("component-heading-value").textContent = `${captured.heading}°`;
+    $("component-tilt-value").textContent = `${captured.tilt}°`;
+    $("component-zoom-value").textContent = `${captured.zoom}×`;
+    try {
+      $("component-yaml").value = componentYaml(read());
+      error();
+    } catch (e) {
+      error(e.message);
+    }
+    if (event.source !== "resize") {
+      deleteArmed = false;
+      $("delete-component").textContent = "Delete";
+      $("component-save-state").textContent = "Unsaved changes";
+    }
+  }
+  mountCameraNavigation($("component-preview"), () => preview);
   const refreshModels = () => {
     const selected = $("component-model").value;
     $("component-model").replaceChildren(
@@ -134,7 +167,9 @@ export function initComponents({ api, models, native, toast }) {
         preview = new SceneView($("component-preview"), () => {}, {
           mode: layer.view,
           markers: false,
-          interactive: false,
+          interactive: true,
+          allowRotate: true,
+          onCameraChange: syncCamera,
           ...layer,
         });
         const view = preview;
@@ -166,7 +201,12 @@ export function initComponents({ api, models, native, toast }) {
       }
       if (current !== generation) return;
       Object.assign(preview.options, { camera: undefined }, layer);
-      preview.setView(layer.view);
+      applyingCamera = true;
+      try {
+        preview.setView(layer.view);
+      } finally {
+        applyingCamera = false;
+      }
       $("component-preview-status").hidden = true;
     } catch (e) {
       if (current === generation) {
