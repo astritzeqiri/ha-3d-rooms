@@ -1,3 +1,7 @@
+# 0.10.0
+
+- Add independent Day/Night/Auto window daylight, shade-dependent illumination, sun-entity state updates and persistent room environment settings.
+
 # 0.9.1
 
 - Use Home Assistant entity/state icons in dashboard circles, including custom icons and cover device classes.

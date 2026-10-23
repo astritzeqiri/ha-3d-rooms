@@ -38,7 +38,7 @@ class RoomsRuntime:
             "entities": [
                 s.as_dict()
                 for s in self.hass.states.async_all()
-                if s.domain in ("light", "switch", "cover")
+                if s.domain in ("light", "switch", "cover", "sun")
             ],
         }
 
@@ -54,6 +54,14 @@ class RoomsRuntime:
             return self.store.catalog()
         if operation == "status":
             return self.status()
+        if operation == "daylight":
+            entity_id = data.get("entity")
+            entity = self.hass.states.get(entity_id) if isinstance(entity_id, str) else None
+            if data.get("mode") == "auto" and (not entity or entity.domain != "sun"):
+                raise ValueError("Choose an existing sun entity for Auto daylight.")
+            result = await self.work(self.store.set_daylight, data.get("model"), data)
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "bindings":
             entity_id = data.get("entityId", "")
             if not isinstance(entity_id, str) or (

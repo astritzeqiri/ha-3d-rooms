@@ -44,6 +44,18 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         await self.hass.async_stop()
 
+    async def test_daylight_settings_and_sun_state_are_native_and_persistent(self):
+        self.store.models[0]["daylight"] = {"mode": "night", "entity": "sun.sun", "windows": [
+            {"id": "window", "nodeId": "glass", "position": [0, 2, 1], "inward": [0, 0, -1], "width": 1, "height": 1}
+        ]}
+        self.hass.states.async_set("sun.sun", "above_horizon", {"elevation": 22})
+        result = await self.runtime.request("daylight", {"model": "kitchen", "mode": "auto", "entity": "sun.sun"}, "test-user")
+        self.assertEqual(result["daylight"]["mode"], "auto")
+        self.assertTrue(any(e["entity_id"] == "sun.sun" for e in self.runtime.status()["entities"]))
+        with self.assertRaises(ValueError):
+            await self.runtime.request("daylight", {"model": "kitchen", "mode": "auto", "entity": "sun.missing"}, "test-user")
+        self.assertEqual(self.store.find("kitchen")["daylight"]["mode"], "auto")
+
     async def test_cover_services_reported_height_and_capability_gating(self):
         calls = []
         async def handle(call):

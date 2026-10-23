@@ -95,6 +95,11 @@ export function validateGLB(b, manifest) {
       throw new Error(
         "Embed textures and buffers in the GLB. External asset URLs are not supported.",
       );
+  const daylightIds = new Set(
+    (doc.nodes || []).map((n) => n.extras?.daylightWindowId),
+  );
+  if (manifest.daylight?.windows.some((w) => !daylightIds.has(w.nodeId)))
+    throw new Error("A daylight window references a missing scene node.");
   const ids = new Set(
     (doc.nodes || []).map((n) => n.extras?.controlId).filter(Boolean),
   );

@@ -1,6 +1,61 @@
 import { coverCommand } from "../shared/cover.mjs";
 import { lightFeatures } from "../shared/light.mjs";
 export const ID = /^[a-z0-9][a-z0-9_-]{0,79}$/;
+export function validateDaylight(value, controls) {
+  const vector = (v) =>
+    Array.isArray(v) &&
+    v.length === 3 &&
+    v.every((n) => Number.isFinite(n) && Math.abs(n) < 10000);
+  if (
+    !value ||
+    !["day", "night", "auto"].includes(value.mode) ||
+    typeof value.entity !== "string" ||
+    !/^sun\.[a-z0-9_]+$/.test(value.entity)
+  )
+    throw new Error("Choose Day, Night or Auto and a sun entity.");
+  if (
+    !Array.isArray(value.windows) ||
+    !value.windows.length ||
+    value.windows.length > 40
+  )
+    throw new Error("Declare 1–40 daylight windows.");
+  const seen = new Set();
+  for (const w of value.windows) {
+    if (
+      !w ||
+      typeof w.id !== "string" ||
+      !ID.test(w.id) ||
+      seen.has(w.id) ||
+      typeof w.nodeId !== "string" ||
+      !ID.test(w.nodeId)
+    )
+      throw new Error(
+        "Daylight windows need unique stable IDs and scene nodes.",
+      );
+    seen.add(w.id);
+    if (
+      !vector(w.position) ||
+      !vector(w.inward) ||
+      w.inward.reduce((sum, v) => sum + v * v, 0) < 0.01 ||
+      !["width", "height"].every(
+        (k) => Number.isFinite(w[k]) && w[k] >= 0.01 && w[k] <= 30,
+      )
+    )
+      throw new Error("Invalid daylight window geometry.");
+    if (
+      w.coverId !== undefined &&
+      !controls.some((c) => c.id === w.coverId && c.type === "cover")
+    )
+      throw new Error("Daylight must reference a declared cover.");
+    if (
+      !Number.isFinite(w.defaultPosition ?? 0) ||
+      (w.defaultPosition ?? 0) < 0 ||
+      (w.defaultPosition ?? 0) > 100
+    )
+      throw new Error("Invalid daylight opening.");
+  }
+  return value;
+}
 export function validateManifest(m) {
   const fail = (message) => {
     throw new Error(message);
@@ -73,6 +128,7 @@ export function validateManifest(m) {
     )
       fail("Unsupported light capabilities.");
   }
+  if (m.daylight) validateDaylight(m.daylight, m.controls);
   if (m.camera && (!vector(m.camera.position) || !vector(m.camera.target)))
     fail("Camera position and target must be three numbers.");
   if (m.ambient !== undefined && !(m.ambient >= 0.05 && m.ambient <= 1))

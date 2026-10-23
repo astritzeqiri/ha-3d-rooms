@@ -25,3 +25,7 @@ Adds interactive component previews and a compact camera cube with face, edge an
 ## Roller shades
 
 Version 0.9.0 accepts prepared movable `cover` controls alongside lights. Map each shade to a Home Assistant `cover.*` entity. The manager and dashboard follow reported opening height; device-supported Open, Close, Stop and percentage commands use native cover services. Re-export a static room with shade metadata before importing it. Old light-only rooms continue to work.
+
+## Daylight — 0.10.0
+
+Import a daylight-ready room ZIP to enable Day, Night and Auto. Select a sun entity (normally sun.sun) for Auto; its reported elevation provides dawn/dusk transitions. Each shade's opening controls its window's light independently of indoor lights. Settings persist per model and are used by the sidebar and dashboard. Existing rooms retain their previous behavior; a new export is needed only to add daylight aperture metadata. This is diffuse window lighting rather than compass-accurate sunlight.

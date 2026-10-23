@@ -12,7 +12,7 @@ import { join, resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Store } from "./store.mjs";
 import { extractPackage, MAX_UPLOAD } from "./import.mjs";
-import { validateBinding, commandFor } from "./manifest.mjs";
+import { validateDaylight, validateBinding, commandFor } from "./manifest.mjs";
 import { HABridge } from "./ha.mjs";
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 export async function createApp({
@@ -42,7 +42,7 @@ export async function createApp({
         : "preview",
     entities: bridge.connected
       ? bridge.entities.filter((e) =>
-          /^(light|switch|cover)\./.test(e.entity_id),
+          /^(light|switch|cover|sun)\./.test(e.entity_id),
         )
       : [],
   });
@@ -176,7 +176,7 @@ export async function createApp({
         return;
       }
       const match = path.match(
-        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|scene\.glb|export\.zip))?$/,
+        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|scene\.glb|export\.zip))?$/,
       );
       if (match) {
         const m = store.find(match[1]);
@@ -221,6 +221,24 @@ export async function createApp({
           res.end(
             await readFile(join(dataDir, "models", m.folder, "scene.glb")),
           );
+          return;
+        }
+        if (req.method === "PUT" && op === "daylight") {
+          const b = JSON.parse(await body(req, 16384));
+          if (!m.daylight)
+            throw new Error("This model has no daylight windows.");
+          if (
+            b.mode === "auto" &&
+            !bridge.entities.some(
+              (e) => e.entity_id === b.entity && e.entity_id.startsWith("sun."),
+            )
+          )
+            throw new Error("Choose an existing sun entity.");
+          const daylight = { ...m.daylight, mode: b.mode, entity: b.entity };
+          validateDaylight(daylight, m.controls);
+          m.daylight = daylight;
+          await store.save();
+          json(res, 200, { daylight });
           return;
         }
         if (req.method === "PUT" && op === "bindings") {

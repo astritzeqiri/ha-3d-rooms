@@ -127,7 +127,15 @@ function drawControls() {
         ? `[data-kelvin="${active.dataset.kelvin}"]`
         : "";
   const states = new Map(selected.controls.map((c) => [c.id, state(c)]));
-  if (view?.model?.id === selected.id) view.setStates(states);
+  if (view?.model?.id === selected.id) {
+    view.setStates(states);
+    view.setDaylight(
+      selected.daylight?.mode ?? "night",
+      status.connected
+        ? status.entities.find((e) => e.entity_id === selected.daylight?.entity)
+        : undefined,
+    );
+  }
   $("controls").innerHTML = selected.controls
     .map((c) => {
       if (c.type === "cover") {
@@ -346,6 +354,58 @@ function drawModels() {
     )
     .join("");
 }
+function drawDaylight() {
+  const config = selected?.daylight;
+  $("daylight-controls").hidden = !config;
+  if (!config) return;
+  $("daylight-mode").value = config.mode;
+  const suns = status.entities.filter((e) => e.entity_id.startsWith("sun."));
+  $("sun-entity").innerHTML = suns
+    .map(
+      (e) =>
+        `<option value="${esc(e.entity_id)}">${esc(e.attributes?.friendly_name || e.entity_id)}</option>`,
+    )
+    .join("");
+  if (!suns.some((e) => e.entity_id === config.entity))
+    $("sun-entity").insertAdjacentHTML(
+      "beforeend",
+      `<option value="${esc(config.entity)}">${esc(config.entity)} (not available)</option>`,
+    );
+  $("sun-entity").value = config.entity;
+  $("sun-setting").hidden = config.mode !== "auto";
+  $("daylight-note").textContent =
+    !status.connected && config.mode === "auto"
+      ? "Sun unavailable: retaining the last daylight level. Choose Day or Night to preview."
+      : "Daylight follows reported shade openings. Indoor lights stay independent.";
+}
+for (const id of ["daylight-mode", "sun-entity"])
+  $(id).onchange = async () => {
+    const model = selected;
+    const settings = {
+      mode: $("daylight-mode").value,
+      entity: $("sun-entity").value,
+    };
+    if (status.mode === "preview") {
+      model.daylight = { ...model.daylight, ...settings };
+      drawDaylight();
+      drawControls();
+      return;
+    }
+    try {
+      const result = await api(`models/${model.id}/daylight`, {
+        method: "PUT",
+        body: JSON.stringify(settings),
+      });
+      model.daylight = result.daylight;
+      if (selected === model) {
+        drawDaylight();
+        drawControls();
+      }
+    } catch (error) {
+      toast(error.message);
+      drawDaylight();
+    }
+  };
 async function choose(id) {
   dashboardEditor.close();
   if (view) {
@@ -364,6 +424,7 @@ async function choose(id) {
   drawModels();
   $("empty").hidden = true;
   $("controls").replaceChildren();
+  drawDaylight();
   $("title").textContent = selected.title;
   $("model-type").textContent = selected.floor || "YOUR MODEL";
   $("settings").hidden = false;
@@ -574,6 +635,7 @@ $("confirm-delete").onclick = async () => {
       drawModels();
       $("empty").hidden = false;
       $("controls-section").hidden = true;
+      $("daylight-controls").hidden = true;
       $("settings").hidden = true;
       $("home-view").hidden = true;
       $("floor-view").hidden = true;

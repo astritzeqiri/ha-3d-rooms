@@ -1,6 +1,6 @@
 # 3D Rooms
 
-**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.9.1.
+**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.10.0.
 
 Upload a prepared room or floor ZIP, connect its declared lights to Home Assistant light/switch entities, and view it on a dashboard. Click the physical modeled fixture to open Home Assistant's own light controls. Brightness, RGB color and white temperature follow the entity's reported state. All walls stay visible; a minimum ambient level keeps unlit rooms readable.
 
@@ -172,3 +172,7 @@ Prepared models can declare `type: "cover"` controls alongside lights. Connect e
 Re-export existing static rooms to add movable shades. Each cover needs stable `id`/`nodeIds`, a world-space marker `position`, `defaultPosition` (0–100), and `capabilities: ["open_close", "position", "stop"]`. Its GLB node carries `extras.controlId` and `extras.rollerShade: {top, height, defaultPosition}`. Slat children carry `extras.rollerShadePart: {center, height}` in local coordinates; the bottom rail adds `rail: true`. Export all parts fully closed so none are lost by visibility filtering. The original room viewer supplies this metadata automatically. Existing light-only packages and mappings remain compatible.
 
 Dashboard circles use Home Assistant’s entity/state icons, including custom entity icons. Badges show light On/Off, shade opening percentage and movement arrows, or unavailable/unmapped status. Marker state follows the entity; clicks retain the existing light toggle and native cover dialog behavior.
+
+## Daylight
+
+Daylight-ready model ZIPs add Day, Night and Auto settings in the manager. Auto follows a selected `sun.*` entity, using elevation for dawn/dusk; the dashboard uses the same saved setting. Each window's daylight follows its cover's reported opening, independently of indoor lights. Existing models keep their previous rendering until re-exported with aperture metadata. This is approximate diffuse window lighting, not compass-accurate solar simulation.

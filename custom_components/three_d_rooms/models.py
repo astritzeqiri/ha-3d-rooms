@@ -56,6 +56,49 @@ def vector(value):
     )
 
 
+def validate_daylight(value, controls):
+    if not isinstance(value, dict) or value.get("mode") not in ("day", "night", "auto"):
+        raise ValueError("Choose Day, Night or Auto daylight.")
+    if not isinstance(value.get("entity"), str) or not re.fullmatch(
+        r"sun\.[a-z0-9_]+", value["entity"]
+    ):
+        raise ValueError("Choose a sun entity for automatic daylight.")
+    windows = value.get("windows")
+    if not isinstance(windows, list) or not 1 <= len(windows) <= 40:
+        raise ValueError("Declare 1–40 daylight windows.")
+    seen = set()
+    for window in windows:
+        if (
+            not isinstance(window, dict)
+            or not valid_id(window.get("id"))
+            or window["id"] in seen
+        ):
+            raise ValueError("Daylight windows need unique stable IDs.")
+        seen.add(window["id"])
+        if (
+            not valid_id(window.get("nodeId"))
+            or not vector(window.get("position"))
+            or not vector(window.get("inward"))
+            or sum(v * v for v in window["inward"]) < .01
+        ):
+            raise ValueError("Declare each window's scene node, position and inward direction.")
+        if any(
+            not number(window.get(key)) or not .01 <= window[key] <= 30
+            for key in ("width", "height")
+        ):
+            raise ValueError("Daylight window dimensions must be 0.01–30 meters.")
+        if window.get("coverId") is not None and not any(
+            c["id"] == window["coverId"] and c["type"] == "cover" for c in controls
+        ):
+            raise ValueError("Daylight windows must reference a declared cover.")
+        if (
+            not number(window.get("defaultPosition", 0))
+            or not 0 <= window.get("defaultPosition", 0) <= 100
+        ):
+            raise ValueError("Invalid default daylight opening.")
+    return deepcopy(value)
+
+
 def validate_manifest(m):
     """Validate and return only supported manifest fields."""
     if (
@@ -125,6 +168,8 @@ def validate_manifest(m):
             )
         ):
             raise ValueError("Unsupported control capabilities.")
+    if "daylight" in m:
+        validate_daylight(m["daylight"], controls)
     if "camera" in m and (
         not isinstance(m["camera"], dict)
         or not vector(m["camera"].get("position"))
@@ -150,6 +195,7 @@ def validate_manifest(m):
             "controls",
             "camera",
             "ambient",
+            "daylight",
         )
     }
 
@@ -227,6 +273,9 @@ def validate_glb(data, manifest):
             raise ValueError(
                 "Embed textures and buffers; external URLs are not supported."
             )
+    daylight_nodes = {n.get("extras", {}).get("daylightWindowId") for n in doc.get("nodes", [])}
+    if any(w["nodeId"] not in daylight_nodes for w in manifest.get("daylight", {}).get("windows", [])):
+        raise ValueError("A daylight window references a missing scene node.")
     nodes = {n.get("extras", {}).get("controlId") for n in doc.get("nodes", [])}
     for control in manifest["controls"]:
         if any(node not in nodes for node in control.get("nodeIds", [])):
@@ -411,6 +460,16 @@ class ModelStore:
             raise
         finally:
             shutil.rmtree(stage, ignore_errors=True)
+
+    def set_daylight(self, model_id, settings):
+        models = deepcopy(self.models)
+        model = next((m for m in models if m["id"] == model_id), None)
+        if model is None or "daylight" not in model:
+            raise ValueError("This model has no daylight windows. Import a daylight-ready export.")
+        value = {**model["daylight"], "mode": settings.get("mode"), "entity": settings.get("entity")}
+        model["daylight"] = validate_daylight(value, model["controls"])
+        self.save(models)
+        return {"daylight": deepcopy(value)}
 
     def bind(self, model_id, control_id, entity_id):
         models = deepcopy(self.models)

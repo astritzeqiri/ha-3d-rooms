@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-ByXTQ52J.js"></script>
+    <script type="module" crossorigin src="./assets/index-eUXFRInp.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/cover-BfJAXT6K.js">
     <link rel="modulepreload" crossorigin href="./assets/camera-view-CGncmR8S.js">
     <link rel="modulepreload" crossorigin href="./assets/preload-helper-DGMmAqYt.js">
@@ -259,6 +259,27 @@
             </button>
           </aside>
         </div>
+        <section
+          id="daylight-controls"
+          class="light-card"
+          hidden
+          aria-label="Day and night"
+        >
+          <div class="light-label">Daylight</div>
+          <label class="light-option"
+            >Time of day<select id="daylight-mode">
+              <option value="night">Night</option>
+              <option value="day">Day</option>
+              <option value="auto">Auto · Home Assistant sun</option>
+            </select></label
+          >
+          <label class="light-option" id="sun-setting"
+            >Sun entity<select id="sun-entity"></select
+          ></label>
+          <p class="muted small" id="daylight-note">
+            Daylight responds to shade openings, independently of indoor lights.
+          </p>
+        </section>
         <section id="controls-section" hidden>
           <div class="section-title">
             <div>

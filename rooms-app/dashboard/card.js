@@ -502,10 +502,19 @@ export class ThreeDRoomsCard extends HTMLElement {
       icon.stateObj = appearance.stateObj;
       button.querySelector(".fixture-state").textContent = appearance.badge;
     }
-    const signature = JSON.stringify([...states]);
+    const sun = this._preview
+      ? undefined
+      : this._hass.states?.[this._model.daylight?.entity || "sun.sun"];
+    const signature = JSON.stringify([
+      [...states],
+      this._model.daylight?.mode,
+      sun?.state,
+      sun?.attributes?.elevation,
+    ]);
     if (signature === this._signature) return;
     this._signature = signature;
     this._view.setStates(states);
+    this._view.setDaylight?.(this._model.daylight?.mode ?? "night", sun);
   }
 }
 if (!customElements.get("three-d-rooms-card"))

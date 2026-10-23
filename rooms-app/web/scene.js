@@ -1,3 +1,4 @@
+import { createDaylight } from "../shared/daylight.mjs";
 import { setShadePosition } from "../shared/cover.mjs";
 import { cameraPreset } from "../shared/camera-presets.mjs";
 import {
@@ -118,7 +119,7 @@ export class SceneView {
     this.asset.traverse((o) => {
       if (o.userData.controlId) this.nodes.set(o.userData.controlId, o);
       if (o.isMesh) {
-        o.castShadow = true;
+        o.castShadow = !o.userData.daylightWindowId;
         o.receiveShadow = true;
         o.material = Array.isArray(o.material)
           ? o.material.map((m) => m.clone())
@@ -186,6 +187,11 @@ export class SceneView {
         base: c.intensity ?? 12,
       });
     }
+    this.daylight = model.daylight ? createDaylight(model.daylight) : null;
+    if (this.daylight) this.scene.add(this.daylight.group);
+    this.daylightMode = model.daylight?.mode ?? "night";
+    this.sunEntity = undefined;
+    this.lastStates = new Map();
     const box = new THREE.Box3().setFromObject(this.asset),
       center = box.getCenter(new THREE.Vector3()),
       size = box.getSize(new THREE.Vector3()).length();
@@ -336,6 +342,7 @@ export class SceneView {
   }
   setStates(states) {
     if (!this.model) return;
+    this.lastStates = states;
     for (const [id, f] of this.fixtures) {
       const s = states.get(id) || { on: false };
       if (f.coverNodes.length) {
@@ -360,13 +367,29 @@ export class SceneView {
         m.emissiveIntensity = intensity * amount;
       }
     }
-    this.ambient.intensity =
-      this.options.mode !== "dollhouse"
+    this.ambient.intensity = this.daylight
+      ? 0.12
+      : this.options.mode !== "dollhouse"
         ? Math.max(this.model.ambient ?? 0.22, 0.55)
         : (this.model.ambient ?? 0.22);
     for (const [m, color] of this.materials)
       m.color.copy(color).multiplyScalar(0.5);
+    this.updateDaylight();
     this.render();
+  }
+  setDaylight(mode, sunEntity) {
+    this.daylightMode = mode;
+    this.sunEntity = sunEntity;
+    this.updateDaylight();
+    this.render();
+  }
+  updateDaylight() {
+    if (!this.daylight) return;
+    this.fill.intensity = 0.08;
+    const positions = new Map(
+      [...this.lastStates].map(([id, s]) => [id, s.position]),
+    );
+    this.daylight.update(this.daylightMode, this.sunEntity, positions);
   }
   highlight(id) {
     for (const [key, f] of this.fixtures)

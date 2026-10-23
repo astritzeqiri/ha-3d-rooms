@@ -64,6 +64,24 @@ class PackageTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.store = models.ModelStore(self.temp.name).open()
 
+    def test_daylight_import_persistence_and_settings_validation(self):
+        daylight = {"mode": "night", "entity": "sun.sun", "windows": [
+            {"id": "window", "nodeId": "glass", "position": [0, 2, 1], "inward": [0, 0, -1], "width": 1, "height": 1}
+        ]}
+        document = {"asset": {"version": "2.0"}, "nodes": [{"extras": {"controlId": "fixture", "daylightWindowId": "glass"}}]}
+        self.store.install(package(manifest_change={"daylight": daylight}, document=document))
+        self.store.set_daylight("kitchen", {"mode": "auto", "entity": "sun.sun"})
+        reopened = models.ModelStore(self.temp.name).open()
+        self.assertEqual(reopened.find("kitchen")["daylight"]["mode"], "auto")
+        self.assertEqual(reopened.find("kitchen")["daylight"]["windows"], daylight["windows"])
+        for settings in ({"mode": "bad", "entity": "sun.sun"}, {"mode": "auto", "entity": "light.sun"}):
+            with self.assertRaises(ValueError):
+                reopened.set_daylight("kitchen", settings)
+        with self.assertRaises(ValueError):
+            models.validate_daylight({**daylight, "windows": [{**daylight["windows"][0], "coverId": "missing"}]}, [])
+        with self.assertRaises(ValueError):
+            self.store.install(package(manifest_change={"id": "broken", "daylight": daylight}))
+
     def test_cover_import_binding_export_roundtrip_and_domain_validation(self):
         control = {"id": "shade", "label": "Shade", "type": "cover", "position": [0, 2, 0],
                    "nodeIds": ["fixture"], "defaultPosition": 85, "capabilities": ["open_close", "position", "stop"]}

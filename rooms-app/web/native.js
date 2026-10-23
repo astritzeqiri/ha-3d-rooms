@@ -44,7 +44,7 @@ export async function connectNative() {
         return bridge.request("delete_component", { id: path.split("/")[1] });
       if (path === "models" || path === "status") return bridge.request(path);
       const match = path.match(
-        /^models\/([a-z0-9_-]+)(?:\/(bindings|command))?$/,
+        /^models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight))?$/,
       );
       if (!match) throw new Error("Unknown room request.");
       return bridge.request(match[2] || "delete", {
