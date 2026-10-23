@@ -1,3 +1,8 @@
+# 0.9.1
+
+- Use Home Assistant entity/state icons in dashboard circles, including custom icons and cover device classes.
+- Show live On/Off, shade opening percentage and movement arrows, plus unmapped/unavailable badges. Keep badges visible near the bottom of a card.
+
 # 0.9.0
 
 - Add movable roller-shade imports, cover entity mappings, supported Open/Close/Stop/position commands, and opening height from Home Assistant state.

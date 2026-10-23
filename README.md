@@ -1,6 +1,6 @@
 # 3D Rooms
 
-**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.9.0.
+**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.9.1.
 
 Upload a prepared room or floor ZIP, connect its declared lights to Home Assistant light/switch entities, and view it on a dashboard. Click the physical modeled fixture to open Home Assistant's own light controls. Brightness, RGB color and white temperature follow the entity's reported state. All walls stay visible; a minimum ambient level keeps unlit rooms readable.
 
@@ -170,3 +170,5 @@ Update **3D Rooms** in HACS, restart Home Assistant itself, then refresh the bro
 Prepared models can declare `type: "cover"` controls alongside lights. Connect each shade to a `cover.*` entity in Model settings. Open, Close, Stop and a 0–100% opening slider appear when the entity advertises the corresponding capabilities. The dashboard opens Home Assistant’s native cover dialog. Both views follow `current_position` (0 closed, 100 open), including changes made elsewhere; unknown or unavailable states retain the last visible height.
 
 Re-export existing static rooms to add movable shades. Each cover needs stable `id`/`nodeIds`, a world-space marker `position`, `defaultPosition` (0–100), and `capabilities: ["open_close", "position", "stop"]`. Its GLB node carries `extras.controlId` and `extras.rollerShade: {top, height, defaultPosition}`. Slat children carry `extras.rollerShadePart: {center, height}` in local coordinates; the bottom rail adds `rail: true`. Export all parts fully closed so none are lost by visibility filtering. The original room viewer supplies this metadata automatically. Existing light-only packages and mappings remain compatible.
+
+Dashboard circles use Home Assistant’s entity/state icons, including custom entity icons. Badges show light On/Off, shade opening percentage and movement arrows, or unavailable/unmapped status. Marker state follows the entity; clicks retain the existing light toggle and native cover dialog behavior.

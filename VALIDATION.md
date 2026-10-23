@@ -104,3 +104,13 @@ All six application version fields agree on 0.7.0. The production manager/card b
 - A separate disposable Core instance on port 18125 loaded the prepared kitchen, mapped two demo cover entities, accepted position commands and exposed cover state. The native manager displayed per-shade opening sliders and Open/Stop/Close; dashboard shade markers opened HA's native cover dialog. External demo state updates reached the manager.
 - The exact `3d-rooms-0.9.0-integration.zip` was extracted under `/tmp/three-d-rooms-cover-artifact` and mounted into a new Core container using the same disposable config. Room and both cover mappings survived the restart; package version 0.9.0 and bundled shade renderer were verified. Six application version fields agree; the ZIP contains no room models or credentials.
 - No production HA instance, physical shades, actual HACS download/install or iPhone GPU performance was tested. The new model ZIP must be imported to add movable geometry to an older static room; existing uploads/mappings remain compatible.
+
+## Version 0.9.1 — native entity icons and marker states (2026-10-23)
+
+- Dashboard circles use `ha-state-icon` with the mapped HA entity, preserving custom entity icons and Home Assistant’s device-class/state icon resolution. Standalone previews retain a type-specific fallback.
+- Badges and accessible descriptions distinguish On/Off, reported shade percentages, opening/closing arrows, unavailable and unmapped devices. Active colors retain readable contrast in the native light theme; badges remain inside the bottom edge of the card.
+- 46 JavaScript tests passed; formatting checks and manager/card production builds passed. The Python suite passed its nine pure tests, with four native service tests skipped on the host. Backend/service behavior is unchanged in this patch.
+- Verified the rebuilt card in the isolated native Core 2026.10.2 dashboard on port 18125: native icon shadow roots rendered HA SVG icons, a custom `mdi:blinds-horizontal` entity icon rendered, and the mapped demo cover displayed `↓ 42%` plus the accessible description “closing, 42% open”. The light displayed “On” and its reported brightness in the accessible label. The screenshot is private local evidence.
+- Six application versions agree at 0.9.1. Release ZIPs contain no private room assets or credentials. No model re-export or mapping migration is needed for this icon change. Physical devices and actual HACS download/install remain untested.
+
+- The exact 0.9.1 integration ZIP was extracted under `/tmp/three-d-rooms-marker-artifact` and loaded in a fresh Core container with the existing disposable config; package/Core versions and persisted room/cover mappings were verified.

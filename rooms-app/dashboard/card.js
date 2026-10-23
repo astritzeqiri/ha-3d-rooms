@@ -1,3 +1,4 @@
+import { markerAppearance } from "../shared/marker.mjs";
 import { coverState } from "../shared/cover.mjs";
 import { validateCameraSnapshot } from "../shared/camera-view.mjs";
 import "./panel.js";
@@ -15,7 +16,7 @@ export class ThreeDRoomsCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:32px;height:32px;min-height:32px;padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}[hidden]{display:none!important}</style><ha-card><header hidden></header><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>`;
+    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:32px;height:32px;min-height:32px;padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:26px;left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}[hidden]{display:none!important}</style><ha-card><header hidden></header><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>`;
     this._container = this.shadowRoot.querySelector(".scene");
     this._message = this.shadowRoot.querySelector(".message");
     this.shadowRoot.querySelector("button").onclick = () => this._load();
@@ -224,11 +225,18 @@ export class ThreeDRoomsCard extends HTMLElement {
         control.type === "cover"
           ? `${label}: opening height controls`
           : `${label}: click to toggle, hold for more info`;
-      button.innerHTML =
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
-      if (control.type === "cover")
-        button.innerHTML =
-          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>';
+      // Home Assistant resolves custom icons, device classes and state-specific icons.
+      // Light-DOM SVG is a fallback for standalone previews without HA elements.
+      const icon = document.createElement("ha-state-icon");
+      icon.setAttribute("aria-hidden", "true");
+      icon.innerHTML =
+        control.type === "cover"
+          ? '<svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>'
+          : '<svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
+      const badge = document.createElement("span");
+      badge.className = "fixture-state";
+      badge.setAttribute("aria-hidden", "true");
+      button.append(icon, badge);
       let timer,
         origin,
         held = false;
@@ -283,7 +291,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       button.hidden = !point?.visible;
       if (point) {
         button.style.left = `${Math.max(0, Math.min(this._container.clientWidth - 32, point.x + 24))}px`;
-        button.style.top = `${Math.max(0, Math.min(this._container.clientHeight - 32, point.y - 16))}px`;
+        button.style.top = `${Math.max(0, Math.min(this._container.clientHeight - 48, point.y - 16))}px`;
       }
     }
   }
@@ -468,9 +476,31 @@ export class ThreeDRoomsCard extends HTMLElement {
       );
     }
     for (const button of this.shadowRoot.querySelectorAll("[data-control]")) {
-      const state = states.get(button.dataset.control);
-      button.setAttribute("aria-pressed", String(!!state?.on));
-      button.setAttribute("aria-disabled", String(!!state?.unavailable));
+      const id = button.dataset.control;
+      const control = this._model.controls.find((c) => c.id === id);
+      const entity = this._hass.states?.[this._model.bindings[id]];
+      const appearance = markerAppearance(
+        control,
+        entity,
+        states.get(id),
+        this._preview,
+      );
+      button.dataset.active = String(appearance.active);
+      button.dataset.moving = String(appearance.moving);
+      button.dataset.unavailable = String(appearance.unavailable);
+      const label = control.label || control.name || "Device";
+      button.title = `${label}: ${appearance.description}`;
+      button.setAttribute(
+        "aria-label",
+        `${control.type === "cover" ? "Control" : "Toggle"} ${label}, ${appearance.description}${control.type === "cover" ? "" : ". Hold for more info."}`,
+      );
+      button.setAttribute("aria-disabled", String(appearance.unavailable));
+      if (control.type === "cover") button.removeAttribute("aria-pressed");
+      else button.setAttribute("aria-pressed", String(appearance.active));
+      const icon = button.querySelector("ha-state-icon");
+      icon.hass = this._hass;
+      icon.stateObj = appearance.stateObj;
+      button.querySelector(".fixture-state").textContent = appearance.badge;
     }
     const signature = JSON.stringify([...states]);
     if (signature === this._signature) return;
