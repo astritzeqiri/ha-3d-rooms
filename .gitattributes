@@ -1,0 +1,3 @@
+# Frontend builds embed Three.js shader strings; keep their generated whitespace.
+/custom_components/three_d_rooms/frontend/** -whitespace linguist-generated=true
+/dist/** -whitespace linguist-generated=true
