@@ -1,6 +1,6 @@
 # 3D Rooms for Home Assistant
 
-A separate Home Assistant OS app (add-on) project. Import multiple private 3D rooms/floors and connect declared lights to existing Home Assistant entities. Version 0.3.1 is an early working build, not yet validated on the user's HA OS VM.
+A separate Home Assistant OS app (add-on) project. Import multiple private 3D rooms/floors and connect declared lights to existing Home Assistant entities. Version 0.3.2 is an early working build, not yet validated on the user's HA OS VM.
 
 ## This private repository
 
@@ -124,21 +124,22 @@ Changes from HA update the fixture's emitted light and emissive material. Warm/c
 
 Advertised effects are selectable by name. The scene follows the color HA reports; it does not invent an animation for device effects that HA does not report continuously. Lights advertising transitions offer a fade time for the next real change. Preview mode supports immediate color/white/brightness changes and sends no device commands.
 
-## Dashboard floor card (0.3.1)
+## Dashboard floor card (0.3.2)
 
 The app has a **Floor view** preset and an **Add to dashboard** setup dialog. The native Home Assistant card shows a front-facing perspective view with hidden ceilings and no entity icons, markers or sidebar. The actual modeled light fixture stays visible: click it to open the mapped Home Assistant light’s native controls, or use Tab to reach its keyboard control. Unmapped fixtures prompt you to connect an entity in Model settings. Light color/brightness still follows actual HA entity states. Floor-view ambient light remains constant so unlit rooms stay readable.
 
-1. Update/install the 0.3.1 add-on on HA OS. Keep the model and its entity mappings there.
+1. Update/install the 0.3.2 add-on on HA OS. Keep the model and its entity mappings there.
 2. In the app, select a model and choose **Add to dashboard → Download card**. Alternatively, use `rooms-app/dist/card/three-d-rooms-card.js` after building locally.
 3. Copy that JavaScript file into Home Assistant's `config/www/` folder as `three-d-rooms-card.js`. Only the card code goes there; model assets stay behind authenticated Ingress.
-4. In your dashboard resources, add `/local/three-d-rooms-card.js?v=0.3.1` with type **JavaScript module**. Advanced Mode may be needed to see dashboard resource settings.
+4. In your dashboard resources, add `/local/three-d-rooms-card.js?v=0.3.2` with type **JavaScript module**. Advanced Mode may be needed to see dashboard resource settings.
 5. Add a **Manual** card with:
 
 ```yaml
 type: custom:three-d-rooms-card
 model: kitchen
 height: 600
-tilt: 8
+view: front
+tilt: 28
 heading: 0
 ```
 
@@ -154,6 +155,8 @@ Local preview: http://127.0.0.1:5190/card-demo.html?model=kitchen . This authori
 
 The same repository also packages the **frontend card** as a HACS **Dashboard** repository (`hacs.json` and the built `dist/ha-3d-rooms.js` at repository root). The add-on remains installed separately and stores the private models.
 
-In HACS, open **Custom repositories**, add `https://github.com/astritzeqiri/ha-3d-rooms`, choose **Dashboard**, and download **3D Rooms Dashboard**. Your HACS GitHub connection must have access to this private repository. Reload the browser, then add the Manual card shown above. HACS normally registers the resource; if needed, add `/hacsfiles/ha-3d-rooms/ha-3d-rooms.js` as a JavaScript module. Do not register both the manual `/local` resource and the HACS resource.
+HACS does not support private GitHub repositories: https://www.hacs.dev/docs/faq/private_repositories/ . While this repository remains private, use the manual download and `/local/three-d-rooms-card.js?v=0.3.2` resource steps above. No GitHub token is needed for manual card installation.
+
+If the repository is made public later, add `https://github.com/astritzeqiri/ha-3d-rooms` under HACS → Custom repositories with type **Dashboard**, then download **3D Rooms Dashboard**. Reload the browser and add the Manual card shown above. If resource registration is needed, use `/hacsfiles/ha-3d-rooms/ha-3d-rooms.js` as a JavaScript module. Register only one copy of the card resource.
 
 After changing the card source, run `npm run build` in `rooms-app`. This also refreshes the root `dist/ha-3d-rooms.js` used by HACS. Household models are never included in that bundle.
