@@ -6,7 +6,7 @@ export function floorFrame(min, max, aspect, tilt = 8, heading = 0) {
     min.some((v, i) => v > max[i])
   )
     throw new Error("Invalid floor camera bounds.");
-  const t = (Math.max(0, Math.min(35, tilt)) * Math.PI) / 180,
+  const t = (Math.max(0, Math.min(180, tilt)) * Math.PI) / 180,
     h = (heading * Math.PI) / 180;
   const normal = [
     Math.sin(t) * Math.sin(h),
@@ -43,7 +43,7 @@ export function floorFrame(min, max, aspect, tilt = 8, heading = 0) {
 /** Fit every bounds corner inside a front-facing perspective camera. */
 export function perspectiveFrame(min, max, aspect, tilt = 28, heading = 0) {
   const frame = floorFrame(min, max, aspect, tilt, heading);
-  const t = (Math.max(0, Math.min(35, tilt)) * Math.PI) / 180,
+  const t = (Math.max(0, Math.min(180, tilt)) * Math.PI) / 180,
     h = (heading * Math.PI) / 180;
   const normal = [
     Math.sin(t) * Math.sin(h),

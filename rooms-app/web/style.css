@@ -749,3 +749,204 @@ textarea {
 #component-preview canvas {
   max-width: 100%;
 }
+
+/* Camera editor stays beside the room instead of covering it. */
+.room-layout,
+.room-preview {
+  min-width: 0;
+}
+.dashboard-editing main {
+  grid-template-columns: minmax(0, 1fr);
+}
+.dashboard-editing main > aside {
+  display: none;
+}
+.dashboard-editing .room-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 328px;
+  gap: 24px;
+  align-items: start;
+}
+.dashboard-editing .room-preview {
+  position: sticky;
+  top: 20px;
+}
+.dashboard-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+.panel-heading {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-heading h2 {
+  margin-top: 6px;
+  font-size: 22px;
+}
+.panel-close {
+  padding: 4px;
+  min-width: 44px;
+  font-size: 24px;
+  background: transparent;
+}
+.dashboard-panel > p {
+  font-size: 13px;
+}
+#dashboard-form {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.panel-field {
+  display: block;
+  font-weight: 500;
+}
+.panel-field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.dashboard-panel input:not([type="range"]),
+.dashboard-panel select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+.camera-fields {
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: 20px 0 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+}
+.camera-fields legend {
+  padding: 0 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.camera-field label {
+  font-weight: 500;
+}
+.camera-adjust {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 16px;
+  align-items: center;
+  margin-top: 8px;
+}
+.camera-adjust input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+.camera-number {
+  position: relative;
+}
+.camera-number input[type="number"] {
+  margin: 0;
+  padding-right: 28px;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+}
+.camera-number input::-webkit-inner-spin-button,
+.camera-number input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.camera-number span {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+.panel-save {
+  display: grid;
+  gap: 8px;
+}
+.panel-save span {
+  text-align: center;
+}
+.dashboard-panel > button {
+  width: 100%;
+}
+.dashboard-config {
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.dashboard-config summary {
+  cursor: pointer;
+  font-size: 14px;
+  min-height: 44px;
+  display: list-item;
+  align-content: center;
+}
+.dashboard-config textarea {
+  margin-top: 12px;
+  font-size: 12px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (max-width: 760px) {
+  .dashboard-editing .room-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .dashboard-editing .room-preview {
+    top: 0;
+    z-index: 2;
+    background: var(--bg);
+    padding-bottom: 8px;
+  }
+  .dashboard-editing #viewport {
+    height: min(42dvh, 360px) !important;
+    min-height: 180px;
+  }
+  .dashboard-editing .room-preview .view-footer {
+    display: none;
+  }
+  .dashboard-panel {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-panel input,
+  .dashboard-panel select,
+  .dashboard-panel button {
+    scroll-margin-top: calc(min(42dvh, 360px) + 24px);
+  }
+  .dashboard-panel > p {
+    display: block;
+  }
+}

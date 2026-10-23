@@ -1,10 +1,17 @@
 {
   "domain": "three_d_rooms",
   "name": "3D Rooms",
-  "version": "0.5.0",
-  "codeowners": ["@astritzeqiri"],
+  "version": "0.6.0",
+  "codeowners": [
+    "@astritzeqiri"
+  ],
   "config_flow": true,
-  "dependencies": ["frontend", "http", "websocket_api", "panel_custom"],
+  "dependencies": [
+    "frontend",
+    "http",
+    "websocket_api",
+    "panel_custom"
+  ],
   "documentation": "https://github.com/astritzeqiri/ha-3d-rooms",
   "issue_tracker": "https://github.com/astritzeqiri/ha-3d-rooms/issues",
   "integration_type": "service",

@@ -13,3 +13,7 @@ Keep model packages or a backup of the old add-on until migration is verified. O
 ## 0.5.0 dashboard components
 
 The retained add-on also supports named room components with angle, tilt, zoom and height settings, preview, duplication and portable JSON import/export. Component files reference an existing model ID. For normal Home Assistant installations, update the single HACS integration instead of installing the legacy add-on.
+
+## Version 0.6.0
+
+The live component sidebar and exact camera saving are included in the integration and retained development add-on. Normal installations should update the HACS Integration; no separate card or add-on update is required.

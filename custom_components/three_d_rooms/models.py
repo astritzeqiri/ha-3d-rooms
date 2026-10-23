@@ -145,6 +145,31 @@ def validate_manifest(m):
     }
 
 
+def validate_camera_snapshot(value, view):
+    """Accept only finite camera geometry, never arbitrary component properties."""
+    def vector(v):
+        return isinstance(v, list) and len(v) == 3 and all(number(n) and abs(n) < 10000 for n in v)
+
+    def positive(n):
+        return number(n) and 0 < n <= 10000
+
+    if not isinstance(value, dict) or not all(vector(value.get(k)) for k in ("position", "target", "up")):
+        raise ValueError("Invalid saved camera view.")
+    if math.dist(value["position"], value["target"]) < 1e-8 or math.hypot(*value["up"]) < 1e-8:
+        raise ValueError("Invalid saved camera view.")
+    if not all(positive(value.get(k)) for k in ("aspect", "zoom", "referenceZoom")):
+        raise ValueError("Invalid saved camera view.")
+    if not number(value.get("heading")) or not 0 <= value["heading"] < 360 or not number(value.get("tilt")) or not 0 <= value["tilt"] <= 180:
+        raise ValueError("Invalid saved camera view.")
+    projection = "orthographic" if view == "floor" else "perspective"
+    if value.get("projection") != projection:
+        raise ValueError("Saved camera projection must match the selected view.")
+    key = "halfHeight" if projection == "orthographic" else "fov"
+    if (key == "halfHeight" and not positive(value.get(key))) or (key == "fov" and (not number(value.get(key)) or not 1 <= value[key] <= 179)):
+        raise ValueError("Invalid saved camera projection.")
+    return {k: deepcopy(value[k]) for k in ("projection", "position", "target", "up", "aspect", "zoom", "referenceZoom", "heading", "tilt", key)}
+
+
 def validate_component(value, model_ids):
     """Validate portable room views without accepting executable configuration."""
     if not isinstance(value, dict) or value.get("schemaVersion") != 1 or not valid_id(value.get("id")):
@@ -160,14 +185,17 @@ def validate_component(value, model_ids):
         raise ValueError("Import the referenced room model first.")
     if layer.get("view") not in ("front", "floor"):
         raise ValueError("Choose perspective or floor view.")
-    for key, minimum, maximum in (("heading", 0, 359), ("tilt", 0, 35), ("zoom", .5, 3)):
+    for key, minimum, maximum in (("heading", 0, 359.99), ("tilt", 0, 180), ("zoom", .01, 100)):
         if not number(layer.get(key)) or not minimum <= layer[key] <= maximum:
             raise ValueError(f"Invalid {key}.")
     height = value.get("height")
     if not isinstance(height, int) or isinstance(height, bool) or not 180 <= height <= 1600:
         raise ValueError("Height must be 180–1600 pixels.")
+    clean_layer = {key: layer[key] for key in ("model", "view", "heading", "tilt", "zoom")}
+    if "camera" in layer:
+        clean_layer["camera"] = validate_camera_snapshot(layer["camera"], layer["view"])
     return {"schemaVersion": 1, "id": value["id"], "title": title.strip(), "height": height,
-            "layers": [{key: layer[key] for key in ("model", "view", "heading", "tilt", "zoom")}]}
+            "layers": [clean_layer]}
 
 
 def validate_glb(data, manifest):

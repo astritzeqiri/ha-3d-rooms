@@ -1,3 +1,7 @@
+import {
+  captureCameraView,
+  restoreCameraView,
+} from "../shared/camera-view.mjs";
 import { floorFrame, perspectiveFrame } from "../shared/floor-view.mjs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -37,6 +41,7 @@ export class SceneView {
     this.orbit.addEventListener("change", () => {
       this.cutaway();
       this.render();
+      this.options.onCameraChange?.();
     });
     this.resize = new ResizeObserver(() => {
       const { width, height } = container.getBoundingClientRect();
@@ -46,6 +51,7 @@ export class SceneView {
       if (this.options.mode !== "dollhouse" && this.model) this.fitFloor();
       this.camera.updateProjectionMatrix();
       this.render();
+      if (this.model) this.options.onCameraChange?.();
     });
     this.resize.observe(container);
     const ray = new THREE.Raycaster();
@@ -186,6 +192,11 @@ export class SceneView {
     return true;
   }
   setView(mode) {
+    if (
+      this.options.camera &&
+      (mode === "floor") !== (this.options.camera.projection === "orthographic")
+    )
+      this.options.camera = undefined;
     this.options.mode = ["floor", "front"].includes(mode) ? mode : "dollhouse";
     this.scene.background.set(
       this.options.mode !== "dollhouse" ? "#1c1c1c" : "#0b100e",
@@ -211,6 +222,7 @@ export class SceneView {
     this.orbit.addEventListener("change", () => {
       this.cutaway();
       this.render();
+      this.options.onCameraChange?.();
     });
     this.orbit.enableRotate = this.options.mode !== "floor";
     for (const f of this.fixtures.values())
@@ -229,13 +241,20 @@ export class SceneView {
     if (!this.bounds) return;
     const { width, height } = this.container.getBoundingClientRect();
     if (!width || !height) return;
-    const f = (this.options.mode === "front" ? perspectiveFrame : floorFrame)(
-      this.bounds.min.toArray(),
-      this.bounds.max.toArray(),
-      width / height,
-      this.options.tilt ?? (this.options.mode === "front" ? 28 : 8),
-      this.options.heading ?? 0,
-    );
+    const f = this.options.camera
+      ? restoreCameraView(this.options.camera, {
+          aspect: width / height,
+          heading: this.options.heading,
+          tilt: this.options.tilt,
+          zoom: this.options.zoom,
+        })
+      : (this.options.mode === "front" ? perspectiveFrame : floorFrame)(
+          this.bounds.min.toArray(),
+          this.bounds.max.toArray(),
+          width / height,
+          this.options.tilt ?? (this.options.mode === "front" ? 28 : 8),
+          this.options.heading ?? 0,
+        );
     Object.assign(this.camera, {
       aspect: width / height,
       left: f.left,
@@ -244,13 +263,30 @@ export class SceneView {
       bottom: f.bottom,
       near: f.near,
       far: f.far,
-      zoom: this.options.zoom ?? 1,
+      zoom: f.zoom ?? this.options.zoom ?? 1,
     });
+    if (this.camera.isPerspectiveCamera && f.fov) this.camera.fov = f.fov;
     this.camera.position.fromArray(f.position);
     this.camera.up.fromArray(f.up);
     this.orbit.target.fromArray(f.target);
     this.camera.lookAt(this.orbit.target);
     this.camera.updateProjectionMatrix();
+  }
+  captureView() {
+    if (!this.model || !this.bounds) return null;
+    return captureCameraView({
+      position: this.camera.position.toArray(),
+      target: this.orbit.target.toArray(),
+      up: this.camera.up.toArray(),
+      aspect: this.camera.aspect,
+      zoom: this.camera.zoom,
+      fov: this.camera.fov,
+      ...(this.camera.isOrthographicCamera
+        ? { halfHeight: (this.camera.top - this.camera.bottom) / 2 }
+        : {}),
+      min: this.bounds.min.toArray(),
+      max: this.bounds.max.toArray(),
+    });
   }
   reset() {
     if (!this.model) return;

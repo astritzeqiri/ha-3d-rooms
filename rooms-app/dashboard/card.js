@@ -1,3 +1,4 @@
+import { validateCameraSnapshot } from "../shared/camera-view.mjs";
 import "./panel.js";
 import { SceneView } from "../web/scene.js";
 import { entityAppearance, hexToRgb, kelvinToRgb } from "../shared/light.mjs";
@@ -30,23 +31,35 @@ export class ThreeDRoomsCard extends HTMLElement {
       throw new Error("Card height must be between 180 and 1600 pixels.");
     if (
       config.zoom !== undefined &&
-      (!Number.isFinite(config.zoom) || config.zoom < 0.5 || config.zoom > 3)
+      (!Number.isFinite(config.zoom) || config.zoom < 0.01 || config.zoom > 100)
     )
-      throw new Error("Zoom must be between 0.5 and 3.");
+      throw new Error("Zoom must be between 0.01 and 100.");
     for (const key of ["tilt", "heading"])
       if (config[key] !== undefined && !Number.isFinite(config[key]))
         throw new Error(`${key} must be a number.`);
-    if (config.tilt !== undefined && (config.tilt < 0 || config.tilt > 35))
-      throw new Error("Tilt must be between 0 and 35 degrees.");
+    if (config.tilt !== undefined && (config.tilt < 0 || config.tilt > 180))
+      throw new Error("Tilt must be between 0 and 180 degrees.");
     if (config.view !== undefined && !["front", "floor"].includes(config.view))
       throw new Error("Choose front or floor view.");
+    const camera =
+      config.camera === undefined
+        ? undefined
+        : validateCameraSnapshot(config.camera);
+    if (
+      camera &&
+      ((config.view || "front") === "floor") !==
+        (camera.projection === "orthographic")
+    )
+      throw new Error("Saved camera projection must match the selected view.");
     this._config = {
       height: 500,
       view: "front",
-      tilt: config.view === "floor" ? 8 : 28,
-      heading: 0,
+      tilt: camera?.tilt ?? (config.view === "floor" ? 8 : 28),
+      heading: camera?.heading ?? 0,
+      zoom: camera?.referenceZoom ?? 1,
       interactive: false,
       ...config,
+      camera,
     };
     this._container.style.height = this._config.height + "px";
     const title = this.shadowRoot.querySelector("header");
@@ -126,6 +139,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         tilt: this._config.tilt,
         heading: this._config.heading,
         zoom: this._config.zoom ?? 1,
+        camera: this._config.camera,
         onRender: () => this._positionButtons(),
       });
       const view = this._view;

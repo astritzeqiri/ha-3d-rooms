@@ -43,3 +43,21 @@ The local integration test uses disposable credentials saved only in `/tmp`; nei
 - Component persistence, independent views and portable configuration round trips are covered by storage and component tests.
 - All application versions agree at 0.5.0. Release ZIP contents were inspected for correct layout and exclusion of private room data and credentials.
 - Production Home Assistant, physical lights and HACS download remain user-side checks. Room merging and current-camera snapshot export are not included.
+
+
+## Current-view dashboard export — 0.6.0
+
+- Camera tests project room points before and after a JSON export/import for perspective and orthographic views, including pan and zoom. Tests also cover narrower cards, subsequent angle/zoom edits and malformed snapshots.
+- Browser check: orbit and zoom the kitchen, open Add to dashboard, and render the resulting configuration in the actual dashboard card. Its composition matches the manager at the same viewport dimensions.
+- The rebuilt integration was loaded into a separate official Home Assistant Core 2026.10.2 container on port 18124. Its native dashboard rendered the camera configuration copied from the manager, with no browser console errors; the isolated upload/authentication/demo-light smoke check also passed. This does not test the user's production HA OS VM or HACS download.
+
+
+## Live component sidebar — 0.6.0
+
+- Replaced the covering dashboard dialog with an inline editor beside the room. Numeric fields and sliders update the actual scene; orbit/pan/zoom refresh the controls and exported camera. Saving stores a named component with its full camera snapshot in both native HA and the development server.
+- Browser verified: adjust rotation/tilt/zoom, save a temporary component, reopen it with the exact zoom precision, and remove only the temporary test record. Verified the room remains visible while scrolling the controls on a 375px mobile viewport.
+- Native HA Core 2026.10.2: built manager rendered and saved a named camera component through the authenticated integration API. Native and storage Python tests all passed (11, no skips); Node regression tests passed (30). User's production VM and HACS distribution remain untested for this change.
+
+## 0.6.0 release artifact check
+
+Built from the published 0.5.0 baseline with all six application versions synchronized to 0.6.0. Extracted the generated integration ZIP and loaded that exact package in a separate official Home Assistant Core 2026.10.2 container on port 18124, retaining the isolated kitchen library and component data. Authenticated setup/catalog, scene/export, bundled frontend and demo-light checks passed. All 11 Python tests passed in that runtime without skips; all 30 JavaScript tests, formatting and build checks passed. Inspected both release archives for matching version/structure and absence of private models, credentials, runtime data, dependencies and Python caches. This does not validate the user's production VM or a HACS download on their device.

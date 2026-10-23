@@ -1,3 +1,4 @@
+import { validateCameraSnapshot } from "./camera-view.mjs";
 /** Portable saved dashboard views. Layers leave room for future compositions. */
 export function validateComponent(value, modelIds) {
   if (
@@ -22,9 +23,9 @@ export function validateComponent(value, modelIds) {
   if (!["front", "floor"].includes(layer.view))
     throw new Error("Choose perspective or floor view.");
   for (const [key, min, max] of [
-    ["heading", 0, 359],
-    ["tilt", 0, 35],
-    ["zoom", 0.5, 3],
+    ["heading", 0, 359.99],
+    ["tilt", 0, 180],
+    ["zoom", 0.01, 100],
   ])
     if (!Number.isFinite(layer[key]) || layer[key] < min || layer[key] > max)
       throw new Error(`Invalid ${key}.`);
@@ -34,6 +35,15 @@ export function validateComponent(value, modelIds) {
     value.height > 1600
   )
     throw new Error("Height must be 180–1600 pixels.");
+  const camera =
+    layer.camera === undefined
+      ? undefined
+      : validateCameraSnapshot(layer.camera);
+  if (
+    camera &&
+    (layer.view === "floor") !== (camera.projection === "orthographic")
+  )
+    throw new Error("Saved camera projection must match the selected view.");
   return {
     schemaVersion: 1,
     id: value.id,
@@ -46,11 +56,12 @@ export function validateComponent(value, modelIds) {
         heading: layer.heading,
         tilt: layer.tilt,
         zoom: layer.zoom,
+        ...(camera ? { camera } : {}),
       },
     ],
   };
 }
 export function componentYaml(component) {
   const layer = component.layers[0];
-  return `type: custom:three-d-rooms-card\ntitle: ${JSON.stringify(component.title)}\nmodel: ${layer.model}\nheight: ${component.height}\nview: ${layer.view}\nheading: ${layer.heading}\ntilt: ${layer.tilt}\nzoom: ${layer.zoom}`;
+  return `type: custom:three-d-rooms-card\ntitle: ${JSON.stringify(component.title)}\nmodel: ${layer.model}\nheight: ${component.height}\nview: ${layer.view}\nheading: ${layer.heading}\ntilt: ${layer.tilt}\nzoom: ${layer.zoom}${layer.camera ? "\ncamera: " + JSON.stringify(layer.camera) : ""}`;
 }

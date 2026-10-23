@@ -112,3 +112,53 @@ test("components API saves, lists and removes portable views", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("saved components preserve exact camera geometry and reject malformed snapshots", async () => {
+  const camera = {
+    projection: "perspective",
+    position: [3, 7, -4],
+    target: [0.7, 1, 0.4],
+    up: [0, 1, 0],
+    aspect: 1.8,
+    zoom: 1,
+    referenceZoom: 1.3,
+    heading: 143.2,
+    tilt: 48,
+    fov: 45,
+  };
+  const value = component();
+  Object.assign(value.layers[0], {
+    camera,
+    tilt: 48,
+    heading: 143.2,
+    zoom: 1.3,
+  });
+  const clean = validateComponent(JSON.parse(JSON.stringify(value)), [
+    "kitchen",
+  ]);
+  assert.deepEqual(clean.layers[0].camera, camera);
+  assert.ok(componentYaml(clean).endsWith("camera: " + JSON.stringify(camera)));
+  const dir = await mkdtemp(join(tmpdir(), "rooms-camera-components-"));
+  try {
+    const store = await new Store(dir).open();
+    store.state.models = [{ id: "kitchen" }];
+    await store.putComponent(clean);
+    assert.deepEqual((await new Store(dir).open()).state.components[0], clean);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+  for (const change of [
+    { position: [Infinity, 0, 0] },
+    { projection: "orthographic" },
+    { referenceZoom: 0 },
+  ])
+    assert.throws(() =>
+      validateComponent(
+        {
+          ...value,
+          layers: [{ ...value.layers[0], camera: { ...camera, ...change } }],
+        },
+        ["kitchen"],
+      ),
+    );
+});

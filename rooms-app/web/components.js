@@ -5,6 +5,7 @@ export function initComponents({ api, models, native, toast }) {
   const $ = (id) => document.getElementById(id);
   let components = [],
     draftId,
+    savedCamera,
     saved = false,
     preview,
     loadedModel,
@@ -28,6 +29,7 @@ export function initComponents({ api, models, native, toast }) {
             heading: Number($("component-heading").value),
             tilt: Number($("component-tilt").value),
             zoom: Number($("component-zoom").value),
+            ...(savedCamera ? { camera: savedCamera } : {}),
           },
         ],
       },
@@ -70,6 +72,7 @@ export function initComponents({ api, models, native, toast }) {
   function edit(c, exists = false) {
     refreshModels();
     draftId = c.id;
+    savedCamera = c.layers[0].camera;
     saved = exists;
     deleteArmed = false;
     error();
@@ -77,6 +80,8 @@ export function initComponents({ api, models, native, toast }) {
     $("component-empty").hidden = true;
     $("component-title").value = c.title;
     $("component-height").value = c.height;
+    $("component-zoom").max = Math.max(3, Math.ceil(c.layers[0].zoom));
+    $("component-zoom").min = Math.min(0.25, c.layers[0].zoom);
     for (const key of ["model", "view", "heading", "tilt", "zoom"])
       $("component-" + key).value = c.layers[0][key];
     $("delete-component").hidden = !saved;
@@ -160,7 +165,7 @@ export function initComponents({ api, models, native, toast }) {
         );
       }
       if (current !== generation) return;
-      Object.assign(preview.options, layer);
+      Object.assign(preview.options, { camera: undefined }, layer);
       preview.setView(layer.view);
       $("component-preview-status").hidden = true;
     } catch (e) {
@@ -199,7 +204,9 @@ export function initComponents({ api, models, native, toast }) {
     $("show-components").setAttribute("aria-pressed", "false");
   };
   $("new-component").onclick = create;
-  $("component-editor").oninput = () => {
+  $("component-editor").oninput = (e) => {
+    if (["component-view", "component-model"].includes(e.target.id))
+      savedCamera = undefined;
     deleteArmed = false;
     $("delete-component").textContent = "Delete";
     $("component-save-state").textContent = "Unsaved changes";

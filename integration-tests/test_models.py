@@ -161,9 +161,25 @@ class ComponentTests(unittest.TestCase):
             self.assertEqual(len(models.ModelStore(directory).open().components), 1)
             self.assertEqual(len(reopened.models), 1)
 
+    def test_component_preserves_camera_snapshot_and_rejects_invalid_geometry(self):
+        from copy import deepcopy
+        camera = {"projection": "perspective", "position": [3, 7, -4], "target": [.7, 1, .4], "up": [0, 1, 0], "aspect": 1.8, "zoom": 1, "referenceZoom": 1.3, "heading": 143.2, "tilt": 48, "fov": 45}
+        value = self.component()
+        value["layers"][0].update(camera=camera, tilt=48, heading=143.2, zoom=1.3)
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package())
+            store.put_component(value)
+            self.assertEqual(models.ModelStore(directory).open().components[0]["layers"][0]["camera"], camera)
+        for change in ({"position": [float("inf"), 0, 0]}, {"projection": "orthographic"}, {"referenceZoom": 0}, {"fov": True}):
+            bad = deepcopy(value)
+            bad["layers"][0]["camera"].update(change)
+            with self.assertRaises(ValueError):
+                models.validate_component(bad, ["kitchen"])
+
     def test_invalid_components_and_failed_write_preserve_catalog(self):
         from copy import deepcopy
-        for key, value in (("zoom", 0), ("heading", float("nan")), ("tilt", 36)):
+        for key, value in (("zoom", 0), ("heading", float("nan")), ("tilt", 181)):
             component = self.component()
             component["layers"][0][key] = value
             with self.assertRaises(ValueError):

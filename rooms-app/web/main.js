@@ -1,4 +1,5 @@
 import "./style.css";
+import { initDashboardEditor } from "./dashboard-editor.js";
 import { connectNative } from "./native.js";
 const native = await connectNative().catch((error) => {
   document.getElementById("connection").textContent = error.message;
@@ -259,6 +260,12 @@ function drawModels() {
     .join("");
 }
 async function choose(id) {
+  dashboardEditor.close();
+  if (view) {
+    for (const key of ["camera", "heading", "tilt", "zoom"])
+      delete view.options[key];
+    view.options.mode = viewMode;
+  }
   const current = ++selection;
   selected = models.find((m) => m.id === id);
   const model = selected;
@@ -339,27 +346,12 @@ $("floor-view").onclick = () => {
   else url.searchParams.delete("view");
   history.replaceState(null, "", url);
 };
-const updateDashboardConfig = () => {
-  $("dashboard-heading-value").textContent = `${$("dashboard-heading").value}°`;
-  $("dashboard-tilt-value").textContent = `${$("dashboard-tilt").value}°`;
-  $("dashboard-yaml").value =
-    `type: custom:three-d-rooms-card\nmodel: ${selected.id}\nheight: 500\nview: ${$("dashboard-view").value}\ntilt: ${$("dashboard-tilt").value}\nheading: ${$("dashboard-heading").value}`;
-};
-for (const id of ["dashboard-heading", "dashboard-tilt", "dashboard-view"])
-  $(id).oninput = updateDashboardConfig;
-$("dashboard").onclick = () => {
-  updateDashboardConfig();
-  $("dashboard-dialog").showModal();
-};
-$("copy-dashboard").onclick = async () => {
-  try {
-    await navigator.clipboard.writeText($("dashboard-yaml").value);
-    toast("Dashboard configuration copied.");
-  } catch {
-    $("dashboard-yaml").select();
-    toast("Select and copy the configuration above.");
-  }
-};
+const dashboardEditor = initDashboardEditor({
+  api,
+  model: () => selected,
+  scene: () => view,
+  toast,
+});
 $("preview").onchange = () => {
   preview = $("preview").checked;
   drawControls();

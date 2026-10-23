@@ -1,6 +1,6 @@
 # 3D Rooms
 
-**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.4.1.
+**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.6.0.
 
 Upload a prepared room or floor ZIP, connect its declared lights to Home Assistant light/switch entities, and view it on a dashboard. Click the physical modeled fixture to open Home Assistant's own light controls. Brightness, RGB color and white temperature follow the entity's reported state. All walls stay visible; a minimum ambient level keeps unlit rooms readable.
 
@@ -31,7 +31,9 @@ heading: 0
 Use the actual model ID shown in **3D Rooms → Model settings**, or copy a ready-made configuration from **Add to dashboard** in the manager. Add another card with another model ID to show a different room or floor.
 
 - `view: front` is the angled perspective. `view: floor` is orthographic.
-- `tilt` is degrees away from overhead (0–35). `heading` rotates around the floor's vertical axis.
+- `tilt` is degrees away from overhead (0–180). `heading` rotates around the floor's vertical axis.
+- `zoom` scales the room (0.01–100; default 1).
+- **Add to dashboard** opens an editor beside the room. Drag the room or use the sliders and numeric fields to change rotation, tilt and zoom live. Name the view and choose **Save component** to find it under **HA components**, or **Copy configuration** for a Manual dashboard card. Keep its generated `camera` object to preserve panning and projection; narrower cards fit the saved composition. Older configurations without `camera` continue to use automatic fitting.
 - `height` is pixels (180–1600). Optional `title` adds a heading.
 - `interactive: true` enables camera movement. Fixtures remain clickable when camera movement is locked.
 - The room reads entity mappings from the integration; there are no floating entity icons.
@@ -113,7 +115,7 @@ users can toggle with Enter or Space and open more info with Shift+Enter or F2.
 Unavailable or unbound lights do not send commands.
 
 In the model manager, open **Add to dashboard** and choose the room view,
-rotation (0–359°), and tilt (0–35°). Copy the generated configuration into a
+rotation (0–359.99°), tilt (0–180°), and zoom. Copy the generated configuration into a
 Manual dashboard card, or update an existing card's `view`, `heading`, and `tilt`
 settings. Each card can use its own room angle.
 
@@ -121,7 +123,7 @@ settings. Each card can use its own room angle.
 
 Open **HA components** beside **Models** to create reusable dashboard views. Choose
 an imported room, name the component, then adjust its view, rotation, tilt, zoom
-(0.5–3×), and height. The room preview updates as you edit. Save several components
+(0.01–100×), and height. The room preview updates as you edit. Save several components
 for the same kitchen, or duplicate one to start from its settings.
 
 **Copy dashboard configuration** produces a Manual card configuration with all
@@ -140,3 +142,7 @@ is not available yet.
 ### Updating to 0.5.0
 
 In **HACS → 3D Rooms**, download/update to **0.5.0**, restart Home Assistant itself, then refresh the browser. The bundled manager and card update together. Existing room uploads, entity mappings and saved components remain in place; no model re-upload is needed.
+
+### Updating to 0.6.0
+
+Update **3D Rooms** in HACS, restart Home Assistant, then refresh the browser. **Add to dashboard** opens the live component sidebar. Existing rooms, mappings, and saved components remain compatible; no re-upload is needed.
