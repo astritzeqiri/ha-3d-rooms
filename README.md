@@ -25,7 +25,7 @@ This release requires a Home Assistant administrator account for both the model 
 
 Choose **Edit dashboard → Add card → By card → 3D Rooms**. Select a room or a saved view, adjust the title, view, rotation, tilt, zoom and height, then click **Save**. Home Assistant shows a live preview. Existing cards also open in this visual editor.
 
-The editor also has a **Time of day** switch (Automatic, Always day, Always night) for the selected room. It is saved with the room rather than the card, so every dashboard and the manager share it; it appears for rooms with daylight windows.
+Rooms with daylight windows show an **Auto / Day / Night** dropdown in the card's top-right corner. Choosing a mode applies instantly and is saved with the room, so every dashboard and the manager share it; other open dashboards update without reloading the 3D scene. The editor also has a **Time of day** switch (Automatic, Always day, Always night) for the selected room. It is saved with the room rather than the card, so every dashboard and the manager share it; it appears for rooms with daylight windows.
 
 Selecting a saved view copies its current configuration into the card; later edits to the original view do not change that dashboard card. Title and height edits preserve exact saved camera framing. Changing the room or projection, or choosing **Reset camera framing**, starts a new framing.
 

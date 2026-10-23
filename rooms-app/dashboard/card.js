@@ -16,9 +16,12 @@ export class ThreeDRoomsCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:32px;height:32px;min-height:32px;padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:26px;left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}[hidden]{display:none!important}</style><ha-card><header hidden></header><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>`;
+    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:32px;height:32px;min-height:32px;padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:26px;left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}</style><ha-card><header hidden></header><select class="daylight-switch" aria-label="Time of day" title="Time of day" hidden><option value="auto">Auto</option><option value="day">Day</option><option value="night">Night</option></select><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>`;
     this._container = this.shadowRoot.querySelector(".scene");
     this._message = this.shadowRoot.querySelector(".message");
+    this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
+    this._daylightSwitch.onchange = () =>
+      this._setDaylight(this._daylightSwitch.value);
     this.shadowRoot.querySelector("button").onclick = () => this._load();
     this._generation = 0;
   }
@@ -167,6 +170,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       this._preview = connection.preview;
       this._signature = null;
       this._states();
+      this._syncDaylightSwitch();
       this._message.hidden = true;
       if (
         !this._preview &&
@@ -174,7 +178,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         this._hass.connection?.subscribeEvents
       ) {
         const unsubscribe = await this._hass.connection.subscribeEvents(
-          () => this._load(),
+          () => this._modelsChanged(),
           "three_d_rooms_updated",
         );
         if (generation !== this._generation) {
@@ -206,6 +210,68 @@ export class ThreeDRoomsCard extends HTMLElement {
     } finally {
       if (generation === this._generation) this._loading = false;
     }
+  }
+  _syncDaylightSwitch() {
+    const daylight = this._model?.daylight;
+    this._daylightSwitch.hidden = !daylight || !!this._preview;
+    if (daylight) this._daylightSwitch.value = daylight.mode;
+  }
+  /** Daylight is saved with the room; a failed save restores the old mode. */
+  async _setDaylight(mode) {
+    const daylight = this._model?.daylight;
+    if (!daylight || this._preview) return;
+    const previous = daylight.mode;
+    const apply = (value) => {
+      daylight.mode = value;
+      this._daylightSwitch.value = value;
+      this._signature = null;
+      this._states();
+    };
+    apply(mode);
+    try {
+      const result = await this._hass.callWS({
+        type: "three_d_rooms/request",
+        operation: "daylight",
+        data: { model: this._model.id, mode, entity: daylight.entity },
+      });
+      daylight.mode = result.daylight.mode;
+    } catch (error) {
+      apply(previous);
+      this.shadowRoot.querySelector(".fixture-feedback")?.remove();
+      const message = document.createElement("div");
+      message.className = "fixture-feedback";
+      message.setAttribute("role", "alert");
+      message.textContent =
+        error.message || "Could not save the time of day for this room.";
+      this._container.append(message);
+      setTimeout(() => message.remove(), 5000);
+    }
+  }
+  /** Reload only when the room itself changed, not for a daylight-only edit. */
+  async _modelsChanged() {
+    const generation = this._generation;
+    try {
+      const models = await this._hass.callWS({
+        type: "three_d_rooms/request",
+        operation: "models",
+      });
+      const next = models.find((m) => m.id === this._config?.model);
+      const rest = ({ daylight, ...model }) => JSON.stringify(model);
+      if (
+        generation === this._generation &&
+        next &&
+        this._model &&
+        rest(next) === rest(this._model) &&
+        !!next.daylight === !!this._model.daylight
+      ) {
+        if (next.daylight) this._model.daylight = next.daylight;
+        this._syncDaylightSwitch();
+        this._signature = null;
+        this._states();
+        return;
+      }
+    } catch {}
+    if (generation === this._generation) this._load();
   }
   _buildAccess() {
     this.shadowRoot.querySelector(".fixture-access")?.remove();

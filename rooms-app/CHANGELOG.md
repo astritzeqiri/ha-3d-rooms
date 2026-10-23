@@ -1,3 +1,7 @@
+# 0.13.0
+
+- Show a compact Auto / Day / Night dropdown in the corner of the rendered dashboard card for rooms with daylight windows. Choosing a mode lights the room immediately and saves it to the room's daylight settings, so other dashboards and the manager follow. Daylight-only changes update cards in place instead of reloading the 3D scene; a failed save reverts the dropdown and shows an error.
+
 # 0.12.0
 
 - Add a Time of day switch (Automatic, Always day, Always night) to the dashboard card editor. It saves to the room's daylight settings, so the card, other dashboards and the manager stay in sync.

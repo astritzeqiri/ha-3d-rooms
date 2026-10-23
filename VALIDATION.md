@@ -160,3 +160,11 @@ All six application version fields agree on 0.7.0. The production manager/card b
 - 59 Node tests, formatting and production builds passed. The host Python run passed 13 pure tests and skipped the six native ones; new tests cover kept versus dropped mappings, ID/title handling, failed writes and cleanup.
 - In the pinned official Core 2026.10.2 container, six native tests passed. `integration-tests/live-check.mjs` now also checks, against the disposable instance only: unauthenticated replace returns 401, a valid replace keeps the renamed room and mappings and changes the scene revision, the new scene downloads, and an invalid ZIP returns 400 without changing the room.
 - Not browser-verified: clicking the Replace form and the card editor's Time of day switch in the native UI. Production HACS installation, the user's VM and physical devices remain untested.
+
+## Card-face time of day dropdown — 0.13.0
+
+- The rendered dashboard card shows an Auto / Day / Night dropdown (top-right) for rooms with daylight windows. It applies instantly and saves through the administrator-only `daylight` API; a failed save restores the previous mode and shows an alert. It is hidden in previews and for rooms without daylight windows.
+- On `three_d_rooms_updated` the card now re-reads the catalog and updates daylight in place; it reloads the 3D scene only when the room's scene revision, controls or mappings changed.
+- 62 Node tests, formatting and production builds passed; the host Python run passed 13 pure tests and skipped the six native ones. No backend code changed in this release. New card tests cover saving, immediate application, hidden states, revert on failure, in-place daylight updates and reload on room changes.
+- Headless Chrome against the disposable official Core 2026.10.2 container (127.0.0.1:18123, test session only): the dropdown rendered on the dashboard card, choosing Day lit the room and persisted the room's mode, and the original Auto mode was restored. The test kitchen was replaced with the daylight-ready export beforehand, which also exercised Replace room model (its old mapping was dropped and reported, as designed).
+- Not verified: the narrow-phone layout of the dropdown, an actual HACS download, the user's HA OS/Proxmox VM and physical devices.

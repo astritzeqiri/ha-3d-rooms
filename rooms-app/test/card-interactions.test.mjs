@@ -19,6 +19,7 @@ function cardHarness() {
       },
     },
     window: {},
+    document: { createElement: () => ({ setAttribute() {}, remove() {} }) },
     hexToRgb: () => [255, 240, 212],
   });
   vm.runInContext(source, context);
@@ -81,4 +82,84 @@ test("cover click opens its position controls without sending a light toggle", a
     assert.fail("cover must not send light.toggle");
   await card._toggle("shade");
   assert.equal(picked, "shade");
+});
+function daylightCard() {
+  const card = cardHarness();
+  card._model = {
+    id: "kitchen",
+    controls: [],
+    bindings: {},
+    sceneRevision: "a",
+    daylight: { mode: "auto", entity: "sun.sun", windows: [] },
+  };
+  card._daylightSwitch = { value: "auto", hidden: true };
+  card._states = () => {};
+  card._config = { model: "kitchen" };
+  card._generation = 1;
+  card._container = { append() {} };
+  return card;
+}
+test("card daylight switch saves the room setting and applies it immediately", async () => {
+  const card = daylightCard(),
+    calls = [];
+  card._hass.callWS = async (message) => {
+    calls.push(message);
+    return { daylight: { mode: message.data.mode, entity: "sun.sun" } };
+  };
+  card._syncDaylightSwitch();
+  assert.equal(card._daylightSwitch.hidden, false);
+  await card._setDaylight("night");
+  assert.equal(card._model.daylight.mode, "night");
+  assert.equal(
+    JSON.stringify(calls),
+    JSON.stringify([
+      {
+        type: "three_d_rooms/request",
+        operation: "daylight",
+        data: { model: "kitchen", mode: "night", entity: "sun.sun" },
+      },
+    ]),
+  );
+});
+test("card daylight switch is hidden without windows or in previews and reverts on failure", async () => {
+  const card = daylightCard();
+  card._model.daylight = undefined;
+  card._syncDaylightSwitch();
+  assert.equal(card._daylightSwitch.hidden, true);
+  card._model.daylight = { mode: "day", entity: "sun.sun", windows: [] };
+  card._preview = true;
+  card._syncDaylightSwitch();
+  assert.equal(card._daylightSwitch.hidden, true);
+  card._hass.callWS = () => assert.fail("previews never save");
+  await card._setDaylight("night");
+  assert.equal(card._model.daylight.mode, "day");
+  card._preview = false;
+  card._hass.callWS = async () => {
+    throw new Error("nope");
+  };
+  card.shadowRoot.querySelector = () => null;
+  assert.equal(card._model.daylight.mode, "day");
+  assert.equal(card._daylightSwitch.value, "day");
+});
+test("daylight-only updates apply in place; room changes reload the card", async () => {
+  const card = daylightCard();
+  let loads = 0;
+  card._load = () => loads++;
+  const catalog = (changes) => [
+    { ...JSON.parse(JSON.stringify(card._model)), ...changes },
+  ];
+  card._hass.callWS = async () =>
+    catalog({ daylight: { mode: "night", entity: "sun.sun", windows: [] } });
+  await card._modelsChanged();
+  assert.equal(card._model.daylight.mode, "night");
+  assert.equal(card._daylightSwitch.value, "night");
+  assert.equal(loads, 0);
+  card._hass.callWS = async () => catalog({ sceneRevision: "b" });
+  await card._modelsChanged();
+  assert.equal(loads, 1);
+  card._hass.callWS = async () => {
+    throw new Error("offline");
+  };
+  await card._modelsChanged();
+  assert.equal(loads, 2);
 });
