@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-BjXi48vy.js"></script>
+    <script type="module" crossorigin src="./assets/index-CzBEKnff.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/view-cube-B97d5y4T.js">
     <link rel="modulepreload" crossorigin href="./assets/camera-view-BL6u3TKn.js">
     <link rel="modulepreload" crossorigin href="./assets/component-CxbERJOA.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-Ick2oQmt.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-CcFRuUtv.css">
   </head>
   <body>
     <header>
@@ -32,7 +32,7 @@
         </div>
         <p class="muted">Your home, one floor at a time.</p>
         <nav id="models" aria-label="Models"></nav>
-        <button id="add-model">＋ Import room</button>
+        <button id="add-model">+ Import room</button>
         <div class="aside-bottom">
           <span class="eyebrow">GETTING STARTED</span>
           <p>Import a floor. Choose its devices. Connect them to your home.</p>
@@ -53,7 +53,7 @@
             ><button id="home-view" hidden>Reset view</button>
           </div>
         </div>
-        <p id="room-summary" class="room-summary"></p>
+        <div id="room-summary" class="room-summary" role="status"></div>
         <nav class="room-tabs" aria-label="Room workspace" hidden>
           <button id="show-models" aria-pressed="true" data-room-tab="devices">
             Devices
@@ -97,6 +97,11 @@
                   Add your first 3D floor or room. Its devices will appear here,
                   ready to connect.
                 </p>
+                <ol class="empty-steps">
+                  <li><span>1</span>Import a room ZIP</li>
+                  <li><span>2</span>Connect its lights and shades</li>
+                  <li><span>3</span>Save a view for your dashboard</li>
+                </ol>
                 <button class="primary" id="empty-add">
                   Import your first room
                 </button>
@@ -106,7 +111,8 @@
             <div class="view-footer">
               <span id="view-hint">Import a prepared room ZIP</span
               ><label id="preview-label" hidden
-                ><input id="preview" type="checkbox" checked /> Preview devices
+                ><input id="preview" type="checkbox" role="switch" checked />
+                <span>Preview mode</span>
                 <span class="muted">No real commands</span></label
               >
             </div>
@@ -297,7 +303,50 @@
               <span class="eyebrow">CONNECTED TO THIS ROOM</span>
               <h2>Devices</h2>
             </div>
-            <span class="muted" id="control-count"></span>
+            <span id="control-count"></span>
+          </div>
+          <div id="device-tools" class="device-tools" hidden>
+            <div class="chips" role="group" aria-label="Filter devices">
+              <button
+                type="button"
+                class="chip"
+                data-chip="all"
+                aria-pressed="true"
+              >
+                All
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-chip="on"
+                aria-pressed="false"
+              >
+                On
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-chip="off"
+                aria-pressed="false"
+              >
+                Off
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-chip="setup"
+                aria-pressed="false"
+              >
+                Needs entity
+              </button>
+            </div>
+            <label class="sr-only" for="device-search">Search devices</label>
+            <input
+              id="device-search"
+              type="search"
+              placeholder="Search devices…"
+              autocomplete="off"
+            />
           </div>
           <div id="controls"></div>
         </section>
@@ -460,26 +509,29 @@
         </div>
       </form>
     </dialog>
-    <dialog id="settings-dialog">
+    <dialog id="settings-dialog" class="sheet" aria-labelledby="settings-title">
       <div class="dialog-top">
         <div>
-          <span class="eyebrow">DEVICE ENTITIES</span>
-          <h2 id="settings-title">Devices</h2>
+          <span class="eyebrow" id="settings-eyebrow">Devices</span>
+          <h2 id="settings-title">Connect devices</h2>
+          <p class="dialog-sub">
+            Choose the Home Assistant entity that controls each device. Changes
+            save automatically.
+          </p>
         </div>
-        <button class="close" aria-label="Close model settings">×</button>
+        <button class="close" aria-label="Close">×</button>
       </div>
-      <p class="muted">
-        Connect modeled devices to compatible Home Assistant entities. Changes
-        save automatically.
-      </p>
-      <p id="mapping-note" class="notice"></p>
-      <div id="mappings"></div>
-      <p id="mapping-error" class="error" role="alert"></p>
+      <div class="sheet-body">
+        <p id="mapping-note" class="notice" hidden></p>
+        <div id="mappings"></div>
+        <p id="mapping-error" class="error" role="alert"></p>
+      </div>
       <div class="dialog-actions">
         <button id="export-model" type="button">
-          Export room &amp; mappings</button
-        ><button id="delete-model" class="danger">Remove model</button
-        ><button class="close primary">Done</button>
+          Export room &amp; mappings
+        </button>
+        <button id="delete-model" class="danger">Remove model</button>
+        <button class="close primary">Done</button>
       </div>
     </dialog>
     <dialog id="use-view-dialog" aria-labelledby="use-view-title">

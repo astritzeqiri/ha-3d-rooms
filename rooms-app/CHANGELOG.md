@@ -1,3 +1,13 @@
+# 0.14.0
+
+- Redesign the room manager with a new Slate & Teal look: soft rounded surfaces, light and dark themes that follow the system setting, and teal marking anything that is on, active or focused. Lit lights glow on their device card, and on/off is a sliding toggle.
+- Add a room status strip with lights on, a "n of m connected" progress bar and a Connect devices button. Room list entries show how many devices are connected.
+- Make device cards compact: colour, white temperature, effects and fade sit behind a collapsible row that remembers its state, brightness shows its percentage, and unconnected devices offer a Connect an entity button. Clicking a card highlights that device in the 3D room.
+- Rooms with five or more devices get All / On / Off / Needs entity filters and a search box.
+- Replace the filter input and select in the entity dialog with one searchable entity field. It suggests entities whose names match the device, shows each entity's state, can be driven from the keyboard, and disconnects with a clear button. The dialog has a fixed header and footer, device icons, and a locate button in place of Highlight. Dialogs also close when you click outside them.
+- Show a Preview or Live badge next to the device count, make Preview mode a labelled switch, show a spinner while a room loads, and let toasts be dismissed with a click.
+- No storage, API or backend changes; rooms, mappings and saved views are unchanged.
+
 # 0.13.0
 
 - Show a compact Auto / Day / Night dropdown in the corner of the rendered dashboard card for rooms with daylight windows. Choosing a mode lights the room immediately and saves it to the room's daylight settings, so other dashboards and the manager follow. Daylight-only changes update cards in place instead of reloading the 3D scene; a failed save reverts the dropdown and shows an error.

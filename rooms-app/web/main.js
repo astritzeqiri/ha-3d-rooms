@@ -2,6 +2,7 @@ import { coverFeatures, coverState, coverCommand } from "../shared/cover.mjs";
 import "./style.css";
 import { initDashboardEditor } from "./dashboard-editor.js";
 import { connectNative } from "./native.js";
+import { initEntityPicker, pickerHTML } from "./entity-picker.js";
 const native = await connectNative().catch((error) => {
   document.getElementById("connection").textContent = error.message;
   throw error;
@@ -57,8 +58,13 @@ const toast = (message) => {
   $("toast").textContent = message;
   $("toast").hidden = false;
   clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => ($("toast").hidden = true), 5000);
+  toast.timer = setTimeout(() => ($("toast").hidden = true), 6000);
 };
+$("toast").onclick = () => ($("toast").hidden = true);
+let deviceFilter = "all",
+  deviceQuery = "";
+const openMore = new Set();
+const DEVICE_TOOLS_MIN = 5;
 function state(c) {
   if (c.type === "cover") {
     if (preview)
@@ -111,6 +117,12 @@ function state(c) {
 }
 const deviceSettingsButton = (c) =>
   `<button class="device-settings" data-device-settings="${c.id}" aria-label="Edit entity for ${esc(c.label)}" title="Change entity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 3-1 3-3 1-2 5 2 5 3 1 1 3h6l1-3 3-1 2-5-2-5-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
+const entityNote = (c) =>
+  preview
+    ? '<span class="muted small device-entity">Simulation only</span>'
+    : selected.bindings[c.id]
+      ? `<span class="muted small device-entity">${esc(selected.bindings[c.id])}</span>`
+      : `<button type="button" class="connect-entity" data-device-settings="${c.id}">Connect an entity</button>`;
 function drawControls() {
   if (!selected) return;
   updateRoomSummary();
@@ -146,7 +158,32 @@ function drawControls() {
         : undefined,
     );
   }
-  $("controls").innerHTML = selected.controls
+  const tools = selected.controls.length >= DEVICE_TOOLS_MIN;
+  $("device-tools").hidden = !tools;
+  for (const chip of document.querySelectorAll("[data-chip]"))
+    chip.setAttribute(
+      "aria-pressed",
+      String(chip.dataset.chip === deviceFilter),
+    );
+  const query = tools ? deviceQuery.trim().toLowerCase() : "";
+  const visible = selected.controls.filter((c) => {
+    const s = states.get(c.id);
+    if (
+      query &&
+      !`${c.label} ${c.room || ""} ${selected.bindings[c.id] || ""}`
+        .toLowerCase()
+        .includes(query)
+    )
+      return false;
+    const isOn = c.type === "cover" ? s.position > 0 : !!s.on;
+    if (!tools || deviceFilter === "all") return true;
+    if (deviceFilter === "on") return isOn;
+    if (deviceFilter === "off") return !isOn;
+    return !selected.bindings[c.id];
+  });
+  $("control-count").innerHTML =
+    `<span class="pill" data-live="${!preview}">${preview ? "Preview" : "Live"}</span>${visible.length === selected.controls.length ? selected.controls.length : `${visible.length} of ${selected.controls.length}`} ${selected.controls.length === 1 ? "device" : "devices"}`;
+  $("controls").innerHTML = visible
     .map((c) => {
       if (c.type === "cover") {
         const s = states.get(c.id),
@@ -155,7 +192,7 @@ function drawControls() {
             : coverFeatures(s.entity);
         const disabled = !preview && s.unavailable ? "disabled" : "";
         const label = esc(c.label);
-        return `<article class="light-card shade-card"><div class="device-heading"><div><div class="light-label">${label}</div><p class="light-state">${preview ? `${Math.round(s.position)}% open · preview` : esc(s.label)}</p></div>${deviceSettingsButton(c)}</div>
+        return `<article class="light-card shade-card" data-control="${c.id}"><div class="device-heading"><div><div class="light-label">${label}</div><p class="light-state">${preview ? `${Math.round(s.position)}% open · preview` : esc(s.label)}</p></div>${deviceSettingsButton(c)}</div>
           <div class="shade-actions">${["open", "stop", "close"]
             .filter(
               (action) =>
@@ -170,7 +207,7 @@ function drawControls() {
             )
             .join("")}</div>
           ${f.position && c.capabilities.includes("position") ? `<div class="shade-position"><label class="shade-position-label" for="shade-position-${c.id}"><span>Opening</span><output>${s.position === undefined ? "Unknown" : Math.round(s.position) + "%"}</output></label><input id="shade-position-${c.id}" style="--shade-fill:${s.position ?? c.defaultPosition ?? 0}%" type="range" min="0" max="100" step="1" value="${s.position ?? c.defaultPosition ?? 0}" data-position="${c.id}" aria-label="${label} opening" aria-valuetext="${s.position === undefined ? "Position unknown" : Math.round(s.position) + " percent open"}" ${disabled}><div class="shade-endpoints"><span>Closed</span><span>Open</span></div></div>` : ""}
-          <span class="muted small device-entity">${preview ? "Simulation only" : esc(selected.bindings[c.id] || "Connect an entity using the cog")}</span></article>`;
+          ${entityNote(c)}</article>`;
       }
       const s = states.get(c.id),
         f = preview
@@ -198,29 +235,39 @@ function drawControls() {
         ["Neutral", 4000],
         ["Cool", 6500],
       ].filter(([, k]) => k >= f.minKelvin && k <= f.maxKelvin);
-      return `<article class="light-card"><div class="light-heading"><div><div class="light-label">${label}</div><div class="light-state">${waiting ? "Waiting for confirmation…" : preview ? (s.on ? "On · preview" : "Off · preview") : esc(s.label)}</div></div><div class="device-card-actions">${deviceSettingsButton(c)}<button role="switch" aria-label="${label}" aria-checked="${s.on}" class="switch" data-toggle="${id}" ${disabled}>${s.on ? "On" : "Off"}</button></div></div>
-    ${c.capabilities.includes("brightness") && f.brightness ? slider("Brightness", "brightness", 1, 255, s.brightness) : ""}
-    ${
-      f.color
-        ? `<div class="color-controls"><label class="color-picker">Color <input type="color" aria-label="${label} color" data-color="${id}" value="${rgbToHex(s.rgb)}" ${disabled}></label><div class="color-presets" aria-label="Color presets for ${label}">${[
-            ["Red", "#ff4242"],
-            ["Green", "#46e881"],
-            ["Blue", "#557bff"],
-            ["Purple", "#c261ff"],
-          ]
-            .map(
-              ([name, color]) =>
-                `<button class="color-swatch" data-preset="${id}" data-hex="${color}" aria-label="Set ${label} to ${name.toLowerCase()}" style="--swatch:${color}" ${disabled}></button>`,
-            )
-            .join("")}</div></div>`
-        : ""
-    }
+      const extras = `${
+        f.color
+          ? `<div class="color-controls"><label class="color-picker">Color <input type="color" aria-label="${label} color" data-color="${id}" value="${rgbToHex(s.rgb)}" ${disabled}></label><div class="color-presets" aria-label="Color presets for ${label}">${[
+              ["Red", "#ff4242"],
+              ["Green", "#46e881"],
+              ["Blue", "#557bff"],
+              ["Purple", "#c261ff"],
+            ]
+              .map(
+                ([name, color]) =>
+                  `<button class="color-swatch" data-preset="${id}" data-hex="${color}" aria-label="Set ${label} to ${name.toLowerCase()}" style="--swatch:${color}" ${disabled}></button>`,
+              )
+              .join("")}</div></div>`
+          : ""
+      }
     ${f.temperature ? `<div class="white-controls">${slider(`White temperature <output>${temperature} K</output>`, "temperature", f.minKelvin, f.maxKelvin, temperature)}<div class="temperature-labels"><span>Warm · ${f.minKelvin} K</span><span>Cool · ${f.maxKelvin} K</span></div><div class="white-presets">${presets.map(([name, k]) => `<button data-white="${id}" data-kelvin="${k}" aria-label="Set ${label} to ${name.toLowerCase()} white" ${disabled}>${name}</button>`).join("")}</div><span class="muted small">${s.colorMode === "color_temp" ? "White temperature active" : "Select white to switch from color"}</span></div>` : ""}
     ${f.effects.length ? `<label class="light-option">Effect<select data-effect="${id}" aria-label="${label} effect" ${disabled}><option value="">Choose an effect</option>${f.effects.map((effect) => `<option value="${esc(effect)}" ${s.effect === effect ? "selected" : ""}>${esc(effect)}</option>`).join("")}</select></label>` : ""}
-    ${f.transition ? `<label class="light-option">Fade on next change<select data-transition="${id}" aria-label="${label} fade" ${disabled}>${[0, 0.5, 1, 2, 5, 10].map((t) => `<option value="${t}" ${t === (fades.get(id) || 0) ? "selected" : ""}>${t ? t + " seconds" : "Instant"}</option>`).join("")}</select></label>` : ""}
-    <span class="muted small device-entity">${preview ? "Simulation only" : esc(selected.bindings[id] || "Connect an entity using the cog")}</span></article>`;
+    ${f.transition ? `<label class="light-option">Fade on next change<select data-transition="${id}" aria-label="${label} fade" ${disabled}>${[0, 0.5, 1, 2, 5, 10].map((t) => `<option value="${t}" ${t === (fades.get(id) || 0) ? "selected" : ""}>${t ? t + " seconds" : "Instant"}</option>`).join("")}</select></label>` : ""}`;
+      const more = [
+        f.color && "Color",
+        f.temperature && "White",
+        f.effects.length && "Effects",
+        f.transition && "Fade",
+      ].filter(Boolean);
+      return `<article class="light-card" data-control="${id}"><div class="light-heading"><div><div class="light-label">${label}</div><div class="light-state">${waiting ? "Waiting for confirmation…" : preview ? (s.on ? "On · preview" : "Off · preview") : esc(s.label)}</div></div><div class="device-card-actions">${deviceSettingsButton(c)}<button role="switch" aria-label="${label}" aria-checked="${s.on}" class="switch" data-toggle="${id}" ${disabled}>${s.on ? "On" : "Off"}</button></div></div>
+    ${c.capabilities.includes("brightness") && f.brightness ? slider(`Brightness <output>${Math.round((s.brightness / 255) * 100)}%</output>`, "brightness", 1, 255, s.brightness) : ""}
+    ${more.length ? `<details class="more-controls" data-more="${id}" ${openMore.has(id) ? "open" : ""}><summary>${more.join(" · ")}</summary><div class="more-body">${extras}</div></details>` : ""}
+    ${entityNote(c)}</article>`;
     })
     .join("");
+  if (!visible.length)
+    $("controls").innerHTML =
+      '<div class="no-devices"><p>No devices match.</p><button type="button" data-clear-filters>Clear filters</button></div>';
   if (focusId)
     document
       .querySelector(`[data-${focusKind}="${focusId}"]${focusExtra}`)
@@ -321,6 +368,15 @@ $("controls").addEventListener("click", (e) => {
     openDeviceSettings(settings.dataset.deviceSettings);
     return;
   }
+  if (e.target.closest("[data-clear-filters]")) {
+    deviceFilter = "all";
+    deviceQuery = $("device-search").value = "";
+    drawControls();
+    return;
+  }
+  const card = e.target.closest("[data-control]");
+  if (card && !e.target.closest("button,input,select,summary,label,a"))
+    view?.highlight(card.dataset.control);
   const cover = e.target.closest("[data-cover]");
   if (cover) moveCover(cover.dataset.cover, cover.dataset.action);
   const toggle = e.target.closest("[data-toggle]"),
@@ -340,6 +396,24 @@ $("controls").addEventListener("click", (e) => {
       color_temp_kelvin: Number(white.dataset.kelvin),
     });
 });
+$("controls").addEventListener(
+  "toggle",
+  (e) => {
+    const id = e.target.dataset?.more;
+    if (id) e.target.open ? openMore.add(id) : openMore.delete(id);
+  },
+  true,
+);
+$("device-tools").addEventListener("click", (e) => {
+  const chip = e.target.closest("[data-chip]");
+  if (!chip) return;
+  deviceFilter = chip.dataset.chip;
+  drawControls();
+});
+$("device-search").addEventListener("input", (e) => {
+  deviceQuery = e.target.value;
+  drawControls();
+});
 $("controls").addEventListener("input", (e) => {
   if (e.target.dataset.position) {
     e.target.closest(".shade-position").querySelector("output").textContent =
@@ -350,6 +424,9 @@ $("controls").addEventListener("input", (e) => {
   if (e.target.dataset.temperature)
     e.target.closest("label").querySelector("output").textContent =
       e.target.value + " K";
+  if (e.target.dataset.brightness)
+    e.target.closest("label").querySelector("output").textContent =
+      Math.round((e.target.value / 255) * 100) + "%";
 });
 $("controls").addEventListener("change", (e) => {
   const input = e.target,
@@ -369,7 +446,7 @@ function drawModels() {
   $("models").innerHTML = models
     .map(
       (m) =>
-        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${m.controls.length} ${m.controls.length === 1 ? "device" : "devices"} · ${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "Area not assigned")}</small></button>`,
+        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${m.controls.filter((c) => m.bindings[c.id]).length}/${m.controls.length} connected · ${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "Area not assigned")}</small></button>`,
     )
     .join("");
 }
@@ -436,12 +513,24 @@ function roomSettingsDirty() {
 function updateRoomSummary() {
   if (!selected) return;
   const area = areas.find((a) => a.area_id === selected.areaId);
-  const assigned = selected.controls.filter(
-    (c) => selected.bindings[c.id],
-  ).length;
-  $("room-summary").textContent =
-    `${area ? "Area: " + area.name : selected.areaId ? "Assigned area unavailable" : "Area not assigned"} · ${assigned} of ${selected.controls.length} devices assigned`;
+  const total = selected.controls.length;
+  const bound = selected.controls.filter((c) => selected.bindings[c.id]).length;
+  const lights = selected.controls.filter((c) => c.type !== "cover");
+  const lit = lights.filter((c) => state(c).on).length;
+  const pct = total ? Math.round((bound / total) * 100) : 0;
+  $("room-summary").innerHTML = `${
+    lights.length
+      ? `<div class="status-item"><strong>${lit}</strong><span>${lit === 1 ? "light" : "lights"} on</span></div>`
+      : ""
+  }<div class="status-item"><span class="progress" role="img" aria-label="${bound} of ${total} devices connected"><i style="width:${pct}%"></i></span><span>${bound === total && total ? "All devices connected" : `${bound} of ${total} connected`}</span></div><div class="status-item status-area"><span>${area ? "Area: " + esc(area.name) : selected.areaId ? "Assigned area unavailable" : "No area assigned"}</span></div>${
+    bound < total
+      ? '<button type="button" class="primary" data-open-mappings>Connect devices</button>'
+      : ""
+  }`;
 }
+$("room-summary").addEventListener("click", (e) => {
+  if (e.target.closest("[data-open-mappings]")) openDeviceSettings();
+});
 function setRoomTab(tab, { keepEditor = false } = {}) {
   if (!["devices", "views", "settings"].includes(tab)) tab = "devices";
   if (
@@ -652,7 +741,10 @@ async function choose(id, tab = "devices") {
   $("view-hint").textContent =
     "Drag to orbit · Scroll to zoom · Select a device to highlight";
   $("scene-status").hidden = false;
+  $("scene-status").dataset.state = "loading";
   $("scene-status").textContent = "Loading your model…";
+  deviceFilter = "all";
+  deviceQuery = $("device-search").value = "";
   try {
     const { SceneView } = await import("./scene");
     if (current !== selection) return;
@@ -690,6 +782,7 @@ async function choose(id, tab = "devices") {
     drawControls();
   } catch (e) {
     if (current !== selection) return;
+    $("scene-status").dataset.state = "error";
     $("scene-status").textContent =
       "Could not display this model: " + e.message;
     toast("The model could not be displayed.");
@@ -732,6 +825,18 @@ for (const id of ["add-model", "empty-add"])
     $("import-error").textContent = "";
     $("import-dialog").showModal();
   };
+for (const dialog of document.querySelectorAll("dialog"))
+  dialog.addEventListener("click", (e) => {
+    if (e.target !== dialog) return;
+    const r = dialog.getBoundingClientRect();
+    if (
+      e.clientX < r.left ||
+      e.clientX > r.right ||
+      e.clientY < r.top ||
+      e.clientY > r.bottom
+    )
+      dialog.close();
+  });
 for (const button of document.querySelectorAll(".close"))
   button.onclick = () => button.closest("dialog").close();
 $("import-form").onsubmit = async (e) => {
@@ -763,48 +868,44 @@ $("import-form").onsubmit = async (e) => {
     $("import-submit").textContent = "Import room";
   }
 };
+const lightDomains = /^(light|switch)\./,
+  coverDomains = /^cover\./;
+const deviceIcon = (c) =>
+  c.type === "cover"
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h16M6 4v10M18 4v10M6 8h12M6 11h12"/><path d="M12 14v5"/><circle cx="12" cy="20" r="1"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/></svg>';
+const capabilityText = (c) =>
+  c.type === "cover"
+    ? "Shade · open, close, position"
+    : c.capabilities.includes("brightness")
+      ? "Light · dimming, color, white"
+      : "Light · on/off";
+const pickerContext = (controlId) => {
+  const control = selected.controls.find((c) => c.id === controlId);
+  return {
+    control,
+    entities: status.entities,
+    selectedId: selected.bindings[controlId] || "",
+    pattern: control.type === "cover" ? coverDomains : lightDomains,
+  };
+};
+const pickerFor = (c) =>
+  pickerHTML({ ...pickerContext(c.id), enabled: status.connected });
+const mappingRow = (c) =>
+  `<div class="mapping" data-mapping="${c.id}"><div class="mapping-head"><span class="mapping-icon">${deviceIcon(c)}</span><div class="mapping-title"><div class="mapping-name">${esc(c.label)}</div><div class="mapping-sub">${esc(c.room ? c.room + " · " : "")}${capabilityText(c)}</div></div><button type="button" class="icon-btn" data-highlight="${c.id}" aria-label="Show ${esc(c.label)} in the room" title="Show in room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></button></div>${pickerFor(c)}</div>`;
 function drawMappings(controlId) {
+  $("settings-eyebrow").textContent = selected.title;
   $("settings-title").textContent = controlId
-    ? selected.controls.find((c) => c.id === controlId).label + " · Entity"
-    : selected.title + " · Devices";
+    ? "Connect " + selected.controls.find((c) => c.id === controlId).label
+    : "Connect devices";
   $("export-model").hidden = $("delete-model").hidden = !!controlId;
-  $("mapping-note").textContent = status.connected
-    ? "Choose an entity for each light or shade. Preview mode never sends real commands."
-    : "Home Assistant is not connected. You can preview the model now; entity mapping becomes available inside the installed add-on.";
+  $("mapping-note").hidden = status.connected;
+  $("mapping-note").textContent =
+    "Home Assistant isn’t connected, so devices can only be previewed. Open 3D Rooms from the Home Assistant sidebar to choose entities.";
   $("mappings").innerHTML = selected.controls
     .filter((c) => !controlId || c.id === controlId)
-    .map(
-      (c) =>
-        `<div class="mapping"><div class="mapping-head"><label for="map-${c.id}">${esc(c.label)}</label><button data-highlight="${c.id}">Highlight</button></div><input type="search" aria-label="Find entity for ${esc(c.label)}" placeholder="${c.type === "cover" ? "Find a cover…" : "Find a light or switch…"}" data-filter="${c.id}" ${status.connected ? "" : "disabled"}><select id="map-${c.id}" data-map="${c.id}" ${status.connected ? "" : "disabled"}>${options(c, "")}</select><p class="muted">${esc(c.room || "This model")} · ${c.type === "cover" ? "Opening height, open/close and stop when supported" : c.capabilities.includes("brightness") ? "On/off, brightness, color and white temperature when supported" : "On/off"}</p></div>`,
-    )
+    .map(mappingRow)
     .join("");
-}
-function options(c, filter) {
-  const saved = selected.bindings[c.id],
-    entities = status.entities
-      .filter((e) =>
-        (c.type === "cover" ? /^cover\./ : /^(light|switch)\./).test(
-          e.entity_id,
-        ),
-      )
-      .filter(
-        (e) =>
-          `${e.attributes?.friendly_name} ${e.entity_id}`
-            .toLowerCase()
-            .includes(filter.toLowerCase()) || e.entity_id === saved,
-      );
-  return (
-    `<option value="">Not connected</option>` +
-    (saved && !entities.some((e) => e.entity_id === saved)
-      ? `<option selected value="${esc(saved)}">${esc(saved)} (missing)</option>`
-      : "") +
-    entities
-      .map(
-        (e) =>
-          `<option value="${esc(e.entity_id)}" ${saved === e.entity_id ? "selected" : ""}>${esc(e.attributes?.friendly_name || e.entity_id)} — ${esc(e.entity_id)}</option>`,
-      )
-      .join("")
-  );
 }
 let mappingControlId;
 function openDeviceSettings(controlId) {
@@ -828,31 +929,32 @@ $("mappings").addEventListener("click", (e) => {
     $("settings-dialog").close();
   }
 });
-$("mappings").addEventListener("input", (e) => {
-  if (e.target.dataset.filter) {
-    const c = selected.controls.find((c) => c.id === e.target.dataset.filter);
-    $("map-" + c.id).innerHTML = options(c, e.target.value);
-  }
-});
-$("mappings").addEventListener("change", async (e) => {
-  if (!e.target.dataset.map) return;
-  const el = e.target;
-  el.disabled = true;
+async function saveBinding(controlId, entityId) {
   $("mapping-error").textContent = "";
   try {
     const result = await api(`models/${selected.id}/bindings`, {
       method: "PUT",
-      body: JSON.stringify({ controlId: el.dataset.map, entityId: el.value }),
+      body: JSON.stringify({ controlId, entityId }),
     });
     selected.bindings = result.bindings;
-    toast("Entity mapping saved.");
+    toast(entityId ? "Entity connected." : "Entity disconnected.");
     drawControls();
   } catch (e) {
     $("mapping-error").textContent = e.message;
-    el.value = selected.bindings[el.dataset.map] || "";
-  } finally {
-    el.disabled = false;
   }
+  const row = $("mappings").querySelector(
+    `[data-mapping="${CSS.escape(controlId)}"] .entity-picker`,
+  );
+  const control = selected.controls.find((c) => c.id === controlId);
+  if (row && control) row.outerHTML = pickerFor(control);
+}
+const entityPicker = initEntityPicker({
+  root: $("mappings"),
+  context: pickerContext,
+  onSelect: saveBinding,
+});
+$("settings-dialog").addEventListener("cancel", (e) => {
+  if (entityPicker.closeOpen()) e.preventDefault();
 });
 $("delete-model").onclick = () => $("delete-dialog").showModal();
 $("confirm-delete").onclick = async () => {
@@ -896,6 +998,11 @@ function updateStatus(s) {
         : s.mode === "preview"
           ? "Local preview · no real devices"
           : "Home Assistant disconnected";
+  $("connection").dataset.state = s.connected
+    ? "connected"
+    : s.mode === "preview" || s.mode === "simulation"
+      ? "preview"
+      : "offline";
   drawControls();
 }
 try {
