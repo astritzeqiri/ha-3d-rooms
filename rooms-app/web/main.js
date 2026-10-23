@@ -261,6 +261,7 @@ function drawModels() {
 async function choose(id) {
   const current = ++selection;
   selected = models.find((m) => m.id === id);
+  const model = selected;
   const url = new URL(location.href);
   url.searchParams.set("model", id);
   history.replaceState(null, "", url);
@@ -285,6 +286,7 @@ async function choose(id) {
   $("scene-status").textContent = "Loading your model…";
   try {
     const { SceneView } = await import("./scene");
+    if (current !== selection) return;
     view ??= new SceneView(
       $("viewport"),
       (id) => {
@@ -293,12 +295,20 @@ async function choose(id) {
       },
       { mode: viewMode },
     );
+    $("scene-status").textContent = "Downloading your room…";
     const sceneURL = native
-      ? await native.sceneURL(id)
+      ? await native.sceneURL(model)
       : new URL(`api/models/${id}/scene.glb`, location.href).href;
+    if (current !== selection) {
+      if (native) URL.revokeObjectURL(sceneURL);
+      return;
+    }
+    $("scene-status").textContent = "Preparing the 3D view…";
+    await new Promise(requestAnimationFrame);
     let loaded;
     try {
-      loaded = await view.load(selected, sceneURL);
+      if (current !== selection) return;
+      loaded = await view.load(model, sceneURL);
     } finally {
       if (native) URL.revokeObjectURL(sceneURL);
     }

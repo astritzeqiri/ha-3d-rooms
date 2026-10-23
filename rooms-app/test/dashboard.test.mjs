@@ -150,7 +150,7 @@ test("native integration transport uses HA session authentication and releases p
   assert.equal(model.id, "kitchen");
   assert.deepEqual(calls, [
     { type: "three_d_rooms/request", operation: "models" },
-    "/api/three_d_rooms/models/kitchen/scene.glb",
+    "/api/three_d_rooms/models/kitchen/scene.glb?v=legacy",
   ]);
   assert.ok(sceneURL.startsWith("blob:"));
   release();

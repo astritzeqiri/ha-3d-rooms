@@ -16,6 +16,14 @@ try {session=JSON.parse(await readFile(file,'utf8'));} catch {
   session={...token,username:'rooms-test',password};
   await writeFile(file,JSON.stringify(session),{mode:0o600});
 }
+// Refresh the disposable test session before repeated local runs.
+if (session.refresh_token) {
+ const response=await fetch(base+'/auth/token',{method:'POST',body:new URLSearchParams({grant_type:'refresh_token',refresh_token:session.refresh_token,client_id:base+'/'})});
+ const refreshed=await response.json();
+ assert.ok(response.ok && refreshed.access_token,'refresh local test session');
+ session.access_token=refreshed.access_token;
+ await writeFile(file,JSON.stringify(session),{mode:0o600});
+}
 const request=async(path,options={})=>{
  const res=await fetch(base+path,{...options,headers:{Authorization:`Bearer ${session.access_token}`,...options.headers}});
  let result; try {result=await res.json();} catch {result={};}
@@ -65,6 +73,13 @@ try {
  const scene=await fetch(base+'/api/three_d_rooms/models/kitchen/scene.glb',{headers:{Authorization:`Bearer ${session.access_token}`}});
  assert.equal(scene.status,200);
  assert.ok((await scene.arrayBuffer()).byteLength>1000);
+ assert.equal(scene.headers.get('content-encoding'),'gzip');
+ const etag=scene.headers.get('etag');
+ const cached=await fetch(base+'/api/three_d_rooms/models/kitchen/scene.glb',{headers:{Authorization:`Bearer ${session.access_token}`,'If-None-Match':etag}});
+ assert.equal(cached.status,304);
+ assert.equal((await cached.arrayBuffer()).byteLength,0);
+ const cachedDenied=await fetch(base+'/api/three_d_rooms/models/kitchen/scene.glb',{headers:{'If-None-Match':etag}});
+ assert.equal(cachedDenied.status,401,'cache validation must still require authentication');
  const status=await call({type:'three_d_rooms/request',operation:'status'});
  const rgb=status.entities.find(e=>e.entity_id.startsWith('light.') && e.attributes.supported_color_modes?.includes('hs'));
  assert.ok(rgb,'built-in demo RGB light exists');

@@ -93,6 +93,7 @@ export class SceneView {
     });
   }
   async load(model, url) {
+    const started = performance.now();
     const generation = ++this.generation;
     const gltf = await new GLTFLoader().loadAsync(url);
     if (generation !== this.generation) {
@@ -176,7 +177,12 @@ export class SceneView {
         .clone()
         .add(new THREE.Vector3(size * 0.7, size * 0.65, size * 0.7))
         .toArray();
+    const prepared = performance.now();
     this.setView(this.options.mode);
+    this.renderer.domElement.dataset.prepareMs = Math.round(prepared - started);
+    this.renderer.domElement.dataset.firstRenderMs = Math.round(
+      performance.now() - prepared,
+    );
     return true;
   }
   setView(mode) {

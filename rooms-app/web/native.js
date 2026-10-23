@@ -45,14 +45,8 @@ export async function connectNative() {
         model: match[1],
       });
     },
-    async sceneURL(id) {
-      return URL.createObjectURL(
-        await (
-          await response(
-            `/api/three_d_rooms/models/${encodeURIComponent(id)}/scene.glb`,
-          )
-        ).blob(),
-      );
+    async sceneURL(model) {
+      return URL.createObjectURL(await bridge.scene(model));
     },
     async exportURL(id) {
       return URL.createObjectURL(

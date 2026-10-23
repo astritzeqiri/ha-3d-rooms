@@ -90,7 +90,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._unsubModels?.();
     this._unsubModels = null;
     this._message.hidden = false;
-    this._message.querySelector("span").textContent = "Loading your floor…";
+    this._message.querySelector("span").textContent = "Downloading your room…";
     this._message.querySelector("button").hidden = true;
     try {
       const connection = await connectModel(
@@ -102,6 +102,13 @@ export class ThreeDRoomsCard extends HTMLElement {
       if (connection.session)
         document.cookie = `ingress_session=${connection.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`;
       const { model, sceneURL, release } = await connection.load();
+      if (generation !== this._generation) {
+        release?.();
+        return;
+      }
+      this._message.querySelector("span").textContent =
+        "Preparing the 3D view…";
+      await new Promise(requestAnimationFrame);
       if (generation !== this._generation) {
         release?.();
         return;

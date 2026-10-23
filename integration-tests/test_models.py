@@ -109,6 +109,21 @@ class PackageTests(unittest.TestCase):
         self.store.remove("kitchen")
         self.assertEqual(models.ModelStore(self.temp.name).open().catalog(), [])
 
+    def test_compressed_scene_cache_preserves_original_and_revision(self):
+        import gzip
+
+        self.store.install(package())
+        before = self.store.catalog()[0]["sceneRevision"]
+        raw = self.store.scene_bytes("kitchen")
+        compressed = self.store.scene_bytes("kitchen", True)
+        self.assertEqual(gzip.decompress(compressed), raw)
+        self.assertEqual(self.store.scene_bytes("kitchen", True), compressed)
+        self.store.bind("kitchen", "ceiling", "light.kitchen")
+        self.assertEqual(self.store.catalog()[0]["sceneRevision"], before)
+        self.store.remove("kitchen")
+        self.store.install(package())
+        self.assertNotEqual(self.store.catalog()[0]["sceneRevision"], before)
+
     def test_expansion_cap_and_duplicate_archive_entries(self):
         with patch.object(models, "MAX_EXPANDED", 5):
             with self.assertRaises(ValueError):

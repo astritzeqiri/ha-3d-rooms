@@ -251,10 +251,37 @@ class ModelAssetView(HomeAssistantView):
         runtime = runtime_for(request, self.hass)
         try:
             if asset == "scene.glb":
+                revision = runtime.store.revision(model_id)
+                # Authentication/admin checks precede all cache revalidation.
+                headers = {
+                    "Cache-Control": "private, no-cache",
+                    "Vary": "Authorization, Accept-Encoding",
+                    "ETag": f'W/"{revision}"',
+                    "X-Content-Type-Options": "nosniff",
+                }
+                if request.headers.get("If-None-Match") in (headers["ETag"], "*"):
+                    return web.Response(status=304, headers=headers)
+                compressed = False
+                for encoding in (
+                    request.headers.get("Accept-Encoding", "").lower().split(",")
+                ):
+                    parts = [p.strip() for p in encoding.split(";")]
+                    if parts[0] != "gzip":
+                        continue
+                    try:
+                        compressed = all(
+                            float(p[2:]) > 0 for p in parts[1:] if p.startswith("q=")
+                        )
+                    except ValueError:
+                        compressed = False
                 data = await runtime.work(
-                    lambda: runtime.store.scene_path(model_id).read_bytes()
+                    runtime.store.scene_bytes, model_id, compressed
                 )
-                content_type, filename = "model/gltf-binary", "scene.glb"
+                if compressed:
+                    headers["Content-Encoding"] = "gzip"
+                return web.Response(
+                    body=data, content_type="model/gltf-binary", headers=headers
+                )
             elif asset == "export.zip":
                 data = await runtime.work(runtime.store.export, model_id)
                 content_type, filename = "application/zip", f"{model_id}.zip"

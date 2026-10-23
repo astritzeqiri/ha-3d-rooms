@@ -1,6 +1,6 @@
 # 3D Rooms
 
-**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.4.0.
+**One HACS integration for your 3D rooms, model library, entity mappings, and dashboard card.** No separate add-on, container, Ingress session, or access token is required in version 0.4.1.
 
 Upload a prepared room or floor ZIP, connect its declared lights to Home Assistant light/switch entities, and view it on a dashboard. Click the physical modeled fixture to open Home Assistant's own light controls. Brightness, RGB color and white temperature follow the entity's reported state. All walls stay visible; a minimum ambient level keeps unlit rooms readable.
 
@@ -97,3 +97,9 @@ From `rooms-app`, run `npm ci`, `npm run dev`, `npm test`, and `npm run build`. 
 Run `python3 -m unittest discover -s integration-tests -v` from the repository root. The isolated runtime checks are described in `VALIDATION.md`.
 
 The legacy card can temporarily use an explicit `addon: YOUR_ADDON_SLUG` while migrating. New installations should omit that setting and use the native integration.
+
+## Model loading (0.4.1)
+
+Scene downloads are gzip-compressed and use private authenticated ETag revalidation. A session cache shared by the sidebar manager and dashboard deduplicates requests for the same model revision (up to 64 MB retained, five-minute expiry). Replaced models get a new revision; failed downloads can retry. Scene files remain authenticated; the original model and textures are unchanged. The server creates a compressed derivative beside each original scene on first use.
+
+The first load still transfers the model and prepares it for the GPU. Subsequent visits reuse it when possible. Existing uploaded rooms do not need to be uploaded again after updating.

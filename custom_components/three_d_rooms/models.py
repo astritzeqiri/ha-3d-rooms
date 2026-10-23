@@ -10,6 +10,8 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from io import BytesIO
 import json
+import gzip
+import hashlib
 import math
 import os
 from pathlib import Path
@@ -263,9 +265,16 @@ class ModelStore:
             self.models = models
         return self
 
+    def revision(self, model_id):
+        return hashlib.sha256(self.find(model_id)["folder"].encode()).hexdigest()[:24]
+
     def catalog(self):
         return [
-            {k: deepcopy(v) for k, v in m.items() if k != "folder"} for m in self.models
+            {
+                **{k: deepcopy(v) for k, v in m.items() if k != "folder"},
+                "sceneRevision": self.revision(m["id"]),
+            }
+            for m in self.models
         ]
 
     def find(self, model_id):
@@ -332,6 +341,22 @@ class ModelStore:
 
     def scene_path(self, model_id):
         return self.directory / "models" / self.find(model_id)["folder"] / "scene.glb"
+
+    def scene_bytes(self, model_id, compressed=False):
+        """Cache a compressed derivative, keeping the original GLB untouched."""
+        path = self.scene_path(model_id)
+        if not compressed:
+            return path.read_bytes()
+        cached = path.with_suffix(".glb.gz")
+        if not cached.exists():
+            data = gzip.compress(path.read_bytes(), compresslevel=4, mtime=0)
+            try:
+                temporary = cached.with_suffix(".gz.tmp")
+                temporary.write_bytes(data)
+                os.replace(temporary, cached)
+            except OSError:
+                return data
+        return cached.read_bytes()
 
     def export(self, model_id):
         model = self.find(model_id)

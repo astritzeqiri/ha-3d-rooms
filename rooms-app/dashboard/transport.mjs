@@ -1,3 +1,4 @@
+import { sceneBlob } from "../shared/scene-download.mjs";
 export async function connectModel(hass, config, origin, fetcher = fetch) {
   if (!config.preview_url && !config.addon) {
     if (hass.user?.is_admin === false)
@@ -14,14 +15,7 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
           throw new Error(
             "Model not found. Upload it in the 3D Rooms sidebar first.",
           );
-        const response = await hass.fetchWithAuth(
-          `/api/three_d_rooms/models/${encodeURIComponent(model.id)}/scene.glb`,
-        );
-        if (!response.ok)
-          throw new Error(
-            "Could not load your room. Check your login and the 3D Rooms integration.",
-          );
-        const sceneURL = URL.createObjectURL(await response.blob());
+        const sceneURL = URL.createObjectURL(await sceneBlob(hass, model));
         return {
           model,
           sceneURL,

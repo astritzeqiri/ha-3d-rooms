@@ -23,3 +23,12 @@ Implemented a local Python integration, one-entry config flow, administrator-onl
 - User-managed HA backup/restore of the library. Storage lives under `config/.storage/three_d_rooms/` and must be included in backups.
 
 The local integration test uses disposable credentials saved only in `/tmp`; neither these nor private model assets are committed. `integration-tests/live-check.mjs` explicitly targets only `127.0.0.1:18123` and exercises the disposable test instance. It is not a command to run against production.
+
+## Loading regression fix — 0.4.1
+
+- Found the integration serving every scene with `Cache-Control: no-store`. The kitchen GLB is 33,983,588 bytes; its ZIP upload size is smaller than its actual scene transfer.
+- Compressed responses transfer 16,660,908 bytes (51% less) without changing geometry or textures. A local warm conditional request returns 304 with zero body bytes (10 ms in one isolated run). These are local transport measurements, not an end-to-end speed claim for the user’s network.
+- Cache revalidation still requires authentication; anonymous requests with a valid ETag return 401. Gzip opt-out returns the original bytes.
+- Client tests verify concurrent/shared downloads, isolation by HA connection, revision invalidation, mapping-only reuse, and failure/retry. The sidebar and dashboard share bytes through the native panel bridge.
+- Browser timings on the local test machine were approximately 112 ms to prepare the GLB and 190 ms for its first render. GPU/browser performance elsewhere will vary.
+- Original files and mappings remain unchanged; compressed derivatives are generated for existing rooms without re-uploading.
