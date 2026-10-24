@@ -1,5 +1,6 @@
 import { coverFeatures, coverState, coverCommand } from "../shared/cover.mjs";
 import "./style.css";
+import { mountCameraNavigation } from "./camera-navigation.js";
 import { initDashboardEditor } from "./dashboard-editor.js";
 import { connectNative } from "./native.js";
 import { initEntityPicker, pickerHTML } from "./entity-picker.js";
@@ -49,6 +50,8 @@ let models = [],
   pending = new Set(),
   simulated = new Map(),
   selection = 0;
+const cameraNavigation = mountCameraNavigation($("viewport"), () => view);
+cameraNavigation.hidden = true;
 const fades = new Map();
 let viewMode =
   new URL(location.href).searchParams.get("view") === "floor"
@@ -707,6 +710,7 @@ async function choose(id, tab = "devices") {
       delete view.options[key];
     view.options.mode = viewMode;
   }
+  cameraNavigation.hidden = true;
   const current = ++selection;
   selected = models.find((m) => m.id === id);
   const model = selected;
@@ -779,6 +783,7 @@ async function choose(id, tab = "devices") {
     }
     if (!loaded || current !== selection) return;
     $("scene-status").hidden = true;
+    cameraNavigation.hidden = false;
     drawControls();
   } catch (e) {
     if (current !== selection) return;
@@ -967,6 +972,7 @@ $("confirm-delete").onclick = async () => {
     $("settings-dialog").close();
     models = await api("models");
     selected = null;
+    cameraNavigation.hidden = true;
     view?.clear();
     if (models.length) await choose(models[0].id);
     else {

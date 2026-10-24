@@ -8,7 +8,7 @@ const svgElement = (tag, attributes = {}) => {
 };
 const points = (vertices) => vertices.map((p) => p.join(",")).join(" ");
 const label = (name) => name.replaceAll("-", " ");
-/** Compact camera-linked cube. The selector provides larger targets for every direction. */
+/** Camera-linked cube: click to snap, drag to orbit, or use arrow keys. */
 export function mountCameraNavigation(
   container,
   getScene,
@@ -32,24 +32,6 @@ export function mountCameraNavigation(
     '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v11h5v-6h4v6h5V10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   reset.setAttribute("aria-label", "Reset camera view");
   reset.title = "Reset and fit room";
-  const picker = document.createElement("select");
-  picker.className = "cube-view-picker";
-  picker.setAttribute("aria-label", "Choose camera view");
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = "Views";
-  picker.append(placeholder);
-  for (const kind of ["face", "edge", "corner"]) {
-    const group = document.createElement("optgroup");
-    group.label = kind[0].toUpperCase() + kind.slice(1) + "s";
-    for (const direction of CUBE_DIRECTIONS.filter((d) => d.kind === kind)) {
-      const option = document.createElement("option");
-      option.value = direction.name;
-      option.textContent = label(direction.name);
-      group.append(option);
-    }
-    picker.append(group);
-  }
   function select(name) {
     const scene = getScene();
     if (!scene?.model) return;
@@ -57,10 +39,74 @@ export function mountCameraNavigation(
     onSelect();
   }
   reset.onclick = () => select("reset");
-  picker.onchange = () => {
-    if (picker.value) select(picker.value);
-    picker.value = "";
-  };
+  cube.setAttribute("tabindex", "0");
+  cube.setAttribute(
+    "aria-label",
+    "View cube: drag or use arrow keys to rotate; click a face, edge or corner to snap",
+  );
+  let drag,
+    suppressClick = false;
+  cube.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || drag || !getScene()?.model) return;
+    event.preventDefault();
+    drag = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      moved: false,
+      view: event.target.closest("[data-view]")?.dataset.view,
+    };
+    suppressClick = false;
+    cube.setPointerCapture(event.pointerId);
+    cube.focus({ preventScroll: true });
+  });
+  cube.addEventListener("pointermove", (event) => {
+    if (!drag || event.pointerId !== drag.id) return;
+    const dx = event.clientX - drag.x,
+      dy = event.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 4) return;
+    drag.moved = true;
+    cube.classList.add("dragging");
+    getScene()?.rotateCamera(dx * 0.012, dy * 0.012);
+    drag.x = event.clientX;
+    drag.y = event.clientY;
+  });
+  function finish(event) {
+    if (!drag || event.pointerId !== drag.id) return;
+    const previous = drag;
+    drag = undefined;
+    suppressClick = true;
+    cube.classList.remove("dragging");
+    if (cube.hasPointerCapture(event.pointerId))
+      cube.releasePointerCapture(event.pointerId);
+    if (event.type === "pointerup" && !previous.moved && previous.view)
+      select(previous.view);
+  }
+  cube.addEventListener("pointerup", finish);
+  cube.addEventListener("pointercancel", finish);
+  cube.addEventListener("lostpointercapture", finish);
+  // Pointer capture retargets click to the SVG; suppress it after a drag or tap.
+  cube.addEventListener(
+    "click",
+    (event) => {
+      if (suppressClick && event.detail !== 0) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    },
+    true,
+  );
+  cube.addEventListener("keydown", (event) => {
+    const delta = {
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1],
+    }[event.key];
+    if (!delta) return;
+    event.preventDefault();
+    getScene()?.rotateCamera(delta[0] * 0.12, delta[1] * 0.12);
+  });
   let lastBasis = "";
   function draw(basis) {
     const key = JSON.stringify(basis);
@@ -153,7 +199,7 @@ export function mountCameraNavigation(
       (
         Array.from(cube.querySelectorAll("[data-view]")).find(
           (el) => el.dataset.view === focused,
-        ) || picker
+        ) || cube
       ).focus({ preventScroll: true });
   }
   container.addEventListener("room-camera-orientation", (event) =>
@@ -164,7 +210,7 @@ export function mountCameraNavigation(
     right: [0.7071, 0, -0.7071],
     up: [-0.40825, 0.8165, -0.40825],
   });
-  controls.append(reset, picker);
+  controls.append(reset);
   nav.append(cube, controls);
   container.append(nav);
   return nav;

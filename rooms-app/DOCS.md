@@ -41,3 +41,7 @@ Room settings can rename the room and assign an existing Home Assistant area. Re
 ## Form fields — 0.11.1
 
 Room-name and plain text/number inputs now match the dark form controls, with padded 44px fields, rounded borders and consistent room-settings spacing. Update the HACS integration, restart Home Assistant and refresh your browser.
+
+## Camera navigation (0.15.0)
+
+The room viewer has a compact, always-visible view cube. Drag it to rotate the room or use arrow keys when focused. Click a face, edge or corner to snap to that angle; Home resets and fits the room. The cube remains visible while editing saved views, including when Advanced camera settings is closed.

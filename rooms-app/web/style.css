@@ -1630,7 +1630,7 @@ body.dashboard-editing #dashboard {
   z-index: 5;
   top: 12px;
   left: 12px;
-  width: 104px;
+  width: 72px;
   display: grid;
   gap: 0;
   padding: 0;
@@ -1641,10 +1641,12 @@ body.dashboard-editing #dashboard {
 }
 .camera-navigation .view-cube {
   display: block;
-  width: 104px;
-  height: 104px;
+  width: 72px;
+  height: 72px;
   overflow: visible;
   filter: drop-shadow(0 3px 4px #0004);
+  touch-action: none;
+  cursor: grab;
 }
 .cube-face {
   fill: #d9e1e7;
@@ -1674,7 +1676,7 @@ body.dashboard-editing #dashboard {
   pointer-events: none;
 }
 .cube-region {
-  cursor: pointer;
+  cursor: inherit;
   outline: none;
 }
 .cube-region polygon {
@@ -1722,12 +1724,11 @@ body.dashboard-editing #dashboard {
 }
 .camera-navigation .cube-controls {
   display: grid;
-  grid-template-columns: 32px 64px;
+  grid-template-columns: 28px;
   justify-content: center;
   gap: 4px;
 }
-.camera-navigation .camera-home,
-.camera-navigation .cube-view-picker {
+.camera-navigation .camera-home {
   box-sizing: border-box;
   min-width: 0;
   width: 100%;
@@ -1749,24 +1750,27 @@ body.dashboard-editing #dashboard {
   align-items: center;
   justify-content: center;
 }
-.camera-navigation .cube-view-picker {
-  padding-left: 8px;
-}
-.camera-navigation .camera-home:hover,
-.camera-navigation .cube-view-picker:hover {
+.camera-navigation .camera-home:hover {
   color: #fff;
   border-color: #2dd4bf;
 }
 @media (pointer: coarse) {
-  .camera-navigation .camera-home,
-  .camera-navigation .cube-view-picker {
+  .camera-navigation .camera-home {
     height: 44px;
     min-height: 44px;
   }
   .camera-navigation .cube-controls {
-    grid-template-columns: 44px 64px;
+    grid-template-columns: 44px;
     gap: 0;
   }
+}
+
+.view-cube.dragging {
+  cursor: grabbing;
+}
+.view-cube:focus-visible {
+  outline: 2px solid var(--accent);
+  border-radius: 8px;
 }
 
 /* Responsive */

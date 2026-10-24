@@ -1,3 +1,9 @@
+# 0.15.0
+
+- Restore the camera-linked navigation cube in the main room viewer and keep it visible when creating or editing saved views, including with Advanced camera settings closed.
+- Make the cube smaller (72px), remove the Views picker, and add drag-to-rotate with mouse or touch. Arrow keys also rotate; clicking faces, edges or corners still snaps the view, and Home resets it. Dragging preserves camera distance, zoom and center.
+- No storage, API or backend changes.
+
 # 0.14.1
 
 - Fix the entity list in the connect-devices dialog being clipped to about one item in the single-device dialog. The list now floats over the dialog, matches the field's width, can extend past the dialog edge, opens upward when there is no room below, and no longer makes the dialog resize or jump.

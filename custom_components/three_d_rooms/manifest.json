@@ -1,7 +1,7 @@
 {
   "domain": "three_d_rooms",
   "name": "3D Rooms",
-  "version": "0.14.1",
+  "version": "0.15.0",
   "codeowners": [
     "@astritzeqiri"
   ],

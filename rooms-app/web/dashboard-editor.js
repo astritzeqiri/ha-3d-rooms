@@ -1,4 +1,3 @@
-import { mountCameraNavigation } from "./camera-navigation.js";
 import { componentYaml, validateComponent } from "../shared/component.mjs";
 
 /** Edit the camera in the same scene that will be saved to the dashboard. */
@@ -11,8 +10,6 @@ export function initDashboardEditor({
 }) {
   const $ = (id) => document.getElementById(id);
   const panel = $("dashboard-panel");
-  const navigation = mountCameraNavigation($("viewport"), scene);
-  navigation.hidden = true;
   let current,
     draftId,
     busy = false,
@@ -118,7 +115,6 @@ export function initDashboardEditor({
       return false;
     scene().options.onCameraChange = undefined;
     panel.hidden = true;
-    navigation.hidden = true;
     document.body.classList.remove("dashboard-editing");
     $("viewport").style.height = "";
     $("dashboard").setAttribute("aria-expanded", "false");
@@ -157,7 +153,6 @@ export function initDashboardEditor({
       );
     panel.hidden = false;
     $("dashboard-advanced").open = false;
-    navigation.hidden = true;
     scene().options.allowRotate = true;
     applying = true;
     Object.assign(scene().options, current);
@@ -278,9 +273,6 @@ export function initDashboardEditor({
       /* Thumbnails are optional and remain private to this browser. */
     }
   }
-  $("dashboard-advanced").addEventListener("toggle", () => {
-    navigation.hidden = panel.hidden || !$("dashboard-advanced").open;
-  });
   $("use-saved-view").onclick = () => {
     try {
       window.dispatchEvent(

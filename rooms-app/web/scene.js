@@ -265,6 +265,25 @@ export class SceneView {
     this.setView(preset.view);
     this.options.onCameraChange?.({ source: "preset" });
   }
+  rotateCamera(horizontal, vertical) {
+    if (!this.model || !this.orbit.enabled) return;
+    // Use the same up-axis as OrbitControls, including top/bottom presets.
+    const rotation = new THREE.Quaternion().setFromUnitVectors(
+      this.camera.up,
+      new THREE.Vector3(0, 1, 0),
+    );
+    const offset = this.camera.position
+      .clone()
+      .sub(this.orbit.target)
+      .applyQuaternion(rotation);
+    const spherical = new THREE.Spherical().setFromVector3(offset);
+    spherical.theta -= horizontal;
+    spherical.phi -= vertical;
+    spherical.phi = Math.max(1e-6, Math.min(Math.PI - 1e-6, spherical.phi));
+    offset.setFromSpherical(spherical).applyQuaternion(rotation.invert());
+    this.camera.position.copy(this.orbit.target).add(offset);
+    this.orbit.update();
+  }
   fitFloor() {
     if (!this.bounds) return;
     const { width, height } = this.container.getBoundingClientRect();

@@ -45,7 +45,7 @@ Use the actual model ID from your room package, or copy a ready-made configurati
 - `view: front` is the angled perspective. `view: floor` is orthographic.
 - `tilt` is degrees away from overhead (0–180). `heading` rotates around the floor's vertical axis.
 - `zoom` scales the room (0.01–100; default 1).
-- **Create dashboard view** opens the shared camera editor beside your room. Choose a preset or drag, pan and zoom, name the view, and choose **Save view → Use in dashboard**. Precise camera controls, navigation cube and card height are under **Advanced camera settings**. Keep the generated `camera` object when copying YAML to preserve framing. Older configurations without `camera` continue to use automatic fitting.
+- **Create dashboard view** opens the shared camera editor beside your room. Choose a preset or drag, pan and zoom, name the view, and choose **Save view → Use in dashboard**. The navigation cube stays visible in the room viewer. Precise camera controls and card height are under **Advanced camera settings**. Keep the generated `camera` object when copying YAML to preserve framing. Older configurations without `camera` continue to use automatic fitting.
 - `height` is pixels (180–1600). Optional `title` adds a heading.
 - `interactive: true` enables camera movement. Fixtures remain clickable when camera movement is locked.
 - The room reads entity mappings from the integration; there are no floating entity icons.
@@ -150,7 +150,7 @@ Update **3D Rooms** in HACS, restart Home Assistant, then refresh the browser. *
 
 ### Editing the camera directly
 
-The saved view preview supports dragging to rotate, scrolling to zoom and right-dragging to pan. These changes update its fields and exported configuration; choose **Save view** to persist them. The shared camera editor has a compact, camera-linked view cube under Advanced camera settings. Click a face for a straight-on view, an edge for a two-axis diagonal, or a corner for a three-axis diagonal. The cube rotates with the room. The home button fits and resets the room; **Views** offers the same six faces, twelve edges and eight corners in a keyboard- and touch-friendly picker.
+The saved view preview supports dragging to rotate, scrolling to zoom and right-dragging to pan. These changes update its fields and exported configuration; choose **Save view** to persist them. The room viewer and saved view editor share an always-visible, camera-linked view cube in the upper-left corner. Click a face for a straight-on view, an edge for a two-axis diagonal, or a corner for a three-axis diagonal. The cube rotates with the room. Drag the compact cube to orbit the room, or focus it and use arrow keys. The home button fits and resets the room.
 
 ### Updating to 0.7.0
 
@@ -173,3 +173,7 @@ To publish an updated model without redoing your setup, open **Room settings →
 Daylight-ready model ZIPs add Day, Night and Auto settings in the manager. Auto follows a selected `sun.*` entity, using elevation for dawn/dusk; the dashboard uses the same saved setting. Each window's daylight follows its cover's reported opening, independently of indoor lights. Existing models keep their previous rendering until re-exported with aperture metadata. This is approximate diffuse window lighting, not compass-accurate solar simulation.
 
 Device cards have a settings cog for changing that device’s entity directly. The focused editor shows compatible entities, saves changes automatically, and returns keyboard focus to the cog when closed. Shade cards provide grouped Open/Stop/Close actions and a full-width percentage slider with Closed/Open endpoints.
+
+### Updating to 0.15.0
+
+Update **3D Rooms** in HACS, restart Home Assistant itself, then refresh the browser. The smaller navigation cube stays visible in the room manager and saved-view editor. Drag it to rotate, use arrow keys, or click faces, edges and corners to snap the view. The Views picker is removed; Home resets the view. No model re-upload or storage migration is required.
