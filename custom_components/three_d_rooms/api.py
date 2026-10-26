@@ -64,9 +64,13 @@ class RoomsRuntime:
             from copy import deepcopy
             return deepcopy(self.store.components)
         if operation == "save_component":
-            return await self.work(self.store.put_component, data)
+            result = await self.work(self.store.put_component, data)
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "delete_component":
-            return await self.work(self.store.remove_component, data.get("id"))
+            result = await self.work(self.store.remove_component, data.get("id"))
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "models":
             return self.store.catalog()
         if operation == "status":

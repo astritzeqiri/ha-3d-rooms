@@ -1,3 +1,4 @@
+import { resolveSavedView } from "../shared/saved-view.mjs";
 import { deviceForControl, macroName } from "../shared/device.mjs";
 import { coverFeatures } from "../shared/cover.mjs";
 import { actionState } from "../shared/action.mjs";
@@ -30,6 +31,13 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._generation = 0;
   }
   setConfig(config) {
+    if (
+      config.saved_view !== undefined &&
+      (typeof config.saved_view !== "string" ||
+        !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(config.saved_view))
+    )
+      throw new Error("Choose a valid saved view ID.");
+    this._sourceConfig = { ...config };
     if (
       config.model !== undefined &&
       (typeof config.model !== "string" ||
@@ -125,6 +133,18 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._message.querySelector("span").textContent = "Downloading your room…";
     this._message.querySelector("button").hidden = true;
     try {
+      if (this._sourceConfig?.saved_view) {
+        const components = await this._hass.callWS({
+          type: "three_d_rooms/request",
+          operation: "components",
+        });
+        if (generation !== this._generation) return;
+        this._config = resolveSavedView(this._sourceConfig, components);
+        this._container.style.height = this._config.height + "px";
+        const title = this.shadowRoot.querySelector("header");
+        title.textContent = this._config.title || "";
+        title.hidden = !this._config.title;
+      }
       if (!this._config.model) {
         this._message.querySelector("span").textContent =
           "Choose a room in the visual editor.";
@@ -255,6 +275,18 @@ export class ThreeDRoomsCard extends HTMLElement {
   async _modelsChanged() {
     const generation = this._generation;
     try {
+      if (this._sourceConfig?.saved_view) {
+        const components = await this._hass.callWS({
+          type: "three_d_rooms/request",
+          operation: "components",
+        });
+        if (generation !== this._generation) return;
+        const resolved = resolveSavedView(this._sourceConfig, components);
+        if (JSON.stringify(resolved) !== JSON.stringify(this._config)) {
+          this._load();
+          return;
+        }
+      }
       const models = await this._hass.callWS({
         type: "three_d_rooms/request",
         operation: "models",

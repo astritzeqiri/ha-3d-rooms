@@ -1,3 +1,10 @@
+# 0.18.0
+
+- Keep dashboard cards linked to their saved view. Changes saved in 3D Rooms update linked cards automatically, including exact camera framing. Generated YAML references the saved view ID.
+- Add a per-field Override for this card checkbox, with an information icon explaining inheritance and overrides on hover or keyboard focus.
+- Show Reset to view beside changed fields to remove that override and resume following the saved view. Numeric camera overrides retain the saved composition.
+- Preserve existing standalone cards, uploaded rooms, entity mappings and saved-view storage. Select a saved view in an existing card to link it.
+
 # 0.17.0
 
 - Add an actual byte-based upload percentage and progress bar for room imports and replacements, with distinct processing and preparation stages.

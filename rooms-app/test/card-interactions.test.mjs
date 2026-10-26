@@ -1,3 +1,4 @@
+import { resolveSavedView } from "../shared/saved-view.mjs";
 import { actionState } from "../shared/action.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -23,6 +24,7 @@ function cardHarness() {
     document: { createElement: () => ({ setAttribute() {}, remove() {} }) },
     hexToRgb: () => [255, 240, 212],
     actionState,
+    resolveSavedView,
   });
   vm.runInContext(source, context);
   const card = Object.create(Card.prototype);
@@ -196,4 +198,28 @@ test("preset clicks invoke only the saved mapping through the native backend and
   card._hass.states["button.desk_sit"].state = "unavailable";
   await card._toggle("sit");
   assert.equal(calls.length, 1);
+});
+
+test("saved view notifications reload inherited changes but ignore overridden changes", async () => {
+  const card = daylightCard();
+  const view = {
+    id: "saved",
+    title: "Office",
+    height: 500,
+    layers: [
+      { model: "kitchen", view: "front", heading: 0, tilt: 28, zoom: 1 },
+    ],
+  };
+  card._sourceConfig = { saved_view: "saved", zoom: 3 };
+  card._config = resolveSavedView(card._sourceConfig, [view]);
+  let reloads = 0;
+  card._load = () => reloads++;
+  card._hass.callWS = async ({ operation }) =>
+    operation === "components" ? [view] : [card._model];
+  view.layers[0].zoom = 2;
+  await card._modelsChanged();
+  assert.equal(reloads, 0);
+  view.title = "Updated office";
+  await card._modelsChanged();
+  assert.equal(reloads, 1);
 });

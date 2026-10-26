@@ -44,6 +44,26 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         await self.hass.async_stop()
 
+    async def test_saved_view_changes_notify_linked_cards_after_persistence(self):
+        from homeassistant.core import callback
+        updates = []
+        @callback
+        def changed(event):
+            updates.append([c["title"] for c in self.store.components])
+        self.hass.bus.async_listen("three_d_rooms_updated", changed)
+        view = {"schemaVersion": 1, "id": "linked-check", "title": "First", "height": 500,
+                "layers": [{"model": "kitchen", "view": "front", "heading": 0, "tilt": 28, "zoom": 1}]}
+        await self.runtime.request("save_component", view, "test-user")
+        await self.hass.async_block_till_done()
+        await self.runtime.request("save_component", {**view, "title": "Changed"}, "test-user")
+        await self.hass.async_block_till_done()
+        with self.assertRaises(ValueError):
+            await self.runtime.request("save_component", {**view, "height": 0}, "test-user")
+        await self.hass.async_block_till_done()
+        await self.runtime.request("delete_component", {"id": view["id"]}, "test-user")
+        await self.hass.async_block_till_done()
+        self.assertEqual(updates, [["First"], ["Changed"], []])
+
     async def test_daylight_settings_and_sun_state_are_native_and_persistent(self):
         self.store.models[0]["daylight"] = {"mode": "night", "entity": "sun.sun", "windows": [
             {"id": "window", "nodeId": "glass", "position": [0, 2, 1], "inward": [0, 0, -1], "width": 1, "height": 1}

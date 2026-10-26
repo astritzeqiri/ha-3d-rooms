@@ -34,7 +34,7 @@ Each device card has an entity-settings cog. Use it to change or disconnect that
 
 ## Room workspace — 0.11.0
 
-Select a room, then use Devices, Saved views or Room settings. Create and edit dashboard views in one shared camera editor. Save a view, then use it in the Home Assistant visual card editor; YAML is optional under Advanced. Existing cards copy view settings, so reselect a view after changing it.
+Select a room, then use Devices, Saved views or Room settings. Create and edit dashboard views in one shared camera editor. Save a view, then use it in the Home Assistant visual card editor; YAML is optional under Advanced. Selecting a saved view links the card with `saved_view: <view-id>`. Saved changes update linked cards automatically. Check **Override for this card** beside a field to customize only that value; uncheck it to resume inheritance. Existing standalone cards keep their settings until a saved view is selected.
 
 Room settings can rename the room and assign an existing Home Assistant area. Refresh areas after creating one in HA. This association does not change device entity assignments and stays local to this installation rather than being included in portable exports. Existing room uploads, mappings and saved-view JSON files remain compatible.
 

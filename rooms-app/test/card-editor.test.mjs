@@ -1,3 +1,4 @@
+import { VIEW_FIELDS, resolveSavedView } from "../shared/saved-view.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
@@ -5,7 +6,9 @@ import { readFile } from "node:fs/promises";
 
 const source = (
   await readFile(new URL("../dashboard/editor.js", import.meta.url), "utf8")
-).replace("export class", "class");
+)
+  .replace(/^import .*;\n/gm, "")
+  .replace("export class", "class");
 function harness() {
   let Editor;
   const fields = new Map();
@@ -18,6 +21,9 @@ function harness() {
         type: "text",
         checkValidity: () => true,
         addEventListener() {},
+        closest() {
+          return { after() {} };
+        },
         add(option) {
           this.options.push(option);
         },
@@ -29,6 +35,15 @@ function harness() {
   };
   const events = [];
   vm.runInNewContext(source, {
+    VIEW_FIELDS,
+    resolveSavedView,
+    document: {
+      createElement: () => ({
+        append() {},
+        setAttribute() {},
+        addEventListener() {},
+      }),
+    },
     HTMLElement: class {
       attachShadow() {
         this.shadowRoot = { getElementById: field };
@@ -86,24 +101,43 @@ test("changing models and projections resets stale camera geometry", () => {
   editor._change("model");
   assert.equal(events[1].detail.config.model, "office");
 });
-test("saved components copy framing without mutating the source component", () => {
+test("saved view remains linked and only checked fields become overrides", () => {
   const { editor, field, events } = harness();
   const component = {
     id: "saved",
     title: "Saved kitchen",
     height: 402,
     layers: [
-      { model: "kitchen", view: "front", camera: { position: [1, 2, 3] } },
+      { model: "kitchen", view: "front", heading: 12, tilt: 34, zoom: 2 },
     ],
   };
   editor._components = [component];
   field("component").value = "saved";
   editor._component();
-  const config = events[0].detail.config;
-  assert.equal(config.title, component.title);
-  assert.equal(config.height, 402);
-  config.camera.position[0] = 99;
-  assert.equal(component.layers[0].camera.position[0], 1);
+  assert.equal(events[0].detail.config.saved_view, "saved");
+  assert.equal(events[0].detail.config.title, undefined);
+  assert.equal(field("title").value, "Saved kitchen");
+  assert.equal(field("zoom").disabled, true);
+  field("override-zoom").checked = true;
+  editor._override("zoom");
+  field("zoom").type = "number";
+  field("zoom").value = "3";
+  editor._change("zoom");
+  component.title = "Renamed";
+  component.layers[0].zoom = 4;
+  editor._sync();
+  assert.equal(field("title").value, "Renamed");
+  assert.equal(field("zoom").value, 3);
+  assert.equal(field("component").value, "saved");
+  field("override-zoom").checked = false;
+  editor._override("zoom");
+  assert.equal(editor._config.zoom, undefined);
+  assert.equal(field("zoom").value, 4);
+  assert.equal(editor._config.extra, "preserved");
+  field("component").value = "";
+  editor._component();
+  assert.equal(editor._config.saved_view, undefined);
+  assert.equal(editor._config.zoom, 4);
 });
 test("invalid or empty numeric fields do not publish a card configuration", () => {
   const { editor, field, events } = harness();
@@ -185,4 +219,38 @@ test("time of day is hidden without daylight windows and reverts on failure", as
   await editor._daylight();
   assert.equal(field("daylight").value, "day");
   assert.equal(field("error").hidden, false);
+});
+
+test("field reset appears only for a changed override and resumes live inheritance", () => {
+  const { editor, field, events } = harness();
+  const saved = {
+    id: "saved",
+    title: "Kitchen",
+    height: 500,
+    layers: [
+      { model: "kitchen", view: "front", heading: 0, tilt: 28, zoom: 2 },
+    ],
+  };
+  editor._components = [saved];
+  editor.setConfig({ saved_view: "saved", zoom: 2, title: "Card title" });
+  assert.equal(field("reset-field-zoom").hidden, true);
+  assert.equal(field("reset-field-title").hidden, false);
+  field("zoom").type = "number";
+  field("zoom").value = "3";
+  editor._change("zoom");
+  assert.equal(field("reset-field-zoom").hidden, false);
+  editor._resetField("zoom");
+  assert.equal(editor._config.zoom, undefined);
+  assert.equal(editor._config.title, "Card title");
+  assert.equal(field("override-zoom").checked, false);
+  assert.equal(field("zoom").disabled, true);
+  assert.equal(field("zoom").value, 2);
+  assert.equal(field("reset-field-zoom").hidden, true);
+  saved.layers[0].zoom = 4;
+  editor._sync();
+  assert.equal(field("zoom").value, 4);
+  assert.equal(events.at(-1).detail.config.saved_view, "saved");
+  editor.setConfig({ model: "kitchen", zoom: 3 });
+  assert.equal(field("override-controls-zoom").hidden, true);
+  assert.equal(field("reset-field-zoom").hidden, true);
 });

@@ -45,7 +45,7 @@ Use the actual model ID from your room package, or copy a ready-made configurati
 - `view: front` is the angled perspective. `view: floor` is orthographic.
 - `tilt` is degrees away from overhead (0–180). `heading` rotates around the floor's vertical axis.
 - `zoom` scales the room (0.01–100; default 1).
-- **Create dashboard view** opens the shared camera editor beside your room. Choose a preset or drag, pan and zoom, name the view, and choose **Save view → Use in dashboard**. The navigation cube stays visible in the room viewer. Precise camera controls and card height are under **Advanced camera settings**. Keep the generated `camera` object when copying YAML to preserve framing. Older configurations without `camera` continue to use automatic fitting.
+- **Create dashboard view** opens the shared camera editor beside your room. Choose a preset or drag, pan and zoom, name the view, and choose **Save view → Use in dashboard**. The navigation cube stays visible in the room viewer. Precise camera controls and card height are under **Advanced camera settings**. Generated YAML uses `saved_view: <view-id>` to follow the saved view, including its exact camera framing. In the card editor, check **Override for this card** beside any field to customize it. The information icon explains how overrides work. **Reset to view** removes a changed field’s override and follows the saved view again. Existing standalone cards keep their values until you select a saved view.
 - `height` is pixels (180–1600). Optional `title` adds a heading.
 - `interactive: true` enables camera movement. Fixtures remain clickable when camera movement is locked.
 - The room reads entity mappings from the integration; there are no floating entity icons.

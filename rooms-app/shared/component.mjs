@@ -62,6 +62,5 @@ export function validateComponent(value, modelIds) {
   };
 }
 export function componentYaml(component) {
-  const layer = component.layers[0];
-  return `type: custom:three-d-rooms-card\ntitle: ${JSON.stringify(component.title)}\nmodel: ${layer.model}\nheight: ${component.height}\nview: ${layer.view}\nheading: ${layer.heading}\ntilt: ${layer.tilt}\nzoom: ${layer.zoom}${layer.camera ? "\ncamera: " + JSON.stringify(layer.camera) : ""}`;
+  return `type: custom:three-d-rooms-card\nsaved_view: ${component.id}`;
 }

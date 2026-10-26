@@ -1,3 +1,7 @@
+# 0.18.0: linked saved views and field overrides
+
+See [release validation](docs/validation-0.18.0.md) for the isolated build, exact ZIP checks and native Home Assistant results.
+
 # 0.16.0: adjustable desk device
 
 - Original private office: verified tabletop heights 0.73 / 1.00 / 1.30 m, fixed feet, return to the measured 0.782 m rest pose, and browser slider persistence. Authoring build and all 8 viewer tests pass. Moving assembly retains existing object-edit paths.

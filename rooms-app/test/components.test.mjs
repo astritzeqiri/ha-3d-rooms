@@ -71,9 +71,10 @@ test("portable component configurations preserve camera and quote titles safely"
     "kitchen",
   ]);
   const yaml = componentYaml(c);
-  assert.match(yaml, /title: "Kitchen: overview"/);
-  assert.match(yaml, /model: kitchen/);
-  assert.match(yaml, /heading: 90\ntilt: 28\nzoom: 1.5/);
+  assert.equal(
+    yaml,
+    "type: custom:three-d-rooms-card\nsaved_view: kitchen-overview",
+  );
 });
 
 test("components API saves, lists and removes portable views", async () => {
@@ -137,7 +138,7 @@ test("saved components preserve exact camera geometry and reject malformed snaps
     "kitchen",
   ]);
   assert.deepEqual(clean.layers[0].camera, camera);
-  assert.ok(componentYaml(clean).endsWith("camera: " + JSON.stringify(camera)));
+  assert.match(componentYaml(clean), /saved_view: kitchen-overview/);
   const dir = await mkdtemp(join(tmpdir(), "rooms-camera-components-"));
   try {
     const store = await new Store(dir).open();
