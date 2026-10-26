@@ -1,4 +1,5 @@
 import { componentYaml, validateComponent } from "../shared/component.mjs";
+import { viewThumbnail } from "./view-thumbnail.js";
 
 /** Edit the camera in the same scene that will be saved to the dashboard. */
 export function initDashboardEditor({
@@ -6,6 +7,7 @@ export function initDashboardEditor({
   model,
   scene,
   toast,
+  preview,
   onOpen = () => {},
 }) {
   const $ = (id) => document.getElementById(id);
@@ -24,6 +26,7 @@ export function initDashboardEditor({
         schemaVersion: 1,
         id: draftId,
         title: $("dashboard-title").value,
+        ...(!$("dashboard-show-title").checked ? { show_title: false } : {}),
         height: Number($("dashboard-height").value),
         layers: [{ model: model().id, ...current }],
       },
@@ -142,6 +145,9 @@ export function initDashboardEditor({
     savedSnapshot = saved ? JSON.stringify(component) : undefined;
     $("dashboard-title").value =
       component?.title || `${model().title} overview`;
+    $("dashboard-show-title").checked = component
+      ? component.show_title !== false
+      : false;
     $("dashboard-height").value =
       component?.height ??
       Math.max(
@@ -179,6 +185,18 @@ export function initDashboardEditor({
     return true;
   }
   $("dashboard").onclick = () => open();
+  $("preview-dashboard").hidden = !preview;
+  $("preview-dashboard").onclick = async () => {
+    try {
+      if (!$("dashboard-form").reportValidity()) return;
+      sync();
+      await preview(read());
+    } catch (error) {
+      $("dashboard-error").textContent = error.message;
+    } finally {
+      $("preview-dashboard").focus({ preventScroll: true });
+    }
+  };
   $("dashboard-preset").onchange = () => {
     if (!$("dashboard-preset").value) return;
     scene().setCameraPreset($("dashboard-preset").value);
@@ -206,6 +224,7 @@ export function initDashboardEditor({
   }
   $("dashboard-view").onchange = apply;
   $("dashboard-title").oninput = update;
+  $("dashboard-show-title").onchange = update;
   $("dashboard-height").oninput = () => {
     const input = $("dashboard-height");
     if (input.validity.valid) $("viewport").style.height = `${input.value}px`;
@@ -259,15 +278,9 @@ export function initDashboardEditor({
     try {
       const view = scene();
       view.render();
-      const canvas = document.createElement("canvas");
-      canvas.width = 320;
-      canvas.height = 200;
-      canvas
-        .getContext("2d")
-        .drawImage(view.renderer.domElement, 0, 0, 320, 200);
       localStorage.setItem(
-        `3d-rooms-view-preview:${draftId}`,
-        canvas.toDataURL("image/jpeg", 0.65),
+        `3d-rooms-view-preview-v2:${draftId}`,
+        viewThumbnail(view.renderer.domElement),
       );
     } catch {
       /* Thumbnails are optional and remain private to this browser. */

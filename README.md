@@ -167,3 +167,7 @@ Model uploads, downloads and device commands use your authenticated Home Assista
 Thanks to [Wes Bos and 3D Model Anything](https://github.com/wesbos/3d-model-anything) for the capture app, reconstruction workflow and viewer foundation used to create our rooms. See the upstream repository for its code license and [demo asset terms](https://github.com/wesbos/3d-model-anything/blob/main/ASSETS-LICENSE.md).
 
 Licensed under the [MIT license](LICENSE). See [third-party notices](THIRD_PARTY_NOTICES.md) for upstream attribution and asset terms.
+
+### Preview a dashboard view
+
+Choose **Preview in dashboard** while editing a view or on its saved-view card. Preview unsaved settings at Desktop or Phone card widths, then close with × or Escape. Device controls are live. **Show title on card** hides the header while retaining the saved view name. New views start without a header; existing views retain their setting. Linked cards follow changes unless overridden in Home Assistant’s card editor.

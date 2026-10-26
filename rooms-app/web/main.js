@@ -994,6 +994,7 @@ $("floor-view").onclick = () => {
 };
 const dashboardEditor = initDashboardEditor({
   api,
+  preview: native?.preview,
   model: () => selected,
   scene: () => view,
   toast,
@@ -1326,6 +1327,7 @@ $("export-model").onclick = async () => {
 const { initComponents } = await import("./components.js");
 savedViews = initComponents({
   api,
+  preview: native?.preview,
   room: () => selected,
   editor: dashboardEditor,
   toast,

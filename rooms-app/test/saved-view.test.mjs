@@ -58,3 +58,21 @@ test("missing saved views produce an actionable error and standalone cards retai
     zoom: 2,
   });
 });
+
+test("title visibility follows the saved view and allows a per-card override", () => {
+  const view = saved();
+  assert.equal(
+    resolveSavedView({ saved_view: view.id }, [view]).show_title,
+    true,
+  );
+  view.show_title = false;
+  assert.equal(
+    resolveSavedView({ saved_view: view.id }, [view]).show_title,
+    false,
+  );
+  assert.equal(
+    resolveSavedView({ saved_view: view.id, show_title: true }, [view])
+      .show_title,
+    true,
+  );
+});

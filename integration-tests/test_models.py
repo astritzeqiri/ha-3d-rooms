@@ -288,6 +288,18 @@ class ComponentTests(unittest.TestCase):
             self.assertEqual(len(models.ModelStore(directory).open().components), 1)
             self.assertEqual(len(reopened.models), 1)
 
+    def test_title_visibility_persists_without_changing_view_name(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package())
+            value = {**self.component(), "show_title": False}
+            store.put_component(value)
+            restored = models.ModelStore(directory).open().components[0]
+            self.assertIs(restored["show_title"], False)
+            self.assertEqual(restored["title"], value["title"])
+            with self.assertRaises(ValueError):
+                models.validate_component({**value, "show_title": "false"}, ["kitchen"])
+
     def test_component_preserves_camera_snapshot_and_rejects_invalid_geometry(self):
         from copy import deepcopy
         camera = {"projection": "perspective", "position": [3, 7, -4], "target": [.7, 1, .4], "up": [0, 1, 0], "aspect": 1.8, "zoom": 1, "referenceZoom": 1.3, "heading": 143.2, "tilt": 48, "fov": 45}

@@ -1,3 +1,9 @@
+# 0.20.0 release validation
+
+- Dashboard previews, optional card titles and proportional thumbnails. All 91 frontend tests, 16 host Python tests and 9 native Home Assistant tests pass. The host skips the native tests; those were run separately in Core 2026.10.2.
+- Exact integration ZIP staged in the existing singleton runtime, preserving persistent rooms/mappings/views. Package and direct dashboard rendering verified. Details: [docs/validation-0.20.0.md](docs/validation-0.20.0.md).
+- No production/physical-device or HACS-download check.
+
 # 0.19.0: Limestone & Clay UI
 
 See [release validation](docs/validation-0.19.0.md) for isolated build, archive and native Home Assistant checks.

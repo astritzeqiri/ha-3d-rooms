@@ -49,3 +49,7 @@ The room viewer has a compact, always-visible view cube. Drag it to rotate the r
 ## Adjustable desk · 0.16.0
 
 Desk-enabled models group height, Up/Stop/Down and four optional macros in one device card and settings box. Map the centimetre height to a number entity, directions to a cover, and each macro to a button, input button, script or scene. Macro names start blank, are user editable, and persist with the room; icons come from the mapped entity. Update the integration before importing a new desk-enabled export. Existing rooms remain compatible.
+
+## 0.20.0 dashboard preview
+
+The native integration manager can preview draft and saved views in the real Home Assistant dashboard card. Desktop/Phone controls change card width; × or Escape closes the preview. Device controls remain live. Show title on card controls the header independently of the saved view name, and linked cards inherit it unless overridden. Existing views preserve their title behavior. Thumbnails retain proportions, with older caches repaired from saved camera aspect ratios when available.

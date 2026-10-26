@@ -86,7 +86,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._container.style.height = this._config.height + "px";
     const title = this.shadowRoot.querySelector("header");
     title.textContent = config.title || "";
-    title.hidden = !config.title;
+    title.hidden = !config.title || config.show_title === false;
     this._reload = true;
     if (this._hass && this.isConnected) this._load();
   }
@@ -143,7 +143,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         this._container.style.height = this._config.height + "px";
         const title = this.shadowRoot.querySelector("header");
         title.textContent = this._config.title || "";
-        title.hidden = !this._config.title;
+        title.hidden = !this._config.title || this._config.show_title === false;
       }
       if (!this._config.model) {
         this._message.querySelector("span").textContent =

@@ -1,3 +1,11 @@
+# 0.20.0
+
+- Add Preview in dashboard to the view editor and each saved-view card. Preview current unsaved settings in the actual Home Assistant card without saving or changing a dashboard.
+- Switch between desktop and phone card widths with aligned segmented controls; close the preview with the accessible close button or Escape and return to the same view.
+- Add Show title on card in both view editors. New saved views hide the header by default; existing views keep their appearance until changed. Linked cards inherit the setting with per-card overrides.
+- Preserve room proportions in higher-resolution thumbnails and repair older cached thumbnails when saved camera proportions are available.
+- Keep existing rooms, mappings, saved views and dashboard configuration compatible. No re-upload or storage migration is required.
+
 # 0.19.0
 
 - Give the manager a warm Limestone & Clay identity: limestone/paper surfaces, terracotta actions, a charcoal dark palette, local serif room titles and a geometric room mark.

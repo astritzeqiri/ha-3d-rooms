@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-DhRdJ3bq.js"></script>
+    <script type="module" crossorigin src="./assets/index-Bn62ZeAd.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/view-cube-c37ALvX2.js">
     <link rel="modulepreload" crossorigin href="./assets/camera-view-BL6u3TKn.js">
-    <link rel="modulepreload" crossorigin href="./assets/component-XQ2sBZDy.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-DcqlEAqb.css">
+    <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-DI6UvNT3.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-C8nqpO7e.css">
   </head>
   <body>
     <header>
@@ -162,6 +162,10 @@
               <label class="panel-field" for="dashboard-title"
                 >View name<input id="dashboard-title" maxlength="160" required
               /></label>
+              <label class="card-title-toggle"
+                ><input id="dashboard-show-title" type="checkbox" />Show title
+                on card</label
+              >
               <div class="panel-field-row">
                 <label class="panel-field" for="dashboard-view"
                   >View<select id="dashboard-view">
@@ -265,6 +269,9 @@
               </details>
               <p id="dashboard-error" class="error" role="alert"></p>
               <div class="panel-save">
+                <button id="preview-dashboard" type="button" hidden>
+                  Preview in dashboard
+                </button>
                 <button
                   id="save-dashboard-component"
                   class="primary"

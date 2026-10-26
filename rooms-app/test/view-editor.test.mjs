@@ -13,7 +13,7 @@ const source =
     .replace(/^import .*;\n/gm, "")
     .replace("export function", "function") +
   "\nglobalThis.makeEditor=initDashboardEditor;";
-function harness() {
+function harness(preview) {
   const fields = new Map(),
     calls = [];
   let allowed = true;
@@ -28,6 +28,7 @@ function harness() {
         setAttribute() {},
         addEventListener() {},
         focus() {},
+        reportValidity: () => true,
         getBoundingClientRect: () => ({ height: 500 }),
         closest: () => ({ open: false }),
       });
@@ -79,6 +80,7 @@ function harness() {
   vm.createContext(context);
   vm.runInContext(source, context);
   const editor = context.makeEditor({
+    preview,
     api: async (path, options) => {
       calls.push({ path, ...JSON.parse(options.body) });
     },
@@ -96,6 +98,24 @@ const saved = () => ({
   layers: [
     { model: "kitchen", view: "front", heading: 90, tilt: 28, zoom: 1.5 },
   ],
+});
+test("dashboard preview uses the current unsaved draft without saving or losing edits", async () => {
+  const previews = [];
+  const h = harness(async (component) => previews.push(component));
+  h.editor.open(saved());
+  h.field("dashboard-title").value = "Draft title";
+  h.field("dashboard-height").value = "640";
+  h.scene.options.zoom = 2;
+  await h.field("preview-dashboard").onclick();
+  assert.equal(previews[0].title, "Draft title");
+  assert.equal(previews[0].height, 640);
+  assert.equal(previews[0].layers[0].zoom, 2);
+  assert.equal(h.calls.length, 0);
+  assert.equal(h.editor.dirty(), true);
+  assert.equal(h.field("dashboard-panel").hidden, false);
+  h.field("dashboard-form").reportValidity = () => false;
+  await h.field("preview-dashboard").onclick();
+  assert.equal(previews.length, 1);
 });
 test("unified editor preserves existing view ID and saves edits in place", async () => {
   const h = harness();
@@ -160,4 +180,20 @@ test("opening a view normalizes its camera without reporting a user edit", () =>
   assert.equal(h.field("use-saved-view").hidden, false);
   h.scene.options.onCameraChange({ source: "orbit" });
   assert.equal(h.editor.dirty(), true);
+});
+
+test("view name is retained when the card title is hidden and the setting survives editing", async () => {
+  const h = harness();
+  h.editor.open();
+  assert.equal(h.field("dashboard-show-title").checked, false);
+  await h.field("dashboard-form").onsubmit({ preventDefault() {} });
+  assert.equal(h.calls[0].show_title, false);
+  assert.equal(h.calls[0].title, "Kitchen overview");
+  h.editor.open({ ...saved(), show_title: false });
+  assert.equal(h.field("dashboard-show-title").checked, false);
+  h.field("dashboard-show-title").checked = true;
+  h.field("dashboard-show-title").onchange();
+  assert.equal(h.editor.dirty(), true);
+  await h.field("dashboard-form").onsubmit({ preventDefault() {} });
+  assert.notEqual(h.calls[1].show_title, false);
 });

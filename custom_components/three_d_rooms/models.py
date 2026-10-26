@@ -299,10 +299,13 @@ def validate_component(value, model_ids):
     height = value.get("height")
     if not isinstance(height, int) or isinstance(height, bool) or not 180 <= height <= 1600:
         raise ValueError("Height must be 180–1600 pixels.")
+    if "show_title" in value and not isinstance(value["show_title"], bool):
+        raise ValueError("Show title must be true or false.")
     clean_layer = {key: layer[key] for key in ("model", "view", "heading", "tilt", "zoom")}
     if "camera" in layer:
         clean_layer["camera"] = validate_camera_snapshot(layer["camera"], layer["view"])
     return {"schemaVersion": 1, "id": value["id"], "title": title.strip(), "height": height,
+            **({"show_title": value["show_title"]} if "show_title" in value else {}),
             "layers": [clean_layer]}
 
 

@@ -17,6 +17,8 @@ export function validateComponent(value, modelIds) {
     throw new Error("Give the component a name up to 160 characters.");
   if (!Array.isArray(value.layers) || value.layers.length !== 1)
     throw new Error("This release supports one room per component.");
+  if (value.show_title !== undefined && typeof value.show_title !== "boolean")
+    throw new Error("Show title must be true or false.");
   const layer = value.layers[0];
   if (!layer || !modelIds.includes(layer.model))
     throw new Error("Import the referenced room model first.");
@@ -49,6 +51,7 @@ export function validateComponent(value, modelIds) {
     id: value.id,
     title: value.title.trim(),
     height: value.height,
+    ...(value.show_title !== undefined ? { show_title: value.show_title } : {}),
     layers: [
       {
         model: layer.model,

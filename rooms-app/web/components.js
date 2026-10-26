@@ -1,7 +1,8 @@
+import { viewThumbnail } from "./view-thumbnail.js";
 import { validateComponent, componentYaml } from "../shared/component.mjs";
 
 /** A room-scoped library; every view opens the same camera editor and scene. */
-export function initComponents({ api, room, editor, toast }) {
+export function initComponents({ api, room, editor, toast, preview }) {
   const $ = (id) => document.getElementById(id);
   let components = [],
     generation = 0;
@@ -52,6 +53,19 @@ export function initComponents({ api, room, editor, toast }) {
         button("Edit view", () => editor.open(c)),
         button("Use in dashboard", () => use(c), true),
       );
+      if (preview) {
+        const previewButton = button("Preview in dashboard", async () => {
+          try {
+            await preview(structuredClone(c));
+          } catch (error) {
+            toast(error.message);
+          } finally {
+            previewButton.focus({ preventScroll: true });
+          }
+        });
+        previewButton.className = "saved-view-preview";
+        actions.insertBefore(previewButton, actions.firstChild);
+      }
       const more = document.createElement("details");
       more.className = "saved-view-more";
       const summary = document.createElement("summary");
@@ -98,13 +112,30 @@ export function initComponents({ api, room, editor, toast }) {
       remove.className = "danger";
       more.append(remove);
       try {
-        const src = localStorage.getItem(`3d-rooms-view-preview:${c.id}`);
+        const key = `3d-rooms-view-preview-v2:${c.id}`;
+        const cached = localStorage.getItem(key);
+        const src =
+          cached || localStorage.getItem(`3d-rooms-view-preview:${c.id}`);
         if (src?.startsWith("data:image/jpeg;base64,")) {
           const img = document.createElement("img");
           img.className = "saved-view-thumb";
           img.src = src;
           img.alt = `${c.title} preview`;
           img.loading = "lazy";
+          if (!cached && c.layers[0].camera?.aspect) {
+            img.addEventListener(
+              "load",
+              () => {
+                try {
+                  img.src = viewThumbnail(img, c.layers[0].camera.aspect);
+                  localStorage.setItem(key, img.src);
+                } catch {
+                  /* Thumbnail storage is optional. */
+                }
+              },
+              { once: true },
+            );
+          }
           card.append(img);
         }
       } catch {

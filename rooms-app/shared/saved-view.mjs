@@ -2,6 +2,7 @@
 export const VIEW_FIELDS = [
   "model",
   "title",
+  "show_title",
   "view",
   "heading",
   "tilt",
@@ -20,6 +21,7 @@ export function resolveSavedView(config, components) {
   const resolved = {
     ...structuredClone(layer),
     title: saved.title,
+    show_title: saved.show_title ?? true,
     height: saved.height,
     interactive: false,
     ...config,

@@ -2,6 +2,7 @@ import { uploadNativeModel } from "../shared/upload.mjs";
 import { resolveEntityIcon } from "../shared/entity-icon.mjs";
 import { roomRoute } from "../shared/room-route.mjs";
 import { sceneBlob } from "../shared/scene-download.mjs";
+import { openDashboardPreview } from "./preview.js";
 /** Native HA sidebar wrapper for the existing room manager. No token copying. */
 class ThreeDRoomsPanel extends HTMLElement {
   constructor() {
@@ -18,6 +19,17 @@ class ThreeDRoomsPanel extends HTMLElement {
       )
         return;
       const bridge = {
+        preview: async (component) => {
+          this._preview?.close();
+          const preview = openDashboardPreview(
+            this.shadowRoot,
+            component,
+            this._hass,
+          );
+          this._preview = preview;
+          await preview.closed;
+          if (this._preview === preview) this._preview = null;
+        },
         navigate: (search) => {
           if (
             roomRoute(search).toString() ===
@@ -69,6 +81,7 @@ class ThreeDRoomsPanel extends HTMLElement {
   }
   set hass(value) {
     this._hass = value;
+    if (this._preview) this._preview.card.hass = value;
     this._publish();
   }
   _publish() {
@@ -93,6 +106,7 @@ class ThreeDRoomsPanel extends HTMLElement {
       query;
   }
   disconnectedCallback() {
+    this._preview?.close();
     window.removeEventListener("message", this._ready);
     this._listener = null;
   }

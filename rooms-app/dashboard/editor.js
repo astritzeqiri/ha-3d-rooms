@@ -2,6 +2,7 @@ import { VIEW_FIELDS, resolveSavedView } from "../shared/saved-view.mjs";
 const FIELD_NAMES = {
   model: "Room",
   title: "Title",
+  show_title: "Show title",
   view: "View",
   heading: "Rotation",
   tilt: "Tilt",
@@ -9,7 +10,14 @@ const FIELD_NAMES = {
   height: "Height",
   interactive: "Camera movement",
 };
-const DEFAULTS = { height: 500, view: "front", heading: 0, tilt: 28, zoom: 1 };
+const DEFAULTS = {
+  show_title: true,
+  height: 500,
+  view: "front",
+  heading: 0,
+  tilt: 28,
+  zoom: 1,
+};
 
 export class ThreeDRoomsEditor extends HTMLElement {
   constructor() {
@@ -28,6 +36,7 @@ export class ThreeDRoomsEditor extends HTMLElement {
     <label>Saved view<select id="component"><option value="">Choose a saved view (optional)</option></select></label>
     <label>Room<select id="model"><option value="">Choose a room</option></select></label>
     <label>Title<input id="title" type="text" maxlength="160"></label>
+    <label class="check"><input id="show_title" type="checkbox">Show title on card</label>
     <label>View<select id="view"><option value="front">Perspective</option><option value="floor">Floor</option></select></label>
     <div class="grid">
       <label>Rotation (°)<input id="heading" type="number" min="0" max="359.99" step="0.01"></label>
@@ -49,6 +58,7 @@ export class ThreeDRoomsEditor extends HTMLElement {
     for (const key of [
       "model",
       "title",
+      "show_title",
       "view",
       "heading",
       "tilt",
@@ -246,7 +256,8 @@ export class ThreeDRoomsEditor extends HTMLElement {
         cameraDefault ??
         (key === "tilt" && resolved.view === "floor" ? 8 : DEFAULTS[key]) ??
         "";
-      if (key === "interactive") input.checked = !!value;
+      if (key === "interactive" || key === "show_title")
+        input.checked = !!value;
       else input.value = value;
     }
     const model = resolved.model;

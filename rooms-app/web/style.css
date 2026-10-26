@@ -2455,3 +2455,22 @@ li[aria-selected="true"] .opt-name {
     gap: 0 12px;
   }
 }
+
+.card-title-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.dashboard-panel .card-title-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  flex: 0 0 18px;
+  padding: 0;
+}
+.saved-view-actions .saved-view-preview {
+  flex: 1 0 100%;
+}

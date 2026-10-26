@@ -35,6 +35,7 @@ export async function connectNative() {
     return res;
   };
   return {
+    preview: (component) => bridge.preview(component),
     async api(path, options = {}) {
       if (path === "models" && options.method === "POST")
         return bridge.upload("/api/three_d_rooms/models", options);
