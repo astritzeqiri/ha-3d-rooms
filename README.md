@@ -60,7 +60,7 @@ Restart Home Assistant itself after the download completes.
 
 ### 3. Add the integration
 
-[![Add 3D Rooms to Home Assistant](https://my.home-assistant.io/badges/config_flow.svg)](https://my.home-assistant.io/redirect/config_flow/?domain=three_d_rooms)
+[![Add 3D Rooms to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=three_d_rooms)
 
 Or go to **Settings → Devices & services → Add integration**, search for **3D Rooms**, and confirm setup. Refresh your browser to see **3D Rooms** in the sidebar.
 
