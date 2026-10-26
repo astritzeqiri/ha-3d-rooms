@@ -25,7 +25,7 @@
           <h2>Your rooms</h2>
           <span id="model-count">0</span>
         </div>
-        <p class="muted">Your home, one floor at a time.</p>
+
         <nav id="models" aria-label="Models"></nav>
         <button id="add-model">+ Import room</button>
         <div class="aside-bottom">
@@ -41,35 +41,42 @@
             <h1 id="title">Bring your home into view</h1>
           </div>
           <div class="toolbar-actions">
-            <button id="floor-view" aria-pressed="false" hidden>
-              Floor view</button
-            ><button id="dashboard" class="primary" hidden>
-              Create dashboard view</button
-            ><button id="home-view" hidden>Reset view</button>
+            <button id="dashboard" class="primary" hidden>
+              Create dashboard view
+            </button>
           </div>
         </div>
         <div id="room-summary" class="room-summary" role="status"></div>
         <nav class="room-tabs" aria-label="Room workspace" hidden>
           <button id="show-models" aria-pressed="true" data-room-tab="devices">
-            Devices
+            Room &amp; devices
           </button>
           <button
             id="show-components"
             aria-pressed="false"
             data-room-tab="views"
           >
-            Saved views
+            Dashboard views
           </button>
           <button
             id="show-room-settings"
             aria-pressed="false"
             data-room-tab="settings"
           >
-            Room settings
+            Settings
           </button>
         </nav>
         <div class="room-layout">
           <div class="room-preview">
+            <div class="view-tools" hidden>
+              <span class="view-tools-title">Room overview</span>
+              <div class="camera-actions" role="group" aria-label="Room camera">
+                <button id="floor-view" aria-pressed="false" hidden>
+                  Floor plan
+                </button>
+                <button id="home-view" hidden>Reset camera</button>
+              </div>
+            </div>
             <div id="viewport">
               <div id="empty">
                 <div class="empty-symbol">
@@ -107,8 +114,10 @@
               <span id="view-hint">Import a prepared room ZIP</span
               ><label id="preview-label" hidden
                 ><input id="preview" type="checkbox" role="switch" checked />
-                <span>Preview mode</span>
-                <span class="muted">No real commands</span></label
+                <span>Preview</span>
+                <span id="preview-mode-note" class="muted"
+                  >Commands off</span
+                ></label
               >
             </div>
           </div>
@@ -295,8 +304,10 @@
         <section id="controls-section" hidden>
           <div class="section-title">
             <div>
-              <span class="eyebrow">CONNECTED TO THIS ROOM</span>
-              <h2>Devices</h2>
+              <h2>Room devices</h2>
+              <p class="muted small">
+                Select a device below to control it or connect an entity.
+              </p>
             </div>
             <span id="control-count"></span>
           </div>
@@ -448,6 +459,15 @@
                 Replace model
               </button>
             </div>
+            <div id="replace-progress" class="upload-progress" hidden>
+              <p data-upload-label role="status" aria-live="polite"></p>
+              <progress
+                max="100"
+                value="0"
+                aria-label="Model upload progress"
+              ></progress>
+              <p data-upload-detail class="muted small"></p>
+            </div>
             <p id="replace-error" class="error" role="alert"></p>
           </form>
 
@@ -495,6 +515,15 @@
           Up to 100 MB. Contains manifest.json and an embedded scene.glb.
           Exported room photos are not required.
         </p>
+        <div id="import-progress" class="upload-progress" hidden>
+          <p data-upload-label role="status" aria-live="polite"></p>
+          <progress
+            max="100"
+            value="0"
+            aria-label="Model upload progress"
+          ></progress>
+          <p data-upload-detail class="muted small"></p>
+        </div>
         <p id="import-error" class="error" role="alert"></p>
         <div class="dialog-actions">
           <button type="button" class="close">Cancel</button

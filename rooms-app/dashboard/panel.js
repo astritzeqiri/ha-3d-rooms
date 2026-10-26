@@ -1,3 +1,4 @@
+import { uploadNativeModel } from "../shared/upload.mjs";
 import { resolveEntityIcon } from "../shared/entity-icon.mjs";
 import { roomRoute } from "../shared/room-route.mjs";
 import { sceneBlob } from "../shared/scene-download.mjs";
@@ -33,6 +34,7 @@ class ThreeDRoomsPanel extends HTMLElement {
         request: (operation, data = {}) =>
           this._hass.callWS({ type: "three_d_rooms/request", operation, data }),
         asset: (path, options) => this._hass.fetchWithAuth(path, options),
+        upload: (path, options) => uploadNativeModel(this._hass, path, options),
         scene: (model) => sceneBlob(this._hass, model),
         entityIcon: (state) => {
           const key = JSON.stringify([

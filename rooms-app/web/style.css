@@ -84,7 +84,7 @@ p {
   line-height: 1.55;
 }
 h1 {
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -176,8 +176,8 @@ summary:focus-visible {
 
 /* Header */
 header {
-  min-height: 68px;
-  padding: 0 32px;
+  min-height: 56px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -236,11 +236,11 @@ header {
 /* Layout */
 main {
   display: grid;
-  grid-template-columns: 264px minmax(0, 1fr);
-  min-height: calc(100dvh - 69px);
+  grid-template-columns: 224px minmax(0, 1fr);
+  min-height: calc(100dvh - 57px);
 }
 aside {
-  padding: 28px 20px;
+  padding: 24px 16px;
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -315,15 +315,15 @@ nav button small {
 }
 .workspace {
   min-width: 0;
-  padding: 32px 40px 72px;
+  padding: 24px 28px 56px;
 }
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 16px 24px;
-  align-items: flex-end;
-  margin-bottom: 20px;
+  align-items: center;
+  margin-bottom: 12px;
 }
 .toolbar > div:first-child {
   flex: 1 1 240px;
@@ -340,15 +340,11 @@ nav button small {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 24px;
-  margin: 0 0 20px;
-  padding: 12px 16px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
+  gap: 8px 16px;
+  margin: 0 0 12px;
+  min-height: 44px;
   font-size: 13px;
   color: var(--muted);
-  box-shadow: var(--shadow);
 }
 .room-summary:empty {
   display: none;
@@ -383,8 +379,11 @@ nav button small {
   transition: width 400ms ease;
 }
 .room-summary button {
-  min-height: 36px;
-  padding: 6px 14px;
+  min-height: 44px;
+  padding: 6px 12px;
+  color: var(--accent-ink);
+  background: transparent;
+  border-color: transparent;
   margin-left: auto;
 }
 .status-area + button {
@@ -393,7 +392,7 @@ nav button small {
 
 /* Viewport */
 #viewport {
-  height: clamp(300px, 46dvh, 560px);
+  height: clamp(340px, 52dvh, 620px);
   background: var(--canvas);
   color: #e8eef2;
   border: 1px solid var(--line);
@@ -570,32 +569,60 @@ input[type="checkbox"][role="switch"]:checked::after {
 
 /* Room tabs */
 .room-tabs {
-  display: inline-flex;
-  gap: 4px;
-  padding: 4px;
-  margin: 24px 0 20px;
-  border-radius: 999px;
-  background: var(--raised);
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0 0 18px;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
   max-width: 100%;
 }
 .room-tabs button {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 6px 18px;
+  min-height: 44px;
+  padding: 8px 0 12px;
   border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
   color: var(--muted);
+  white-space: nowrap;
 }
 .room-tabs button:hover:not(:disabled) {
   background: transparent;
   color: var(--text);
 }
 .room-tabs button[aria-pressed="true"] {
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow);
+  border-bottom-color: var(--accent-ink);
+  color: var(--accent-ink);
+  background: transparent;
+  box-shadow: none;
+}
+.view-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 10px;
+}
+.view-tools-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.camera-actions {
+  display: flex;
+  gap: 8px;
+}
+.camera-actions button {
+  background: transparent;
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+}
+.status-ready {
+  color: var(--accent-ink);
+  margin-left: auto;
 }
 #floor-view[aria-pressed="true"] {
   background: var(--glow);
@@ -1908,8 +1935,8 @@ body.dashboard-editing #dashboard {
     white-space: normal;
   }
   .room-summary button {
-    width: 100%;
-    margin-left: 0;
+    width: auto;
+    margin-left: auto;
   }
   .component-fields {
     grid-template-columns: 1fr;
@@ -2303,5 +2330,116 @@ li[aria-selected="true"] .opt-name {
   }
   .desk-macros {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.upload-progress {
+  margin: 20px 0;
+}
+.upload-progress p {
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.upload-progress [data-upload-label] {
+  font-weight: 600;
+}
+.upload-progress progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  accent-color: var(--accent, #14b8a6);
+}
+
+@media (max-width: 600px) {
+  main > aside {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+  main > aside .section-title {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  main > aside h2 {
+    font-size: 15px;
+  }
+  main > aside #models {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    gap: 8px;
+  }
+  #models button {
+    min-width: 140px;
+    padding: 10px 12px;
+  }
+  #models button span {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #models button small {
+    font-size: 11px;
+  }
+  #add-model {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+  .toolbar {
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .toolbar-actions {
+    width: auto;
+  }
+  .toolbar-actions button {
+    flex: none;
+  }
+  h1 {
+    font-size: 22px;
+    overflow-wrap: anywhere;
+  }
+  .room-summary {
+    margin-bottom: 8px;
+    gap: 4px 10px;
+  }
+  .room-tabs {
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .room-tabs button {
+    flex: initial;
+    padding: 8px 0 12px;
+    font-size: 13px;
+  }
+  .view-tools {
+    gap: 8px;
+  }
+  .view-tools-title {
+    font-size: 13px;
+  }
+  .camera-actions {
+    gap: 4px;
+  }
+  .camera-actions button {
+    font-size: 12px;
+    padding: 8px;
+  }
+  #viewport {
+    height: clamp(300px, 48dvh, 440px);
+  }
+  #connection {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  .brand {
+    font-size: 16px;
+    gap: 8px;
+  }
+  .view-footer {
+    gap: 0 12px;
   }
 }

@@ -1,5 +1,7 @@
-# 0.16.1
+# 0.17.0
 
+- Add an actual byte-based upload percentage and progress bar for room imports and replacements, with distinct processing and preparation stages.
+- Simplify the room workspace: compact room navigation and device setup summary, clear Room & devices / Dashboard views / Settings tabs, and camera controls beside the model.
 - Fix macro entity icons in the native Home Assistant manager: resolve the HA icon in its own document and send plain SVG data to the manager frame. This avoids cross-document stylesheet errors and preserves the entity's icon.
 - Show Uploading model… and Preparing 3D view… as separate replacement stages.
 - Verify the released desk model inside Home Assistant Core 2026.10.2: all eight native tests, local helper mappings and real manager replacement pass. Existing rooms and mappings remain compatible.

@@ -1,3 +1,5 @@
+import { uploadJSON } from "../shared/upload.mjs";
+import { uploadProgress } from "./upload-progress.js";
 import { paintEntityIcon } from "../shared/entity-icon.mjs";
 import {
   deviceEntries,
@@ -36,6 +38,12 @@ const esc = (s) =>
   );
 const api = async (path, options = {}) => {
   if (native) return native.api(path, options);
+  if (options.onProgress)
+    return uploadJSON(new URL("api/" + path, location.href).href, {
+      ...options,
+      file: options.body,
+      headers: { "X-Rooms-Request": "1", ...options.headers },
+    });
   const res = await fetch(new URL("api/" + path, location.href), {
     ...options,
     headers: { "X-Rooms-Request": "1", ...options.headers },
@@ -193,6 +201,9 @@ function deskCard(device, states) {
     )}</div><button class="connect-entity" data-device-settings="${height.id}">Configure desk entities and macros</button></article>`;
 }
 function drawControls() {
+  $("preview-mode-note").textContent = preview
+    ? "Commands off"
+    : "Live controls";
   if (!selected) return;
   updateRoomSummary();
   const active = document.activeElement;
@@ -612,7 +623,7 @@ function drawModels() {
   $("models").innerHTML = models
     .map(
       (m) =>
-        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${deviceEntries(m).filter((c) => (c.device ? [c.device.height, c.device.motion, ...c.device.macros].some((id) => m.bindings[id]) : m.bindings[c.id])).length}/${deviceEntries(m).length} connected · ${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "Area not assigned")}</small></button>`,
+        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${deviceEntries(m).filter((c) => (c.device ? [c.device.height, c.device.motion, ...c.device.macros].some((id) => m.bindings[id]) : m.bindings[c.id])).length}/${deviceEntries(m).length} connected ${m.areaId || m.floor ? "· " : ""}${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "")}</small></button>`,
     )
     .join("");
 }
@@ -688,18 +699,8 @@ function updateRoomSummary() {
         )
       : selected.bindings[c.id],
   ).length;
-  const lights = selected.controls.filter((c) => c.type === "light");
-  const lit = lights.filter((c) => state(c).on).length;
-  const pct = total ? Math.round((bound / total) * 100) : 0;
-  $("room-summary").innerHTML = `${
-    lights.length
-      ? `<div class="status-item"><strong>${lit}</strong><span>${lit === 1 ? "light" : "lights"} on</span></div>`
-      : ""
-  }<div class="status-item"><span class="progress" role="img" aria-label="${bound} of ${total} devices connected"><i style="width:${pct}%"></i></span><span>${bound === total && total ? "All devices connected" : `${bound} of ${total} connected`}</span></div><div class="status-item status-area"><span>${area ? "Area: " + esc(area.name) : selected.areaId ? "Assigned area unavailable" : "No area assigned"}</span></div>${
-    bound < total
-      ? '<button type="button" class="primary" data-open-mappings>Connect devices</button>'
-      : ""
-  }`;
+  $("room-summary").innerHTML =
+    `<div class="status-item"><span>${total} ${total === 1 ? "device" : "devices"}</span><span aria-hidden="true">·</span><span>${bound} connected</span></div>${area ? `<span class="status-area">${esc(area.name)}</span>` : ""}${bound < total ? `<button type="button" data-open-mappings>Set up ${total - bound} ${total - bound === 1 ? "device" : "devices"}<span aria-hidden="true"> →</span></button>` : '<span class="status-ready">All devices connected</span>'}`;
 }
 $("room-summary").addEventListener("click", (e) => {
   if (e.target.closest("[data-open-mappings]")) openDeviceSettings();
@@ -720,6 +721,8 @@ function setRoomTab(tab, { keepEditor = false } = {}) {
   $("floor-view").hidden = $("home-view").hidden =
     !selected || tab === "settings";
   document.querySelector(".room-tabs").hidden = !selected;
+  document.querySelector(".view-tools").hidden =
+    !selected || tab === "settings";
   for (const b of document.querySelectorAll("[data-room-tab]"))
     b.setAttribute("aria-pressed", String(b.dataset.roomTab === tab));
   $("controls-section").hidden = !selected || tab !== "devices";
@@ -835,15 +838,21 @@ $("replace-form").onsubmit = async (event) => {
     )
   )
     return;
+  $("replace-form").setAttribute("aria-busy", "true");
   $("replace-submit").disabled = true;
   $("replace-submit").textContent = "Uploading model…";
   $("replace-error").textContent = "";
+  const progress = uploadProgress("replace");
   try {
     const result = await api(`models/${model.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/zip" },
       body: file,
+      file,
+      onProgress: progress.onProgress,
+      onUploaded: progress.onUploaded,
     });
+    progress.preparing();
     $("replace-submit").textContent = "Preparing 3D view…";
     models = await api("models");
     $("replace-form").reset();
@@ -857,10 +866,13 @@ $("replace-form").onsubmit = async (event) => {
       notes.push(
         `${result.unmappedControls.length} device${result.unmappedControls.length === 1 ? " needs" : "s need"} an entity`,
       );
+    progress.complete();
     toast(["Room model replaced.", ...notes].join(" · "));
   } catch (error) {
+    progress.failed();
     $("replace-error").textContent = error.message;
   } finally {
+    $("replace-form").setAttribute("aria-busy", "false");
     $("replace-submit").disabled = false;
     $("replace-submit").textContent = "Replace model";
   }
@@ -913,8 +925,7 @@ async function choose(id, tab = "devices") {
   $("preview-label").hidden = false;
   $("controls-section").hidden = activeRoomTab !== "devices";
   $("control-count").textContent = `${selected.controls.length} devices`;
-  $("view-hint").textContent =
-    "Drag to orbit · Scroll to zoom · Select a device to highlight";
+  $("view-hint").textContent = "Drag to rotate · Scroll to zoom";
   $("scene-status").hidden = false;
   $("scene-status").dataset.state = "loading";
   $("scene-status").textContent = "Loading your model…";
@@ -999,6 +1010,7 @@ $("preview").onchange = () => {
 for (const id of ["add-model", "empty-add"])
   $(id).onclick = () => {
     $("import-error").textContent = "";
+    $("import-progress").hidden = true;
     $("import-dialog").showModal();
   };
 for (const dialog of document.querySelectorAll("dialog"))
@@ -1023,23 +1035,33 @@ $("import-form").onsubmit = async (e) => {
     $("import-error").textContent = "Choose a ZIP smaller than 100 MB.";
     return;
   }
+  $("import-form").setAttribute("aria-busy", "true");
   $("import-submit").disabled = true;
-  $("import-submit").textContent = "Importing…";
+  $("import-submit").textContent = "Uploading model…";
   $("import-error").textContent = "";
+  const progress = uploadProgress("import");
   try {
     const result = await api("models", {
       method: "POST",
       headers: { "Content-Type": "application/zip" },
       body: file,
+      file,
+      onProgress: progress.onProgress,
+      onUploaded: progress.onUploaded,
     });
+    progress.preparing();
+    $("import-submit").textContent = "Preparing 3D view…";
     models = await api("models");
+    await choose(result.id);
+    progress.complete();
     $("import-dialog").close();
     $("import-form").reset();
-    await choose(result.id);
     toast("Room imported. Connect its devices, then save a dashboard view.");
   } catch (e) {
+    progress.failed();
     $("import-error").textContent = e.message;
   } finally {
+    $("import-form").setAttribute("aria-busy", "false");
     $("import-submit").disabled = false;
     $("import-submit").textContent = "Import room";
   }
@@ -1247,7 +1269,7 @@ function updateStatus(s) {
     s.mode === "simulation"
       ? "Simulated Home Assistant · no real devices"
       : s.connected
-        ? "Connected to Home Assistant"
+        ? "Home Assistant connected"
         : s.mode === "preview"
           ? "Local preview · no real devices"
           : "Home Assistant disconnected";
