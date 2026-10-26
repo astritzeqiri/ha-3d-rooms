@@ -1,5 +1,44 @@
 /** Presentation only: actual entity state remains the source of truth. */
 export function markerAppearance(control, entity, state, preview = false) {
+  if (control.type === "button") {
+    const connected = preview || !!entity,
+      unavailable = !connected || !!state.unavailable;
+    return {
+      badge: unavailable ? "—" : "Run",
+      description: unavailable ? "Not connected" : "Run preset",
+      active: false,
+      moving: false,
+      unavailable,
+      stateObj: entity || {
+        entity_id: "button.preview",
+        state: "unknown",
+        attributes: { icon: "mdi:gesture-tap-button" },
+      },
+    };
+  }
+  if (control.type === "number") {
+    const connected = preview || !!entity,
+      unavailable = !connected || !!state.unavailable;
+    const label = Number.isFinite(state.value)
+      ? `${state.value} ${control.unit}`
+      : "Unknown";
+    return {
+      badge: !connected ? "—" : unavailable ? "!" : label,
+      description: !connected
+        ? "Not connected"
+        : unavailable
+          ? "Unavailable"
+          : label,
+      active: !unavailable,
+      moving: false,
+      unavailable,
+      stateObj: entity || {
+        entity_id: "number.three_d_rooms_preview",
+        state: String(state.value ?? control.defaultValue),
+        attributes: { unit_of_measurement: control.unit, icon: "mdi:desk" },
+      },
+    };
+  }
   const cover = control.type === "cover";
   const connected = preview || !!entity;
   const unavailable = !preview && connected && state.unavailable;

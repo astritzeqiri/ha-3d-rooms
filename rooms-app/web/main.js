@@ -1,3 +1,10 @@
+import {
+  deviceEntries,
+  deviceForControl,
+  macroName,
+} from "../shared/device.mjs";
+import { actionState, actionCommand } from "../shared/action.mjs";
+import { numberState, numberCommand } from "../shared/number.mjs";
 import { coverFeatures, coverState, coverCommand } from "../shared/cover.mjs";
 import "./style.css";
 import { mountCameraNavigation } from "./camera-navigation.js";
@@ -69,6 +76,29 @@ let deviceFilter = "all",
 const openMore = new Set();
 const DEVICE_TOOLS_MIN = 5;
 function state(c) {
+  if (c.type === "button") {
+    const entity = status.entities.find(
+      (e) => e.entity_id === selected.bindings[c.id],
+    );
+    return preview
+      ? { unavailable: false }
+      : { ...actionState(entity), entity };
+  }
+  if (c.type === "number") {
+    if (preview)
+      return (
+        simulated.get(c.id) || { value: c.defaultValue, unavailable: false }
+      );
+    const entity = status.entities.find(
+      (e) => e.entity_id === selected.bindings[c.id],
+    );
+    const reported = numberState(entity, c);
+    return {
+      ...reported,
+      entity,
+      unavailable: !status.connected || reported.unavailable,
+    };
+  }
   if (c.type === "cover") {
     if (preview)
       return (
@@ -126,12 +156,49 @@ const entityNote = (c) =>
     : selected.bindings[c.id]
       ? `<span class="muted small device-entity">${esc(selected.bindings[c.id])}</span>`
       : `<button type="button" class="connect-entity" data-device-settings="${c.id}">Connect an entity</button>`;
+function deskCard(device, states) {
+  const height = selected.controls.find((c) => c.id === device.height),
+    motion = selected.controls.find((c) => c.id === device.motion);
+  const h = states.get(height.id),
+    m = states.get(motion.id),
+    f = preview
+      ? { open: true, close: true, stop: true }
+      : coverFeatures(m.entity);
+  const attrs = h.entity?.attributes || {},
+    min = preview ? height.min : Math.max(height.min, attrs.min ?? height.min),
+    max = preview ? height.max : Math.min(height.max, attrs.max ?? height.max),
+    step = preview
+      ? height.step
+      : Math.max(height.step, attrs.step || height.step);
+  return `<article class="light-card desk-card" data-device="${device.id}" data-control="${height.id}"><div class="device-heading"><div><div class="light-label">${esc(device.label)}</div><p class="light-state">Adjustable desk · ${height.min}–${height.max} ${esc(height.unit)}</p></div>${deviceSettingsButton({ ...height, label: device.label })}</div><div class="desk-main"><label class="desk-height-label">Height <output>${h.value === undefined ? "Unknown" : h.value + " " + esc(height.unit)}</output><input type="range" data-number="${height.id}" aria-label="${esc(device.label)} height" min="${min}" max="${max}" step="${step}" value="${h.value ?? height.defaultValue}" ${!preview && h.unavailable ? "disabled" : ""}></label><div class="shade-actions desk-directions">${[
+    ["open", "Up", "↑"],
+    ["stop", "Stop", "■"],
+    ["close", "Down", "↓"],
+  ]
+    .map(
+      ([action, label, icon]) =>
+        `<button data-cover="${motion.id}" data-action="${action}" aria-label="${esc(device.label)} ${label.toLowerCase()}" ${!preview && (m.unavailable || !f[action]) ? "disabled" : ""}><span aria-hidden="true">${icon}</span><span>${label}</span></button>`,
+    )
+    .join(
+      "",
+    )}</div></div><div class="desk-macros" aria-label="Desk macros">${device.macros
+    .map((id, i) => {
+      const name = macroName(selected, device, id),
+        st = states.get(id);
+      return `<button data-press="${id}" aria-label="${esc(name || "Macro " + (i + 1))}" ${!preview && st.unavailable ? "disabled" : ""}><span data-entity-icon="${id}" aria-hidden="true"></span><span ${name ? "" : 'class="muted"'}>${esc(name || "Name macro")}</span></button>`;
+    })
+    .join(
+      "",
+    )}</div><button class="connect-entity" data-device-settings="${height.id}">Configure desk entities and macros</button></article>`;
+}
 function drawControls() {
   if (!selected) return;
   updateRoomSummary();
   const active = document.activeElement;
   const focusKind = [
     "deviceSettings",
+    "number",
+    "press",
     "cover",
     "position",
     "toggle",
@@ -161,7 +228,8 @@ function drawControls() {
         : undefined,
     );
   }
-  const tools = selected.controls.length >= DEVICE_TOOLS_MIN;
+  const entries = deviceEntries(selected);
+  const tools = entries.length >= DEVICE_TOOLS_MIN;
   $("device-tools").hidden = !tools;
   for (const chip of document.querySelectorAll("[data-chip]"))
     chip.setAttribute(
@@ -169,7 +237,7 @@ function drawControls() {
       String(chip.dataset.chip === deviceFilter),
     );
   const query = tools ? deviceQuery.trim().toLowerCase() : "";
-  const visible = selected.controls.filter((c) => {
+  const visible = entries.filter((c) => {
     const s = states.get(c.id);
     if (
       query &&
@@ -185,9 +253,25 @@ function drawControls() {
     return !selected.bindings[c.id];
   });
   $("control-count").innerHTML =
-    `<span class="pill" data-live="${!preview}">${preview ? "Preview" : "Live"}</span>${visible.length === selected.controls.length ? selected.controls.length : `${visible.length} of ${selected.controls.length}`} ${selected.controls.length === 1 ? "device" : "devices"}`;
+    `<span class="pill" data-live="${!preview}">${preview ? "Preview" : "Live"}</span>${visible.length === entries.length ? entries.length : `${visible.length} of ${entries.length}`} ${entries.length === 1 ? "device" : "devices"}`;
   $("controls").innerHTML = visible
     .map((c) => {
+      if (c.device) return deskCard(c.device, states);
+      if (c.type === "button") {
+        const s = states.get(c.id),
+          label = esc(c.label);
+        return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${label}</span>${deviceSettingsButton(c)}</div><button data-press="${c.id}" aria-label="Run ${label}" ${!preview && s.unavailable ? "disabled" : ""}><span data-entity-icon="${c.id}" aria-hidden="true"></span> ${label}</button>${entityNote(c)}</article>`;
+      }
+      if (c.type === "number") {
+        const s = states.get(c.id),
+          label = esc(c.label),
+          disabled = !preview && s.unavailable ? "disabled" : "";
+        const attrs = s.entity?.attributes || {},
+          min = preview ? c.min : Math.max(c.min, attrs.min ?? c.min),
+          max = preview ? c.max : Math.min(c.max, attrs.max ?? c.max),
+          step = preview ? c.step : Math.max(c.step, attrs.step || c.step);
+        return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><div class="light-label">${label}</div>${deviceSettingsButton(c)}</div><label>${label} <output>${s.value === undefined ? "Unknown" : s.value + " " + esc(c.unit)}</output><input type="range" min="${min}" max="${max}" step="${step}" value="${s.value ?? c.defaultValue}" data-number="${c.id}" aria-label="${label}" ${disabled}></label>${entityNote(c)}</article>`;
+      }
       if (c.type === "cover") {
         const s = states.get(c.id),
           f = preview
@@ -195,7 +279,23 @@ function drawControls() {
             : coverFeatures(s.entity);
         const disabled = !preview && s.unavailable ? "disabled" : "";
         const label = esc(c.label);
-        return `<article class="light-card shade-card" data-control="${c.id}"><div class="device-heading"><div><div class="light-label">${label}</div><p class="light-state">${preview ? `${Math.round(s.position)}% open · preview` : esc(s.label)}</p></div>${deviceSettingsButton(c)}</div>
+        const actionLabel = (action) =>
+          c.motion === "none"
+            ? { open: "Up", close: "Down", stop: "Stop" }[action]
+            : action[0].toUpperCase() + action.slice(1);
+        const statusLabel =
+          c.motion === "none"
+            ? s.unavailable
+              ? "Unavailable"
+              : s.entity?.state === "opening"
+                ? "Moving up"
+                : s.entity?.state === "closing"
+                  ? "Moving down"
+                  : "Stopped"
+            : preview
+              ? `${Math.round(s.position)}% open · preview`
+              : s.label;
+        return `<article class="light-card shade-card" data-control="${c.id}"><div class="device-heading"><div><div class="light-label">${label}</div><p class="light-state">${esc(statusLabel)}</p></div>${deviceSettingsButton(c)}</div>
           <div class="shade-actions">${["open", "stop", "close"]
             .filter(
               (action) =>
@@ -206,7 +306,7 @@ function drawControls() {
             )
             .map(
               (action) =>
-                `<button data-cover="${c.id}" data-action="${action}" aria-label="${action} ${label}" ${disabled}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${action === "stop" ? '<rect x="7" y="7" width="10" height="10" rx="1"/>' : `<path d="${action === "open" ? "m6 14 6-6 6 6" : "m6 10 6 6 6-6"}"/>`}</svg><span>${action[0].toUpperCase() + action.slice(1)}</span></button>`,
+                `<button data-cover="${c.id}" data-action="${action}" aria-label="${actionLabel(action)} ${label}" ${disabled}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${action === "stop" ? '<rect x="7" y="7" width="10" height="10" rx="1"/>' : `<path d="${action === "open" ? "m6 14 6-6 6 6" : "m6 10 6 6 6-6"}"/>`}</svg><span>${actionLabel(action)}</span></button>`,
             )
             .join("")}</div>
           ${f.position && c.capabilities.includes("position") ? `<div class="shade-position"><label class="shade-position-label" for="shade-position-${c.id}"><span>Opening</span><output>${s.position === undefined ? "Unknown" : Math.round(s.position) + "%"}</output></label><input id="shade-position-${c.id}" style="--shade-fill:${s.position ?? c.defaultPosition ?? 0}%" type="range" min="0" max="100" step="1" value="${s.position ?? c.defaultPosition ?? 0}" data-position="${c.id}" aria-label="${label} opening" aria-valuetext="${s.position === undefined ? "Position unknown" : Math.round(s.position) + " percent open"}" ${disabled}><div class="shade-endpoints"><span>Closed</span><span>Open</span></div></div>` : ""}
@@ -268,6 +368,28 @@ function drawControls() {
     ${entityNote(c)}</article>`;
     })
     .join("");
+  for (const slot of document.querySelectorAll("[data-entity-icon]")) {
+    const c = selected.controls.find((c) => c.id === slot.dataset.entityIcon),
+      entity = states.get(c.id)?.entity;
+    try {
+      const parentDoc = window.parent.document;
+      if (!window.parent.customElements.get("ha-state-icon")) {
+        slot.textContent = "▶";
+        continue;
+      }
+      const icon = parentDoc.createElement("ha-state-icon");
+      icon.hass = parentDoc.querySelector("home-assistant")?.hass;
+      icon.stateObj = entity || {
+        entity_id: "button.preview",
+        state: "unknown",
+        attributes: { icon: "mdi:gesture-tap-button" },
+      };
+      slot.append(icon);
+    } catch {
+      slot.textContent = "▶";
+    }
+  }
+
   if (!visible.length)
     $("controls").innerHTML =
       '<div class="no-devices"><p>No devices match.</p><button type="button" data-clear-filters>Clear filters</button></div>';
@@ -330,6 +452,45 @@ async function command(id, on, settings = {}) {
     drawControls();
   }
 }
+async function pressPreset(id) {
+  const c = selected.controls.find((c) => c.id === id);
+  if (preview) {
+    toast("Preset preview: connect its Home Assistant entity to run it.");
+    return;
+  }
+  try {
+    actionCommand(state(c).entity, c, "press");
+    await api(`models/${selected.id}/command`, {
+      method: "POST",
+      body: JSON.stringify({ controlId: id, action: "press" }),
+    });
+    status = await api("status");
+    drawControls();
+  } catch (error) {
+    toast(error.message);
+  }
+}
+async function moveNumber(id, value) {
+  const model = selected,
+    c = model.controls.find((c) => c.id === id);
+  if (preview) {
+    simulated.set(id, { value });
+    drawControls();
+    return;
+  }
+  try {
+    numberCommand(state(c).entity, c, "set_value", value);
+    await api(`models/${model.id}/command`, {
+      method: "POST",
+      body: JSON.stringify({ controlId: id, action: "set_value", value }),
+    });
+    status = await api("status");
+    drawControls();
+  } catch (error) {
+    toast(error.message);
+    drawControls();
+  }
+}
 async function moveCover(id, action, position) {
   const model = selected,
     c = model.controls.find((c) => c.id === id);
@@ -380,6 +541,8 @@ $("controls").addEventListener("click", (e) => {
   const card = e.target.closest("[data-control]");
   if (card && !e.target.closest("button,input,select,summary,label,a"))
     view?.highlight(card.dataset.control);
+  const preset = e.target.closest("[data-press]");
+  if (preset) pressPreset(preset.dataset.press);
   const cover = e.target.closest("[data-cover]");
   if (cover) moveCover(cover.dataset.cover, cover.dataset.action);
   const toggle = e.target.closest("[data-toggle]"),
@@ -418,6 +581,9 @@ $("device-search").addEventListener("input", (e) => {
   drawControls();
 });
 $("controls").addEventListener("input", (e) => {
+  if (e.target.dataset.number)
+    e.target.closest("label").querySelector("output").textContent =
+      e.target.value + " cm";
   if (e.target.dataset.position) {
     e.target.closest(".shade-position").querySelector("output").textContent =
       e.target.value + "%";
@@ -434,6 +600,7 @@ $("controls").addEventListener("input", (e) => {
 $("controls").addEventListener("change", (e) => {
   const input = e.target,
     d = input.dataset;
+  if (d.number) moveNumber(d.number, Number(input.value));
   if (d.position) moveCover(d.position, "position", Number(input.value));
   if (d.brightness)
     command(d.brightness, true, { brightness: Number(input.value) });
@@ -449,7 +616,7 @@ function drawModels() {
   $("models").innerHTML = models
     .map(
       (m) =>
-        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${m.controls.filter((c) => m.bindings[c.id]).length}/${m.controls.length} connected · ${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "Area not assigned")}</small></button>`,
+        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${deviceEntries(m).filter((c) => (c.device ? [c.device.height, c.device.motion, ...c.device.macros].some((id) => m.bindings[id]) : m.bindings[c.id])).length}/${deviceEntries(m).length} connected · ${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "Area not assigned")}</small></button>`,
     )
     .join("");
 }
@@ -516,9 +683,16 @@ function roomSettingsDirty() {
 function updateRoomSummary() {
   if (!selected) return;
   const area = areas.find((a) => a.area_id === selected.areaId);
-  const total = selected.controls.length;
-  const bound = selected.controls.filter((c) => selected.bindings[c.id]).length;
-  const lights = selected.controls.filter((c) => c.type !== "cover");
+  const entries = deviceEntries(selected),
+    total = entries.length;
+  const bound = entries.filter((c) =>
+    c.device
+      ? [c.device.height, c.device.motion, ...c.device.macros].some(
+          (id) => selected.bindings[id],
+        )
+      : selected.bindings[c.id],
+  ).length;
+  const lights = selected.controls.filter((c) => c.type === "light");
   const lit = lights.filter((c) => state(c).on).length;
   const pct = total ? Math.round((bound / total) * 100) : 0;
   $("room-summary").innerHTML = `${
@@ -758,7 +932,7 @@ async function choose(id, tab = "devices") {
         view.highlight(id);
         document
           .querySelector(
-            `[data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"]`,
+            `[data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"], [data-number="${id}"], [data-press="${id}"]`,
           )
           ?.focus();
       },
@@ -876,22 +1050,39 @@ $("import-form").onsubmit = async (e) => {
 const lightDomains = /^(light|switch)\./,
   coverDomains = /^cover\./;
 const deviceIcon = (c) =>
-  c.type === "cover"
-    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h16M6 4v10M18 4v10M6 8h12M6 11h12"/><path d="M12 14v5"/><circle cx="12" cy="20" r="1"/></svg>'
-    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/></svg>';
+  c.type === "button"
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 10 7-10 7Z"/></svg>'
+    : c.type === "number"
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h18M5 8v12M19 8v12M9 3h6"/></svg>'
+      : c.type === "cover"
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h16M6 4v10M18 4v10M6 8h12M6 11h12"/><path d="M12 14v5"/><circle cx="12" cy="20" r="1"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/></svg>';
 const capabilityText = (c) =>
-  c.type === "cover"
-    ? "Shade · open, close, position"
-    : c.capabilities.includes("brightness")
-      ? "Light · dimming, color, white"
-      : "Light · on/off";
+  c.type === "button"
+    ? "Preset · press"
+    : c.type === "number"
+      ? `Height · ${c.min}–${c.max} ${c.unit}`
+      : c.type === "cover"
+        ? c.motion === "none"
+          ? "Desk direction · up, stop, down"
+          : "Shade · open, close, position"
+        : c.capabilities.includes("brightness")
+          ? "Light · dimming, color, white"
+          : "Light · on/off";
 const pickerContext = (controlId) => {
   const control = selected.controls.find((c) => c.id === controlId);
   return {
     control,
     entities: status.entities,
     selectedId: selected.bindings[controlId] || "",
-    pattern: control.type === "cover" ? coverDomains : lightDomains,
+    pattern:
+      control.type === "button"
+        ? /^(button|input_button|script|scene)\./
+        : control.type === "number"
+          ? /^(number|input_number)\./
+          : control.type === "cover"
+            ? coverDomains
+            : lightDomains,
   };
 };
 const pickerFor = (c) =>
@@ -899,22 +1090,50 @@ const pickerFor = (c) =>
 const mappingRow = (c) =>
   `<div class="mapping" data-mapping="${c.id}"><div class="mapping-head"><span class="mapping-icon">${deviceIcon(c)}</span><div class="mapping-title"><div class="mapping-name">${esc(c.label)}</div><div class="mapping-sub">${esc(c.room ? c.room + " · " : "")}${capabilityText(c)}</div></div><button type="button" class="locate-btn" data-highlight="${c.id}" title="Close this window and highlight the device in the 3D room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Show in room</button></div>${pickerFor(c)}</div>`;
 function drawMappings(controlId) {
+  const device = controlId ? deviceForControl(selected, controlId) : null;
+  const members = device
+    ? [device.height, device.motion, ...device.macros]
+    : null;
   $("settings-eyebrow").textContent = selected.title;
-  $("settings-sub").textContent = controlId
-    ? "Choose the Home Assistant entity that controls this device. Changes save automatically."
-    : "Choose the Home Assistant entity that controls each device. Changes save automatically.";
-  $("settings-title").textContent = controlId
-    ? "Connect " + selected.controls.find((c) => c.id === controlId).label
-    : "Connect devices";
+  $("settings-title").textContent = device
+    ? device.label
+    : controlId
+      ? "Connect " + selected.controls.find((c) => c.id === controlId).label
+      : "Connect devices";
+  $("settings-sub").textContent = device
+    ? "Set the height and direction entities, then choose and name up to four macros. Changes save automatically."
+    : "Choose the Home Assistant entities. Changes save automatically.";
   $("export-model").hidden = $("delete-model").hidden = !!controlId;
   $("mapping-note").hidden = status.connected;
   $("mapping-note").textContent =
-    "Home Assistant isn’t connected, so devices can only be previewed. Open 3D Rooms from the Home Assistant sidebar to choose entities.";
-  $("mappings").innerHTML = selected.controls
-    .filter((c) => !controlId || c.id === controlId)
+    "Open 3D Rooms from Home Assistant to choose entities.";
+  const groups = device ? [device] : controlId ? [] : selected.devices || [];
+  const memberIds = new Set(
+    groups.flatMap((d) => [d.height, d.motion, ...d.macros]),
+  );
+  const deviceRows = groups
+    .map(
+      (d) =>
+        `<section class="desk-mapping"><h3>${esc(d.label)}</h3>${[
+          d.height,
+          d.motion,
+          ...d.macros,
+        ]
+          .map((id, index) => {
+            const c = selected.controls.find((c) => c.id === id);
+            const name = index >= 2 ? macroName(selected, d, id) : "";
+            return `${index >= 2 ? `<label class="macro-name">Macro ${index - 1} name<input data-macro-name="${id}" data-device="${d.id}" maxlength="80" value="${esc(name)}" placeholder="Name your macro" aria-label="Macro ${index - 1} name"></label>` : ""}${mappingRow({ ...c, label: index === 0 ? "Height entity" : index === 1 ? "Up / Stop / Down entity" : name || "Macro " + (index - 1) + " entity" })}`;
+          })
+          .join("")}</section>`,
+    )
+    .join("");
+  const other = selected.controls
+    .filter((c) => !memberIds.has(c.id) && (!controlId || c.id === controlId))
     .map(mappingRow)
     .join("");
+  $("mappings").innerHTML = deviceRows + other;
 }
+
 let mappingControlId;
 function openDeviceSettings(controlId) {
   mappingControlId = controlId;
@@ -929,6 +1148,34 @@ $("settings-dialog").addEventListener("close", () => {
     document
       .querySelector(`[data-device-settings="${mappingControlId}"]`)
       ?.focus({ preventScroll: true });
+});
+$("mappings").addEventListener("change", async (e) => {
+  const input = e.target;
+  if (!input.dataset.macroName) return;
+  const deviceId = input.dataset.device,
+    id = input.dataset.macroName;
+  const names = {
+    ...selected.deviceSettings?.[deviceId]?.macroNames,
+    [id]: input.value,
+  };
+  try {
+    const result = await api(`models/${selected.id}/device-settings`, {
+      method: "PUT",
+      body: JSON.stringify({ deviceId, macroNames: names }),
+    });
+    selected.deviceSettings = result.deviceSettings;
+    const device = selected.devices.find((d) => d.id === deviceId),
+      index = device.macros.indexOf(id);
+    const title = $("mappings").querySelector(
+      `[data-mapping="${CSS.escape(id)}"] .mapping-name`,
+    );
+    if (title)
+      title.textContent = input.value.trim() || `Macro ${index + 1} entity`;
+    drawControls();
+    $("mapping-error").textContent = "";
+  } catch (error) {
+    $("mapping-error").textContent = error.message;
+  }
 });
 $("mappings").addEventListener("click", (e) => {
   const b = e.target.closest("[data-highlight]");

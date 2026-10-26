@@ -177,3 +177,10 @@ Device cards have a settings cog for changing that device’s entity directly. T
 ### Updating to 0.15.0
 
 Update **3D Rooms** in HACS, restart Home Assistant itself, then refresh the browser. The smaller navigation cube stays visible in the room manager and saved-view editor. Drag it to rotate, use arrow keys, or click faces, edges and corners to snap the view. The Views picker is removed; Home resets the view. No model re-upload or storage migration is required.
+
+## Adjustable desk support · 0.16.0
+
+Version 0.16.0 adds a single **Adjustable desk** device, grouping height,
+Up/Stop/Down and four user-named macros in one card/settings box. Macro icons
+follow their mapped Home Assistant entities. See [the device contract](docs/adjustable-desk.md).
+Update in HACS, restart Home Assistant, and refresh the browser. Export the desk-enabled office from the authoring viewer, then import that ZIP into 3D Rooms. To upgrade an existing room while retaining its matching mappings and saved views, use **Room settings → Replace model**. Existing rooms do not need re-uploading just to update the integration.

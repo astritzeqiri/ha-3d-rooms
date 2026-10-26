@@ -42,7 +42,9 @@ export async function createApp({
         : "preview",
     entities: bridge.connected
       ? bridge.entities.filter((e) =>
-          /^(light|switch|cover|sun)\./.test(e.entity_id),
+          /^(light|switch|cover|sun|number|input_number|button|input_button|script|scene)\./.test(
+            e.entity_id,
+          ),
         )
       : [],
   });
@@ -186,7 +188,7 @@ export async function createApp({
         return;
       }
       const match = path.match(
-        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|scene\.glb|export\.zip))?$/,
+        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|device-settings|scene\.glb|export\.zip))?$/,
       );
       if (match) {
         const m = store.find(match[1]);
@@ -284,6 +286,15 @@ export async function createApp({
           json(res, 200, { daylight });
           return;
         }
+        if (req.method === "PUT" && op === "device-settings") {
+          const b = JSON.parse(await body(req, 65536));
+          json(
+            res,
+            200,
+            await store.setDeviceSettings(m.id, b.deviceId, b.macroNames),
+          );
+          return;
+        }
         if (req.method === "PUT" && op === "bindings") {
           const b = JSON.parse(await body(req, 65536));
           const control = m.controls.find((c) => c.id === b.controlId);
@@ -310,7 +321,11 @@ export async function createApp({
           if (!c || !entityId)
             throw new Error("Connect this object to an entity first.");
           const entity = bridge.entities.find((e) => e.entity_id === entityId);
-          if (!entity || ["unavailable", "unknown"].includes(entity.state))
+          if (
+            !entity ||
+            entity.state === "unavailable" ||
+            (entity.state === "unknown" && c.type !== "button")
+          )
             throw new Error("This entity is unavailable.");
           await bridge.call(
             commandFor(
@@ -319,6 +334,7 @@ export async function createApp({
               b.brightness,
               c,
               {
+                ...(b.value !== undefined ? { value: b.value } : {}),
                 ...(b.position !== undefined ? { position: b.position } : {}),
                 ...(b.rgb_color !== undefined
                   ? { rgb_color: b.rgb_color }

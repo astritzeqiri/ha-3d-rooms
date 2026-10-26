@@ -56,6 +56,57 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
             await self.runtime.request("daylight", {"model": "kitchen", "mode": "auto", "entity": "sun.missing"}, "test-user")
         self.assertEqual(self.store.find("kitchen")["daylight"]["mode"], "auto")
 
+    async def test_desk_number_services_limits_units_and_reported_state(self):
+        calls = []
+        async def handle(call):
+            calls.append(call)
+            self.hass.states.async_set(call.data["entity_id"], str(call.data["value"]), attrs)
+        attrs = {"min": 73, "max": 130, "step": .1, "unit_of_measurement": "cm"}
+        control = {"id": "desk-height", "type": "number", "min": 73, "max": 130, "step": .1, "unit": "cm", "capabilities": ["set_value"]}
+        self.store.models[0]["controls"].append(control)
+        base = {"model": "kitchen", "controlId": "desk-height", "action": "set_value"}
+        for domain in ("number", "input_number"):
+            entity_id = f"{domain}.desk"
+            self.hass.services.async_register(domain, "set_value", handle)
+            self.hass.states.async_set(entity_id, "78.2", attrs)
+            self.store.models[0]["bindings"]["desk-height"] = entity_id
+            await self.runtime.request("command", {**base, "value": 130, "entityId": "number.injected"}, "test-user")
+            self.assertEqual(calls[-1].data["entity_id"], entity_id)
+            self.assertEqual(calls[-1].context.user_id, "test-user")
+            self.assertEqual(self.hass.states.get(entity_id).state, "130")
+            self.assertTrue(any(e["entity_id"] == entity_id for e in self.runtime.status()["entities"]))
+            for value in (72, 131, True, "100", float("nan"), 100.05):
+                with self.assertRaises(ValueError):
+                    await self.runtime.request("command", {**base, "value": value}, "test-user")
+            self.hass.states.async_set(entity_id, "unknown", attrs)
+            with self.assertRaises(ValueError):
+                await self.runtime.request("command", {**base, "value": 100}, "test-user")
+            self.hass.states.async_set(entity_id, "100", {**attrs, "unit_of_measurement": "in"})
+            with self.assertRaises(ValueError):
+                await self.runtime.request("command", {**base, "value": 100}, "test-user")
+        self.assertEqual(len(calls), 2)
+
+    async def test_desk_presets_dispatch_only_mapped_actions_with_caller(self):
+        calls = []
+        async def handle(call):
+            calls.append(call)
+        for index, domain in enumerate(("button", "input_button", "script", "scene")):
+            control_id = f"desk-preset-{index+1}"
+            entity_id = f"{domain}.desk_preset"
+            self.store.models[0]["controls"].append({"id": control_id, "type": "button", "capabilities": ["press"]})
+            self.store.models[0]["bindings"][control_id] = entity_id
+            self.hass.states.async_set(entity_id, "unknown")
+            service = "press" if domain in ("button", "input_button") else "turn_on"
+            self.hass.services.async_register(domain, service, handle)
+            await self.runtime.request("command", {"model": "kitchen", "controlId": control_id, "action": "press", "entityId": "button.injected"}, "test-user")
+            self.assertEqual(calls[-1].data["entity_id"], entity_id)
+            self.assertEqual(calls[-1].service, service)
+            self.assertEqual(calls[-1].context.user_id, "test-user")
+            self.hass.states.async_set(entity_id, "unavailable")
+            with self.assertRaises(ValueError):
+                await self.runtime.request("command", {"model": "kitchen", "controlId": control_id, "action": "press"}, "test-user")
+        self.assertEqual(len(calls), 4)
+
     async def test_cover_services_reported_height_and_capability_gating(self):
         calls = []
         async def handle(call):

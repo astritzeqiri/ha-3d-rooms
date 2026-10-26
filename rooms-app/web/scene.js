@@ -1,3 +1,5 @@
+import { deviceForControl } from "../shared/device.mjs";
+import { setNumberValue } from "../shared/number.mjs";
 import { createDaylight } from "../shared/daylight.mjs";
 import { setShadePosition } from "../shared/cover.mjs";
 import { cameraPreset } from "../shared/camera-presets.mjs";
@@ -141,21 +143,24 @@ export class SceneView {
     for (const c of model.controls) {
       const light = new THREE.PointLight(
         c.color || "#fff0d4",
-        c.type === "cover" ? 0 : (c.intensity ?? 12),
+        c.type !== "light" ? 0 : (c.intensity ?? 12),
         20,
         2,
       );
       light.position.fromArray(c.position);
-      light.castShadow = true;
+      light.castShadow = c.type === "light";
       light.shadow.mapSize.set(512, 512);
       light.shadow.bias = -0.001;
       light.shadow.normalBias = 0.02;
-      this.scene.add(light);
+      if (c.type === "light") this.scene.add(light);
       const marker = new THREE.Mesh(
         new THREE.SphereGeometry(0.065, 12, 8),
         new THREE.MeshBasicMaterial({ color: "#c3dbab", depthTest: false }),
       );
-      marker.visible = this.options.markers && this.options.mode !== "floor";
+      const device = deviceForControl(model, c.id),
+        companion = device && device.height !== c.id;
+      marker.visible =
+        !companion && this.options.markers && this.options.mode !== "floor";
       marker.position.fromArray(c.position);
       marker.userData.pickControl = c.id;
       marker.renderOrder = 10;
@@ -179,7 +184,22 @@ export class SceneView {
           : [];
       for (const node of coverNodes)
         setShadePosition(node, c.defaultPosition ?? 0);
+      const numberNodes =
+        c.type === "number"
+          ? (c.nodeIds || []).map((id) => this.nodes.get(id)).filter(Boolean)
+          : [];
+      for (const node of numberNodes) setNumberValue(node, c.defaultValue);
+      if (numberNodes.length) {
+        const motion = numberNodes[0].userData.numberMotion;
+        marker.position.y =
+          c.position[1] +
+          (c.defaultValue - motion.restValue) * motion.metersPerUnit;
+      }
       this.fixtures.set(c.id, {
+        numberNodes,
+        markerRestY: c.position[1],
+        type: c.type,
+        companion,
         light,
         marker,
         mats,
@@ -247,7 +267,8 @@ export class SceneView {
     this.orbit.enableRotate =
       this.options.allowRotate ?? this.options.mode !== "floor";
     for (const f of this.fixtures.values())
-      f.marker.visible = this.options.markers && this.options.mode !== "floor";
+      f.marker.visible =
+        !f.companion && this.options.markers && this.options.mode !== "floor";
     this.renderer.domElement.setAttribute(
       "aria-label",
       this.options.mode === "floor"
@@ -364,7 +385,24 @@ export class SceneView {
     this.lastStates = states;
     for (const [id, f] of this.fixtures) {
       const s = states.get(id) || { on: false };
-      if (f.coverNodes.length) {
+      if (f.numberNodes.length) {
+        for (const node of f.numberNodes) setNumberValue(node, s.value);
+        if (Number.isFinite(s.value)) {
+          const motion = f.numberNodes[0].userData.numberMotion;
+          f.marker.position.y =
+            f.markerRestY +
+            (Math.max(motion.min, Math.min(motion.max, s.value)) -
+              motion.restValue) *
+              motion.metersPerUnit;
+        }
+        f.marker.material.color.set(s.unavailable ? "#858b86" : "#c3dbab");
+        continue;
+      }
+      if (f.type === "button") {
+        f.marker.material.color.set(s.unavailable ? "#858b86" : "#c3dbab");
+        continue;
+      }
+      if (f.type === "cover") {
         for (const node of f.coverNodes) setShadePosition(node, s.position);
         f.marker.material.color.set(s.unavailable ? "#858b86" : "#c3dbab");
         continue;

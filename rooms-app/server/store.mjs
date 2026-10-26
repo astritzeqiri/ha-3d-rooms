@@ -1,3 +1,4 @@
+import { validateDeviceSettings } from "../shared/device.mjs";
 import { validateComponent } from "../shared/component.mjs";
 import { mkdir, readFile, writeFile, rename, rm } from "node:fs/promises";
 import { join } from "node:path";
@@ -68,6 +69,24 @@ export class Store {
         throw error;
       }
       return { ok: true };
+    });
+  }
+  async setDeviceSettings(modelId, deviceId, macroNames) {
+    return this.transaction(async () => {
+      const model = this.find(modelId),
+        previous = model.deviceSettings;
+      const settings = validateDeviceSettings(
+        { ...previous, [deviceId]: { macroNames } },
+        model.devices,
+      );
+      model.deviceSettings = settings;
+      try {
+        await this.save();
+      } catch (error) {
+        model.deviceSettings = previous;
+        throw error;
+      }
+      return { deviceSettings: settings };
     });
   }
   async install(stage, manifest) {

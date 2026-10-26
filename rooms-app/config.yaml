@@ -1,5 +1,5 @@
 name: 3D Rooms
-version: "0.15.0"
+version: "0.16.0"
 slug: three_d_rooms
 url: https://github.com/astritzeqiri/ha-3d-rooms
 description: Import 3D floors and connect their lights to Home Assistant entities.

@@ -2236,3 +2236,72 @@ li[aria-selected="true"] .opt-name {
     padding-right: 16px;
   }
 }
+
+.desk-card {
+  grid-column: 1 / -1;
+}
+.desk-main {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 0.65fr);
+  gap: 24px;
+  align-items: center;
+  margin: 12px 0 20px;
+}
+.desk-height-label {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  font-weight: 600;
+}
+.desk-height-label input {
+  grid-column: 1/-1;
+  width: 100%;
+}
+.desk-macros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.desk-macros button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+}
+.desk-macros ha-state-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  --mdc-icon-size: 24px;
+}
+.desk-mapping {
+  border: 1px solid var(--border, #d2dedc);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 0 0 16px;
+}
+.desk-mapping h3 {
+  margin: 0 0 16px;
+}
+.macro-name {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0 8px;
+  font-weight: 600;
+}
+.macro-name input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+}
+@media (max-width: 600px) {
+  .desk-main {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .desk-macros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -16,7 +16,7 @@ from homeassistant.components.http import HomeAssistantView
 from homeassistant.core import Context
 from homeassistant.exceptions import HomeAssistantError
 from .const import DOMAIN
-from .models import ENTITY, MAX_UPLOAD, number
+from .models import ENTITY, MAX_UPLOAD, number, compatible_entity
 
 
 class RoomsRuntime:
@@ -38,7 +38,7 @@ class RoomsRuntime:
             "entities": [
                 s.as_dict()
                 for s in self.hass.states.async_all()
-                if s.domain in ("light", "switch", "cover", "sun")
+                if s.domain in ("light", "switch", "cover", "sun", "number", "input_number", "button", "input_button", "script", "scene")
             ],
         }
 
@@ -79,6 +79,10 @@ class RoomsRuntime:
             result = await self.work(self.store.set_daylight, data.get("model"), data)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
+        if operation == "device-settings":
+            result = await self.work(self.store.set_device_settings, data.get("model"), data.get("deviceId"), data.get("macroNames"))
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "bindings":
             entity_id = data.get("entityId", "")
             if not isinstance(entity_id, str) or (
@@ -103,12 +107,18 @@ class RoomsRuntime:
             if not control or not entity_id or not ENTITY.fullmatch(entity_id):
                 raise ValueError("Connect this control to an entity first.")
             entity = self.hass.states.get(entity_id)
-            if not entity or entity.state in ("unavailable", "unknown"):
+            if not entity or entity.state == "unavailable" or (entity.state == "unknown" and control.get("type") != "button"):
                 raise ValueError("This entity is unavailable.")
             is_cover = control.get("type") == "cover"
-            if (entity.domain == "cover") != is_cover:
+            if not compatible_entity(control, entity_id):
                 raise ValueError("Entity does not match this control type.")
-            if is_cover:
+            if control.get("type") == "button":
+                if data.get("action") != "press" or "press" not in control["capabilities"]:
+                    raise ValueError("Use the preset's press action.")
+                service, settings = ("press" if entity.domain in ("button", "input_button") else "turn_on"), {}
+            elif control.get("type") == "number":
+                service, settings = number_command(data, control, entity)
+            elif is_cover:
                 service, settings = cover_command(data, control, entity)
             else:
                 settings = light_command(data, control, entity)
@@ -122,6 +132,31 @@ class RoomsRuntime:
             )
             return {"ok": True}
         raise ValueError("Unknown 3D Rooms operation.")
+
+
+def number_command(data, control, entity):
+    """Set a mapped desk height only inside both model and device limits."""
+    import math
+    attrs = entity.attributes
+    try:
+        reported = float(entity.state)
+    except (TypeError, ValueError):
+        raise ValueError("This number is unavailable.") from None
+    if not math.isfinite(reported) or not control["min"] <= reported <= control["max"]:
+        raise ValueError("This number is outside the modeled range.")
+    value = data.get("value")
+    if (data.get("action") != "set_value" or "set_value" not in control["capabilities"]
+        or entity.domain not in ("number", "input_number")
+        or attrs.get("unit_of_measurement", control["unit"]) != control["unit"]):
+        raise ValueError("Choose an available number with matching units.")
+    if (not number(value) or not control["min"] <= value <= control["max"]
+        or not number(attrs.get("min")) or not number(attrs.get("max"))
+        or not attrs["min"] <= value <= attrs["max"]):
+        raise ValueError("Value is outside the desk or entity range.")
+    for minimum, step in ((control["min"], control["step"]), (attrs["min"], attrs.get("step"))):
+        if not number(step) or step <= 0 or not math.isclose((value-minimum)/step, round((value-minimum)/step), abs_tol=1e-6, rel_tol=0):
+            raise ValueError("Value must follow the allowed step.")
+    return "set_value", {"value": value}
 
 
 def cover_command(data, control, entity):

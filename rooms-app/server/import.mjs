@@ -100,6 +100,7 @@ export function validateGLB(b, manifest) {
   );
   if (manifest.daylight?.windows.some((w) => !daylightIds.has(w.nodeId)))
     throw new Error("A daylight window references a missing scene node.");
+  validateNumberNodes(doc, manifest);
   const ids = new Set(
     (doc.nodes || []).map((n) => n.extras?.controlId).filter(Boolean),
   );
@@ -109,4 +110,52 @@ export function validateGLB(b, manifest) {
         throw new Error(
           `Control ${c.label} references a missing scene node: ${id}`,
         );
+}
+
+export function validateNumberNodes(doc, manifest) {
+  for (const control of manifest.controls.filter((c) => c.type === "number"))
+    for (const id of control.nodeIds) {
+      const matches = (doc.nodes || []).filter(
+        (n) => n.extras?.controlId === id,
+      );
+      if (matches.length !== 1)
+        throw new Error("Number controls need unique scene roots.");
+      const motion = matches[0].extras.numberMotion;
+      if (
+        !motion ||
+        !["min", "max", "restValue", "metersPerUnit", "defaultValue"].every(
+          (k) => Number.isFinite(motion[k]),
+        ) ||
+        motion.min !== control.min ||
+        motion.max !== control.max ||
+        motion.metersPerUnit !== 0.01 ||
+        motion.restValue < motion.min ||
+        motion.restValue > motion.max ||
+        motion.defaultValue !== control.defaultValue
+      )
+        throw new Error("Invalid centimetre number motion metadata.");
+      const pending = [...(matches[0].children || [])],
+        seen = new Set();
+      let count = 0;
+      while (pending.length) {
+        const index = pending.pop();
+        if (!Number.isInteger(index) || seen.has(index) || !doc.nodes[index])
+          throw new Error("Invalid number motion hierarchy.");
+        seen.add(index);
+        const node = doc.nodes[index];
+        pending.push(...(node.children || []));
+        const part = node.extras?.numberMotionPart;
+        if (part) {
+          if (
+            !Number.isFinite(part.baseY) ||
+            !Number.isFinite(part.factor) ||
+            part.factor < 0 ||
+            part.factor > 1
+          )
+            throw new Error("Invalid number motion part.");
+          count++;
+        }
+      }
+      if (!count) throw new Error("Number controls need moving scene parts.");
+    }
 }

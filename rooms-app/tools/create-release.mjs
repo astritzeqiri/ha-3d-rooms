@@ -37,6 +37,9 @@ for (const file of [
 files["three_d_rooms/README.md"] = new Uint8Array(
   await readFile("../README.md"),
 );
+files["three_d_rooms/docs/adjustable-desk.md"] = new Uint8Array(
+  await readFile("../docs/adjustable-desk.md"),
+);
 await mkdir("../releases", { recursive: true });
 await writeFile(
   `../releases/3d-rooms-${version}-source.zip`,

@@ -26,7 +26,7 @@ import zipfile
 MAX_UPLOAD = 100 * 1024 * 1024
 MAX_EXPANDED = 300 * 1024 * 1024
 ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,79}\Z")
-ENTITY = re.compile(r"(?:light|switch|cover)\.[a-z0-9_]+\Z")
+ENTITY = re.compile(r"(?:light|switch|cover|number|input_number|button|input_button|script|scene)\.[a-z0-9_]+\Z")
 SAFE_FILE = re.compile(
     r"(?:manifest\.json|bindings\.json|scene\.glb|thumbnail\.(?:png|jpg|webp)|textures/[a-zA-Z0-9_./-]+)\Z"
 )
@@ -128,12 +128,12 @@ def validate_manifest(m):
             raise ValueError("Every control needs a unique stable ID.")
         seen.add(c["id"])
         if (
-            c.get("type") not in ("light", "cover")
+            c.get("type") not in ("light", "cover", "number", "button")
             or not isinstance(c.get("label"), str)
             or not c["label"].strip()
             or len(c["label"]) > 160
         ):
-            raise ValueError("Every control must be a labeled light or cover.")
+            raise ValueError("Every control must be a labeled light, cover or number.")
         if not vector(c.get("position")):
             raise ValueError("Every control needs a position in meters.")
         if "intensity" in c and (
@@ -150,24 +150,36 @@ def validate_manifest(m):
             or not all(valid_id(n) for n in c["nodeIds"])
         ):
             raise ValueError("Invalid light scene node IDs.")
-        if c["type"] == "cover" and (
+        if c["type"] == "cover" and c.get("motion") != "none" and (
             not c.get("nodeIds")
             or not number(c.get("defaultPosition", 0))
             or not 0 <= c.get("defaultPosition", 0) <= 100
         ):
             raise ValueError("Covers need scene nodes and a default position from 0 to 100.")
+        if c["type"] == "number":
+            if (not c.get("nodeIds") or not all(number(c.get(k)) for k in ("min", "max", "step", "defaultValue"))
+                or not c["min"] < c["max"] or c["step"] <= 0
+                or not c["min"] <= c["defaultValue"] <= c["max"] or c.get("unit") != "cm"):
+                raise ValueError("Numbers need nodes, a valid centimetre range, step and default value.")
+        if c.get("motion") is not None and (c["type"] != "cover" or c["motion"] != "none" or c.get("nodeIds")):
+            raise ValueError("Command-only covers must have no moving scene nodes.")
+        if c.get("group") is not None and (not valid_id(c["group"]) or not any(item.get("id") == c["group"] and item.get("type") == "number" for item in controls)):
+            raise ValueError("Companion controls must reference a declared number.")
         caps = c.get("capabilities")
         if (
             not isinstance(caps, list)
-            or ("open_close" if c["type"] == "cover" else "on_off") not in caps
+            or ("press" if c["type"] == "button" else "set_value" if c["type"] == "number" else "open_close" if c["type"] == "cover" else "on_off") not in caps
             or any(
                 v not in (
-                    ("open_close", "position", "stop") if c["type"] == "cover"
+                    ("press",) if c["type"] == "button" else ("set_value",) if c["type"] == "number" else ("open_close", "position", "stop") if c["type"] == "cover"
                     else ("on_off", "brightness", "color", "color_temp")
                 ) for v in caps
             )
         ):
             raise ValueError("Unsupported control capabilities.")
+    validate_devices(m.get("devices", []), controls)
+    if "deviceSettings" in m:
+        validate_device_settings(m["deviceSettings"], m.get("devices", []))
     if "daylight" in m:
         validate_daylight(m["daylight"], controls)
     if "camera" in m and (
@@ -196,8 +208,49 @@ def validate_manifest(m):
             "camera",
             "ambient",
             "daylight",
+            "devices",
+            "deviceSettings",
         )
     }
+
+
+def validate_devices(devices, controls):
+    if not isinstance(devices, list) or len(devices) > 100:
+        raise ValueError("Invalid devices.")
+    seen, members = set(), set()
+    for device in devices:
+        if (not isinstance(device, dict) or not valid_id(device.get("id")) or device["id"] in seen
+            or device.get("type") != "adjustable_desk" or not isinstance(device.get("label"), str)
+            or not device["label"].strip() or len(device["label"]) > 160
+            or not isinstance(device.get("macros"), list) or len(device["macros"]) != 4):
+            raise ValueError("Invalid adjustable desk device.")
+        seen.add(device["id"])
+        roles = [(device.get("height"), "number"), (device.get("motion"), "cover")] + [(key, "button") for key in device["macros"]]
+        for key, kind in roles:
+            if not valid_id(key) or key in members or not any(c["id"] == key and c["type"] == kind for c in controls):
+                raise ValueError("Desk roles must reference distinct compatible controls.")
+            members.add(key)
+        if next(c for c in controls if c["id"] == device["motion"]).get("motion") != "none":
+            raise ValueError("Desk motion must be a command-only cover.")
+    return deepcopy(devices)
+
+
+def validate_device_settings(value, devices):
+    if not isinstance(value, dict):
+        raise ValueError("Invalid device settings.")
+    clean = {}
+    for key, settings in value.items():
+        device = next((d for d in devices if d["id"] == key), None)
+        if (not device or not isinstance(settings, dict) or set(settings) != {"macroNames"}
+            or not isinstance(settings["macroNames"], dict)):
+            raise ValueError("Invalid desk settings.")
+        names = {}
+        for control_id, name in settings["macroNames"].items():
+            if control_id not in device["macros"] or not isinstance(name, str) or len(name) > 80:
+                raise ValueError("Macro names must be at most 80 characters.")
+            names[control_id] = name.strip()
+        clean[key] = {"macroNames": names}
+    return clean
 
 
 def validate_camera_snapshot(value, view):
@@ -280,6 +333,33 @@ def validate_glb(data, manifest):
     for control in manifest["controls"]:
         if any(node not in nodes for node in control.get("nodeIds", [])):
             raise ValueError("A control references a missing scene node.")
+        if control["type"] == "number":
+            for node_id in control["nodeIds"]:
+                matches = [n for n in doc.get("nodes", []) if n.get("extras", {}).get("controlId") == node_id]
+                if len(matches) != 1:
+                    raise ValueError("Number controls need unique scene roots.")
+                motion = matches[0].get("extras", {}).get("numberMotion", {})
+                if (not isinstance(motion, dict) or not all(number(motion.get(k)) for k in ("min", "max", "restValue", "metersPerUnit", "defaultValue"))
+                    or motion["metersPerUnit"] != .01
+                    or motion["min"] != control["min"] or motion["max"] != control["max"]
+                    or not motion["min"] <= motion["restValue"] <= motion["max"]
+                    or motion["defaultValue"] != control["defaultValue"]):
+                    raise ValueError("Invalid centimetre number motion metadata.")
+                descendants = list(matches[0].get("children", [])); seen_parts = set(); parts = 0
+                while descendants:
+                    index = descendants.pop()
+                    if not isinstance(index, int) or index in seen_parts or not 0 <= index < len(doc.get("nodes", [])):
+                        raise ValueError("Invalid number motion hierarchy.")
+                    seen_parts.add(index); child = doc["nodes"][index]
+                    descendants.extend(child.get("children", []))
+                    part = child.get("extras", {}).get("numberMotionPart")
+                    if part is not None:
+                        if (not isinstance(part, dict) or not number(part.get("baseY"))
+                            or not number(part.get("factor")) or not 0 <= part["factor"] <= 1):
+                            raise ValueError("Invalid number motion part.")
+                        parts += 1
+                if not parts:
+                    raise ValueError("Number controls need moving scene parts.")
 
 
 def compatible_entity(control, entity_id):
@@ -287,7 +367,7 @@ def compatible_entity(control, entity_id):
     return (
         isinstance(entity_id, str)
         and bool(ENTITY.fullmatch(entity_id))
-        and entity_id.startswith("cover.") == (control.get("type") == "cover")
+        and (entity_id.split(".")[0] in ({"button", "input_button", "script", "scene"} if control.get("type") == "button" else {"number", "input_number"} if control.get("type") == "number" else {"cover"} if control.get("type") == "cover" else {"light", "switch"}))
     )
 
 
@@ -298,7 +378,7 @@ def validate_bindings(bindings, manifest):
         for key, value in bindings.items()
     ):
         raise ValueError(
-            "Bindings must connect declared controls to matching light, switch or cover entities."
+            "Bindings must connect declared controls to matching light, switch, cover or number entities."
         )
     return dict(bindings)
 
@@ -435,6 +515,16 @@ class ModelStore:
         self.save(models)
         return {"title": model["title"], "areaId": model.get("areaId", "")}
 
+    def set_device_settings(self, model_id, device_id, names):
+        models = deepcopy(self.models)
+        model = next((m for m in models if m["id"] == model_id), None)
+        if model is None:
+            raise ValueError("Model not found.")
+        settings = validate_device_settings({**model.get("deviceSettings", {}), device_id: {"macroNames": names}}, model.get("devices", []))
+        model["deviceSettings"] = settings
+        self.save(models)
+        return {"deviceSettings": deepcopy(settings)}
+
     def put_component(self, value):
         component = validate_component(value, [m["id"] for m in self.models])
         previous = self.components
@@ -509,6 +599,12 @@ class ModelStore:
                     },
                     manifest["controls"],
                 )
+            settings = {}
+            for device in manifest.get("devices", []):
+                names = previous.get("deviceSettings", {}).get(device["id"], {}).get("macroNames", {})
+                settings[device["id"]] = {"macroNames": {key: name for key, name in names.items() if key in device["macros"]}}
+            if settings:
+                manifest["deviceSettings"] = validate_device_settings(settings, manifest["devices"])
             controls = {c["id"]: c for c in manifest["controls"]}
             bindings = {
                 control_id: entity_id

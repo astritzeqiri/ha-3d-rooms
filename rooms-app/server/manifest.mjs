@@ -1,3 +1,6 @@
+import { validateDevices, validateDeviceSettings } from "../shared/device.mjs";
+import { actionCommand } from "../shared/action.mjs";
+import { numberCommand } from "../shared/number.mjs";
 import { coverCommand } from "../shared/cover.mjs";
 import { lightFeatures } from "../shared/light.mjs";
 export const ID = /^[a-z0-9][a-z0-9_-]{0,79}$/;
@@ -93,14 +96,15 @@ export function validateManifest(m) {
     ids.add(c.id);
     if (
       c.type === "cover" &&
+      c.motion !== "none" &&
       (!c.nodeIds?.length ||
         !Number.isFinite(c.defaultPosition ?? 0) ||
         (c.defaultPosition ?? 0) < 0 ||
         (c.defaultPosition ?? 0) > 100)
     )
       fail("Covers need nodes and a default position from 0 to 100.");
-    if (!["light", "cover"].includes(c.type))
-      fail("Use light or cover controls.");
+    if (!["light", "cover", "number", "button"].includes(c.type))
+      fail("Use light, cover or number controls.");
     if (typeof c.label !== "string" || !c.label.trim() || c.label.length > 160)
       fail("Every light needs a label.");
     if (!vector(c.position)) fail("Each light needs a position in meters.");
@@ -115,19 +119,56 @@ export function validateManifest(m) {
     )
       fail("Light node IDs must be stable IDs.");
     if (
+      c.type === "number" &&
+      (!c.nodeIds?.length ||
+        !["min", "max", "step", "defaultValue"].every((k) =>
+          Number.isFinite(c[k]),
+        ) ||
+        c.min >= c.max ||
+        c.step <= 0 ||
+        c.defaultValue < c.min ||
+        c.defaultValue > c.max ||
+        c.unit !== "cm")
+    )
+      fail("Numbers need nodes, a centimetre range, step and default value.");
+    if (
+      c.motion !== undefined &&
+      (c.type !== "cover" || c.motion !== "none" || c.nodeIds?.length)
+    )
+      fail("Command-only covers must have no moving scene nodes.");
+    if (
+      c.group !== undefined &&
+      !m.controls.some((item) => item.id === c.group && item.type === "number")
+    )
+      fail("Companion controls must reference a number.");
+    if (
       !Array.isArray(c.capabilities) ||
-      !c.capabilities.includes(c.type === "cover" ? "open_close" : "on_off") ||
+      !c.capabilities.includes(
+        c.type === "button"
+          ? "press"
+          : c.type === "number"
+            ? "set_value"
+            : c.type === "cover"
+              ? "open_close"
+              : "on_off",
+      ) ||
       c.capabilities.some(
         (v) =>
           !(
-            c.type === "cover"
-              ? ["open_close", "position", "stop"]
-              : ["on_off", "brightness", "color", "color_temp"]
+            c.type === "button"
+              ? ["press"]
+              : c.type === "number"
+                ? ["set_value"]
+                : c.type === "cover"
+                  ? ["open_close", "position", "stop"]
+                  : ["on_off", "brightness", "color", "color_temp"]
           ).includes(v),
       )
     )
       fail("Unsupported light capabilities.");
   }
+  validateDevices(m.devices, m.controls);
+  if (m.deviceSettings) validateDeviceSettings(m.deviceSettings, m.devices);
   if (m.daylight) validateDaylight(m.daylight, m.controls);
   if (m.camera && (!vector(m.camera.position) || !vector(m.camera.target)))
     fail("Camera position and target must be three numbers.");
@@ -138,9 +179,14 @@ export function validateManifest(m) {
 export function compatible(control, entity) {
   return (
     entity &&
-    (control.type === "cover" ? /^cover\./ : /^(light|switch)\./).test(
-      entity.entity_id,
-    )
+    (control.type === "button"
+      ? /^(button|input_button|script|scene)\./
+      : control.type === "number"
+        ? /^(number|input_number)\./
+        : control.type === "cover"
+          ? /^cover\./
+          : /^(light|switch)\./
+    ).test(entity.entity_id)
   );
 }
 export function validateBinding(control, entity) {
@@ -156,6 +202,9 @@ export function commandFor(
   settings = {},
   entity,
 ) {
+  if (control.type === "button") return actionCommand(entity, control, action);
+  if (control.type === "number")
+    return numberCommand(entity, control, action, settings.value);
   if (control.type === "cover")
     return coverCommand(entity, control, action, settings.position);
   if (!["on", "off"].includes(action))

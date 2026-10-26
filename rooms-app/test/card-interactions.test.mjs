@@ -1,3 +1,4 @@
+import { actionState } from "../shared/action.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
@@ -21,6 +22,7 @@ function cardHarness() {
     window: {},
     document: { createElement: () => ({ setAttribute() {}, remove() {} }) },
     hexToRgb: () => [255, 240, 212],
+    actionState,
   });
   vm.runInContext(source, context);
   const card = Object.create(Card.prototype);
@@ -162,4 +164,36 @@ test("daylight-only updates apply in place; room changes reload the card", async
   };
   await card._modelsChanged();
   assert.equal(loads, 2);
+});
+
+test("preset clicks invoke only the saved mapping through the native backend and ignore overlap", async () => {
+  const card = cardHarness();
+  card._model = {
+    id: "office",
+    controls: [{ id: "sit", type: "button", capabilities: ["press"] }],
+    bindings: { sit: "button.desk_sit" },
+  };
+  card._hass.states = {
+    "button.desk_sit": { entity_id: "button.desk_sit", state: "unknown" },
+  };
+  const calls = [];
+  let finish;
+  card._hass.callWS = (message) => {
+    calls.push(message);
+    return new Promise((resolve) => {
+      finish = resolve;
+    });
+  };
+  const first = card._toggle("sit");
+  await card._toggle("sit");
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].operation, "command");
+  assert.equal(calls[0].data.controlId, "sit");
+  assert.equal(calls[0].data.action, "press");
+  assert.equal(calls[0].data.entityId, undefined);
+  finish();
+  await first;
+  card._hass.states["button.desk_sit"].state = "unavailable";
+  await card._toggle("sit");
+  assert.equal(calls.length, 1);
 });

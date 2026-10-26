@@ -1,3 +1,7 @@
+import { deviceForControl, macroName } from "../shared/device.mjs";
+import { coverFeatures } from "../shared/cover.mjs";
+import { actionState } from "../shared/action.mjs";
+import { numberState } from "../shared/number.mjs";
 import { markerAppearance } from "../shared/marker.mjs";
 import { coverState } from "../shared/cover.mjs";
 import { validateCameraSnapshot } from "../shared/camera-view.mjs";
@@ -278,27 +282,33 @@ export class ThreeDRoomsCard extends HTMLElement {
     const access = document.createElement("div");
     access.className = "fixture-access";
     for (const control of this._model.controls) {
+      const device = deviceForControl(this._model, control.id);
+      if (device && device.height !== control.id) continue;
       const button = document.createElement("button");
-      const label = control.label || control.name || "light";
+      const label = device?.label || control.label || control.name || "light";
       button.dataset.control = control.id;
       button.setAttribute(
         "aria-label",
-        control.type === "cover"
+        control.type !== "light"
           ? `Control ${label}`
           : `Toggle ${label}. Hold for more info.`,
       );
       button.title =
-        control.type === "cover"
-          ? `${label}: opening height controls`
+        control.type !== "light"
+          ? `${label}: value controls`
           : `${label}: click to toggle, hold for more info`;
       // Home Assistant resolves custom icons, device classes and state-specific icons.
       // Light-DOM SVG is a fallback for standalone previews without HA elements.
       const icon = document.createElement("ha-state-icon");
       icon.setAttribute("aria-hidden", "true");
       icon.innerHTML =
-        control.type === "cover"
-          ? '<svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>'
-          : '<svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
+        control.type === "button"
+          ? '<svg viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></svg>'
+          : control.type === "number"
+            ? '<svg viewBox="0 0 24 24"><path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/></svg>'
+            : control.type !== "light"
+              ? '<svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>'
+              : '<svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
       const badge = document.createElement("span");
       badge.className = "fixture-state";
       badge.setAttribute("aria-hidden", "true");
@@ -364,7 +374,11 @@ export class ThreeDRoomsCard extends HTMLElement {
   async _toggle(id) {
     const control = this._model.controls.find((c) => c.id === id);
     if (!control) return;
-    if (control.type === "cover") {
+    if (control.type === "button") {
+      await this._pressPreset(control);
+      return;
+    }
+    if (control.type === "cover" || control.type === "number") {
       this._pick(id);
       return;
     }
@@ -402,9 +416,40 @@ export class ThreeDRoomsCard extends HTMLElement {
       button?.removeAttribute("aria-busy");
     }
   }
+  async _pressPreset(control) {
+    if (this._preview || !this._model.bindings[control.id]) {
+      this._pick(control.id);
+      return;
+    }
+    const entity = this._hass.states?.[this._model.bindings[control.id]];
+    if (actionState(entity).unavailable) return;
+    this._pendingPresets ||= new Set();
+    if (this._pendingPresets.has(control.id)) return;
+    this._pendingPresets.add(control.id);
+    try {
+      await this._hass.callWS({
+        type: "three_d_rooms/request",
+        operation: "command",
+        data: { model: this._model.id, controlId: control.id, action: "press" },
+      });
+    } catch {
+      const message = document.createElement("div");
+      message.className = "fixture-feedback";
+      message.setAttribute("role", "alert");
+      message.textContent = "Could not run the preset. Try again.";
+      this._container.append(message);
+    } finally {
+      this._pendingPresets.delete(control.id);
+    }
+  }
   _pick(id) {
     const control = this._model.controls.find((c) => c.id === id);
     if (!control) return;
+    const desk = deviceForControl(this._model, id);
+    if (desk) {
+      this._deskDialog(desk);
+      return;
+    }
     const entityId = this._model.bindings[id];
     if (!this._preview && entityId) {
       this.dispatchEvent(
@@ -414,6 +459,21 @@ export class ThreeDRoomsCard extends HTMLElement {
           composed: true,
         }),
       );
+      return;
+    }
+    if (control.type === "button") {
+      this._dialog?.remove();
+      const dialog = document.createElement("dialog");
+      this._dialog = dialog;
+      dialog.innerHTML =
+        '<form method="dialog"><h2></h2><p>Connect this preset to its button, script or scene in 3D Rooms → Devices.</p><button>Close</button></form>';
+      dialog.querySelector("h2").textContent = control.label;
+      this.shadowRoot.append(dialog);
+      dialog.showModal();
+      return;
+    }
+    if (control.type === "number") {
+      this._numberPreview(control);
       return;
     }
     if (control.type === "cover") {
@@ -479,6 +539,154 @@ export class ThreeDRoomsCard extends HTMLElement {
     this.shadowRoot.append(dialog);
     dialog.showModal();
   }
+  _deskDialog(device) {
+    this._dialog?.remove();
+    const dialog = document.createElement("dialog");
+    this._dialog = dialog;
+    dialog.dataset.desk = device.id;
+    dialog.innerHTML =
+      '<style>.desk-main{display:grid;gap:16px;margin:20px 0}.desk-directions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.desk-macros{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.desk-macros button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px}.desk-macros ha-state-icon{--mdc-icon-size:24px;width:24px;height:24px}</style><form method="dialog"><h2></h2><div class="desk-main"><label>Height <output></output><input data-desk-height type="range" aria-label="Desk height"></label><div class="desk-directions"><button type="button" data-action="open">↑ Up</button><button type="button" data-action="stop">■ Stop</button><button type="button" data-action="close">↓ Down</button></div></div><div class="desk-macros"></div><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p><p data-desk-error role="alert"></p><button>Close</button></form>';
+    dialog.querySelector("h2").textContent = device.label;
+    for (const [index, id] of device.macros.entries()) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.macro = id;
+      button.setAttribute("aria-label", "Macro " + (index + 1));
+      const icon = document.createElement("ha-state-icon"),
+        label = document.createElement("span");
+      icon.setAttribute("aria-hidden", "true");
+      button.append(icon, label);
+      dialog.querySelector(".desk-macros").append(button);
+      button.onclick = () => this._deskCommand(id, "press");
+    }
+    for (const button of dialog.querySelectorAll("[data-action]"))
+      button.onclick = () =>
+        this._deskCommand(device.motion, button.dataset.action);
+    const input = dialog.querySelector("[data-desk-height]");
+    input.oninput = () => {
+      dialog.querySelector("output").textContent = input.value + " cm";
+    };
+    input.onchange = () =>
+      this._deskCommand(device.height, "set_value", Number(input.value));
+    dialog.addEventListener("close", () => dialog.remove());
+    this.shadowRoot.append(dialog);
+    this._updateDeskDialog();
+    dialog.showModal();
+  }
+  async _deskCommand(id, action, value) {
+    const control = this._model.controls.find((c) => c.id === id);
+    if (this._preview) {
+      if (control.type === "number") this._previewStates.set(id, { value });
+      this._states();
+      return;
+    }
+    const buttons =
+      this._dialog?.querySelectorAll('button[type="button"]') || [];
+    buttons.forEach((b) => (b.disabled = true));
+    try {
+      await this._hass.callWS({
+        type: "three_d_rooms/request",
+        operation: "command",
+        data: {
+          model: this._model.id,
+          controlId: id,
+          action,
+          ...(value === undefined ? {} : { value }),
+        },
+      });
+    } catch (error) {
+      const host = this._dialog?.querySelector("[data-desk-error]");
+      if (host)
+        host.textContent =
+          error.message || "Could not change the desk. Try again.";
+    } finally {
+      this._updateDeskDialog();
+    }
+  }
+  _updateDeskDialog() {
+    const dialog = this._dialog;
+    if (!dialog?.dataset?.desk) return;
+    const device = this._model.devices?.find(
+      (d) => d.id === dialog.dataset.desk,
+    );
+    if (!device) return;
+    const height = this._model.controls.find((c) => c.id === device.height),
+      entity = this._hass.states?.[this._model.bindings[height.id]],
+      reported = this._preview
+        ? this._previewStates.get(height.id) || { value: height.defaultValue }
+        : numberState(entity, height);
+    const input = dialog.querySelector("[data-desk-height]");
+    Object.assign(input, {
+      min: Math.max(height.min, entity?.attributes?.min ?? height.min),
+      max: Math.min(height.max, entity?.attributes?.max ?? height.max),
+      step: Math.max(height.step, entity?.attributes?.step || height.step),
+      disabled: !!reported.unavailable,
+    });
+    if (this.shadowRoot.activeElement !== input)
+      input.value = reported.value ?? height.defaultValue;
+    dialog.querySelector("output").textContent =
+      reported.value === undefined
+        ? "Unknown"
+        : reported.value + " " + height.unit;
+    const cover = this._hass.states?.[this._model.bindings[device.motion]],
+      features = this._preview
+        ? { open: true, close: true, stop: true }
+        : coverFeatures(cover),
+      unavailable = !this._preview && coverState(cover).unavailable;
+    for (const button of dialog.querySelectorAll("[data-action]"))
+      button.disabled = unavailable || !features[button.dataset.action];
+    for (const button of dialog.querySelectorAll("[data-macro]")) {
+      const id = button.dataset.macro,
+        e = this._hass.states?.[this._model.bindings[id]],
+        name = macroName(this._model, device, id);
+      button.querySelector("span").textContent = name || "Name macro";
+      button.setAttribute(
+        "aria-label",
+        name || "Macro " + (device.macros.indexOf(id) + 1),
+      );
+      const icon = button.querySelector("ha-state-icon");
+      icon.hass = this._hass;
+      icon.stateObj = e || {
+        entity_id: "button.preview",
+        state: "unknown",
+        attributes: { icon: "mdi:gesture-tap-button" },
+      };
+      button.disabled = !this._preview && actionState(e).unavailable;
+    }
+  }
+  _numberPreview(control) {
+    this._dialog?.remove();
+    const dialog = document.createElement("dialog");
+    this._dialog = dialog;
+    dialog.innerHTML =
+      '<form method="dialog"><h2></h2><p></p><label>Height <output></output><input type="range" aria-label="Desk height"></label><button>Close</button></form>';
+    dialog.querySelector("h2").textContent = control.label;
+    dialog.querySelector("p").textContent = this._preview
+      ? "Local preview · no real device commands"
+      : "Connect this height to a number or input number entity in 3D Rooms → Devices.";
+    const input = dialog.querySelector("input");
+    Object.assign(input, {
+      min: control.min,
+      max: control.max,
+      step: control.step,
+      value:
+        this._previewStates?.get(control.id)?.value ?? control.defaultValue,
+      disabled: !this._preview,
+    });
+    const update = () => {
+      dialog.querySelector("output").textContent =
+        input.value + " " + control.unit;
+      if (this._preview) {
+        this._previewStates.set(control.id, { value: Number(input.value) });
+        this._states();
+      }
+    };
+    input.oninput = update;
+    update();
+    dialog.addEventListener("close", () => dialog.remove());
+    this.shadowRoot.append(dialog);
+    dialog.showModal();
+  }
   _coverPreview(control) {
     this._dialog?.remove();
     const dialog = document.createElement("dialog");
@@ -513,6 +721,24 @@ export class ThreeDRoomsCard extends HTMLElement {
     const states = new Map();
     for (const control of this._model.controls) {
       const entity = this._hass.states?.[this._model.bindings[control.id]];
+      if (control.type === "button") {
+        states.set(
+          control.id,
+          this._preview ? { unavailable: false } : actionState(entity),
+        );
+        continue;
+      }
+      if (control.type === "number") {
+        states.set(
+          control.id,
+          this._preview
+            ? this._previewStates?.get(control.id) || {
+                value: control.defaultValue,
+              }
+            : numberState(entity, control),
+        );
+        continue;
+      }
       if (control.type === "cover") {
         states.set(
           control.id,
@@ -541,6 +767,7 @@ export class ThreeDRoomsCard extends HTMLElement {
             },
       );
     }
+    this._updateDeskDialog();
     for (const button of this.shadowRoot.querySelectorAll("[data-control]")) {
       const id = button.dataset.control;
       const control = this._model.controls.find((c) => c.id === id);
@@ -554,14 +781,18 @@ export class ThreeDRoomsCard extends HTMLElement {
       button.dataset.active = String(appearance.active);
       button.dataset.moving = String(appearance.moving);
       button.dataset.unavailable = String(appearance.unavailable);
-      const label = control.label || control.name || "Device";
+      const label =
+        deviceForControl(this._model, id)?.label ||
+        control.label ||
+        control.name ||
+        "Device";
       button.title = `${label}: ${appearance.description}`;
       button.setAttribute(
         "aria-label",
-        `${control.type === "cover" ? "Control" : "Toggle"} ${label}, ${appearance.description}${control.type === "cover" ? "" : ". Hold for more info."}`,
+        `${control.type !== "light" ? "Control" : "Toggle"} ${label}, ${appearance.description}${control.type !== "light" ? "" : ". Hold for more info."}`,
       );
       button.setAttribute("aria-disabled", String(appearance.unavailable));
-      if (control.type === "cover") button.removeAttribute("aria-pressed");
+      if (control.type !== "light") button.removeAttribute("aria-pressed");
       else button.setAttribute("aria-pressed", String(appearance.active));
       const icon = button.querySelector("ha-state-icon");
       icon.hass = this._hass;

@@ -1,3 +1,8 @@
+# 0.16.0
+
+- Add an Adjustable desk device with one card and settings box for height, Up/Stop/Down, and four optional macros. Macro names start blank and are user editable; icons follow the mapped entities.
+- Add centimetre number mappings and rest-based 3D desk motion, plus typed button/script/scene actions. Existing room mappings remain compatible.
+
 # 0.15.0
 
 - Restore the camera-linked navigation cube in the main room viewer and keep it visible when creating or editing saved views, including with Advanced camera settings closed.

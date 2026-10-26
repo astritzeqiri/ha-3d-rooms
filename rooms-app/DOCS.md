@@ -45,3 +45,7 @@ Room-name and plain text/number inputs now match the dark form controls, with pa
 ## Camera navigation (0.15.0)
 
 The room viewer has a compact, always-visible view cube. Drag it to rotate the room or use arrow keys when focused. Click a face, edge or corner to snap to that angle; Home resets and fits the room. The cube remains visible while editing saved views, including when Advanced camera settings is closed.
+
+## Adjustable desk · 0.16.0
+
+Desk-enabled models group height, Up/Stop/Down and four optional macros in one device card and settings box. Map the centimetre height to a number entity, directions to a cover, and each macro to a button, input button, script or scene. Macro names start blank, are user editable, and persist with the room; icons come from the mapped entity. Update the integration before importing a new desk-enabled export. Existing rooms remain compatible.
