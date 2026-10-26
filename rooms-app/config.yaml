@@ -1,0 +1,21 @@
+name: 3D Rooms
+version: "0.19.0"
+slug: three_d_rooms
+url: https://github.com/astritzeqiri/ha-3d-rooms
+description: Import 3D floors and connect their lights to Home Assistant entities.
+arch:
+  - amd64
+  - aarch64
+startup: application
+boot: auto
+backup: cold
+init: false
+ingress: true
+ingress_stream: true
+panel_admin: true
+ingress_port: 8099
+panel_icon: mdi:floor-plan
+panel_title: 3D Rooms
+homeassistant_api: true
+options: {}
+schema: {}

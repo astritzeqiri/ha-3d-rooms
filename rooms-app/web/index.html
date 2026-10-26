@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>3D Rooms</title>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="./"
+        ><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="m3 7 9-5 9 5v10l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v10"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          /></svg
+        >3D Rooms</a
+      ><span id="connection" role="status">Connecting…</span>
+    </header>
+    <main>
+      <aside>
+        <div class="section-title">
+          <h2>Your rooms</h2>
+          <span id="model-count">0</span>
+        </div>
+
+        <nav id="models" aria-label="Models"></nav>
+        <button id="add-model">+ Import room</button>
+        <div class="aside-bottom">
+          <span class="eyebrow">GETTING STARTED</span>
+          <p>Import a floor. Choose its devices. Connect them to your home.</p>
+          <p class="muted">Models stay on this server.</p>
+        </div>
+      </aside>
+      <section class="workspace" id="models-workspace">
+        <div class="toolbar">
+          <div>
+            <span class="eyebrow" id="model-type">YOUR SPACE</span>
+            <h1 id="title">Bring your home into view</h1>
+          </div>
+          <div class="toolbar-actions">
+            <button id="dashboard" class="primary" hidden>
+              Create dashboard view
+            </button>
+          </div>
+        </div>
+        <div id="room-summary" class="room-summary" role="status"></div>
+        <nav class="room-tabs" aria-label="Room workspace" hidden>
+          <button id="show-models" aria-pressed="true" data-room-tab="devices">
+            Room &amp; devices
+          </button>
+          <button
+            id="show-components"
+            aria-pressed="false"
+            data-room-tab="views"
+          >
+            Dashboard views
+          </button>
+          <button
+            id="show-room-settings"
+            aria-pressed="false"
+            data-room-tab="settings"
+          >
+            Settings
+          </button>
+        </nav>
+        <div class="room-layout">
+          <div class="room-preview">
+            <div class="view-tools" hidden>
+              <span class="view-tools-title">Room overview</span>
+              <div class="camera-actions" role="group" aria-label="Room camera">
+                <button id="floor-view" aria-pressed="false" hidden>
+                  Floor plan
+                </button>
+                <button id="home-view" hidden>Reset camera</button>
+              </div>
+            </div>
+            <div id="viewport">
+              <div id="empty">
+                <div class="empty-symbol">
+                  <svg
+                    width="64"
+                    height="64"
+                    viewBox="0 0 64 64"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="m8 21 24-13 24 13v25L32 59 8 46Zm0 0 24 13 24-13M32 34v25"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    />
+                  </svg>
+                </div>
+                <h2>A familiar place.<br />A new way to control it.</h2>
+                <p>
+                  Add your first 3D floor or room. Its devices will appear here,
+                  ready to connect.
+                </p>
+                <ol class="empty-steps">
+                  <li><span>1</span>Import a room ZIP</li>
+                  <li><span>2</span>Connect its lights and shades</li>
+                  <li><span>3</span>Save a view for your dashboard</li>
+                </ol>
+                <button class="primary" id="empty-add">
+                  Import your first room
+                </button>
+              </div>
+              <div id="scene-status" role="status" hidden></div>
+            </div>
+            <div class="view-footer">
+              <span id="view-hint">Import a prepared room ZIP</span
+              ><label id="preview-label" hidden
+                ><input id="preview" type="checkbox" role="switch" checked />
+                <span>Preview</span>
+                <span id="preview-mode-note" class="muted"
+                  >Commands off</span
+                ></label
+              >
+            </div>
+          </div>
+          <aside
+            id="dashboard-panel"
+            class="dashboard-panel"
+            aria-labelledby="dashboard-panel-title"
+            hidden
+          >
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">DASHBOARD VIEW</span>
+                <h2 id="dashboard-panel-title">Save this view</h2>
+              </div>
+              <button
+                id="close-dashboard"
+                class="panel-close"
+                aria-label="Close view editor"
+              >
+                ×
+              </button>
+            </div>
+            <p class="muted">
+              Drag the room to frame your view, or choose a camera preset.
+            </p>
+            <form id="dashboard-form">
+              <label class="panel-field"
+                >Camera preset<select id="dashboard-preset">
+                  <option value="">Current view</option>
+                  <option value="reset">Room overview</option>
+                  <option value="front">Front</option>
+                  <option value="top">Top</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                </select></label
+              >
+              <label class="panel-field" for="dashboard-title"
+                >View name<input id="dashboard-title" maxlength="160" required
+              /></label>
+              <div class="panel-field-row">
+                <label class="panel-field" for="dashboard-view"
+                  >View<select id="dashboard-view">
+                    <option value="front">Perspective</option>
+                    <option value="floor">Floor plan</option>
+                  </select></label
+                >
+              </div>
+              <details class="view-advanced" id="dashboard-advanced">
+                <summary>Advanced camera settings</summary>
+                <label
+                  class="panel-field view-height-field"
+                  for="dashboard-height"
+                  >Height <span class="muted">px</span
+                  ><input
+                    id="dashboard-height"
+                    type="number"
+                    min="180"
+                    max="1600"
+                    step="1"
+                    required
+                /></label>
+                <fieldset class="camera-fields">
+                  <legend>Camera</legend>
+                  <div class="camera-field">
+                    <label for="dashboard-heading">Rotation</label>
+                    <div class="camera-adjust">
+                      <input
+                        id="dashboard-heading-range"
+                        type="range"
+                        min="0"
+                        max="359.99"
+                        step="0.01"
+                        value="0"
+                        aria-label="Rotation slider"
+                      />
+                      <div class="camera-number">
+                        <input
+                          id="dashboard-heading"
+                          type="number"
+                          min="0"
+                          max="359.99"
+                          step="0.01"
+                          value="0"
+                          required
+                        /><span aria-hidden="true">°</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="camera-field">
+                    <label for="dashboard-tilt">Tilt</label>
+                    <div class="camera-adjust">
+                      <input
+                        id="dashboard-tilt-range"
+                        type="range"
+                        min="0"
+                        max="180"
+                        step="0.01"
+                        value="28"
+                        aria-label="Tilt slider"
+                      />
+                      <div class="camera-number">
+                        <input
+                          id="dashboard-tilt"
+                          type="number"
+                          min="0"
+                          max="180"
+                          step="0.01"
+                          value="28"
+                          required
+                        /><span aria-hidden="true">°</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="camera-field">
+                    <label for="dashboard-zoom">Zoom</label>
+                    <div class="camera-adjust">
+                      <input
+                        id="dashboard-zoom-range"
+                        type="range"
+                        min="0.25"
+                        max="100"
+                        step="0.0001"
+                        value="1"
+                        aria-label="Zoom slider"
+                      />
+                      <div class="camera-number">
+                        <input
+                          id="dashboard-zoom"
+                          type="number"
+                          min="0.01"
+                          max="100"
+                          step="0.0001"
+                          value="1"
+                          required
+                        /><span aria-hidden="true">×</span>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </details>
+              <p id="dashboard-error" class="error" role="alert"></p>
+              <div class="panel-save">
+                <button
+                  id="save-dashboard-component"
+                  class="primary"
+                  type="submit"
+                >
+                  Save view</button
+                ><button
+                  id="use-saved-view"
+                  class="primary"
+                  type="button"
+                  hidden
+                >
+                  Use in dashboard</button
+                ><span
+                  id="dashboard-save-state"
+                  class="muted small"
+                  role="status"
+                  >Not saved yet</span
+                >
+              </div>
+            </form>
+            <details class="dashboard-config">
+              <summary>Advanced: YAML configuration</summary>
+              <p class="muted small">
+                Add a Manual card in Home Assistant and paste this
+                configuration.
+              </p>
+              <label class="sr-only" for="dashboard-yaml"
+                >Dashboard card configuration</label
+              ><textarea
+                id="dashboard-yaml"
+                readonly
+                rows="7"
+                spellcheck="false"
+              ></textarea
+              ><button id="copy-dashboard" type="button">
+                Copy configuration
+              </button>
+            </details>
+          </aside>
+        </div>
+        <section id="controls-section" hidden>
+          <div class="section-title">
+            <div>
+              <h2>Room devices</h2>
+              <p class="muted small">
+                Select a device below to control it or connect an entity.
+              </p>
+            </div>
+            <span id="control-count"></span>
+          </div>
+          <div id="device-tools" class="device-tools" hidden>
+            <div class="chips" role="group" aria-label="Filter devices">
+              <button
+                type="button"
+                class="chip"
+                data-chip="all"
+                aria-pressed="true"
+              >
+                All
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-chip="on"
+                aria-pressed="false"
+              >
+                On
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-chip="off"
+                aria-pressed="false"
+              >
+                Off
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-chip="setup"
+                aria-pressed="false"
+              >
+                Needs entity
+              </button>
+            </div>
+            <label class="sr-only" for="device-search">Search devices</label>
+            <input
+              id="device-search"
+              type="search"
+              placeholder="Search devices…"
+              autocomplete="off"
+            />
+          </div>
+          <div id="controls"></div>
+        </section>
+        <section
+          id="saved-views-section"
+          hidden
+          aria-labelledby="saved-views-heading"
+        >
+          <div class="section-title">
+            <div>
+              <h2 id="saved-views-heading">Saved views</h2>
+              <p class="muted">
+                Different dashboard views of this room. Device mappings are
+                shared.
+              </p>
+            </div>
+          </div>
+          <p id="component-error" class="error" role="alert"></p>
+          <div id="component-list" class="saved-view-grid"></div>
+          <button id="import-component" class="quiet-button">
+            Import saved view</button
+          ><input
+            id="component-file"
+            type="file"
+            accept=".json,application/json"
+            hidden
+          />
+        </section>
+        <section
+          id="room-settings-section"
+          hidden
+          aria-labelledby="room-settings-heading"
+        >
+          <h2 id="room-settings-heading">Room settings</h2>
+          <form id="room-settings-form" class="room-settings-card">
+            <label for="room-name"
+              >Room name<input
+                id="room-name"
+                type="text"
+                maxlength="160"
+                required
+            /></label>
+            <label for="room-area"
+              >Home Assistant area<select id="room-area">
+                <option value="">Not assigned</option>
+              </select></label
+            >
+            <p id="room-area-note" class="muted small">
+              Link this 3D room to its area in Home Assistant. Device mappings
+              stay explicit.
+            </p>
+            <div class="room-settings-actions">
+              <button id="save-room-settings" class="primary" type="submit">
+                Save room settings</button
+              ><button id="refresh-areas" type="button">Refresh areas</button
+              ><span id="room-save-status" role="status"></span>
+            </div>
+            <p id="room-settings-error" class="error" role="alert"></p>
+          </form>
+          <section
+            id="daylight-controls"
+            class="light-card"
+            hidden
+            aria-label="Day and night"
+          >
+            <div class="light-label">Daylight</div>
+            <label class="light-option"
+              >Time of day<select id="daylight-mode">
+                <option value="night">Night</option>
+                <option value="day">Day</option>
+                <option value="auto">Auto · Home Assistant sun</option>
+              </select></label
+            >
+            <label class="light-option" id="sun-setting"
+              >Sun entity<select id="sun-entity"></select
+            ></label>
+            <p class="muted small" id="daylight-note">
+              Daylight responds to shade openings, independently of indoor
+              lights.
+            </p>
+          </section>
+
+          <form
+            id="replace-form"
+            class="room-settings-card"
+            aria-labelledby="replace-heading"
+            hidden
+          >
+            <h3 id="replace-heading">Replace room model</h3>
+            <p class="muted small">
+              Upload an updated room ZIP to swap the 3D model. The room keeps
+              its name, area, daylight setting, saved views and the device
+              mappings that still match.
+            </p>
+            <label for="replace-package"
+              >Updated room ZIP (.zip)<input
+                id="replace-package"
+                type="file"
+                accept=".zip,application/zip"
+                required
+            /></label>
+            <div class="room-settings-actions">
+              <button id="replace-submit" class="primary" type="submit">
+                Replace model
+              </button>
+            </div>
+            <div id="replace-progress" class="upload-progress" hidden>
+              <p data-upload-label role="status" aria-live="polite"></p>
+              <progress
+                max="100"
+                value="0"
+                aria-label="Model upload progress"
+              ></progress>
+              <p data-upload-detail class="muted small"></p>
+            </div>
+            <p id="replace-error" class="error" role="alert"></p>
+          </form>
+
+          <details class="room-advanced">
+            <summary>Advanced room settings</summary>
+            <div class="room-settings-actions">
+              <button id="settings">Manage all device entities</button
+              ><button id="room-export">Export room &amp; mappings</button>
+            </div>
+            <div class="room-danger">
+              <h3>Remove room</h3>
+              <p class="muted small">
+                Removes the imported room and its device mappings. Saved views
+                referencing it will be unavailable.
+              </p>
+              <button id="room-remove" class="danger">Remove room</button>
+            </div>
+          </details>
+        </section>
+      </section>
+    </main>
+    <dialog id="import-dialog">
+      <form id="import-form">
+        <div class="dialog-top">
+          <div>
+            <span class="eyebrow">MODEL LIBRARY</span>
+            <h2>Add your space</h2>
+          </div>
+          <button type="button" class="close" aria-label="Close import">
+            ×
+          </button>
+        </div>
+        <p class="muted">
+          Upload a prepared model package. We’ll read its scene and list the
+          lights you can connect.
+        </p>
+        <label for="package">Room ZIP (.zip)</label
+        ><input
+          id="package"
+          type="file"
+          accept=".zip,application/zip"
+          required
+        />
+        <p class="muted small">
+          Up to 100 MB. Contains manifest.json and an embedded scene.glb.
+          Exported room photos are not required.
+        </p>
+        <div id="import-progress" class="upload-progress" hidden>
+          <p data-upload-label role="status" aria-live="polite"></p>
+          <progress
+            max="100"
+            value="0"
+            aria-label="Model upload progress"
+          ></progress>
+          <p data-upload-detail class="muted small"></p>
+        </div>
+        <p id="import-error" class="error" role="alert"></p>
+        <div class="dialog-actions">
+          <button type="button" class="close">Cancel</button
+          ><button id="import-submit" class="primary" type="submit">
+            Import room
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="settings-dialog" class="sheet" aria-labelledby="settings-title">
+      <div class="dialog-top">
+        <div>
+          <span class="eyebrow" id="settings-eyebrow">Devices</span>
+          <h2 id="settings-title">Connect devices</h2>
+          <p class="dialog-sub" id="settings-sub">
+            Choose the Home Assistant entity that controls each device. Changes
+            save automatically.
+          </p>
+        </div>
+        <button class="close" aria-label="Close">×</button>
+      </div>
+      <div class="sheet-body">
+        <p id="mapping-note" class="notice" hidden></p>
+        <div id="mappings"></div>
+        <p id="mapping-error" class="error" role="alert"></p>
+      </div>
+      <div class="dialog-actions">
+        <button id="export-model" type="button">
+          Export room &amp; mappings
+        </button>
+        <button id="delete-model" class="danger">Remove model</button>
+        <button class="close primary">Done</button>
+      </div>
+    </dialog>
+    <dialog id="use-view-dialog" aria-labelledby="use-view-title">
+      <div class="dialog-top">
+        <h2 id="use-view-title">Use this view on a dashboard</h2>
+        <button class="close" aria-label="Close dashboard instructions">
+          ×
+        </button>
+      </div>
+      <p id="use-view-name"></p>
+      <p class="muted small">
+        Dashboard cards copy this view’s settings. After editing a saved view,
+        select it again in the card editor to update an existing card.
+      </p>
+      <ol class="dashboard-steps">
+        <li>
+          Open your Home Assistant dashboard and choose
+          <strong>Edit dashboard</strong>.
+        </li>
+        <li>Choose <strong>Add card → 3D Rooms</strong>.</li>
+        <li>Select this <strong>Saved view</strong>, then save the card.</li>
+      </ol>
+      <details>
+        <summary>Advanced: YAML configuration</summary>
+        <textarea
+          id="use-view-yaml"
+          rows="8"
+          readonly
+          spellcheck="false"
+          aria-label="Dashboard card configuration"
+        ></textarea
+        ><button id="copy-view-yaml">Copy configuration</button>
+      </details>
+      <div class="dialog-actions">
+        <button class="close primary">Done</button>
+      </div>
+    </dialog>
+    <dialog id="delete-dialog">
+      <h2>Remove this room?</h2>
+      <p>
+        The model and its entity mappings will be removed. Your Home Assistant
+        devices won’t be changed.
+      </p>
+      <div class="dialog-actions">
+        <button class="close">Keep model</button
+        ><button id="confirm-delete" class="danger">Remove model</button>
+      </div>
+    </dialog>
+    <div id="toast" role="status" hidden></div>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

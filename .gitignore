@@ -1,0 +1,12 @@
+node_modules/
+rooms-app/dist/
+rooms-app/.data/
+private-models/
+*.log
+rooms-app/.data-mock/
+releases/
+model-exports/
+.DS_Store
+
+__pycache__/
+*.pyc
