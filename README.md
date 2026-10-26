@@ -166,4 +166,4 @@ Model uploads, downloads and device commands use your authenticated Home Assista
 
 Thanks to [Wes Bos and 3D Model Anything](https://github.com/wesbos/3d-model-anything) for the capture app, reconstruction workflow and viewer foundation used to create our rooms. See the upstream repository for its code license and [demo asset terms](https://github.com/wesbos/3d-model-anything/blob/main/ASSETS-LICENSE.md).
 
-Licensed under the [MIT license](LICENSE).
+Licensed under the [MIT license](LICENSE). See [third-party notices](THIRD_PARTY_NOTICES.md) for upstream attribution and asset terms.

@@ -1,7 +1,6 @@
 {
   "domain": "three_d_rooms",
   "name": "3D Rooms",
-  "version": "0.19.0",
   "codeowners": [
     "@astritzeqiri"
   ],
@@ -9,12 +8,13 @@
   "dependencies": [
     "frontend",
     "http",
-    "websocket_api",
-    "panel_custom"
+    "panel_custom",
+    "websocket_api"
   ],
   "documentation": "https://github.com/astritzeqiri/ha-3d-rooms",
-  "issue_tracker": "https://github.com/astritzeqiri/ha-3d-rooms/issues",
   "integration_type": "service",
   "iot_class": "local_push",
-  "requirements": []
+  "issue_tracker": "https://github.com/astritzeqiri/ha-3d-rooms/issues",
+  "requirements": [],
+  "version": "0.19.0"
 }
