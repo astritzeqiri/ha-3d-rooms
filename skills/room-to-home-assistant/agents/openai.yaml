@@ -1,0 +1,4 @@
+interface:
+  display_name: "Room to Home Assistant"
+  short_description: "Prepare scan-based rooms, controls and daylight for HA"
+  default_prompt: "Use $room-to-home-assistant to prepare my approved scan-based room for HA with independent lights, shades and shade-aware Day/Night/Auto, then validate the private import ZIP."

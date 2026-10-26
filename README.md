@@ -85,6 +85,18 @@ Scanning is optional. You can model a room yourself, generate it with your own t
 
 See **[Preparing a room package](docs/room-packages.md)** for a minimal example. A model needs separate, identified fixture nodes for the devices you want to control; a single flattened mesh does not automatically become controllable.
 
+### Check which objects can become entity controls
+
+Use our **[Room to Home Assistant skill](skills/room-to-home-assistant/SKILL.md)** with an AI coding agent and your editable room model. It reviews the model hierarchy and available reference images, then lists candidate lights, shades, adjustable desks and openings, including supported behavior, suitable Home Assistant entity domains and anything uncertain or unsupported.
+
+For an assessment without changing the model, ask:
+
+> Use the room-to-home-assistant skill to inspect my room. List objects that could become Home Assistant controls, their model nodes, proposed stable IDs, compatible entity domains and any missing preparation. Assess only; do not modify the model or send device commands.
+
+When you want to prepare the room, ask the agent to add the supported controls and export a validated ZIP. The skill includes control/daylight references and a package validator. It works with your own editable models as well as reconstructed scans. Actual entity IDs must be chosen from your Home Assistant setup; the skill cannot discover them from a photograph.
+
+To use it, copy the complete [`skills/room-to-home-assistant`](skills/room-to-home-assistant) folder into your agent’s skills directory, or point your agent at its `SKILL.md` and accompanying files. For Codex, the usual user skill location is `~/.codex/skills/room-to-home-assistant/`.
+
 ## Add your first room
 
 1. Open **3D Rooms** in the Home Assistant sidebar.

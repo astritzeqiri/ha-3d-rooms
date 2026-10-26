@@ -2,6 +2,8 @@
 
 3D Rooms imports prepared ZIP packages. You can use an editable scene reconstructed with [Wes Bos’s 3D Model Anything](https://github.com/wesbos/3d-model-anything), or create your own model independently.
 
+For an AI-assisted candidate inventory and preparation workflow, use the [Room to Home Assistant skill](../skills/room-to-home-assistant/SKILL.md). It distinguishes assessment-only requests from changes to the model.
+
 ## Files
 
 Put these files at the ZIP’s root, without an enclosing folder:
