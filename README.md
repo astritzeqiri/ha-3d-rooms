@@ -184,3 +184,7 @@ Version 0.16.0 adds a single **Adjustable desk** device, grouping height,
 Up/Stop/Down and four user-named macros in one card/settings box. Macro icons
 follow their mapped Home Assistant entities. See [the device contract](docs/adjustable-desk.md).
 Update in HACS, restart Home Assistant, and refresh the browser. Export the desk-enabled office from the authoring viewer, then import that ZIP into 3D Rooms. To upgrade an existing room while retaining its matching mappings and saved views, use **Room settings → Replace model**. Existing rooms do not need re-uploading just to update the integration.
+
+### Updating to 0.19.0
+
+Update **3D Rooms** in HACS, restart Home Assistant itself, then refresh the browser. The room manager now uses a warm limestone/terracotta palette, serif room headings and slimmer device switches. Existing rooms, mappings and linked saved views remain compatible; no model re-upload is needed.

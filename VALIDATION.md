@@ -1,3 +1,7 @@
+# 0.19.0: Limestone & Clay UI
+
+See [release validation](docs/validation-0.19.0.md) for isolated build, archive and native Home Assistant checks.
+
 # 0.18.0: linked saved views and field overrides
 
 See [release validation](docs/validation-0.18.0.md) for the isolated build, exact ZIP checks and native Home Assistant results.

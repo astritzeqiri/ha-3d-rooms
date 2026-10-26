@@ -1,3 +1,10 @@
+# 0.19.0
+
+- Give the manager a warm Limestone & Clay identity: limestone/paper surfaces, terracotta actions, a charcoal dark palette, local serif room titles and a geometric room mark.
+- Replace glowing surfaces and pill-shaped actions with quiet borders and compact rectangular buttons; unify the room stage on warm charcoal.
+- Make device on/off switches slimmer with a 36 × 20 px track and 16 px thumb, retaining a 44 × 44 px touch target, keyboard support and explicit state labels.
+- Preserve rooms, entity mappings, saved views and dashboard configurations; no model re-upload or storage migration required.
+
 # 0.18.0
 
 - Keep dashboard cards linked to their saved view. Changes saved in 3D Rooms update linked cards automatically, including exact camera framing. Generated YAML references the saved view ID.

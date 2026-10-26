@@ -38,7 +38,7 @@ export class SceneView {
     this.renderer.domElement.setAttribute("role", "img");
     container.append(this.renderer.domElement);
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color("#0b100e");
+    this.scene.background = new THREE.Color("#242320");
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
     this.orbit.enableDamping = false;
@@ -238,9 +238,7 @@ export class SceneView {
     )
       this.options.camera = undefined;
     this.options.mode = ["floor", "front"].includes(mode) ? mode : "dollhouse";
-    this.scene.background.set(
-      this.options.mode !== "dollhouse" ? "#1c1c1c" : "#0b100e",
-    );
+    this.scene.background.set("#242320");
     if (this.fill)
       this.fill.intensity = this.options.mode !== "dollhouse" ? 0.35 : 0.25;
     this.camera =
