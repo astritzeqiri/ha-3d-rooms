@@ -64,6 +64,27 @@ Restart Home Assistant itself after the download completes.
 
 Or go to **Settings → Devices & services → Add integration**, search for **3D Rooms**, and confirm setup. Refresh your browser to see **3D Rooms** in the sidebar.
 
+## Create a room model
+
+You can start with a scan or build your own 3D room. Both routes finish with a **3D Rooms ZIP package** that you import into this integration.
+
+### Scan with the iOS app
+
+Our room-creation workflow builds on **[Wes Bos’s 3D Model Anything](https://github.com/wesbos/3d-model-anything)**, which includes an iOS capture app, a Three.js viewer and an AI-assisted reconstruction workflow.
+
+1. Use the **[3D Model Anything iOS app](https://github.com/wesbos/3d-model-anything/blob/main/apps/house-capture/README.md)** to capture your room with a LiDAR-equipped iPhone or iPad. Follow its build and device instructions.
+2. Export the capture and use the project’s **[scan-to-threejs workflow](https://github.com/wesbos/3d-model-anything/tree/main/.agents/skills/scan-to-threejs)** to reconstruct and refine an editable room from its measurements and photographs.
+3. Prepare the resulting scene as a 3D Rooms package: embed its geometry and textures in a GLB, declare its controllable devices, and package it for import.
+4. Import the prepared ZIP into **3D Rooms**, then connect the devices to your Home Assistant entities.
+
+The iOS app’s raw capture ZIP is input to the reconstruction workflow; it is not the room package uploaded here. This integration adds the Home Assistant model library, entity connections and dashboard controls around the prepared model.
+
+### Build your own model
+
+Scanning is optional. You can model a room yourself, generate it with your own tools, or adapt a model you already have permission to use. Export an embedded **glTF 2.0 binary (`scene.glb`)** and add a `manifest.json` describing the room and its device controls.
+
+See **[Preparing a room package](docs/room-packages.md)** for a minimal example. A model needs separate, identified fixture nodes for the devices you want to control; a single flattened mesh does not automatically become controllable.
+
 ## Add your first room
 
 1. Open **3D Rooms** in the Home Assistant sidebar.
@@ -128,5 +149,9 @@ Model uploads, downloads and device commands use your authenticated Home Assista
 - [Adjustable desk model specification](docs/adjustable-desk.md)
 - [Development and contribution guide](AGENTS.md)
 - [Validation records](VALIDATION.md)
+
+## Credits
+
+Thanks to [Wes Bos and 3D Model Anything](https://github.com/wesbos/3d-model-anything) for the capture app, reconstruction workflow and viewer foundation used to create our rooms. See the upstream repository for its code license and [demo asset terms](https://github.com/wesbos/3d-model-anything/blob/main/ASSETS-LICENSE.md).
 
 Licensed under the [MIT license](LICENSE).
