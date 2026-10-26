@@ -1,3 +1,4 @@
+import { resolveEntityIcon } from "../shared/entity-icon.mjs";
 import { roomRoute } from "../shared/room-route.mjs";
 import { sceneBlob } from "../shared/scene-download.mjs";
 /** Native HA sidebar wrapper for the existing room manager. No token copying. */
@@ -7,6 +8,7 @@ class ThreeDRoomsPanel extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = `<style>:host{display:block;height:100%;min-height:100vh}iframe{display:block;width:100%;height:100vh;border:0}</style><iframe title="3D Rooms model library"></iframe>`;
     this._frame = this.shadowRoot.querySelector("iframe");
+    this._iconCache = new Map();
     this._ready = (event) => {
       if (
         event.source !== this._frame.contentWindow ||
@@ -32,6 +34,23 @@ class ThreeDRoomsPanel extends HTMLElement {
           this._hass.callWS({ type: "three_d_rooms/request", operation, data }),
         asset: (path, options) => this._hass.fetchWithAuth(path, options),
         scene: (model) => sceneBlob(this._hass, model),
+        entityIcon: (state) => {
+          const key = JSON.stringify([
+            state.entity_id,
+            state.state,
+            state.attributes?.icon,
+            state.attributes?.device_class,
+          ]);
+          if (!this._iconCache.has(key)) {
+            this._iconCache.set(
+              key,
+              resolveEntityIcon(this.shadowRoot, this._hass, state),
+            );
+            if (this._iconCache.size > 32)
+              this._iconCache.delete(this._iconCache.keys().next().value);
+          }
+          return this._iconCache.get(key);
+        },
         subscribe: (listener) => {
           this._listener = listener;
           this._publish();

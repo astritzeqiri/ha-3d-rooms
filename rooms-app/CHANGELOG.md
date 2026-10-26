@@ -1,3 +1,9 @@
+# 0.16.1
+
+- Fix macro entity icons in the native Home Assistant manager: resolve the HA icon in its own document and send plain SVG data to the manager frame. This avoids cross-document stylesheet errors and preserves the entity's icon.
+- Show Uploading model… and Preparing 3D view… as separate replacement stages.
+- Verify the released desk model inside Home Assistant Core 2026.10.2: all eight native tests, local helper mappings and real manager replacement pass. Existing rooms and mappings remain compatible.
+
 # 0.16.0
 
 - Add an Adjustable desk device with one card and settings box for height, Up/Stop/Down, and four optional macros. Macro names start blank and are user editable; icons follow the mapped entities.

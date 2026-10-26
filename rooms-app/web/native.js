@@ -73,6 +73,7 @@ export async function connectNative() {
         ).blob(),
       );
     },
+    entityIcon: (state) => bridge.entityIcon?.(state) ?? Promise.resolve(null),
     subscribe: bridge.subscribe,
   };
 }

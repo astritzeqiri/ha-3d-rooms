@@ -1,3 +1,4 @@
+import { paintEntityIcon } from "../shared/entity-icon.mjs";
 import {
   deviceEntries,
   deviceForControl,
@@ -369,25 +370,20 @@ function drawControls() {
     })
     .join("");
   for (const slot of document.querySelectorAll("[data-entity-icon]")) {
-    const c = selected.controls.find((c) => c.id === slot.dataset.entityIcon),
-      entity = states.get(c.id)?.entity;
-    try {
-      const parentDoc = window.parent.document;
-      if (!window.parent.customElements.get("ha-state-icon")) {
-        slot.textContent = "▶";
-        continue;
-      }
-      const icon = parentDoc.createElement("ha-state-icon");
-      icon.hass = parentDoc.querySelector("home-assistant")?.hass;
-      icon.stateObj = entity || {
-        entity_id: "button.preview",
-        state: "unknown",
-        attributes: { icon: "mdi:gesture-tap-button" },
-      };
-      slot.append(icon);
-    } catch {
-      slot.textContent = "▶";
-    }
+    const c = selected.controls.find((c) => c.id === slot.dataset.entityIcon);
+    const entity = states.get(c.id)?.entity || {
+      entity_id: "button.preview",
+      state: "unknown",
+      attributes: { icon: "mdi:gesture-tap-button" },
+    };
+    slot.textContent = "▶";
+    if (native?.entityIcon)
+      void native
+        .entityIcon(entity)
+        .then((data) => {
+          if (slot.isConnected) paintEntityIcon(slot, data);
+        })
+        .catch(() => {});
   }
 
   if (!visible.length)
@@ -840,7 +836,7 @@ $("replace-form").onsubmit = async (event) => {
   )
     return;
   $("replace-submit").disabled = true;
-  $("replace-submit").textContent = "Replacing…";
+  $("replace-submit").textContent = "Uploading model…";
   $("replace-error").textContent = "";
   try {
     const result = await api(`models/${model.id}`, {
@@ -848,6 +844,7 @@ $("replace-form").onsubmit = async (event) => {
       headers: { "Content-Type": "application/zip" },
       body: file,
     });
+    $("replace-submit").textContent = "Preparing 3D view…";
     models = await api("models");
     $("replace-form").reset();
     await choose(model.id, "settings");
