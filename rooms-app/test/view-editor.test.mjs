@@ -13,7 +13,7 @@ const source =
     .replace(/^import .*;\n/gm, "")
     .replace("export function", "function") +
   "\nglobalThis.makeEditor=initDashboardEditor;";
-function harness(preview) {
+function harness(preview, onClose) {
   const fields = new Map(),
     calls = [];
   let allowed = true;
@@ -81,6 +81,7 @@ function harness(preview) {
   vm.runInContext(source, context);
   const editor = context.makeEditor({
     preview,
+    onClose,
     api: async (path, options) => {
       calls.push({ path, ...JSON.parse(options.body) });
     },
@@ -88,7 +89,14 @@ function harness(preview) {
     scene: () => scene,
     toast() {},
   });
-  return { editor, field, calls, scene, allow: (v) => (allowed = v) };
+  return {
+    body: context.document.body,
+    editor,
+    field,
+    calls,
+    scene,
+    allow: (v) => (allowed = v),
+  };
 }
 const saved = () => ({
   schemaVersion: 1,
@@ -196,4 +204,24 @@ test("view name is retained when the card title is hidden and the setting surviv
   assert.equal(h.editor.dirty(), true);
   await h.field("dashboard-form").onsubmit({ preventDefault() {} });
   assert.notEqual(h.calls[1].show_title, false);
+});
+
+test("creating from the gallery fits the hidden canvas before capturing and returns on close", () => {
+  let returned = 0;
+  const h = harness(undefined, () => returned++);
+  h.body.dataset = { roomTab: "views" };
+  let fitted = false;
+  h.scene.fitFloor = () => {
+    fitted = true;
+  };
+  const capture = h.scene.captureView.bind(h.scene);
+  h.scene.captureView = () => {
+    assert.equal(fitted, true);
+    return capture();
+  };
+  h.editor.open();
+  assert.equal(h.field("dashboard-panel").hidden, false);
+  assert.equal(h.editor.dirty(), false);
+  assert.equal(h.editor.close(), true);
+  assert.equal(returned, 1);
 });

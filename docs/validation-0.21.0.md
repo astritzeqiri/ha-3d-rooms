@@ -1,0 +1,9 @@
+# 0.21.0 validation — 2026-10-27
+
+- Prepared in an isolated checkout from published 0.20.0 (`a56575d`) and current remote main. Original workspace edits remain untouched; unrelated uncommitted action-control/layout changes are excluded.
+- All six application version locations agree at 0.21.0. All 92 frontend tests pass, including gallery camera initialization and return behavior. Formatting, manager/card build and diff whitespace checks pass. The known Three.js bundle-size advisory remains.
+- Host Python: 16 pass, 9 native tests skip without HA. All 9 native tests pass separately in the existing singleton official Home Assistant Core 2026.10.2 runtime.
+- Integration ZIP: 21 files. Source ZIP: 85 files. Integrity, version consistency, referenced frontend assets and private-data exclusions pass. Source contains only the unchanged tracked public sample-floor ZIP; no private models, credentials, local config or node dependencies are included.
+- Exact release ZIP extracted to `/tmp/three-d-rooms-artifact-0.21.0` and loaded using the original checkout's singleton helper. Existing room models, device mappings and saved views remain available. Native UI: populated gallery, direct gallery Create, framed editor, Back to views/focus restoration, room/device tab and empty gallery verified. No view saves or device commands sent.
+- Earlier feature checks also verified editing existing views, room-scoped view count and responsive CSS rules. The release retains published card behavior and styling outside this feature. No storage migration or room re-upload is required.
+- Production HA, physical devices, full mobile/dark visual passes and actual HACS download were not checked. Local Core mounting verifies the packaged runtime, not HACS download/discovery. Shared local HA remains available for the user's ongoing testing.

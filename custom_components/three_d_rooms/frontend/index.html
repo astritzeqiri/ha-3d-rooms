@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-Bn62ZeAd.js"></script>
+    <script type="module" crossorigin src="./assets/index-C1ntag9H.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/view-cube-c37ALvX2.js">
     <link rel="modulepreload" crossorigin href="./assets/camera-view-BL6u3TKn.js">
     <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-DI6UvNT3.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-C8nqpO7e.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-CsnkHwTR.css">
   </head>
   <body>
     <header>
@@ -140,9 +140,9 @@
               <button
                 id="close-dashboard"
                 class="panel-close"
-                aria-label="Close view editor"
+                aria-label="Back to views"
               >
-                ×
+                Back to views
               </button>
             </div>
             <p class="muted">
@@ -373,20 +373,32 @@
           hidden
           aria-labelledby="saved-views-heading"
         >
-          <div class="section-title">
-            <div>
-              <h2 id="saved-views-heading">Saved views</h2>
+          <div class="views-library-heading">
+            <div class="views-library-intro">
+              <span class="eyebrow">DASHBOARD LIBRARY</span>
+              <h2 id="saved-views-heading">
+                Dashboard views
+                <span id="saved-view-count" class="views-count">0</span>
+              </h2>
               <p class="muted">
-                Different dashboard views of this room. Device mappings are
-                shared.
+                Choose the angles you want on your dashboard. Each view shares
+                this room’s devices.
               </p>
             </div>
+            <div class="views-library-actions">
+              <button id="import-component">Import</button>
+              <button id="create-library-view" class="primary">
+                Create view
+              </button>
+            </div>
           </div>
+          <p class="views-library-hint">
+            Preview a view to see its dashboard card, or edit it to adjust the
+            framing.
+          </p>
           <p id="component-error" class="error" role="alert"></p>
           <div id="component-list" class="saved-view-grid"></div>
-          <button id="import-component" class="quiet-button">
-            Import saved view</button
-          ><input
+          <input
             id="component-file"
             type="file"
             accept=".json,application/json"

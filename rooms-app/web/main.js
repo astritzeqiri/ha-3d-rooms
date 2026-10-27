@@ -998,6 +998,12 @@ const dashboardEditor = initDashboardEditor({
   model: () => selected,
   scene: () => view,
   toast,
+  onClose: () => {
+    if (activeRoomTab === "views") {
+      savedViews?.refresh();
+      $("create-library-view").focus({ preventScroll: true });
+    } else $("dashboard").focus({ preventScroll: true });
+  },
   onOpen: () => {
     setRoomTab("views", { keepEditor: true });
     viewMode = view.options.mode;

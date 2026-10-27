@@ -1,3 +1,9 @@
+# 0.21.0 release validation
+
+- Dedicated Dashboard views gallery and focused view editor. All 92 frontend tests, 16 host Python tests and 9 native integration tests pass; the host-native skips were run separately in Core 2026.10.2.
+- Exact integration ZIP tested through the singleton helper, retaining rooms/mappings/views. Gallery, direct creation, return navigation, device tab and empty state verified. Version, archive, privacy and frontend-reference checks pass. Details: [docs/validation-0.21.0.md](docs/validation-0.21.0.md).
+- Production/physical devices and actual HACS download not tested.
+
 # 0.20.0 release validation
 
 - Dashboard previews, optional card titles and proportional thumbnails. All 91 frontend tests, 16 host Python tests and 9 native Home Assistant tests pass. The host skips the native tests; those were run separately in Core 2026.10.2.

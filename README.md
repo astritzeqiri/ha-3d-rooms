@@ -171,3 +171,7 @@ Licensed under the [MIT license](LICENSE). See [third-party notices](THIRD_PARTY
 ### Preview a dashboard view
 
 Choose **Preview in dashboard** while editing a view or on its saved-view card. Preview unsaved settings at Desktop or Phone card widths, then close with × or Escape. Device controls are live. **Show title on card** hides the header while retaining the saved view name. New views start without a header; existing views retain their setting. Linked cards follow changes unless overridden in Home Assistant’s card editor.
+
+### Dashboard views gallery
+
+Open **Dashboard views** to browse this room’s saved views, preview a card, or choose **Create view** or **Import**. Creating or editing opens the room canvas beside its view settings. Choose **Back to views** to return to the gallery. **Room & devices** retains its live room overview and device controls.

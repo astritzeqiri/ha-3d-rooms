@@ -53,3 +53,7 @@ Desk-enabled models group height, Up/Stop/Down and four optional macros in one d
 ## 0.20.0 dashboard preview
 
 The native integration manager can preview draft and saved views in the real Home Assistant dashboard card. Desktop/Phone controls change card width; × or Escape closes the preview. Device controls remain live. Show title on card controls the header independently of the saved view name, and linked cards inherit it unless overridden. Existing views preserve their title behavior. Thumbnails retain proportions, with older caches repaired from saved camera aspect ratios when available.
+
+### Dashboard views gallery
+
+Open **Dashboard views** to browse this room’s saved views, preview a card, or choose **Create view** or **Import**. Creating or editing opens the room canvas beside its view settings. Choose **Back to views** to return to the gallery. **Room & devices** retains its live room overview and device controls.

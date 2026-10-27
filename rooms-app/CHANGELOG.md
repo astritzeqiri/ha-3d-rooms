@@ -1,3 +1,10 @@
+# 0.21.0
+
+- Make Dashboard views a dedicated room-scoped gallery with a saved-view count, Create view and Import actions, and a helpful empty state.
+- Show the room canvas on this tab only when creating or editing a view. Back to views returns to the gallery and restores keyboard focus.
+- Initialize camera framing after revealing the editor, so creating from a directly opened gallery works reliably.
+- Keep Room & devices focused on its live room overview and device controls. Preserve existing rooms, mappings, saved views and dashboard cards without migration.
+
 # 0.20.0
 
 - Add Preview in dashboard to the view editor and each saved-view card. Preview current unsaved settings in the actual Home Assistant card without saving or changing a dashboard.

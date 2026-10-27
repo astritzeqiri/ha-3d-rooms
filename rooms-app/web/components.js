@@ -18,6 +18,11 @@ export function initComponents({ api, room, editor, toast, preview }) {
     const host = $("component-list");
     host.replaceChildren();
     const views = components.filter((c) => c.layers[0].model === room()?.id);
+    $("saved-view-count").textContent = views.length;
+    $("saved-view-count").setAttribute(
+      "aria-label",
+      `${views.length} saved ${views.length === 1 ? "view" : "views"}`,
+    );
     if (!views.length) {
       const empty = document.createElement("div");
       empty.className = "saved-views-empty";
@@ -26,8 +31,13 @@ export function initComponents({ api, room, editor, toast, preview }) {
       const text = document.createElement("p");
       text.className = "muted";
       text.textContent =
-        "Frame the room above, then save an overview, floor plan or close-up.";
-      empty.append(title, text);
+        "Create an overview, a floor plan or a close-up. Set the camera once, then use it on any dashboard.";
+      const create = document.createElement("button");
+      create.type = "button";
+      create.className = "primary";
+      create.textContent = "Create your first view";
+      create.onclick = () => editor.open();
+      empty.append(title, text, create);
       host.append(empty);
       return;
     }
@@ -173,6 +183,7 @@ export function initComponents({ api, room, editor, toast, preview }) {
       toast("Select and copy the configuration.");
     }
   };
+  $("create-library-view").onclick = () => editor.open();
   $("import-component").onclick = () => $("component-file").click();
   $("component-file").onchange = async () => {
     try {

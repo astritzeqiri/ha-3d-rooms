@@ -9,6 +9,7 @@ export function initDashboardEditor({
   toast,
   preview,
   onOpen = () => {},
+  onClose = () => {},
 }) {
   const $ = (id) => document.getElementById(id);
   const panel = $("dashboard-panel");
@@ -125,21 +126,33 @@ export function initDashboardEditor({
     url.searchParams.delete("saved_view");
     history.replaceState(null, "", url);
     window.dispatchEvent(new CustomEvent("rooms-route-change"));
+    onClose();
     return true;
   }
   $("dashboard").setAttribute("aria-controls", "dashboard-panel");
   $("dashboard").setAttribute("aria-expanded", "false");
   function open(component, { draft = false } = {}) {
     if (!panel.hidden && !close()) return false;
-    current = component
-      ? structuredClone(component.layers[0])
-      : scene()?.captureView();
-    if (!current) {
+    if (!scene()?.model) {
       toast("Wait for the room to finish loading.");
       return;
     }
     if (component && component.layers[0].model !== model().id)
       throw new Error("Choose the view’s room first.");
+    const fromLibrary = document.body.dataset?.roomTab === "views";
+    panel.hidden = false;
+    document.body.classList.add("dashboard-editing");
+    // A library opened directly has never laid out its hidden room canvas.
+    if (!component && fromLibrary) scene().fitFloor?.();
+    current = component
+      ? structuredClone(component.layers[0])
+      : scene().captureView();
+    if (!current) {
+      panel.hidden = true;
+      document.body.classList.remove("dashboard-editing");
+      toast("Wait for the room to finish loading.");
+      return;
+    }
     draftId = component?.id || crypto.randomUUID();
     saved = !!component && !draft;
     savedSnapshot = saved ? JSON.stringify(component) : undefined;
@@ -157,14 +170,12 @@ export function initDashboardEditor({
           Math.round($("viewport").getBoundingClientRect().height),
         ),
       );
-    panel.hidden = false;
     $("dashboard-advanced").open = false;
     scene().options.allowRotate = true;
     applying = true;
     Object.assign(scene().options, current);
     scene().setView(current.view);
     scene().options.onCameraChange = sync;
-    document.body.classList.add("dashboard-editing");
     $("dashboard").setAttribute("aria-expanded", "true");
     applying = false;
     sync();
@@ -205,13 +216,11 @@ export function initDashboardEditor({
   };
   $("close-dashboard").onclick = () => {
     close();
-    $("dashboard").focus({ preventScroll: true });
   };
   panel.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       e.preventDefault();
       close();
-      $("dashboard").focus();
     }
   });
   for (const key of fields) {
