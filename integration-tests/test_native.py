@@ -5,8 +5,10 @@ python -m unittest discover -s /repo/integration-tests -p test_native.py -v
 """
 
 import importlib
+import json
 import sys
 import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 import unittest
 
@@ -43,6 +45,34 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
 
     async def asyncTearDown(self):
         await self.hass.async_stop()
+
+    async def test_shared_thumbnails_are_optional_in_dashboard_metadata(self):
+        import base64
+        thumbnail = "data:image/jpeg;base64," + base64.b64encode(bytes.fromhex("ffd8ffc0000b080190028001011100ffd9")).decode()
+        view = {"schemaVersion": 1, "id": "preview-check", "title": "Preview", "height": 500,
+                "thumbnail": thumbnail,
+                "layers": [{"model": "kitchen", "view": "front", "heading": 0, "tilt": 28, "zoom": 1}]}
+        await self.runtime.request("save_component", view, "test-user")
+        lightweight = await self.runtime.request("components", {}, "test-user")
+        self.assertNotIn("thumbnail", lightweight[0])
+        full = await self.runtime.request("components", {"include_thumbnails": True}, "test-user")
+        self.assertEqual(full[0]["thumbnail"], thumbnail)
+        import json
+        stored = json.loads((Path(self.temp.name) / "catalog.json").read_text())
+        self.assertEqual(stored["components"][0]["thumbnail"], thumbnail)
+
+    async def test_marker_settings_persist_through_native_saved_view_api(self):
+        markers = {"ceiling": {"visible": True, "show_label": False, "size": 44,
+                               "placement": "room", "offset": [0.5, 0.25, -1]}}
+        view = {"schemaVersion": 1, "id": "marker-check", "title": "Markers", "height": 500,
+                "markers": markers, "layers": [{"model": "kitchen", "view": "front", "heading": 0, "tilt": 28, "zoom": 1}]}
+        await self.runtime.request("save_component", view, "test-user")
+        restored = await self.runtime.request("components", {}, "test-user")
+        self.assertEqual(restored[0]["markers"], markers)
+        self.assertEqual(json.loads((self.store.directory / "catalog.json").read_text())["components"][0]["markers"], markers)
+        with self.assertRaises(ValueError):
+            await self.runtime.request("save_component", {**view, "markers": {"ceiling": {"offset": [0, True, 0]}}}, "test-user")
+        self.assertEqual(self.store.components[0]["markers"], markers)
 
     async def test_saved_view_changes_notify_linked_cards_after_persistence(self):
         from homeassistant.core import callback

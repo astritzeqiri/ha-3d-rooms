@@ -10,6 +10,8 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from io import BytesIO
 import json
+import base64
+import binascii
 import gzip
 import hashlib
 import math
@@ -278,6 +280,56 @@ def validate_camera_snapshot(value, view):
     return {k: deepcopy(value[k]) for k in ("projection", "position", "target", "up", "aspect", "zoom", "referenceZoom", "heading", "tilt", key)}
 
 
+def validate_thumbnail(value):
+    """Accept only small, fixed-size JPEG previews, never executable data URLs."""
+    if not isinstance(value, str) or len(value) > 140000 or not re.fullmatch(r"data:image/jpeg;base64,[A-Za-z0-9+/]+={0,2}", value):
+        raise ValueError("Choose a JPEG preview under 100 KB.")
+    try:
+        data = base64.b64decode(value[23:], validate=True)
+    except (ValueError, binascii.Error) as error:
+        raise ValueError("Invalid JPEG preview.") from error
+    if not data.startswith(b"\xff\xd8") or not data.endswith(b"\xff\xd9"):
+        raise ValueError("Invalid JPEG preview.")
+    offset = 2
+    while offset + 8 < len(data):
+        if data[offset] != 255:
+            break
+        marker = data[offset + 1]
+        size = int.from_bytes(data[offset + 2:offset + 4], "big")
+        if size < 2 or offset + 2 + size > len(data):
+            break
+        if marker in (0xc0, 0xc1, 0xc2):
+            if int.from_bytes(data[offset + 5:offset + 7], "big") == 400 and int.from_bytes(data[offset + 7:offset + 9], "big") == 640:
+                return value
+            break
+        if marker == 0xda:
+            break
+        offset += 2 + size
+    raise ValueError("Preview must be a 640 by 400 JPEG.")
+
+def validate_markers(value):
+    """Bounded, view-local control presentation. Coordinates are offsets, not geometry."""
+    if not isinstance(value, dict) or len(value) > 128:
+        raise ValueError("Use a device-marker settings object with at most 128 controls.")
+    clean = {}
+    for control_id, options in value.items():
+        if (not valid_id(control_id) or not isinstance(options, dict) or
+                set(options) - {"visible", "show_label", "size", "placement", "offset"}):
+            raise ValueError("Invalid device-marker settings.")
+        for key in ("visible", "show_label"):
+            if key in options and not isinstance(options[key], bool):
+                raise ValueError("Marker visibility and labels must be true or false.")
+        if "size" in options and (not isinstance(options["size"], int) or isinstance(options["size"], bool) or not 24 <= options["size"] <= 64):
+            raise ValueError("Marker size must be 24–64 pixels.")
+        if "placement" in options and options["placement"] not in ("room", "tray"):
+            raise ValueError("Choose room or tray for a device control.")
+        if "offset" in options and (not isinstance(options["offset"], list) or len(options["offset"]) != 3 or
+                any(not number(v) or abs(v) > 1000 for v in options["offset"])):
+            raise ValueError("Marker offsets must be three finite values within 1000 metres.")
+        clean[control_id] = deepcopy(options)
+    return clean
+
+
 def validate_component(value, model_ids):
     """Validate portable room views without accepting executable configuration."""
     if not isinstance(value, dict) or value.get("schemaVersion") != 1 or not valid_id(value.get("id")):
@@ -305,7 +357,9 @@ def validate_component(value, model_ids):
     if "camera" in layer:
         clean_layer["camera"] = validate_camera_snapshot(layer["camera"], layer["view"])
     return {"schemaVersion": 1, "id": value["id"], "title": title.strip(), "height": height,
+            **({"thumbnail": validate_thumbnail(value["thumbnail"])} if "thumbnail" in value else {}),
             **({"show_title": value["show_title"]} if "show_title" in value else {}),
+            **({"markers": validate_markers(value["markers"])} if "markers" in value else {}),
             "layers": [clean_layer]}
 
 

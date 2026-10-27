@@ -123,16 +123,28 @@ export function initComponents({ api, room, editor, toast, preview }) {
       more.append(remove);
       try {
         const key = `3d-rooms-view-preview-v2:${c.id}`;
-        const cached = localStorage.getItem(key);
+        let cached;
+        try {
+          cached = localStorage.getItem(key);
+        } catch {}
         const src =
-          cached || localStorage.getItem(`3d-rooms-view-preview:${c.id}`);
+          c.thumbnail ||
+          cached ||
+          (() => {
+            try {
+              return localStorage.getItem(`3d-rooms-view-preview:${c.id}`);
+            } catch {
+              return null;
+            }
+          })();
         if (src?.startsWith("data:image/jpeg;base64,")) {
           const img = document.createElement("img");
           img.className = "saved-view-thumb";
+          img.dataset.previewSource = c.thumbnail ? "shared" : "browser";
           img.src = src;
           img.alt = `${c.title} preview`;
           img.loading = "lazy";
-          if (!cached && c.layers[0].camera?.aspect) {
+          if (!c.thumbnail && !cached && c.layers[0].camera?.aspect) {
             img.addEventListener(
               "load",
               () => {
@@ -189,8 +201,8 @@ export function initComponents({ api, room, editor, toast, preview }) {
     try {
       const file = $("component-file").files[0];
       if (!file) return;
-      if (file.size > 16384)
-        throw new Error("Choose a saved view smaller than 16 KB.");
+      if (file.size > 196608)
+        throw new Error("Choose a saved view smaller than 192 KB.");
       const imported = JSON.parse(await file.text());
       if (imported?.layers?.[0]?.model !== room()?.id)
         throw new Error(

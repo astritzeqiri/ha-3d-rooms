@@ -1,3 +1,4 @@
+import { floorFrame, perspectiveFrame } from "../shared/floor-view.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "three";
@@ -126,3 +127,63 @@ test("top and bottom captures keep a stable heading at the camera poles", () => 
     assert.equal(saved.tilt, sign === 1 ? 0 : 180);
   }
 });
+
+for (const orthographic of [false, true])
+  test(`responsive ${orthographic ? "floor" : "perspective"} framing uses room bounds and does not shrink on every resize`, () => {
+    const min = [-1, 0, -4],
+      max = [1, 2, 4];
+    const base = orthographic
+      ? floorFrame(min, max, 2, 28, 0)
+      : perspectiveFrame(min, max, 2, 28, 0);
+    const source = restoredCamera(
+      { ...base, aspect: 2, zoom: 1 },
+      orthographic,
+    );
+    const saved = captureCameraView({
+      position: source.position.toArray(),
+      target: base.target,
+      up: source.up.toArray(),
+      aspect: 2,
+      zoom: 1,
+      ...(orthographic ? { halfHeight: base.top } : { fov: base.fov }),
+      min,
+      max,
+    });
+    const original = JSON.stringify(saved);
+    const legacy = restoreCameraView(saved.camera, { ...saved, aspect: 0.7 });
+    const phone = restoreCameraView(saved.camera, {
+      ...saved,
+      aspect: 0.7,
+      min,
+      max,
+    });
+    assert.ok(
+      phone.zoom > legacy.zoom * 1.2,
+      "unused wide space must not make a tall room tiny on a phone",
+    );
+    const camera = restoredCamera(phone, orthographic);
+    for (let corner = 0; corner < 8; corner++) {
+      const point = new THREE.Vector3(
+        ...min.map((n, i) => ((corner >> i) & 1 ? max[i] : n)),
+      ).project(camera);
+      assert.ok(
+        Math.abs(point.x) <= 1.001 && Math.abs(point.y) <= 1.001,
+        "all room corners remain visible",
+      );
+    }
+    for (const aspect of [0.5, 2, 0.7, 1.2, 2])
+      restoreCameraView(saved.camera, { ...saved, aspect, min, max });
+    assert.equal(
+      JSON.stringify(saved),
+      original,
+      "rendering does not rewrite the authored snapshot",
+    );
+    const desktop = restoreCameraView(saved.camera, {
+      ...saved,
+      aspect: 2,
+      min,
+      max,
+    });
+    assert.equal(desktop.zoom, 1);
+    assert.deepEqual(desktop.target, saved.camera.target);
+  });

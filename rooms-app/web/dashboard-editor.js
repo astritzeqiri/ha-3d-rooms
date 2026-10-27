@@ -1,3 +1,4 @@
+import { initMarkerEditor } from "./marker-editor.js";
 import { componentYaml, validateComponent } from "../shared/component.mjs";
 import { viewThumbnail } from "./view-thumbnail.js";
 
@@ -13,8 +14,10 @@ export function initDashboardEditor({
 }) {
   const $ = (id) => document.getElementById(id);
   const panel = $("dashboard-panel");
+  const markerEditor = initMarkerEditor({ model, scene, onChange: update });
   let current,
     draftId,
+    thumbnail,
     busy = false,
     applying = false,
     saved = false,
@@ -29,6 +32,11 @@ export function initDashboardEditor({
         title: $("dashboard-title").value,
         ...(!$("dashboard-show-title").checked ? { show_title: false } : {}),
         height: Number($("dashboard-height").value),
+        ...(thumbnail ? { thumbnail } : {}),
+
+        ...(Object.keys(markerEditor.read()).length
+          ? { markers: markerEditor.read() }
+          : {}),
         layers: [{ model: model().id, ...current }],
       },
       [model().id],
@@ -57,10 +65,17 @@ export function initDashboardEditor({
   }
   function sync(event = {}) {
     if (panel.hidden || applying || !scene()?.model) return;
-    const resizeOnly = event.source === "resize" && !dirty();
-    const wasSaved = saved && baseline === savedSnapshot;
-    current = scene().captureView();
-    if (!current) return;
+    // Resizing changes only the rendered fit, never the authored camera.
+    if (event.source === "resize") {
+      update();
+      return;
+    }
+    if (!current?.camera || ["orbit", "preset"].includes(event.source)) {
+      const captured = scene().captureView();
+      if (!captured) return;
+      current = captured;
+      Object.assign(scene().options, current);
+    }
     $("dashboard-view").value = current.view;
     for (const key of fields) {
       const input = $("dashboard-" + key);
@@ -72,12 +87,6 @@ export function initDashboardEditor({
         range.max = Math.max(3, Math.ceil(current.zoom));
       }
       range.value = current[key];
-    }
-    // Preserve drag/pan changes when the preview or window resizes.
-    Object.assign(scene().options, current);
-    if (resizeOnly) {
-      baseline = JSON.stringify(read());
-      if (wasSaved) savedSnapshot = baseline;
     }
     update();
   }
@@ -93,12 +102,15 @@ export function initDashboardEditor({
     const mode = $("dashboard-view").value;
     applying = true;
     try {
-      Object.assign(scene().options, {
+      current = {
+        ...current,
+        view: mode,
         camera: current.view === mode ? current.camera : undefined,
         heading: Number($("dashboard-heading").value),
         tilt: Number($("dashboard-tilt").value),
         zoom: Number($("dashboard-zoom").value),
-      });
+      };
+      Object.assign(scene().options, current);
       scene().setView(mode);
     } finally {
       applying = false;
@@ -118,6 +130,7 @@ export function initDashboardEditor({
     if (!force && dirty() && !confirm("Discard unsaved view changes?"))
       return false;
     scene().options.onCameraChange = undefined;
+    markerEditor.close();
     panel.hidden = true;
     document.body.classList.remove("dashboard-editing");
     $("viewport").style.height = "";
@@ -154,6 +167,7 @@ export function initDashboardEditor({
       return;
     }
     draftId = component?.id || crypto.randomUUID();
+    thumbnail = component?.thumbnail;
     saved = !!component && !draft;
     savedSnapshot = saved ? JSON.stringify(component) : undefined;
     $("dashboard-title").value =
@@ -177,6 +191,7 @@ export function initDashboardEditor({
     scene().setView(current.view);
     scene().options.onCameraChange = sync;
     $("dashboard").setAttribute("aria-expanded", "true");
+    markerEditor.open(component?.markers);
     applying = false;
     sync();
     baseline = JSON.stringify(read());
@@ -211,7 +226,7 @@ export function initDashboardEditor({
   $("dashboard-preset").onchange = () => {
     if (!$("dashboard-preset").value) return;
     scene().setCameraPreset($("dashboard-preset").value);
-    sync();
+    sync({ source: "preset" });
     $("dashboard-preset").value = "";
   };
   $("close-dashboard").onclick = () => {
@@ -246,6 +261,7 @@ export function initDashboardEditor({
     $("save-dashboard-component").disabled = true;
     try {
       sync();
+      thumbnail = captureThumbnail() || thumbnail;
       const snapshot = read();
       await api("components", {
         method: "PUT",
@@ -283,6 +299,15 @@ export function initDashboardEditor({
       toast("Select and copy the configuration.");
     }
   };
+  function captureThumbnail() {
+    try {
+      const view = scene();
+      view.render();
+      return viewThumbnail(view.renderer.domElement);
+    } catch {
+      return undefined;
+    }
+  }
   function cachePreview() {
     try {
       const view = scene();

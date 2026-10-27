@@ -62,7 +62,11 @@ class RoomsRuntime:
             return result
         if operation == "components":
             from copy import deepcopy
-            return deepcopy(self.store.components)
+            components = deepcopy(self.store.components)
+            if not data.get("include_thumbnails", False):
+                for component in components:
+                    component.pop("thumbnail", None)
+            return components
         if operation == "save_component":
             result = await self.work(self.store.put_component, data)
             self.hass.bus.async_fire("three_d_rooms_updated")

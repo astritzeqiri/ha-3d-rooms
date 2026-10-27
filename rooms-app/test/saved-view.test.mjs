@@ -76,3 +76,19 @@ test("title visibility follows the saved view and allows a per-card override", (
     true,
   );
 });
+
+test("linked marker settings follow saved views, support explicit overrides and reset for another room", () => {
+  const view = { ...saved(), markers: { lamp: { visible: false, size: 44 } } };
+  const result = resolveSavedView({ saved_view: view.id }, [view]);
+  assert.deepEqual(result.markers, view.markers);
+  result.markers.lamp.size = 24;
+  assert.equal(view.markers.lamp.size, 44);
+  assert.deepEqual(
+    resolveSavedView({ saved_view: view.id, markers: {} }, [view]).markers,
+    {},
+  );
+  assert.equal(
+    resolveSavedView({ saved_view: view.id, model: "other" }, [view]).markers,
+    undefined,
+  );
+});

@@ -1,3 +1,9 @@
+import {
+  validateMarkers,
+  markerSettings,
+  markerLayout,
+  markerTrayHeight,
+} from "../shared/marker-settings.mjs";
 import { resolveSavedView } from "../shared/saved-view.mjs";
 import { deviceForControl, macroName } from "../shared/device.mjs";
 import { coverFeatures } from "../shared/cover.mjs";
@@ -21,7 +27,7 @@ export class ThreeDRoomsCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:32px;height:32px;min-height:32px;padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:26px;left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}</style><ha-card><header hidden></header><select class="daylight-switch" aria-label="Time of day" title="Time of day" hidden><option value="auto">Auto</option><option value="day">Day</option><option value="night">Night</option></select><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>`;
+    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(select:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:static;flex-shrink:0;margin-left:auto;min-height:44px;max-width:100%;border-radius:8px;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:-4px}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}</style><ha-card><div class="card-top"><header hidden></header><select class="daylight-switch" aria-label="Time of day" title="Time of day" hidden><option value="auto">Auto</option><option value="day">Day</option><option value="night">Night</option></select></div><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>`;
     this._container = this.shadowRoot.querySelector(".scene");
     this._message = this.shadowRoot.querySelector(".message");
     this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
@@ -81,6 +87,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       zoom: camera?.referenceZoom ?? 1,
       interactive: false,
       ...config,
+      markers: validateMarkers(config.markers),
       camera,
     };
     this._container.style.height = this._config.height + "px";
@@ -98,12 +105,20 @@ export class ThreeDRoomsCard extends HTMLElement {
     } else this._states();
   }
   getCardSize() {
-    return Math.ceil((this._config?.height || 500) / 50);
+    return Math.ceil(
+      ((this._config?.height || 500) +
+        markerTrayHeight(this._config?.markers)) /
+        50,
+    );
   }
   getGridOptions() {
     return {
       columns: 12,
-      rows: Math.ceil((this._config?.height || 500) / 56),
+      rows: Math.ceil(
+        ((this._config?.height || 500) +
+          markerTrayHeight(this._config?.markers)) /
+          56,
+      ),
       min_columns: 6,
       min_rows: 4,
     };
@@ -140,6 +155,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         });
         if (generation !== this._generation) return;
         this._config = resolveSavedView(this._sourceConfig, components);
+        this._config.markers = validateMarkers(this._config.markers);
         this._container.style.height = this._config.height + "px";
         const title = this.shadowRoot.querySelector("header");
         title.textContent = this._config.title || "";
@@ -311,14 +327,19 @@ export class ThreeDRoomsCard extends HTMLElement {
   }
   _buildAccess() {
     this.shadowRoot.querySelector(".fixture-access")?.remove();
+    this.shadowRoot.querySelector(".fixture-tray")?.remove();
     const access = document.createElement("div");
     access.className = "fixture-access";
+    const tray = document.createElement("div");
+    tray.className = "fixture-tray";
     for (const control of this._model.controls) {
       const device = deviceForControl(this._model, control.id);
       if (device && device.height !== control.id) continue;
       const button = document.createElement("button");
       const label = device?.label || control.label || control.name || "light";
       button.dataset.control = control.id;
+      const presentation = markerSettings(this._config.markers, control.id);
+      button.style.setProperty("--marker-size", presentation.size + "px");
       button.setAttribute(
         "aria-label",
         control.type !== "light"
@@ -344,7 +365,15 @@ export class ThreeDRoomsCard extends HTMLElement {
       const badge = document.createElement("span");
       badge.className = "fixture-state";
       badge.setAttribute("aria-hidden", "true");
-      button.append(icon, badge);
+      badge.hidden = !presentation.show_label;
+      button.append(icon);
+      if (presentation.placement === "tray") {
+        const name = document.createElement("span");
+        name.className = "fixture-name";
+        name.textContent = label;
+        button.append(name);
+      }
+      button.append(badge);
       let timer,
         origin,
         held = false;
@@ -388,18 +417,37 @@ export class ThreeDRoomsCard extends HTMLElement {
           this._pick(control.id);
         }
       };
-      access.append(button);
+      if (presentation.visible)
+        (presentation.placement === "tray" ? tray : access).append(button);
     }
     this._container.append(access);
+    this.shadowRoot.querySelector("ha-card").append(tray);
     this._positionButtons();
   }
   _positionButtons() {
     for (const button of this.shadowRoot.querySelectorAll("[data-control]")) {
-      const point = this._view?.fixtureScreenPosition(button.dataset.control);
-      button.hidden = !point?.visible;
+      const settings = markerSettings(
+        this._config?.markers,
+        button.dataset.control,
+      );
+      if (settings.placement === "tray") {
+        button.hidden = !settings.visible;
+        continue;
+      }
+      const point = this._view?.fixtureScreenPosition(
+        button.dataset.control,
+        settings.offset,
+      );
+      button.hidden = !settings.visible || !point?.visible;
       if (point) {
-        button.style.left = `${Math.max(0, Math.min(this._container.clientWidth - 32, point.x + 24))}px`;
-        button.style.top = `${Math.max(0, Math.min(this._container.clientHeight - 48, point.y - 16))}px`;
+        const layout = markerLayout(
+          point,
+          settings,
+          this._container.clientWidth,
+          this._container.clientHeight,
+        );
+        button.style.left = layout.left + "px";
+        button.style.top = layout.top + "px";
       }
     }
   }

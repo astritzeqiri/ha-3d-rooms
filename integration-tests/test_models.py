@@ -3,6 +3,7 @@
 import importlib.util
 from io import BytesIO
 import json
+import base64
 from pathlib import Path
 import struct
 import tempfile
@@ -288,6 +289,18 @@ class ComponentTests(unittest.TestCase):
             self.assertEqual(len(models.ModelStore(directory).open().components), 1)
             self.assertEqual(len(reopened.models), 1)
 
+    def test_shared_thumbnail_survives_reload_and_rejects_unsafe_images(self):
+        thumbnail = "data:image/jpeg;base64," + base64.b64encode(bytes.fromhex("ffd8ffc0000b080190028001011100ffd9")).decode()
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package())
+            store.put_component({**self.component(), "thumbnail": thumbnail})
+            self.assertEqual(models.ModelStore(directory).open().components[0]["thumbnail"], thumbnail)
+            for bad in ("https://example.com/preview.jpg", "data:image/svg+xml;base64,PHN2Zz4=", "data:image/jpeg;base64,AA==", "x" * 140001):
+                with self.assertRaises(ValueError):
+                    models.validate_component({**self.component(), "thumbnail": bad}, ["kitchen"])
+            self.assertEqual(store.components[0]["thumbnail"], thumbnail)
+
     def test_title_visibility_persists_without_changing_view_name(self):
         with tempfile.TemporaryDirectory() as directory:
             store = models.ModelStore(directory).open()
@@ -299,6 +312,23 @@ class ComponentTests(unittest.TestCase):
             self.assertEqual(restored["title"], value["title"])
             with self.assertRaises(ValueError):
                 models.validate_component({**value, "show_title": "false"}, ["kitchen"])
+
+    def test_device_marker_settings_roundtrip_and_validation(self):
+        markers = {"ceiling": {"visible": False, "size": 44, "show_label": False,
+                               "placement": "room", "offset": [1, 0.25, -2]},
+                   "desk": {"placement": "tray"}}
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package())
+            store.put_component({**self.component(), "markers": markers})
+            restored = models.ModelStore(directory).open().components[0]
+            self.assertEqual(restored["markers"], markers)
+            store.put_component({**restored, "title": "Renamed"})
+            self.assertEqual(store.components[0]["markers"], markers)
+        for options in ({"offset": [1, True, 3]}, {"offset": [0, 0]}, {"size": 200},
+                        {"placement": "absolute"}, {"visible": "no"}, {"url": "https://example.com"}):
+            with self.assertRaises(ValueError):
+                models.validate_component({**self.component(), "markers": {"ceiling": options}}, ["kitchen"])
 
     def test_component_preserves_camera_snapshot_and_rejects_invalid_geometry(self):
         from copy import deepcopy

@@ -23,6 +23,9 @@ export function resolveSavedView(config, components) {
     title: saved.title,
     show_title: saved.show_title ?? true,
     height: saved.height,
+    ...(saved.markers !== undefined
+      ? { markers: structuredClone(saved.markers) }
+      : {}),
     interactive: false,
     ...config,
   };
@@ -30,5 +33,6 @@ export function resolveSavedView(config, components) {
   // can still use the snapshot's target and composition.
   if (resolved.model !== layer.model || resolved.view !== layer.view)
     delete resolved.camera;
+  if (resolved.model !== layer.model) delete resolved.markers;
   return resolved;
 }

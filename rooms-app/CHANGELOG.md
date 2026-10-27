@@ -1,3 +1,12 @@
+# 0.22.0
+
+- Customize each device icon independently in a saved dashboard view: visibility, state label, size and room/below-room placement.
+- Drag room icons directly onto model surfaces. Use Position for click-to-place, reset or precise X/Y/Z offsets. Changes remain anchored in 3D and follow moving devices.
+- Open compact fan-out actions by selecting an icon: Undo, Edit icon, Position and an eye for visibility. Undo affects only the selected device during the editing session. Clicking outside clears selection and focus.
+- Keep hidden controls faded and selectable in the editor with a Hidden pill while omitting them from dashboard cards. Centre native Home Assistant symbols at every icon size.
+- Preserve authored camera framing across editing, saving and resizing, improve phone/tablet layouts, and store bounded thumbnails with saved views so galleries share the same previews.
+- Existing rooms, mappings and saved views remain compatible; no re-import is required.
+
 # 0.21.0
 
 - Make Dashboard views a dedicated room-scoped gallery with a saved-view count, Create view and Import actions, and a helpful empty state.

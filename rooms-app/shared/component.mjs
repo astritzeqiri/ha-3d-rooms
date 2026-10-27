@@ -1,3 +1,5 @@
+import { validateThumbnail } from "./thumbnail.mjs";
+import { validateMarkers } from "./marker-settings.mjs";
 import { validateCameraSnapshot } from "./camera-view.mjs";
 /** Portable saved dashboard views. Layers leave room for future compositions. */
 export function validateComponent(value, modelIds) {
@@ -51,6 +53,12 @@ export function validateComponent(value, modelIds) {
     id: value.id,
     title: value.title.trim(),
     height: value.height,
+    ...(value.thumbnail !== undefined
+      ? { thumbnail: validateThumbnail(value.thumbnail) }
+      : {}),
+    ...(value.markers !== undefined
+      ? { markers: validateMarkers(value.markers) }
+      : {}),
     ...(value.show_title !== undefined ? { show_title: value.show_title } : {}),
     layers: [
       {

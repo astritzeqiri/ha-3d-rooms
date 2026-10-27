@@ -1,3 +1,4 @@
+import { THUMBNAIL_LIMIT } from "../shared/thumbnail.mjs";
 /** Fit the entire capture without distorting it, including older squeezed JPEGs. */
 export function viewThumbnail(source, aspect = source.width / source.height) {
   if (!Number.isFinite(aspect) || aspect <= 0)
@@ -17,5 +18,9 @@ export function viewThumbnail(source, aspect = source.width / source.height) {
     width,
     height,
   );
-  return canvas.toDataURL("image/jpeg", 0.85);
+  for (const quality of [0.75, 0.6, 0.45]) {
+    const image = canvas.toDataURL("image/jpeg", quality);
+    if (image.length <= THUMBNAIL_LIMIT) return image;
+  }
+  throw new Error("Preview image is too large.");
 }

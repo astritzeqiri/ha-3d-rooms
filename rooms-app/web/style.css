@@ -2593,3 +2593,713 @@ body[data-room-tab="views"] .saved-view-thumb {
 .dashboard-panel .panel-heading {
   flex-wrap: wrap;
 }
+
+/* Phone and small tablet layouts keep the room and form usable together. */
+.saved-view-card {
+  min-width: 0;
+}
+.saved-view-card h3 {
+  overflow-wrap: anywhere;
+}
+.views-library-heading > * {
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  body > header {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    white-space: nowrap;
+  }
+  #connection {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  main > aside {
+    padding: 12px 16px;
+  }
+  main > aside .section-title {
+    margin-bottom: 8px;
+  }
+  #models {
+    gap: 8px;
+  }
+  #models button {
+    min-width: 156px;
+    padding: 10px 12px;
+  }
+  #add-model {
+    min-height: 44px;
+    margin-top: 8px;
+  }
+  .workspace {
+    min-width: 0;
+  }
+  .views-library-heading {
+    gap: 16px;
+    padding: 20px 0 16px;
+  }
+  .views-library-intro h2 {
+    flex-wrap: wrap;
+  }
+  .views-library-hint {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .saved-view-grid {
+    margin-top: 0;
+  }
+  .saved-view-actions {
+    gap: 8px;
+  }
+  .saved-view-actions button {
+    min-height: 44px;
+  }
+  .dashboard-editing main > aside {
+    display: none;
+  }
+  .dashboard-editing .workspace {
+    padding: 16px 12px max(24px, env(safe-area-inset-bottom));
+  }
+  .dashboard-editing .toolbar {
+    margin-bottom: 12px;
+  }
+  .dashboard-editing .toolbar h1 {
+    font-size: 22px;
+  }
+  .dashboard-editing .room-tabs {
+    display: none;
+  }
+  .dashboard-editing .room-preview {
+    top: 0;
+    padding-bottom: 8px;
+  }
+  .dashboard-editing #viewport {
+    height: min(34dvh, 280px) !important;
+    min-height: 150px;
+  }
+  .dashboard-panel {
+    padding: 16px;
+    gap: 12px;
+  }
+  .dashboard-panel input:not([type="checkbox"]):not([type="range"]),
+  .dashboard-panel select {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .dashboard-panel input,
+  .dashboard-panel select,
+  .dashboard-panel button {
+    scroll-margin-top: calc(min(34dvh, 280px) + 64px);
+  }
+  .dashboard-panel .panel-close {
+    min-height: 44px;
+  }
+  .panel-save {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  dialog {
+    max-width: calc(100vw - 24px);
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .dashboard-editing .room-preview {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 980px) {
+  .dashboard-editing main {
+    display: block;
+  }
+  .dashboard-editing main > aside {
+    display: none;
+  }
+  .dashboard-editing .workspace {
+    padding: 20px;
+  }
+  .dashboard-editing .room-tabs {
+    display: none;
+  }
+  .dashboard-editing .room-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .dashboard-editing .room-preview {
+    top: 68px;
+    z-index: 2;
+    padding-bottom: 8px;
+    background: var(--bg);
+  }
+  .dashboard-editing #viewport {
+    height: min(36dvh, 320px) !important;
+    min-height: 180px;
+  }
+  .dashboard-editing .view-footer {
+    display: none;
+  }
+  .dashboard-panel input:not([type="checkbox"]):not([type="range"]),
+  .dashboard-panel select {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .dashboard-panel input,
+  .dashboard-panel select,
+  .dashboard-panel button {
+    scroll-margin-top: calc(min(36dvh, 320px) + 140px);
+  }
+}
+
+/* Device marker presentation inside the saved-view editor. */
+.view-controls-settings > summary {
+  min-height: 44px;
+  padding: 10px 0;
+  font-weight: 600;
+}
+.marker-device-settings {
+  border-top: 1px solid var(--line);
+}
+.marker-device-settings > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 0;
+  cursor: pointer;
+}
+.marker-device-name {
+  font-weight: 600;
+}
+.marker-device-summary {
+  font-size: 12px;
+  color: var(--muted);
+}
+.marker-device-fields {
+  display: grid;
+  gap: 12px;
+  padding: 4px 0 16px;
+}
+.marker-device-fields > label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+.marker-device-fields > .marker-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.dashboard-panel .marker-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.marker-position {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.marker-position button {
+  font-size: 12px;
+  flex: 1;
+  padding: 8px;
+}
+.marker-position > details {
+  flex: 1 0 100%;
+}
+.marker-position > details > summary {
+  min-height: 44px;
+  padding: 10px 0;
+}
+.marker-axes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.marker-axes label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+}
+.dashboard-panel .marker-axes input {
+  padding: 8px;
+}
+.marker-editor-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.marker-editor-overlay .marker-editor-control {
+  position: absolute;
+  box-sizing: border-box;
+  width: var(--marker-size, 32px);
+  height: var(--marker-size, 32px);
+  min-height: var(--marker-size, 32px);
+  padding: 5px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  pointer-events: auto;
+  box-shadow: 0 2px 8px #0004;
+}
+.marker-editor-overlay .marker-editor-control:before {
+  content: "";
+  position: absolute;
+  min-width: 44px;
+  min-height: 44px;
+  inset: -6px;
+  border-radius: 50%;
+}
+.marker-editor-icon {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+.marker-editor-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+.marker-editor-control[data-active="true"] {
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.marker-editor-overlay .marker-editor-badge {
+  position: absolute;
+  top: calc(var(--marker-size, 32px) - 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.marker-editor-tray {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+.marker-editor-tray .marker-editor-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  width: 100%;
+  text-align: left;
+}
+.marker-editor-tray .marker-editor-icon {
+  width: var(--marker-size, 32px);
+  height: var(--marker-size, 32px);
+  flex-shrink: 0;
+}
+.marker-editor-tray .marker-editor-name {
+  flex: 1;
+}
+.marker-editor-tray .marker-editor-badge {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.placing-marker,
+.placing-marker canvas {
+  cursor: crosshair;
+}
+.placing-marker {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.marker-device-settings[open] > summary {
+  color: var(--accent-ink);
+}
+.marker-editor-control[aria-pressed="true"] {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.marker-editor-control[data-movable="true"] {
+  cursor: grab;
+  touch-action: none;
+}
+.moving-marker:active .marker-editor-control[data-movable="true"] {
+  cursor: grabbing;
+}
+.marker-position [data-move] {
+  flex-basis: 100%;
+  min-height: 44px;
+}
+.marker-position [data-move][aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Contextual icon editor: the scene owns the tools; the sidebar only picks devices. */
+.marker-floating-tools {
+  position: absolute;
+  z-index: 12;
+  width: min(280px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 8px 28px #0005;
+  pointer-events: auto;
+}
+.marker-floating-tools[hidden],
+.marker-floating-tools [hidden] {
+  display: none !important;
+}
+.marker-floating-tools .marker-device-settings {
+  border: 0;
+}
+.marker-floating-tools .marker-device-settings > summary {
+  display: none;
+}
+.marker-tool-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.marker-tool-heading strong {
+  font-size: 13px;
+}
+.marker-tool-heading [data-close] {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 22px;
+  border: 0;
+  background: transparent;
+}
+.marker-tool-actions {
+  display: flex;
+  gap: 6px;
+}
+.marker-tool-actions button {
+  flex: 1;
+  padding: 8px;
+  min-height: 44px;
+  font-size: 12px;
+}
+.marker-tool-actions [aria-pressed="true"],
+.marker-tool-actions [aria-expanded="true"] {
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.marker-appearance {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-top: 12px;
+}
+.marker-appearance > label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.marker-appearance select {
+  width: 100%;
+  min-height: 44px;
+  padding: 6px;
+  font-size: 13px;
+}
+.marker-tool-checks {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.marker-tool-checks label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-size: 12px;
+}
+.marker-tool-checks input {
+  width: 18px;
+  height: 18px;
+}
+.marker-floating-tools .marker-position {
+  margin-top: 12px;
+}
+.marker-floating-tools .marker-position > button {
+  min-height: 44px;
+}
+.marker-floating-tools .marker-axes input {
+  width: 100%;
+  min-height: 44px;
+  padding: 6px;
+  font-size: 16px;
+}
+#dashboard-marker-settings > select {
+  width: 100%;
+}
+
+.marker-tool-hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+
+/* Three satellite actions fan out from the selected device icon. */
+.marker-floating-tools {
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  max-height: none;
+  pointer-events: none;
+}
+.marker-floating-tools .marker-tool-heading,
+.marker-floating-tools .marker-tool-hint {
+  display: none;
+}
+.marker-floating-tools .marker-tool-actions {
+  display: contents;
+}
+.marker-floating-tools .marker-tool-actions button {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 7px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: 0 3px 10px #0005;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  animation: marker-action-pop 140ms ease-out;
+}
+.marker-tool-actions svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.marker-floating-tools .marker-tool-actions [aria-pressed="true"],
+.marker-floating-tools .marker-tool-actions [aria-expanded="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+.marker-floating-tools .marker-appearance,
+.marker-floating-tools .marker-position {
+  position: absolute;
+  width: min(240px, calc(100vw - 48px));
+  max-height: 250px;
+  overflow: auto;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 6px 20px #0005;
+  pointer-events: auto;
+}
+@keyframes marker-action-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marker-floating-tools .marker-tool-actions button {
+    animation: none;
+  }
+}
+
+/* Smaller visuals retain generous invisible touch targets. */
+.marker-floating-tools .marker-tool-actions button::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+}
+.marker-floating-tools .marker-position {
+  gap: 6px;
+}
+.marker-floating-tools .marker-position > button {
+  min-height: 32px;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 18px;
+}
+.marker-floating-tools .marker-position > details > summary {
+  min-height: 32px;
+  padding: 7px 0;
+  font-size: 12px;
+  line-height: 18px;
+}
+.marker-floating-tools .marker-position .small {
+  font-size: 11px;
+  margin: 4px 0 8px;
+}
+.marker-floating-tools .marker-axes {
+  gap: 6px;
+}
+.marker-floating-tools .marker-axes label {
+  font-size: 11px;
+  gap: 4px;
+}
+.marker-floating-tools .marker-axes input {
+  min-height: 32px;
+  padding: 5px;
+  font-size: 13px;
+}
+@media (pointer: coarse) {
+  .marker-floating-tools .marker-position > button,
+  .marker-floating-tools .marker-position > details > summary,
+  .marker-floating-tools .marker-axes input {
+    min-height: 44px;
+  }
+}
+
+.marker-editor-control[data-movable="true"] {
+  cursor: grab;
+  touch-action: none;
+}
+.marker-editor-control[data-movable="true"]:active {
+  cursor: grabbing;
+}
+.marker-floating-tools .marker-tool-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Compact property rows for the contextual icon panels. */
+.marker-floating-tools .marker-appearance,
+.marker-floating-tools .marker-position {
+  width: min(210px, calc(100vw - 48px));
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px #0004;
+}
+.marker-floating-tools .marker-appearance {
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+.marker-floating-tools .marker-tool-checks {
+  display: contents;
+}
+.marker-floating-tools .marker-appearance > label,
+.marker-floating-tools .marker-tool-checks > label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+  font-size: 12px;
+  line-height: 18px;
+}
+.marker-floating-tools .marker-tool-checks input {
+  order: 1;
+  width: 14px;
+  height: 14px;
+  margin: 0 2px 0 0;
+}
+.marker-floating-tools .marker-appearance select {
+  width: 112px;
+  min-height: 28px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 18px;
+}
+.marker-floating-tools .marker-position {
+  gap: 4px;
+}
+.marker-floating-tools .marker-position > button {
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.marker-floating-tools .marker-position > details > summary {
+  min-height: 28px;
+  padding: 5px 0 1px;
+  font-size: 12px;
+}
+.marker-floating-tools .marker-position .marker-axes {
+  margin-top: 6px;
+}
+@media (pointer: coarse) {
+  .marker-floating-tools .marker-appearance > label,
+  .marker-floating-tools .marker-tool-checks > label,
+  .marker-floating-tools .marker-appearance select,
+  .marker-floating-tools .marker-position > button,
+  .marker-floating-tools .marker-position > details > summary {
+    min-height: 40px;
+  }
+  .marker-floating-tools .marker-appearance select,
+  .marker-floating-tools .marker-axes input {
+    font-size: 16px;
+  }
+}
+
+/* Keep small glyphs centred inside their circle and labels below the symbol. */
+.marker-editor-overlay .marker-editor-control {
+  display: grid;
+  place-items: center;
+  min-width: var(--marker-size, 32px);
+  padding: 0;
+  --marker-glyph-size: clamp(12px, calc(var(--marker-size, 32px) - 14px), 24px);
+}
+.marker-editor-overlay .marker-editor-icon {
+  width: var(--marker-glyph-size);
+  height: var(--marker-glyph-size);
+}
+.marker-editor-overlay .marker-editor-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.marker-editor-overlay .marker-editor-badge {
+  top: calc(var(--marker-size, 32px) - 2px);
+  font-size: clamp(9px, calc(var(--marker-size, 32px) - 15px), 11px);
+  line-height: 14px;
+}
+
+/* Hidden controls remain selectable as ghosts only in the view editor. */
+.marker-editor-control[data-hidden="true"] {
+  background: color-mix(in srgb, var(--surface) 92%, var(--muted));
+  border-color: color-mix(in srgb, var(--muted) 45%, var(--surface));
+  border-style: solid;
+  color: var(--muted);
+  box-shadow: none;
+}
+.marker-editor-control[data-hidden="true"] .marker-editor-icon,
+.marker-editor-control[data-hidden="true"] .marker-editor-name {
+  opacity: 0.65;
+}
+.marker-editor-control[data-hidden="true"] .marker-editor-badge {
+  background: var(--surface);
+  color: var(--muted);
+  border-style: solid;
+  font-size: 9px;
+  line-height: 13px;
+  font-weight: 500;
+}

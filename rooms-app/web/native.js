@@ -48,7 +48,9 @@ export async function connectNative() {
       if (path === "components")
         return bridge.request(
           options.method === "PUT" ? "save_component" : "components",
-          JSON.parse(options.body || "{}"),
+          options.method === "PUT"
+            ? JSON.parse(options.body || "{}")
+            : { include_thumbnails: true },
         );
       if (path.startsWith("components/") && options.method === "DELETE")
         return bridge.request("delete_component", { id: path.split("/")[1] });

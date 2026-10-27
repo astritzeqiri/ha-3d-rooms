@@ -1,3 +1,7 @@
+# 0.22.0 release validation
+
+Device-icon editing, 3D positioning, per-device presentation/Undo, shared thumbnails and responsive camera improvements. All 113 frontend tests, 18 host Python tests and 11 native Core tests pass; exact integration ZIP, restart persistence and a linked real dashboard verified. Original rooms/views retained. Release checks are recorded in [docs/validation-0.22.0.md](docs/validation-0.22.0.md).
+
 # 0.21.0 release validation
 
 - Dedicated Dashboard views gallery and focused view editor. All 92 frontend tests, 16 host Python tests and 9 native integration tests pass; the host-native skips were run separately in Core 2026.10.2.

@@ -337,7 +337,7 @@ export class ThreeDRoomsEditor extends HTMLElement {
     }
     if (!component || component.layers?.length !== 1) return;
     const config = { ...this._config, saved_view: component.id };
-    for (const key of [...VIEW_FIELDS, "camera"]) delete config[key];
+    for (const key of [...VIEW_FIELDS, "camera", "markers"]) delete config[key];
     this._emit(config);
   }
   _override(key) {

@@ -1,3 +1,4 @@
+import { offsetPoint } from "../shared/marker-settings.mjs";
 import { deviceForControl } from "../shared/device.mjs";
 import { setNumberValue } from "../shared/number.mjs";
 import { createDaylight } from "../shared/daylight.mjs";
@@ -50,8 +51,8 @@ export class SceneView {
     });
     this.resize = new ResizeObserver(() => {
       const { width, height } = container.getBoundingClientRect();
-      this.renderer.setSize(width, height);
       if (!width || !height) return;
+      this.renderer.setSize(width, height);
       this.camera.aspect = width / height;
       if (this.options.mode !== "dollhouse" && this.model) this.fitFloor();
       this.camera.updateProjectionMatrix();
@@ -310,6 +311,8 @@ export class SceneView {
     const f = this.options.camera
       ? restoreCameraView(this.options.camera, {
           aspect: width / height,
+          min: this.bounds.min.toArray(),
+          max: this.bounds.max.toArray(),
           heading: this.options.heading,
           tilt: this.options.tilt,
           zoom: this.options.zoom,
@@ -466,10 +469,36 @@ export class SceneView {
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
-  fixtureScreenPosition(id) {
+  fixturePosition(id) {
+    return this.fixtures.get(id)?.marker.position.toArray() || null;
+  }
+  pickMarkerPosition(clientX, clientY) {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height || !this.asset) return null;
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(
+      new THREE.Vector2(
+        ((clientX - rect.left) / rect.width) * 2 - 1,
+        1 - ((clientY - rect.top) / rect.height) * 2,
+      ),
+      this.camera,
+    );
+    const hit = ray.intersectObject(this.asset, true).find(({ object }) => {
+      for (let node = object; node; node = node.parent)
+        if (!node.visible) return false;
+      const materials = Array.isArray(object.material)
+        ? object.material
+        : [object.material];
+      return materials.some((m) => m && m.visible && m.opacity > 0);
+    });
+    return hit ? hit.point.toArray() : null;
+  }
+  fixtureScreenPosition(id, offset) {
     const fixture = this.fixtures.get(id);
     if (!fixture) return null;
-    const point = fixture.marker.position.clone().project(this.camera);
+    const point = new THREE.Vector3()
+      .fromArray(offsetPoint(fixture.marker.position.toArray(), offset))
+      .project(this.camera);
     return {
       x: ((point.x + 1) * this.container.clientWidth) / 2,
       y: ((1 - point.y) * this.container.clientHeight) / 2,

@@ -57,3 +57,16 @@ The native integration manager can preview draft and saved views in the real Hom
 ### Dashboard views gallery
 
 Open **Dashboard views** to browse this room’s saved views, preview a card, or choose **Create view** or **Import**. Creating or editing opens the room canvas beside its view settings. Choose **Back to views** to return to the gallery. **Room & devices** retains its live room overview and device controls.
+
+## Editing device icons
+
+Create or edit a view under **Dashboard views**. Click a device icon to open its compact fan-out actions:
+
+- **Eye** hides or shows that control in this view. Hidden controls stay faded and selectable in the editor with a **Hidden** pill; dashboard cards and previews omit them.
+- **Edit icon** changes the state label, size and whether the control appears on the room or below it. The Visible checkbox stays synchronized with the eye.
+- **Position** offers click-to-place, reset and precise X/Y/Z offsets in metres. You can also drag an icon directly onto a visible model surface. Escape cancels an unfinished placement.
+- **Undo** steps through up to 50 icon edits for the selected device during the current editing session. Opening another view resets this history.
+
+Click outside the icons/tools to close the fan and clear selection. The device picker under **Device controls** provides another way to select a control. Editing icons never sends device commands; **Preview in dashboard** uses live controls. Save the view to retain presentation and position changes. Linked cards inherit saved marker settings unless explicitly overridden.
+
+Camera framing is retained when reopening, resizing and saving views. Saved views now include a bounded JPEG thumbnail shared across gallery browsers; older views gain one on their next save. Phone/tablet layouts keep preview actions accessible while scrolling.

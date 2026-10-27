@@ -1,3 +1,9 @@
+import {
+  markerSettings,
+  markerLayout,
+  markerTrayHeight,
+  validateMarkers,
+} from "../shared/marker-settings.mjs";
 import { resolveSavedView } from "../shared/saved-view.mjs";
 import { actionState } from "../shared/action.mjs";
 import test from "node:test";
@@ -8,7 +14,7 @@ import { readFile } from "node:fs/promises";
 const source = (
   await readFile(new URL("../dashboard/card.js", import.meta.url), "utf8")
 )
-  .replace(/^import .*;\n/gm, "")
+  .replace(/^import[\s\S]*?;\n/gm, "")
   .replace("export class", "class");
 function cardHarness() {
   let Card;
@@ -25,6 +31,10 @@ function cardHarness() {
     hexToRgb: () => [255, 240, 212],
     actionState,
     resolveSavedView,
+    markerSettings,
+    markerLayout,
+    markerTrayHeight,
+    validateMarkers,
   });
   vm.runInContext(source, context);
   const card = Object.create(Card.prototype);
@@ -222,4 +232,32 @@ test("saved view notifications reload inherited changes but ignore overridden ch
   view.title = "Updated office";
   await card._modelsChanged();
   assert.equal(reloads, 1);
+});
+
+test("card applies per-device offsets and leaves tray controls visible when outside the camera", () => {
+  const card = cardHarness();
+  const room = { dataset: { control: "lamp" }, style: {} };
+  const tray = { dataset: { control: "desk" }, style: {} };
+  card._config = {
+    markers: {
+      lamp: { size: 44, offset: [1, 2, 3], show_label: false },
+      desk: { placement: "tray" },
+    },
+  };
+  card._container = { clientWidth: 500, clientHeight: 400 };
+  card.shadowRoot.querySelectorAll = () => [room, tray];
+  card._view = {
+    fixtureScreenPosition(id, offset) {
+      assert.equal(id, "lamp");
+      assert.deepEqual(offset, [1, 2, 3]);
+      return { x: 200, y: 150, visible: true };
+    },
+  };
+  card._positionButtons();
+  assert.equal(room.style.left, "178px");
+  assert.equal(room.style.top, "128px");
+  assert.equal(tray.hidden, false);
+  card._config.markers.lamp.visible = false;
+  card._positionButtons();
+  assert.equal(room.hidden, true);
 });

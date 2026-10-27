@@ -74,6 +74,16 @@ function harness(preview, onClose) {
       }
     },
     mountCameraNavigation: () => ({ hidden: true }),
+    initMarkerEditor: () => {
+      let markers = {};
+      return {
+        open(value) {
+          markers = value || {};
+        },
+        close() {},
+        read: () => markers,
+      };
+    },
     validateComponent,
     componentYaml,
   };
@@ -224,4 +234,62 @@ test("creating from the gallery fits the hidden canvas before capturing and retu
   assert.equal(h.editor.dirty(), false);
   assert.equal(h.editor.close(), true);
   assert.equal(returned, 1);
+});
+
+test("saved camera stays canonical through open, resize, title edits and saving", async () => {
+  const h = harness();
+  const component = {
+    ...saved(),
+    layers: [
+      {
+        ...saved().layers[0],
+        camera: {
+          projection: "perspective",
+          position: [0, 8, 6],
+          target: [0, 1, 0],
+          up: [0, 1, 0],
+          aspect: 2,
+          zoom: 1,
+          referenceZoom: 1.5,
+          heading: 90,
+          tilt: 28,
+          fov: 35,
+        },
+      },
+    ],
+  };
+  const original = structuredClone(component.layers[0].camera);
+  h.scene.captureView = () =>
+    assert.fail("layout changes must not recapture an authored camera");
+  h.editor.open(component);
+  for (const aspect of [0.5, 2, 0.75, 1.5]) {
+    h.scene.camera = { aspect };
+    h.scene.options.onCameraChange({ source: "resize" });
+  }
+
+  assert.equal(h.editor.dirty(), false);
+  h.field("dashboard-title").value = "Renamed";
+  await h.field("dashboard-form").onsubmit({ preventDefault() {} });
+  assert.equal(h.calls[0].title, "Renamed");
+  assert.deepEqual(h.calls[0].layers[0].camera, original);
+});
+
+test("saved marker presentation survives title/camera edits and preview without mutating the source", async () => {
+  let preview;
+  const h = harness(async (v) => {
+    preview = v;
+  });
+  const component = {
+    ...saved(),
+    markers: {
+      lamp: { visible: false, show_label: false, size: 44, offset: [1, 2, 3] },
+    },
+  };
+  h.editor.open(component);
+  h.field("dashboard-title").value = "New name";
+  await h.field("preview-dashboard").onclick();
+  assert.deepEqual(preview.markers, component.markers);
+  await h.field("dashboard-form").onsubmit({ preventDefault() {} });
+  assert.deepEqual(h.calls[0].markers, component.markers);
+  assert.equal(component.title, "Overview");
 });

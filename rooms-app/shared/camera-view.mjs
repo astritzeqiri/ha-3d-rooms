@@ -116,11 +116,51 @@ export function captureCameraView({
   return { view, heading, tilt, zoom: referenceZoom, camera };
 }
 
-/** Preserve the captured composition; fit it inside narrower dashboard cards. */
+/** Scale to the room's projected bounds instead of blindly scaling by aspect.
+ * A tall room often already fits a phone; wide empty canvas must not shrink it.
+ */
+function framingScale(s, position, up, aspect, min, max) {
+  if (!Number.isFinite(aspect) || aspect <= 0)
+    throw new Error("Invalid camera aspect ratio.");
+  const fallback = Math.min(1, aspect / s.aspect);
+  if (!min || !max) return fallback;
+  const dot = (a, b) => a.reduce((sum, value, i) => sum + value * b[i], 0);
+  const cross = (a, b) => [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+  const unit = (v) => {
+    const length = Math.hypot(...v);
+    return v.map((n) => n / length);
+  };
+  const forward = unit(s.target.map((n, i) => n - position[i]));
+  const right = unit(cross(forward, up));
+  const vertical = unit(cross(right, forward));
+  let halfWidth = 0,
+    halfHeight = 0;
+  for (let corner = 0; corner < 8; corner++) {
+    const point = min.map(
+      (value, i) => ((corner >> i) & 1 ? max[i] : value) - position[i],
+    );
+    const depth = s.projection === "perspective" ? dot(point, forward) : 1;
+    if (depth <= 0) return fallback;
+    halfWidth = Math.max(halfWidth, Math.abs(dot(point, right) / depth));
+    halfHeight = Math.max(halfHeight, Math.abs(dot(point, vertical) / depth));
+  }
+  const before = Math.max(halfHeight, halfWidth / s.aspect);
+  const after = Math.max(halfHeight, halfWidth / aspect);
+  return after > 0 ? before / after : fallback;
+}
+
+/** Preserve authored pan/orbit/zoom while adapting to the visible room bounds. */
+
 export function restoreCameraView(
   snapshot,
   {
     aspect,
+    min,
+    max,
     heading = snapshot.heading,
     tilt = snapshot.tilt,
     zoom = snapshot.referenceZoom,
@@ -146,7 +186,9 @@ export function restoreCameraView(
     target: [...s.target],
     up,
     aspect,
-    zoom: ((s.zoom * zoom) / s.referenceZoom) * Math.min(1, aspect / s.aspect),
+    zoom:
+      ((s.zoom * zoom) / s.referenceZoom) *
+      framingScale(s, position, up, aspect, min, max),
     ...(s.projection === "perspective"
       ? { fov: s.fov }
       : {
