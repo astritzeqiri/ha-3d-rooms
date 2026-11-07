@@ -1,3 +1,4 @@
+import { validatePlacement } from "../shared/house.mjs";
 import yauzl from "yauzl";
 import { mkdir, writeFile, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
@@ -29,7 +30,7 @@ export async function extractPackage(buffer, dir) {
               new Error("Model exceeds the expanded size or file limit."),
             );
           if (
-            !/^(manifest\.json|scene\.glb|thumbnail\.(png|jpg|webp)|textures\/[a-zA-Z0-9_./-]+)$/.test(
+            !/^(manifest\.json|house-placement\.json|bindings\.json|scene\.glb|thumbnail\.(png|jpg|webp)|textures\/[a-zA-Z0-9_./-]+)$/.test(
               name,
             ) ||
             name.includes("..") ||
@@ -67,9 +68,22 @@ export async function extractPackage(buffer, dir) {
         zip.readEntry();
       }),
     );
-    const manifest = validateManifest(
-      JSON.parse(await readFile(join(dir, "manifest.json"), "utf8")),
-    );
+    const raw = JSON.parse(await readFile(join(dir, "manifest.json"), "utf8"));
+    try {
+      const placement = validatePlacement(
+        JSON.parse(await readFile(join(dir, "house-placement.json"), "utf8")),
+      );
+      if (
+        raw.housePlacement &&
+        JSON.stringify(validatePlacement(raw.housePlacement)) !==
+          JSON.stringify(placement)
+      )
+        throw new Error("The room and placement file disagree.");
+      raw.housePlacement = placement;
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    const manifest = validateManifest(raw);
     const glb = await readFile(join(dir, "scene.glb"));
     validateGLB(glb, manifest);
     return manifest;
@@ -95,6 +109,11 @@ export function validateGLB(b, manifest) {
       throw new Error(
         "Embed textures and buffers in the GLB. External asset URLs are not supported.",
       );
+  const appearanceIds = new Set(
+    (doc.nodes || []).map((n) => n.extras?.appearanceId),
+  );
+  if (manifest.appearance?.some((p) => !appearanceIds.has(p.id)))
+    throw new Error("An architectural part references a missing scene node.");
   const daylightIds = new Set(
     (doc.nodes || []).map((n) => n.extras?.daylightWindowId),
   );

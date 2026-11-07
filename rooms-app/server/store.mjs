@@ -1,3 +1,4 @@
+import { houseModels } from "../shared/house.mjs";
 import { validateDeviceSettings } from "../shared/device.mjs";
 import { validateComponent } from "../shared/component.mjs";
 import { mkdir, readFile, writeFile, rename, rm } from "node:fs/promises";
@@ -42,8 +43,10 @@ export class Store {
     return this.transaction(async () => {
       const component = validateComponent(
         value,
-        this.state.models.map((m) => m.id),
+        this.catalog().map((m) => m.id),
       );
+      if (this.find(component.layers[0].model).houseView)
+        delete component.markers;
       const previous = this.state.components;
       this.state.components = [
         ...previous.filter((c) => c.id !== component.id),
@@ -109,14 +112,27 @@ export class Store {
       return model;
     });
   }
+  catalog() {
+    const models = this.state.models.map(({ folder, ...m }) => ({
+      ...m,
+      sceneRevision: folder,
+    }));
+    return [...models, ...houseModels(models)];
+  }
   find(id) {
-    const m = this.state.models.find((m) => m.id === id);
+    const m =
+      this.state.models.find((m) => m.id === id) ||
+      houseModels(this.catalog().filter((m) => !m.houseView)).find(
+        (m) => m.id === id,
+      );
     if (!m) throw new Error("Model not found.");
     return m;
   }
   async remove(id) {
     return this.transaction(async () => {
       const model = this.find(id);
+      if (model.houseView)
+        throw new Error("Remove individual rooms to change this house.");
       this.state.models = this.state.models.filter((m) => m.id !== id);
       await this.save();
       await rm(join(this.dir, "models", model.folder), {

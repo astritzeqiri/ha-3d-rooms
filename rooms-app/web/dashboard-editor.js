@@ -34,7 +34,7 @@ export function initDashboardEditor({
         height: Number($("dashboard-height").value),
         ...(thumbnail ? { thumbnail } : {}),
 
-        ...(Object.keys(markerEditor.read()).length
+        ...(!model().houseView && Object.keys(markerEditor.read()).length
           ? { markers: markerEditor.read() }
           : {}),
         layers: [{ model: model().id, ...current }],
@@ -191,7 +191,9 @@ export function initDashboardEditor({
     scene().setView(current.view);
     scene().options.onCameraChange = sync;
     $("dashboard").setAttribute("aria-expanded", "true");
-    markerEditor.open(component?.markers);
+    $("dashboard-controls").hidden = !!model().houseView;
+    if (model().houseView) markerEditor.close();
+    else markerEditor.open(component?.markers);
     applying = false;
     sync();
     baseline = JSON.stringify(read());

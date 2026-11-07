@@ -3303,3 +3303,62 @@ body[data-room-tab="views"] .saved-view-thumb {
   line-height: 13px;
   font-weight: 500;
 }
+
+.house-library-heading {
+  margin: 20px 10px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+#room-floor-choices {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+}
+#room-floor-choices label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#room-floor-choices input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+#dashboard-scope {
+  max-width: 220px;
+  min-height: 40px;
+}
+#room-floor-links {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+#room-floor-links label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+}
+#room-floor-links select {
+  width: 100%;
+}
+#room-appearance-settings {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  min-width: 0;
+}
+#room-appearance-choices label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  cursor: pointer;
+}
+#room-appearance-choices input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}

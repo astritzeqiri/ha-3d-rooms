@@ -1,3 +1,4 @@
+import { climateState } from "../shared/climate.mjs";
 import {
   validateMarkers,
   markerSettings,
@@ -174,7 +175,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       if (generation !== this._generation) return;
       if (connection.session)
         document.cookie = `ingress_session=${connection.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`;
-      const { model, sceneURL, release } = await connection.load();
+      const { model, sceneURL, layers, release } = await connection.load();
       if (generation !== this._generation) {
         release?.();
         return;
@@ -197,9 +198,16 @@ export class ThreeDRoomsCard extends HTMLElement {
         camera: this._config.camera,
         onRender: () => this._positionButtons(),
       });
+      if (model.houseView) {
+        this._config.markers = {};
+        for (const dialog of this.shadowRoot.querySelectorAll("dialog"))
+          dialog.remove();
+      }
       const view = this._view;
       try {
-        await view.load(model, sceneURL);
+        await (layers
+          ? view.loadLayers(model, layers)
+          : view.load(model, sceneURL));
       } finally {
         release?.();
       }
@@ -328,6 +336,7 @@ export class ThreeDRoomsCard extends HTMLElement {
   _buildAccess() {
     this.shadowRoot.querySelector(".fixture-access")?.remove();
     this.shadowRoot.querySelector(".fixture-tray")?.remove();
+    if (this._model?.houseView) return;
     const access = document.createElement("div");
     access.className = "fixture-access";
     const tray = document.createElement("div");
@@ -355,13 +364,15 @@ export class ThreeDRoomsCard extends HTMLElement {
       const icon = document.createElement("ha-state-icon");
       icon.setAttribute("aria-hidden", "true");
       icon.innerHTML =
-        control.type === "button"
-          ? '<svg viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></svg>'
-          : control.type === "number"
-            ? '<svg viewBox="0 0 24 24"><path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/></svg>'
-            : control.type !== "light"
-              ? '<svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>'
-              : '<svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
+        control.type === "climate"
+          ? '<svg viewBox="0 0 24 24"><path d="M11 2h2v20h-2zM3 6l18 10-1 2L2 8zm0 12-1-2L20 6l1 2z"/></svg>'
+          : control.type === "button"
+            ? '<svg viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></svg>'
+            : control.type === "number"
+              ? '<svg viewBox="0 0 24 24"><path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/></svg>'
+              : control.type !== "light"
+                ? '<svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>'
+                : '<svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
       const badge = document.createElement("span");
       badge.className = "fixture-state";
       badge.setAttribute("aria-hidden", "true");
@@ -452,13 +463,18 @@ export class ThreeDRoomsCard extends HTMLElement {
     }
   }
   async _toggle(id) {
+    if (this._model?.houseView) return;
     const control = this._model.controls.find((c) => c.id === id);
     if (!control) return;
     if (control.type === "button") {
       await this._pressPreset(control);
       return;
     }
-    if (control.type === "cover" || control.type === "number") {
+    if (
+      control.type === "climate" ||
+      control.type === "cover" ||
+      control.type === "number"
+    ) {
       this._pick(id);
       return;
     }
@@ -497,6 +513,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     }
   }
   async _pressPreset(control) {
+    if (this._model?.houseView) return;
     if (this._preview || !this._model.bindings[control.id]) {
       this._pick(control.id);
       return;
@@ -523,6 +540,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     }
   }
   _pick(id) {
+    if (this._model?.houseView) return;
     const control = this._model.controls.find((c) => c.id === id);
     if (!control) return;
     const desk = deviceForControl(this._model, id);
@@ -539,6 +557,16 @@ export class ThreeDRoomsCard extends HTMLElement {
           composed: true,
         }),
       );
+      return;
+    }
+    if (control.type === "climate") {
+      this._dialog?.remove();
+      const dialog = document.createElement("dialog");
+      this._dialog = dialog;
+      dialog.innerHTML =
+        '<form method="dialog"><h2>Air conditioner</h2><p>Connect this AC to its climate entity in 3D Rooms → Devices. The mapped device opens Home Assistant controls for temperature, mode and fan features.</p><button>Close</button></form>';
+      this.shadowRoot.append(dialog);
+      dialog.showModal();
       return;
     }
     if (control.type === "button") {
@@ -654,6 +682,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     dialog.showModal();
   }
   async _deskCommand(id, action, value) {
+    if (this._model?.houseView) return;
     const control = this._model.controls.find((c) => c.id === id);
     if (this._preview) {
       if (control.type === "number") this._previewStates.set(id, { value });
@@ -801,6 +830,10 @@ export class ThreeDRoomsCard extends HTMLElement {
     const states = new Map();
     for (const control of this._model.controls) {
       const entity = this._hass.states?.[this._model.bindings[control.id]];
+      if (control.type === "climate") {
+        states.set(control.id, climateState(entity));
+        continue;
+      }
       if (control.type === "button") {
         states.set(
           control.id,

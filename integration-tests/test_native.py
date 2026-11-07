@@ -46,6 +46,59 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         await self.hass.async_stop()
 
+    async def test_house_views_are_presentation_only_and_rooms_keep_device_controls(self):
+        from homeassistant.helpers import floor_registry
+        await floor_registry.async_load(self.hass)
+        floors = floor_registry.async_get(self.hass)
+        first = floors.async_create("1st floor", level=1)
+        second = floors.async_create("2nd floor", level=2)
+        model = self.store.models[0]
+        model.update(title="Kitchen", folder="a"*32, importedAt="2026-11-07")
+        model["controls"][0].update(label="Ceiling", type="light", position=[0,2,0], nodeIds=[])
+        model["housePlacement"] = {"schemaVersion":1,"houseId":"native-house","houseName":"Native house","roomId":"kitchen","transform":[1,0,0,0,0,1,0,0,0,0,1,0,10,0,4,1],"floors":[{"id":"first","name":"1st floor","minY":0,"maxY":2.8},{"id":"second","name":"2nd floor","minY":2.8,"maxY":6}],"floorIds":["first","second"]}
+        model["appearance"]=[{"id":"entrance-upper-wall","label":"Show wall above entrance","visible":True}]
+        await self.runtime.request("room",{"model":"kitchen","appearance":[{**model["appearance"][0],"visible":False}]},"test-user")
+        appearance_catalog=await self.runtime.request("models",{},"test-user")
+        for composed in appearance_catalog:
+            if composed.get("houseView"):
+                self.assertFalse(composed["members"][0]["appearance"][0]["visible"])
+        self.assertEqual(self.store.models[0]["bindings"],{"ceiling":"light.kitchen"})
+        with self.assertRaises(ValueError):
+            await self.runtime.request("room",{"model":"kitchen","appearance":[{"id":"door","label":"Door","visible":False}]},"test-user")
+        listed = await self.runtime.request("floors",{},"test-user")
+        self.assertEqual({f["floor_id"] for f in listed},{first.floor_id,second.floor_id})
+        links={"first":first.floor_id,"second":second.floor_id}
+        await self.runtime.request("room",{"model":"kitchen","floorLinks":links,"haFloorIds":[first.floor_id,second.floor_id]},"test-user")
+        self.assertEqual(self.store.models[0]["housePlacement"]["floors"][0]["haFloorId"],first.floor_id)
+        floors.async_update(first.floor_id,name="Lower level")
+        renamed = await self.runtime.request("models",{},"test-user")
+        self.assertTrue(any(m.get("houseFloor",{}).get("name")=="Lower level" for m in renamed if m.get("houseFloor")))
+        with self.assertRaises(ValueError):
+            await self.runtime.request("room",{"model":"kitchen","floorLinks":{"first":"missing"},"haFloorIds":["missing"]},"test-user")
+        choices = await self.runtime.request("models",{},"test-user")
+        for index, scope in enumerate([m for m in choices if m.get("houseView")]):
+            component={"schemaVersion":1,"id":f"house-scope-{index}","title":scope["title"],"height":500,"layers":[{"model":scope["id"],"view":"front","heading":0,"tilt":28,"zoom":1}]}
+            saved=await self.runtime.request("save_component",{**component,"markers":{"ceiling":{"size":44}}},"test-user")
+            self.assertEqual(saved["layers"][0]["model"],scope["id"])
+            self.assertNotIn("markers",saved)
+        calls=[]
+        async def handle(call):
+            calls.append(call)
+        self.hass.services.async_register("light","turn_on",handle)
+        self.hass.states.async_set("light.kitchen","off",{"supported_color_modes":["onoff"]})
+        catalog=await self.runtime.request("models",{},"test-user")
+        for view in [m for m in catalog if m.get("houseView") and m["controls"]]:
+            self.assertEqual(view["bindings"][view["controls"][0]["id"]],"light.kitchen")
+            with self.assertRaisesRegex(ValueError,"presentation-only"):
+                await self.runtime.request("command",{"model":view["id"],"controlId":view["controls"][0]["id"],"action":"on"},"test-user")
+        self.assertEqual(calls,[])
+        await self.runtime.request("command",{"model":"kitchen","controlId":"ceiling","action":"on"},"test-user")
+        self.assertEqual(len(calls),1)
+        self.assertEqual(calls[0].data["entity_id"],"light.kitchen")
+        self.assertEqual(calls[0].context.user_id,"test-user")
+        await self.runtime.request("room",{"model":"kitchen","floorIds":["second"]},"test-user")
+        self.assertEqual(self.store.models[0]["housePlacement"]["floorIds"],["second"])
+
     async def test_shared_thumbnails_are_optional_in_dashboard_metadata(self):
         import base64
         thumbnail = "data:image/jpeg;base64," + base64.b64encode(bytes.fromhex("ffd8ffc0000b080190028001011100ffd9")).decode()

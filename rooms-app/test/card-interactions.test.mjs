@@ -261,3 +261,20 @@ test("card applies per-device offsets and leaves tray controls visible when outs
   card._positionButtons();
   assert.equal(room.hidden, true);
 });
+
+test("house and floor cards create no entity widgets and reject device interactions", async () => {
+  const card = cardHarness();
+  card._model.houseView = true;
+  card._hass.callService = () =>
+    assert.fail("House must not send a device service");
+  card._hass.callWS = () => assert.fail("House must not send a device command");
+  card.dispatchEvent = () => assert.fail("House must not open entity details");
+  card._container = {
+    append: () => assert.fail("House must not create entity widgets"),
+  };
+  assert.doesNotThrow(() => card._buildAccess());
+  await card._toggle("lamp");
+  card._pick("lamp");
+  await card._pressPreset({ id: "lamp" });
+  await card._deskCommand("lamp", "set_value", 90);
+});

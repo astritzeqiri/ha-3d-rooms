@@ -1,3 +1,9 @@
+# 0.23.0 house and floor views
+
+Use the native HACS integration for room imports and house/floor dashboards. Room ZIPs from the house builder carry shared placement metadata. In each room’s settings, map saved height ranges to Home Assistant floors and assign every occupied floor. House dashboard editors configure camera and floor presentation only; entity setup stays in the individual rooms. Optional architecture is configured per room and inherited by house/floor views.
+
+Update via HACS, restart Home Assistant itself, and refresh the browser. Only older models needing new optional geometry (such as the split hallway entrance wall) need a replacement model.
+
 # Legacy 3D Rooms add-on
 
 The recommended installation is now the single **3D Rooms HACS Integration**. See the repository README. A separate add-on and HACS Dashboard download are no longer required.

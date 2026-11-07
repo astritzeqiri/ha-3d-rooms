@@ -1,3 +1,7 @@
+# 0.23.0 — houses, floors and room appearance
+
+Release validation is recorded in [docs/validation-0.23.0.md](docs/validation-0.23.0.md). Frontend, host and native tests pass; the packaged integration loads with the persistent room catalog unchanged. See the report for scope and remaining limits.
+
 # 0.22.0 release validation
 
 Device-icon editing, 3D positioning, per-device presentation/Undo, shared thumbnails and responsive camera improvements. All 113 frontend tests, 18 host Python tests and 11 native Core tests pass; exact integration ZIP, restart persistence and a linked real dashboard verified. Original rooms/views retained. Release checks are recorded in [docs/validation-0.22.0.md](docs/validation-0.22.0.md).

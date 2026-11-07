@@ -38,11 +38,15 @@ class RoomsRuntime:
             "entities": [
                 s.as_dict()
                 for s in self.hass.states.async_all()
-                if s.domain in ("light", "switch", "cover", "sun", "number", "input_number", "button", "input_button", "script", "scene")
+                if s.domain in ("climate", "light", "switch", "cover", "sun", "number", "input_number", "button", "input_button", "script", "scene")
             ],
         }
 
     async def request(self, operation, data, user_id):
+        if operation == "floors":
+            from homeassistant.helpers import floor_registry
+            registry = floor_registry.async_get(self.hass)
+            return [{"floor_id":f.floor_id,"name":f.name,"level":f.level} for f in registry.async_list_floors()]
         if operation == "areas":
             from homeassistant.helpers import area_registry
             registry = area_registry.async_get(self.hass)
@@ -50,13 +54,28 @@ class RoomsRuntime:
                     for a in registry.async_list_areas()]
         if operation == "room":
             from homeassistant.helpers import area_registry
-            settings = {k: data[k] for k in ("title", "areaId") if k in data}
+            settings = {k: data[k] for k in ("title", "areaId", "floorIds", "floorLinks", "appearance") if k in data}
             if "areaId" in settings:
                 area_id = settings["areaId"]
                 if not isinstance(area_id, str) or (
                     area_id and not area_registry.async_get(self.hass).async_get_area(area_id)
                 ):
                     raise ValueError("Choose an existing Home Assistant area.")
+            if "floorLinks" in data or "haFloorIds" in data:
+                from homeassistant.helpers import floor_registry
+                floors = floor_registry.async_get(self.hass)
+                links = data.get("floorLinks",{})
+                if not isinstance(links,dict) or any(not isinstance(v,str) or (v and not floors.async_get_floor(v)) for v in links.values()):
+                    raise ValueError("Choose existing Home Assistant floors.")
+                if "haFloorIds" in data:
+                    ids = data["haFloorIds"]
+                    if not isinstance(ids,list) or len(ids)>30 or not all(isinstance(i,str) and floors.async_get_floor(i) for i in ids):
+                        raise ValueError("Choose existing Home Assistant floors.")
+                    placement = self.store.find(data.get("model")).get("housePlacement")
+                    if not placement: raise ValueError("Export house placement and floor heights first.")
+                    effective = {f["id"]:links.get(f["id"],f.get("haFloorId","")) for f in placement["floors"]}
+                    if any(i not in effective.values() for i in ids): raise ValueError("Match each selected Home Assistant floor to a saved height range first.")
+                    settings["floorIds"] = [key for key,value in effective.items() if value in ids]
             result = await self.work(self.store.update_room, data.get("model"), settings)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
@@ -76,7 +95,9 @@ class RoomsRuntime:
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
         if operation == "models":
-            return self.store.catalog()
+            from homeassistant.helpers import floor_registry
+            registry=floor_registry.async_get(self.hass)
+            return self.store.catalog({f.floor_id:f.name for f in registry.async_list_floors()})
         if operation == "status":
             return self.status()
         if operation == "daylight":
@@ -108,6 +129,8 @@ class RoomsRuntime:
             return result
         if operation == "command":
             model = self.store.find(data.get("model"))
+            if model.get("houseView"):
+                raise ValueError("House and floor views are presentation-only. Use the individual room for device controls.")
             control = next(
                 (c for c in model["controls"] if c["id"] == data.get("controlId")), None
             )
@@ -120,6 +143,8 @@ class RoomsRuntime:
             is_cover = control.get("type") == "cover"
             if not compatible_entity(control, entity_id):
                 raise ValueError("Entity does not match this control type.")
+            if control.get("type") == "climate":
+                raise ValueError("Use Home Assistant climate controls from the device dialog.")
             if control.get("type") == "button":
                 if data.get("action") != "press" or "press" not in control["capabilities"]:
                     raise ValueError("Use the preset's press action.")

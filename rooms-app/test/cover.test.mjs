@@ -83,6 +83,44 @@ test("HA reported height, moving state, unavailable and unknown position", () =>
   );
   assert.equal(coverFeatures(entity).stop, true);
 });
+test("binary cover states move the door without inventing position services", () => {
+  const binary = {
+    entity_id: "cover.door",
+    state: "open",
+    attributes: { supported_features: 11 },
+  };
+  const door = new THREE.Group();
+  door.userData.hingedDoor = {
+    axis: "y",
+    closedAngle: 0,
+    openAngle: Math.PI / 2,
+  };
+  for (const state of ["closed", "open", "closed", "open"]) {
+    const reported = coverState({ ...binary, state });
+    setShadePosition(door, reported.motionPosition);
+    assert.equal(door.rotation.y, state === "open" ? Math.PI / 2 : 0);
+  }
+  assert.equal(coverState(binary).label, "open");
+  assert.equal(coverState(binary).position, undefined);
+  assert.equal(coverFeatures(binary).position, false);
+  assert.throws(() => coverCommand(binary, cover, "position", 50));
+  for (const state of ["opening", "closing", "unknown", "unavailable"]) {
+    setShadePosition(door, coverState({ ...binary, state }).motionPosition);
+    assert.equal(door.rotation.y, Math.PI / 2);
+  }
+  // A position-capable cover with a temporarily missing reading stays unknown.
+  assert.equal(
+    coverState({ ...binary, attributes: { supported_features: 15 } }).position,
+    undefined,
+  );
+  assert.equal(
+    coverState({
+      ...binary,
+      attributes: { supported_features: 11, current_position: 42 },
+    }).position,
+    42,
+  );
+});
 test("exported local-space slats move without drifting and retain last known height", () => {
   const root = new THREE.Group();
   root.userData.rollerShade = { top: 2, height: 1 };
@@ -98,4 +136,31 @@ test("exported local-space slats move without drifting and retain last known hei
   setShadePosition(root, 0);
   assert.equal(slat.visible, true);
   assert.equal(slat.position.y, 1.05);
+});
+
+test("hinged doors use their local pivot and restore repeatedly without drift", () => {
+  const holder = new THREE.Group();
+  holder.rotation.y = 0.7;
+  const door = new THREE.Group();
+  door.position.set(2, 0, -0.03);
+  holder.add(door);
+  door.userData.hingedDoor = {
+    axis: "y",
+    closedAngle: 0,
+    openAngle: Math.PI / 2,
+  };
+  const handle = new THREE.Object3D();
+  handle.position.set(-0.75, 1, 0.07);
+  door.add(handle);
+  const hinge = door.position.clone(),
+    handleRest = handle.position.clone();
+  for (const position of [0, 50, 100, 0, 100, 50, 0]) {
+    setShadePosition(door, position);
+    assert.equal(door.rotation.y, ((Math.PI / 2) * position) / 100);
+    assert.deepEqual(door.position, hinge);
+    assert.deepEqual(handle.position, handleRest);
+  }
+  setShadePosition(door, 100);
+  setShadePosition(door, undefined);
+  assert.equal(door.rotation.y, Math.PI / 2);
 });

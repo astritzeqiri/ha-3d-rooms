@@ -1,3 +1,5 @@
+import { climateState } from "../shared/climate.mjs";
+import { houseViewSummary } from "../shared/house-presentation.mjs";
 import { uploadJSON } from "../shared/upload.mjs";
 import { uploadProgress } from "./upload-progress.js";
 import { paintEntityIcon } from "../shared/entity-icon.mjs";
@@ -53,6 +55,7 @@ const api = async (path, options = {}) => {
   return data;
 };
 let areas = [],
+  haFloors = [],
   savedViews,
   areasError = "";
 const initialRoomTab =
@@ -85,6 +88,17 @@ let deviceFilter = "all",
 const openMore = new Set();
 const DEVICE_TOOLS_MIN = 5;
 function state(c) {
+  if (c.type === "climate") {
+    const entity = status.entities.find(
+      (e) => e.entity_id === selected.bindings[c.id],
+    );
+    return {
+      ...climateState(entity),
+      entity,
+      unavailable:
+        preview || !status.connected || climateState(entity).unavailable,
+    };
+  }
   if (c.type === "button") {
     const entity = status.entities.find(
       (e) => e.entity_id === selected.bindings[c.id],
@@ -240,6 +254,11 @@ function drawControls() {
         : undefined,
     );
   }
+  if (selected.houseView) {
+    $("controls").replaceChildren();
+    $("controls-section").hidden = true;
+    return;
+  }
   const entries = deviceEntries(selected);
   const tools = entries.length >= DEVICE_TOOLS_MIN;
   $("device-tools").hidden = !tools;
@@ -269,6 +288,11 @@ function drawControls() {
   $("controls").innerHTML = visible
     .map((c) => {
       if (c.device) return deskCard(c.device, states);
+      if (c.type === "climate") {
+        const s = states.get(c.id);
+        return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${esc(c.label)}</span>${deviceSettingsButton(c)}</div><p>${esc(s.mode)}${s.currentTemperature === undefined ? "" : ` · Current ${s.currentTemperature}°`}${s.temperature === undefined ? "" : ` · Target ${s.temperature}°`}</p><button data-climate="${c.id}" ${s.unavailable || !native?.moreInfo ? "disabled" : ""}>Open Home Assistant AC controls</button>${entityNote(c)}</article>`;
+      }
+
       if (c.type === "button") {
         const s = states.get(c.id),
           label = esc(c.label);
@@ -548,6 +572,12 @@ $("controls").addEventListener("click", (e) => {
   const card = e.target.closest("[data-control]");
   if (card && !e.target.closest("button,input,select,summary,label,a"))
     view?.highlight(card.dataset.control);
+  const climate = e.target.closest("[data-climate]");
+  if (climate) {
+    const c = selected.controls.find((c) => c.id === climate.dataset.climate);
+    if (c && !state(c).unavailable) native?.moreInfo?.(selected.bindings[c.id]);
+    return;
+  }
   const preset = e.target.closest("[data-press]");
   if (preset) pressPreset(preset.dataset.press);
   const cover = e.target.closest("[data-cover]");
@@ -618,12 +648,16 @@ $("controls").addEventListener("change", (e) => {
   if (d.transition) fades.set(d.transition, Number(input.value));
 });
 function drawModels() {
-  $("model-count").textContent = models.length;
+  $("model-count").textContent = models.filter((m) => !m.houseView).length;
   document.querySelector(".aside-bottom").hidden = !!models.length;
-  $("models").innerHTML = models
+  const ordered = [
+    ...models.filter((m) => !m.houseView),
+    ...models.filter((m) => m.houseView),
+  ];
+  $("models").innerHTML = ordered
     .map(
       (m) =>
-        `<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${deviceEntries(m).filter((c) => (c.device ? [c.device.height, c.device.motion, ...c.device.macros].some((id) => m.bindings[id]) : m.bindings[c.id])).length}/${deviceEntries(m).length} connected ${m.areaId || m.floor ? "· " : ""}${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "")}</small></button>`,
+        `${m.houseView && m === ordered.find((r) => r.houseView) ? '<p class="house-library-heading">Houses &amp; floors</p>' : ""}<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${m.houseView ? esc(houseViewSummary(m)) : `${deviceEntries(m).filter((c) => (c.device ? [c.device.height, c.device.motion, ...c.device.macros].some((id) => m.bindings[id]) : m.bindings[c.id])).length}/${deviceEntries(m).length} connected ${m.areaId || m.floor ? "· " : ""}${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "")}`}</small></button>`,
     )
     .join("");
 }
@@ -684,11 +718,41 @@ function roomSettingsDirty() {
     selected &&
     activeRoomTab === "settings" &&
     ($("room-name").value !== selected.title ||
-      $("room-area").value !== (selected.areaId || ""))
+      $("room-area").value !== (selected.areaId || "") ||
+      [...$("room-appearance-choices").querySelectorAll("input")].some(
+        (input) =>
+          input.checked !==
+          selected.appearance?.find((p) => p.id === input.dataset.partId)
+            ?.visible,
+      ) ||
+      (selected.housePlacement &&
+        (JSON.stringify(
+          [...$("room-floor-choices").querySelectorAll("input:checked")]
+            .map((i) => i.value)
+            .sort(),
+        ) !==
+          JSON.stringify(
+            selected.housePlacement.floors
+              .filter((f) => selected.housePlacement.floorIds.includes(f.id))
+              .map((f) => f.haFloorId)
+              .filter(Boolean)
+              .sort(),
+          ) ||
+          [...$("room-floor-links").querySelectorAll("select")].some(
+            (p) =>
+              p.value !==
+              (selected.housePlacement.floors.find(
+                (f) => f.id === p.dataset.levelId,
+              )?.haFloorId || ""),
+          ))))
   );
 }
 function updateRoomSummary() {
   if (!selected) return;
+  if (selected.houseView) {
+    $("room-summary").textContent = houseViewSummary(selected);
+    return;
+  }
   const area = areas.find((a) => a.area_id === selected.areaId);
   const entries = deviceEntries(selected),
     total = entries.length;
@@ -725,7 +789,8 @@ function setRoomTab(tab, { keepEditor = false } = {}) {
     !selected || tab === "settings";
   for (const b of document.querySelectorAll("[data-room-tab]"))
     b.setAttribute("aria-pressed", String(b.dataset.roomTab === tab));
-  $("controls-section").hidden = !selected || tab !== "devices";
+  $("controls-section").hidden =
+    !selected || !!selected.houseView || tab !== "devices";
   $("saved-views-section").hidden = !selected || tab !== "views";
   $("room-settings-section").hidden = !selected || tab !== "settings";
   if (tab === "settings") drawRoomSettings();
@@ -740,6 +805,64 @@ for (const b of document.querySelectorAll("[data-room-tab]"))
   b.onclick = () => setRoomTab(b.dataset.roomTab);
 function drawRoomSettings() {
   if (!selected) return;
+  $("room-appearance-settings").hidden = !selected.appearance?.length;
+  $("room-appearance-choices").replaceChildren(
+    ...(selected.appearance || []).map((part) => {
+      const label = document.createElement("label"),
+        input = document.createElement("input");
+      label.className = "check";
+      input.type = "checkbox";
+      input.dataset.partId = part.id;
+      input.checked = part.visible;
+      label.append(input, document.createTextNode(part.label));
+      return label;
+    }),
+  );
+  $("house-floor-settings").hidden = !selected.housePlacement;
+  $("room-floor-choices").replaceChildren();
+  $("room-floor-links").replaceChildren();
+  const definition = selected.housePlacement;
+  for (const level of definition?.floors || []) {
+    const label = document.createElement("label"),
+      picker = document.createElement("select");
+    label.textContent = `${level.name} · ${level.minY}–${level.maxY} m`;
+    picker.dataset.levelId = level.id;
+    picker.setAttribute("aria-label", `Home Assistant floor for ${level.name}`);
+    picker.append(
+      new Option("Match to an HA floor", ""),
+      ...haFloors.map((f) => new Option(f.name, f.floor_id)),
+    );
+    picker.value = level.haFloorId || "";
+    let previous = picker.value;
+    picker.onchange = () => {
+      if (definition.floorIds.includes(level.id)) {
+        for (const checkbox of $("room-floor-choices").querySelectorAll(
+          "input",
+        )) {
+          if (checkbox.value === previous) checkbox.checked = false;
+          if (checkbox.value === picker.value) checkbox.checked = true;
+        }
+      }
+      previous = picker.value;
+    };
+    label.append(picker);
+    $("room-floor-links").append(label);
+  }
+  for (const floor of haFloors) {
+    const label = document.createElement("label"),
+      checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = floor.floor_id;
+    checkbox.checked = !!definition?.floors.some(
+      (f) =>
+        f.haFloorId === floor.floor_id && definition.floorIds.includes(f.id),
+    );
+    label.append(checkbox, document.createTextNode(floor.name));
+    $("room-floor-choices").append(label);
+  }
+  $("room-floor-note").textContent = haFloors.length
+    ? "Floors come from Home Assistant. Match exported height ranges below, then check every floor this room occupies."
+    : "No Home Assistant floors found. Create them under Settings → Areas, labels & zones, then refresh areas and floors.";
   $("room-name").value = selected.title;
   $("room-area").replaceChildren();
   const add = (value, label) => {
@@ -772,12 +895,24 @@ async function refreshAreas({ quiet = false } = {}) {
   const editing = roomSettingsDirty()
     ? {
         id: selected.id,
+        appearance: [
+          ...$("room-appearance-choices").querySelectorAll("input"),
+        ].map((i) => [i.dataset.partId, i.checked]),
         title: $("room-name").value,
         areaId: $("room-area").value,
+        floorIds: [
+          ...$("room-floor-choices").querySelectorAll("input:checked"),
+        ].map((i) => i.value),
+        floorLinks: Object.fromEntries(
+          [...$("room-floor-links").querySelectorAll("select")].map((p) => [
+            p.dataset.levelId,
+            p.value,
+          ]),
+        ),
       }
     : null;
   try {
-    areas = await api("areas");
+    [areas, haFloors] = await Promise.all([api("areas"), api("floors")]);
     areasError = "";
     drawModels();
     drawRoomSettings();
@@ -788,17 +923,61 @@ async function refreshAreas({ quiet = false } = {}) {
     drawRoomSettings();
   }
   if (editing && selected?.id === editing.id) {
+    for (const input of $("room-appearance-choices").querySelectorAll("input"))
+      input.checked =
+        editing.appearance.find(([id]) => id === input.dataset.partId)?.[1] ??
+        input.checked;
     $("room-name").value = editing.title;
     $("room-area").value = editing.areaId;
+    for (const input of $("room-floor-choices").querySelectorAll("input"))
+      input.checked = editing.floorIds.includes(input.value);
+    for (const picker of $("room-floor-links").querySelectorAll("select"))
+      picker.value = editing.floorLinks[picker.dataset.levelId] || "";
   }
 }
+async function changeDashboardScope(picker) {
+  const wasEditing = !$("dashboard-panel").hidden,
+    id = picker.value;
+  await choose(id, "views");
+  if (wasEditing && selected?.id === id && view?.model?.id === id)
+    dashboardEditor.open();
+  $("dashboard-scope").value = selected?.id || "";
+  $("dashboard-house-scope").value = selected?.id || "";
+}
+$("dashboard-scope").onchange = () =>
+  void changeDashboardScope($("dashboard-scope"));
+$("dashboard-house-scope").onchange = () =>
+  void changeDashboardScope($("dashboard-house-scope"));
 $("refresh-areas").onclick = () => refreshAreas();
 $("room-settings-form").onsubmit = async (event) => {
   event.preventDefault();
   const model = selected;
   const data = {
     title: $("room-name").value.trim(),
+    ...(model.appearance?.length
+      ? {
+          appearance: model.appearance.map((part) => ({
+            ...part,
+            visible:
+              [...$("room-appearance-choices").querySelectorAll("input")].find(
+                (i) => i.dataset.partId === part.id,
+              )?.checked ?? part.visible,
+          })),
+        }
+      : {}),
     areaId: $("room-area").value,
+    ...(model.housePlacement
+      ? {
+          haFloorIds: [
+            ...$("room-floor-choices").querySelectorAll("input:checked"),
+          ].map((input) => input.value),
+          floorLinks: Object.fromEntries(
+            [...$("room-floor-links").querySelectorAll("select")].map(
+              (picker) => [picker.dataset.levelId, picker.value],
+            ),
+          ),
+        }
+      : {}),
   };
   $("save-room-settings").disabled = true;
   $("room-settings-error").textContent = "";
@@ -808,8 +987,15 @@ $("room-settings-form").onsubmit = async (event) => {
       body: JSON.stringify(data),
     });
     Object.assign(model, result);
+    if (view?.model?.id === model.id) {
+      view.model = model;
+      view.cutaway();
+      view.render();
+    }
+    models = await api("models");
+    selected = models.find((m) => m.id === model.id);
     drawModels();
-    if (selected === model) {
+    if (selected?.id === model.id) {
       $("title").textContent = model.title;
       $("model-type").textContent =
         areas.find((a) => a.area_id === model.areaId)?.name || "3D ROOM";
@@ -896,6 +1082,17 @@ async function choose(id, tab = "devices") {
   cameraNavigation.hidden = true;
   const current = ++selection;
   selected = models.find((m) => m.id === id);
+  if (selected?.houseView && tab === "settings") tab = "devices";
+  $("show-room-settings").hidden = !!selected?.houseView;
+  $("show-models").textContent = selected?.houseView
+    ? "Overview"
+    : "Room & devices";
+  document.querySelector(".view-tools-title").textContent = selected?.houseView
+    ? selected.houseFloor
+      ? "Floor overview"
+      : "House overview"
+    : "Room overview";
+  $("dashboard-house-scope-field").hidden = !selected?.houseView;
   const model = selected;
   const url = new URL(location.href);
   if (url.searchParams.get("model") !== id)
@@ -912,18 +1109,49 @@ async function choose(id, tab = "devices") {
   drawRoomSettings();
   setRoomTab(tab, { keepEditor: true });
   savedViews?.refresh();
+  const houseId = selected.houseId || selected.housePlacement?.houseId;
+  $("dashboard-scope").hidden = !houseId;
+  $("dashboard-scope").replaceChildren(
+    ...[
+      selected,
+      ...models.filter(
+        (m) => m.houseView && m.houseId === houseId && m.id !== selected.id,
+      ),
+    ].map(
+      (m) =>
+        new Option(
+          m.houseView
+            ? m.houseFloor
+              ? m.houseFloor.name
+              : "Whole house"
+            : "This room",
+          m.id,
+        ),
+    ),
+  );
+  $("dashboard-scope").value = selected.id;
+  $("dashboard-house-scope").replaceChildren(
+    ...models
+      .filter((m) => m.houseView && m.houseId === houseId)
+      .map((m) => new Option(m.houseFloor?.name || "Whole house", m.id)),
+  );
+  $("dashboard-house-scope").value = selected.id;
   $("title").textContent = selected.title;
-  $("model-type").textContent =
-    areas.find((a) => a.area_id === selected.areaId)?.name ||
-    selected.floor ||
-    "3D ROOM";
-  $("settings").hidden = false;
+  $("model-type").textContent = selected.houseView
+    ? selected.houseFloor
+      ? "HOUSE FLOOR"
+      : "HOUSE"
+    : areas.find((a) => a.area_id === selected.areaId)?.name ||
+      selected.floor ||
+      "3D ROOM";
+  $("settings").hidden = !!selected.houseView;
   $("home-view").hidden = activeRoomTab === "settings";
   $("floor-view").hidden = activeRoomTab === "settings";
   $("dashboard").hidden = activeRoomTab === "settings";
   $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
-  $("preview-label").hidden = false;
-  $("controls-section").hidden = activeRoomTab !== "devices";
+  $("preview-label").hidden = !!selected.houseView;
+  $("controls-section").hidden =
+    !!selected.houseView || activeRoomTab !== "devices";
   $("control-count").textContent = `${selected.controls.length} devices`;
   $("view-hint").textContent = "Drag to rotate · Scroll to zoom";
   $("scene-status").hidden = false;
@@ -940,28 +1168,40 @@ async function choose(id, tab = "devices") {
         view.highlight(id);
         document
           .querySelector(
-            `[data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"], [data-number="${id}"], [data-press="${id}"]`,
+            `[data-climate="${id}"], [data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"], [data-number="${id}"], [data-press="${id}"]`,
           )
           ?.focus();
       },
       { mode: viewMode },
     );
     $("scene-status").textContent = "Downloading your room…";
-    const sceneURL = native
-      ? await native.sceneURL(model)
-      : new URL(`api/models/${id}/scene.glb`, location.href).href;
-    if (current !== selection) {
-      if (native) URL.revokeObjectURL(sceneURL);
-      return;
-    }
-    $("scene-status").textContent = "Preparing the 3D view…";
-    await new Promise(requestAnimationFrame);
+    const layers = [],
+      urls = [];
     let loaded;
     try {
-      if (current !== selection) return;
-      loaded = await view.load(model, sceneURL);
+      if (model.members) {
+        for (const member of model.members) {
+          const source = models.find((m) => m.id === member.model);
+          if (!source) throw new Error("A room in this house is missing.");
+          const url = native
+            ? await native.sceneURL(source)
+            : new URL(`api/models/${member.model}/scene.glb`, location.href)
+                .href;
+          if (native) urls.push(url);
+          layers.push({ ...member, url });
+        }
+        if (current !== selection) return;
+        loaded = await view.loadLayers(model, layers);
+      } else {
+        const url = native
+          ? await native.sceneURL(model)
+          : new URL(`api/models/${id}/scene.glb`, location.href).href;
+        if (native) urls.push(url);
+        if (current !== selection) return;
+        loaded = await view.load(model, url);
+      }
     } finally {
-      if (native) URL.revokeObjectURL(sceneURL);
+      urls.forEach((url) => URL.revokeObjectURL(url));
     }
     if (!loaded || current !== selection) return;
     $("scene-status").hidden = true;
@@ -1076,25 +1316,29 @@ $("import-form").onsubmit = async (e) => {
 const lightDomains = /^(light|switch)\./,
   coverDomains = /^cover\./;
 const deviceIcon = (c) =>
-  c.type === "button"
-    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 10 7-10 7Z"/></svg>'
-    : c.type === "number"
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h18M5 8v12M19 8v12M9 3h6"/></svg>'
-      : c.type === "cover"
-        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h16M6 4v10M18 4v10M6 8h12M6 11h12"/><path d="M12 14v5"/><circle cx="12" cy="20" r="1"/></svg>'
-        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/></svg>';
+  c.type === "climate"
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3"/></svg>'
+    : c.type === "button"
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 10 7-10 7Z"/></svg>'
+      : c.type === "number"
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h18M5 8v12M19 8v12M9 3h6"/></svg>'
+        : c.type === "cover"
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h16M6 4v10M18 4v10M6 8h12M6 11h12"/><path d="M12 14v5"/><circle cx="12" cy="20" r="1"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/></svg>';
 const capabilityText = (c) =>
-  c.type === "button"
-    ? "Preset · press"
-    : c.type === "number"
-      ? `Height · ${c.min}–${c.max} ${c.unit}`
-      : c.type === "cover"
-        ? c.motion === "none"
-          ? "Desk direction · up, stop, down"
-          : "Shade · open, close, position"
-        : c.capabilities.includes("brightness")
-          ? "Light · dimming, color, white"
-          : "Light · on/off";
+  c.type === "climate"
+    ? "Air conditioner · Home Assistant controls"
+    : c.type === "button"
+      ? "Preset · press"
+      : c.type === "number"
+        ? `Height · ${c.min}–${c.max} ${c.unit}`
+        : c.type === "cover"
+          ? c.motion === "none"
+            ? "Desk direction · up, stop, down"
+            : "Shade · open, close, position"
+          : c.capabilities.includes("brightness")
+            ? "Light · dimming, color, white"
+            : "Light · on/off";
 const pickerContext = (controlId) => {
   const control = selected.controls.find((c) => c.id === controlId);
   return {
@@ -1102,13 +1346,15 @@ const pickerContext = (controlId) => {
     entities: status.entities,
     selectedId: selected.bindings[controlId] || "",
     pattern:
-      control.type === "button"
-        ? /^(button|input_button|script|scene)\./
-        : control.type === "number"
-          ? /^(number|input_number)\./
-          : control.type === "cover"
-            ? coverDomains
-            : lightDomains,
+      control.type === "climate"
+        ? /^climate\./
+        : control.type === "button"
+          ? /^(button|input_button|script|scene)\./
+          : control.type === "number"
+            ? /^(number|input_number)\./
+            : control.type === "cover"
+              ? coverDomains
+              : lightDomains,
   };
 };
 const pickerFor = (c) =>
@@ -1162,6 +1408,8 @@ function drawMappings(controlId) {
 
 let mappingControlId;
 function openDeviceSettings(controlId) {
+  if (selected?.houseView) return;
+
   mappingControlId = controlId;
   $("mapping-error").textContent = "";
   drawMappings(controlId);

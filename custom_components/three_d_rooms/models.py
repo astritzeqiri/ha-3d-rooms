@@ -25,12 +25,14 @@ import tempfile
 from uuid import uuid4
 import zipfile
 
+from .house import validate_placement, house_models
+
 MAX_UPLOAD = 100 * 1024 * 1024
 MAX_EXPANDED = 300 * 1024 * 1024
 ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,79}\Z")
-ENTITY = re.compile(r"(?:light|switch|cover|number|input_number|button|input_button|script|scene)\.[a-z0-9_]+\Z")
+ENTITY = re.compile(r"(?:climate|light|switch|cover|number|input_number|button|input_button|script|scene)\.[a-z0-9_]+\Z")
 SAFE_FILE = re.compile(
-    r"(?:manifest\.json|bindings\.json|scene\.glb|thumbnail\.(?:png|jpg|webp)|textures/[a-zA-Z0-9_./-]+)\Z"
+    r"(?:manifest\.json|house-placement\.json|bindings\.json|scene\.glb|thumbnail\.(?:png|jpg|webp)|textures/[a-zA-Z0-9_./-]+)\Z"
 )
 
 
@@ -130,7 +132,7 @@ def validate_manifest(m):
             raise ValueError("Every control needs a unique stable ID.")
         seen.add(c["id"])
         if (
-            c.get("type") not in ("light", "cover", "number", "button")
+            c.get("type") not in ("light", "cover", "number", "button", "climate")
             or not isinstance(c.get("label"), str)
             or not c["label"].strip()
             or len(c["label"]) > 160
@@ -170,15 +172,17 @@ def validate_manifest(m):
         caps = c.get("capabilities")
         if (
             not isinstance(caps, list)
-            or ("press" if c["type"] == "button" else "set_value" if c["type"] == "number" else "open_close" if c["type"] == "cover" else "on_off") not in caps
+            or ("more_info" if c["type"] == "climate" else "press" if c["type"] == "button" else "set_value" if c["type"] == "number" else "open_close" if c["type"] == "cover" else "on_off") not in caps
             or any(
                 v not in (
-                    ("press",) if c["type"] == "button" else ("set_value",) if c["type"] == "number" else ("open_close", "position", "stop") if c["type"] == "cover"
+                    ("more_info",) if c["type"] == "climate" else ("press",) if c["type"] == "button" else ("set_value",) if c["type"] == "number" else ("open_close", "position", "stop") if c["type"] == "cover"
                     else ("on_off", "brightness", "color", "color_temp")
                 ) for v in caps
             )
         ):
             raise ValueError("Unsupported control capabilities.")
+    if "appearance" in m:
+        validate_appearance(m["appearance"])
     validate_devices(m.get("devices", []), controls)
     if "deviceSettings" in m:
         validate_device_settings(m["deviceSettings"], m.get("devices", []))
@@ -194,11 +198,14 @@ def validate_manifest(m):
         raise ValueError("Ambient light must be between 0.05 and 1.")
     if "floor" in m and (not isinstance(m["floor"], str) or len(m["floor"]) > 160):
         raise ValueError("Floor name must be up to 160 characters.")
+    if "housePlacement" in m:
+        m = {**m, "housePlacement": validate_placement(m["housePlacement"])}
     return {
         k: deepcopy(v)
         for k, v in m.items()
         if k
         in (
+            "housePlacement",
             "schemaVersion",
             "id",
             "title",
@@ -212,8 +219,23 @@ def validate_manifest(m):
             "daylight",
             "devices",
             "deviceSettings",
+            "appearance",
         )
     }
+
+
+def validate_appearance(value):
+    if not isinstance(value, list) or len(value) > 40:
+        raise ValueError("Provide up to 40 optional architectural parts.")
+    seen = set()
+    for part in value:
+        if (not isinstance(part, dict) or set(part) != {"id", "label", "visible"}
+                or not valid_id(part.get("id")) or part["id"] in seen
+                or not isinstance(part.get("label"), str) or not part["label"].strip()
+                or len(part["label"]) > 160 or not isinstance(part.get("visible"), bool)):
+            raise ValueError("Optional architecture needs unique IDs, labels and visibility.")
+        seen.add(part["id"])
+    return deepcopy(value)
 
 
 def validate_devices(devices, controls):
@@ -383,6 +405,9 @@ def validate_glb(data, manifest):
             raise ValueError(
                 "Embed textures and buffers; external URLs are not supported."
             )
+    appearance_nodes = {n.get("extras", {}).get("appearanceId") for n in doc.get("nodes", [])}
+    if any(p["id"] not in appearance_nodes for p in manifest.get("appearance", [])):
+        raise ValueError("An architectural part references a missing scene node.")
     daylight_nodes = {n.get("extras", {}).get("daylightWindowId") for n in doc.get("nodes", [])}
     if any(w["nodeId"] not in daylight_nodes for w in manifest.get("daylight", {}).get("windows", [])):
         raise ValueError("A daylight window references a missing scene node.")
@@ -390,6 +415,20 @@ def validate_glb(data, manifest):
     for control in manifest["controls"]:
         if any(node not in nodes for node in control.get("nodeIds", [])):
             raise ValueError("A control references a missing scene node.")
+        if control["type"] == "cover":
+            for node_id in control.get("nodeIds", []):
+                matches = [n for n in doc.get("nodes", []) if n.get("extras", {}).get("controlId") == node_id]
+                hinges = [n for n in matches if "hingedDoor" in n.get("extras", {})]
+                if hinges:
+                    if len(matches) != 1:
+                        raise ValueError("Hinged doors need unique scene roots.")
+                    hinge = hinges[0]["extras"]["hingedDoor"]
+                    if (not isinstance(hinge, dict) or hinge.get("axis") != "y"
+                        or not all(number(hinge.get(k)) for k in ("closedAngle", "openAngle", "defaultPosition"))
+                        or not 0 < abs(hinge["openAngle"] - hinge["closedAngle"]) <= math.pi
+                        or hinge["defaultPosition"] != control.get("defaultPosition", 0)
+                        or not hinges[0].get("children")):
+                        raise ValueError("Invalid hinged door motion metadata.")
         if control["type"] == "number":
             for node_id in control["nodeIds"]:
                 matches = [n for n in doc.get("nodes", []) if n.get("extras", {}).get("controlId") == node_id]
@@ -424,7 +463,7 @@ def compatible_entity(control, entity_id):
     return (
         isinstance(entity_id, str)
         and bool(ENTITY.fullmatch(entity_id))
-        and (entity_id.split(".")[0] in ({"button", "input_button", "script", "scene"} if control.get("type") == "button" else {"number", "input_number"} if control.get("type") == "number" else {"cover"} if control.get("type") == "cover" else {"light", "switch"}))
+        and (entity_id.split(".")[0] in ({"climate"} if control.get("type") == "climate" else {"button", "input_button", "script", "scene"} if control.get("type") == "button" else {"number", "input_number"} if control.get("type") == "number" else {"cover"} if control.get("type") == "cover" else {"light", "switch"}))
     )
 
 
@@ -435,7 +474,7 @@ def validate_bindings(bindings, manifest):
         for key, value in bindings.items()
     ):
         raise ValueError(
-            "Bindings must connect declared controls to matching light, switch, cover or number entities."
+            "Bindings must connect declared controls to matching light, switch, cover, climate or number entities."
         )
     return dict(bindings)
 
@@ -473,9 +512,13 @@ def extract_package(data, destination):
                     if actual > info.file_size or actual > MAX_EXPANDED:
                         raise ValueError("Expanded file is too large.")
                     output.write(piece)
-    manifest = validate_manifest(
-        json.loads((destination / "manifest.json").read_text())
-    )
+    raw_manifest = json.loads((destination / "manifest.json").read_text())
+    if "house-placement.json" in names:
+        placement = validate_placement(json.loads((destination / "house-placement.json").read_text()))
+        if "housePlacement" in raw_manifest and validate_placement(raw_manifest["housePlacement"]) != placement:
+            raise ValueError("The room and placement file disagree.")
+        raw_manifest["housePlacement"] = placement
+    manifest = validate_manifest(raw_manifest)
     validate_glb((destination / "scene.glb").read_bytes(), manifest)
     bindings = (
         validate_bindings(
@@ -527,8 +570,8 @@ class ModelStore:
     def revision(self, model_id):
         return hashlib.sha256(self.find(model_id)["folder"].encode()).hexdigest()[:24]
 
-    def catalog(self):
-        return [
+    def catalog(self, floor_names=None):
+        models = [
             {
                 **{k: deepcopy(v) for k, v in m.items() if k != "folder"},
                 "sceneRevision": self.revision(m["id"]),
@@ -536,11 +579,34 @@ class ModelStore:
             for m in self.models
         ]
 
+        if floor_names is not None:
+            for model in models:
+                for floor in model.get("housePlacement", {}).get("floors", []):
+                    linked = floor.get("haFloorId")
+                    if linked not in floor_names:
+                        matches = [key for key,name in floor_names.items() if name.strip().casefold() == floor["name"].strip().casefold()]
+                        linked = matches[0] if len(matches)==1 else None
+                    if linked:
+                        floor["haFloorId"] = linked
+                        floor["name"] = floor_names[linked]
+                    else:
+                        floor.pop("haFloorId", None)
+        views = house_models(models)
+        if floor_names is not None:
+            views = [v for v in views if not v.get("houseFloor") or v["houseFloor"].get("haFloorId") in floor_names]
+        return [*models, *views]
+
     def find(self, model_id):
         for model in self.models:
             if model["id"] == model_id:
                 return model
+        for model in house_models(self.catalog_real()):
+            if model["id"] == model_id:
+                return model
         raise ValueError("Model not found.")
+
+    def catalog_real(self):
+        return [{**m, "sceneRevision": hashlib.sha256(m["folder"].encode()).hexdigest()[:24]} for m in self.models]
 
     def save(self, models):
         temporary = self.directory / "catalog.json.tmp"
@@ -553,7 +619,7 @@ class ModelStore:
 
     def update_room(self, model_id, settings):
         """Store local room identity without altering geometry or device bindings."""
-        if not isinstance(settings, dict) or set(settings) - {"title", "areaId"}:
+        if not isinstance(settings, dict) or set(settings) - {"title", "areaId", "floorIds", "floorLinks", "appearance"}:
             raise ValueError("Unsupported room setting.")
         models = deepcopy(self.models)
         model = next((m for m in models if m["id"] == model_id), None)
@@ -569,8 +635,33 @@ class ModelStore:
             if not isinstance(area_id, str) or len(area_id) > 128:
                 raise ValueError("Invalid Home Assistant area.")
             model["areaId"] = area_id
+        if "appearance" in settings:
+            parts = validate_appearance(settings["appearance"])
+            known = {p["id"]: p["label"] for p in model.get("appearance", [])}
+            if {p["id"]: p["label"] for p in parts} != known:
+                raise ValueError("Change only declared architectural parts.")
+            model["appearance"] = parts
+        if "floorLinks" in settings:
+            placement = model.get("housePlacement")
+            if not placement:
+                raise ValueError("Export this room from the web house builder before assigning house floors.")
+            links = settings["floorLinks"]
+            known = {f["id"] for f in placement["floors"]} if placement else set()
+            if not isinstance(links,dict) or set(links)-known or any(not isinstance(v,str) or len(v)>128 for v in links.values()) or len([v for v in links.values() if v]) != len({v for v in links.values() if v}):
+                raise ValueError("Invalid floor height mapping.")
+            for member in models:
+                if member.get("housePlacement",{}).get("houseId") == placement["houseId"]:
+                    for floor in member["housePlacement"]["floors"]:
+                        if floor["id"] in links:
+                            if links[floor["id"]]: floor["haFloorId"] = links[floor["id"]]
+                            else: floor.pop("haFloorId",None)
+                    member["housePlacement"] = validate_placement(member["housePlacement"])
+        if "floorIds" in settings:
+            if "housePlacement" not in model:
+                raise ValueError("Export this room from the web house builder before assigning house floors.")
+            model["housePlacement"] = validate_placement({**model["housePlacement"], "floorIds": settings["floorIds"]})
         self.save(models)
-        return {"title": model["title"], "areaId": model.get("areaId", "")}
+        return {"title": model["title"], "areaId": model.get("areaId", ""), **({"appearance":deepcopy(model["appearance"])} if "appearance" in model else {}), **({"housePlacement": deepcopy(model["housePlacement"])} if "housePlacement" in model else {})}
 
     def set_device_settings(self, model_id, device_id, names):
         models = deepcopy(self.models)
@@ -583,7 +674,9 @@ class ModelStore:
         return {"deviceSettings": deepcopy(settings)}
 
     def put_component(self, value):
-        component = validate_component(value, [m["id"] for m in self.models])
+        component = validate_component(value, [m["id"] for m in [*self.models, *house_models(self.models)]])
+        if self.find(component["layers"][0]["model"]).get("houseView"):
+            component.pop("markers", None)
         previous = self.components
         self.components = [c for c in previous if c["id"] != component["id"]] + [component]
         try:
@@ -647,6 +740,18 @@ class ModelStore:
                 raise ValueError("Model not found.")
             previous = models[index]
             manifest = {**manifest, "id": model_id, "title": previous["title"]}
+            if "housePlacement" not in manifest and "housePlacement" in previous:
+                manifest["housePlacement"] = deepcopy(previous["housePlacement"])
+            elif manifest.get("housePlacement", {}).get("houseId") == previous.get("housePlacement", {}).get("houseId") and "housePlacement" in previous:
+                ids = {f["id"] for f in manifest["housePlacement"]["floors"]}
+                manifest["housePlacement"]["floorIds"] = [f for f in previous["housePlacement"]["floorIds"] if f in ids]
+                links = {f["id"]:f["haFloorId"] for f in previous["housePlacement"]["floors"] if f.get("haFloorId")}
+                for floor in manifest["housePlacement"]["floors"]:
+                    if floor["id"] in links: floor["haFloorId"] = links[floor["id"]]
+
+            previous_parts = {p["id"]:p["visible"] for p in previous.get("appearance", [])}
+            for part in manifest.get("appearance", []):
+                part["visible"] = previous_parts.get(part["id"], part["visible"])
             if "daylight" in manifest and "daylight" in previous:
                 manifest["daylight"] = validate_daylight(
                     {
@@ -723,12 +828,17 @@ class ModelStore:
 
     def remove(self, model_id):
         model = self.find(model_id)
+        if model.get("houseView"):
+            raise ValueError("Remove or replace the individual rooms to change this house.")
         self.save([m for m in self.models if m["id"] != model_id])
         shutil.rmtree(self.directory / "models" / model["folder"], ignore_errors=True)
         return {"ok": True}
 
     def scene_path(self, model_id):
-        return self.directory / "models" / self.find(model_id)["folder"] / "scene.glb"
+        model = self.find(model_id)
+        if model.get("houseView"):
+            raise ValueError("Load the individual room assets for this house.")
+        return self.directory / "models" / model["folder"] / "scene.glb"
 
     def scene_bytes(self, model_id, compressed=False):
         """Cache a compressed derivative, keeping the original GLB untouched."""
@@ -748,9 +858,13 @@ class ModelStore:
 
     def export(self, model_id):
         model = self.find(model_id)
+        if model.get("houseView"):
+            raise ValueError("Export the individual rooms to preserve their identities.")
         output = BytesIO()
         with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
             archive.writestr("manifest.json", json.dumps(validate_manifest(model)))
             archive.writestr("bindings.json", json.dumps(model["bindings"]))
+            if "housePlacement" in model:
+                archive.writestr("house-placement.json", json.dumps(model["housePlacement"]))
             archive.write(self.scene_path(model_id), "scene.glb")
         return output.getvalue()

@@ -41,6 +41,11 @@
             <h1 id="title">Bring your home into view</h1>
           </div>
           <div class="toolbar-actions">
+            <select
+              id="dashboard-scope"
+              aria-label="Dashboard view scope"
+              hidden
+            ></select>
             <button id="dashboard" class="primary" hidden>
               Create dashboard view
             </button>
@@ -144,6 +149,12 @@
               Drag the room to frame your view, or choose a camera preset.
             </p>
             <form id="dashboard-form">
+              <label id="dashboard-house-scope-field" class="panel-field" hidden
+                >House / floor<select
+                  id="dashboard-house-scope"
+                  aria-label="House dashboard floor"
+                ></select
+              ></label>
               <label class="panel-field"
                 >Camera preset<select id="dashboard-preset">
                   <option value="">Current view</option>
@@ -426,12 +437,29 @@
             <label for="room-area"
               >Home Assistant area<select id="room-area">
                 <option value="">Not assigned</option>
-              </select></label
+              </select>
+              <fieldset id="house-floor-settings" hidden>
+                <legend>Floors occupied by this room</legend>
+                <div id="room-floor-choices"></div>
+                <p id="room-floor-note" class="muted"></p>
+                <div id="room-floor-links"></div>
+                <p class="muted">
+                  Select every floor the room spans. Height ranges come from the
+                  web house builder; the model stays intact.
+                </p>
+              </fieldset></label
             >
             <p id="room-area-note" class="muted small">
               Link this 3D room to its area in Home Assistant. Device mappings
               stay explicit.
             </p>
+            <fieldset id="room-appearance-settings" hidden>
+              <legend>Room appearance</legend>
+              <div id="room-appearance-choices"></div>
+              <p class="muted small">
+                Applies to this room and its house and floor views.
+              </p>
+            </fieldset>
             <div class="room-settings-actions">
               <button id="save-room-settings" class="primary" type="submit">
                 Save room settings</button

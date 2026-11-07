@@ -54,7 +54,12 @@ export async function connectNative() {
         );
       if (path.startsWith("components/") && options.method === "DELETE")
         return bridge.request("delete_component", { id: path.split("/")[1] });
-      if (path === "models" || path === "status" || path === "areas")
+      if (
+        path === "models" ||
+        path === "status" ||
+        path === "areas" ||
+        path === "floors"
+      )
         return bridge.request(path);
       const match = path.match(
         /^models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|device-settings))?$/,

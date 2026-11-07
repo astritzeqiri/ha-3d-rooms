@@ -1,3 +1,12 @@
+# 0.23.0 — Houses, floors and room appearance
+
+- Assemble independently imported rooms using portable house placement and floor metadata; retain each room’s identity, controls and mappings.
+- Choose Home Assistant floors for whole-house dashboard views. Multi-floor rooms are clipped to the selected floor’s saved height range.
+- House/floor views expose presentation settings only. Device setup and actions remain in individual rooms; composed models retain live room appearance.
+- Room appearance can show or hide optional architectural sections. Updated hallway exports separate the wall above the entrance from the entrance door and casing.
+- Preserve compatible placement, floor, appearance and entity settings when replacing a room.
+- Support prepared hinged-door cover motion and binary-cover state; prepared AC controls open Home Assistant’s native climate dialog.
+
 # 0.22.0
 
 - Customize each device icon independently in a saved dashboard view: visibility, state label, size and room/below-room placement.

@@ -1,3 +1,5 @@
+import { validateAppearance } from "../shared/appearance.mjs";
+import { validatePlacement } from "../shared/house.mjs";
 import { zipSync, strToU8 } from "fflate";
 import http from "node:http";
 import {
@@ -124,6 +126,16 @@ export async function createApp({
         req.on("close", () => clients.delete(res));
         return;
       }
+      if (path === "/api/floors" && req.method === "GET") {
+        json(
+          res,
+          200,
+          bridge.connected && !bridge.simulated && bridge.request
+            ? await bridge.request("config/floor_registry/list")
+            : [],
+        );
+        return;
+      }
       if (path === "/api/areas" && req.method === "GET") {
         json(
           res,
@@ -142,7 +154,7 @@ export async function createApp({
         json(
           res,
           200,
-          await store.putComponent(JSON.parse(await body(req, 16384))),
+          await store.putComponent(JSON.parse(await body(req, 196608))),
         );
         return;
       }
@@ -152,11 +164,7 @@ export async function createApp({
         return;
       }
       if (path === "/api/models" && req.method === "GET") {
-        json(
-          res,
-          200,
-          store.state.models.map(({ folder, ...m }) => m),
-        );
+        json(res, 200, store.catalog());
         return;
       }
       if (path === "/api/models" && req.method === "POST") {
@@ -193,6 +201,10 @@ export async function createApp({
       if (match) {
         const m = store.find(match[1]);
         const op = match[2];
+        if (m.houseView)
+          throw new Error(
+            "Edit, export or remove the individual source rooms for this house.",
+          );
         if (req.method === "DELETE" && !op) {
           await store.remove(m.id);
           json(res, 200, { ok: true });
@@ -211,6 +223,13 @@ export async function createApp({
             {
               "manifest.json": strToU8(JSON.stringify(manifest)),
               "bindings.json": strToU8(JSON.stringify(bindings)),
+              ...(m.housePlacement
+                ? {
+                    "house-placement.json": strToU8(
+                      JSON.stringify(m.housePlacement),
+                    ),
+                  }
+                : {}),
               "scene.glb": await readFile(
                 join(dataDir, "models", folder, "scene.glb"),
               ),
@@ -253,10 +272,79 @@ export async function createApp({
             if (!areas.some((a) => a.area_id === data.areaId))
               throw new Error("Choose an existing Home Assistant area.");
           }
+          let appearance = m.appearance;
+          if (data.appearance !== undefined) {
+            appearance = validateAppearance(data.appearance);
+            const known = new Map(
+              (m.appearance || []).map((p) => [p.id, p.label]),
+            );
+            if (
+              appearance.length !== known.size ||
+              appearance.some((p) => known.get(p.id) !== p.label)
+            )
+              throw new Error("Change only declared architectural parts.");
+          }
+          let placement = m.housePlacement;
+          if (data.haFloorIds !== undefined || data.floorLinks !== undefined) {
+            if (!placement)
+              throw new Error(
+                "Export house placement and floor heights first.",
+              );
+            const floors =
+              bridge.connected && !bridge.simulated && bridge.request
+                ? await bridge.request("config/floor_registry/list")
+                : [];
+            const links = data.floorLinks || {},
+              ids = data.haFloorIds || [];
+            if (
+              !Array.isArray(ids) ||
+              !links ||
+              typeof links !== "object" ||
+              Array.isArray(links) ||
+              ids.some((id) => !floors.some((f) => f.floor_id === id)) ||
+              Object.values(links).some(
+                (id) => id && !floors.some((f) => f.floor_id === id),
+              )
+            )
+              throw new Error("Choose existing Home Assistant floors.");
+            const definitions = placement.floors.map((f) => {
+              const linked = links[f.id] ?? f.haFloorId;
+              const native = floors.find((n) => n.floor_id === linked);
+              return {
+                ...f,
+                ...(native
+                  ? { haFloorId: native.floor_id, name: native.name }
+                  : {}),
+              };
+            });
+            if (ids.some((id) => !definitions.some((f) => f.haFloorId === id)))
+              throw new Error(
+                "Match each selected HA floor to a saved height range first.",
+              );
+            placement = validatePlacement({
+              ...placement,
+              floors: definitions,
+              floorIds: definitions
+                .filter((f) => ids.includes(f.haFloorId))
+                .map((f) => f.id),
+            });
+          }
           await store.transaction(async () => {
             const previous = { ...m };
+            if (appearance) m.appearance = appearance;
             m.title = data.title.trim();
             m.areaId = data.areaId;
+            if (placement) m.housePlacement = placement;
+            if (data.floorIds !== undefined) {
+              if (!m.housePlacement)
+                throw new Error(
+                  "Export this room from the web house builder before assigning floors.",
+                );
+              m.housePlacement = validatePlacement({
+                ...m.housePlacement,
+                floorIds: data.floorIds,
+              });
+            }
             try {
               await store.save();
             } catch (error) {
@@ -265,7 +353,12 @@ export async function createApp({
               throw error;
             }
           });
-          json(res, 200, { title: m.title, areaId: m.areaId });
+          json(res, 200, {
+            ...(m.appearance ? { appearance: m.appearance } : {}),
+            title: m.title,
+            areaId: m.areaId,
+            ...(m.housePlacement ? { housePlacement: m.housePlacement } : {}),
+          });
           return;
         }
         if (req.method === "PUT" && op === "daylight") {

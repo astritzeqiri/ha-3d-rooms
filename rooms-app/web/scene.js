@@ -67,6 +67,7 @@ export class SceneView {
       (e) => (start = [e.clientX, e.clientY]),
     );
     this.renderer.domElement.addEventListener("pointerup", (e) => {
+      if (this.model?.houseView) return;
       if (!start || Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 6)
         return;
       const r = this.renderer.domElement.getBoundingClientRect();
@@ -112,10 +113,50 @@ export class SceneView {
       this.disposeScene(gltf.scene);
       return false;
     }
+    return this.prepareAsset(model, gltf.scene, started);
+  }
+  async loadLayers(model, layers) {
+    const started = performance.now(),
+      generation = ++this.generation;
+    const root = new THREE.Group();
+    try {
+      for (const layer of layers) {
+        const gltf = await new GLTFLoader().loadAsync(layer.url);
+        if (generation !== this.generation) {
+          this.disposeScene(gltf.scene);
+          this.disposeScene(root);
+          return false;
+        }
+        gltf.scene.traverse((object) => {
+          if (object.userData.appearanceId)
+            object.userData.appearanceVisible =
+              (layer.appearance || []).find(
+                (p) => p.id === object.userData.appearanceId,
+              )?.visible ?? true;
+          if (
+            object.userData.controlId &&
+            layer.nodeIds[object.userData.controlId]
+          )
+            object.userData.controlId =
+              layer.nodeIds[object.userData.controlId];
+        });
+        const placement = new THREE.Group();
+        placement.matrixAutoUpdate = false;
+        placement.matrix.fromArray(layer.transform);
+        placement.add(gltf.scene);
+        root.add(placement);
+      }
+      return this.prepareAsset(model, root, started);
+    } catch (error) {
+      this.disposeScene(root);
+      throw error;
+    }
+  }
+  prepareAsset(model, asset, started) {
     this.disposeScene(this.scene);
     this.scene.clear();
     this.model = model;
-    this.asset = gltf.scene;
+    this.asset = asset;
     this.scene.add(this.asset);
     this.materials = [];
     this.nodes = new Map();
@@ -161,7 +202,10 @@ export class SceneView {
       const device = deviceForControl(model, c.id),
         companion = device && device.height !== c.id;
       marker.visible =
-        !companion && this.options.markers && this.options.mode !== "floor";
+        !model.houseView &&
+        !companion &&
+        this.options.markers &&
+        this.options.mode !== "floor";
       marker.position.fromArray(c.position);
       marker.userData.pickControl = c.id;
       marker.renderOrder = 10;
@@ -216,6 +260,28 @@ export class SceneView {
     const box = new THREE.Box3().setFromObject(this.asset),
       center = box.getCenter(new THREE.Vector3()),
       size = box.getSize(new THREE.Vector3()).length();
+    if (model.houseFloor) {
+      box.min.y = Math.max(box.min.y, model.houseFloor.minY);
+      box.max.y = Math.min(box.max.y, model.houseFloor.maxY);
+      if (box.max.y < box.min.y) box.max.y = box.min.y + 0.1;
+    }
+    this.renderer.localClippingEnabled = !!model.houseFloor;
+    const planes = model.houseFloor
+      ? [
+          new THREE.Plane(new THREE.Vector3(0, 1, 0), -model.houseFloor.minY),
+          new THREE.Plane(new THREE.Vector3(0, -1, 0), model.houseFloor.maxY),
+        ]
+      : [];
+    this.asset.traverse((object) => {
+      for (const material of Array.isArray(object.material)
+        ? object.material
+        : [object.material])
+        if (material) {
+          material.clippingPlanes = planes;
+          material.clipShadows = true;
+          material.needsUpdate = true;
+        }
+    });
     this.bounds = box;
     this.defaultTarget = model.camera?.target || center.toArray();
     this.defaultPosition =
@@ -267,14 +333,19 @@ export class SceneView {
       this.options.allowRotate ?? this.options.mode !== "floor";
     for (const f of this.fixtures.values())
       f.marker.visible =
-        !f.companion && this.options.markers && this.options.mode !== "floor";
+        !this.model.houseView &&
+        !f.companion &&
+        this.options.markers &&
+        this.options.mode !== "floor";
     this.renderer.domElement.setAttribute(
       "aria-label",
-      this.options.mode === "floor"
-        ? "3D floor plan with a slight overhead tilt. No device icons."
-        : this.options.mode === "front"
-          ? "3D room from the front. Select the modeled device to control it."
-          : "3D model. Drag to orbit; use the device controls below for keyboard access.",
+      this.model.houseView
+        ? "3D house view. Drag to orbit and use the camera controls to frame the house."
+        : this.options.mode === "floor"
+          ? "3D floor plan with a slight overhead tilt. No device icons."
+          : this.options.mode === "front"
+            ? "3D room from the front. Select the modeled device to control it."
+            : "3D model. Drag to orbit; use the device controls below for keyboard access.",
     );
     this.reset();
   }
@@ -379,6 +450,12 @@ export class SceneView {
     this.asset?.traverse((o) => {
       if (o.userData.ceiling) o.visible = !!o.userData.controlId;
       if (o.userData.wallNormal) o.visible = true;
+      if (o.userData.appearanceId)
+        o.visible = this.model.houseView
+          ? o.userData.appearanceVisible !== false
+          : (this.model.appearance || []).find(
+              (p) => p.id === o.userData.appearanceId,
+            )?.visible !== false;
     });
   }
   setStates(states) {
@@ -403,8 +480,24 @@ export class SceneView {
         f.marker.material.color.set(s.unavailable ? "#858b86" : "#c3dbab");
         continue;
       }
+      if (f.type === "climate") {
+        f.marker.material.color.set(
+          s.unavailable ? "#858b86" : s.on ? "#7bbcc9" : "#697b6d",
+        );
+        this.asset.traverse((o) => {
+          if (
+            o.userData.climateIndicator === id &&
+            o.material?.isMeshStandardMaterial
+          ) {
+            o.material.emissive.set("#8bc6b8");
+            o.material.emissiveIntensity = s.on && !s.unavailable ? 1 : 0;
+          }
+        });
+        continue;
+      }
       if (f.type === "cover") {
-        for (const node of f.coverNodes) setShadePosition(node, s.position);
+        for (const node of f.coverNodes)
+          setShadePosition(node, s.position ?? s.motionPosition);
         f.marker.material.color.set(s.unavailable ? "#858b86" : "#c3dbab");
         continue;
       }

@@ -15,6 +15,27 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
           throw new Error(
             "Model not found. Upload it in the 3D Rooms sidebar first.",
           );
+        if (model.members) {
+          const layers = [];
+          try {
+            for (const member of model.members) {
+              const source = models.find((m) => m.id === member.model);
+              if (!source) throw new Error("A room in this house is missing.");
+              layers.push({
+                ...member,
+                url: URL.createObjectURL(await sceneBlob(hass, source)),
+              });
+            }
+            return {
+              model,
+              layers,
+              release: () => layers.forEach((l) => URL.revokeObjectURL(l.url)),
+            };
+          } catch (error) {
+            layers.forEach((l) => URL.revokeObjectURL(l.url));
+            throw error;
+          }
+        }
         const sceneURL = URL.createObjectURL(await sceneBlob(hass, model));
         return {
           model,
@@ -96,6 +117,17 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
         throw new Error(
           "Model not found. Upload it in the 3D Rooms add-on first.",
         );
+      if (model.members)
+        return {
+          model,
+          layers: model.members.map((member) => ({
+            ...member,
+            url: new URL(
+              `api/models/${encodeURIComponent(member.model)}/scene.glb`,
+              base,
+            ).href,
+          })),
+        };
       return {
         model,
         sceneURL: new URL(

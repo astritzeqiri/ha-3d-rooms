@@ -18,6 +18,18 @@ Bring your rooms into Home Assistant with an interactive 3D view. Import a prepa
 
 **The room manager and dashboard card come together in one integration.**
 
+## Houses, floors and room appearance
+
+Export rooms independently from the web house builder with matching house placement metadata. Import the room ZIPs in 3D Rooms; rooms sharing a house ID assemble automatically. In each room’s settings, link its saved height ranges to Home Assistant floors and select every floor it occupies. Stairways and hallways can span floors.
+
+Create a dashboard view from the house, then choose the whole house or a linked floor. Floor views clip the model to the exported height range. House views configure camera, perspective, framing and presentation; entities stay configured in their source rooms. Live room appearance still reflects those mappings.
+
+Prepared models may expose **Room settings → Room appearance**. The updated hallway export offers **Show wall above entrance**, leaving its door, casing and lower wall intact. Existing hallway models need one replacement export to gain separate geometry; a normal integration update does not require re-uploading other rooms.
+
+Compatible room replacement preserves device mappings, floor links and appearance choices. Back up room exports before replacing models. Prepared AC controls use Home Assistant’s native climate dialog; prepared hinged doors follow cover open/closed state.
+
+See [portable placement and floors](docs/house-placement.md) for the package contract.
+
 ## Features
 
 - **Interactive rooms** — orbit, pan and zoom, or use the navigation cube to find the right angle.

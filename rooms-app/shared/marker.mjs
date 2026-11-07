@@ -1,5 +1,23 @@
+import { climateState } from "./climate.mjs";
 /** Presentation only: actual entity state remains the source of truth. */
 export function markerAppearance(control, entity, state, preview = false) {
+  if (control.type === "climate") {
+    const s = climateState(entity);
+    return {
+      active: s.on,
+      unavailable: s.unavailable,
+      moving: false,
+      badge: s.unavailable
+        ? "Unavailable"
+        : s.temperature === undefined
+          ? s.mode
+          : `${s.temperature}°`,
+      description: s.unavailable
+        ? "Unavailable"
+        : `${s.mode}, Home Assistant climate controls`,
+      stateObj: entity,
+    };
+  }
   if (control.type === "button") {
     const connected = preview || !!entity,
       unavailable = !connected || !!state.unavailable;

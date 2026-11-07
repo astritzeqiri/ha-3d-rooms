@@ -13,7 +13,7 @@ const source =
     .replace(/^import .*;\n/gm, "")
     .replace("export function", "function") +
   "\nglobalThis.makeEditor=initDashboardEditor;";
-function harness(preview, onClose) {
+function harness(preview, onClose, modelConfig = {}) {
   const fields = new Map(),
     calls = [];
   let allowed = true;
@@ -95,7 +95,7 @@ function harness(preview, onClose) {
     api: async (path, options) => {
       calls.push({ path, ...JSON.parse(options.body) });
     },
-    model: () => ({ id: "kitchen", title: "Kitchen" }),
+    model: () => ({ id: "kitchen", title: "Kitchen", ...modelConfig }),
     scene: () => scene,
     toast() {},
   });
@@ -292,4 +292,31 @@ test("saved marker presentation survives title/camera edits and preview without 
   await h.field("dashboard-form").onsubmit({ preventDefault() {} });
   assert.deepEqual(h.calls[0].markers, component.markers);
   assert.equal(component.title, "Overview");
+});
+
+test("house view editor hides entity tools and omits legacy marker edits while retaining camera settings", async () => {
+  const previews = [];
+  const h = harness(async (draft) => previews.push(draft), undefined, {
+    houseView: true,
+  });
+  h.editor.open({
+    ...saved(),
+    markers: { lamp: { size: 44, placement: "tray" } },
+  });
+  assert.equal(h.field("dashboard-controls").hidden, true);
+  h.field("dashboard-title").value = "Whole house";
+  h.field("dashboard-height").value = "640";
+  h.scene.options.zoom = 2;
+  await h.field("preview-dashboard").onclick();
+  assert.equal(previews[0].markers, undefined);
+  assert.equal(previews[0].title, "Whole house");
+  assert.equal(previews[0].layers[0].zoom, 2);
+  await h.field("dashboard-form").onsubmit({ preventDefault() {} });
+  assert.equal(h.calls[0].markers, undefined);
+  assert.equal(h.calls[0].height, 640);
+});
+test("individual room view editor retains its entity tools", () => {
+  const h = harness();
+  h.editor.open(saved());
+  assert.equal(h.field("dashboard-controls").hidden, false);
 });

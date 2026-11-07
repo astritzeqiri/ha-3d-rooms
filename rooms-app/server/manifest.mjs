@@ -1,3 +1,5 @@
+import { validateAppearance } from "../shared/appearance.mjs";
+import { validatePlacement } from "../shared/house.mjs";
 import { validateDevices, validateDeviceSettings } from "../shared/device.mjs";
 import { actionCommand } from "../shared/action.mjs";
 import { numberCommand } from "../shared/number.mjs";
@@ -103,7 +105,7 @@ export function validateManifest(m) {
         (c.defaultPosition ?? 0) > 100)
     )
       fail("Covers need nodes and a default position from 0 to 100.");
-    if (!["light", "cover", "number", "button"].includes(c.type))
+    if (!["light", "cover", "number", "button", "climate"].includes(c.type))
       fail("Use light, cover or number controls.");
     if (typeof c.label !== "string" || !c.label.trim() || c.label.length > 160)
       fail("Every light needs a label.");
@@ -144,24 +146,28 @@ export function validateManifest(m) {
     if (
       !Array.isArray(c.capabilities) ||
       !c.capabilities.includes(
-        c.type === "button"
-          ? "press"
-          : c.type === "number"
-            ? "set_value"
-            : c.type === "cover"
-              ? "open_close"
-              : "on_off",
+        c.type === "climate"
+          ? "more_info"
+          : c.type === "button"
+            ? "press"
+            : c.type === "number"
+              ? "set_value"
+              : c.type === "cover"
+                ? "open_close"
+                : "on_off",
       ) ||
       c.capabilities.some(
         (v) =>
           !(
-            c.type === "button"
-              ? ["press"]
-              : c.type === "number"
-                ? ["set_value"]
-                : c.type === "cover"
-                  ? ["open_close", "position", "stop"]
-                  : ["on_off", "brightness", "color", "color_temp"]
+            c.type === "climate"
+              ? ["more_info"]
+              : c.type === "button"
+                ? ["press"]
+                : c.type === "number"
+                  ? ["set_value"]
+                  : c.type === "cover"
+                    ? ["open_close", "position", "stop"]
+                    : ["on_off", "brightness", "color", "color_temp"]
           ).includes(v),
       )
     )
@@ -169,23 +175,27 @@ export function validateManifest(m) {
   }
   validateDevices(m.devices, m.controls);
   if (m.deviceSettings) validateDeviceSettings(m.deviceSettings, m.devices);
+  if (m.appearance !== undefined) validateAppearance(m.appearance);
   if (m.daylight) validateDaylight(m.daylight, m.controls);
   if (m.camera && (!vector(m.camera.position) || !vector(m.camera.target)))
     fail("Camera position and target must be three numbers.");
   if (m.ambient !== undefined && !(m.ambient >= 0.05 && m.ambient <= 1))
     fail("Minimum ambient light must be between 0.05 and 1.");
+  if (m.housePlacement) m.housePlacement = validatePlacement(m.housePlacement);
   return m;
 }
 export function compatible(control, entity) {
   return (
     entity &&
-    (control.type === "button"
-      ? /^(button|input_button|script|scene)\./
-      : control.type === "number"
-        ? /^(number|input_number)\./
-        : control.type === "cover"
-          ? /^cover\./
-          : /^(light|switch)\./
+    (control.type === "climate"
+      ? /^climate\./
+      : control.type === "button"
+        ? /^(button|input_button|script|scene)\./
+        : control.type === "number"
+          ? /^(number|input_number)\./
+          : control.type === "cover"
+            ? /^cover\./
+            : /^(light|switch)\./
     ).test(entity.entity_id)
   );
 }
@@ -202,6 +212,10 @@ export function commandFor(
   settings = {},
   entity,
 ) {
+  if (control.type === "climate")
+    throw new Error(
+      "Use Home Assistant climate controls from the device dialog.",
+    );
   if (control.type === "button") return actionCommand(entity, control, action);
   if (control.type === "number")
     return numberCommand(entity, control, action, settings.value);

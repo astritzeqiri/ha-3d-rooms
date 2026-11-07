@@ -23,6 +23,14 @@ export function coverState(entity) {
         : undefined;
   return {
     position,
+    // Binary covers report endpoints without a measured percentage.
+    motionPosition:
+      position ??
+      (!unavailable &&
+      entity.state === "open" &&
+      !coverFeatures(entity).position
+        ? 100
+        : undefined),
     unavailable,
     label: unavailable
       ? "Unavailable"
@@ -60,6 +68,22 @@ export function coverCommand(entity, control, action, position) {
 }
 // All rest transforms are in node-local coordinates, including after GLB import.
 export function setShadePosition(root, position) {
+  const hinge = root.userData.hingedDoor;
+  if (hinge) {
+    if (
+      !Number.isFinite(position) ||
+      hinge.axis !== "y" ||
+      !Number.isFinite(hinge.closedAngle) ||
+      !Number.isFinite(hinge.openAngle)
+    )
+      return;
+    root.rotation.y =
+      hinge.closedAngle +
+      ((hinge.openAngle - hinge.closedAngle) *
+        Math.max(0, Math.min(100, position))) /
+        100;
+    return;
+  }
   const shade = root.userData.rollerShade;
   if (
     !shade ||

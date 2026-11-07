@@ -1,6 +1,8 @@
 """Run with Python unittest; validation does not require Home Assistant."""
 
 import importlib.util
+import sys
+import types
 from io import BytesIO
 import json
 import base64
@@ -11,8 +13,11 @@ import unittest
 from unittest.mock import patch
 import zipfile
 
+package_module = types.ModuleType("rooms_test")
+package_module.__path__ = [str(Path(__file__).parents[1] / "custom_components/three_d_rooms")]
+sys.modules["rooms_test"] = package_module
 spec = importlib.util.spec_from_file_location(
-    "rooms_models",
+    "rooms_test.models",
     Path(__file__).parents[1] / "custom_components/three_d_rooms/models.py",
 )
 models = importlib.util.module_from_spec(spec)

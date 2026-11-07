@@ -40,6 +40,9 @@ files["three_d_rooms/README.md"] = new Uint8Array(
 files["three_d_rooms/docs/adjustable-desk.md"] = new Uint8Array(
   await readFile("../docs/adjustable-desk.md"),
 );
+files["three_d_rooms/docs/house-placement.md"] = new Uint8Array(
+  await readFile("../docs/house-placement.md"),
+);
 await mkdir("../releases", { recursive: true });
 await writeFile(
   `../releases/3d-rooms-${version}-source.zip`,
