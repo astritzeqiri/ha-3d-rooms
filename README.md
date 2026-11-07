@@ -1,3 +1,7 @@
+## 0.25.1 rendering fix
+
+Rooms with many lights and windows now retain textured floors and furniture on graphics devices with limited texture capacity. Shadow casting adapts to the device; all light controls remain available. Update through HACS, restart Home Assistant itself, and refresh the browser. No room re-export or re-upload is needed.
+
 <p align="center">
   <img src="custom_components/three_d_rooms/brand/icon.png" alt="3D Rooms" width="112" />
 </p>

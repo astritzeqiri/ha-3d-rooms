@@ -1,3 +1,9 @@
+# 0.25.1 — Restore textured floors and furniture
+
+- Prevent missing surfaces when fixture and daylight shadow maps exceed the graphics device’s texture limit.
+- Budget shadows against material textures and device capacity in both the manager and dashboard card. All lights remain visible and controllable.
+- Existing uploaded rooms work without re-exporting or re-uploading.
+
 # 0.25.0 — Dashboard workspace and device presentation
 
 - Dashboard cards can fill the available screen height with `height: auto`, selectable in the visual card editor.

@@ -82,7 +82,10 @@ test("floor view clips the same geometry in world height and fits floor bounds",
   view.scene = new THREE.Scene();
   view.disposeScene = () => {};
   view.options = { mode: "front", markers: false };
-  view.renderer = { domElement: { dataset: {} } };
+  view.renderer = {
+    domElement: { dataset: {} },
+    capabilities: { maxTextures: 16 },
+  };
   view.setView = () => {};
   const asset = new THREE.Group(),
     material = new THREE.MeshStandardMaterial(),

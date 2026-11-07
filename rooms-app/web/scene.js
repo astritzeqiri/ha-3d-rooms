@@ -1,3 +1,4 @@
+import { applyShadowBudget } from "../shared/shadow-budget.mjs";
 import { createClimateVisual } from "../shared/climate-visual.mjs";
 import { climateAppearance } from "../shared/climate.mjs";
 import { offsetPoint } from "../shared/marker-settings.mjs";
@@ -297,6 +298,7 @@ export class SceneView {
     }
     this.daylight = model.daylight ? createDaylight(model.daylight) : null;
     if (this.daylight) this.scene.add(this.daylight.group);
+    applyShadowBudget(this.scene, this.renderer.capabilities.maxTextures);
     this.daylightMode = model.daylight?.mode ?? "night";
     this.sunEntity = undefined;
     this.lastStates = new Map();

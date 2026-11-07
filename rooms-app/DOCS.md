@@ -1,3 +1,7 @@
+## 0.25.1 rendering fix
+
+Rooms with many lights and windows now retain textured floors and furniture on graphics devices with limited texture capacity. Shadow casting adapts to the device; all light controls remain available. Update through HACS, restart Home Assistant itself, and refresh the browser. No room re-export or re-upload is needed.
+
 ## Full-house import preview
 
 Use **Build a house → House → Export full house for Home Assistant** in the authoring app, then **Import room or house** in the native sidebar. All rooms are imported together; each retains independent controls, position and floors. Limits are 50 rooms, 100 MB uploaded and 300 MB expanded. Existing room IDs are rejected without replacement. The project backup ZIP is a separate authoring format.

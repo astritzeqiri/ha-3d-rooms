@@ -1,3 +1,7 @@
+# 0.25.1 rendering fix
+
+See [release validation](docs/validation-0.25.1.md).
+
 # 0.25.0 release validation
 
 See [release checks](docs/validation-0.25.0.md) for packaged integration verification and remaining limits.
