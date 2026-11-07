@@ -53,3 +53,28 @@ test("failed scene requests can retry instead of poisoning the cache", async () 
   assert.equal((await sceneBlob(hass, model)).size, 5);
   assert.equal(attempts, 2);
 });
+
+test("manual reload invalidates current session without an old failure evicting replacements", async () => {
+  const { clearSceneDownloads } = await import("../shared/scene-download.mjs");
+  let calls = 0,
+    fail;
+  const hass = {
+    connection: {},
+    fetchWithAuth: () => {
+      calls++;
+      if (calls === 1)
+        return new Promise((_, reject) => {
+          fail = reject;
+        });
+      return Promise.resolve(new Response(new Blob(["fresh"])));
+    },
+  };
+  const model = { id: "room", sceneRevision: "1" };
+  const pending = sceneBlob(hass, model);
+  clearSceneDownloads(hass);
+  const fresh = await sceneBlob(hass, model);
+  fail(new Error("old failure"));
+  await assert.rejects(pending, /old failure/);
+  assert.equal(await sceneBlob(hass, model), fresh);
+  assert.equal(calls, 2);
+});

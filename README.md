@@ -1,3 +1,7 @@
+## Model caching — 0.27.0
+
+Dashboard cards reuse decoded room models across tab switches in the current Home Assistant connection. The bottom-right **Reload models** button clears the session caches and reloads the current view. New model revisions automatically get fresh geometry. Cached templates are private browser memory, bounded to eight entries / approximately 256 MiB and ten minutes of inactivity; downloaded files have a separate 96 MiB / ten-minute limit. A full page refresh starts a fresh memory cache. Oversized models still load normally without being retained. Each card keeps independent controls, materials and placement.
+
 ## 0.25.1 rendering fix
 
 Rooms with many lights and windows now retain textured floors and furniture on graphics devices with limited texture capacity. Shadow casting adapts to the device; all light controls remain available. Update through HACS, restart Home Assistant itself, and refresh the browser. No room re-export or re-upload is needed.

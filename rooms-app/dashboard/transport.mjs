@@ -1,4 +1,5 @@
-import { sceneBlob } from "../shared/scene-download.mjs";
+import { sceneAssetKey } from "../shared/scene-assets.mjs";
+import { sceneBlob, sceneOwner } from "../shared/scene-download.mjs";
 export async function connectModel(hass, config, origin, fetcher = fetch) {
   if (!config.preview_url && !config.addon) {
     if (hass.user?.is_admin === false)
@@ -23,6 +24,10 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
               if (!source) throw new Error("A room in this house is missing.");
               layers.push({
                 ...member,
+                assetCache: {
+                  owner: sceneOwner(hass),
+                  key: sceneAssetKey(source),
+                },
                 url: URL.createObjectURL(await sceneBlob(hass, source)),
               });
             }
@@ -40,6 +45,7 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
         return {
           model,
           sceneURL,
+          assetCache: { owner: sceneOwner(hass), key: sceneAssetKey(model) },
           release: () => URL.revokeObjectURL(sceneURL),
         };
       },

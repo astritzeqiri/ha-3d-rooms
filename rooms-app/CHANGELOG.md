@@ -1,3 +1,8 @@
+## 0.27.0
+
+- Reuse decoded models between dashboard cards and tab revisits, with session isolation, revision keys, bounded memory and retry after failure.
+- Add a bottom-right Reload models control beside fullscreen to clear the session cache and reload the active view.
+
 # 0.26.0 — room device management
 
 - Group modeled lights into one named control connected to a shared Home Assistant entity. Edit or ungroup while retaining original fixtures and connections.

@@ -2,12 +2,18 @@
  * Bound retained data; failed loads never become a cached result.
  */
 const sessions = new WeakMap();
-const MAX_BYTES = 64 * 1024 * 1024;
-const MAX_AGE = 5 * 60 * 1000;
+const MAX_BYTES = 96 * 1024 * 1024;
+const MAX_AGE = 10 * 60 * 1000;
+export function sceneOwner(hass) {
+  return hass.connection || hass.auth || hass;
+}
+export function clearSceneDownloads(hass) {
+  sessions.delete(sceneOwner(hass));
+}
 export async function sceneBlob(hass, model) {
   if (hass.user?.is_admin === false)
     throw new Error("Administrator access is required.");
-  const owner = hass.connection || hass.auth || hass;
+  const owner = sceneOwner(hass);
   let cache = sessions.get(owner);
   if (!cache) sessions.set(owner, (cache = new Map()));
   const revision = model.sceneRevision || model.importedAt || "legacy";

@@ -19,6 +19,7 @@ test("house layers apply placement without baking source geometry and isolate no
   };
   try {
     const view = Object.create(SceneView.prototype);
+    view.renderer = { domElement: { dataset: {} } };
     view.generation = 0;
     view.disposeScene = () => {};
     let assembled;
@@ -61,6 +62,7 @@ test("cancelled house load disposes temporary geometry and leaves current scene 
   GLTFLoader.prototype.loadAsync = () => new Promise((r) => (resolve = r));
   try {
     const view = Object.create(SceneView.prototype);
+    view.renderer = { domElement: { dataset: {} } };
     view.generation = 0;
     const disposed = [];
     view.disposeScene = (o) => disposed.push(o);
@@ -79,6 +81,7 @@ test("cancelled house load disposes temporary geometry and leaves current scene 
 });
 test("floor view clips the same geometry in world height and fits floor bounds", () => {
   const view = Object.create(SceneView.prototype);
+  view.renderer = { domElement: { dataset: {} } };
   view.scene = new THREE.Scene();
   view.disposeScene = () => {};
   view.options = { mode: "front", markers: false };
@@ -121,6 +124,7 @@ test("architecture visibility affects only the declared upper wall in room and c
   wall.add(upper, door);
   root.add(wall);
   const view = Object.create(SceneView.prototype);
+  view.renderer = { domElement: { dataset: {} } };
   view.asset = root;
   view.model = { appearance: [{ id: "entrance-upper-wall", visible: false }] };
   view.cutaway();
@@ -161,6 +165,7 @@ test("architecture visibility affects only the declared upper wall in room and c
 
 test("house room selection highlights the placed room and replaces its previous outline", () => {
   const view = Object.create(SceneView.prototype);
+  view.renderer = { domElement: { dataset: {} } };
   view.scene = new THREE.Scene();
   view.asset = new THREE.Group();
   const room = new THREE.Group();
@@ -189,6 +194,7 @@ test("house room selection highlights the placed room and replaces its previous 
 
 test("Floor plan clears an angled camera and uses the exact Top orthographic preset", () => {
   const view = Object.create(SceneView.prototype);
+  view.renderer = { domElement: { dataset: {} } };
   view.model = { id: "house" };
   let event;
   view.options = {

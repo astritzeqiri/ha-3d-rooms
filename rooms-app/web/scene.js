@@ -14,7 +14,7 @@ import {
 import { floorFrame, perspectiveFrame } from "../shared/floor-view.mjs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { loadSceneAsset } from "../shared/scene-assets.mjs";
 export class SceneView {
   constructor(container, onPick = () => {}, options = {}) {
     this.options = {
@@ -145,10 +145,11 @@ export class SceneView {
         }
     });
   }
-  async load(model, url) {
+  async load(model, url, assetCache) {
     const started = performance.now();
     const generation = ++this.generation;
-    const gltf = await new GLTFLoader().loadAsync(url);
+    const gltf = await loadSceneAsset(url, assetCache);
+    this.renderer.domElement.dataset.assetCache = gltf.hit ? "hit" : "miss";
     if (generation !== this.generation) {
       this.disposeScene(gltf.scene);
       return false;
@@ -159,9 +160,13 @@ export class SceneView {
     const started = performance.now(),
       generation = ++this.generation;
     const root = new THREE.Group();
+    let cacheHits = 0;
+    const cacheSizes = [];
     try {
       for (const layer of layers) {
-        const gltf = await new GLTFLoader().loadAsync(layer.url);
+        const gltf = await loadSceneAsset(layer.url, layer.assetCache);
+        if (gltf.hit) cacheHits++;
+        cacheSizes.push(Math.round((gltf.bytes || 0) / 1024 / 1024));
         if (generation !== this.generation) {
           this.disposeScene(gltf.scene);
           this.disposeScene(root);
@@ -188,6 +193,9 @@ export class SceneView {
         placement.add(gltf.scene);
         root.add(placement);
       }
+      this.renderer.domElement.dataset.assetCacheMb = cacheSizes.join(",");
+      this.renderer.domElement.dataset.assetCache =
+        cacheHits === layers.length ? "hit" : cacheHits ? "partial" : "miss";
       return this.prepareAsset(model, root, started);
     } catch (error) {
       this.disposeScene(root);

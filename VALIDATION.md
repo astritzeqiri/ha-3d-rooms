@@ -1,3 +1,18 @@
+# 0.27.0 release validation
+
+Final versioned build, 166 frontend tests and formatting pass. Integration ZIP inspected for correct structure, bundled frontend, version and absence of private room models. Prior native cache and reload checks below apply to the same implementation.
+
+# Model cache and reload button — local preview, 2026-11-07
+
+Based on published 0.26.0, preserved in `.local/model-cache`. Built integration staged through the canonical singleton helper; no version bump or publication. Existing model files, mappings and saved dashboard definitions were not edited.
+
+- 166 frontend tests pass, including concurrent decode reuse, independent viewer resources, revision changes, retry, expiry, memory eviction, oversized admission, session separation and explicit cache clearing.
+- Formatting, production manager/card build and `git diff --check` pass.
+- Host Python integration suite: 58 tests, 43 pass and 15 native-runtime tests skipped. No backend code changed; native Python suite was not rerun.
+- Native HA dashboard first visit reported cache miss; tab revisit reported a full cache hit for both layers. Preparation measured 355 ms cold and 28 ms warm in one local comparison (not total download/first-render time or a cross-device benchmark). Manual reload via keyboard and pointer reported fresh cache misses and returned to a rendered scene.
+- Button is visible at the bottom right beside fullscreen; checked at the desktop and naturally compact browser sizes. Capture: `/tmp/three-d-rooms-model-cache.jpg` (private, outside package).
+- A generic HA console `Object` error was observed; no shader error was reported in the inspected log. Physical devices, HACS download flow, prolonged browsing and production HA were not tested. Session caches do not persist across full browser refreshes; GPU compilation/first render still occurs for new viewers.
+
 # 0.26.0 release validation
 
 See [0.26.0 checks](docs/validation-0.26.0.md). All included device-management features and the retained renderer fix were checked in the packaged native integration.
