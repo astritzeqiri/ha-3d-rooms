@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from .light_groups import apply_light_groups
+
 import asyncio
 import zipfile
 from aiohttp import web
@@ -108,8 +110,22 @@ class RoomsRuntime:
             result = await self.work(self.store.set_daylight, data.get("model"), data)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
+        if operation == "device-visibility":
+            result = await self.work(self.store.set_device_visibility, data.get("model"), data.get("controlId"), data.get("hidden"))
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "device-settings":
             result = await self.work(self.store.set_device_settings, data.get("model"), data.get("deviceId"), data.get("macroNames"))
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
+        if operation == "light-groups":
+            groups = data.get("groups")
+            if isinstance(groups, list):
+                for group in groups:
+                    entity_id = group.get("entityId") if isinstance(group, dict) else None
+                    if entity_id and (not isinstance(entity_id, str) or not self.hass.states.get(entity_id)):
+                        raise ValueError("Choose an existing light entity.")
+            result = await self.work(self.store.set_light_groups, data.get("model"), groups)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
         if operation == "bindings":
@@ -134,7 +150,7 @@ class RoomsRuntime:
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
         if operation == "command":
-            model = self.store.find(data.get("model"))
+            model = apply_light_groups(self.store.find(data.get("model")))
             control = next(
                 (c for c in model["controls"] if c["id"] == data.get("controlId")), None
             )

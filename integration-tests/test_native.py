@@ -46,6 +46,20 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         await self.hass.async_stop()
 
+    async def test_room_visibility_persists_and_notifies_without_touching_bindings(self):
+        from unittest.mock import patch
+        with patch.object(type(self.hass.bus), "async_fire") as fire:
+            result = await self.runtime.request("device-visibility", {"model": "kitchen", "controlId": "ceiling", "hidden": True}, "test-user")
+            self.assertTrue(result["controls"][0]["hidden"])
+            fire.assert_called_once_with("three_d_rooms_updated")
+        self.assertTrue(json.loads((self.store.directory / "catalog.json").read_text())["models"][0]["controls"][0]["hidden"])
+        self.assertEqual(self.store.find("kitchen")["bindings"], {"ceiling": "light.kitchen"})
+        for invalid in [None, 1, "true"]:
+            with self.assertRaises(ValueError):
+                await self.runtime.request("device-visibility", {"model": "kitchen", "controlId": "ceiling", "hidden": invalid}, "test-user")
+        await self.runtime.request("device-visibility", {"model": "kitchen", "controlId": "ceiling", "hidden": False}, "test-user")
+        self.assertNotIn("hidden", self.store.find("kitchen")["controls"][0])
+
     async def test_full_house_upload_uses_native_api_and_keeps_independent_rooms(self):
         from unittest.mock import AsyncMock, patch
         from io import BytesIO
@@ -340,6 +354,28 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
             ),
             self.runtime,
         )
+
+    async def test_light_group_uses_one_entity_and_one_service_call(self):
+        from copy import deepcopy
+        controls = [{"id": "left", "label":"Left", "type":"light", "position":[0,2,0], "capabilities":["on_off","brightness"]}, {"id":"right","label":"Right","type":"light","position":[2,2,0],"capabilities":["on_off","brightness"]}]
+        self.store.models[0]["controls"] = controls
+        self.store.models[0]["bindings"] = {"left":"light.original"}
+        self.hass.states.async_set("light.dining", "off", {"supported_color_modes":["brightness"]})
+        calls = []
+        async def handle(call): calls.append(call)
+        self.hass.services.async_register("light", "turn_on", handle)
+        groups = [{"id":"dining","label":"Dining lights","controls":["left","right"],"entityId":"light.dining"}]
+        await self.runtime.request("light-groups", {"model":"kitchen","groups":groups}, "test-user")
+        await self.runtime.request("command", {"model":"kitchen","controlId":"left","action":"on","brightness":128,"entityId":"light.injected"}, "test-user")
+        self.assertEqual(len(calls),1)
+        self.assertEqual(calls[0].data["entity_id"],"light.dining")
+        self.assertEqual(calls[0].context.user_id,"test-user")
+        before = deepcopy(self.store.models)
+        with self.assertRaises(ValueError):
+            await self.runtime.request("light-groups", {"model":"kitchen","groups":[{**groups[0],"entityId":"light.missing"}]}, "test-user")
+        self.assertEqual(self.store.models,before)
+        await self.runtime.request("light-groups", {"model":"kitchen","groups":[]}, "test-user")
+        self.assertEqual(self.store.models[0]["bindings"],{"left":"light.original"})
 
     async def test_only_mapped_services_run_with_caller_context(self):
         calls = []

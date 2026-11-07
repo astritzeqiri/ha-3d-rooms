@@ -1,4 +1,5 @@
 """Portable room placement and derived house/floor views; no scene duplication."""
+from .light_groups import position_group_markers
 from copy import deepcopy
 import json
 import math
@@ -76,7 +77,8 @@ def house_models(models):
                     p = placed_point(c["position"],t)
                     if floor and not floor["minY"] <= p[1] < floor["maxY"]:
                         continue
-                    controls.append({**deepcopy(c),"id":key(c["id"]),"label":m["title"]+" · "+c["label"],"position":p,"nodeIds":[node(n) for n in c.get("nodeIds",[])],**({"group":key(c["group"])} if c.get("group") else {}),"sourceModel":m["id"],"sourceControl":c["id"]})
+                    controls.append({**deepcopy(c),"id":key(c["id"]),"label":m["title"]+" · "+c["label"],"position":p,**({"markerPosition":placed_point(c["markerPosition"],t)} if "markerPosition" in c else {}),**({"lightGroup":key(c["lightGroup"]),"lightGroupLabel":m["title"]+" · "+c["lightGroupLabel"]} if c.get("lightGroup") else {}),"nodeIds":[node(n) for n in c.get("nodeIds",[])],**({"group":key(c["group"])} if c.get("group") else {}),"sourceModel":m["id"],"sourceControl":c["id"]})
+                position_group_markers(controls)
                 model["controls"].extend(controls)
                 visible = {c["id"] for c in controls}
                 for c in controls:

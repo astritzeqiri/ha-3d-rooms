@@ -1,3 +1,4 @@
+import { initLightGroups } from "./light-groups.js";
 import { searchableSelect } from "./searchable-select.js";
 import {
   viewKind,
@@ -120,6 +121,20 @@ const toast = (message) => {
   toast.timer = setTimeout(() => ($("toast").hidden = true), 6000);
 };
 $("toast").onclick = () => ($("toast").hidden = true);
+const lightGroups = initLightGroups({
+  model: () => selected,
+  entities: () => status.entities,
+  save: async (id, groups) => {
+    await api(`models/${id}/light-groups`, {
+      method: "PUT",
+      body: JSON.stringify({ groups }),
+    });
+    models = await api("models");
+    await choose(id, "devices");
+    toast("Light groups saved.");
+  },
+});
+$("group-lights").onclick = () => lightGroups.open();
 let deviceFilter = "all",
   deviceQuery = "";
 const openMore = new Set();
@@ -209,7 +224,7 @@ function state(c) {
   };
 }
 const deviceSettingsButton = (c) =>
-  `<button class="device-settings" data-device-settings="${c.id}" aria-label="Edit entity for ${esc(c.label)}" title="Change entity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 3-1 3-3 1-2 5 2 5 3 1 1 3h6l1-3 3-1 2-5-2-5-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
+  `<button class="device-settings" data-device-settings="${c.id}" aria-label="${c.lightGroup ? "Edit light group" : "Edit entity for"} ${esc(c.label)}" title="${c.lightGroup ? "Edit group" : "Change entity"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 3-1 3-3 1-2 5 2 5 3 1 1 3h6l1-3 3-1 2-5-2-5-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
 const entityNote = (c) =>
   preview
     ? '<span class="muted small device-entity">Simulation only</span>'
@@ -265,6 +280,7 @@ function drawControls() {
   const active = document.activeElement;
   const focusKind = [
     "deviceSettings",
+    "deviceVisibility",
     "number",
     "press",
     "cover",
@@ -301,7 +317,10 @@ function drawControls() {
     $("controls-section").hidden = true;
     return;
   }
-  const entries = deviceEntries(selected);
+  const entries = deviceEntries(selected, { includeHidden: true });
+  $("group-lights").hidden =
+    !!selected.houseView ||
+    selected.controls.filter((c) => c.type === "light").length < 2;
   const tools = entries.length >= DEVICE_TOOLS_MIN;
   $("device-tools").hidden = !tools;
   for (const chip of document.querySelectorAll("[data-chip]"))
@@ -328,6 +347,8 @@ function drawControls() {
   $("control-count").innerHTML =
     `<span class="pill" data-live="${!preview}">${preview ? "Simulation" : "Live controls"}</span>${visible.length === entries.length ? entries.length : `${visible.length} of ${entries.length}`} ${entries.length === 1 ? "device" : "devices"}`;
   const cardHTML = visible.map((c) => {
+    if (c.hidden)
+      return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><strong>${esc(c.label)}</strong><span class="pill">Hidden</span></div><p class="muted">Hidden in all 3D Rooms views and dashboards.</p><button type="button" data-device-visibility="${c.id}" data-hidden="false" aria-label="Show ${esc(c.label)}">Show device</button></article>`;
     if (c.device) return deskCard(c.device, states);
     if (c.type === "climate") {
       const s = states.get(c.id);
@@ -441,7 +462,7 @@ function drawControls() {
       f.effects.length && "Effects",
       f.transition && "Fade",
     ].filter(Boolean);
-    return `<article class="light-card" data-control="${id}"><div class="light-heading"><div><div class="light-label">${label}</div><div class="light-state">${waiting ? "Waiting for confirmation…" : preview ? (s.on ? "On · preview" : "Off · preview") : esc(s.label)}</div></div><div class="device-card-actions">${deviceSettingsButton(c)}<button role="switch" aria-label="${label}" aria-checked="${s.on}" class="switch" data-toggle="${id}" ${disabled}>${s.on ? "On" : "Off"}</button></div></div>
+    return `<article class="light-card" data-control="${id}"><div class="light-heading"><div><div class="light-label">${label}</div>${c.lightGroup ? `<span class="muted small">Light group · ${selected.controls.filter((member) => member.lightGroup === c.lightGroup).length} lights</span>` : ""}<div class="light-state">${waiting ? "Waiting for confirmation…" : preview ? (s.on ? "On · preview" : "Off · preview") : esc(s.label)}</div></div><div class="device-card-actions">${deviceSettingsButton(c)}<button role="switch" aria-label="${label}" aria-checked="${s.on}" class="switch" data-toggle="${id}" ${disabled}>${s.on ? "On" : "Off"}</button></div></div>
     ${c.capabilities.includes("brightness") && f.brightness ? slider(`Brightness <output>${Math.round((s.brightness / 255) * 100)}%</output>`, "brightness", 1, 255, s.brightness) : ""}
     ${more.length ? `<details class="more-controls" data-more="${id}" ${openMore.has(id) ? "open" : ""}><summary>${more.join(" · ")}</summary><div class="more-body">${extras}</div></details>` : ""}
     ${entityNote(c)}</article>`;
@@ -459,7 +480,7 @@ function drawControls() {
               status,
               preview,
             );
-            return `<div class="device-with-status"><span class="device-connection" data-kind="${connection.kind}">${esc(connection.label)}</span>${cardHTML[index]}</div>`;
+            return `<div class="device-with-status"><span class="device-connection" data-kind="${connection.kind}">${esc(connection.label)}</span>${cardHTML[index]}${control.hidden ? "" : `<button type="button" class="hide-device" data-device-visibility="${control.id}" data-hidden="true" aria-label="Hide ${esc(control.label)}">Hide device</button>`}</div>`;
           })
           .join("")}</div></section>`,
     )
@@ -505,7 +526,12 @@ async function command(id, on, settings = {}) {
       next.rgb = kelvinToRgb(settings.color_temp_kelvin);
       next.colorMode = "color_temp";
     }
-    simulated.set(id, next);
+    for (const member of model.controls.filter(
+      (member) =>
+        member.id === id ||
+        (c.lightGroup && member.lightGroup === c.lightGroup),
+    ))
+      simulated.set(member.id, next);
     drawControls();
     return;
   }
@@ -617,7 +643,32 @@ async function moveCover(id, action, position) {
     toast(error.message);
   }
 }
-$("controls").addEventListener("click", (e) => {
+$("controls").addEventListener("click", async (e) => {
+  const visibility = e.target.closest("[data-device-visibility]");
+  if (visibility) {
+    const model = selected;
+    visibility.disabled = true;
+    try {
+      await api(`models/${model.id}/device-visibility`, {
+        method: "PUT",
+        body: JSON.stringify({
+          controlId: visibility.dataset.deviceVisibility,
+          hidden: visibility.dataset.hidden === "true",
+        }),
+      });
+      await refreshDeviceVisibility();
+      toast(
+        visibility.dataset.hidden === "true"
+          ? "Device hidden in all 3D Rooms views"
+          : "Device shown again",
+      );
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      visibility.disabled = false;
+    }
+    return;
+  }
   const settings = e.target.closest("[data-device-settings]");
   if (settings) {
     openDeviceSettings(settings.dataset.deviceSettings);
@@ -1208,6 +1259,10 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
       $("viewport"),
       (id) => {
         view.highlight(id);
+        if (activeRoomTab === "devices") {
+          openDeviceSettings(id);
+          return;
+        }
         document
           .querySelector(
             `[data-climate="${id}"], [data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"], [data-number="${id}"], [data-press="${id}"]`,
@@ -1624,7 +1679,12 @@ function drawMappings(controlId) {
     )
     .join("");
   const other = selected.controls
-    .filter((c) => !memberIds.has(c.id) && (!controlId || c.id === controlId))
+    .filter(
+      (c) =>
+        c.lightGroupPrimary !== false &&
+        !memberIds.has(c.id) &&
+        (!controlId || c.id === controlId),
+    )
     .map(mappingRow)
     .join("");
   $("mappings").innerHTML = deviceRows + other;
@@ -1633,6 +1693,11 @@ function drawMappings(controlId) {
 let mappingControlId;
 function openDeviceSettings(controlId) {
   if (selected?.houseView) return;
+  const group = selected?.controls.find((c) => c.id === controlId)?.lightGroup;
+  if (group) {
+    lightGroups.open(group);
+    return;
+  }
 
   mappingControlId = controlId;
   $("mapping-error").textContent = "";
@@ -1690,6 +1755,8 @@ async function saveBinding(controlId, entityId) {
       body: JSON.stringify({ controlId, entityId }),
     });
     selected.bindings = result.bindings;
+    for (const group of selected.lightGroups || [])
+      if (group.controls.includes(controlId)) group.entityId = entityId;
     toast(entityId ? "Entity connected." : "Entity disconnected.");
     drawControls();
   } catch (e) {
@@ -1742,6 +1809,21 @@ $("confirm-delete").onclick = async () => {
     toast(e.message);
   }
 };
+async function refreshDeviceVisibility() {
+  const latest = await api("models");
+  // Keep active room/editor references and unsaved camera edits intact.
+  for (const model of models) {
+    const next = latest.find((m) => m.id === model.id);
+    if (!next) continue;
+    for (const control of model.controls) {
+      const updated = next.controls.find((c) => c.id === control.id);
+      if (updated?.hidden) control.hidden = true;
+      else delete control.hidden;
+    }
+  }
+  view?.refreshVisibility();
+  drawControls();
+}
 function updateStatus(s) {
   status = s;
   $("connection").textContent =
@@ -1778,6 +1860,12 @@ try {
   else setRoomTab(initialRoomTab);
   if (native) {
     const unsubscribe = native.subscribe(updateStatus);
+    const unsubscribeModels = await native.subscribeModels?.(() =>
+      refreshDeviceVisibility().catch((error) => toast(error.message)),
+    );
+    window.addEventListener("pagehide", () => unsubscribeModels?.(), {
+      once: true,
+    });
     window.addEventListener("pagehide", unsubscribe, { once: true });
   } else {
     const events = new EventSource(new URL("api/events", location.href));

@@ -85,7 +85,9 @@ export function markerLayout(point, settings, width, height) {
 
 export function markerTrayHeight(markers, controls) {
   const ids = controls
-    ? controls.map((c) => c.id)
+    ? controls
+        .filter((c) => !c.hidden && c.lightGroupPrimary !== false)
+        .map((c) => c.id)
     : Object.keys(markers || {}).filter((id) => id !== "_defaults");
   const count = ids.filter((id) => {
     const options = markerSettings(markers, id);

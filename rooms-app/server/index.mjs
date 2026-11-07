@@ -1,3 +1,7 @@
+import {
+  validateLightGroups,
+  applyLightGroups,
+} from "../shared/light-groups.mjs";
 import { validateAppearance } from "../shared/appearance.mjs";
 import { validatePlacement } from "../shared/house.mjs";
 import { zipSync, strToU8 } from "fflate";
@@ -196,7 +200,7 @@ export async function createApp({
         return;
       }
       const match = path.match(
-        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|device-settings|scene\.glb|export\.zip))?$/,
+        /^\/api\/models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|device-settings|device-visibility|light-groups|scene\.glb|export\.zip))?$/,
       );
       if (match) {
         const m = store.find(match[1]);
@@ -379,6 +383,15 @@ export async function createApp({
           json(res, 200, { daylight });
           return;
         }
+        if (req.method === "PUT" && op === "device-visibility") {
+          const b = JSON.parse(await body(req, 65536));
+          json(
+            res,
+            200,
+            await store.setDeviceVisibility(m.id, b.controlId, b.hidden),
+          );
+          return;
+        }
         if (req.method === "PUT" && op === "device-settings") {
           const b = JSON.parse(await body(req, 65536));
           json(
@@ -386,6 +399,20 @@ export async function createApp({
             200,
             await store.setDeviceSettings(m.id, b.deviceId, b.macroNames),
           );
+          return;
+        }
+        if (req.method === "PUT" && op === "light-groups") {
+          const data = JSON.parse(await body(req, 65536));
+          const groups = validateLightGroups(data.groups, m.controls);
+          for (const group of groups)
+            if (
+              group.entityId &&
+              !bridge.entities.some((e) => e.entity_id === group.entityId)
+            )
+              throw Error("Choose an existing light entity.");
+          m.lightGroups = groups;
+          await store.save();
+          json(res, 200, { lightGroups: groups });
           return;
         }
         if (req.method === "PUT" && op === "bindings") {
@@ -401,16 +428,21 @@ export async function createApp({
               control,
               bridge.entities.find((e) => e.entity_id === b.entityId),
             );
-            m.bindings[control.id] = b.entityId;
-          } else delete m.bindings[control.id];
+          }
+          const group = m.lightGroups?.find((g) =>
+            g.controls.includes(control.id),
+          );
+          if (group) group.entityId = b.entityId || "";
+          else if (b.entityId) m.bindings[control.id] = b.entityId;
+          else delete m.bindings[control.id];
           await store.save();
-          json(res, 200, { bindings: m.bindings });
+          json(res, 200, { bindings: applyLightGroups(m).bindings });
           return;
         }
         if (req.method === "POST" && op === "command") {
           const b = JSON.parse(await body(req, 65536));
           const c = m.controls.find((c) => c.id === b.controlId);
-          const entityId = m.bindings[c?.id];
+          const entityId = applyLightGroups(m).bindings[c?.id];
           if (!c || !entityId)
             throw new Error("Connect this object to an entity first.");
           const entity = bridge.entities.find((e) => e.entity_id === entityId);

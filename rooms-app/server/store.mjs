@@ -1,3 +1,4 @@
+import { applyLightGroups } from "../shared/light-groups.mjs";
 import { houseModels } from "../shared/house.mjs";
 import { validateDeviceSettings } from "../shared/device.mjs";
 import { validateComponent } from "../shared/component.mjs";
@@ -74,6 +75,39 @@ export class Store {
       return { ok: true };
     });
   }
+  async setDeviceVisibility(modelId, controlId, hidden) {
+    return this.transaction(async () => {
+      const model = this.state.models.find((m) => m.id === modelId);
+      if (
+        typeof hidden !== "boolean" ||
+        !model?.controls.some((c) => c.id === controlId)
+      )
+        throw new Error(
+          "Choose a device in its source room and a boolean hidden value.",
+        );
+      const previous = structuredClone(model.controls);
+      const ids = new Set([controlId]);
+      for (const group of model.lightGroups || [])
+        if (group.controls.includes(controlId))
+          group.controls.forEach((id) => ids.add(id));
+      for (const device of model.devices || []) {
+        const members = [device.height, device.motion, ...device.macros];
+        if (members.includes(controlId)) for (const id of members) ids.add(id);
+      }
+      for (const control of model.controls)
+        if (ids.has(control.id)) {
+          if (hidden) control.hidden = true;
+          else delete control.hidden;
+        }
+      try {
+        await this.save();
+      } catch (error) {
+        model.controls = previous;
+        throw error;
+      }
+      return { controls: structuredClone(model.controls) };
+    });
+  }
   async setDeviceSettings(modelId, deviceId, macroNames) {
     return this.transaction(async () => {
       const model = this.find(modelId),
@@ -113,10 +147,12 @@ export class Store {
     });
   }
   catalog() {
-    const models = this.state.models.map(({ folder, ...m }) => ({
-      ...m,
-      sceneRevision: folder,
-    }));
+    const models = this.state.models.map(({ folder, ...m }) =>
+      applyLightGroups({
+        ...m,
+        sceneRevision: folder,
+      }),
+    );
     return [...models, ...houseModels(models)];
   }
   find(id) {

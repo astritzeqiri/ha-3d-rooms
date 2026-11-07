@@ -417,3 +417,52 @@ button:focus-visible {
   width: 100%;
   margin-bottom: 8px;
 }
+
+.room-device-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#light-groups-dialog {
+  width: min(560px, calc(100vw - 24px));
+  max-height: 90dvh;
+  overflow: auto;
+}
+#light-groups-dialog fieldset {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  margin: 20px 0;
+}
+#light-group-members {
+  max-height: 280px;
+  overflow: auto;
+  margin-top: 10px;
+}
+.light-group-member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  margin: 0;
+  padding: 6px 4px;
+}
+.light-group-member input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--accent);
+}
+.light-group-member small {
+  color: var(--muted);
+}
+.light-group-member:has(input:disabled) {
+  opacity: 0.65;
+}
+#light-groups-dialog .actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}

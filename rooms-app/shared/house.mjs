@@ -1,3 +1,4 @@
+import { positionGroupMarkers } from "./light-groups.mjs";
 const id = (v, max = 80) =>
   typeof v === "string" &&
   v.length <= max &&
@@ -143,6 +144,15 @@ export function houseModels(models) {
             id: key(c.id),
             label: `${m.title} · ${c.label}`,
             position: placedPoint(c.position, t),
+            ...(c.markerPosition
+              ? { markerPosition: placedPoint(c.markerPosition, t) }
+              : {}),
+            ...(c.lightGroup
+              ? {
+                  lightGroup: key(c.lightGroup),
+                  lightGroupLabel: `${m.title} · ${c.lightGroupLabel}`,
+                }
+              : {}),
             nodeIds: (c.nodeIds || []).map(node),
             ...(c.group ? { group: key(c.group) } : {}),
             sourceModel: m.id,
@@ -153,6 +163,7 @@ export function houseModels(models) {
               !floor ||
               (c.position[1] >= floor.minY && c.position[1] < floor.maxY),
           );
+        positionGroupMarkers(controls);
         model.controls.push(...controls);
         const visible = new Set(controls.map((c) => c.id));
         for (const c of controls)

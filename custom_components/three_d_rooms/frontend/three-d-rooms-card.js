@@ -143,7 +143,7 @@ function o(e, t, n, r) {
 	};
 }
 function s(e, t) {
-	let n = (t ? t.map((e) => e.id) : Object.keys(e || {}).filter((e) => e !== "_defaults")).filter((t) => {
+	let n = (t ? t.filter((e) => !e.hidden && e.lightGroupPrimary !== !1).map((e) => e.id) : Object.keys(e || {}).filter((e) => e !== "_defaults")).filter((t) => {
 		let n = i(e, t);
 		return n.visible && n.placement === "tray";
 	}).length;
@@ -642,6 +642,7 @@ var oe = class extends HTMLElement {
 					]);
 					return this._iconCache.has(t) || (this._iconCache.set(t, ee(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
 				},
+				subscribeModels: (e) => this._hass.connection.subscribeEvents(e, "three_d_rooms_updated"),
 				subscribe: (e) => (this._listener = e, this._publish(), () => {
 					this._listener === e && (this._listener = null);
 				})
@@ -7682,7 +7683,7 @@ function hc(e) {
 	throw Error(`THREE.TextureUtils: Unknown texture type ${e}.`);
 }
 typeof __THREE_DEVTOOLS__ < "u" && __THREE_DEVTOOLS__.dispatchEvent(new CustomEvent("register", { detail: { revision: "186" } })), typeof window < "u" && (window.__THREE__ ? B("WARNING: Multiple instances of Three.js being imported.") : window.__THREE__ = "186");
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/build/three.module.js
+// ../../three-d-rooms-release-0.25.0/rooms-app/node_modules/three/build/three.module.js
 function gc() {
 	let e = null, t = !1, n = null, r = null;
 	function i(t, a) {
@@ -13821,7 +13822,7 @@ function Vd(e, t = "front") {
 		camera: void 0
 	};
 }
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/controls/OrbitControls.js
+// ../../three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/controls/OrbitControls.js
 var Hd = { type: "change" }, Ud = { type: "start" }, Wd = { type: "end" }, Gd = new ji(), Kd = new wi(), qd = Math.cos(70 * yn.DEG2RAD), Jd = new G(), Yd = 2 * Math.PI, Q = {
 	NONE: -1,
 	ROTATE: 0,
@@ -14259,7 +14260,7 @@ function uf(e) {
 		capture: !0
 	}));
 }
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+// ../../three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
 function df(e, t) {
 	if (t === 0) return console.warn("THREE.BufferGeometryUtils.toTrianglesDrawMode(): Geometry already defined as triangles."), e;
 	if (t === 2 || t === 1) {
@@ -14278,7 +14279,7 @@ function df(e, t) {
 	}
 	return console.error("THREE.BufferGeometryUtils.toTrianglesDrawMode(): Unknown draw mode:", t), e;
 }
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/utils/SkeletonUtils.js
+// ../../three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/utils/SkeletonUtils.js
 function ff(e) {
 	let t = /* @__PURE__ */ new Map(), n = /* @__PURE__ */ new Map(), r = e.clone();
 	return pf(e, r, function(e, r) {
@@ -14295,7 +14296,7 @@ function pf(e, t, n) {
 	n(e, t);
 	for (let r = 0; r < e.children.length; r++) pf(e.children[r], t.children[r], n);
 }
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/loaders/GLTFLoader.js
+// ../../three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/loaders/GLTFLoader.js
 var mf = class extends fs {
 	constructor(e) {
 		super(e), this.dracoLoader = null, this.ktx2Loader = null, this.meshoptDecoder = null, this.pluginCallbacks = [], this.register(function(e) {
@@ -15674,8 +15675,9 @@ var pp = class {
 						this.options.onRoomPick?.(n.userData.pickRoom);
 						return;
 					}
-					if (n.userData.pickControl && (!this.model?.houseView || !this.options.onRoomPick)) {
-						t(n.userData.pickControl);
+					if (n.userData.pickControl && !this.model?.controls.find((e) => e.id === n.userData.pickControl)?.hidden && (!this.model?.houseView || !this.options.onRoomPick)) {
+						let e = this.model.controls.find((e) => e.id === n.userData.pickControl);
+						t((e?.lightGroup ? this.model.controls.find((t) => t.lightGroup === e.lightGroup && t.lightGroupPrimary) : e)?.id || n.userData.pickControl);
 						return;
 					}
 					n = n.parent;
@@ -15731,8 +15733,8 @@ var pp = class {
 			let r = new Wi(new So(.065, 12, 8), new Mi({
 				color: "#c3dbab",
 				depthTest: !1
-			})), i = u(e, t.id), a = i && i.height !== t.id;
-			r.visible = !a && this.options.markers && this.options.mode !== "floor", r.position.fromArray(t.position), r.userData.pickControl = t.id, r.renderOrder = 10, this.scene.add(r);
+			})), i = u(e, t.id), a = i && i.height !== t.id || t.lightGroupPrimary === !1;
+			r.visible = !t.hidden && !a && t.lightGroupPrimary !== !1 && this.options.markers && this.options.mode !== "floor", r.position.fromArray(t.markerPosition || t.position), r.userData.pickControl = t.id, r.renderOrder = 10, this.scene.add(r);
 			let o = [];
 			for (let e of t.nodeIds || []) {
 				let n = this.nodes.get(e);
@@ -15777,7 +15779,7 @@ var pp = class {
 		this.options.camera && e === "floor" != (this.options.camera.projection === "orthographic") && (this.options.camera = void 0), this.options.mode = ["floor", "front"].includes(e) ? e : "dollhouse", this.scene.background.set("#242320"), this.fill && (this.fill.intensity = this.options.mode === "dollhouse" ? .25 : .35), this.camera = this.options.mode === "floor" ? new Ls() : new Ms(this.options.mode === "front" ? 35 : 45, 1, .05, 500), this.options.mode !== "dollhouse" && this.fitFloor(), this.orbit.dispose(), this.orbit = new Zd(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.orbit.enabled = this.options.interactive, this.orbit.addEventListener("change", () => {
 			this.cutaway(), this.render(), this.options.onCameraChange?.({ source: "orbit" });
 		}), this.orbit.enableRotate = this.options.allowRotate ?? this.options.mode !== "floor";
-		for (let e of this.fixtures.values()) e.marker.visible = !e.companion && this.options.markers && this.options.mode !== "floor";
+		for (let [e, t] of this.fixtures) t.marker.visible = !this.model.controls.find((t) => t.id === e)?.hidden && !t.companion && this.options.markers && this.options.mode !== "floor";
 		this.renderer.domElement.setAttribute("aria-label", this.model.houseView ? "3D house view. Drag to orbit and use the camera controls to frame the house." : this.options.mode === "floor" ? "3D floor plan. Select a device control to interact." : this.options.mode === "front" ? "3D room from the front. Select the modeled device to control it." : "3D model. Drag to orbit; use the device controls below for keyboard access."), this.reset();
 	}
 	setFloorPlan() {
@@ -15892,6 +15894,12 @@ var pp = class {
 		this.fill.intensity = .08;
 		let e = new Map([...this.lastStates].map(([e, t]) => [e, t.position]));
 		this.daylight.update(this.daylightMode, this.sunEntity, e);
+	}
+	refreshVisibility() {
+		if (this.model && this.fixtures) {
+			for (let [e, t] of this.fixtures) t.marker.visible = !this.model.controls.find((t) => t.id === e)?.hidden && !t.companion && this.options.markers && this.options.mode !== "floor";
+			this.render();
+		}
 	}
 	highlight(e) {
 		for (let [t, n] of this.fixtures) n.marker.scale.setScalar(t === e ? 2 : 1);
@@ -16295,8 +16303,9 @@ var vp = class extends HTMLElement {
 		let t = document.createElement("div");
 		t.className = "fixture-tray";
 		for (let n of this._model.controls) {
+			if (n.hidden) continue;
 			let r = u(this._model, n.id);
-			if (r && r.height !== n.id) continue;
+			if (n.lightGroupPrimary === !1 || r && r.height !== n.id) continue;
 			let a = document.createElement("button"), o = r?.label || n.label || n.name || "light";
 			a.dataset.control = n.id;
 			let s = i(this._config.markers, n.id);
@@ -16344,7 +16353,7 @@ var vp = class extends HTMLElement {
 	}
 	async _toggle(e) {
 		let t = this._model.controls.find((t) => t.id === e);
-		if (!t) return;
+		if (!t || t.hidden) return;
 		if (t.type === "button") {
 			await this._pressPreset(t);
 			return;
@@ -16411,7 +16420,7 @@ var vp = class extends HTMLElement {
 			return;
 		}
 		let t = this._model.controls.find((t) => t.id === e);
-		if (!t) return;
+		if (!t || t.hidden) return;
 		let n = u(this._model, e);
 		if (n) {
 			this._deskDialog(n);

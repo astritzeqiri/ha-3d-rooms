@@ -1,3 +1,7 @@
+# 0.26.0 release validation
+
+See [0.26.0 checks](docs/validation-0.26.0.md). All included device-management features and the retained renderer fix were checked in the packaged native integration.
+
 # 0.25.1 rendering fix
 
 See [release validation](docs/validation-0.25.1.md).

@@ -358,8 +358,13 @@ export class ThreeDRoomsCard extends HTMLElement {
     const tray = document.createElement("div");
     tray.className = "fixture-tray";
     for (const control of this._model.controls) {
+      if (control.hidden) continue;
       const device = deviceForControl(this._model, control.id);
-      if (device && device.height !== control.id) continue;
+      if (
+        control.lightGroupPrimary === false ||
+        (device && device.height !== control.id)
+      )
+        continue;
       const button = document.createElement("button");
       const label = device?.label || control.label || control.name || "light";
       button.dataset.control = control.id;
@@ -483,7 +488,7 @@ export class ThreeDRoomsCard extends HTMLElement {
   }
   async _toggle(id) {
     const control = this._model.controls.find((c) => c.id === id);
-    if (!control) return;
+    if (!control || control.hidden) return;
     if (control.type === "button") {
       await this._pressPreset(control);
       return;
@@ -565,7 +570,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       return;
     }
     const control = this._model.controls.find((c) => c.id === id);
-    if (!control) return;
+    if (!control || control.hidden) return;
     const desk = deviceForControl(this._model, id);
     if (desk) {
       this._deskDialog(desk);

@@ -6,6 +6,7 @@ exercised independently of the running server.
 
 from __future__ import annotations
 
+from .light_groups import validate_light_groups, apply_light_groups, preserved_groups
 from copy import deepcopy
 from datetime import datetime, timezone
 from io import BytesIO
@@ -131,6 +132,8 @@ def validate_manifest(m):
         if not isinstance(c, dict) or not valid_id(c.get("id")) or c["id"] in seen:
             raise ValueError("Every control needs a unique stable ID.")
         seen.add(c["id"])
+        if "hidden" in c and not isinstance(c["hidden"], bool):
+            raise ValueError("Device hidden must be a boolean.")
         if (
             c.get("type") not in ("light", "cover", "number", "button", "climate")
             or not isinstance(c.get("label"), str)
@@ -183,6 +186,7 @@ def validate_manifest(m):
             raise ValueError("Unsupported control capabilities.")
     if "appearance" in m:
         validate_appearance(m["appearance"])
+    validate_light_groups(m.get("lightGroups", []), controls)
     validate_devices(m.get("devices", []), controls)
     if "deviceSettings" in m:
         validate_device_settings(m["deviceSettings"], m.get("devices", []))
@@ -219,9 +223,20 @@ def validate_manifest(m):
             "daylight",
             "devices",
             "deviceSettings",
+            "lightGroups",
             "appearance",
         )
     }
+
+
+def preserve_device_visibility(previous, incoming):
+    old = {c["id"]: c for c in previous["controls"]}
+    for control in incoming["controls"]:
+        if control["id"] in old:
+            if old[control["id"]].get("hidden"):
+                control["hidden"] = True
+            else:
+                control.pop("hidden", None)
 
 
 def validate_appearance(value):
@@ -593,6 +608,7 @@ class ModelStore:
                         floor["name"] = floor_names[linked]
                     else:
                         floor.pop("haFloorId", None)
+        models = [apply_light_groups(m) for m in models]
         views = house_models(models)
         return [*models, *views]
 
@@ -606,7 +622,7 @@ class ModelStore:
         raise ValueError("Model not found.")
 
     def catalog_real(self):
-        return [{**m, "sceneRevision": hashlib.sha256(m["folder"].encode()).hexdigest()[:24]} for m in self.models]
+        return [apply_light_groups({**m, "sceneRevision": hashlib.sha256(m["folder"].encode()).hexdigest()[:24]}) for m in self.models]
 
     def save(self, models):
         temporary = self.directory / "catalog.json.tmp"
@@ -662,6 +678,31 @@ class ModelStore:
             model["housePlacement"] = validate_placement({**model["housePlacement"], "floorIds": settings["floorIds"]})
         self.save(models)
         return {"title": model["title"], "areaId": model.get("areaId", ""), **({"appearance":deepcopy(model["appearance"])} if "appearance" in model else {}), **({"housePlacement": deepcopy(model["housePlacement"])} if "housePlacement" in model else {})}
+
+    def set_device_visibility(self, model_id, control_id, hidden):
+        """Room-only visibility, shared by all views and grouped device controls."""
+        if not isinstance(hidden, bool):
+            raise ValueError("Device hidden must be a boolean.")
+        models = deepcopy(self.models)
+        model = next((m for m in models if m["id"] == model_id), None)
+        if model is None or control_id not in {c["id"] for c in model["controls"]}:
+            raise ValueError("Choose a device in its source room.")
+        ids = {control_id}
+        for group in model.get("lightGroups", []):
+            if control_id in group["controls"]:
+                ids.update(group["controls"])
+        for device in model.get("devices", []):
+            members = {device["height"], device["motion"], *device["macros"]}
+            if control_id in members:
+                ids.update(members)
+        for control in model["controls"]:
+            if control["id"] in ids:
+                if hidden:
+                    control["hidden"] = True
+                else:
+                    control.pop("hidden", None)
+        self.save(models)
+        return {"controls": deepcopy(model["controls"])}
 
     def set_device_settings(self, model_id, device_id, names):
         models = deepcopy(self.models)
@@ -759,6 +800,8 @@ class ModelStore:
                     model["title"] = previous["title"]
                     if "areaId" in previous:
                         model["areaId"] = previous["areaId"]
+                    preserve_device_visibility(previous, model)
+                    model["lightGroups"] = preserved_groups(previous, model["controls"])
                     controls = {c["id"]: c for c in model["controls"]}
                     kept_bindings = {k: v for k, v in previous["bindings"].items() if k in controls and compatible_entity(controls[k], v)}
                     removed_bindings.extend(f"{previous['title']}: {k}" for k in previous["bindings"] if k not in kept_bindings)
@@ -934,12 +977,14 @@ class ModelStore:
                     },
                     manifest["controls"],
                 )
+            manifest["lightGroups"] = preserved_groups(previous, manifest["controls"])
             settings = {}
             for device in manifest.get("devices", []):
                 names = previous.get("deviceSettings", {}).get(device["id"], {}).get("macroNames", {})
                 settings[device["id"]] = {"macroNames": {key: name for key, name in names.items() if key in device["macros"]}}
             if settings:
                 manifest["deviceSettings"] = validate_device_settings(settings, manifest["devices"])
+            preserve_device_visibility(previous, manifest)
             controls = {c["id"]: c for c in manifest["controls"]}
             bindings = {
                 control_id: entity_id
@@ -984,11 +1029,26 @@ class ModelStore:
         self.save(models)
         return {"daylight": deepcopy(value)}
 
+    def set_light_groups(self, model_id, groups):
+        models = deepcopy(self.models)
+        model = next((m for m in models if m["id"] == model_id), None)
+        if model is None:
+            raise ValueError("Choose an individual room to group its lights.")
+        model["lightGroups"] = validate_light_groups(groups, model["controls"])
+        self.save(models)
+        return {"lightGroups": deepcopy(model["lightGroups"])}
+
     def bind(self, model_id, control_id, entity_id):
         models = deepcopy(self.models)
         model = next((m for m in models if m["id"] == model_id), None)
         if model is None or control_id not in {c["id"] for c in model["controls"]}:
             raise ValueError("Unknown model control.")
+        group = next((g for g in model.get("lightGroups", []) if control_id in g["controls"]), None)
+        if group:
+            group["entityId"] = entity_id
+            validate_light_groups(model["lightGroups"], model["controls"])
+            self.save(models)
+            return {"bindings": apply_light_groups(model)["bindings"]}
         if entity_id:
             control = next(c for c in model["controls"] if c["id"] == control_id)
             if not compatible_entity(control, entity_id):

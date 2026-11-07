@@ -81,12 +81,17 @@ export const deviceForControl = (model, id) =>
   );
 export const macroName = (model, device, id) =>
   model.deviceSettings?.[device.id]?.macroNames?.[id] || "";
-export function deviceEntries(model) {
+export function deviceEntries(model, { includeHidden = false } = {}) {
   const members = new Set(
     (model.devices || []).flatMap((d) => [d.motion, ...d.macros]),
   );
   return model.controls
-    .filter((c) => !members.has(c.id))
+    .filter(
+      (c) =>
+        !members.has(c.id) &&
+        c.lightGroupPrimary !== false &&
+        (includeHidden || !c.hidden),
+    )
     .map((c) => {
       const device = (model.devices || []).find((d) => d.height === c.id);
       return device ? { ...c, label: device.label, device } : c;

@@ -70,6 +70,35 @@ class PackageTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.store = models.ModelStore(self.temp.name).open()
 
+    def test_hidden_devices_persist_export_replace_and_inherit_in_house_views(self):
+        self.store.install_upload(self.house_package())
+        before = self.store.find("kitchen")["bindings"].copy()
+        self.store.set_device_visibility("kitchen", "ceiling", True)
+        reopened = models.ModelStore(self.temp.name).open()
+        self.assertTrue(reopened.find("kitchen")["controls"][0]["hidden"])
+        for model in reopened.catalog():
+            for control in model["controls"]:
+                if control.get("sourceModel") == "kitchen":
+                    self.assertTrue(control["hidden"])
+        exported = reopened.export("kitchen")
+        with zipfile.ZipFile(BytesIO(exported)) as archive:
+            self.assertTrue(json.loads(archive.read("manifest.json"))["controls"][0]["hidden"])
+        self.store.replace("kitchen", package())
+        self.assertTrue(self.store.find("kitchen")["controls"][0]["hidden"])
+        preview = self.store.replace_house("house-test", self.house_package(), preview=True)
+        self.store.replace_house("house-test", self.house_package(), preview["revision"])
+        self.assertTrue(self.store.find("kitchen")["controls"][0]["hidden"])
+        self.assertEqual(self.store.find("kitchen")["bindings"], before)
+        for model_id, control_id, hidden in [("h-house-test", "ceiling", False), ("kitchen", "missing", True), ("kitchen", "ceiling", "true")]:
+            with self.assertRaises(ValueError):
+                self.store.set_device_visibility(model_id, control_id, hidden)
+        with patch.object(self.store, "save", side_effect=OSError("Disk full")):
+            with self.assertRaises(OSError):
+                self.store.set_device_visibility("kitchen", "ceiling", False)
+        self.assertTrue(self.store.find("kitchen")["controls"][0]["hidden"])
+        self.store.set_device_visibility("kitchen", "ceiling", False)
+        self.assertNotIn("hidden", models.ModelStore(self.temp.name).open().find("kitchen")["controls"][0])
+
     def house_package(self, changes=None):
         placement = {"schemaVersion": 1, "houseId": "house-test", "houseName": "Test house", "roomId": "kitchen", "transform": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1], "floors": [{"id": "ground", "name": "Ground", "minY": 0, "maxY": 3}], "floorIds": ["ground"]}
         entries = {}

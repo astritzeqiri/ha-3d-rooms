@@ -28,10 +28,14 @@ export function initMarkerEditor({ model, scene, onChange }) {
     suppressClickUntil = 0;
   const entries = new Map();
   const history = new Map();
-  const controls = () =>
+  const controls = (includeHidden = false) =>
     (model()?.controls || []).filter((c) => {
       const device = deviceForControl(model(), c.id);
-      return !device || device.height === c.id;
+      return (
+        (includeHidden || !c.hidden) &&
+        c.lightGroupPrimary !== false &&
+        (!device || device.height === c.id)
+      );
     });
   const label = (c) =>
     deviceForControl(model(), c.id)?.label || c.label || c.name || c.id;
@@ -111,6 +115,19 @@ export function initMarkerEditor({ model, scene, onChange }) {
       if (input.type === "checkbox")
         input.checked = defaults[input.dataset.setting];
       else input.value = defaults[input.dataset.setting];
+    }
+    for (const [id, entry] of entries) {
+      const hidden = !!model()?.controls.find((c) => c.id === id)?.hidden;
+      const option = [...(picker?.options || [])].find((o) => o.value === id);
+      if (option) {
+        option.hidden = hidden;
+        option.disabled = hidden;
+      }
+      if (!hidden) continue;
+      entry.button.hidden = true;
+      entry.details.hidden = true;
+
+      if (selected === id) deselect();
     }
     for (const control of controls()) {
       const entry = entries.get(control.id);
@@ -360,7 +377,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
     say(
       "Drag a room icon to move it, or click for tools. Undo restores its last edit.",
     );
-    for (const control of controls()) {
+    for (const control of controls(true)) {
       const details = document.createElement("details");
       details.className = "marker-device-settings";
       details.name = "marker-device-tools";
@@ -579,8 +596,9 @@ export function initMarkerEditor({ model, scene, onChange }) {
     if (owner) {
       owner.options.onRender = previousRender;
       owner.options.markers = previousMarkers;
-      for (const fixture of owner.fixtures.values())
+      for (const [id, fixture] of owner.fixtures)
         fixture.marker.visible =
+          !model()?.controls.find((c) => c.id === id)?.hidden &&
           !fixture.companion &&
           previousMarkers &&
           owner.options.mode !== "floor";

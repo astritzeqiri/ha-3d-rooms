@@ -82,3 +82,30 @@ test("macro names survive reopening the catalog and failed changes preserve the 
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("hiding a grouped device hides every member and only room settings list it", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "hidden-devices-"));
+  try {
+    const store = await new Store(dir).open();
+    store.state.models = [
+      {
+        id: "office",
+        controls: structuredClone(controls),
+        devices: [desk],
+        bindings: { height: "number.desk" },
+      },
+    ];
+    await store.setDeviceVisibility("office", "macro-1", true);
+    const model = (await new Store(dir).open()).find("office");
+    assert.equal(model.controls.filter((c) => c.hidden).length, 6);
+    assert.equal(deviceEntries(model).length, 1);
+    assert.equal(deviceEntries(model, { includeHidden: true }).length, 2);
+    assert.deepEqual(model.bindings, { height: "number.desk" });
+    await assert.rejects(store.setDeviceVisibility("office", "light", "true"));
+    await assert.rejects(store.setDeviceVisibility("house", "light", true));
+    await store.setDeviceVisibility("office", "height", false);
+    assert.equal(deviceEntries(store.find("office")).length, 2);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

@@ -1,3 +1,4 @@
+import { validateLightGroups } from "../shared/light-groups.mjs";
 import { validateAppearance } from "../shared/appearance.mjs";
 import { validatePlacement } from "../shared/house.mjs";
 import { validateDevices, validateDeviceSettings } from "../shared/device.mjs";
@@ -87,6 +88,8 @@ export function validateManifest(m) {
     v.length === 3 &&
     v.every((n) => Number.isFinite(n) && Math.abs(n) < 10000);
   for (const c of m.controls) {
+    if (c.hidden !== undefined && typeof c.hidden !== "boolean")
+      fail("Device hidden must be a boolean.");
     if (
       !c ||
       typeof c.id !== "string" ||
@@ -173,6 +176,7 @@ export function validateManifest(m) {
     )
       fail("Unsupported light capabilities.");
   }
+  validateLightGroups(m.lightGroups, m.controls);
   validateDevices(m.devices, m.controls);
   if (m.deviceSettings) validateDeviceSettings(m.deviceSettings, m.devices);
   if (m.appearance !== undefined) validateAppearance(m.appearance);

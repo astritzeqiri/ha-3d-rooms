@@ -75,6 +75,11 @@ class ThreeDRoomsPanel extends HTMLElement {
           }
           return this._iconCache.get(key);
         },
+        subscribeModels: (listener) =>
+          this._hass.connection.subscribeEvents(
+            listener,
+            "three_d_rooms_updated",
+          ),
         subscribe: (listener) => {
           this._listener = listener;
           this._publish();

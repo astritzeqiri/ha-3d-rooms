@@ -222,3 +222,17 @@ Device controls include **Defaults for this view**: set visibility, state labels
 In the Home Assistant card editor, choose **Height → Auto · fill available screen**. Use a single-card **Panel** view to fill both width and the space below Home Assistant’s header. YAML accepts `height: auto`; numeric heights from 180 to 1600 remain supported. This is a per-card layout choice and does not change the saved view or camera.
 
 The fullscreen button appears in browsers that support the Fullscreen API. Exit using the same button or the browser’s Escape action. Opening a device dialog exits fullscreen so Home Assistant dialogs remain accessible. Auto height includes the title and device tray; long trays scroll within the card.
+
+## Hide a device everywhere in 3D Rooms
+
+Open its source room → **Devices → Hide device**. The device's controls and markers disappear from room, house and floor views, dashboard cards, device trays and the view editor. Per-view visibility and icon defaults cannot reveal it. A minimal Hidden row remains only in the room's Devices tab; choose **Show device** there to restore it.
+
+Grouped desk controls hide together. Entity mappings, saved views and the physical room model remain intact; Home Assistant entities and automations are unaffected. Visibility persists across restarts, room exports and compatible room/house replacements.
+
+## Group modeled lights
+
+In **My home → room → Devices**, choose **Group lights**. Name the group, select at least two modeled lights from that room, and choose the one existing Home Assistant light (or switch) entity that controls them. You can connect it later. This does not create a Home Assistant entity.
+
+The group appears as one control in the device list and saved room/floor/house views. Each original fixture keeps its geometry and light source, and follows the shared entity's state. The group marker sits at the center of its visible fixtures. Use the group's settings button to change its name, members or entity. **Ungroup** restores individual controls and their previous connections. A light can belong to one group at a time. Groups persist through restarts, room exports and compatible model replacement.
+
+On a room’s Devices tab, click a device bubble to open its settings. Grouped lights open the group editor.

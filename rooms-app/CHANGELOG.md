@@ -1,3 +1,10 @@
+# 0.26.0 — room device management
+
+- Group modeled lights into one named control connected to a shared Home Assistant entity. Edit or ungroup while retaining original fixtures and connections.
+- Hide devices globally from their room’s Devices screen; only Show device in that room restores them. Covers room, floor, house, dashboard trays and view editors.
+- Click a device bubble on the Devices screen to open its settings or light-group editor.
+- Retains the 0.25.1 rendering fix and existing fullscreen/auto-height features.
+
 # 0.25.1 — Restore textured floors and furniture
 
 - Prevent missing surfaces when fixture and daylight shadow maps exceed the graphics device’s texture limit.

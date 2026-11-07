@@ -96,9 +96,20 @@ export class SceneView {
           }
           if (
             o.userData.pickControl &&
+            !this.model?.controls.find((c) => c.id === o.userData.pickControl)
+              ?.hidden &&
             (!this.model?.houseView || !this.options.onRoomPick)
           ) {
-            onPick(o.userData.pickControl);
+            const control = this.model.controls.find(
+              (c) => c.id === o.userData.pickControl,
+            );
+            const primary = control?.lightGroup
+              ? this.model.controls.find(
+                  (c) =>
+                    c.lightGroup === control.lightGroup && c.lightGroupPrimary,
+                )
+              : control;
+            onPick(primary?.id || o.userData.pickControl);
             return;
           }
           o = o.parent;
@@ -233,10 +244,15 @@ export class SceneView {
         new THREE.MeshBasicMaterial({ color: "#c3dbab", depthTest: false }),
       );
       const device = deviceForControl(model, c.id),
-        companion = device && device.height !== c.id;
+        companion =
+          (device && device.height !== c.id) || c.lightGroupPrimary === false;
       marker.visible =
-        !companion && this.options.markers && this.options.mode !== "floor";
-      marker.position.fromArray(c.position);
+        !c.hidden &&
+        !companion &&
+        c.lightGroupPrimary !== false &&
+        this.options.markers &&
+        this.options.mode !== "floor";
+      marker.position.fromArray(c.markerPosition || c.position);
       marker.userData.pickControl = c.id;
       marker.renderOrder = 10;
       this.scene.add(marker);
@@ -378,9 +394,12 @@ export class SceneView {
     });
     this.orbit.enableRotate =
       this.options.allowRotate ?? this.options.mode !== "floor";
-    for (const f of this.fixtures.values())
+    for (const [id, f] of this.fixtures)
       f.marker.visible =
-        !f.companion && this.options.markers && this.options.mode !== "floor";
+        !this.model.controls.find((c) => c.id === id)?.hidden &&
+        !f.companion &&
+        this.options.markers &&
+        this.options.mode !== "floor";
     this.renderer.domElement.setAttribute(
       "aria-label",
       this.model.houseView
@@ -593,6 +612,17 @@ export class SceneView {
       [...this.lastStates].map(([id, s]) => [id, s.position]),
     );
     this.daylight.update(this.daylightMode, this.sunEntity, positions);
+  }
+  refreshVisibility() {
+    if (!this.model || !this.fixtures) return;
+    for (const [id, fixture] of this.fixtures) {
+      fixture.marker.visible =
+        !this.model.controls.find((c) => c.id === id)?.hidden &&
+        !fixture.companion &&
+        this.options.markers &&
+        this.options.mode !== "floor";
+    }
+    this.render();
   }
   highlight(id) {
     for (const [key, f] of this.fixtures)

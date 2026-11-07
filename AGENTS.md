@@ -319,3 +319,5 @@ Check current primary documentation when changing packaging or release behavior:
 
 - HACS integration packaging: https://www.hacs.dev/docs/publish/integration/
 - GitHub CLI release creation: https://cli.github.com/manual/gh_release_create
+
+**0.26.0 combined release (2026-11-07):** Release source `/tmp/three-d-rooms-release-0.26.0`; extracted artifact `/tmp/three-d-rooms-026-artifact/custom_components` runs in the singleton. Includes light groups, hidden devices, bubble editing and the 0.25.1 renderer fix. Preserve these together. Validation is in docs/validation-0.26.0.md.

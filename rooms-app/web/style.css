@@ -3362,3 +3362,9 @@ body[data-room-tab="views"] .saved-view-thumb {
   height: 18px;
   flex: none;
 }
+
+.hide-device {
+  margin: 8px 0 16px;
+  min-height: 44px;
+  color: var(--muted);
+}
