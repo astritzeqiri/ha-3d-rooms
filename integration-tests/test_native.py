@@ -46,6 +46,43 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         await self.hass.async_stop()
 
+    async def test_full_house_upload_uses_native_api_and_keeps_independent_rooms(self):
+        from unittest.mock import AsyncMock, patch
+        from io import BytesIO
+        import struct
+        import zipfile
+        entries = {}
+        for index, room in enumerate(["kitchen", "office"]):
+            placement = {"schemaVersion": 1, "houseId": "house-test", "houseName": "Test house", "roomId": room, "transform": [1,0,0,0,0,1,0,0,0,0,1,0,index*4,0,0,1], "floors": [], "floorIds": []}
+            manifest = {"schemaVersion": 1, "id": room, "title": room.title(), "units": "meters", "up": "Y", "scene": "scene.glb", "controls": [], "housePlacement": placement}
+            doc = json.dumps({"asset": {"version": "2.0"}}).encode()
+            doc += b" " * (-len(doc) % 4)
+            glb = struct.pack("<4sIIII", b"glTF", 2, len(doc)+20, len(doc), 0x4E4F534A) + doc
+            output = BytesIO()
+            with zipfile.ZipFile(output, "w") as archive:
+                archive.writestr("manifest.json", json.dumps(manifest))
+                archive.writestr("scene.glb", glb)
+            entries[f"rooms/{room}.zip"] = output.getvalue()
+        output = BytesIO()
+        with zipfile.ZipFile(output, "w") as archive:
+            archive.writestr("house-manifest.json", json.dumps({"format": "three-d-rooms-house/1", "houseId": "house-test", "houseName": "Test house", "rooms": list(entries)}))
+            for name, payload in entries.items():
+                archive.writestr(name, payload)
+        payload = output.getvalue()
+        self.store.models = []
+        request = {"hass_user": SimpleNamespace(is_admin=True)}
+        with patch.object(self.api, "read_upload", AsyncMock(return_value=payload)):
+            response = await self.api.ModelUploadView(self.hass).post(request)
+        self.assertEqual(response.status, 201)
+        result = json.loads(response.body)
+        self.assertEqual(result["roomCount"], 2)
+        self.assertEqual(result["viewId"], "h-house-test")
+        self.assertEqual(len(self.store.models), 2)
+        with patch.object(self.api, "read_upload", AsyncMock(return_value=payload)):
+            duplicate = await self.api.ModelUploadView(self.hass).post(request)
+        self.assertEqual(duplicate.status, 400)
+        self.assertEqual(len(self.store.models), 2)
+
     async def test_house_views_are_presentation_only_and_rooms_keep_device_controls(self):
         from homeassistant.helpers import floor_registry
         await floor_registry.async_load(self.hass)

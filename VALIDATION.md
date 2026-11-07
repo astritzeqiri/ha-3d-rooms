@@ -1,3 +1,7 @@
+# 0.24.0 — Full-house imports and workspace
+
+Release checks pass; see [release validation](docs/validation-0.24.0.md) for artifact, native runtime and browser results and remaining limits. Persistent room catalog unchanged.
+
 # 0.23.0 — houses, floors and room appearance
 
 Release validation is recorded in [docs/validation-0.23.0.md](docs/validation-0.23.0.md). Frontend, host and native tests pass; the packaged integration loads with the persistent room catalog unchanged. See the report for scope and remaining limits.

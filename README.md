@@ -200,3 +200,7 @@ Create or edit a view under **Dashboard views**. Click a device icon to open its
 Click outside the icons/tools to close the fan and clear selection. The device picker under **Device controls** provides another way to select a control. Editing icons never sends device commands; **Preview in dashboard** uses live controls. Save the view to retain presentation and position changes. Linked cards inherit saved marker settings unless explicitly overridden.
 
 Camera framing is retained when reopening, resizing and saving views. Saved views now include a bounded JPEG thumbnail shared across gallery browsers; older views gain one on their next save. Phone/tablet layouts keep preview actions accessible while scrolling.
+
+## Updating to 0.24.0
+
+Update 3D Rooms in HACS, restart Home Assistant itself, then refresh your browser. Full-house ZIP imports, the compact house workspace and AC state/visual fixes are included. Existing rooms, mappings and saved views remain compatible; no re-upload is required.

@@ -2,13 +2,28 @@ import { viewThumbnail } from "./view-thumbnail.js";
 import { validateComponent, componentYaml } from "../shared/component.mjs";
 
 /** A room-scoped library; every view opens the same camera editor and scene. */
-export function initComponents({ api, room, editor, toast, preview }) {
+export function initComponents({
+  api,
+  room,
+  editor,
+  toast,
+  preview,
+  selectModel,
+  scopeModels,
+}) {
   const $ = (id) => document.getElementById(id);
   let components = [],
     generation = 0;
   const fail = (message) => {
     $("component-error").textContent = message || "";
   };
+  async function openEditor(component, options) {
+    const id = component?.layers?.[0]?.model;
+    if (id && id !== room()?.id) {
+      if (!selectModel || !(await selectModel(id))) return;
+    }
+    editor.open(component, options);
+  }
   function use(component) {
     $("use-view-name").textContent = `Saved view: ${component.title}`;
     $("use-view-yaml").value = componentYaml(component);
@@ -17,7 +32,14 @@ export function initComponents({ api, room, editor, toast, preview }) {
   function draw() {
     const host = $("component-list");
     host.replaceChildren();
-    const views = components.filter((c) => c.layers[0].model === room()?.id);
+    const current = room();
+    const related = new Set(
+      scopeModels?.() || [
+        current?.id,
+        ...(current?.members || []).map((m) => m.model),
+      ],
+    );
+    const views = components.filter((c) => related.has(c.layers[0].model));
     $("saved-view-count").textContent = views.length;
     $("saved-view-count").setAttribute(
       "aria-label",
@@ -36,7 +58,7 @@ export function initComponents({ api, room, editor, toast, preview }) {
       create.type = "button";
       create.className = "primary";
       create.textContent = "Create your first view";
-      create.onclick = () => editor.open();
+      create.onclick = () => openEditor();
       empty.append(title, text, create);
       host.append(empty);
       return;
@@ -60,8 +82,8 @@ export function initComponents({ api, room, editor, toast, preview }) {
         return b;
       };
       actions.append(
-        button("Edit view", () => editor.open(c)),
-        button("Use in dashboard", () => use(c), true),
+        button("Edit view", () => openEditor(c)),
+        button("Add to dashboard", () => use(c), true),
       );
       if (preview) {
         const previewButton = button("Preview in dashboard", async () => {
@@ -83,7 +105,7 @@ export function initComponents({ api, room, editor, toast, preview }) {
       more.append(summary);
       more.append(
         button("Duplicate", () =>
-          editor.open(
+          openEditor(
             {
               ...structuredClone(c),
               id: crypto.randomUUID(),
@@ -163,6 +185,16 @@ export function initComponents({ api, room, editor, toast, preview }) {
       } catch {
         /* Browser storage is optional. */
       }
+      if (!card.querySelector("img")) {
+        const placeholder = document.createElement("div");
+        placeholder.className = "saved-view-placeholder";
+        placeholder.innerHTML =
+          '<svg viewBox="0 0 64 48" aria-hidden="true"><path d="m10 18 22-12 22 12v16L32 46 10 34V18Zm0 0 22 12 22-12M32 30v16" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+        const hint = document.createElement("span");
+        hint.textContent = "Edit and save to capture a preview";
+        placeholder.append(hint);
+        card.append(placeholder);
+      }
       card.append(title, detail, actions, more);
       host.append(card);
     }
@@ -195,7 +227,7 @@ export function initComponents({ api, room, editor, toast, preview }) {
       toast("Select and copy the configuration.");
     }
   };
-  $("create-library-view").onclick = () => editor.open();
+  $("create-library-view").onclick = () => openEditor();
   $("import-component").onclick = () => $("component-file").click();
   $("component-file").onchange = async () => {
     try {
@@ -209,7 +241,7 @@ export function initComponents({ api, room, editor, toast, preview }) {
           "This view belongs to another room. Select that room before importing it.",
         );
       const c = validateComponent(imported, [room()?.id]);
-      editor.open(
+      openEditor(
         { ...c, id: crypto.randomUUID(), title: c.title },
         { draft: true },
       );

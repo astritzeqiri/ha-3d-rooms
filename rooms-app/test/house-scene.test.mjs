@@ -24,6 +24,10 @@ test("house layers apply placement without baking source geometry and isolate no
     let assembled;
     view.prepareAsset = (_model, root) => {
       assembled = root;
+      // Camera fitting reads bounds before the renderer's first matrix update.
+      const bounds = new THREE.Box3().setFromObject(root);
+      assert.equal(bounds.min.x, 2.5);
+      assert.equal(bounds.max.x, 8.5);
       return true;
     };
     const pose = (x) => new THREE.Matrix4().makeTranslation(x, 0, 0).toArray();
@@ -150,4 +154,32 @@ test("architecture visibility affects only the declared upper wall in room and c
   } finally {
     GLTFLoader.prototype.loadAsync = original;
   }
+});
+
+test("house room selection highlights the placed room and replaces its previous outline", () => {
+  const view = Object.create(SceneView.prototype);
+  view.scene = new THREE.Scene();
+  view.asset = new THREE.Group();
+  const room = new THREE.Group();
+  room.userData.pickRoom = "office";
+  room.position.set(7, 3, 0);
+  room.add(
+    new THREE.Mesh(
+      new THREE.BoxGeometry(2, 2, 2),
+      new THREE.MeshBasicMaterial(),
+    ),
+  );
+  view.asset.add(room);
+  view.scene.add(view.asset);
+  view.render = () => {};
+  view.highlightRoom("office");
+  assert.ok(view.roomHighlight);
+  assert.equal(view.scene.children.length, 2);
+  const previous = view.roomHighlight;
+  view.highlightRoom("office");
+  assert.notEqual(previous, view.roomHighlight);
+  assert.equal(view.scene.children.length, 2);
+  view.highlightRoom("missing");
+  assert.equal(view.roomHighlight, null);
+  assert.equal(view.scene.children.length, 1);
 });

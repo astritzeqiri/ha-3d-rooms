@@ -373,7 +373,7 @@ class ModelUploadView(HomeAssistantView):
         if data is None:
             return self.json({"error": "Upload exceeds 100 MB."}, 413)
         try:
-            result = await runtime.work(runtime.store.install, data)
+            result = await runtime.work(runtime.store.install_upload, data)
         except UPLOAD_ERRORS as error:
             return self.json({"error": str(error)}, 400)
         self.hass.bus.async_fire("three_d_rooms_updated")

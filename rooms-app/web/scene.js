@@ -1,3 +1,5 @@
+import { createClimateVisual } from "../shared/climate-visual.mjs";
+import { climateAppearance } from "../shared/climate.mjs";
 import { offsetPoint } from "../shared/marker-settings.mjs";
 import { deviceForControl } from "../shared/device.mjs";
 import { setNumberValue } from "../shared/number.mjs";
@@ -25,6 +27,9 @@ export class SceneView {
     this.materials = [];
     this.fixtures = new Map();
     this.generation = 0;
+    this.climateFrame = 0;
+    this.visibilityChanged = () => this.syncClimateAnimation();
+    document.addEventListener("visibilitychange", this.visibilityChanged);
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -67,7 +72,7 @@ export class SceneView {
       (e) => (start = [e.clientX, e.clientY]),
     );
     this.renderer.domElement.addEventListener("pointerup", (e) => {
-      if (this.model?.houseView) return;
+      if (this.model?.houseView && !this.options.onRoomPick) return;
       if (!start || Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 6)
         return;
       const r = this.renderer.domElement.getBoundingClientRect();
@@ -85,7 +90,11 @@ export class SceneView {
           if (!parent.visible) visible = false;
         if (!visible) continue;
         while (o) {
-          if (o.userData.pickControl) {
+          if (this.model?.houseView && o.userData.pickRoom) {
+            this.options.onRoomPick?.(o.userData.pickRoom);
+            return;
+          }
+          if (!this.model?.houseView && o.userData.pickControl) {
             onPick(o.userData.pickControl);
             return;
           }
@@ -93,6 +102,23 @@ export class SceneView {
         }
       }
     });
+  }
+  highlightRoom(id) {
+    if (this.roomHighlight) {
+      this.scene.remove(this.roomHighlight);
+      this.roomHighlight.geometry.dispose();
+      this.roomHighlight.material.dispose();
+      this.roomHighlight = null;
+    }
+    const room = this.asset?.children.find(
+      (child) => child.userData.pickRoom === id,
+    );
+    if (room) {
+      room.updateWorldMatrix(true, true);
+      this.roomHighlight = new THREE.BoxHelper(room, 0xedac8c);
+      this.scene.add(this.roomHighlight);
+    }
+    this.render();
   }
   disposeScene(scene) {
     scene.traverse((o) => {
@@ -141,8 +167,10 @@ export class SceneView {
               layer.nodeIds[object.userData.controlId];
         });
         const placement = new THREE.Group();
+        placement.userData.pickRoom = layer.model;
         placement.matrixAutoUpdate = false;
         placement.matrix.fromArray(layer.transform);
+        placement.matrixWorldNeedsUpdate = true;
         placement.add(gltf.scene);
         root.add(placement);
       }
@@ -153,8 +181,10 @@ export class SceneView {
     }
   }
   prepareAsset(model, asset, started) {
+    this.clearClimateVisuals();
     this.disposeScene(this.scene);
     this.scene.clear();
+    this.roomHighlight = null;
     this.model = model;
     this.asset = asset;
     this.scene.add(this.asset);
@@ -240,7 +270,21 @@ export class SceneView {
           c.position[1] +
           (c.defaultValue - motion.restValue) * motion.metersPerUnit;
       }
+      const climateVisuals =
+        c.type === "climate"
+          ? (c.nodeIds || [])
+              .map((id) => this.nodes.get(id))
+              .filter(Boolean)
+              .map((root) =>
+                createClimateVisual(root, {
+                  reducedMotion: matchMedia("(prefers-reduced-motion: reduce)")
+                    .matches,
+                }),
+              )
+              .filter(Boolean)
+          : [];
       this.fixtures.set(c.id, {
+        climateVisuals,
         numberNodes,
         markerRestY: c.position[1],
         type: c.type,
@@ -257,6 +301,8 @@ export class SceneView {
     this.daylightMode = model.daylight?.mode ?? "night";
     this.sunEntity = undefined;
     this.lastStates = new Map();
+    // Manual house placements and restored control transforms must reach world space before fitting the camera.
+    this.asset.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(this.asset),
       center = box.getCenter(new THREE.Vector3()),
       size = box.getSize(new THREE.Vector3()).length();
@@ -481,18 +527,19 @@ export class SceneView {
         continue;
       }
       if (f.type === "climate") {
-        f.marker.material.color.set(
-          s.unavailable ? "#858b86" : s.on ? "#7bbcc9" : "#697b6d",
-        );
-        this.asset.traverse((o) => {
-          if (
-            o.userData.climateIndicator === id &&
-            o.material?.isMeshStandardMaterial
-          ) {
-            o.material.emissive.set("#8bc6b8");
-            o.material.emissiveIntensity = s.on && !s.unavailable ? 1 : 0;
-          }
-        });
+        const appearance = climateAppearance(s);
+        f.marker.material.color.set(appearance.color);
+        for (const effect of f.climateVisuals) effect.setState(s);
+        if (!f.climateVisuals.length)
+          this.asset.traverse((o) => {
+            if (
+              o.userData.climateIndicator === id &&
+              o.material?.isMeshStandardMaterial
+            ) {
+              o.material.emissive.set(appearance.color);
+              o.material.emissiveIntensity = s.on && !s.unavailable ? 1 : 0;
+            }
+          });
         continue;
       }
       if (f.type === "cover") {
@@ -526,6 +573,7 @@ export class SceneView {
     for (const [m, color] of this.materials)
       m.color.copy(color).multiplyScalar(0.5);
     this.updateDaylight();
+    this.syncClimateAnimation();
     this.render();
   }
   setDaylight(mode, sunEntity) {
@@ -548,6 +596,7 @@ export class SceneView {
     this.render();
   }
   clear() {
+    this.clearClimateVisuals();
     ++this.generation;
     this.disposeScene(this.scene);
     this.scene.clear();
@@ -555,6 +604,8 @@ export class SceneView {
     this.render();
   }
   dispose() {
+    document.removeEventListener("visibilitychange", this.visibilityChanged);
+    this.clearClimateVisuals();
     ++this.generation;
     this.resize.disconnect();
     this.orbit.dispose();
@@ -602,7 +653,41 @@ export class SceneView {
         Math.abs(point.y) <= 1,
     };
   }
+  clearClimateVisuals() {
+    if (this.climateFrame) cancelAnimationFrame(this.climateFrame);
+    this.climateFrame = 0;
+    for (const f of this.fixtures?.values() || []) {
+      for (const effect of f.climateVisuals || []) effect.dispose();
+      f.climateVisuals = [];
+    }
+  }
+  syncClimateAnimation() {
+    const effects = [...this.fixtures.values()].flatMap(
+      (f) => f.climateVisuals || [],
+    );
+    const shouldRun =
+      !document.hidden && effects.some((effect) => effect.animating);
+    if (!shouldRun) {
+      if (this.climateFrame) cancelAnimationFrame(this.climateFrame);
+      this.climateFrame = 0;
+      return;
+    }
+    if (this.climateFrame) return;
+    const tick = (time) => {
+      this.climateFrame = 0;
+      if (document.hidden || !effects.some((effect) => effect.animating))
+        return;
+      for (const effect of effects) effect.update(time / 1000);
+      this.renderer.render(this.scene, this.camera);
+      this.climateFrame = requestAnimationFrame(tick);
+    };
+    this.climateFrame = requestAnimationFrame(tick);
+  }
   render() {
+    this.syncClimateAnimation();
+    for (const f of this.fixtures.values())
+      for (const effect of f.climateVisuals || [])
+        effect.update(performance.now() / 1000);
     this.renderer.render(this.scene, this.camera);
     this.options.onRender?.();
     const e = this.camera.matrixWorld.elements;

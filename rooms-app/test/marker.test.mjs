@@ -71,3 +71,19 @@ test("unmapped, unavailable and preview markers never display stale live percent
   assert.equal(p.badge, "30%");
   assert.equal(p.stateObj.entity_id, "cover.three_d_rooms_preview");
 });
+
+test("climate markers retain their climate domain without a mapped entity or temperature", () => {
+  const marker = markerAppearance({ type: "climate" }, undefined, {
+    on: true,
+    mode: "cool",
+    action: "cooling",
+    unavailable: false,
+  });
+  assert.equal(marker.badge, "Cooling");
+  assert.equal(marker.stateObj.entity_id, "climate.three_d_rooms_preview");
+  assert.equal(marker.stateObj.attributes.icon, "mdi:air-conditioner");
+  assert.equal(
+    markerAppearance({ type: "climate" }, undefined, {}).badge,
+    "Unavailable",
+  );
+});

@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-Dt5thHan.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/view-cube-DqTxspDJ.js">
+    <script type="module" crossorigin src="./assets/index-DNek8urD.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/view-cube-2T710AFC.js">
     <link rel="modulepreload" crossorigin href="./assets/camera-view-DcroHp47.js">
     <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-UzAFn-Qr.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-BgpBsh3V.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-kqf6eaD3.css">
   </head>
   <body>
     <header>
@@ -22,17 +22,48 @@
             stroke-width="1.8"
           /></svg
         >3D Rooms</a
+      ><button
+        id="library-toggle"
+        type="button"
+        aria-controls="space-library"
+        aria-expanded="false"
+      >
+        Spaces</button
       ><span id="connection" role="status">Connecting…</span>
     </header>
     <main>
-      <aside>
+      <button
+        id="library-scrim"
+        type="button"
+        aria-label="Close spaces"
+      ></button>
+      <aside id="space-library" aria-label="Your spaces">
         <div class="section-title">
-          <h2>Your rooms</h2>
+          <h2>Spaces</h2>
+          <button id="library-close" type="button" aria-label="Close spaces">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              aria-hidden="true"
+            >
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          </button>
           <span id="model-count">0</span>
         </div>
 
-        <nav id="models" aria-label="Models"></nav>
-        <button id="add-model">+ Import room</button>
+        <label class="sr-only" for="library-search"
+          >Search houses and rooms</label
+        ><input
+          id="library-search"
+          type="search"
+          placeholder="Find a room…"
+          autocomplete="off"
+        /><span id="library-result" class="sr-only" role="status"></span>
+        <nav id="models" aria-label="Houses, floors and rooms"></nav>
+        <button id="add-model">+ Import</button>
         <div class="aside-bottom">
           <span class="eyebrow">GETTING STARTED</span>
           <p>Import a floor. Choose its devices. Connect them to your home.</p>
@@ -40,12 +71,14 @@
         </div>
       </aside>
       <section class="workspace" id="models-workspace">
+        <nav id="space-breadcrumb" aria-label="Location"></nav>
         <div class="toolbar">
           <div>
             <span class="eyebrow" id="model-type">YOUR SPACE</span>
             <h1 id="title">Bring your home into view</h1>
           </div>
           <div class="toolbar-actions">
+            <select id="space-floor" aria-label="Explore floor" hidden></select>
             <select
               id="dashboard-scope"
               aria-label="Dashboard view scope"
@@ -58,8 +91,18 @@
         </div>
         <div id="room-summary" class="room-summary" role="status"></div>
         <nav class="room-tabs" aria-label="Room workspace" hidden>
-          <button id="show-models" aria-pressed="true" data-room-tab="devices">
-            Room &amp; devices
+          <button
+            id="show-overview"
+            aria-pressed="true"
+            data-room-tab="overview"
+          >
+            Overview</button
+          ><button
+            id="show-models"
+            aria-pressed="false"
+            data-room-tab="devices"
+          >
+            Devices
           </button>
           <button
             id="show-components"
@@ -110,23 +153,30 @@
                   ready to connect.
                 </p>
                 <ol class="empty-steps">
-                  <li><span>1</span>Import a room ZIP</li>
+                  <li><span>1</span>Import a room or house ZIP</li>
                   <li><span>2</span>Connect its lights and shades</li>
                   <li><span>3</span>Save a view for your dashboard</li>
                 </ol>
                 <button class="primary" id="empty-add">
-                  Import your first room
+                  Import your first space
                 </button>
               </div>
               <div id="scene-status" role="status" hidden></div>
+              <button id="retry-scene" type="button" hidden>
+                Retry loading
+              </button>
             </div>
             <div class="view-footer">
-              <span id="view-hint">Import a prepared room ZIP</span
+              <span id="view-hint">Import a room or full-house ZIP</span
               ><label id="preview-label" hidden
-                ><input id="preview" type="checkbox" role="switch" checked />
-                <span>Preview</span>
+                ><input id="preview" type="checkbox" checked hidden />
+                <span id="control-mode-label">Control mode</span
+                ><select id="control-mode" aria-label="Control mode">
+                  <option value="simulation">Simulation</option>
+                  <option value="live">Live controls</option>
+                </select>
                 <span id="preview-mode-note" class="muted"
-                  >Commands off</span
+                  >No device commands</span
                 ></label
               >
             </div>
@@ -332,7 +382,12 @@
               </button>
             </details>
           </aside>
+          <aside id="space-inspector" aria-label="Room details"></aside>
         </div>
+        <section id="house-settings-section" hidden>
+          <h2>House floors</h2>
+          <form id="house-floor-form" class="room-settings-card"></form>
+        </section>
         <section id="controls-section" hidden>
           <div class="section-title">
             <div>
@@ -401,8 +456,8 @@
                 <span id="saved-view-count" class="views-count">0</span>
               </h2>
               <p class="muted">
-                Choose the angles you want on your dashboard. Each view shares
-                this room’s devices.
+                Save house, floor and room views for your dashboards. Choose a
+                thumbnail to edit its framing.
               </p>
             </div>
             <div class="views-library-actions">
@@ -443,17 +498,24 @@
               >Home Assistant area<select id="room-area">
                 <option value="">Not assigned</option>
               </select>
-              <fieldset id="house-floor-settings" hidden>
-                <legend>Floors occupied by this room</legend>
-                <div id="room-floor-choices"></div>
-                <p id="room-floor-note" class="muted"></p>
-                <div id="room-floor-links"></div>
-                <p class="muted">
-                  Select every floor the room spans. Height ranges come from the
-                  web house builder; the model stays intact.
+            </label>
+            <fieldset id="house-floor-settings" hidden>
+              <legend>Floors occupied by this room</legend>
+              <div id="room-floor-choices"></div>
+              <p id="room-floor-note" class="muted"></p>
+              <details>
+                <summary>Advanced: house floor links</summary>
+                <p class="muted small">
+                  These links apply to the whole house. You can also manage them
+                  from House → Settings.
                 </p>
-              </fieldset></label
-            >
+                <div id="room-floor-links"></div>
+              </details>
+              <p class="muted">
+                Select every floor the room spans. Height ranges come from the
+                web house builder; the model stays intact.
+              </p>
+            </fieldset>
             <p id="room-area-note" class="muted small">
               Link this 3D room to its area in Home Assistant. Device mappings
               stay explicit.
@@ -562,10 +624,10 @@
           </button>
         </div>
         <p class="muted">
-          Upload a prepared model package. We’ll read its scene and list the
-          lights you can connect.
+          Upload a prepared room or full-house package. A house imports all its
+          rooms with their controls, positions and floors.
         </p>
-        <label for="package">Room ZIP (.zip)</label
+        <label for="package">Room or full-house ZIP (.zip)</label
         ><input
           id="package"
           type="file"
@@ -573,9 +635,10 @@
           required
         />
         <p class="muted small">
-          Up to 100 MB. Contains manifest.json and an embedded scene.glb.
-          Exported room photos are not required.
+          Up to 100 MB. Export a room or use “Export full house for Home
+          Assistant” in the house editor. Exported room photos are not required.
         </p>
+        <section id="import-summary" aria-live="polite" hidden></section>
         <div id="import-progress" class="upload-progress" hidden>
           <p data-upload-label role="status" aria-live="polite"></p>
           <progress
@@ -589,7 +652,7 @@
         <div class="dialog-actions">
           <button type="button" class="close">Cancel</button
           ><button id="import-submit" class="primary" type="submit">
-            Import room
+            Import ZIP
           </button>
         </div>
       </form>

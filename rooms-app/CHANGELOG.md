@@ -1,3 +1,11 @@
+# 0.24.0 — Full-house imports and workspace
+
+- Import a complete house ZIP with all rooms, placements, floors and mappings in one atomic operation; invalid or duplicate imports leave the library unchanged.
+- Navigate houses with a compact room sidebar, floor filter and phone drawer; inspect and highlight rooms in the combined house view.
+- Preview ZIP contents before import, group devices by type, and select Simulation or Live controls explicitly.
+- Correct camera fitting for positioned rooms and retain existing room identities, mappings and saved views.
+- Keep AC state and native controls available in the manager; show climate mode effects on prepared models and correct AC icons/status in the dashboard-view editor.
+
 # 0.23.0 — Houses, floors and room appearance
 
 - Assemble independently imported rooms using portable house placement and floor metadata; retain each room’s identity, controls and mappings.

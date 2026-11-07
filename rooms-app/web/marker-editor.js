@@ -1,3 +1,4 @@
+import { markerAppearance } from "../shared/marker.mjs";
 import { deviceForControl } from "../shared/device.mjs";
 import {
   markerSettings,
@@ -139,24 +140,32 @@ export function initMarkerEditor({ model, scene, onChange }) {
       entry.badge.hidden = option.visible && !option.show_label;
       entry.button.dataset.hidden = String(!option.visible);
       const state = owner.lastStates?.get(control.id) || {};
-      entry.badge.textContent = state.unavailable
-        ? "Unavailable"
-        : control.type === "number"
-          ? state.value === undefined
-            ? "—"
-            : `${state.value} ${control.unit || ""}`
-          : control.type === "cover"
-            ? state.position === undefined
+      const climate =
+        control.type === "climate"
+          ? markerAppearance(control, state.entity, state)
+          : null;
+      entry.badge.textContent = climate
+        ? climate.badge
+        : state.unavailable
+          ? "Unavailable"
+          : control.type === "number"
+            ? state.value === undefined
               ? "—"
-              : `${Math.round(state.position)}%`
-            : control.type === "button"
-              ? "Run"
-              : state.on
-                ? "On"
-                : "Off";
+              : `${state.value} ${control.unit || ""}`
+            : control.type === "cover"
+              ? state.position === undefined
+                ? "—"
+                : `${Math.round(state.position)}%`
+              : control.type === "button"
+                ? "Run"
+                : state.on
+                  ? "On"
+                  : "Off";
       if (!option.visible) entry.badge.textContent = "Hidden";
       entry.button.dataset.active = String(
-        control.type === "light" && !!state.on,
+        (control.type === "light" || control.type === "climate") &&
+          !!state.on &&
+          !state.unavailable,
       );
       entry.button.setAttribute(
         "aria-label",
@@ -373,13 +382,15 @@ export function initMarkerEditor({ model, scene, onChange }) {
       button.type = "button";
       button.className = "marker-editor-control";
       const path =
-        control.type === "number"
-          ? '<path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/>'
-          : control.type === "cover"
-            ? '<path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/>'
-            : control.type === "button"
-              ? '<path d="m8 4 12 8-12 8Z"/>'
-              : '<path d="M12 2a7 7 0 0 0-4 12.74V18h8v-3.26A7 7 0 0 0 12 2ZM9 20h6v2H9Z"/>';
+        control.type === "climate"
+          ? '<path fill-rule="evenodd" d="M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z"/><path d="M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z"/>'
+          : control.type === "number"
+            ? '<path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/>'
+            : control.type === "cover"
+              ? '<path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/>'
+              : control.type === "button"
+                ? '<path d="m8 4 12 8-12 8Z"/>'
+                : '<path d="M12 2a7 7 0 0 0-4 12.74V18h8v-3.26A7 7 0 0 0 12 2ZM9 20h6v2H9Z"/>';
       button.innerHTML = `<span class="marker-editor-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span><span class="marker-editor-name"></span><span class="marker-editor-badge" aria-hidden="true"></span>`;
       button.querySelector(".marker-editor-name").textContent = label(control);
       button.dataset.markerId = control.id;

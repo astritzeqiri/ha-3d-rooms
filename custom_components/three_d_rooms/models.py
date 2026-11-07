@@ -696,6 +696,72 @@ class ModelStore:
             raise
         return {"ok": True}
 
+    def install_upload(self, data):
+        """Accept a room or an atomic full-house package at the same endpoint."""
+        if len(data) > MAX_UPLOAD:
+            raise ValueError("Upload exceeds 100 MB.")
+        with zipfile.ZipFile(BytesIO(data)) as archive:
+            if "house-manifest.json" not in archive.namelist():
+                return self.install(data)
+            infos = archive.infolist()
+            if len(infos) > 51 or len({i.filename for i in infos}) != len(infos):
+                raise ValueError("Invalid house package file count.")
+            if any(i.is_dir() or stat.S_ISLNK(i.external_attr >> 16) or i.flag_bits & 1 for i in infos):
+                raise ValueError("House package contains unsupported entries.")
+            if sum(i.file_size for i in infos) > MAX_EXPANDED:
+                raise ValueError("Expanded house exceeds 300 MB.")
+            if archive.getinfo("house-manifest.json").file_size > 65536:
+                raise ValueError("House manifest is too large.")
+            house = json.loads(archive.read("house-manifest.json"))
+            if not isinstance(house, dict) or house.get("format") != "three-d-rooms-house/1":
+                raise ValueError("Unsupported house package format.")
+            rooms = house.get("rooms")
+            if not isinstance(rooms, list) or not 1 <= len(rooms) <= 50 or not all(isinstance(p, str) and re.fullmatch(r"rooms/[a-z0-9_-]+\.zip", p) for p in rooms) or len(set(rooms)) != len(rooms):
+                raise ValueError("Provide 1–50 unique room packages.")
+            if set(archive.namelist()) != {"house-manifest.json", *rooms}:
+                raise ValueError("House package contains unexpected or missing files.")
+            stage = Path(tempfile.mkdtemp(prefix="house-", dir=self.directory))
+            installed = []
+            pending = []
+            seen = {m["id"] for m in self.models}
+            room_ids = {m["housePlacement"]["roomId"] for m in self.models if m.get("housePlacement", {}).get("houseId") == house.get("houseId")}
+            floors = None
+            expanded = 0
+            try:
+                for index, path in enumerate(rooms):
+                    payload = archive.read(path)
+                    with zipfile.ZipFile(BytesIO(payload)) as inner:
+                        expanded += sum(i.file_size for i in inner.infolist())
+                    if expanded > MAX_EXPANDED:
+                        raise ValueError("Expanded house exceeds 300 MB.")
+                    destination = stage / str(index)
+                    destination.mkdir()
+                    manifest, bindings = extract_package(payload, destination)
+                    placement = manifest.get("housePlacement", {})
+                    if placement.get("houseId") != house.get("houseId") or placement.get("houseName") != house.get("houseName") or not placement.get("roomId"):
+                        raise ValueError("Every room must belong to this house.")
+                    if manifest["id"] in seen or placement["roomId"] in room_ids:
+                        raise ValueError("A room already exists or is duplicated. No rooms were imported.")
+                    if floors is not None and floors != placement["floors"]:
+                        raise ValueError("House rooms must share the same floor definitions.")
+                    floors = placement["floors"]
+                    seen.add(manifest["id"])
+                    room_ids.add(placement["roomId"])
+                    folder = uuid4().hex
+                    pending.append({**manifest, "bindings": bindings, "folder": folder, "importedAt": datetime.now(timezone.utc).isoformat()})
+                for index, model in enumerate(pending):
+                    target = self.directory / "models" / model["folder"]
+                    os.replace(stage / str(index), target)
+                    installed.append(target)
+                self.save([*self.models, *pending])
+                return {"id": pending[0]["id"], "ids": [m["id"] for m in pending], "houseId": house["houseId"], "roomCount": len(pending), "viewId": "h-" + house["houseId"]}
+            except Exception:
+                for target in installed:
+                    shutil.rmtree(target, ignore_errors=True)
+                raise
+            finally:
+                shutil.rmtree(stage, ignore_errors=True)
+
     def install(self, data):
         stage = Path(tempfile.mkdtemp(prefix="import-", dir=self.directory))
         installed = None

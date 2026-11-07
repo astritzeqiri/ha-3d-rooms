@@ -19,6 +19,16 @@ class ThreeDRoomsPanel extends HTMLElement {
       )
         return;
       const bridge = {
+        moreInfo: (entityId) => {
+          if (!this._hass?.states?.[entityId]) return;
+          this.dispatchEvent(
+            new CustomEvent("hass-more-info", {
+              detail: { entityId },
+              bubbles: true,
+              composed: true,
+            }),
+          );
+        },
         preview: async (component) => {
           this._preview?.close();
           const preview = openDashboardPreview(
@@ -90,7 +100,7 @@ class ThreeDRoomsPanel extends HTMLElement {
       connected: this._hass.connected !== false,
       mode: "homeassistant",
       entities: Object.values(this._hass.states).filter((e) =>
-        /^(light|switch|cover|sun|number|input_number|button|input_button|script|scene)\./.test(
+        /^(climate|light|switch|cover|sun|number|input_number|button|input_button|script|scene)\./.test(
           e.entity_id,
         ),
       ),

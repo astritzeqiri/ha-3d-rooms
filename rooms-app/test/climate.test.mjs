@@ -39,7 +39,7 @@ test("climate state and markers distinguish off, idle, active and unavailable", 
       attributes: { temperature: 23, current_temperature: 25 },
     };
     assert.equal(climateState(e).on, true);
-    assert.equal(markerAppearance(c, e, {}).badge, "23°");
+    assert.match(markerAppearance(c, e, {}).badge, /23°$/);
   }
   assert.equal(climateState({ state: "off" }).on, false);
   for (const e of [undefined, { state: "unknown" }, { state: "unavailable" }])

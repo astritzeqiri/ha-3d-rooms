@@ -1,3 +1,7 @@
+## Full-house import preview
+
+Use **Build a house → House → Export full house for Home Assistant** in the authoring app, then **Import room or house** in the native sidebar. All rooms are imported together; each retains independent controls, position and floors. Limits are 50 rooms, 100 MB uploaded and 300 MB expanded. Existing room IDs are rejected without replacement. The project backup ZIP is a separate authoring format.
+
 # 0.23.0 house and floor views
 
 Use the native HACS integration for room imports and house/floor dashboards. Room ZIPs from the house builder carry shared placement metadata. In each room’s settings, map saved height ranges to Home Assistant floors and assign every occupied floor. House dashboard editors configure camera and floor presentation only; entity setup stays in the individual rooms. Optional architecture is configured per room and inherited by house/floor views.

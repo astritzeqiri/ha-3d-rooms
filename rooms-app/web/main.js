@@ -1,3 +1,10 @@
+import { initWorkspace } from "./workspace.js";
+import { initImportSummary } from "./import-summary.js";
+import {
+  roomName,
+  deviceGroup,
+  connectionState,
+} from "../shared/workspace.mjs";
 import { climateState } from "../shared/climate.mjs";
 import { houseViewSummary } from "../shared/house-presentation.mjs";
 import { uploadJSON } from "../shared/upload.mjs";
@@ -12,6 +19,7 @@ import { actionState, actionCommand } from "../shared/action.mjs";
 import { numberState, numberCommand } from "../shared/number.mjs";
 import { coverFeatures, coverState, coverCommand } from "../shared/cover.mjs";
 import "./style.css";
+import "./workspace.css";
 import { mountCameraNavigation } from "./camera-navigation.js";
 import { initDashboardEditor } from "./dashboard-editor.js";
 import { connectNative } from "./native.js";
@@ -59,8 +67,8 @@ let areas = [],
   savedViews,
   areasError = "";
 const initialRoomTab =
-  new URL(location.href).searchParams.get("tab") || "devices";
-let activeRoomTab = "devices";
+  new URL(location.href).searchParams.get("tab") || "overview";
+let activeRoomTab = "overview";
 let models = [],
   selected = null,
   status = { connected: false, mode: "preview", entities: [] },
@@ -69,6 +77,22 @@ let models = [],
   pending = new Set(),
   simulated = new Map(),
   selection = 0;
+const workspace = initWorkspace({
+  getModels: () => models,
+  getSelected: () => selected,
+  getFloors: () => haFloors,
+  choose,
+  tab: setRoomTab,
+  api,
+  scene: () => view,
+  toast: (message) => toast(message),
+  reload: async (id) => {
+    models = await api("models");
+    selected = models.find((m) => m.id === id);
+    drawModels();
+  },
+});
+const importSummary = initImportSummary({ models: () => models });
 const cameraNavigation = mountCameraNavigation($("viewport"), () => view);
 cameraNavigation.hidden = true;
 const fades = new Map();
@@ -216,8 +240,13 @@ function deskCard(device, states) {
 }
 function drawControls() {
   $("preview-mode-note").textContent = preview
-    ? "Commands off"
-    : "Live controls";
+    ? "No device commands"
+    : "Actions control real devices";
+  $("control-mode").value = preview ? "simulation" : "live";
+  $("preview").setAttribute(
+    "aria-label",
+    "Simulation: device commands are disabled",
+  );
   if (!selected) return;
   updateRoomSummary();
   const active = document.activeElement;
@@ -284,43 +313,44 @@ function drawControls() {
     return !selected.bindings[c.id];
   });
   $("control-count").innerHTML =
-    `<span class="pill" data-live="${!preview}">${preview ? "Preview" : "Live"}</span>${visible.length === entries.length ? entries.length : `${visible.length} of ${entries.length}`} ${entries.length === 1 ? "device" : "devices"}`;
-  $("controls").innerHTML = visible
-    .map((c) => {
-      if (c.device) return deskCard(c.device, states);
-      if (c.type === "climate") {
-        const s = states.get(c.id);
-        return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${esc(c.label)}</span>${deviceSettingsButton(c)}</div><p>${esc(s.mode)}${s.currentTemperature === undefined ? "" : ` · Current ${s.currentTemperature}°`}${s.temperature === undefined ? "" : ` · Target ${s.temperature}°`}</p><button data-climate="${c.id}" ${s.unavailable || !native?.moreInfo ? "disabled" : ""}>Open Home Assistant AC controls</button>${entityNote(c)}</article>`;
-      }
+    `<span class="pill" data-live="${!preview}">${preview ? "Simulation" : "Live controls"}</span>${visible.length === entries.length ? entries.length : `${visible.length} of ${entries.length}`} ${entries.length === 1 ? "device" : "devices"}`;
+  const cardHTML = visible.map((c) => {
+    if (c.device) return deskCard(c.device, states);
+    if (c.type === "climate") {
+      const s = states.get(c.id);
+      return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${esc(c.label)}</span>${deviceSettingsButton(c)}</div><p>${esc(s.mode)}${s.currentTemperature === undefined ? "" : ` · Current ${s.currentTemperature}°`}${s.temperature === undefined ? "" : ` · Target ${s.temperature}°`}</p><button data-climate="${c.id}" ${s.unavailable || !native?.moreInfo ? "disabled" : ""}>Open Home Assistant AC controls</button>${entityNote(c)}</article>`;
+    }
 
-      if (c.type === "button") {
-        const s = states.get(c.id),
-          label = esc(c.label);
-        return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${label}</span>${deviceSettingsButton(c)}</div><button data-press="${c.id}" aria-label="Run ${label}" ${!preview && s.unavailable ? "disabled" : ""}><span data-entity-icon="${c.id}" aria-hidden="true"></span> ${label}</button>${entityNote(c)}</article>`;
-      }
-      if (c.type === "number") {
-        const s = states.get(c.id),
-          label = esc(c.label),
-          disabled = !preview && s.unavailable ? "disabled" : "";
-        const attrs = s.entity?.attributes || {},
-          min = preview ? c.min : Math.max(c.min, attrs.min ?? c.min),
-          max = preview ? c.max : Math.min(c.max, attrs.max ?? c.max),
-          step = preview ? c.step : Math.max(c.step, attrs.step || c.step);
-        return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><div class="light-label">${label}</div>${deviceSettingsButton(c)}</div><label>${label} <output>${s.value === undefined ? "Unknown" : s.value + " " + esc(c.unit)}</output><input type="range" min="${min}" max="${max}" step="${step}" value="${s.value ?? c.defaultValue}" data-number="${c.id}" aria-label="${label}" ${disabled}></label>${entityNote(c)}</article>`;
-      }
-      if (c.type === "cover") {
-        const s = states.get(c.id),
-          f = preview
-            ? { open: true, close: true, position: true, stop: true }
-            : coverFeatures(s.entity);
-        const disabled = !preview && s.unavailable ? "disabled" : "";
-        const label = esc(c.label);
-        const actionLabel = (action) =>
-          c.motion === "none"
-            ? { open: "Up", close: "Down", stop: "Stop" }[action]
-            : action[0].toUpperCase() + action.slice(1);
-        const statusLabel =
-          c.motion === "none"
+    if (c.type === "button") {
+      const s = states.get(c.id),
+        label = esc(c.label);
+      return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${label}</span>${deviceSettingsButton(c)}</div><button data-press="${c.id}" aria-label="Run ${label}" ${!preview && s.unavailable ? "disabled" : ""}><span data-entity-icon="${c.id}" aria-hidden="true"></span> ${label}</button>${entityNote(c)}</article>`;
+    }
+    if (c.type === "number") {
+      const s = states.get(c.id),
+        label = esc(c.label),
+        disabled = !preview && s.unavailable ? "disabled" : "";
+      const attrs = s.entity?.attributes || {},
+        min = preview ? c.min : Math.max(c.min, attrs.min ?? c.min),
+        max = preview ? c.max : Math.min(c.max, attrs.max ?? c.max),
+        step = preview ? c.step : Math.max(c.step, attrs.step || c.step);
+      return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><div class="light-label">${label}</div>${deviceSettingsButton(c)}</div><label>${label} <output>${s.value === undefined ? "Unknown" : s.value + " " + esc(c.unit)}</output><input type="range" min="${min}" max="${max}" step="${step}" value="${s.value ?? c.defaultValue}" data-number="${c.id}" aria-label="${label}" ${disabled}></label>${entityNote(c)}</article>`;
+    }
+    if (c.type === "cover") {
+      const s = states.get(c.id),
+        f = preview
+          ? { open: true, close: true, position: true, stop: true }
+          : coverFeatures(s.entity);
+      const disabled = !preview && s.unavailable ? "disabled" : "";
+      const label = esc(c.label);
+      const actionLabel = (action) =>
+        c.motion === "none"
+          ? { open: "Up", close: "Down", stop: "Stop" }[action]
+          : action[0].toUpperCase() + action.slice(1);
+      const statusLabel =
+        !preview && !selected.bindings[c.id]
+          ? "Not connected"
+          : c.motion === "none"
             ? s.unavailable
               ? "Unavailable"
               : s.entity?.state === "opening"
@@ -331,7 +361,7 @@ function drawControls() {
             : preview
               ? `${Math.round(s.position)}% open · preview`
               : s.label;
-        return `<article class="light-card shade-card" data-control="${c.id}"><div class="device-heading"><div><div class="light-label">${label}</div><p class="light-state">${esc(statusLabel)}</p></div>${deviceSettingsButton(c)}</div>
+      return `<article class="light-card shade-card" data-control="${c.id}"><div class="device-heading"><div><div class="light-label">${label}</div><p class="light-state">${esc(statusLabel)}</p></div>${deviceSettingsButton(c)}</div>
           <div class="shade-actions">${["open", "stop", "close"]
             .filter(
               (action) =>
@@ -347,62 +377,79 @@ function drawControls() {
             .join("")}</div>
           ${f.position && c.capabilities.includes("position") ? `<div class="shade-position"><label class="shade-position-label" for="shade-position-${c.id}"><span>Opening</span><output>${s.position === undefined ? "Unknown" : Math.round(s.position) + "%"}</output></label><input id="shade-position-${c.id}" style="--shade-fill:${s.position ?? c.defaultPosition ?? 0}%" type="range" min="0" max="100" step="1" value="${s.position ?? c.defaultPosition ?? 0}" data-position="${c.id}" aria-label="${label} opening" aria-valuetext="${s.position === undefined ? "Position unknown" : Math.round(s.position) + " percent open"}" ${disabled}><div class="shade-endpoints"><span>Closed</span><span>Open</span></div></div>` : ""}
           ${entityNote(c)}</article>`;
-      }
-      const s = states.get(c.id),
-        f = preview
-          ? {
-              brightness: true,
-              color: true,
-              temperature: true,
-              minKelvin: 2000,
-              maxKelvin: 6500,
-              effects: [],
-              transition: false,
-            }
-          : lightFeatures(s.entity);
-      const waiting = pending.has(`${selected.id}/${c.id}`),
-        disabled = waiting || (!preview && s.unavailable) ? "disabled" : "";
-      const label = esc(c.label),
-        id = c.id;
-      const slider = (title, kind, min, max, value, extra = "") =>
-        `<label class="brightness ${kind === "temperature" ? "temperature-control" : ""}"><span>${title}</span><input aria-label="${label} ${kind === "temperature" ? "white temperature" : kind}" type="range" min="${min}" max="${max}" value="${value}" data-${kind}="${id}" ${disabled} ${extra}></label>`;
-      const temperature = Math.round(
-        Math.max(f.minKelvin, Math.min(f.maxKelvin, s.colorTempKelvin ?? 3000)),
-      );
-      const presets = [
-        ["Warm", 2700],
-        ["Neutral", 4000],
-        ["Cool", 6500],
-      ].filter(([, k]) => k >= f.minKelvin && k <= f.maxKelvin);
-      const extras = `${
-        f.color
-          ? `<div class="color-controls"><label class="color-picker">Color <input type="color" aria-label="${label} color" data-color="${id}" value="${rgbToHex(s.rgb)}" ${disabled}></label><div class="color-presets" aria-label="Color presets for ${label}">${[
-              ["Red", "#ff4242"],
-              ["Green", "#46e881"],
-              ["Blue", "#557bff"],
-              ["Purple", "#c261ff"],
-            ]
-              .map(
-                ([name, color]) =>
-                  `<button class="color-swatch" data-preset="${id}" data-hex="${color}" aria-label="Set ${label} to ${name.toLowerCase()}" style="--swatch:${color}" ${disabled}></button>`,
-              )
-              .join("")}</div></div>`
-          : ""
-      }
+    }
+    const s = states.get(c.id),
+      f = preview
+        ? {
+            brightness: true,
+            color: true,
+            temperature: true,
+            minKelvin: 2000,
+            maxKelvin: 6500,
+            effects: [],
+            transition: false,
+          }
+        : lightFeatures(s.entity);
+    const waiting = pending.has(`${selected.id}/${c.id}`),
+      disabled = waiting || (!preview && s.unavailable) ? "disabled" : "";
+    const label = esc(c.label),
+      id = c.id;
+    const slider = (title, kind, min, max, value, extra = "") =>
+      `<label class="brightness ${kind === "temperature" ? "temperature-control" : ""}"><span>${title}</span><input aria-label="${label} ${kind === "temperature" ? "white temperature" : kind}" type="range" min="${min}" max="${max}" value="${value}" data-${kind}="${id}" ${disabled} ${extra}></label>`;
+    const temperature = Math.round(
+      Math.max(f.minKelvin, Math.min(f.maxKelvin, s.colorTempKelvin ?? 3000)),
+    );
+    const presets = [
+      ["Warm", 2700],
+      ["Neutral", 4000],
+      ["Cool", 6500],
+    ].filter(([, k]) => k >= f.minKelvin && k <= f.maxKelvin);
+    const extras = `${
+      f.color
+        ? `<div class="color-controls"><label class="color-picker">Color <input type="color" aria-label="${label} color" data-color="${id}" value="${rgbToHex(s.rgb)}" ${disabled}></label><div class="color-presets" aria-label="Color presets for ${label}">${[
+            ["Red", "#ff4242"],
+            ["Green", "#46e881"],
+            ["Blue", "#557bff"],
+            ["Purple", "#c261ff"],
+          ]
+            .map(
+              ([name, color]) =>
+                `<button class="color-swatch" data-preset="${id}" data-hex="${color}" aria-label="Set ${label} to ${name.toLowerCase()}" style="--swatch:${color}" ${disabled}></button>`,
+            )
+            .join("")}</div></div>`
+        : ""
+    }
     ${f.temperature ? `<div class="white-controls">${slider(`White temperature <output>${temperature} K</output>`, "temperature", f.minKelvin, f.maxKelvin, temperature)}<div class="temperature-labels"><span>Warm · ${f.minKelvin} K</span><span>Cool · ${f.maxKelvin} K</span></div><div class="white-presets">${presets.map(([name, k]) => `<button data-white="${id}" data-kelvin="${k}" aria-label="Set ${label} to ${name.toLowerCase()} white" ${disabled}>${name}</button>`).join("")}</div><span class="muted small">${s.colorMode === "color_temp" ? "White temperature active" : "Select white to switch from color"}</span></div>` : ""}
     ${f.effects.length ? `<label class="light-option">Effect<select data-effect="${id}" aria-label="${label} effect" ${disabled}><option value="">Choose an effect</option>${f.effects.map((effect) => `<option value="${esc(effect)}" ${s.effect === effect ? "selected" : ""}>${esc(effect)}</option>`).join("")}</select></label>` : ""}
     ${f.transition ? `<label class="light-option">Fade on next change<select data-transition="${id}" aria-label="${label} fade" ${disabled}>${[0, 0.5, 1, 2, 5, 10].map((t) => `<option value="${t}" ${t === (fades.get(id) || 0) ? "selected" : ""}>${t ? t + " seconds" : "Instant"}</option>`).join("")}</select></label>` : ""}`;
-      const more = [
-        f.color && "Color",
-        f.temperature && "White",
-        f.effects.length && "Effects",
-        f.transition && "Fade",
-      ].filter(Boolean);
-      return `<article class="light-card" data-control="${id}"><div class="light-heading"><div><div class="light-label">${label}</div><div class="light-state">${waiting ? "Waiting for confirmation…" : preview ? (s.on ? "On · preview" : "Off · preview") : esc(s.label)}</div></div><div class="device-card-actions">${deviceSettingsButton(c)}<button role="switch" aria-label="${label}" aria-checked="${s.on}" class="switch" data-toggle="${id}" ${disabled}>${s.on ? "On" : "Off"}</button></div></div>
+    const more = [
+      f.color && "Color",
+      f.temperature && "White",
+      f.effects.length && "Effects",
+      f.transition && "Fade",
+    ].filter(Boolean);
+    return `<article class="light-card" data-control="${id}"><div class="light-heading"><div><div class="light-label">${label}</div><div class="light-state">${waiting ? "Waiting for confirmation…" : preview ? (s.on ? "On · preview" : "Off · preview") : esc(s.label)}</div></div><div class="device-card-actions">${deviceSettingsButton(c)}<button role="switch" aria-label="${label}" aria-checked="${s.on}" class="switch" data-toggle="${id}" ${disabled}>${s.on ? "On" : "Off"}</button></div></div>
     ${c.capabilities.includes("brightness") && f.brightness ? slider(`Brightness <output>${Math.round((s.brightness / 255) * 100)}%</output>`, "brightness", 1, 255, s.brightness) : ""}
     ${more.length ? `<details class="more-controls" data-more="${id}" ${openMore.has(id) ? "open" : ""}><summary>${more.join(" · ")}</summary><div class="more-body">${extras}</div></details>` : ""}
     ${entityNote(c)}</article>`;
-    })
+  });
+  const categories = [...new Set(visible.map(deviceGroup))];
+  $("controls").innerHTML = categories
+    .map(
+      (group) =>
+        `<section class="device-category"><h3>${esc(group)}</h3><div class="device-category-grid">${visible
+          .map((control, index) => {
+            if (deviceGroup(control) !== group) return "";
+            const connection = connectionState(
+              control,
+              selected,
+              status,
+              preview,
+            );
+            return `<div class="device-with-status"><span class="device-connection" data-kind="${connection.kind}">${esc(connection.label)}</span>${cardHTML[index]}</div>`;
+          })
+          .join("")}</div></section>`,
+    )
     .join("");
   for (const slot of document.querySelectorAll("[data-entity-icon]")) {
     const c = selected.controls.find((c) => c.id === slot.dataset.entityIcon);
@@ -648,18 +695,7 @@ $("controls").addEventListener("change", (e) => {
   if (d.transition) fades.set(d.transition, Number(input.value));
 });
 function drawModels() {
-  $("model-count").textContent = models.filter((m) => !m.houseView).length;
-  document.querySelector(".aside-bottom").hidden = !!models.length;
-  const ordered = [
-    ...models.filter((m) => !m.houseView),
-    ...models.filter((m) => m.houseView),
-  ];
-  $("models").innerHTML = ordered
-    .map(
-      (m) =>
-        `${m.houseView && m === ordered.find((r) => r.houseView) ? '<p class="house-library-heading">Houses &amp; floors</p>' : ""}<button data-model="${m.id}" class="${selected?.id === m.id ? "active" : ""}" ${selected?.id === m.id ? 'aria-current="true"' : ""}><span>${esc(m.title)}</span><small>${m.houseView ? esc(houseViewSummary(m)) : `${deviceEntries(m).filter((c) => (c.device ? [c.device.height, c.device.motion, ...c.device.macros].some((id) => m.bindings[id]) : m.bindings[c.id])).length}/${deviceEntries(m).length} connected ${m.areaId || m.floor ? "· " : ""}${esc(areas.find((a) => a.area_id === m.areaId)?.name || m.floor || "")}`}</small></button>`,
-    )
-    .join("");
+  workspace.draw();
 }
 function drawDaylight() {
   const config = selected?.daylight;
@@ -714,6 +750,7 @@ for (const id of ["daylight-mode", "sun-entity"])
     }
   };
 function roomSettingsDirty() {
+  if (selected?.houseView) return workspace.dirty();
   return (
     selected &&
     activeRoomTab === "settings" &&
@@ -764,17 +801,19 @@ function updateRoomSummary() {
       : selected.bindings[c.id],
   ).length;
   $("room-summary").innerHTML =
-    `<div class="status-item"><span>${total} ${total === 1 ? "device" : "devices"}</span><span aria-hidden="true">·</span><span>${bound} connected</span></div>${area ? `<span class="status-area">${esc(area.name)}</span>` : ""}${bound < total ? `<button type="button" data-open-mappings>Set up ${total - bound} ${total - bound === 1 ? "device" : "devices"}<span aria-hidden="true"> →</span></button>` : '<span class="status-ready">All devices connected</span>'}`;
+    `<div class="status-item"><span>${total} ${total === 1 ? "device" : "devices"}</span><span aria-hidden="true">·</span><span>${bound} connected</span></div>${area ? `<span class="status-area">${esc(area.name)}</span>` : ""}${bound < total ? `<button type="button" data-open-mappings>Set up ${total - bound} ${total - bound === 1 ? "device" : "devices"}<span aria-hidden="true"> →</span></button>` : total ? '<span class="status-ready">All devices connected</span>' : '<span class="status-ready">No devices in this room</span>'}`;
 }
 $("room-summary").addEventListener("click", (e) => {
   if (e.target.closest("[data-open-mappings]")) openDeviceSettings();
 });
 function setRoomTab(tab, { keepEditor = false } = {}) {
-  if (!["devices", "views", "settings"].includes(tab)) tab = "devices";
+  if (!["overview", "devices", "views", "settings"].includes(tab))
+    tab = "overview";
+  if (selected?.houseView && tab === "devices") tab = "overview";
   if (
     tab !== activeRoomTab &&
     roomSettingsDirty() &&
-    !confirm("Discard unsaved room settings?")
+    !confirm("Discard unsaved settings?")
   )
     return false;
   if (!keepEditor && tab !== activeRoomTab && !dashboardEditor.close())
@@ -782,6 +821,8 @@ function setRoomTab(tab, { keepEditor = false } = {}) {
   activeRoomTab = tab;
   document.body.dataset.roomTab = tab;
   $("dashboard").hidden = !selected || tab === "settings";
+  $("preview-label").hidden =
+    !selected || !!selected.houseView || tab !== "devices";
   $("floor-view").hidden = $("home-view").hidden =
     !selected || tab === "settings";
   document.querySelector(".room-tabs").hidden = !selected;
@@ -792,8 +833,12 @@ function setRoomTab(tab, { keepEditor = false } = {}) {
   $("controls-section").hidden =
     !selected || !!selected.houseView || tab !== "devices";
   $("saved-views-section").hidden = !selected || tab !== "views";
-  $("room-settings-section").hidden = !selected || tab !== "settings";
-  if (tab === "settings") drawRoomSettings();
+  $("room-settings-section").hidden =
+    !selected || !!selected.houseView || tab !== "settings";
+  $("house-settings-section").hidden =
+    !selected?.houseView || tab !== "settings";
+  if (tab === "settings" && selected?.houseView) workspace.drawFloors();
+  if (tab === "settings" && !selected?.houseView) drawRoomSettings();
   if (tab === "views") savedViews?.refresh();
   const url = new URL(location.href);
   url.searchParams.set("tab", tab);
@@ -1071,8 +1116,8 @@ window.addEventListener("beforeunload", (event) => {
     event.returnValue = "";
   }
 });
-async function choose(id, tab = "devices") {
-  if (roomSettingsDirty() && !confirm("Discard unsaved room settings?")) return;
+async function choose(id, tab = "overview") {
+  if (roomSettingsDirty() && !confirm("Discard unsaved settings?")) return;
   if (!dashboardEditor.close()) return;
   if (view) {
     for (const key of ["camera", "heading", "tilt", "zoom"])
@@ -1082,11 +1127,11 @@ async function choose(id, tab = "devices") {
   cameraNavigation.hidden = true;
   const current = ++selection;
   selected = models.find((m) => m.id === id);
-  if (selected?.houseView && tab === "settings") tab = "devices";
-  $("show-room-settings").hidden = !!selected?.houseView;
-  $("show-models").textContent = selected?.houseView
-    ? "Overview"
-    : "Room & devices";
+  if (selected?.houseView && tab === "devices") tab = "overview";
+  $("show-room-settings").hidden = false;
+  $("show-models").hidden = !!selected?.houseView;
+  workspace.closeLibrary();
+  $("show-models").textContent = "Devices";
   document.querySelector(".view-tools-title").textContent = selected?.houseView
     ? selected.houseFloor
       ? "Floor overview"
@@ -1110,7 +1155,7 @@ async function choose(id, tab = "devices") {
   setRoomTab(tab, { keepEditor: true });
   savedViews?.refresh();
   const houseId = selected.houseId || selected.housePlacement?.houseId;
-  $("dashboard-scope").hidden = !houseId;
+  $("dashboard-scope").hidden = true;
   $("dashboard-scope").replaceChildren(
     ...[
       selected,
@@ -1136,7 +1181,7 @@ async function choose(id, tab = "devices") {
       .map((m) => new Option(m.houseFloor?.name || "Whole house", m.id)),
   );
   $("dashboard-house-scope").value = selected.id;
-  $("title").textContent = selected.title;
+  $("title").textContent = roomName(selected);
   $("model-type").textContent = selected.houseView
     ? selected.houseFloor
       ? "HOUSE FLOOR"
@@ -1149,11 +1194,13 @@ async function choose(id, tab = "devices") {
   $("floor-view").hidden = activeRoomTab === "settings";
   $("dashboard").hidden = activeRoomTab === "settings";
   $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
-  $("preview-label").hidden = !!selected.houseView;
+  $("preview-label").hidden =
+    !!selected.houseView || activeRoomTab !== "devices";
   $("controls-section").hidden =
     !!selected.houseView || activeRoomTab !== "devices";
   $("control-count").textContent = `${selected.controls.length} devices`;
   $("view-hint").textContent = "Drag to rotate · Scroll to zoom";
+  $("retry-scene").hidden = true;
   $("scene-status").hidden = false;
   $("scene-status").dataset.state = "loading";
   $("scene-status").textContent = "Loading your model…";
@@ -1172,7 +1219,7 @@ async function choose(id, tab = "devices") {
           )
           ?.focus();
       },
-      { mode: viewMode },
+      { mode: viewMode, onRoomPick: (id) => workspace.focusRoom(id) },
     );
     $("scene-status").textContent = "Downloading your room…";
     const layers = [],
@@ -1180,7 +1227,9 @@ async function choose(id, tab = "devices") {
     let loaded;
     try {
       if (model.members) {
-        for (const member of model.members) {
+        for (const [index, member] of model.members.entries()) {
+          $("scene-status").textContent =
+            `Loading room ${index + 1} of ${model.members.length}…`;
           const source = models.find((m) => m.id === member.model);
           if (!source) throw new Error("A room in this house is missing.");
           const url = native
@@ -1212,9 +1261,11 @@ async function choose(id, tab = "devices") {
     $("scene-status").dataset.state = "error";
     $("scene-status").textContent =
       "Could not display this model: " + e.message;
-    toast("The model could not be displayed.");
+    $("retry-scene").hidden = false;
+    toast("The model could not be displayed. Try loading it again.");
   }
 }
+$("retry-scene").onclick = () => choose(selected.id, activeRoomTab);
 $("models").addEventListener("click", (e) => {
   const b = e.target.closest("[data-model]");
   if (b) {
@@ -1250,13 +1301,16 @@ const dashboardEditor = initDashboardEditor({
     $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
   },
 });
-$("preview").onchange = () => {
+$("control-mode").onchange = () => {
+  $("preview").checked = $("control-mode").value === "simulation";
   preview = $("preview").checked;
   drawControls();
 };
 for (const id of ["add-model", "empty-add"])
   $(id).onclick = () => {
+    workspace.closeLibrary();
     $("import-error").textContent = "";
+    importSummary.reset();
     $("import-progress").hidden = true;
     $("import-dialog").showModal();
   };
@@ -1282,6 +1336,7 @@ $("import-form").onsubmit = async (e) => {
     $("import-error").textContent = "Choose a ZIP smaller than 100 MB.";
     return;
   }
+  if (!(await importSummary.ready())) return;
   $("import-form").setAttribute("aria-busy", "true");
   $("import-submit").disabled = true;
   $("import-submit").textContent = "Uploading model…";
@@ -1299,18 +1354,22 @@ $("import-form").onsubmit = async (e) => {
     progress.preparing();
     $("import-submit").textContent = "Preparing 3D view…";
     models = await api("models");
-    await choose(result.id);
+    await choose(result.viewId || result.id);
     progress.complete();
     $("import-dialog").close();
     $("import-form").reset();
-    toast("Room imported. Connect its devices, then save a dashboard view.");
+    toast(
+      result.roomCount
+        ? `House imported: ${result.roomCount} rooms. Connect their devices, then save a dashboard view.`
+        : "Room imported. Connect its devices, then save a dashboard view.",
+    );
   } catch (e) {
     progress.failed();
     $("import-error").textContent = e.message;
   } finally {
     $("import-form").setAttribute("aria-busy", "false");
     $("import-submit").disabled = false;
-    $("import-submit").textContent = "Import room";
+    $("import-submit").textContent = "Import ZIP";
   }
 };
 const lightDomains = /^(light|switch)\./,
@@ -1546,7 +1605,9 @@ try {
     await choose(
       models.find(
         (m) => m.id === new URL(location.href).searchParams.get("model"),
-      )?.id || models[0].id,
+      )?.id ||
+        models.find((m) => m.houseView && !m.houseFloor)?.id ||
+        models[0].id,
       initialRoomTab,
     );
   if (native) {
@@ -1582,6 +1643,19 @@ const { initComponents } = await import("./components.js");
 savedViews = initComponents({
   api,
   preview: native?.preview,
+  selectModel: async (id) => {
+    await choose(id, "views");
+    return selected?.id === id;
+  },
+  scopeModels: () =>
+    selected?.houseView
+      ? models
+          .filter(
+            (m) =>
+              (m.houseId || m.housePlacement?.houseId) === selected.houseId,
+          )
+          .map((m) => m.id)
+      : [selected?.id],
   room: () => selected,
   editor: dashboardEditor,
   toast,

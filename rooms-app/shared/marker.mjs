@@ -1,8 +1,13 @@
-import { climateState } from "./climate.mjs";
+import { climateState, climateAppearance } from "./climate.mjs";
 /** Presentation only: actual entity state remains the source of truth. */
 export function markerAppearance(control, entity, state, preview = false) {
   if (control.type === "climate") {
-    const s = climateState(entity);
+    const s = entity
+        ? climateState(entity)
+        : state?.mode
+          ? state
+          : climateState(undefined),
+      visual = climateAppearance(s);
     return {
       active: s.on,
       unavailable: s.unavailable,
@@ -10,12 +15,16 @@ export function markerAppearance(control, entity, state, preview = false) {
       badge: s.unavailable
         ? "Unavailable"
         : s.temperature === undefined
-          ? s.mode
-          : `${s.temperature}°`,
+          ? visual.label
+          : `${visual.label} · ${s.temperature}°`,
       description: s.unavailable
         ? "Unavailable"
-        : `${s.mode}, Home Assistant climate controls`,
-      stateObj: entity,
+        : `${visual.label}, Home Assistant climate controls`,
+      stateObj: entity || {
+        entity_id: "climate.three_d_rooms_preview",
+        state: s.mode || "unavailable",
+        attributes: { icon: "mdi:air-conditioner" },
+      },
     };
   }
   if (control.type === "button") {

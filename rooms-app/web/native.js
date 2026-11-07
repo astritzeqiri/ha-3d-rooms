@@ -35,6 +35,7 @@ export async function connectNative() {
     return res;
   };
   return {
+    moreInfo: bridge.moreInfo,
     preview: (component) => bridge.preview(component),
     async api(path, options = {}) {
       if (path === "models" && options.method === "POST")

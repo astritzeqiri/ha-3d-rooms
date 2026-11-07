@@ -70,6 +70,55 @@ class PackageTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.store = models.ModelStore(self.temp.name).open()
 
+    def house_package(self, changes=None):
+        placement = {"schemaVersion": 1, "houseId": "house-test", "houseName": "Test house", "roomId": "kitchen", "transform": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1], "floors": [{"id": "ground", "name": "Ground", "minY": 0, "maxY": 3}], "floorIds": ["ground"]}
+        entries = {}
+        for index, room in enumerate(["kitchen", "office"]):
+            pose = {**placement, "roomId": room, "transform": [*placement["transform"]]}
+            pose["transform"][12] = index * 4
+            change = {"id": room, "title": room.title(), "housePlacement": pose}
+            change.update((changes or {}).get(room, {}))
+            entries[f"rooms/{room}.zip"] = package(manifest_change=change, bindings={"ceiling": "light.demo"})
+        entries["house-manifest.json"] = json.dumps({"format": "three-d-rooms-house/1", "houseId": "house-test", "houseName": "Test house", "rooms": ["rooms/kitchen.zip", "rooms/office.zip"]})
+        output = BytesIO()
+        with zipfile.ZipFile(output, "w") as archive:
+            for name, data in entries.items():
+                archive.writestr(name, data)
+        return output.getvalue()
+
+    def test_full_house_import_persists_rooms_controls_positions_and_views(self):
+        result = self.store.install_upload(self.house_package())
+        self.assertEqual(result["roomCount"], 2)
+        self.assertEqual(result["ids"], ["kitchen", "office"])
+        reopened = models.ModelStore(self.temp.name).open()
+        self.assertEqual(reopened.find("office")["housePlacement"]["transform"][12], 4)
+        self.assertEqual(reopened.find("kitchen")["bindings"], {"ceiling": "light.demo"})
+        self.assertEqual(reopened.find("office")["housePlacement"]["floorIds"], ["ground"])
+        self.assertTrue(any(m.get("houseView") for m in reopened.catalog()))
+
+    def test_full_house_invalid_second_room_rolls_back_everything(self):
+        with self.assertRaises(ValueError):
+            self.store.install_upload(self.house_package({"office": {"units": "feet"}}))
+        self.assertEqual(self.store.models, [])
+        self.assertEqual(list((Path(self.temp.name) / "models").iterdir()), [])
+
+    def test_full_house_duplicate_keeps_existing_mapping(self):
+        self.store.install(package(bindings={"ceiling": "light.existing"}))
+        with self.assertRaises(ValueError):
+            self.store.install_upload(self.house_package())
+        self.assertEqual(len(self.store.models), 1)
+        self.assertEqual(self.store.find("kitchen")["bindings"], {"ceiling": "light.existing"})
+
+    def test_full_house_catalog_failure_removes_staged_rooms(self):
+        with patch.object(self.store, "save", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError):
+                self.store.install_upload(self.house_package())
+        self.assertEqual(self.store.models, [])
+        self.assertEqual(list((Path(self.temp.name) / "models").iterdir()), [])
+
+    def test_upload_still_accepts_single_room(self):
+        self.assertEqual(self.store.install_upload(package())["id"], "kitchen")
+
     def test_daylight_import_persistence_and_settings_validation(self):
         daylight = {"mode": "night", "entity": "sun.sun", "windows": [
             {"id": "window", "nodeId": "glass", "position": [0, 2, 1], "inward": [0, 0, -1], "width": 1, "height": 1}

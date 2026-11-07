@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { initMarkerEditor } from "../web/marker-editor.js";
 
-function harness() {
+function harness(extraControls = []) {
   class Element {
     constructor() {
       this.children = [];
@@ -113,6 +113,7 @@ function harness() {
       controls: [
         { id: "light", label: "Light", type: "light" },
         { id: "shade", label: "Shade", type: "cover" },
+        ...extraControls,
       ],
     }),
     scene: () => scene,
@@ -370,5 +371,60 @@ test("outside-click dismissal does not cancel click-to-place", () => {
   h.viewport.listeners.pointerdown(h.event());
   h.viewport.listeners.pointerup(h.event());
   assert.deepEqual(h.editor.read().light.offset, [9, 2, 2]);
+  h.editor.close();
+});
+
+test("AC editor marker uses a climate icon and reported mode rather than a bulb and On", () => {
+  const h = harness([{ id: "ac", type: "climate", label: "Air conditioner" }]);
+  const layer = h.viewport.children.find(
+    (el) => el.className === "marker-editor-overlay",
+  );
+  const button = layer.children.find((el) => el.dataset.markerId === "ac");
+  assert.match(button.html, /M4 3h16/);
+  assert.doesNotMatch(button.html, /M12 2a7/);
+  h.scene.lastStates = new Map([
+    [
+      "ac",
+      {
+        on: true,
+        mode: "cool",
+        action: "cooling",
+        temperature: 24,
+        unavailable: false,
+      },
+    ],
+  ]);
+  h.scene.options.onRender();
+  assert.equal(
+    button.querySelector(".marker-editor-badge").textContent,
+    "Cooling · 24°",
+  );
+  assert.equal(button.dataset.active, "true");
+  h.scene.lastStates.set("ac", {
+    on: true,
+    mode: "heat",
+    action: "heating",
+    temperature: 25,
+    unavailable: false,
+  });
+  h.scene.options.onRender();
+  assert.equal(
+    button.querySelector(".marker-editor-badge").textContent,
+    "Heating · 25°",
+  );
+  h.scene.lastStates.set("ac", { on: false, mode: "off", unavailable: false });
+  h.scene.options.onRender();
+  assert.equal(button.querySelector(".marker-editor-badge").textContent, "Off");
+  assert.equal(button.dataset.active, "false");
+  h.scene.lastStates.set("ac", {
+    on: false,
+    mode: "unknown",
+    unavailable: true,
+  });
+  h.scene.options.onRender();
+  assert.equal(
+    button.querySelector(".marker-editor-badge").textContent,
+    "Unavailable",
+  );
   h.editor.close();
 });
