@@ -183,3 +183,25 @@ test("house room selection highlights the placed room and replaces its previous 
   assert.equal(view.roomHighlight, null);
   assert.equal(view.scene.children.length, 1);
 });
+
+test("Floor plan clears an angled camera and uses the exact Top orthographic preset", () => {
+  const view = Object.create(SceneView.prototype);
+  view.model = { id: "house" };
+  let event;
+  view.options = {
+    mode: "front",
+    tilt: 60,
+    heading: 135,
+    zoom: 2,
+    camera: { projection: "perspective" },
+    onCameraChange: (value) => (event = value),
+  };
+  view.setView = (mode) => (view.options.mode = mode);
+  view.setFloorPlan();
+  assert.equal(view.options.mode, "floor");
+  assert.equal(view.options.tilt, 0);
+  assert.equal(view.options.heading, 0);
+  assert.equal(view.options.camera, undefined);
+  assert.equal(view.options.zoom, 1);
+  assert.equal(event.source, "preset");
+});

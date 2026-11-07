@@ -78,7 +78,7 @@ class PackageTests(unittest.TestCase):
             pose["transform"][12] = index * 4
             change = {"id": room, "title": room.title(), "housePlacement": pose}
             change.update((changes or {}).get(room, {}))
-            entries[f"rooms/{room}.zip"] = package(manifest_change=change, bindings={"ceiling": "light.demo"})
+            entries[f"rooms/{room}.zip"] = package(manifest_change=change, bindings={} if change.get("controls") == [] else {"ceiling": "light.demo"})
         entries["house-manifest.json"] = json.dumps({"format": "three-d-rooms-house/1", "houseId": "house-test", "houseName": "Test house", "rooms": ["rooms/kitchen.zip", "rooms/office.zip"]})
         output = BytesIO()
         with zipfile.ZipFile(output, "w") as archive:
@@ -86,8 +86,93 @@ class PackageTests(unittest.TestCase):
                 archive.writestr(name, data)
         return output.getvalue()
 
+    def test_house_preview_and_replace_preserve_matching_configuration(self):
+        self.store.install_upload(self.house_package())
+        self.store.bind("kitchen", "ceiling", "light.local")
+        self.store.update_room("kitchen", {"title": "My kitchen", "areaId": "local-area", "floorLinks": {"ground": "ha-ground"}})
+        before = Path(self.temp.name, "catalog.json").read_bytes()
+        data = self.house_package({"kitchen": {"id": "new-kitchen-export"}})
+        preview = self.store.replace_house("house-test", data, preview=True)
+        self.assertEqual(before, Path(self.temp.name, "catalog.json").read_bytes())
+        self.assertEqual(preview["keptRooms"], 2)
+        self.store.replace_house("house-test", data, preview["revision"])
+        reopened = models.ModelStore(self.temp.name).open()
+        kitchen = reopened.find("kitchen")
+        self.assertEqual(kitchen["title"], "My kitchen")
+        self.assertEqual(kitchen["bindings"]["ceiling"], "light.local")
+        self.assertEqual(kitchen["areaId"], "local-area")
+        self.assertEqual(kitchen["housePlacement"]["floors"][0]["haFloorId"], "ha-ground")
+        self.assertEqual(len(list(Path(self.temp.name, "models").iterdir())), 2)
+
+    def test_house_preview_reports_removed_control_mappings(self):
+        self.store.install_upload(self.house_package())
+        data = self.house_package({"kitchen": {"controls": []}})
+        preview = self.store.replace_house("house-test", data, preview=True)
+        self.assertEqual(preview["removedBindings"], ["Kitchen: ceiling"])
+        self.assertEqual(self.store.find("kitchen")["bindings"], {"ceiling": "light.demo"})
+
+    def test_house_replacement_failure_and_stale_preview_leave_library_intact(self):
+        self.store.install_upload(self.house_package())
+        before = Path(self.temp.name, "catalog.json").read_bytes()
+        folders = sorted(p.name for p in Path(self.temp.name, "models").iterdir())
+        revision = self.store.house_summary("house-test")["revision"]
+        for data in [package(), self.house_package({"office": {"units": "feet"}})]:
+            with self.assertRaises(ValueError):
+                self.store.replace_house("house-test", data, revision)
+        with patch.object(self.store, "save", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError):
+                self.store.replace_house("house-test", self.house_package(), revision)
+        self.assertEqual(before, Path(self.temp.name, "catalog.json").read_bytes())
+        self.assertEqual(folders, sorted(p.name for p in Path(self.temp.name, "models").iterdir()))
+        self.store.bind("kitchen", "ceiling", "light.changed")
+        with self.assertRaisesRegex(ValueError, "changed"):
+            self.store.replace_house("house-test", self.house_package(), revision)
+        with self.assertRaisesRegex(ValueError, "changed"):
+            self.store.remove_house("house-test", revision)
+
+    def test_delete_house_removes_its_views_and_retains_other_rooms(self):
+        self.store.install_upload(self.house_package())
+        self.store.install(package(manifest_change={"id": "unrelated"}))
+        for identifier, model in [("house-view", "h-house-test"), ("room-view", "kitchen"), ("other-view", "unrelated")]:
+            self.store.put_component({"schemaVersion": 1, "id": identifier, "title": identifier, "height": 500,
+                "layers": [{"model": model, "view": "front", "heading": 0, "tilt": 28, "zoom": 1}]})
+        revision = self.store.house_summary("house-test")["revision"]
+        before = Path(self.temp.name, "catalog.json").read_bytes()
+        with patch.object(self.store, "save", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError): self.store.remove_house("house-test", revision)
+        self.assertEqual(len(self.store.components), 3)
+        self.assertEqual(before, Path(self.temp.name, "catalog.json").read_bytes())
+        self.store.remove_house("house-test", revision)
+        reopened = models.ModelStore(self.temp.name).open()
+        self.assertEqual([m["id"] for m in reopened.models], ["unrelated"])
+        self.assertEqual([c["id"] for c in reopened.components], ["other-view"])
+        self.assertEqual(len(list(Path(self.temp.name, "models").iterdir())), 1)
+
+    def test_replace_house_rejects_conflicts_with_other_rooms(self):
+        self.store.install_upload(self.house_package())
+        self.store.install(package(manifest_change={"id": "unrelated"}))
+        data = self.house_package({"office": {"id": "unrelated", "housePlacement": {**self.store.find("office")["housePlacement"], "roomId": "different"}}})
+        before = Path(self.temp.name, "catalog.json").read_bytes()
+        with self.assertRaisesRegex(ValueError, "conflicts"):
+            self.store.replace_house("house-test", data, preview=True)
+        self.assertEqual(before, Path(self.temp.name, "catalog.json").read_bytes())
+
+    def test_replace_house_prunes_only_removed_room_views(self):
+        self.store.install_upload(self.house_package())
+        for identifier, model in [("house-view", "h-house-test"), ("room-view", "office")]:
+            self.store.put_component({"schemaVersion": 1, "id": identifier, "title": identifier, "height": 500,
+                "layers": [{"model": model, "view": "front", "heading": 0, "tilt": 28, "zoom": 1}]})
+        pose = {**self.store.find("office")["housePlacement"], "roomId": "new-room"}
+        data = self.house_package({"office": {"id": "new-room", "housePlacement": pose}})
+        preview = self.store.replace_house("house-test", data, preview=True)
+        self.assertEqual(preview["removedViews"], ["room-view"])
+        self.store.replace_house("house-test", data, preview["revision"])
+        self.assertEqual([c["id"] for c in self.store.components], ["house-view"])
+        self.assertEqual({m["id"] for m in self.store.models}, {"kitchen", "new-room"})
+
     def test_full_house_import_persists_rooms_controls_positions_and_views(self):
         result = self.store.install_upload(self.house_package())
+        self.assertTrue(any(m.get("houseFloor") for m in self.store.catalog({})))
         self.assertEqual(result["roomCount"], 2)
         self.assertEqual(result["ids"], ["kitchen", "office"])
         reopened = models.ModelStore(self.temp.name).open()
@@ -368,7 +453,8 @@ class ComponentTests(unittest.TestCase):
                 models.validate_component({**value, "show_title": "false"}, ["kitchen"])
 
     def test_device_marker_settings_roundtrip_and_validation(self):
-        markers = {"ceiling": {"visible": False, "size": 44, "show_label": False,
+        markers = {"_defaults": {"size": 56, "placement": "tray", "show_label": False},
+                   "ceiling": {"visible": False, "size": 44, "show_label": False,
                                "placement": "room", "offset": [1, 0.25, -2]},
                    "desk": {"placement": "tray"}}
         with tempfile.TemporaryDirectory() as directory:

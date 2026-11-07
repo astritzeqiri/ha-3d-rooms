@@ -715,3 +715,35 @@ summary:focus-visible {
     min-height: 64px;
   }
 }
+
+#house-management {
+  margin-top: 24px;
+}
+#house-management .actions,
+#house-action-dialog .actions,
+#house-view-dialog .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+#house-file-field,
+#house-view-form > label {
+  display: grid;
+  gap: 8px;
+  margin-block: 20px;
+}
+#house-file {
+  max-width: 100%;
+}
+#house-action-summary {
+  overflow-wrap: anywhere;
+}
+#house-action-summary:empty {
+  display: none;
+}
+#house-action-summary:not(:empty) {
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+  padding-top: 16px;
+}

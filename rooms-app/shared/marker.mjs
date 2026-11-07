@@ -132,3 +132,7 @@ export function markerAppearance(control, entity, state, preview = false) {
     stateObj,
   };
 }
+
+/** Shared wall-mounted AC glyph for the viewer and dashboard. */
+export const AC_ICON_PATH =
+  '<path fill-rule="evenodd" d="M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z"/><path d="M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z"/>';

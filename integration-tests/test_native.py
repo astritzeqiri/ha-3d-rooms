@@ -82,8 +82,29 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
             duplicate = await self.api.ModelUploadView(self.hass).post(request)
         self.assertEqual(duplicate.status, 400)
         self.assertEqual(len(self.store.models), 2)
+        class HouseRequest(dict):
+            headers = {}
+        house_request = HouseRequest(hass_user=SimpleNamespace(is_admin=True))
+        view = self.api.HouseReplaceView(self.hass)
+        before = (self.store.directory / "catalog.json").read_bytes()
+        with patch.object(self.api, "read_upload", AsyncMock(return_value=payload)):
+            preview = await view.post(house_request, "house-test")
+            self.assertEqual(preview.status, 200)
+            self.assertEqual(before, (self.store.directory / "catalog.json").read_bytes())
+            invalid = await view.put(house_request, "house-test")
+            self.assertEqual(invalid.status, 400)
+            house_request.headers = {"X-Rooms-Revision": json.loads(preview.body)["revision"]}
+            replaced = await view.put(house_request, "house-test")
+            self.assertEqual(replaced.status, 200)
+            denied = HouseRequest(hass_user=SimpleNamespace(is_admin=False))
+            with self.assertRaises(self.api.web.HTTPForbidden):
+                await view.put(denied, "house-test")
+        summary = await self.runtime.request("house_summary", {"house": "house-test"}, "user")
+        await self.runtime.request("delete_house", {"house": "house-test", "revision": summary["revision"]}, "user")
+        self.assertEqual(self.store.models, [])
 
-    async def test_house_views_are_presentation_only_and_rooms_keep_device_controls(self):
+
+    async def test_house_and_floor_views_keep_mapped_device_controls(self):
         from homeassistant.helpers import floor_registry
         await floor_registry.async_load(self.hass)
         floors = floor_registry.async_get(self.hass)
@@ -117,7 +138,7 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
             component={"schemaVersion":1,"id":f"house-scope-{index}","title":scope["title"],"height":500,"layers":[{"model":scope["id"],"view":"front","heading":0,"tilt":28,"zoom":1}]}
             saved=await self.runtime.request("save_component",{**component,"markers":{"ceiling":{"size":44}}},"test-user")
             self.assertEqual(saved["layers"][0]["model"],scope["id"])
-            self.assertNotIn("markers",saved)
+            self.assertEqual(saved["markers"]["ceiling"]["size"],44)
         calls=[]
         async def handle(call):
             calls.append(call)
@@ -126,9 +147,13 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
         catalog=await self.runtime.request("models",{},"test-user")
         for view in [m for m in catalog if m.get("houseView") and m["controls"]]:
             self.assertEqual(view["bindings"][view["controls"][0]["id"]],"light.kitchen")
-            with self.assertRaisesRegex(ValueError,"presentation-only"):
-                await self.runtime.request("command",{"model":view["id"],"controlId":view["controls"][0]["id"],"action":"on"},"test-user")
-        self.assertEqual(calls,[])
+            await self.runtime.request("command",{"model":view["id"],"controlId":view["controls"][0]["id"],"action":"on"},"test-user")
+            self.assertEqual(calls[-1].data["entity_id"],"light.kitchen")
+            self.assertEqual(calls[-1].context.user_id,"test-user")
+            with self.assertRaises(ValueError):
+                await self.runtime.request("command",{"model":view["id"],"controlId":"not-in-this-space","action":"on"},"test-user")
+        self.assertEqual(len(calls),len([m for m in catalog if m.get("houseView") and m["controls"]]))
+        calls.clear()
         await self.runtime.request("command",{"model":"kitchen","controlId":"ceiling","action":"on"},"test-user")
         self.assertEqual(len(calls),1)
         self.assertEqual(calls[0].data["entity_id"],"light.kitchen")

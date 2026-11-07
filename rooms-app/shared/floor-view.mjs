@@ -1,5 +1,5 @@
-/** Fit all eight bounds corners to a slightly tilted orthographic camera. */
-export function floorFrame(min, max, aspect, tilt = 8, heading = 0) {
+/** Fit all eight bounds corners to a top-down orthographic camera. */
+export function floorFrame(min, max, aspect, tilt = 0, heading = 0) {
   if (
     ![...min, ...max, aspect, tilt, heading].every(Number.isFinite) ||
     aspect <= 0 ||

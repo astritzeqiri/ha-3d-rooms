@@ -202,7 +202,7 @@ export function initWorkspace({
       ? "Rooms in this space"
       : "Room at a glance";
     $("space-inspector").innerHTML =
-      `<div class="inspector-heading"><span class="eyebrow">${model.houseView ? "EXPLORE" : "OVERVIEW"}</span><h2>${heading}</h2></div><p class="muted small">${model.houseView ? "Select a room here or in the 3D model." : "Connect devices, adjust room settings, or create a dashboard view."}</p><div class="space-room-list">${rooms
+      `<div class="inspector-heading"><span class="eyebrow">${model.houseView ? "EXPLORE" : "OVERVIEW"}</span><h2>${heading}</h2></div><p class="muted small">${model.houseView ? "Select a room here or in the 3D model." : "Connect devices and adjust room settings."}</p><div class="space-room-list">${rooms
         .map(
           (room) =>
             `<article class="space-room ${focusedRoom === room.id ? "is-selected" : ""}"><button class="room-select" data-focus-room="${esc(room.id)}" ${model.houseView ? `aria-pressed="${focusedRoom === room.id}"` : ""}><span>${esc(roomName(room))}</span><small>${deviceEntries(room).length} devices · ${esc(

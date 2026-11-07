@@ -26,6 +26,39 @@
         Spaces</button
       ><span id="connection" role="status">Connecting…</span>
     </header>
+    <nav class="workspace-navigation" aria-label="3D Rooms workspaces">
+      <div class="workspace-switcher">
+        <button id="nav-home" type="button" aria-pressed="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7" /></svg
+          >My home
+        </button>
+        <button id="nav-views" type="button" aria-pressed="false">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" /></svg
+          >Dashboard views
+        </button>
+      </div>
+    </nav>
     <main>
       <button
         id="library-scrim"
@@ -73,7 +106,12 @@
             <h1 id="title">Bring your home into view</h1>
           </div>
           <div class="toolbar-actions">
-            <select id="space-floor" aria-label="Explore floor" hidden></select>
+            <select
+              id="space-floor"
+              aria-label="Show in 3D"
+              title="Show the whole house or one floor in 3D"
+              hidden
+            ></select>
             <select
               id="dashboard-scope"
               aria-label="Dashboard view scope"
@@ -100,13 +138,6 @@
             Devices
           </button>
           <button
-            id="show-components"
-            aria-pressed="false"
-            data-room-tab="views"
-          >
-            Dashboard views
-          </button>
-          <button
             id="show-room-settings"
             aria-pressed="false"
             data-room-tab="settings"
@@ -120,9 +151,32 @@
               <span class="view-tools-title">Room overview</span>
               <div class="camera-actions" role="group" aria-label="Room camera">
                 <button id="floor-view" aria-pressed="false" hidden>
-                  Floor plan
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M3 12h9V3M12 12v9M12 16h9" /></svg
+                  >Floor plan
                 </button>
-                <button id="home-view" hidden>Reset camera</button>
+                <button id="home-view" hidden>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 10a9 9 0 1 1 2 8M3 4v6h6" /></svg
+                  >Reset camera
+                </button>
               </div>
             </div>
             <div id="viewport">
@@ -192,19 +246,34 @@
                 class="panel-close"
                 aria-label="Back to views"
               >
-                Back to views
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m10 6-6 6 6 6M4 12h16" /></svg
+                >Back to views
               </button>
             </div>
             <p class="muted">
               Drag the room to frame your view, or choose a camera preset.
             </p>
             <form id="dashboard-form">
-              <label id="dashboard-house-scope-field" class="panel-field" hidden
-                >House / floor<select
-                  id="dashboard-house-scope"
-                  aria-label="House dashboard floor"
-                ></select
-              ></label>
+              <section
+                class="view-content-summary"
+                aria-labelledby="view-content-heading"
+              >
+                <h3 id="view-content-heading">What to show</h3>
+                <p id="view-content-name"></p>
+                <button id="change-view-content" type="button">
+                  Change space
+                </button>
+                <p id="view-content-note" class="muted small"></p>
+              </section>
               <label class="panel-field"
                 >Camera preset<select id="dashboard-preset">
                   <option value="">Current view</option>
@@ -382,6 +451,23 @@
         <section id="house-settings-section" hidden>
           <h2>House floors</h2>
           <form id="house-floor-form" class="room-settings-card"></form>
+          <section
+            id="house-management"
+            class="room-settings-card"
+            aria-labelledby="house-management-title"
+          >
+            <h2 id="house-management-title">House model</h2>
+            <p>
+              Replace all rooms using a full-house ZIP, or delete this house
+              from your library. Your Home Assistant devices are never deleted.
+            </p>
+            <div class="actions">
+              <button id="house-replace" type="button">Replace house…</button
+              ><button id="house-delete" class="danger" type="button">
+                Delete house…
+              </button>
+            </div>
+          </section>
         </section>
         <section id="controls-section" hidden>
           <div class="section-title">
@@ -446,26 +532,41 @@
           <div class="views-library-heading">
             <div class="views-library-intro">
               <span class="eyebrow">DASHBOARD LIBRARY</span>
-              <h2 id="saved-views-heading">
+              <h1 id="saved-views-heading">
                 Dashboard views
                 <span id="saved-view-count" class="views-count">0</span>
-              </h2>
+              </h1>
               <p class="muted">
-                Save house, floor and room views for your dashboards. Choose a
-                thumbnail to edit its framing.
+                One place for every house, floor and room view. Choose what to
+                show, frame it, then use it on your dashboard.
               </p>
             </div>
             <div class="views-library-actions">
               <button id="import-component">Import</button>
-              <button id="create-library-view" class="primary">
-                Create view
-              </button>
+              <button id="create-library-view" class="primary">New view</button>
             </div>
           </div>
           <p class="views-library-hint">
             Preview a view to see its dashboard card, or edit it to adjust the
             framing.
           </p>
+          <div class="view-library-filters">
+            <label
+              >Find a view<input
+                id="view-search"
+                type="search"
+                placeholder="Search views or spaces…"
+            /></label>
+            <label
+              >Show<select id="view-kind-filter">
+                <option value="all">All views</option>
+                <option value="house">Whole houses</option>
+                <option value="floor">Floors</option>
+                <option value="room">Rooms</option>
+              </select></label
+            >
+            <span id="view-results" class="muted small" role="status"></span>
+          </div>
           <p id="component-error" class="error" role="alert"></p>
           <div id="component-list" class="saved-view-grid"></div>
           <input
@@ -711,6 +812,76 @@
       <div class="dialog-actions">
         <button class="close primary">Done</button>
       </div>
+    </dialog>
+    <dialog id="house-action-dialog" aria-labelledby="house-action-title">
+      <form id="house-action-form">
+        <h2 id="house-action-title">Replace house</h2>
+        <p id="house-action-description"></p>
+        <label id="house-file-field"
+          >Full-house ZIP<input
+            id="house-file"
+            type="file"
+            accept=".zip,application/zip"
+        /></label>
+        <button id="house-review" type="button">Preview replacement</button>
+        <div id="house-action-summary" aria-live="polite"></div>
+        <p id="house-action-progress" role="status"></p>
+        <p id="house-action-error" class="error" role="alert"></p>
+        <div class="actions">
+          <button id="house-action-cancel" type="button">Cancel</button
+          ><button
+            id="house-action-confirm"
+            type="submit"
+            class="danger"
+            disabled
+          >
+            Replace house
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="view-scope-dialog" aria-labelledby="view-scope-title">
+      <form id="view-scope-form">
+        <span class="eyebrow">DASHBOARD VIEW</span>
+        <h2 id="view-scope-title">What would you like to show?</h2>
+        <p class="muted">Choose a space. Next, frame it in the live preview.</p>
+        <fieldset class="view-scope-kinds">
+          <legend class="sr-only">Type of space</legend>
+          <label
+            ><input type="radio" name="view-scope-kind" value="house" /><span
+              ><strong>Whole house</strong
+              ><small>All rooms together</small></span
+            ></label
+          >
+          <label
+            ><input type="radio" name="view-scope-kind" value="floor" /><span
+              ><strong>A floor</strong
+              ><small>One level of your home</small></span
+            ></label
+          >
+          <label
+            ><input type="radio" name="view-scope-kind" value="room" /><span
+              ><strong>A room</strong><small>A focused room view</small></span
+            ></label
+          >
+        </fieldset>
+        <div class="panel-field">
+          <label id="view-scope-label" for="view-scope-model">Space</label>
+          <select id="view-scope-model" required></select>
+        </div>
+        <p id="view-scope-summary" class="muted small" role="status"></p>
+        <p id="view-scope-reset" class="muted small" hidden>
+          Changing space resets camera framing and device presentation. Your
+          view name and dashboard links stay the same.
+        </p>
+        <p id="view-scope-error" class="error" role="alert"></p>
+        <div class="actions">
+          <button id="view-scope-cancel" type="button">Cancel</button>
+          <button id="view-scope-continue" class="primary" type="submit">
+            Continue to editor
+          </button>
+        </div>
+      </form>
     </dialog>
     <dialog id="delete-dialog">
       <h2>Remove this room?</h2>

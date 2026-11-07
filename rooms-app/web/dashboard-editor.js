@@ -34,7 +34,7 @@ export function initDashboardEditor({
         height: Number($("dashboard-height").value),
         ...(thumbnail ? { thumbnail } : {}),
 
-        ...(!model().houseView && Object.keys(markerEditor.read()).length
+        ...(Object.keys(markerEditor.read()).length
           ? { markers: markerEditor.read() }
           : {}),
         layers: [{ model: model().id, ...current }],
@@ -77,6 +77,9 @@ export function initDashboardEditor({
       Object.assign(scene().options, current);
     }
     $("dashboard-view").value = current.view;
+    window.dispatchEvent(
+      new CustomEvent("rooms-view-camera", { detail: { view: current.view } }),
+    );
     for (const key of fields) {
       const input = $("dashboard-" + key);
       // Keep an in-progress decimal intact while the user is typing.
@@ -100,6 +103,11 @@ export function initDashboardEditor({
       return;
     }
     const mode = $("dashboard-view").value;
+    if (mode === "floor" && current.view !== mode) {
+      scene().setFloorPlan();
+      sync({ source: "preset" });
+      return;
+    }
     applying = true;
     try {
       current = {
@@ -127,6 +135,10 @@ export function initDashboardEditor({
   }
   function close({ force = false } = {}) {
     if (panel.hidden) return true;
+    if (busy) {
+      toast("Wait for this view to finish saving.");
+      return false;
+    }
     if (!force && dirty() && !confirm("Discard unsaved view changes?"))
       return false;
     scene().options.onCameraChange = undefined;
@@ -144,7 +156,15 @@ export function initDashboardEditor({
   }
   $("dashboard").setAttribute("aria-controls", "dashboard-panel");
   $("dashboard").setAttribute("aria-expanded", "false");
-  function open(component, { draft = false } = {}) {
+  function open(
+    component,
+    {
+      draft = false,
+      reframe = false,
+      baselineSnapshot,
+      savedSnapshot: priorSavedSnapshot,
+    } = {},
+  ) {
     if (!panel.hidden && !close()) return false;
     if (!scene()?.model) {
       toast("Wait for the room to finish loading.");
@@ -156,10 +176,11 @@ export function initDashboardEditor({
     panel.hidden = false;
     document.body.classList.add("dashboard-editing");
     // A library opened directly has never laid out its hidden room canvas.
-    if (!component && fromLibrary) scene().fitFloor?.();
-    current = component
-      ? structuredClone(component.layers[0])
-      : scene().captureView();
+    if ((!component || reframe) && fromLibrary) scene().fitFloor?.();
+    current =
+      component && !reframe
+        ? structuredClone(component.layers[0])
+        : scene().captureView();
     if (!current) {
       panel.hidden = true;
       document.body.classList.remove("dashboard-editing");
@@ -191,13 +212,12 @@ export function initDashboardEditor({
     scene().setView(current.view);
     scene().options.onCameraChange = sync;
     $("dashboard").setAttribute("aria-expanded", "true");
-    $("dashboard-controls").hidden = !!model().houseView;
-    if (model().houseView) markerEditor.close();
-    else markerEditor.open(component?.markers);
+    $("dashboard-controls").hidden = false;
+    markerEditor.open(component?.markers);
     applying = false;
     sync();
-    baseline = JSON.stringify(read());
-    if (saved) savedSnapshot = baseline;
+    baseline = baselineSnapshot || JSON.stringify(read());
+    if (saved) savedSnapshot = priorSavedSnapshot || baseline;
     update();
     $("dashboard-panel-title").textContent = saved
       ? "Edit saved view"
@@ -212,7 +232,7 @@ export function initDashboardEditor({
     $("dashboard-title").focus({ preventScroll: true });
     return true;
   }
-  $("dashboard").onclick = () => open();
+
   $("preview-dashboard").hidden = !preview;
   $("preview-dashboard").onclick = async () => {
     try {
@@ -337,5 +357,10 @@ export function initDashboardEditor({
       event.returnValue = "";
     }
   });
-  return { close, open, dirty };
+  return {
+    close,
+    open,
+    dirty,
+    snapshot: () => ({ component: read(), saved, baseline, savedSnapshot }),
+  };
 }

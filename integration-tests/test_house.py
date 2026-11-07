@@ -86,13 +86,13 @@ class HouseTests(unittest.TestCase):
                 restored.update_room("kitchen",{"floorLinks":{"first":"same","second":"same"}})
             self.assertEqual(restored.models[0]["housePlacement"]["floors"][0]["haFloorId"],"downstairs")
 
-    def test_house_views_drop_marker_edits_without_affecting_room_views(self):
+    def test_house_views_preserve_marker_edits_without_affecting_room_views(self):
         with tempfile.TemporaryDirectory() as directory:
             store=models.ModelStore(directory).open()
             store.install(package(manifest_change={"housePlacement":placement()}))
             whole=next(m for m in store.catalog() if m.get("houseView") and not m.get("houseFloor"))
             value={"schemaVersion":1,"id":"house-overview","title":"House","height":500,"markers":{"ceiling":{"size":44}},"layers":[{"model":whole["id"],"view":"front","heading":0,"tilt":28,"zoom":1}]}
-            self.assertNotIn("markers",store.put_component(value))
+            self.assertEqual(store.put_component(value)["markers"]["ceiling"]["size"],44)
             value["id"]="room-overview";value["layers"][0]["model"]="kitchen"
             self.assertEqual(store.put_component(value)["markers"]["ceiling"]["size"],44)
 

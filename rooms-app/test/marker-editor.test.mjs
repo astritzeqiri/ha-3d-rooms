@@ -120,7 +120,8 @@ function harness(extraControls = []) {
     onChange: () => changed++,
   });
   editor.open();
-  const picker = fields.get("dashboard-marker-settings").children[0];
+  const defaults = fields.get("dashboard-marker-settings").children[0];
+  const picker = fields.get("dashboard-marker-settings").children[1];
   const viewport = fields.get("viewport");
   viewport.clientWidth = 386;
   viewport.clientHeight = 380;
@@ -139,6 +140,7 @@ function harness(extraControls = []) {
   });
   return {
     editor,
+    defaults,
     picker,
     inspector,
     rows,
@@ -426,5 +428,29 @@ test("AC editor marker uses a climate icon and reported mode rather than a bulb 
     button.querySelector(".marker-editor-badge").textContent,
     "Unavailable",
   );
+  h.editor.close();
+});
+
+test("view defaults stay inherited while per-device overrides and positions remain independent", () => {
+  const h = harness();
+  const size = h.defaults.querySelector('[data-setting="size"]');
+  size.value = "44";
+  size.onchange();
+  assert.equal(h.rows[0].querySelector('[data-setting="size"]').value, 44);
+  const own = h.rows[0].querySelector('[data-setting="size"]');
+  own.value = "24";
+  own.onchange();
+  const axis = h.rows[0].axes[0];
+  axis.value = "1";
+  axis.validity = { valid: true };
+  axis.oninput();
+  size.value = "56";
+  size.onchange();
+  assert.equal(own.value, 24);
+  assert.equal(h.rows[1].querySelector('[data-setting="size"]').value, 56);
+  h.rows[0].querySelector("[data-inherit]").onclick();
+  assert.equal(own.value, 56);
+  assert.deepEqual(h.editor.read().light, { offset: [1, 0, 0] });
+  assert.equal(h.editor.read()._defaults.size, 56);
   h.editor.close();
 });

@@ -48,13 +48,18 @@ export async function uploadNativeModel(hass, path, options) {
   if (!(
     (path === "/api/three_d_rooms/models" && options.method === "POST") ||
     (/^\/api\/three_d_rooms\/models\/[a-z0-9_-]+$/.test(path) &&
-      options.method === "PUT")
+      options.method === "PUT") ||
+    (/^\/api\/three_d_rooms\/houses\/[a-z0-9_-]+$/.test(path) &&
+      ["POST", "PUT"].includes(options.method))
   ))
     throw new Error("Unknown model upload.");
   if (hass.auth.expired) await hass.auth.refreshAccessToken();
   return uploadJSON(path, {
     ...options,
     headers: {
+      ...(options.headers?.["X-Rooms-Revision"]
+        ? { "X-Rooms-Revision": options.headers["X-Rooms-Revision"] }
+        : {}),
       "Content-Type": "application/zip",
       Authorization: `Bearer ${hass.auth.accessToken}`,
     },

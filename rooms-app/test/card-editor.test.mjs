@@ -96,12 +96,12 @@ test("changing models and projections resets stale camera geometry", () => {
   field("view").value = "floor";
   editor._change("view");
   assert.equal(events[0].detail.config.camera, undefined);
-  assert.equal(events[0].detail.config.tilt, 8);
+  assert.equal(events[0].detail.config.tilt, 0);
   field("model").value = "office";
   editor._change("model");
   assert.equal(events[1].detail.config.model, "office");
 });
-test("saved view remains linked and only checked fields become overrides", () => {
+test("saved view remains linked and editing a field creates its override", () => {
   const { editor, field, events } = harness();
   const component = {
     id: "saved",
@@ -117,9 +117,7 @@ test("saved view remains linked and only checked fields become overrides", () =>
   assert.equal(events[0].detail.config.saved_view, "saved");
   assert.equal(events[0].detail.config.title, undefined);
   assert.equal(field("title").value, "Saved kitchen");
-  assert.equal(field("zoom").disabled, true);
-  field("override-zoom").checked = true;
-  editor._override("zoom");
+  assert.equal(field("zoom").disabled, false);
   field("zoom").type = "number";
   field("zoom").value = "3";
   editor._change("zoom");
@@ -129,8 +127,7 @@ test("saved view remains linked and only checked fields become overrides", () =>
   assert.equal(field("title").value, "Renamed");
   assert.equal(field("zoom").value, 3);
   assert.equal(field("component").value, "saved");
-  field("override-zoom").checked = false;
-  editor._override("zoom");
+  editor._resetField("zoom");
   assert.equal(editor._config.zoom, undefined);
   assert.equal(field("zoom").value, 4);
   assert.equal(editor._config.extra, "preserved");
@@ -242,9 +239,14 @@ test("field reset appears only for a changed override and resumes live inheritan
   editor._resetField("zoom");
   assert.equal(editor._config.zoom, undefined);
   assert.equal(editor._config.title, "Card title");
-  assert.equal(field("override-zoom").checked, false);
-  assert.equal(field("zoom").disabled, true);
+  assert.equal(field("zoom").disabled, false);
   assert.equal(field("zoom").value, 2);
+  assert.equal(field("reset-field-zoom").hidden, true);
+  field("zoom").value = "3";
+  editor._change("zoom");
+  field("zoom").value = "2";
+  editor._change("zoom");
+  assert.equal(editor._config.zoom, undefined);
   assert.equal(field("reset-field-zoom").hidden, true);
   saved.layers[0].zoom = 4;
   editor._sync();
@@ -253,4 +255,18 @@ test("field reset appears only for a changed override and resumes live inheritan
   editor.setConfig({ model: "kitchen", zoom: 3 });
   assert.equal(field("override-controls-zoom").hidden, true);
   assert.equal(field("reset-field-zoom").hidden, true);
+});
+
+test("auto height is a card override and preserves saved camera and view", () => {
+  const { editor, field, events } = harness();
+  field("height-mode").value = "auto";
+  field("height-mode").onchange();
+  const config = events.at(-1).detail.config;
+  assert.equal(config.height, "auto");
+  assert.equal(config.camera.referenceZoom, 2);
+  editor.setConfig(config);
+  assert.equal(field("height").hidden, true);
+  field("height-mode").value = "fixed";
+  field("height-mode").onchange();
+  assert.equal(events.at(-1).detail.config.height, 500);
 });

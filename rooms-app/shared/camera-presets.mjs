@@ -17,7 +17,7 @@ export function cameraPreset(name, mode = "front") {
     return {
       view,
       heading: 0,
-      tilt: view === "floor" ? 8 : 28,
+      tilt: view === "floor" ? 0 : 28,
       zoom: 1,
       camera: undefined,
     };

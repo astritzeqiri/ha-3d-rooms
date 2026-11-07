@@ -6,6 +6,7 @@ import {
   markerSettings,
   offsetPoint,
   markerLayout,
+  markerTrayHeight,
 } from "../shared/marker-settings.mjs";
 import { validateComponent } from "../shared/component.mjs";
 import { SceneView } from "../web/scene.js";
@@ -84,7 +85,7 @@ test("3D offsets stay relative to moving device anchors and project under camera
   assert.equal(view.fixtureScreenPosition("missing"), null);
   assert.deepEqual(
     markerLayout({ x: 100, y: 100 }, markerSettings({}, "desk"), 500, 400),
-    { left: 124, top: 84 },
+    { left: 84, top: 84 },
   );
 });
 
@@ -117,4 +118,47 @@ test("placing a marker raycasts visible model geometry and ignores hidden surfac
   assert.equal(view.pickMarkerPosition(300, 200), null);
   plane.geometry.dispose();
   plane.material.dispose();
+});
+
+test("view defaults resolve with overrides and count inherited tray controls", () => {
+  const markers = validateMarkers({
+    _defaults: { size: 44, placement: "tray", show_label: false },
+    light: { size: 24 },
+    shade: { visible: false },
+  });
+  assert.equal(markerSettings(markers, "new-device").size, 44);
+  assert.equal(markerSettings(markers, "light").size, 24);
+  assert.equal(markerSettings(markers, "light").show_label, false);
+  assert.equal(
+    markerTrayHeight(markers, [
+      { id: "light" },
+      { id: "shade" },
+      { id: "new-device" },
+    ]),
+    176,
+  );
+  assert.throws(() => validateMarkers({ _defaults: { offset: [0, 1, 0] } }));
+});
+
+test("marker circles stay centered on projected model anchors at every size", () => {
+  for (const size of [24, 32, 44, 56, 64]) {
+    for (const offset of [undefined, [0, 0, 0], [1, 0, -1]]) {
+      const settings = {
+        ...markerSettings({}, "light"),
+        size,
+        ...(offset ? { offset } : {}),
+      };
+      const layout = markerLayout({ x: 250, y: 180 }, settings, 600, 400);
+      assert.equal(layout.left + size / 2, 250);
+      assert.equal(layout.top + size / 2, 180);
+    }
+  }
+  assert.deepEqual(
+    markerLayout({ x: 2, y: 2 }, { size: 32, show_label: true }, 600, 400),
+    { left: 0, top: 0 },
+  );
+  assert.deepEqual(
+    markerLayout({ x: 599, y: 399 }, { size: 32, show_label: true }, 600, 400),
+    { left: 568, top: 352 },
+  );
 });

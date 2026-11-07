@@ -59,6 +59,8 @@ Use meaningful checks appropriate to the change. Documentation-only work does no
 
 ### Native Home Assistant verification: local setup
 
+**0.25.0 release (2026-11-07):** The reviewed dashboard workspace, house management, device defaults/controls, alignment, AC icon, direct card editing and auto-height/fullscreen changes are included. The singleton package was verified from `/tmp/three-d-rooms-025-artifact/custom_components`, with persistent rooms and mappings retained. See `docs/validation-0.25.0.md`. Continue using the canonical workspace helper and the same singleton for local checks.
+
 Use a disposable **Home Assistant Core container with demo devices** to exercise the real integration and frontend. This is the local setup used on this workstation, separate from the user's production HA OS/Proxmox VM. It does not require running the legacy add-on or connecting physical lights.
 
 | Item | Local setup |

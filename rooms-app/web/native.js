@@ -40,6 +40,21 @@ export async function connectNative() {
     async api(path, options = {}) {
       if (path === "models" && options.method === "POST")
         return bridge.upload("/api/three_d_rooms/models", options);
+      const house = path.match(/^houses\/([a-z0-9_-]+)$/);
+      if (house) {
+        if (["POST", "PUT"].includes(options.method))
+          return bridge.upload(
+            `/api/three_d_rooms/houses/${house[1]}`,
+            options,
+          );
+        return bridge.request(
+          options.method === "DELETE" ? "delete_house" : "house_summary",
+          {
+            ...JSON.parse(options.body || "{}"),
+            house: house[1],
+          },
+        );
+      }
       const replacement = path.match(/^models\/([a-z0-9_-]+)$/);
       if (replacement && options.method === "PUT")
         return bridge.upload(

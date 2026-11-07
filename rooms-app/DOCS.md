@@ -44,7 +44,7 @@ Each device card has an entity-settings cog. Use it to change or disconnect that
 
 ## Room workspace — 0.11.0
 
-Select a room, then use Devices, Saved views or Room settings. Create and edit dashboard views in one shared camera editor. Save a view, then use it in the Home Assistant visual card editor; YAML is optional under Advanced. Selecting a saved view links the card with `saved_view: <view-id>`. Saved changes update linked cards automatically. Check **Override for this card** beside a field to customize only that value; uncheck it to resume inheritance. Existing standalone cards keep their settings until a saved view is selected.
+Use **My home** for rooms, devices and settings. Create and edit views in the top-level **Dashboard views** workspace and its shared camera editor. Save a view, then use it in the Home Assistant visual card editor; YAML is optional under Advanced. Selecting a saved view links the card with `saved_view: <view-id>`. Saved changes update linked cards automatically. Edit any field directly to customize it for this card; use its small **Reset** action to follow the saved view again. Existing standalone cards keep their settings until a saved view is selected.
 
 Room settings can rename the room and assign an existing Home Assistant area. Refresh areas after creating one in HA. This association does not change device entity assignments and stays local to this installation rather than being included in portable exports. Existing room uploads, mappings and saved-view JSON files remain compatible.
 
@@ -66,7 +66,7 @@ The native integration manager can preview draft and saved views in the real Hom
 
 ### Dashboard views gallery
 
-Open **Dashboard views** to browse this room’s saved views, preview a card, or choose **Create view** or **Import**. Creating or editing opens the room canvas beside its view settings. Choose **Back to views** to return to the gallery. **Room & devices** retains its live room overview and device controls.
+Open the top-level **Dashboard views** workspace to browse every saved view across all houses, floors and rooms. Search by view or space name, filter by space type, or choose **New view** or **Import**. One creator lets you choose Whole house, A floor, or A room, then frame the live preview. **Change space** retains the view ID, name, height and linked dashboard cards while resetting camera framing and device presentation. **Back to views** returns to the global gallery. **My home** contains imports, room setup, devices and house settings. Existing saved views appear automatically; no migration or re-upload is needed. Arbitrary combinations of rooms are not part of this first version. House, floor and room views all show device controls and support individual button presentation. Entity connections follow their source rooms; floor views include the controls in that floor.
 
 ## Editing device icons
 
@@ -80,3 +80,11 @@ Create or edit a view under **Dashboard views**. Click a device icon to open its
 Click outside the icons/tools to close the fan and clear selection. The device picker under **Device controls** provides another way to select a control. Editing icons never sends device commands; **Preview in dashboard** uses live controls. Save the view to retain presentation and position changes. Linked cards inherit saved marker settings unless explicitly overridden.
 
 Camera framing is retained when reopening, resizing and saving views. Saved views now include a bounded JPEG thumbnail shared across gallery browsers; older views gain one on their next save. Phone/tablet layouts keep preview actions accessible while scrolling.
+
+Device controls include **Defaults for this view**: set visibility, state labels, size and display position once for the view. Individual device settings override only the fields you change. **Use view defaults** removes appearance overrides and retains the device’s position. Existing saved customizations remain intact.
+
+## Auto height and fullscreen (local preview)
+
+In the Home Assistant card editor, choose **Height → Auto · fill available screen**. Use a single-card **Panel** view to fill both width and the space below Home Assistant’s header. YAML accepts `height: auto`; numeric heights from 180 to 1600 remain supported. This is a per-card layout choice and does not change the saved view or camera.
+
+The fullscreen button appears in browsers that support the Fullscreen API. Exit using the same button or the browser’s Escape action. Opening a device dialog exits fullscreen so Home Assistant dialogs remain accessible. Auto height includes the title and device tray; long trays scroll within the card.

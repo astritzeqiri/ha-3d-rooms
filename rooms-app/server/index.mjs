@@ -201,7 +201,7 @@ export async function createApp({
       if (match) {
         const m = store.find(match[1]);
         const op = match[2];
-        if (m.houseView)
+        if (m.houseView && op !== "command")
           throw new Error(
             "Edit, export or remove the individual source rooms for this house.",
           );

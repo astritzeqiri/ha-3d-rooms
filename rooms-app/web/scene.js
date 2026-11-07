@@ -72,7 +72,6 @@ export class SceneView {
       (e) => (start = [e.clientX, e.clientY]),
     );
     this.renderer.domElement.addEventListener("pointerup", (e) => {
-      if (this.model?.houseView && !this.options.onRoomPick) return;
       if (!start || Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 6)
         return;
       const r = this.renderer.domElement.getBoundingClientRect();
@@ -94,7 +93,10 @@ export class SceneView {
             this.options.onRoomPick?.(o.userData.pickRoom);
             return;
           }
-          if (!this.model?.houseView && o.userData.pickControl) {
+          if (
+            o.userData.pickControl &&
+            (!this.model?.houseView || !this.options.onRoomPick)
+          ) {
             onPick(o.userData.pickControl);
             return;
           }
@@ -232,10 +234,7 @@ export class SceneView {
       const device = deviceForControl(model, c.id),
         companion = device && device.height !== c.id;
       marker.visible =
-        !model.houseView &&
-        !companion &&
-        this.options.markers &&
-        this.options.mode !== "floor";
+        !companion && this.options.markers && this.options.mode !== "floor";
       marker.position.fromArray(c.position);
       marker.userData.pickControl = c.id;
       marker.renderOrder = 10;
@@ -379,21 +378,24 @@ export class SceneView {
       this.options.allowRotate ?? this.options.mode !== "floor";
     for (const f of this.fixtures.values())
       f.marker.visible =
-        !this.model.houseView &&
-        !f.companion &&
-        this.options.markers &&
-        this.options.mode !== "floor";
+        !f.companion && this.options.markers && this.options.mode !== "floor";
     this.renderer.domElement.setAttribute(
       "aria-label",
       this.model.houseView
         ? "3D house view. Drag to orbit and use the camera controls to frame the house."
         : this.options.mode === "floor"
-          ? "3D floor plan with a slight overhead tilt. No device icons."
+          ? "3D floor plan. Select a device control to interact."
           : this.options.mode === "front"
             ? "3D room from the front. Select the modeled device to control it."
             : "3D model. Drag to orbit; use the device controls below for keyboard access.",
     );
     this.reset();
+  }
+  setFloorPlan() {
+    if (!this.model) return;
+    Object.assign(this.options, cameraPreset("top", "floor"));
+    this.setView("floor");
+    this.options.onCameraChange?.({ source: "preset" });
   }
   setCameraPreset(name) {
     if (!this.model) return;
@@ -438,7 +440,7 @@ export class SceneView {
           this.bounds.min.toArray(),
           this.bounds.max.toArray(),
           width / height,
-          this.options.tilt ?? (this.options.mode === "front" ? 28 : 8),
+          this.options.tilt ?? (this.options.mode === "front" ? 28 : 0),
           this.options.heading ?? 0,
         );
     Object.assign(this.camera, {

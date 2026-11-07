@@ -1,3 +1,30 @@
+# 0.25.0 — Dashboard workspace and device presentation
+
+- Dashboard cards can fill the available screen height with `height: auto`, selectable in the visual card editor.
+- Added a fullscreen button in supported browsers; device dialogs return to the normal dashboard.
+
+
+- Edit linked card fields directly, with a small per-field Reset action only for changed values. Remove the repeated override checkboxes; resetting or typing the inherited value restores the saved-view link for that field.
+
+- Use the viewer’s wall-mounted AC icon in dashboard device controls, including the tray and live entity updates.
+
+- Center device icons on their projected model anchors in the view configurator and dashboard cards; remove the unintended rightward screen offset while retaining explicit position overrides.
+
+- Set view-wide device defaults for visibility, state labels, size and room/tray display; override individual devices or restore inheritance without resetting their position.
+
+- Refine workspace navigation, action buttons, focus states and phone layouts.
+- Make Floor plan switch directly to a true top-down orthographic camera.
+- Show and configure device buttons in whole-house and floor views, retaining source-room entity connections and saved presentation settings.
+
+- Preview and replace a complete house ZIP atomically, preserving matching room identities, compatible mappings and settings.
+- Review and delete an entire house, including its rooms and saved views, without deleting Home Assistant devices.
+- Reject stale confirmations if the library changes; preserve unrelated houses and rooms.
+- Search house, floor and room names in the shared space chooser, with keyboard selection and clear no-match feedback.
+- Create every view in a top-level Dashboard views workspace, alongside My home. Browse all existing views with search and house/floor/room filters.
+- Use one space chooser and camera editor for whole houses, floors and individual rooms. Exported floors remain available without requiring Home Assistant floor links.
+- Change a saved view’s space without changing its identity or breaking linked dashboard cards; preserve drafts on cancelled navigation or a failed model download.
+- Import, export, duplicate and preview saved views from one global gallery. Existing storage, room mappings and saved-view IDs remain compatible.
+
 # 0.24.0 — Full-house imports and workspace
 
 - Import a complete house ZIP with all rooms, placements, floors and mappings in one atomic operation; invalid or duplicate imports leave the library unchanged.

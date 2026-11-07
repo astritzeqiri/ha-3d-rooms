@@ -262,19 +262,19 @@ test("card applies per-device offsets and leaves tray controls visible when outs
   assert.equal(room.hidden, true);
 });
 
-test("house and floor cards create no entity widgets and reject device interactions", async () => {
-  const card = cardHarness();
+test("house and floor cards toggle their composed bindings and open mapped entity details", async () => {
+  const card = cardHarness(),
+    calls = [];
   card._model.houseView = true;
-  card._hass.callService = () =>
-    assert.fail("House must not send a device service");
-  card._hass.callWS = () => assert.fail("House must not send a device command");
-  card.dispatchEvent = () => assert.fail("House must not open entity details");
-  card._container = {
-    append: () => assert.fail("House must not create entity widgets"),
-  };
-  assert.doesNotThrow(() => card._buildAccess());
+  card._hass.callService = (...args) => calls.push(args);
   await card._toggle("lamp");
-  card._pick("lamp");
-  await card._pressPreset({ id: "lamp" });
-  await card._deskCommand("lamp", "set_value", 90);
+  assert.equal(calls[0][2].entity_id, "light.office");
+  card._pick = (id) => calls.push(id);
+  card._model.controls = [
+    { id: "shade", type: "cover" },
+    { id: "ac", type: "climate" },
+  ];
+  await card._toggle("shade");
+  await card._toggle("ac");
+  assert.deepEqual(calls.slice(1), ["shade", "ac"]);
 });

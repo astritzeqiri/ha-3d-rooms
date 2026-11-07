@@ -99,3 +99,26 @@ test("native upload refreshes HA auth and never sends credentials to other paths
   xhr.onload();
   assert.equal((await result).id, "office");
 });
+
+test("house preview and replacement retain revision while protecting auth", async () => {
+  for (const method of ["POST", "PUT"]) {
+    const xhr = fakeXHR();
+    const result = uploadNativeModel(
+      { auth: { expired: false, accessToken: "local-test" } },
+      "/api/three_d_rooms/houses/my-house",
+      {
+        method,
+        file: "zip",
+        headers: { "X-Rooms-Revision": "reviewed", Authorization: "untrusted" },
+        createXHR: () => xhr,
+      },
+    );
+    assert.equal(xhr.method, method);
+    assert.equal(xhr.headers["X-Rooms-Revision"], "reviewed");
+    assert.equal(xhr.headers.Authorization, "Bearer local-test");
+    xhr.status = 200;
+    xhr.responseText = '{"ok":true}';
+    xhr.onload();
+    assert.equal((await result).ok, true);
+  }
+});

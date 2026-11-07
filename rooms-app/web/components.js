@@ -1,7 +1,8 @@
+import { filterViews, viewScopeLabel } from "../shared/view-library.mjs";
 import { viewThumbnail } from "./view-thumbnail.js";
 import { validateComponent, componentYaml } from "../shared/component.mjs";
 
-/** A room-scoped library; every view opens the same camera editor and scene. */
+/** One library across all houses, floors and rooms. Saved IDs remain unchanged. */
 export function initComponents({
   api,
   room,
@@ -9,7 +10,9 @@ export function initComponents({
   toast,
   preview,
   selectModel,
-  scopeModels,
+  getModels,
+  createView,
+  initialViewId,
 }) {
   const $ = (id) => document.getElementById(id);
   let components = [],
@@ -19,10 +22,18 @@ export function initComponents({
   };
   async function openEditor(component, options) {
     const id = component?.layers?.[0]?.model;
-    if (id && id !== room()?.id) {
-      if (!selectModel || !(await selectModel(id))) return;
+    try {
+      if (!component) return createView();
+      if (!getModels().some((m) => m.id === id))
+        throw new Error(
+          "This view’s space is missing. Import the matching model before editing it.",
+        );
+      if (id !== room()?.id && !(await selectModel(id))) return false;
+      return editor.open(component, options);
+    } catch (error) {
+      fail(error.message);
+      return false;
     }
-    editor.open(component, options);
   }
   function use(component) {
     $("use-view-name").textContent = `Saved view: ${component.title}`;
@@ -32,33 +43,52 @@ export function initComponents({
   function draw() {
     const host = $("component-list");
     host.replaceChildren();
-    const current = room();
-    const related = new Set(
-      scopeModels?.() || [
-        current?.id,
-        ...(current?.members || []).map((m) => m.model),
-      ],
-    );
-    const views = components.filter((c) => related.has(c.layers[0].model));
-    $("saved-view-count").textContent = views.length;
+    const models = getModels();
+    const views = filterViews(components, models, {
+      query: $("view-search").value,
+      kind: $("view-kind-filter").value,
+    });
+    $("view-results").textContent =
+      `${views.length} of ${components.length} views`;
+    $("create-library-view").disabled = !models.length;
+    $("saved-view-count").textContent = components.length;
     $("saved-view-count").setAttribute(
       "aria-label",
-      `${views.length} saved ${views.length === 1 ? "view" : "views"}`,
+      `${components.length} saved ${components.length === 1 ? "view" : "views"}`,
     );
     if (!views.length) {
       const empty = document.createElement("div");
       empty.className = "saved-views-empty";
       const title = document.createElement("h3");
-      title.textContent = "Save your first dashboard view";
+      title.textContent = components.length
+        ? "No views match"
+        : models.length
+          ? "Create your first dashboard view"
+          : "Your views start with a space";
       const text = document.createElement("p");
       text.className = "muted";
-      text.textContent =
-        "Create an overview, a floor plan or a close-up. Set the camera once, then use it on any dashboard.";
+      text.textContent = components.length
+        ? "Try another search or show all views."
+        : models.length
+          ? "Choose your house, a floor or a room. Save the framing once and use it on any dashboard."
+          : "Import a house or room in My home, then create your first view here.";
       const create = document.createElement("button");
       create.type = "button";
       create.className = "primary";
-      create.textContent = "Create your first view";
-      create.onclick = () => openEditor();
+      create.textContent = components.length
+        ? "Clear filters"
+        : models.length
+          ? "New view"
+          : "Go to My home";
+      create.onclick = () => {
+        if (components.length) {
+          $("view-search").value = "";
+          $("view-kind-filter").value = "all";
+          draw();
+          $("view-search").focus();
+        } else if (models.length) createView();
+        else $("nav-home").click();
+      };
       empty.append(title, text, create);
       host.append(empty);
       return;
@@ -70,7 +100,10 @@ export function initComponents({
       title.textContent = c.title;
       const detail = document.createElement("p");
       detail.className = "muted small";
-      detail.textContent = `${c.layers[0].view === "floor" ? "Floor plan" : "Perspective"} · ${c.height}px card`;
+      detail.textContent = `${viewScopeLabel(
+        models.find((m) => m.id === c.layers[0].model),
+        models,
+      )} · ${c.layers[0].view === "floor" ? "Floor plan" : "Perspective"} · ${c.height}px card`;
       const actions = document.createElement("div");
       actions.className = "saved-view-actions";
       const button = (text, action, primary = false) => {
@@ -207,12 +240,12 @@ export function initComponents({
       if (current !== generation) return;
       components = next;
       draw();
-      const id = new URL(location.href).searchParams.get("saved_view");
+      const id =
+        initialViewId || new URL(location.href).searchParams.get("saved_view");
       if (openLink && id) {
-        const c = components.find(
-          (c) => c.id === id && c.layers[0].model === room()?.id,
-        );
-        if (c) editor.open(c);
+        const c = components.find((c) => c.id === id);
+        if (c) await openEditor(c);
+        else fail("This saved view could not be found.");
       }
     } catch (e) {
       if (current === generation) fail(e.message);
@@ -236,22 +269,27 @@ export function initComponents({
       if (file.size > 196608)
         throw new Error("Choose a saved view smaller than 192 KB.");
       const imported = JSON.parse(await file.text());
-      if (imported?.layers?.[0]?.model !== room()?.id)
+      if (!getModels().some((m) => m.id === imported?.layers?.[0]?.model))
         throw new Error(
-          "This view belongs to another room. Select that room before importing it.",
+          "Import this view’s matching house or room in My home first.",
         );
-      const c = validateComponent(imported, [room()?.id]);
-      openEditor(
+      const c = validateComponent(
+        imported,
+        getModels().map((m) => m.id),
+      );
+      const opened = await openEditor(
         { ...c, id: crypto.randomUUID(), title: c.title },
         { draft: true },
       );
-      toast("View imported as a new draft. Review and save it.");
+      if (opened) toast("View imported as a new draft. Review and save it.");
     } catch (e) {
       fail(e.message);
     } finally {
       $("component-file").value = "";
     }
   };
+  $("view-search").oninput = draw;
+  $("view-kind-filter").onchange = draw;
   window.addEventListener("rooms-view-saved", () => refresh());
   window.addEventListener("rooms-view-use", (event) => use(event.detail));
   refresh({ openLink: true });

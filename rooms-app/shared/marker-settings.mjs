@@ -5,7 +5,7 @@ export function validateMarkers(value) {
     !value ||
     typeof value !== "object" ||
     Array.isArray(value) ||
-    Object.keys(value).length > 128
+    Object.keys(value).filter((id) => id !== "_defaults").length > 128
   )
     throw new Error(
       "Use a device-marker settings object with at most 128 controls.",
@@ -13,7 +13,7 @@ export function validateMarkers(value) {
   const clean = {};
   for (const [id, options] of Object.entries(value)) {
     if (
-      !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(id) ||
+      (id !== "_defaults" && !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(id)) ||
       ["constructor", "prototype"].includes(id) ||
       !options ||
       typeof options !== "object" ||
@@ -26,6 +26,8 @@ export function validateMarkers(value) {
       )
     )
       throw new Error("Invalid device-marker settings.");
+    if (id === "_defaults" && options.offset !== undefined)
+      throw new Error("View defaults cannot contain a position offset.");
     for (const key of ["visible", "show_label"])
       if (options[key] !== undefined && typeof options[key] !== "boolean")
         throw new Error("Marker visibility and labels must be true or false.");
@@ -60,6 +62,7 @@ export function markerSettings(markers, id) {
     show_label: true,
     size: 32,
     placement: "room",
+    ...(markers?._defaults || {}),
     ...(markers?.[id] || {}),
   };
 }
@@ -69,10 +72,7 @@ export function offsetPoint(position, offset = [0, 0, 0]) {
 export function markerLayout(point, settings, width, height) {
   const size = settings.size;
   return {
-    left: Math.max(
-      0,
-      Math.min(width - size, point.x + (settings.offset ? -size / 2 : 24)),
-    ),
+    left: Math.max(0, Math.min(width - size, point.x - size / 2)),
     top: Math.max(
       0,
       Math.min(
@@ -83,9 +83,13 @@ export function markerLayout(point, settings, width, height) {
   };
 }
 
-export function markerTrayHeight(markers) {
-  const count = Object.values(markers || {}).filter(
-    (o) => o.visible !== false && o.placement === "tray",
-  ).length;
+export function markerTrayHeight(markers, controls) {
+  const ids = controls
+    ? controls.map((c) => c.id)
+    : Object.keys(markers || {}).filter((id) => id !== "_defaults");
+  const count = ids.filter((id) => {
+    const options = markerSettings(markers, id);
+    return options.visible && options.placement === "tray";
+  }).length;
   return count ? count * 76 + 24 : 0;
 }

@@ -123,14 +123,18 @@ class RoomsRuntime:
             )
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
+        if operation == "house_summary":
+            return await self.work(self.store.house_summary, data.get("house"))
+        if operation == "delete_house":
+            result = await self.work(self.store.remove_house, data.get("house"), data.get("revision"))
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "delete":
             result = await self.work(self.store.remove, data.get("model"))
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
         if operation == "command":
             model = self.store.find(data.get("model"))
-            if model.get("houseView"):
-                raise ValueError("House and floor views are presentation-only. Use the individual room for device controls.")
             control = next(
                 (c for c in model["controls"] if c["id"] == data.get("controlId")), None
             )
@@ -378,6 +382,35 @@ class ModelUploadView(HomeAssistantView):
             return self.json({"error": str(error)}, 400)
         self.hass.bus.async_fire("three_d_rooms_updated")
         return self.json(result, 201)
+
+
+class HouseReplaceView(HomeAssistantView):
+    url = "/api/three_d_rooms/houses/{house_id}"
+    name = "api:three_d_rooms:replace_house"
+    requires_auth = True
+
+    def __init__(self, hass):
+        self.hass = hass
+
+    async def post(self, request, house_id):
+        return await self.upload(request, house_id, True)
+
+    async def put(self, request, house_id):
+        return await self.upload(request, house_id, False)
+
+    async def upload(self, request, house_id, preview):
+        runtime = runtime_for(request, self.hass)
+        data = await read_upload(request)
+        if data is None:
+            return self.json({"error": "Upload exceeds 100 MB."}, 413)
+        try:
+            result = await runtime.work(runtime.store.replace_house, house_id, data,
+                                        request.headers.get("X-Rooms-Revision"), preview)
+        except UPLOAD_ERRORS as error:
+            return self.json({"error": str(error)}, 400)
+        if not preview:
+            self.hass.bus.async_fire("three_d_rooms_updated")
+        return self.json(result)
 
 
 class ModelReplaceView(HomeAssistantView):

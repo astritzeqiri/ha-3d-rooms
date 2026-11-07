@@ -38,6 +38,6 @@ test("fixed camera views face all six room axes and clear old pan/zoom", () => {
     }
   }
   assert.equal(cameraPreset("reset").tilt, 28);
-  assert.equal(cameraPreset("reset", "floor").tilt, 8);
+  assert.equal(cameraPreset("reset", "floor").tilt, 0);
   assert.throws(() => cameraPreset("unknown"), /Unknown/);
 });

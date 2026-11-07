@@ -13,7 +13,7 @@ const source =
     .replace(/^import .*;\n/gm, "")
     .replace("export function", "function") +
   "\nglobalThis.makeEditor=initDashboardEditor;";
-function harness(preview, onClose, modelConfig = {}) {
+function harness(preview, onClose, modelConfig = {}, requestScope) {
   const fields = new Map(),
     calls = [];
   let allowed = true;
@@ -44,6 +44,12 @@ function harness(preview, onClose, modelConfig = {}) {
         tilt: this.options.tilt,
         zoom: this.options.zoom,
       };
+    },
+    setFloorPlan() {
+      this.options.mode = "floor";
+      this.options.heading = this.options.tilt = 0;
+      this.options.zoom = 1;
+      delete this.options.camera;
     },
     setView(mode) {
       this.options.mode = mode;
@@ -92,6 +98,7 @@ function harness(preview, onClose, modelConfig = {}) {
   const editor = context.makeEditor({
     preview,
     onClose,
+    requestScope,
     api: async (path, options) => {
       calls.push({ path, ...JSON.parse(options.body) });
     },
@@ -294,7 +301,7 @@ test("saved marker presentation survives title/camera edits and preview without 
   assert.equal(component.title, "Overview");
 });
 
-test("house view editor hides entity tools and omits legacy marker edits while retaining camera settings", async () => {
+test("house view editor retains entity tools and saves marker presentation with camera settings", async () => {
   const previews = [];
   const h = harness(async (draft) => previews.push(draft), undefined, {
     houseView: true,
@@ -303,20 +310,76 @@ test("house view editor hides entity tools and omits legacy marker edits while r
     ...saved(),
     markers: { lamp: { size: 44, placement: "tray" } },
   });
-  assert.equal(h.field("dashboard-controls").hidden, true);
+  assert.equal(h.field("dashboard-controls").hidden, false);
   h.field("dashboard-title").value = "Whole house";
   h.field("dashboard-height").value = "640";
   h.scene.options.zoom = 2;
   await h.field("preview-dashboard").onclick();
-  assert.equal(previews[0].markers, undefined);
+  assert.equal(previews[0].markers.lamp.size, 44);
   assert.equal(previews[0].title, "Whole house");
   assert.equal(previews[0].layers[0].zoom, 2);
   await h.field("dashboard-form").onsubmit({ preventDefault() {} });
-  assert.equal(h.calls[0].markers, undefined);
+  assert.equal(h.calls[0].markers.lamp.size, 44);
   assert.equal(h.calls[0].height, 640);
 });
 test("individual room view editor retains its entity tools", () => {
   const h = harness();
   h.editor.open(saved());
   assert.equal(h.field("dashboard-controls").hidden, false);
+});
+
+test("changing a view’s space keeps its ID and unsaved state until saved", async () => {
+  const model = {};
+  const h = harness(undefined, undefined, model);
+  h.editor.open(saved());
+  h.field("dashboard-title").value = "New name";
+  const previous = h.editor.snapshot();
+  h.editor.close({ force: true });
+  model.id = "house";
+  model.houseView = true;
+  h.scene.model.id = "house";
+  h.editor.open(
+    {
+      ...previous.component,
+      layers: [{ model: "house", view: "floor", heading: 0, tilt: 0, zoom: 1 }],
+    },
+    {
+      baselineSnapshot: previous.baseline,
+      savedSnapshot: previous.savedSnapshot,
+    },
+  );
+  assert.equal(h.editor.dirty(), true);
+  assert.equal(h.field("use-saved-view").hidden, true);
+  await h.field("dashboard-form").onsubmit({ preventDefault() {} });
+  assert.equal(h.calls[0].id, "existing-view");
+  assert.equal(h.calls[0].title, "New name");
+  assert.equal(h.calls[0].layers[0].model, "house");
+  assert.equal(h.editor.dirty(), false);
+});
+
+test("changing space frames the newly visible canvas instead of capturing a hidden floor", () => {
+  const h = harness();
+  h.body.dataset = { roomTab: "views" };
+  let fitted = false;
+  h.scene.fitFloor = () => {
+    fitted = true;
+  };
+  const capture = h.scene.captureView.bind(h.scene);
+  h.scene.captureView = () => {
+    assert.equal(fitted, true);
+    return capture();
+  };
+  h.editor.open(saved(), { reframe: true });
+  assert.equal(fitted, true);
+});
+
+test("choosing Floor plan in the editor saves a top-down orthographic view", async () => {
+  const h = harness();
+  h.editor.open(saved());
+  h.field("dashboard-view").value = "floor";
+  h.field("dashboard-view").onchange();
+  await h.field("dashboard-form").onsubmit({ preventDefault() {} });
+  assert.equal(h.calls[0].layers[0].view, "floor");
+  assert.equal(h.calls[0].layers[0].tilt, 0);
+  assert.equal(h.calls[0].layers[0].heading, 0);
 });

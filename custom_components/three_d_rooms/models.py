@@ -331,13 +331,15 @@ def validate_thumbnail(value):
 
 def validate_markers(value):
     """Bounded, view-local control presentation. Coordinates are offsets, not geometry."""
-    if not isinstance(value, dict) or len(value) > 128:
+    if not isinstance(value, dict) or len(set(value) - {"_defaults"}) > 128:
         raise ValueError("Use a device-marker settings object with at most 128 controls.")
     clean = {}
     for control_id, options in value.items():
-        if (not valid_id(control_id) or not isinstance(options, dict) or
+        if ((control_id != "_defaults" and not valid_id(control_id)) or not isinstance(options, dict) or
                 set(options) - {"visible", "show_label", "size", "placement", "offset"}):
             raise ValueError("Invalid device-marker settings.")
+        if control_id == "_defaults" and "offset" in options:
+            raise ValueError("View defaults cannot contain a position offset.")
         for key in ("visible", "show_label"):
             if key in options and not isinstance(options[key], bool):
                 raise ValueError("Marker visibility and labels must be true or false.")
@@ -592,8 +594,6 @@ class ModelStore:
                     else:
                         floor.pop("haFloorId", None)
         views = house_models(models)
-        if floor_names is not None:
-            views = [v for v in views if not v.get("houseFloor") or v["houseFloor"].get("haFloorId") in floor_names]
         return [*models, *views]
 
     def find(self, model_id):
@@ -675,8 +675,6 @@ class ModelStore:
 
     def put_component(self, value):
         component = validate_component(value, [m["id"] for m in [*self.models, *house_models(self.models)]])
-        if self.find(component["layers"][0]["model"]).get("houseView"):
-            component.pop("markers", None)
         previous = self.components
         self.components = [c for c in previous if c["id"] != component["id"]] + [component]
         try:
@@ -695,6 +693,115 @@ class ModelStore:
             self.components = previous
             raise
         return {"ok": True}
+
+    def house_summary(self, house_id):
+        rooms = [m for m in self.models if m.get("housePlacement", {}).get("houseId") == house_id]
+        if not rooms:
+            raise ValueError("House not found.")
+        ids = {m["id"] for m in rooms}
+        ids.update(v["id"] for v in house_models(rooms))
+        views = [c for c in self.components if any(l["model"] in ids for l in c["layers"])]
+        revision = hashlib.sha256(json.dumps([self.models, self.components], sort_keys=True).encode()).hexdigest()
+        return {"houseId": house_id, "title": rooms[0]["housePlacement"]["houseName"],
+                "rooms": [{"id": m["id"], "title": m["title"]} for m in rooms],
+                "views": [c["title"] for c in views], "revision": revision}
+
+    def remove_house(self, house_id, revision):
+        summary = self.house_summary(house_id)
+        if revision != summary["revision"]:
+            raise ValueError("The library changed. Review this house again before deleting it.")
+        removed = [m for m in self.models if m.get("housePlacement", {}).get("houseId") == house_id]
+        ids = {m["id"] for m in removed} | {v["id"] for v in house_models(removed)}
+        previous = self.components
+        self.components = [c for c in previous if not any(l["model"] in ids for l in c["layers"])]
+        try:
+            self.save([m for m in self.models if m not in removed])
+        except Exception:
+            self.components = previous
+            raise
+        for model in removed:
+            shutil.rmtree(self.directory / "models" / model["folder"], ignore_errors=True)
+        return {"ok": True, "removedRooms": len(removed), "removedViews": len(previous) - len(self.components)}
+
+    def replace_house(self, house_id, data, revision=None, preview=False):
+        """Validate every room first; commit geometry, settings and views together."""
+        summary = self.house_summary(house_id)
+        if not preview and revision != summary["revision"]:
+            raise ValueError("The library changed. Preview the replacement again.")
+        if len(data) > MAX_UPLOAD:
+            raise ValueError("Upload exceeds 100 MB.")
+        with zipfile.ZipFile(BytesIO(data)) as archive:
+            if "house-manifest.json" not in archive.namelist():
+                raise ValueError("Choose a full-house ZIP exported for Home Assistant.")
+        old = [m for m in self.models if m.get("housePlacement", {}).get("houseId") == house_id]
+        others = [m for m in self.models if m not in old]
+        by_room = {m["housePlacement"]["roomId"]: m for m in old}
+        links = {f["id"]: f["haFloorId"] for m in old for f in m["housePlacement"]["floors"] if f.get("haFloorId")}
+        stage = Path(tempfile.mkdtemp(prefix="replace-house-", dir=self.directory))
+        moved = []
+        previous_components = self.components
+        try:
+            incoming = ModelStore(stage).open()
+            incoming.install_upload(data)
+            pending = incoming.models
+            matched = set()
+            removed_bindings = []
+            for model in pending:
+                placement = model["housePlacement"]
+                previous = by_room.get(placement["roomId"])
+                placement["houseId"] = house_id
+                for floor in placement["floors"]:
+                    if floor["id"] in links:
+                        floor["haFloorId"] = links[floor["id"]]
+                if previous:
+                    matched.add(previous["id"])
+                    model["id"] = previous["id"]
+                    model["title"] = previous["title"]
+                    if "areaId" in previous:
+                        model["areaId"] = previous["areaId"]
+                    controls = {c["id"]: c for c in model["controls"]}
+                    kept_bindings = {k: v for k, v in previous["bindings"].items() if k in controls and compatible_entity(controls[k], v)}
+                    removed_bindings.extend(f"{previous['title']}: {k}" for k in previous["bindings"] if k not in kept_bindings)
+                    model["bindings"].update(kept_bindings)
+                    visibility = {p["id"]: p["visible"] for p in previous.get("appearance", [])}
+                    for part in model.get("appearance", []):
+                        part["visible"] = visibility.get(part["id"], part["visible"])
+                    if "daylight" in model and "daylight" in previous:
+                        model["daylight"].update({k: previous["daylight"][k] for k in ("mode", "entity")})
+                    settings = {}
+                    for device in model.get("devices", []):
+                        names = previous.get("deviceSettings", {}).get(device["id"], {}).get("macroNames", {})
+                        settings[device["id"]] = {"macroNames": {k: v for k, v in names.items() if k in device["macros"]}}
+                    if settings:
+                        model["deviceSettings"] = validate_device_settings(settings, model["devices"])
+            combined = others + pending
+            ids = [m["id"] for m in combined]
+            if len(ids) != len(set(ids)):
+                raise ValueError("A replacement room conflicts with another room in your library.")
+            valid_ids = set(ids) | {v["id"] for v in house_models(combined)}
+            affected_ids = {m["id"] for m in old} | {v["id"] for v in house_models(old)}
+            removed_views = [c for c in self.components if any(l["model"] in affected_ids and l["model"] not in valid_ids for l in c["layers"])]
+            result = {**summary, "incomingRooms": [{"id": m["id"], "title": m["title"]} for m in pending],
+                      "keptRooms": len(matched), "removedBindings": removed_bindings, "removedRooms": [m["title"] for m in old if m["id"] not in matched],
+                      "removedViews": [c["title"] for c in removed_views], "viewId": "h-" + house_id}
+            if preview:
+                return result
+            for model in pending:
+                target = self.directory / "models" / model["folder"]
+                os.replace(stage / "models" / model["folder"], target)
+                moved.append(target)
+            self.components = [c for c in self.components if c not in removed_views]
+            self.save(combined)
+        except Exception:
+            self.components = previous_components
+            for target in moved:
+                shutil.rmtree(target, ignore_errors=True)
+            raise
+        finally:
+            shutil.rmtree(stage, ignore_errors=True)
+        for model in old:
+            shutil.rmtree(self.directory / "models" / model["folder"], ignore_errors=True)
+        return result
 
     def install_upload(self, data):
         """Accept a room or an atomic full-house package at the same endpoint."""

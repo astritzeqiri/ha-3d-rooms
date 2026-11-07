@@ -22,7 +22,7 @@ Bring your rooms into Home Assistant with an interactive 3D view. Import a prepa
 
 Export rooms independently from the web house builder with matching house placement metadata. Import the room ZIPs in 3D Rooms; rooms sharing a house ID assemble automatically. In each room’s settings, link its saved height ranges to Home Assistant floors and select every floor it occupies. Stairways and hallways can span floors.
 
-Create a dashboard view from the house, then choose the whole house or a linked floor. Floor views clip the model to the exported height range. House views configure camera, perspective, framing and presentation; entities stay configured in their source rooms. Live room appearance still reflects those mappings.
+Open **Dashboard views → New view**, then choose the whole house, a floor, or a room. Floor views clip the model to the exported height range. House views configure camera, perspective, framing and presentation; entities stay configured in their source rooms. Live room appearance still reflects those mappings.
 
 Prepared models may expose **Room settings → Room appearance**. The updated hallway export offers **Show wall above entrance**, leaving its door, casing and lower wall intact. Existing hallway models need one replacement export to gain separate geometry; a normal integration update does not require re-uploading other rooms.
 
@@ -126,11 +126,11 @@ In your dashboard, choose **Edit dashboard → Add card → 3D Rooms**. Select a
 
 To create a reusable view:
 
-1. Open a room and choose **Create dashboard view**.
-2. Frame the room using the camera controls and give the view a name.
-3. Choose **Save view**, then select it in the dashboard card editor.
+1. Open **Dashboard views → New view** and choose **Whole house**, **A floor**, or **A room**.
+2. Pick the space, frame it using the camera controls, and give the view a name. All spaces let you choose device-button presentation.
+3. Preview the desktop or phone card, choose **Save view**, then select it in the dashboard card editor.
 
-Cards linked to a saved view follow later changes automatically. Use **Override for this card** to customize an individual field, or **Reset to view** to follow the saved value again.
+Cards linked to a saved view follow later changes automatically. Edit a field directly to customize it for this card. A small **Reset** appears only for changed values and restores the saved view value.
 
 On the dashboard, click a light marker to toggle it; hold it to open Home Assistant’s device controls. Clicking the modeled light fixture also opens the controls. Cover markers open the native cover dialog. Daylight-ready rooms include an **Auto / Day / Night** selector.
 
@@ -186,7 +186,7 @@ Choose **Preview in dashboard** while editing a view or on its saved-view card. 
 
 ### Dashboard views gallery
 
-Open **Dashboard views** to browse this room’s saved views, preview a card, or choose **Create view** or **Import**. Creating or editing opens the room canvas beside its view settings. Choose **Back to views** to return to the gallery. **Room & devices** retains its live room overview and device controls.
+Open the top-level **Dashboard views** workspace to browse every saved view across all houses, floors and rooms. Search by view or space name, filter by space type, or choose **New view** or **Import**. One creator lets you choose Whole house, A floor, or A room, then frame the live preview. **Change space** retains the view ID, name, height and linked dashboard cards while resetting camera framing and device presentation. **Back to views** returns to the global gallery. **My home** contains imports, room setup, devices and house settings. Existing saved views appear automatically; no migration or re-upload is needed. Arbitrary combinations of rooms are not part of this first version. House, floor and room views all show device controls and support individual button presentation. Entity connections follow their source rooms; floor views include the controls in that floor.
 
 ## Editing device icons
 
@@ -204,3 +204,17 @@ Camera framing is retained when reopening, resizing and saving views. Saved view
 ## Updating to 0.24.0
 
 Update 3D Rooms in HACS, restart Home Assistant itself, then refresh your browser. Full-house ZIP imports, the compact house workspace and AC state/visual fixes are included. Existing rooms, mappings and saved views remain compatible; no re-upload is required.
+
+## House management (local preview)
+
+Under a house’s Settings, use **Replace house** to preview a full-house ZIP before applying it, or **Delete house** to review all affected rooms and saved views. Replacement matches stable exported room IDs, retaining compatible device mappings and local settings. Missing rooms and their saved views are removed; other houses and Home Assistant devices are unchanged. Dashboard cards referring to removed content need manual updates.
+
+**Dashboard views → New view** is the shared creator for houses, floors and rooms. The editor previews the chosen space and saves that scope. The top-right selector changes the main 3D view; the sidebar floor filter only filters the room list.
+
+Device controls include **Defaults for this view**: set visibility, state labels, size and display position once for the view. Individual device settings override only the fields you change. **Use view defaults** removes appearance overrides and retains the device’s position. Existing saved customizations remain intact.
+
+## Auto height and fullscreen (local preview)
+
+In the Home Assistant card editor, choose **Height → Auto · fill available screen**. Use a single-card **Panel** view to fill both width and the space below Home Assistant’s header. YAML accepts `height: auto`; numeric heights from 180 to 1600 remain supported. This is a per-card layout choice and does not change the saved view or camera.
+
+The fullscreen button appears in browsers that support the Fullscreen API. Exit using the same button or the browser’s Escape action. Opening a device dialog exits fullscreen so Home Assistant dialogs remain accessible. Auto height includes the title and device tray; long trays scroll within the card.

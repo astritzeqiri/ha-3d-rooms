@@ -1,4 +1,4 @@
-import { markerAppearance } from "../shared/marker.mjs";
+import { markerAppearance, AC_ICON_PATH } from "../shared/marker.mjs";
 import { deviceForControl } from "../shared/device.mjs";
 import {
   markerSettings,
@@ -17,6 +17,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
     tray,
     inspector,
     picker,
+    defaultsBox,
     previousRender,
     previousMarkers,
     placing,
@@ -105,11 +106,24 @@ export function initMarkerEditor({ model, scene, onChange }) {
   function refresh() {
     if (!owner) return;
     if (placing) owner.orbit.enabled = false;
+    const defaults = markerSettings(settings, "_defaults");
+    for (const input of defaultsBox?.querySelectorAll("[data-setting]") || []) {
+      if (input.type === "checkbox")
+        input.checked = defaults[input.dataset.setting];
+      else input.value = defaults[input.dataset.setting];
+    }
     for (const control of controls()) {
       const entry = entries.get(control.id);
       if (!entry) continue;
       const option = markerSettings(settings, control.id);
       if (drag?.id === control.id && drag.offset) option.offset = drag.offset;
+      const customized = ["visible", "show_label", "size", "placement"].some(
+        (key) => settings[control.id]?.[key] !== undefined,
+      );
+      entry.details.querySelector("[data-inheritance]").textContent = customized
+        ? "Custom settings for this device"
+        : "Using view defaults";
+      entry.details.querySelector("[data-inherit]").disabled = !customized;
       entry.visible.checked = option.visible;
       const eyeLabel = `${label(control)}: ${option.visible ? "Hide icon" : "Show icon"}`;
       entry.eye.setAttribute("aria-label", eyeLabel);
@@ -310,6 +324,25 @@ export function initMarkerEditor({ model, scene, onChange }) {
     tray.className = "marker-editor-tray";
     viewport.after(tray);
     host.replaceChildren();
+    defaultsBox = document.createElement("section");
+    defaultsBox.className = "marker-view-defaults";
+    defaultsBox.setAttribute("aria-label", "Device defaults for this view");
+    defaultsBox.innerHTML = `<h3>Defaults for this view</h3><p class="muted small">Apply to all devices unless you customize them individually.</p><label class="marker-check"><input type="checkbox" data-setting="visible">Visible</label><label class="marker-check"><input type="checkbox" data-setting="show_label">State label</label><label>Size<select data-setting="size"><option value="24">Small</option><option value="32">Standard</option><option value="44">Large</option><option value="56">Extra large</option></select></label><label>Display<select data-setting="placement"><option value="room">On room</option><option value="tray">Below room</option></select></label>`;
+    for (const input of defaultsBox.querySelectorAll("[data-setting]")) {
+      input.onchange = () => {
+        stopPlacement();
+        commit(
+          "_defaults",
+          input.dataset.setting,
+          input.type === "checkbox"
+            ? input.checked
+            : input.dataset.setting === "size"
+              ? Number(input.value)
+              : input.value,
+        );
+      };
+    }
+    host.append(defaultsBox);
     picker = document.createElement("select");
     picker.setAttribute("aria-label", "Choose device icon to edit");
     const placeholder = document.createElement("option");
@@ -332,7 +365,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
       details.className = "marker-device-settings";
       details.name = "marker-device-tools";
       details.hidden = true;
-      details.innerHTML = `<summary><span class="marker-device-name"></span><span class="marker-device-summary"></span></summary><div class="marker-tool-heading"><strong></strong><button type="button" data-close aria-label="Close icon tools">×</button></div><div class="marker-tool-actions"><button type="button" data-undo disabled>Undo</button><button type="button" data-style aria-expanded="false">Edit icon</button><button type="button" data-more aria-expanded="false">Position</button><button type="button" data-eye aria-pressed="false">Hide icon</button></div><p class="marker-tool-hint" hidden>Drag the highlighted icon onto a room surface. Escape cancels.</p><div class="marker-appearance" hidden><div class="marker-tool-checks"><label class="marker-check"><input type="checkbox" data-setting="visible">Visible</label><label class="marker-check"><input type="checkbox" data-setting="show_label">State label</label></div><label>Size<select data-setting="size"><option value="24">Small</option><option value="32">Standard</option><option value="44">Large</option><option value="56">Extra large</option></select></label><label>Display<select data-setting="placement"><option value="room">On room</option><option value="tray">Below room</option></select></label></div><div class="marker-position" hidden><button type="button" data-place>Place icon</button><button type="button" data-reset>Reset</button><details><summary>Precise position</summary><p class="muted small">Offset in metres.</p><div class="marker-axes"><label>X<input data-axis="0" type="number" required min="-1000" max="1000" step="any"></label><label>Y · height<input data-axis="1" type="number" required min="-1000" max="1000" step="any"></label><label>Z<input data-axis="2" type="number" required min="-1000" max="1000" step="any"></label></div></details></div>`;
+      details.innerHTML = `<summary><span class="marker-device-name"></span><span class="marker-device-summary"></span></summary><div class="marker-tool-heading"><strong></strong><button type="button" data-close aria-label="Close icon tools">×</button></div><div class="marker-tool-actions"><button type="button" data-undo disabled>Undo</button><button type="button" data-style aria-expanded="false">Edit icon</button><button type="button" data-more aria-expanded="false">Position</button><button type="button" data-eye aria-pressed="false">Hide icon</button></div><p class="marker-tool-hint" hidden>Drag the highlighted icon onto a room surface. Escape cancels.</p><div class="marker-appearance" hidden><p class="muted small" data-inheritance></p><button type="button" data-inherit>Use view defaults</button><div class="marker-tool-checks"><label class="marker-check"><input type="checkbox" data-setting="visible">Visible</label><label class="marker-check"><input type="checkbox" data-setting="show_label">State label</label></div><label>Size<select data-setting="size"><option value="24">Small</option><option value="32">Standard</option><option value="44">Large</option><option value="56">Extra large</option></select></label><label>Display<select data-setting="placement"><option value="room">On room</option><option value="tray">Below room</option></select></label></div><div class="marker-position" hidden><button type="button" data-place>Place icon</button><button type="button" data-reset>Reset</button><details><summary>Precise position</summary><p class="muted small">Offset in metres.</p><div class="marker-axes"><label>X<input data-axis="0" type="number" required min="-1000" max="1000" step="any"></label><label>Y · height<input data-axis="1" type="number" required min="-1000" max="1000" step="any"></label><label>Z<input data-axis="2" type="number" required min="-1000" max="1000" step="any"></label></div></details></div>`;
       details.querySelector(".marker-device-name").textContent = label(control);
       // Include the device name in every field's accessible name.
       for (const input of details.querySelectorAll("input,select,button")) {
@@ -383,7 +416,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
       button.className = "marker-editor-control";
       const path =
         control.type === "climate"
-          ? '<path fill-rule="evenodd" d="M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z"/><path d="M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z"/>'
+          ? AC_ICON_PATH
           : control.type === "number"
             ? '<path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/>'
             : control.type === "cover"
@@ -432,6 +465,17 @@ export function initMarkerEditor({ model, scene, onChange }) {
         badge: button.querySelector(".marker-editor-badge"),
       };
       entries.set(control.id, entry);
+      details.querySelector("[data-inherit]").onclick = () => {
+        stopPlacement();
+        remember(control.id);
+        for (const key of ["visible", "show_label", "size", "placement"])
+          delete settings[control.id]?.[key];
+        if (settings[control.id] && !Object.keys(settings[control.id]).length)
+          delete settings[control.id];
+        refresh();
+        onChange();
+        say(`${label(control)} now uses view defaults.`);
+      };
       entry.eye.onclick = () => {
         stopPlacement();
         commit(

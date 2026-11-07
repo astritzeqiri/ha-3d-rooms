@@ -1,3 +1,10 @@
+import { searchableSelect } from "./searchable-select.js";
+import {
+  viewKind,
+  viewScopeLabel,
+  scopeOptions,
+} from "../shared/view-library.mjs";
+import { initHouseActions } from "./house-actions.js";
 import { initWorkspace } from "./workspace.js";
 import { initImportSummary } from "./import-summary.js";
 import {
@@ -20,6 +27,7 @@ import { numberState, numberCommand } from "../shared/number.mjs";
 import { coverFeatures, coverState, coverCommand } from "../shared/cover.mjs";
 import "./style.css";
 import "./workspace.css";
+import "./views-workspace.css";
 import { mountCameraNavigation } from "./camera-navigation.js";
 import { initDashboardEditor } from "./dashboard-editor.js";
 import { connectNative } from "./native.js";
@@ -66,9 +74,14 @@ let areas = [],
   haFloors = [],
   savedViews,
   areasError = "";
+const initialSavedViewId = new URL(location.href).searchParams.get(
+  "saved_view",
+);
 const initialRoomTab =
   new URL(location.href).searchParams.get("tab") || "overview";
-let activeRoomTab = "overview";
+let activeRoomTab = "overview",
+  homeModelId,
+  homeTab = "overview";
 let models = [],
   selected = null,
   status = { connected: false, mode: "preview", entities: [] },
@@ -818,9 +831,17 @@ function setRoomTab(tab, { keepEditor = false } = {}) {
     return false;
   if (!keepEditor && tab !== activeRoomTab && !dashboardEditor.close())
     return false;
+  if (activeRoomTab !== "views" && tab === "views") {
+    homeModelId = selected?.id;
+    homeTab = activeRoomTab;
+  }
   activeRoomTab = tab;
+  document.body.dataset.workspace = tab === "views" ? "views" : "home";
+  $("nav-home").setAttribute("aria-pressed", String(tab !== "views"));
+  $("nav-views").setAttribute("aria-pressed", String(tab === "views"));
+  workspace.closeLibrary();
   document.body.dataset.roomTab = tab;
-  $("dashboard").hidden = !selected || tab === "settings";
+  $("dashboard").hidden = true;
   $("preview-label").hidden =
     !selected || !!selected.houseView || tab !== "devices";
   $("floor-view").hidden = $("home-view").hidden =
@@ -832,9 +853,10 @@ function setRoomTab(tab, { keepEditor = false } = {}) {
     b.setAttribute("aria-pressed", String(b.dataset.roomTab === tab));
   $("controls-section").hidden =
     !selected || !!selected.houseView || tab !== "devices";
-  $("saved-views-section").hidden = !selected || tab !== "views";
+  $("saved-views-section").hidden = tab !== "views";
   $("room-settings-section").hidden =
     !selected || !!selected.houseView || tab !== "settings";
+  $("house-management").hidden = !native;
   $("house-settings-section").hidden =
     !selected?.houseView || tab !== "settings";
   if (tab === "settings" && selected?.houseView) workspace.drawFloors();
@@ -846,6 +868,19 @@ function setRoomTab(tab, { keepEditor = false } = {}) {
   window.dispatchEvent(new CustomEvent("rooms-route-change"));
   return true;
 }
+$("nav-views").onclick = () => {
+  if (dashboardEditor.close()) setRoomTab("views");
+};
+$("nav-home").onclick = async () => {
+  if (activeRoomTab !== "views") return;
+  if (
+    homeModelId &&
+    models.some((m) => m.id === homeModelId) &&
+    selected?.id !== homeModelId
+  )
+    await choose(homeModelId, homeTab);
+  else setRoomTab(homeTab);
+};
 for (const b of document.querySelectorAll("[data-room-tab]"))
   b.onclick = () => setRoomTab(b.dataset.roomTab);
 function drawRoomSettings() {
@@ -980,19 +1015,6 @@ async function refreshAreas({ quiet = false } = {}) {
       picker.value = editing.floorLinks[picker.dataset.levelId] || "";
   }
 }
-async function changeDashboardScope(picker) {
-  const wasEditing = !$("dashboard-panel").hidden,
-    id = picker.value;
-  await choose(id, "views");
-  if (wasEditing && selected?.id === id && view?.model?.id === id)
-    dashboardEditor.open();
-  $("dashboard-scope").value = selected?.id || "";
-  $("dashboard-house-scope").value = selected?.id || "";
-}
-$("dashboard-scope").onchange = () =>
-  void changeDashboardScope($("dashboard-scope"));
-$("dashboard-house-scope").onchange = () =>
-  void changeDashboardScope($("dashboard-house-scope"));
 $("refresh-areas").onclick = () => refreshAreas();
 $("room-settings-form").onsubmit = async (event) => {
   event.preventDefault();
@@ -1116,9 +1138,10 @@ window.addEventListener("beforeunload", (event) => {
     event.returnValue = "";
   }
 });
-async function choose(id, tab = "overview") {
+async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
+  if (!models.some((m) => m.id === id)) return false;
   if (roomSettingsDirty() && !confirm("Discard unsaved settings?")) return;
-  if (!dashboardEditor.close()) return;
+  if (!dashboardEditor.close({ force: forceEditorClose })) return false;
   if (view) {
     for (const key of ["camera", "heading", "tilt", "zoom"])
       delete view.options[key];
@@ -1137,7 +1160,6 @@ async function choose(id, tab = "overview") {
       ? "Floor overview"
       : "House overview"
     : "Room overview";
-  $("dashboard-house-scope-field").hidden = !selected?.houseView;
   const model = selected;
   const url = new URL(location.href);
   if (url.searchParams.get("model") !== id)
@@ -1154,33 +1176,6 @@ async function choose(id, tab = "overview") {
   drawRoomSettings();
   setRoomTab(tab, { keepEditor: true });
   savedViews?.refresh();
-  const houseId = selected.houseId || selected.housePlacement?.houseId;
-  $("dashboard-scope").hidden = true;
-  $("dashboard-scope").replaceChildren(
-    ...[
-      selected,
-      ...models.filter(
-        (m) => m.houseView && m.houseId === houseId && m.id !== selected.id,
-      ),
-    ].map(
-      (m) =>
-        new Option(
-          m.houseView
-            ? m.houseFloor
-              ? m.houseFloor.name
-              : "Whole house"
-            : "This room",
-          m.id,
-        ),
-    ),
-  );
-  $("dashboard-scope").value = selected.id;
-  $("dashboard-house-scope").replaceChildren(
-    ...models
-      .filter((m) => m.houseView && m.houseId === houseId)
-      .map((m) => new Option(m.houseFloor?.name || "Whole house", m.id)),
-  );
-  $("dashboard-house-scope").value = selected.id;
   $("title").textContent = roomName(selected);
   $("model-type").textContent = selected.houseView
     ? selected.houseFloor
@@ -1192,7 +1187,7 @@ async function choose(id, tab = "overview") {
   $("settings").hidden = !!selected.houseView;
   $("home-view").hidden = activeRoomTab === "settings";
   $("floor-view").hidden = activeRoomTab === "settings";
-  $("dashboard").hidden = activeRoomTab === "settings";
+  $("dashboard").hidden = true;
   $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
   $("preview-label").hidden =
     !!selected.houseView || activeRoomTab !== "devices";
@@ -1256,6 +1251,7 @@ async function choose(id, tab = "overview") {
     $("scene-status").hidden = true;
     cameraNavigation.hidden = false;
     drawControls();
+    return true;
   } catch (e) {
     if (current !== selection) return;
     $("scene-status").dataset.state = "error";
@@ -1263,6 +1259,7 @@ async function choose(id, tab = "overview") {
       "Could not display this model: " + e.message;
     $("retry-scene").hidden = false;
     toast("The model could not be displayed. Try loading it again.");
+    return false;
   }
 }
 $("retry-scene").onclick = () => choose(selected.id, activeRoomTab);
@@ -1272,10 +1269,18 @@ $("models").addEventListener("click", (e) => {
     choose(b.dataset.model);
   }
 });
+window.addEventListener("rooms-view-camera", (event) => {
+  viewMode = event.detail.view;
+  $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
+});
 $("home-view").onclick = () => view?.setCameraPreset("reset");
 $("floor-view").onclick = () => {
-  viewMode = viewMode === "floor" ? "front" : "floor";
-  view?.setView(viewMode);
+  viewMode = view?.options.mode === "floor" ? "front" : "floor";
+  if (viewMode === "floor") view?.setFloorPlan();
+  else {
+    view?.setView("front");
+    view?.setCameraPreset("reset");
+  }
   $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
   const url = new URL(location.href);
   if (viewMode === "floor") url.searchParams.set("view", "floor");
@@ -1283,6 +1288,162 @@ $("floor-view").onclick = () => {
   history.replaceState(null, "", url);
   window.dispatchEvent(new CustomEvent("rooms-route-change"));
 };
+let scopeChange = null,
+  scopeBusy = false;
+const scopePicker = searchableSelect(
+  $("view-scope-model"),
+  $("view-scope-label"),
+);
+const scopeRadios = () => [
+  ...document.querySelectorAll('[name="view-scope-kind"]'),
+];
+function drawScopeOptions(preferred) {
+  const kind = scopeRadios().find((input) => input.checked)?.value;
+  const options = scopeOptions(models, kind);
+  $("view-scope-model").replaceChildren(
+    ...options.map((m) => new Option(viewScopeLabel(m, models), m.id)),
+  );
+  if (options.some((m) => m.id === preferred))
+    $("view-scope-model").value = preferred;
+  $("view-scope-label").textContent =
+    { house: "House", floor: "Floor", room: "Room" }[kind] || "Space";
+  scopePicker.refresh();
+  drawScopeSummary();
+}
+function drawScopeSummary() {
+  const model = models.find((m) => m.id === $("view-scope-model").value);
+  const members = model?.members
+    ?.map((member) => models.find((m) => m.id === member.model))
+    .filter(Boolean);
+  $("view-scope-summary").textContent = members
+    ? `${members.length} rooms: ${members.map(roomName).join(", ")}`
+    : model
+      ? "A focused view with its own camera and device presentation."
+      : "Import a space in My home to get started.";
+  $("view-scope-continue").disabled = !model;
+}
+function requestViewScope({ change = false } = {}) {
+  if (!models.length) return;
+  try {
+    scopeChange = change ? dashboardEditor.snapshot() : null;
+  } catch (error) {
+    toast(error.message);
+    return;
+  }
+  const preferred = change
+    ? selected
+    : models.find((m) => m.houseView && !m.houseFloor) || models[0];
+  for (const input of scopeRadios()) {
+    input.disabled = !scopeOptions(models, input.value).length;
+    input.checked = input.value === viewKind(preferred);
+  }
+  drawScopeOptions(preferred.id);
+  $("view-scope-error").textContent = "";
+  $("view-scope-reset").hidden = !change;
+  $("view-scope-title").textContent = change
+    ? "Change the space in this view"
+    : "What would you like to show?";
+  $("view-scope-continue").textContent = change
+    ? "Use this space"
+    : "Continue to editor";
+  $("view-scope-dialog").showModal();
+}
+for (const input of scopeRadios()) input.onchange = () => drawScopeOptions();
+$("view-scope-model").onchange = drawScopeSummary;
+$("view-scope-cancel").onclick = () => {
+  if (!scopeBusy) $("view-scope-dialog").close();
+};
+$("view-scope-dialog").addEventListener("cancel", (event) => {
+  if (scopeBusy) event.preventDefault();
+});
+$("change-view-content").onclick = () => requestViewScope({ change: true });
+$("view-scope-form").onsubmit = async (event) => {
+  event.preventDefault();
+  if (scopeBusy) return;
+  const id = $("view-scope-model").value;
+  if (!models.some((m) => m.id === id)) return;
+  if (scopeChange && id === selected?.id) {
+    $("view-scope-dialog").close();
+    return;
+  }
+  scopeBusy = true;
+  const controls = [
+    ...$("view-scope-form").querySelectorAll("input,select,button"),
+  ];
+  const disabled = controls.map((el) => el.disabled);
+  controls.forEach((el) => (el.disabled = true));
+  $("view-scope-continue").textContent = "Loading space…";
+  try {
+    const previous = scopeChange;
+    if (
+      selected?.id !== id ||
+      view?.model?.id !== id ||
+      !$("scene-status").hidden
+    ) {
+      const loaded = await choose(id, "views", {
+        forceEditorClose: !!previous,
+      });
+      if (!loaded)
+        throw new Error("This space could not be loaded. Please try again.");
+    }
+    if (selected?.id !== id || view?.model?.id !== id)
+      throw new Error("This space could not be loaded. Please try again.");
+    let component;
+    if (previous) {
+      const { markers, thumbnail, layers, ...rest } = previous.component;
+      component = {
+        ...rest,
+        layers: [{ model: id, view: "front", heading: 0, tilt: 28, zoom: 1 }],
+      };
+    }
+    $("view-scope-dialog").close();
+    dashboardEditor.open(component, {
+      draft: previous ? !previous.saved : false,
+      reframe: !!previous,
+      baselineSnapshot: previous?.baseline,
+      savedSnapshot: previous?.savedSnapshot,
+    });
+  } catch (error) {
+    // Restore the original draft after a failed scope load, including unsaved edits.
+    if (scopeChange && $("dashboard-panel").hidden) {
+      const previousId = scopeChange.component.layers[0].model;
+      if (await choose(previousId, "views", { forceEditorClose: true })) {
+        dashboardEditor.open(scopeChange.component, {
+          draft: !scopeChange.saved,
+          baselineSnapshot: scopeChange.baseline,
+          savedSnapshot: scopeChange.savedSnapshot,
+        });
+      }
+    }
+    $("view-scope-error").textContent = error.message;
+  } finally {
+    scopeBusy = false;
+    controls.forEach((el, index) => (el.disabled = disabled[index]));
+    $("view-scope-continue").textContent = scopeChange
+      ? "Use this space"
+      : "Continue to editor";
+  }
+};
+initHouseActions({
+  api,
+  selected: () => selected,
+  changed: async (result) => {
+    models = await api("models");
+    const next =
+      models.find((m) => m.id === result.viewId) ||
+      models.find((m) => m.houseView && !m.houseFloor) ||
+      models[0];
+    if (next) await choose(next.id, "overview");
+    else {
+      location.reload();
+    }
+    toast(
+      result.viewId
+        ? "House replaced."
+        : "House deleted. Home Assistant devices are unchanged.",
+    );
+  },
+});
 const dashboardEditor = initDashboardEditor({
   api,
   preview: native?.preview,
@@ -1293,10 +1454,13 @@ const dashboardEditor = initDashboardEditor({
     if (activeRoomTab === "views") {
       savedViews?.refresh();
       $("create-library-view").focus({ preventScroll: true });
-    } else $("dashboard").focus({ preventScroll: true });
+    } else $("nav-views").focus({ preventScroll: true });
   },
   onOpen: () => {
     setRoomTab("views", { keepEditor: true });
+    $("view-content-name").textContent = viewScopeLabel(selected, models);
+    $("view-content-note").textContent =
+      "Choose visible device controls below. Connections follow the rooms configured in My home.";
     viewMode = view.options.mode;
     $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
   },
@@ -1316,7 +1480,8 @@ for (const id of ["add-model", "empty-add"])
   };
 for (const dialog of document.querySelectorAll("dialog"))
   dialog.addEventListener("click", (e) => {
-    if (e.target !== dialog) return;
+    if (e.target !== dialog || (dialog.id === "view-scope-dialog" && scopeBusy))
+      return;
     const r = dialog.getBoundingClientRect();
     if (
       e.clientX < r.left ||
@@ -1610,6 +1775,7 @@ try {
         models[0].id,
       initialRoomTab,
     );
+  else setRoomTab(initialRoomTab);
   if (native) {
     const unsubscribe = native.subscribe(updateStatus);
     window.addEventListener("pagehide", unsubscribe, { once: true });
@@ -1644,18 +1810,12 @@ savedViews = initComponents({
   api,
   preview: native?.preview,
   selectModel: async (id) => {
-    await choose(id, "views");
-    return selected?.id === id;
+    const loaded = await choose(id, "views");
+    return !!loaded && selected?.id === id && view?.model?.id === id;
   },
-  scopeModels: () =>
-    selected?.houseView
-      ? models
-          .filter(
-            (m) =>
-              (m.houseId || m.housePlacement?.houseId) === selected.houseId,
-          )
-          .map((m) => m.id)
-      : [selected?.id],
+  initialViewId: initialSavedViewId,
+  getModels: () => models,
+  createView: () => requestViewScope(),
   room: () => selected,
   editor: dashboardEditor,
   toast,
