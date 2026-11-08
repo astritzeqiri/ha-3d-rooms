@@ -2,13 +2,17 @@
 // `lightGroups` for compatibility; the member type decides the entity domain.
 export const GROUP_ENTITY = {
   light: /^(light|switch)\.[a-z0-9_]+$/,
-  cover: /^cover\.[a-z0-9_]+$/,
+  // Windows/doors may also follow a read-only contact sensor; desks may not.
+  cover: /^(cover|binary_sensor)\.[a-z0-9_]+$/,
 };
 export function validateLightGroups(groups = [], controls) {
   if (!Array.isArray(groups) || groups.length > 100)
     throw Error("Provide up to 100 light groups.");
   const types = new Map(
       controls.filter((c) => GROUP_ENTITY[c.type]).map((c) => [c.id, c.type]),
+    ),
+    desks = new Set(
+      controls.filter((c) => c.motion === "none").map((c) => c.id),
     ),
     ids = new Set(),
     members = new Set();
@@ -31,7 +35,10 @@ export function validateLightGroups(groups = [], controls) {
       g.controls.some((id) => !types.has(id) || members.has(id)) ||
       new Set(g.controls.map((id) => types.get(id))).size !== 1 ||
       typeof g.entityId !== "string" ||
-      (g.entityId && !GROUP_ENTITY[types.get(g.controls[0])].test(g.entityId))
+      (g.entityId &&
+        !GROUP_ENTITY[types.get(g.controls[0])].test(g.entityId)) ||
+      (g.entityId.startsWith("binary_sensor.") &&
+        g.controls.some((id) => desks.has(id)))
     )
       throw Error(
         "Choose a name, two or more distinct room devices of one kind (lights, or shades/windows/doors) and a compatible entity. Each device can belong to one group.",

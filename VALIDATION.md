@@ -1,3 +1,9 @@
+# 0.30.2 — contact sensors for window/door groups, 2026-11-08
+
+Released as 0.30.2, based on v0.30.1. Frontend and backend group validation accept `binary_sensor` for cover groups unless a member is a desk (motion "none"); the group editor lists binary sensors for windows & doors.
+
+183 frontend tests, formatting and build pass; host Python tests pass (15 native skipped on host), including new contact-sensor group cases; native tests pass inside Core 2026.10.2. Integration ZIP inspected and the extracted artifact staged on the singleton: the "Group windows & doors" editor lists demo binary sensors. Dialog closed without saving; no rooms, groups or mappings changed. Not checked on the user's production HA.
+
 # 0.30.1 — binary sensors in the native window/door picker, 2026-11-08
 
 Released as 0.30.1, based on v0.30.0. The native sidebar panel's entity list now includes `binary_sensor`.

@@ -122,6 +122,10 @@ test("shades and windows group as covers with a cover entity, never mixed with l
     [{ ...shades, controls: ["s1", "c"] }],
   ])
     assert.throws(() => validateLightGroups(bad, room));
+  const contact = { ...shades, entityId: "binary_sensor.dining_windows" };
+  assert.deepEqual(validateLightGroups([contact], room), [contact]);
+  const desks = room.map((c) => (c.id === "s2" ? { ...c, motion: "none" } : c));
+  assert.throws(() => validateLightGroups([contact], desks));
   const model = applyLightGroups({
     id: "room",
     title: "Room",

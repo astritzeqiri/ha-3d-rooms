@@ -56,6 +56,14 @@ class CoverGroupTests(unittest.TestCase):
         self.store.set_light_groups("kitchen", [SHADES, {"id": "lights", "label": "Lamps", "controls": ["lamp", "lamp-2"], "entityId": "light.lamps"}])
         self.assertEqual(len(self.store.find("kitchen")["lightGroups"]), 2)
 
+    def test_window_group_accepts_contact_sensor_but_desk_group_does_not(self):
+        windows = {**SHADES, "entityId": "binary_sensor.dining_windows"}
+        self.store.set_light_groups("kitchen", [windows])
+        self.assertEqual(self.store.catalog()[0]["bindings"]["shade-right"], "binary_sensor.dining_windows")
+        controls = [{**c, "motion": "none"} if c["id"] == "window" else c for c in CONTROLS]
+        self.assertRaises(ValueError, models.validate_light_groups,
+                          [{**windows, "controls": ["shade-left", "window"]}], controls)
+
 
 if __name__ == "__main__":
     unittest.main()

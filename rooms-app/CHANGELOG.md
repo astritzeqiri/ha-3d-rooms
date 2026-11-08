@@ -1,3 +1,7 @@
+## 0.30.2
+
+- Window and door groups can now be connected to a `binary_sensor` (contact sensor) as well as a `cover`. Every window or door in the group shows the sensor's Open/Closed state; sensors are read-only, so open/close buttons stay disabled. Groups that include a desk still require a `cover`. Existing groups are unchanged; no migration is needed.
+
 ## 0.30.1
 
 - In the Home Assistant sidebar, the entity picker for windows, doors and shades now actually lists `binary_sensor` entities (contact sensors). 0.29.x added them to the backend list, but the native sidebar panel builds its own entity list and still filtered them out. No migration is needed.

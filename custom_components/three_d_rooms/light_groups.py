@@ -8,13 +8,15 @@ from copy import deepcopy
 import re
 
 # Member control type -> compatible shared entity.
-GROUP_ENTITY = {"light": r"(?:light|switch)\.[a-z0-9_]+", "cover": r"cover\.[a-z0-9_]+"}
+# Windows/doors may also follow a read-only contact sensor; desks (motion "none") may not.
+GROUP_ENTITY = {"light": r"(?:light|switch)\.[a-z0-9_]+", "cover": r"(?:cover|binary_sensor)\.[a-z0-9_]+"}
 
 
 def validate_light_groups(value, controls):
     if not isinstance(value, list) or len(value) > 100:
         raise ValueError("Provide up to 100 light groups.")
     types = {c["id"]: c["type"] for c in controls if c["type"] in GROUP_ENTITY}
+    desks = {c["id"] for c in controls if c.get("motion") == "none"}
     ids, members = set(), set()
     clean = []
     for group in value:
@@ -27,7 +29,8 @@ def validate_light_groups(value, controls):
                 or len(set(group["controls"])) != len(group["controls"])
                 or len({types[c] for c in group["controls"]}) != 1
                 or not isinstance(group["entityId"], str)
-                or (group["entityId"] and not re.fullmatch(GROUP_ENTITY[types[group["controls"][0]]], group["entityId"]))):
+                or (group["entityId"] and not re.fullmatch(GROUP_ENTITY[types[group["controls"][0]]], group["entityId"]))
+                or (group["entityId"].startswith("binary_sensor.") and any(c in desks for c in group["controls"]))):
             raise ValueError("Give each group a name, at least two distinct room devices of one kind (lights, or shades/windows/doors) and one compatible entity. A device can belong to only one group.")
         ids.add(group["id"])
         members.update(group["controls"])

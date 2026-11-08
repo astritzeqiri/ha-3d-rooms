@@ -31,8 +31,8 @@ export const GROUP_KINDS = {
     edit: "Edit window & door group",
     noun: "windows or doors",
     intro:
-      "Choose modeled windows or doors that share one Home Assistant cover. They will appear as one control and open or close together.",
-    entity: /^cover\./,
+      "Choose modeled windows or doors that share one Home Assistant cover or contact sensor. They will appear as one control and open or close together.",
+    entity: /^(cover|binary_sensor)\./,
     placeholder: "e.g. Dining windows",
     prefix: "cg-",
     member: (c, kind) => c.type === "cover" && kind !== "shade",
