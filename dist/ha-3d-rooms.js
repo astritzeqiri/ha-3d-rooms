@@ -14816,7 +14816,7 @@ var zf = class extends HTMLElement {
 		this._hass && this._listener?.({
 			connected: this._hass.connected !== !1,
 			mode: "homeassistant",
-			entities: Object.values(this._hass.states).filter((e) => /^(climate|light|switch|cover|sun|number|input_number|button|input_button|script|scene)\./.test(e.entity_id))
+			entities: Object.values(this._hass.states).filter((e) => /^(climate|light|switch|cover|sun|binary_sensor|number|input_number|button|input_button|script|scene)\./.test(e.entity_id))
 		});
 	}
 	connectedCallback() {

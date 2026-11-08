@@ -1,3 +1,9 @@
+# 0.30.1 — binary sensors in the native window/door picker, 2026-11-08
+
+Released as 0.30.1, based on v0.30.0. The native sidebar panel's entity list now includes `binary_sensor`.
+
+183 frontend tests, formatting and build pass; 51 host Python tests pass (15 native skipped on host); native tests pass inside Core 2026.10.2. Integration ZIP inspected (structure, bundled frontend, version 0.30.1, no private models). Extracted artifact staged on the singleton: in the native manager, the Living room "Kitchen window" picker lists demo `binary_sensor` entities alongside covers. No mapping was changed. Not checked on the user's production HA.
+
 # 0.30.0 — house replacement room/device matching, 2026-11-08
 
 Released as 0.30.0, based on v0.29.1.
