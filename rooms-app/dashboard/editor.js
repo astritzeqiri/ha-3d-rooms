@@ -51,6 +51,11 @@ export class ThreeDRoomsEditor extends HTMLElement {
     <label class="check"><input id="interactive" type="checkbox">Allow camera movement by default</label>
     <label class="check"><input id="camera_controls" type="checkbox">Show camera buttons on the card (move camera and reset view)</label>
     <label class="check" id="floor-selector-setting" hidden><input id="floor_selector" type="checkbox">Show floor switcher (whole house or one floor)</label>
+    <label>Rendering quality<select id="quality">
+      <option value="auto">Automatic · lighter on phones and tablets</option>
+      <option value="high">High · full shadows and sharpness</option>
+      <option value="low">Low · faster and uses less battery</option>
+    </select></label>
     <label id="daylight-setting" hidden>Time of day<select id="daylight">
       <option value="auto">Automatic · follow the Home Assistant sun</option>
       <option value="day">Always day</option>
@@ -118,6 +123,13 @@ export class ThreeDRoomsEditor extends HTMLElement {
       const config = { ...this._config };
       if (this._field("floor_selector").checked) delete config.floor_selector;
       else config.floor_selector = false;
+      this._emit(config);
+    };
+    this._field("quality").onchange = () => {
+      const config = { ...this._config };
+      const quality = this._field("quality").value;
+      if (quality === "auto") delete config.quality;
+      else config.quality = quality;
       this._emit(config);
     };
     this._field("daylight").addEventListener("change", () => this._daylight());
@@ -278,6 +290,7 @@ export class ThreeDRoomsEditor extends HTMLElement {
       this._config.floor_selector !== false;
     this._field("camera_controls").checked =
       this._config.camera_controls !== false;
+    this._field("quality").value = this._config.quality || "auto";
     const daylight = this._models?.find((m) => m.id === model)?.daylight;
     this._field("daylight-setting").hidden = !daylight;
     this._field("daylight-note").hidden = !daylight;

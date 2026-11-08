@@ -702,6 +702,34 @@
             <p id="replace-error" class="error" role="alert"></p>
           </form>
 
+          <section
+            id="optimize-card"
+            class="room-settings-card"
+            aria-labelledby="optimize-heading"
+            hidden
+          >
+            <h3 id="optimize-heading">Faster loading</h3>
+            <p id="optimize-status" class="muted small" role="status"></p>
+            <div class="room-settings-actions">
+              <button id="optimize-room" type="button">
+                Optimize for phones and desktops
+              </button>
+            </div>
+            <progress
+              id="optimize-progress"
+              max="100"
+              value="0"
+              aria-label="Optimization progress"
+              hidden
+            ></progress>
+            <p class="muted small">
+              Makes lighter copies in this browser: compressed geometry and
+              textures that stay compressed on the graphics chip. Your upload is
+              kept unchanged for export. Keep this page open until it finishes.
+            </p>
+            <p id="optimize-error" class="error" role="alert"></p>
+          </section>
+
           <details class="room-advanced">
             <summary>Advanced room settings</summary>
             <div class="room-settings-actions">

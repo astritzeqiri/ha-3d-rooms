@@ -28,6 +28,7 @@ import zipfile
 
 from .house import validate_placement, house_models
 from .house_matching import match_controls, match_rooms, review, translated, validate_choices
+from .optimize import DECODABLE, SERVER_VERSION, VARIANTS, node_metadata, optimize_glb, read_glb
 
 MAX_UPLOAD = 100 * 1024 * 1024
 MAX_EXPANDED = 300 * 1024 * 1024
@@ -570,6 +571,9 @@ class ModelStore:
         self.directory = Path(directory)
         self.models = []
         self.components = []
+        # folder -> {variant: (file name, size, mtime)}; filled from executor code only,
+        # so catalog/revision calls on the event loop never touch the disk.
+        self.variants = {}
 
     def open(self):
         (self.directory / "models").mkdir(parents=True, exist_ok=True)
@@ -594,10 +598,46 @@ class ModelStore:
                 )
             self.models = models
             self.components = catalog.get("components", [])
+        for model in self.models:
+            self.refresh_variants(model["folder"])
         return self
 
     def revision(self, model_id):
-        return hashlib.sha256(self.find(model_id)["folder"].encode()).hexdigest()[:24]
+        """Room identity plus the optimized copies currently served, for cache keys."""
+        model = self.find(model_id)
+        stamps = [model["folder"]]
+        for variant, found in sorted(self.variants.get(model["folder"], {}).items()):
+            stamps.append(f"{variant}:{found[0]}:{found[1]}:{found[2]}")
+        return hashlib.sha256("|".join(stamps).encode()).hexdigest()[:24]
+
+    def refresh_variants(self, folder_name):
+        found = {}
+        for variant in VARIANTS:
+            path = self.variant_path(self.directory / "models" / folder_name, variant)
+            try:
+                if path is not None:
+                    stat = path.stat()
+                    found[variant] = (path.name, stat.st_size, stat.st_mtime_ns)
+            except OSError:
+                pass
+        self.variants[folder_name] = found
+
+    @staticmethod
+    def source_revision(model):
+        """Identity of the uploaded scene only; browser optimizations are tied to it."""
+        return hashlib.sha256(model["folder"].encode()).hexdigest()[:24]
+
+    @staticmethod
+    def variant_path(folder, variant):
+        """Best optimized copy: browser-made, then server-made; None serves the upload."""
+        for name in (f"scene.web-{variant}.glb", f"scene.s{SERVER_VERSION}-{variant}.glb"):
+            path = folder / name
+            try:
+                if path.is_file():
+                    return path
+            except OSError:
+                pass
+        return None
 
     def catalog(self, floor_names=None):
         models = [
@@ -634,7 +674,7 @@ class ModelStore:
         raise ValueError("Model not found.")
 
     def catalog_real(self):
-        return [apply_light_groups({**m, "sceneRevision": hashlib.sha256(m["folder"].encode()).hexdigest()[:24]}) for m in self.models]
+        return [apply_light_groups({**m, "sceneRevision": self.revision(m["id"])}) for m in self.models]
 
     def save(self, models):
         temporary = self.directory / "catalog.json.tmp"
@@ -1111,9 +1151,19 @@ class ModelStore:
             raise ValueError("Load the individual room assets for this house.")
         return self.directory / "models" / model["folder"] / "scene.glb"
 
-    def scene_bytes(self, model_id, compressed=False):
-        """Cache a compressed derivative, keeping the original GLB untouched."""
+    def scene_file(self, model_id, variant="original"):
         path = self.scene_path(model_id)
+        if variant == "original":
+            return path
+        if variant not in VARIANTS:
+            raise ValueError("Unknown scene variant.")
+        # Serve what revision() advertises, so ETags always match the bytes.
+        found = self.variants.get(path.parent.name, {}).get(variant)
+        return path.parent / found[0] if found else path
+
+    def scene_bytes(self, model_id, compressed=False, variant="original"):
+        """Cache a compressed derivative, keeping the original GLB untouched."""
+        path = self.scene_file(model_id, variant)
         if not compressed:
             return path.read_bytes()
         cached = path.with_suffix(".glb.gz")
@@ -1126,6 +1176,88 @@ class ModelStore:
             except OSError:
                 return data
         return cached.read_bytes()
+
+    def pending_optimizations(self):
+        """Rooms lacking current server-made copies (and no browser-made ones)."""
+        pending = []
+        for model in self.models:
+            folder = self.directory / "models" / model["folder"]
+            if (folder / f"scene.s{SERVER_VERSION}.failed").exists():
+                continue
+            if any(self.variant_path(folder, v) is None for v in VARIANTS):
+                pending.append((model["id"], model["folder"]))
+        return pending
+
+    def optimize_room(self, model_id, folder_name):
+        """Write lighter copies beside the upload. Returns False when nothing was written."""
+        model = next((m for m in self.models if m["id"] == model_id and m["folder"] == folder_name), None)
+        folder = self.directory / "models" / folder_name
+        if model is None or not folder.is_dir():
+            return False
+        for stale in folder.glob("scene.s*-*.glb*"):
+            if not stale.name.startswith(f"scene.s{SERVER_VERSION}-"):
+                stale.unlink(missing_ok=True)
+        source = (folder / "scene.glb").read_bytes()
+        written = False
+        try:
+            for variant, edge in VARIANTS.items():
+                if self.variant_path(folder, variant) is not None:
+                    continue
+                data = optimize_glb(source, edge)
+                validate_glb(data, model)
+                target = folder / f"scene.s{SERVER_VERSION}-{variant}.glb"
+                temporary = target.with_suffix(".tmp")
+                temporary.write_bytes(data)
+                os.replace(temporary, target)
+                written = True
+        except FileNotFoundError:
+            return written  # the room was replaced or removed meanwhile
+        except Exception:  # noqa: BLE001 - keep serving the upload; do not retry forever
+            (folder / f"scene.s{SERVER_VERSION}.failed").touch()
+            raise
+        finally:
+            self.refresh_variants(folder_name)
+        return written
+
+    def put_web_variant(self, model_id, variant, data, source_revision):
+        """Store a browser-optimized copy made from this exact upload."""
+        if variant not in VARIANTS:
+            raise ValueError("Unknown scene variant.")
+        model = next((m for m in self.models if m["id"] == model_id), None)
+        if model is None:
+            raise ValueError("Model not found.")
+        if source_revision != self.source_revision(model):
+            raise ValueError("The room was replaced while it was being optimized. Optimize it again.")
+        validate_glb(data, model)
+        if len(data) > MAX_UPLOAD:
+            raise ValueError("Optimized scene is too large.")
+        doc, _ = read_glb(data)
+        unsupported = set(doc.get("extensionsRequired", [])) - DECODABLE
+        if unsupported:
+            raise ValueError("Unsupported optimized scene extensions: " + ", ".join(sorted(unsupported)))
+        folder = self.directory / "models" / model["folder"]
+        if node_metadata(doc) != node_metadata(read_glb((folder / "scene.glb").read_bytes())[0]):
+            raise ValueError("The optimized scene changed device or room metadata.")
+        target = folder / f"scene.web-{variant}.glb"
+        temporary = target.with_suffix(".tmp")
+        temporary.write_bytes(data)
+        os.replace(temporary, target)
+        target.with_suffix(".glb.gz").unlink(missing_ok=True)
+        self.refresh_variants(model["folder"])
+        return {"variant": variant, "bytes": len(data), "sceneRevision": self.revision(model_id)}
+
+    def optimization_status(self, model_id):
+        model = next((m for m in self.models if m["id"] == model_id), None)
+        if model is None:
+            raise ValueError("Model not found.")
+        folder = self.directory / "models" / model["folder"]
+        variants = {}
+        for variant in VARIANTS:
+            path = self.variant_path(folder, variant)
+            variants[variant] = {"kind": "web" if path and path.name.startswith("scene.web-") else "server" if path else "none",
+                                 "bytes": path.stat().st_size if path else None}
+        return {"original": (folder / "scene.glb").stat().st_size, "variants": variants,
+                "sourceRevision": self.source_revision(model)}
 
     def export(self, model_id):
         model = self.find(model_id)

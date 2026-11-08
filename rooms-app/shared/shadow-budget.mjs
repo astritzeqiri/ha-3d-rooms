@@ -1,8 +1,9 @@
 /** Keep shadow samplers within the GPU's per-fragment texture limit.
  * Lights without a shadow map still illuminate the room and remain controllable.
+ * `maxPasses` optionally limits shadow render passes for slower GPUs.
  * Call once after adding the asset, fixture lights and daylight sources.
  */
-export function applyShadowBudget(scene, maxTextures) {
+export function applyShadowBudget(scene, maxTextures, maxPasses = Infinity) {
   let materialTextures = 0;
   const lights = [];
   scene.traverse((object) => {
@@ -26,12 +27,19 @@ export function applyShadowBudget(scene, maxTextures) {
       Number(!!b.isSpotLight) - Number(!!a.isSpotLight) ||
       b.intensity - a.intensity,
   );
-  lights.forEach((light, index) => {
-    light.castShadow = index < budget;
-  });
+  // Each shadow pass redraws the scene; a point light needs six (cube faces).
+  let passes = 0,
+    shadowLights = 0;
+  for (const light of lights) {
+    const cost = light.isPointLight ? 6 : 1;
+    light.castShadow = shadowLights < budget && passes + cost <= maxPasses;
+    if (!light.castShadow) continue;
+    passes += cost;
+    shadowLights++;
+  }
   return {
     budget,
-    shadowLights: Math.min(lights.length, budget),
+    shadowLights,
     materialTextures,
   };
 }

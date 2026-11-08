@@ -5,6 +5,7 @@ from __future__ import annotations
 from .light_groups import apply_light_groups
 
 import asyncio
+import logging
 import base64
 import binascii
 import json
@@ -24,6 +25,8 @@ from .const import DOMAIN
 from .models import ENTITY, MAX_UPLOAD, number, compatible_entity
 from .house_matching import MAX_CHOICES
 
+LOGGER = logging.getLogger(__name__)
+
 
 
 
@@ -35,6 +38,32 @@ class RoomsRuntime:
         self.hass = hass
         self.store = store
         self.lock = asyncio.Lock()
+        self.optimizer = None
+
+    def schedule_optimize(self):
+        """Make lighter copies of rooms in the background; uploads stay usable meanwhile."""
+        if self.optimizer is None or self.optimizer.done():
+            self.optimizer = self.hass.async_create_background_task(
+                self.optimize_pending(), "three_d_rooms optimize scenes"
+            )
+
+    async def optimize_pending(self):
+        failed = set()
+        while True:
+            pending = [p for p in await self.hass.async_add_executor_job(self.store.pending_optimizations) if p not in failed]
+            if not pending:
+                return
+            model_id, folder = pending[0]
+            try:
+                written = await self.hass.async_add_executor_job(self.store.optimize_room, model_id, folder)
+            except Exception:  # noqa: BLE001 - the room keeps loading from its upload
+                LOGGER.exception("Could not optimize 3D room %s", model_id)
+                written = False
+            if not written:
+                failed.add((model_id, folder))
+                continue
+            # Cards and the manager reload once to pick up the lighter copy.
+            self.hass.bus.async_fire("three_d_rooms_updated")
 
     async def work(self, function, *args):
         async with self.lock:
@@ -107,6 +136,8 @@ class RoomsRuntime:
             from homeassistant.helpers import floor_registry
             registry=floor_registry.async_get(self.hass)
             return self.store.catalog({f.floor_id:f.name for f in registry.async_list_floors()})
+        if operation == "optimization":
+            return await self.hass.async_add_executor_job(self.store.optimization_status, data.get("model"))
         if operation == "status":
             return self.status()
         if operation == "daylight":
@@ -416,6 +447,7 @@ class ModelUploadView(HomeAssistantView):
         except UPLOAD_ERRORS as error:
             return self.json({"error": str(error)}, 400)
         self.hass.bus.async_fire("three_d_rooms_updated")
+        runtime.schedule_optimize()
         return self.json(result, 201)
 
 
@@ -446,6 +478,7 @@ class HouseReplaceView(HomeAssistantView):
             return self.json({"error": str(error)}, 400)
         if not preview:
             self.hass.bus.async_fire("three_d_rooms_updated")
+            runtime.schedule_optimize()
         return self.json(result)
 
 
@@ -469,6 +502,7 @@ class ModelReplaceView(HomeAssistantView):
         except UPLOAD_ERRORS as error:
             return self.json({"error": str(error)}, 400)
         self.hass.bus.async_fire("three_d_rooms_updated")
+        runtime.schedule_optimize()
         return self.json(result)
 
 
@@ -484,12 +518,15 @@ class ModelAssetView(HomeAssistantView):
         runtime = runtime_for(request, self.hass)
         try:
             if asset == "scene.glb":
+                variant = request.query.get("variant", "original")
+                if variant not in ("original", "full", "phone"):
+                    raise ValueError("Unknown scene variant.")
                 revision = runtime.store.revision(model_id)
                 # Authentication/admin checks precede all cache revalidation.
                 headers = {
                     "Cache-Control": "private, no-cache",
                     "Vary": "Authorization, Accept-Encoding",
-                    "ETag": f'W/"{revision}"',
+                    "ETag": f'W/"{revision}-{variant}"',
                     "X-Content-Type-Options": "nosniff",
                 }
                 if request.headers.get("If-None-Match") in (headers["ETag"], "*"):
@@ -507,8 +544,9 @@ class ModelAssetView(HomeAssistantView):
                         )
                     except ValueError:
                         compressed = False
-                data = await runtime.work(
-                    runtime.store.scene_bytes, model_id, compressed
+                # Reads only; no need to queue behind uploads.
+                data = await self.hass.async_add_executor_job(
+                    runtime.store.scene_bytes, model_id, compressed, variant
                 )
                 if compressed:
                     headers["Content-Encoding"] = "gzip"
@@ -531,3 +569,29 @@ class ModelAssetView(HomeAssistantView):
                 "Content-Disposition": f'attachment; filename="{filename}"',
             },
         )
+
+
+class ModelOptimizedView(HomeAssistantView):
+    """Accept a browser-optimized copy of one room (the upload itself is kept)."""
+
+    url = "/api/three_d_rooms/models/{model_id}/optimized/{variant}"
+    name = "api:three_d_rooms:optimized"
+    requires_auth = True
+
+    def __init__(self, hass):
+        self.hass = hass
+
+    async def put(self, request, model_id, variant):
+        runtime = runtime_for(request, self.hass)
+        data = await read_upload(request)
+        if data is None:
+            return self.json({"error": "Optimized scene exceeds 100 MB."}, 413)
+        try:
+            result = await runtime.work(
+                runtime.store.put_web_variant, model_id, variant, data,
+                request.headers.get("X-Rooms-Source-Revision"),
+            )
+        except UPLOAD_ERRORS as error:
+            return self.json({"error": str(error)}, 400)
+        self.hass.bus.async_fire("three_d_rooms_updated")
+        return self.json(result)

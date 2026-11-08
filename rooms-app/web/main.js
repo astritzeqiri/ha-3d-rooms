@@ -32,6 +32,7 @@ import "./views-workspace.css";
 import { mountCameraNavigation } from "./camera-navigation.js";
 import { initDashboardEditor } from "./dashboard-editor.js";
 import { connectNative } from "./native.js";
+import { createOptimizePanel } from "./optimize-panel.js";
 import { initEntityPicker, pickerHTML } from "./entity-picker.js";
 const native = await connectNative().catch((error) => {
   document.getElementById("connection").textContent = error.message;
@@ -121,6 +122,15 @@ const toast = (message) => {
   toast.timer = setTimeout(() => ($("toast").hidden = true), 6000);
 };
 $("toast").onclick = () => ($("toast").hidden = true);
+const optimizePanel = createOptimizePanel({
+  $,
+  optimizer: native?.optimizer,
+  toast,
+  current: () => selected,
+  onDone: async () => {
+    models = await api("models");
+  },
+});
 // Shade vs window/door from the loaded scene's cover motion metadata.
 const coverKind = (id) => {
   const data =
@@ -1244,6 +1254,7 @@ function drawRoomSettings() {
   $("room-area").disabled = !status.connected;
   $("replace-form").hidden = !native;
   $("replace-error").textContent = "";
+  optimizePanel.render(selected);
   $("room-area-note").textContent =
     areasError ||
     (!status.connected
@@ -1405,6 +1416,7 @@ $("replace-form").onsubmit = async (event) => {
       );
     progress.complete();
     toast(["Room model replaced.", ...notes].join(" · "));
+    optimizePanel.add(model.id);
   } catch (error) {
     progress.failed();
     $("replace-error").textContent = error.message;
@@ -1809,6 +1821,8 @@ $("import-form").onsubmit = async (e) => {
     models = await api("models");
     await choose(result.viewId || result.id);
     progress.complete();
+    // Lighter copies for phones and desktops, made in this browser in the background.
+    optimizePanel.add(result.ids || result.id);
     $("import-dialog").close();
     $("import-form").reset();
     toast(

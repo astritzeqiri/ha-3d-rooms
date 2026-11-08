@@ -1,4 +1,9 @@
 import { applyShadowBudget } from "../shared/shadow-budget.mjs";
+import {
+  capShadowMapSize,
+  isMobileDevice,
+  renderProfile,
+} from "../shared/render-profile.mjs";
 import { createClimateVisual } from "../shared/climate-visual.mjs";
 import { climateAppearance } from "../shared/climate.mjs";
 import { offsetPoint } from "../shared/marker-settings.mjs";
@@ -31,10 +36,22 @@ export class SceneView {
     this.climateFrame = 0;
     this.visibilityChanged = () => this.syncClimateAnimation();
     document.addEventListener("visibilitychange", this.visibilityChanged);
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.profile = renderProfile({
+      quality: this.options.quality,
+      mobile: isMobileDevice(),
+      devicePixelRatio: globalThis.devicePixelRatio,
+    });
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: this.profile.antialias,
+    });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    // Lights and geometry do not move with the camera, so orbiting reuses shadow maps.
+    this.renderer.shadowMap.autoUpdate = false;
+    this.renderer.setPixelRatio(this.profile.pixelRatio);
+    this.renderer.domElement.dataset.renderProfile = this.profile.low
+      ? "low"
+      : "high";
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.1;
@@ -52,7 +69,7 @@ export class SceneView {
     this.setInteractive(this.options.interactive);
     this.orbit.addEventListener("change", () => {
       this.cutaway();
-      this.render();
+      this.render({ cameraOnly: true });
       this.options.onCameraChange?.({ source: "orbit" });
     });
     this.resize = new ResizeObserver(() => {
@@ -62,7 +79,7 @@ export class SceneView {
       this.camera.aspect = width / height;
       if (this.options.mode !== "dollhouse" && this.model) this.fitFloor();
       this.camera.updateProjectionMatrix();
-      this.render();
+      this.render({ cameraOnly: true });
       if (this.model) this.options.onCameraChange?.({ source: "resize" });
     });
     this.resize.observe(container);
@@ -148,7 +165,7 @@ export class SceneView {
   async load(model, url, assetCache) {
     const started = performance.now();
     const generation = ++this.generation;
-    const gltf = await loadSceneAsset(url, assetCache);
+    const gltf = await loadSceneAsset(url, assetCache, this.renderer);
     this.renderer.domElement.dataset.assetCache = gltf.hit ? "hit" : "miss";
     if (generation !== this.generation) {
       this.disposeScene(gltf.scene);
@@ -164,7 +181,11 @@ export class SceneView {
     const cacheSizes = [];
     try {
       for (const layer of layers) {
-        const gltf = await loadSceneAsset(layer.url, layer.assetCache);
+        const gltf = await loadSceneAsset(
+          layer.url,
+          layer.assetCache,
+          this.renderer,
+        );
         if (gltf.hit) cacheHits++;
         cacheSizes.push(Math.round((gltf.bytes || 0) / 1024 / 1024));
         if (generation !== this.generation) {
@@ -203,6 +224,7 @@ export class SceneView {
     }
   }
   prepareAsset(model, asset, started) {
+    this.shadowsCurrent = false;
     this.clearClimateVisuals();
     this.disposeScene(this.scene);
     this.scene.clear();
@@ -362,7 +384,18 @@ export class SceneView {
         fixture.type === "light" && !fixture.outOfScope;
       if (fixture.outOfScope) fixture.marker.visible = false;
     }
-    applyShadowBudget(this.scene, this.renderer.capabilities.maxTextures);
+    // Re-offer window shadows: an earlier, narrower view may have budgeted them out.
+    this.daylight?.group.traverse((o) => {
+      if (o.isSpotLight) o.castShadow = true;
+    });
+    const shadows = applyShadowBudget(
+      this.scene,
+      this.renderer.capabilities.maxTextures,
+      this.profile?.shadowPasses,
+    );
+    capShadowMapSize(this.scene, this.profile?.shadowMapSize);
+    if (this.renderer.domElement)
+      this.renderer.domElement.dataset.shadowLights = shadows.shadowLights;
     // Manual house placements and restored control transforms must reach world space before fitting the camera.
     this.asset.updateMatrixWorld(true);
     const box = new THREE.Box3();
@@ -461,7 +494,7 @@ export class SceneView {
     this.setInteractive(this.options.interactive);
     this.orbit.addEventListener("change", () => {
       this.cutaway();
-      this.render();
+      this.render({ cameraOnly: true });
       this.options.onCameraChange?.({ source: "orbit" });
     });
     this.orbit.enableRotate =
@@ -799,18 +832,26 @@ export class SceneView {
       if (document.hidden || !effects.some((effect) => effect.animating))
         return;
       for (const effect of effects) effect.update(time / 1000);
+      // Climate effects cast no shadows; keep any pending shadow refresh.
+      this.renderer.shadowMap.needsUpdate ||= !this.shadowsCurrent;
       this.renderer.render(this.scene, this.camera);
       this.climateFrame = requestAnimationFrame(tick);
     };
     this.climateFrame = requestAnimationFrame(tick);
   }
-  render() {
-    if (this.renderSuspended) return;
+  /** `cameraOnly` renders that follow camera movement reuse the last shadow maps. */
+  render({ cameraOnly = false } = {}) {
+    if (this.renderSuspended) {
+      if (!cameraOnly) this.shadowsCurrent = false;
+      return;
+    }
     this.syncClimateAnimation();
     for (const f of this.fixtures.values())
       for (const effect of f.climateVisuals || [])
         effect.update(performance.now() / 1000);
+    this.renderer.shadowMap.needsUpdate = !cameraOnly || !this.shadowsCurrent;
     this.renderer.render(this.scene, this.camera);
+    this.shadowsCurrent = true;
     this.options.onRender?.();
     const e = this.camera.matrixWorld.elements;
     const vector = (offset) =>

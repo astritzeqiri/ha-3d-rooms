@@ -1,6 +1,7 @@
 import { sceneAssetKey } from "../shared/scene-assets.mjs";
 import { sceneBlob, sceneOwner } from "../shared/scene-download.mjs";
 import { houseLoadPlan } from "../shared/house-floors.mjs";
+import { sceneVariant } from "../shared/render-profile.mjs";
 /**
  * With the floor switcher on, a house card loads the whole house once and
  * reports its views; the card then shows any floor without another load.
@@ -21,6 +22,8 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
           throw new Error(
             "Model not found. Upload it in the 3D Rooms sidebar first.",
           );
+        // Phones download the copy with smaller textures; see render-profile.
+        const variant = sceneVariant(config.quality);
         const { model, floors, views } = houseLoadPlan(
           models,
           configured,
@@ -36,9 +39,11 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
                 ...member,
                 assetCache: {
                   owner: sceneOwner(hass),
-                  key: sceneAssetKey(source),
+                  key: sceneAssetKey(source, variant),
                 },
-                url: URL.createObjectURL(await sceneBlob(hass, source)),
+                url: URL.createObjectURL(
+                  await sceneBlob(hass, source, variant),
+                ),
               });
             }
             return {
@@ -54,14 +59,19 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
             throw error;
           }
         }
-        const sceneURL = URL.createObjectURL(await sceneBlob(hass, model));
+        const sceneURL = URL.createObjectURL(
+          await sceneBlob(hass, model, variant),
+        );
         return {
           model,
           configured,
           floors,
           views,
           sceneURL,
-          assetCache: { owner: sceneOwner(hass), key: sceneAssetKey(model) },
+          assetCache: {
+            owner: sceneOwner(hass),
+            key: sceneAssetKey(model, variant),
+          },
           release: () => URL.revokeObjectURL(sceneURL),
         };
       },

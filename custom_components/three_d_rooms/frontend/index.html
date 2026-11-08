@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-B4er2RKU.js"></script>
+    <script type="module" crossorigin src="./assets/index-Aj4XDqXJ.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/camera-view-DI5K_Cq1.js">
     <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-CI3TWnzS.js">
     <link rel="modulepreload" crossorigin href="./assets/view-cube-B1D3WmXe.js">
+    <link rel="modulepreload" crossorigin href="./assets/preload-helper-CRzLMJPS.js">
     <link rel="stylesheet" crossorigin href="./assets/index-CQ59eyv3.css">
   </head>
   <body>
@@ -706,6 +707,34 @@
             </div>
             <p id="replace-error" class="error" role="alert"></p>
           </form>
+
+          <section
+            id="optimize-card"
+            class="room-settings-card"
+            aria-labelledby="optimize-heading"
+            hidden
+          >
+            <h3 id="optimize-heading">Faster loading</h3>
+            <p id="optimize-status" class="muted small" role="status"></p>
+            <div class="room-settings-actions">
+              <button id="optimize-room" type="button">
+                Optimize for phones and desktops
+              </button>
+            </div>
+            <progress
+              id="optimize-progress"
+              max="100"
+              value="0"
+              aria-label="Optimization progress"
+              hidden
+            ></progress>
+            <p class="muted small">
+              Makes lighter copies in this browser: compressed geometry and
+              textures that stay compressed on the graphics chip. Your upload is
+              kept unchanged for export. Keep this page open until it finishes.
+            </p>
+            <p id="optimize-error" class="error" role="alert"></p>
+          </section>
 
           <details class="room-advanced">
             <summary>Advanced room settings</summary>

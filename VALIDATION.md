@@ -1,3 +1,13 @@
+# 0.31.0 — faster on phones and lighter room models, 2026-11-08
+
+Released as 0.31.0, based on v0.30.2.
+
+- 196 frontend tests, formatting and build pass. 71 Python tests pass on the host (15 native skipped) and all 71 pass inside Core 2026.10.2, including the server optimizer on Home Assistant's Pillow 12.3.
+- Integration ZIP inspected: structure, version 0.31.0, bundled frontend with the optimizer, KTX2 transcoder and notices, and no private models, sessions or storage. The extracted artifact was staged on the singleton.
+- Render profile (phone vs desktop browser emulation): phone gets 1.5× pixel ratio without MSAA and a shadow-pass cap; `quality: high` restores full quality; orbiting renders no shadow passes. Headless timings for the phone-size house: about 27 ms per camera frame, against about 80 ms before.
+- Lighter models on the five local test rooms: the server copies were created automatically at startup and the uploads are byte-identical. Browser optimization from the real manager took 4–63 s per room. Whole-house texture memory on a phone went from 266 MB to 86 MB (server copies) to 11.8 MB (KTX2). Phone cards download only phone copies. Living-room card load went from about 4.9 s to about 0.75 s. Side-by-side renders of the upload and the optimized copy differ only by animation and compression noise. A colour-space bug found here (data maps encoded as sRGB) is fixed and covered by a test.
+- Not checked: a real phone, the actual HACS download, the user's production HA.
+
 # 0.30.2 — contact sensors for window/door groups, 2026-11-08
 
 Released as 0.30.2, based on v0.30.1. Frontend and backend group validation accept `binary_sensor` for cover groups unless a member is a desk (motion "none"); the group editor lists binary sensors for windows & doors.

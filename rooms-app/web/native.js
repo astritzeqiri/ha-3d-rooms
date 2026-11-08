@@ -87,7 +87,23 @@ export async function connectNative() {
       });
     },
     async sceneURL(model) {
-      return URL.createObjectURL(await bridge.scene(model));
+      return URL.createObjectURL(await bridge.scene(model, "full"));
+    },
+    /** Primitives for the browser optimizer (web/room-optimizer.js). */
+    optimizer: {
+      optimization: (id) => bridge.request("optimization", { model: id }),
+      async originalScene(id) {
+        const res = await response(
+          `/api/three_d_rooms/models/${encodeURIComponent(id)}/scene.glb?variant=original`,
+        );
+        return new Uint8Array(await res.arrayBuffer());
+      },
+      uploadOptimized: (id, variant, bytes, sourceRevision) =>
+        bridge.upload(`/api/three_d_rooms/models/${id}/optimized/${variant}`, {
+          method: "PUT",
+          file: new Blob([bytes], { type: "model/gltf-binary" }),
+          headers: { "X-Rooms-Source-Revision": sourceRevision },
+        }),
     },
     async exportURL(id) {
       return URL.createObjectURL(

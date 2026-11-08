@@ -22,6 +22,7 @@ import { SceneView } from "../web/scene.js";
 import { entityAppearance, hexToRgb, kelvinToRgb } from "../shared/light.mjs";
 import { connectModel } from "./transport.mjs";
 import { selectHouseView } from "../shared/house-floors.mjs";
+import { QUALITIES } from "../shared/render-profile.mjs";
 export class ThreeDRoomsCard extends HTMLElement {
   static getConfigElement() {
     return document.createElement("three-d-rooms-editor");
@@ -122,6 +123,8 @@ export class ThreeDRoomsCard extends HTMLElement {
       throw new Error("Tilt must be between 0 and 180 degrees.");
     if (config.view !== undefined && !["front", "floor"].includes(config.view))
       throw new Error("Choose front or floor view.");
+    if (config.quality !== undefined && !QUALITIES.includes(config.quality))
+      throw new Error("Quality must be auto, high or low.");
     for (const key of ["floor_selector", "camera_controls"])
       if (config[key] !== undefined && typeof config[key] !== "boolean")
         throw new Error(`${key} must be true or false.`);
@@ -286,6 +289,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         heading: this._config.heading,
         zoom: this._config.zoom ?? 1,
         camera: this._config.camera,
+        quality: this._config.quality,
         onRender: () => this._positionButtons(),
         onCameraChange: ({ source }) => {
           if (source !== "orbit" || this._cameraMoved) return;

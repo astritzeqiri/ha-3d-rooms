@@ -50,9 +50,17 @@ export async function uploadNativeModel(hass, path, options) {
     (/^\/api\/three_d_rooms\/models\/[a-z0-9_-]+$/.test(path) &&
       options.method === "PUT") ||
     (/^\/api\/three_d_rooms\/houses\/[a-z0-9_-]+$/.test(path) &&
-      ["POST", "PUT"].includes(options.method))
+      ["POST", "PUT"].includes(options.method)) ||
+    (/^\/api\/three_d_rooms\/models\/[a-z0-9_-]+\/optimized\/(full|phone)$/.test(
+      path,
+    ) &&
+      options.method === "PUT")
   ))
     throw new Error("Unknown model upload.");
+  const optimized = path.includes("/optimized/");
+  const source = options.headers?.["X-Rooms-Source-Revision"];
+  if (optimized && !/^[a-f0-9]{24}$/.test(source || ""))
+    throw new Error("Optimized scenes must name the upload they came from.");
   const matches = options.headers?.["X-Rooms-Matches"];
   if (matches !== undefined && !/^[A-Za-z0-9_-]{1,6000}$/.test(matches))
     throw new Error("Too many room and device choices to send at once.");
@@ -64,7 +72,8 @@ export async function uploadNativeModel(hass, path, options) {
         ? { "X-Rooms-Revision": options.headers["X-Rooms-Revision"] }
         : {}),
       ...(matches ? { "X-Rooms-Matches": matches } : {}),
-      "Content-Type": "application/zip",
+      ...(optimized ? { "X-Rooms-Source-Revision": source } : {}),
+      "Content-Type": optimized ? "model/gltf-binary" : "application/zip",
       Authorization: `Bearer ${hass.auth.accessToken}`,
     },
   });

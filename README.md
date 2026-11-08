@@ -160,6 +160,12 @@ Use `view: floor` for an orthographic floor plan. Optional fields include `title
 
 </details>
 
+## Faster loading on phones
+
+3D Rooms keeps lighter copies of every room next to your upload. Home Assistant makes them automatically (shared, smaller WebP textures), and phones download a copy with smaller textures. For the biggest gain, open the room in the 3D Rooms sidebar → Room settings → **Faster loading** → **Optimize for phones and desktops**. This compresses geometry and uses GPU-compressed (KTX2) textures; it runs in your browser and also starts automatically after an upload. Your upload is never changed, and Export returns it.
+
+Cards render more lightly on phones. Add `quality: high` to a card to keep full quality on a phone, or `quality: low` to use the light profile everywhere.
+
 ## Update
 
 Download the latest version in **HACS → 3D Rooms**, restart **Home Assistant**, then refresh your browser.

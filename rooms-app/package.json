@@ -1,6 +1,6 @@
 {
   "name": "ha-3d-rooms",
-  "version": "0.30.2",
+  "version": "0.31.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,10 +13,15 @@
     "format:check": "prettier --check server shared web dashboard tools test vite*.config.mjs"
   },
   "dependencies": {
+    "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/extensions": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
+    "fflate": "^0.8.2",
+    "ktx2-encoder": "0.6.0",
+    "meshoptimizer": "1.3.0",
     "three": "^0.186.0",
     "ws": "^8.18.0",
-    "yauzl": "^3.2.0",
-    "fflate": "^0.8.2"
+    "yauzl": "^3.2.0"
   },
   "devDependencies": {
     "prettier": "^3.9.10",

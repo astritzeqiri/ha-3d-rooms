@@ -1,3 +1,11 @@
+## 0.31.0
+
+- **Faster on phones.** Phones and touch-only tablets render the 3D room with a lighter profile: at most 1.5× pixel density, no edge smoothing on dense screens, smaller shadow maps and a cap on shadow work (window shadows first). Every light still lights the room and stays controllable. On every device, moving the camera reuses the room's shadows instead of redrawing them each frame.
+- **Rendering quality card option.** `quality: auto | high | low` (Rendering quality in the card editor). Automatic is the default; High keeps full quality on phones.
+- **Lighter room models, automatically.** Home Assistant makes a desktop and a phone copy of every room next to your upload: identical textures are stored once, large ones are shrunk (2048 px desktop, 512 px phone) and saved as WebP. Existing rooms are processed once after updating; your uploads are never changed and Export still returns them. Cards download the phone copy on phones.
+- **Optimize for phones and desktops.** Room settings → Faster loading compresses a room's geometry and converts its textures to KTX2, which stay compressed on the graphics chip. It runs in the browser and starts automatically after you upload or replace a room. Device, door and room data are checked to be unchanged before Home Assistant accepts the copy.
+- No migration or re-upload is needed.
+
 ## 0.30.2
 
 - Window and door groups can now be connected to a `binary_sensor` (contact sensor) as well as a `cover`. Every window or door in the group shows the sensor's Open/Closed state; sensors are read-only, so open/close buttons stay disabled. Groups that include a desk still require a `cover`. Existing groups are unchanged; no migration is needed.

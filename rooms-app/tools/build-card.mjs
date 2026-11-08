@@ -10,6 +10,18 @@ await rm(destination, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });
 await cp("dist/assets", `${destination}/assets`, { recursive: true });
 await copyFile("dist/index.html", `${destination}/index.html`);
+// HACS installs only this folder, so the bundled-library notices travel with it.
+await copyFile(
+  "../THIRD_PARTY_NOTICES.md",
+  `${destination}/THIRD_PARTY_NOTICES.md`,
+);
+// KTX2 transcoder for GPU-compressed room textures; loaded only when a room uses them.
+await mkdir(`${destination}/basis`, { recursive: true });
+for (const file of ["basis_transcoder.js", "basis_transcoder.wasm"])
+  await copyFile(
+    `node_modules/three/examples/jsm/libs/basis/${file}`,
+    `${destination}/basis/${file}`,
+  );
 await copyFile(
   "dist/card/three-d-rooms-card.js",
   `${destination}/three-d-rooms-card.js`,

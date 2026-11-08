@@ -7,6 +7,7 @@ from homeassistant.components.http import StaticPathConfig
 from .api import (
     HouseReplaceView,
     ModelAssetView,
+    ModelOptimizedView,
     ModelReplaceView,
     ModelUploadView,
     RoomsRuntime,
@@ -25,6 +26,7 @@ async def async_setup(hass, config):
     hass.http.register_view(ModelUploadView(hass))
     hass.http.register_view(ModelReplaceView(hass))
     hass.http.register_view(ModelAssetView(hass))
+    hass.http.register_view(ModelOptimizedView(hass))
     websocket_api.async_register_command(hass, websocket_request)
     hass.data.setdefault(DOMAIN, {})
     return True
@@ -34,7 +36,10 @@ async def async_setup_entry(hass, entry):
     """Open the persistent library and expose the bundled UI."""
     store = ModelStore(hass.config.path(".storage", DOMAIN))
     await hass.async_add_executor_job(store.open)
-    hass.data[DOMAIN]["runtime"] = RoomsRuntime(hass, store)
+    runtime = RoomsRuntime(hass, store)
+    hass.data[DOMAIN]["runtime"] = runtime
+    # Existing rooms get lighter copies once, without re-uploading.
+    runtime.schedule_optimize()
     module_url = f"{STATIC_URL}/three-d-rooms-card.js?v={VERSION}"
     # HA loads this ES module on every frontend, including dashboard-only visits.
     # No user-managed Lovelace resource or second HACS download is needed.
@@ -55,6 +60,8 @@ async def async_unload_entry(hass, entry):
     """Hide the panel, while retaining models for a later setup or recovery."""
     runtime = hass.data[DOMAIN].get("runtime")
     if runtime is not None:
+        if runtime.optimizer is not None:
+            runtime.optimizer.cancel()
         async with runtime.lock:
             hass.data[DOMAIN].pop("runtime", None)
     frontend.async_remove_panel(hass, DOMAIN)

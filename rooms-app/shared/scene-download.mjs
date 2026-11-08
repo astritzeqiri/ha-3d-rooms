@@ -10,14 +10,15 @@ export function sceneOwner(hass) {
 export function clearSceneDownloads(hass) {
   sessions.delete(sceneOwner(hass));
 }
-export async function sceneBlob(hass, model) {
+/** `variant` is "original", "full" or "phone"; the server falls back to the upload. */
+export async function sceneBlob(hass, model, variant = "original") {
   if (hass.user?.is_admin === false)
     throw new Error("Administrator access is required.");
   const owner = sceneOwner(hass);
   let cache = sessions.get(owner);
   if (!cache) sessions.set(owner, (cache = new Map()));
   const revision = model.sceneRevision || model.importedAt || "legacy";
-  const key = `${model.id}:${revision}`;
+  const key = `${model.id}:${revision}:${variant}`;
   const now = Date.now();
   for (const [id, entry] of cache) if (entry.expires < now) cache.delete(id);
   let entry = cache.get(key);
@@ -28,7 +29,7 @@ export async function sceneBlob(hass, model) {
   }
   entry = { bytes: 0, expires: now + MAX_AGE };
   entry.promise = (async () => {
-    const path = `/api/three_d_rooms/models/${encodeURIComponent(model.id)}/scene.glb?v=${encodeURIComponent(revision)}`;
+    const path = `/api/three_d_rooms/models/${encodeURIComponent(model.id)}/scene.glb?v=${encodeURIComponent(revision)}&variant=${encodeURIComponent(variant)}`;
     const response = await hass.fetchWithAuth(path);
     if (!response.ok)
       throw new Error(

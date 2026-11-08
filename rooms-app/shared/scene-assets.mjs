@@ -1,4 +1,6 @@
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { KTX2Loader } from "three/addons/loaders/KTX2Loader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
 
 // CPU-only templates, scoped to the authenticated HA connection. Never render or
@@ -7,8 +9,33 @@ const sessions = new WeakMap();
 export function clearSceneAssets(owner) {
   sessions.delete(owner);
 }
-export function sceneAssetKey(model) {
-  return `${model.id}:${model.sceneRevision || model.importedAt || "legacy"}`;
+export function sceneAssetKey(model, variant = "original") {
+  return `${model.id}:${model.sceneRevision || model.importedAt || "legacy"}:${variant}`;
+}
+/* The bundled Basis transcoder ships beside the card (frontend/basis/). Each build
+ * defines where that folder is relative to its own module. */
+const BASIS_PATH =
+  typeof __THREE_D_ROOMS_BASIS__ === "string"
+    ? __THREE_D_ROOMS_BASIS__
+    : "./basis/";
+let ktx2;
+/** Decoders for optimized copies: meshopt geometry and KTX2 (GPU-compressed) textures. */
+export function sceneLoader(renderer) {
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+  if (renderer?.extensions && !ktx2) {
+    const candidate = new KTX2Loader().setTranscoderPath(
+      new URL(BASIS_PATH, import.meta.url).href,
+    );
+    try {
+      // Formats depend on the GPU, not the canvas; one detection serves every viewer.
+      candidate.detectSupport(renderer);
+      ktx2 = candidate;
+    } catch {
+      // Without detection only KTX2 rooms fail to load; others are unaffected.
+    }
+  }
+  if (ktx2) loader.setKTX2Loader(ktx2);
+  return loader;
 }
 export function cloneScene(scene) {
   const result = clone(scene),
@@ -57,10 +84,20 @@ export function sceneBytes(scene) {
       for (const texture of Object.values(mat || {}))
         if (texture?.isTexture) {
           const image = texture.image;
-          count(
-            image,
-            ((image?.width || 0) * (image?.height || 0) * 4 * 4) / 3,
-          );
+          // GPU-compressed (KTX2) textures keep their compressed size in memory.
+          if (texture.isCompressedTexture)
+            count(
+              image,
+              (texture.mipmaps || []).reduce(
+                (sum, level) => sum + (level.data?.byteLength || 0),
+                0,
+              ),
+            );
+          else
+            count(
+              image,
+              ((image?.width || 0) * (image?.height || 0) * 4 * 4) / 3,
+            );
         }
   });
   return bytes;
@@ -117,8 +154,8 @@ export class SceneAssetCache {
     return { scene: cloneScene(scene), hit, bytes: entry.bytes };
   }
 }
-export async function loadSceneAsset(url, context) {
-  const loader = async () => (await new GLTFLoader().loadAsync(url)).scene;
+export async function loadSceneAsset(url, context, renderer) {
+  const loader = async () => (await sceneLoader(renderer).loadAsync(url)).scene;
   if (!context) return { scene: await loader(), hit: false };
   let cache = sessions.get(context.owner);
   if (!cache) sessions.set(context.owner, (cache = new SceneAssetCache()));

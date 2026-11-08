@@ -57,7 +57,8 @@ class ThreeDRoomsPanel extends HTMLElement {
           this._hass.callWS({ type: "three_d_rooms/request", operation, data }),
         asset: (path, options) => this._hass.fetchWithAuth(path, options),
         upload: (path, options) => uploadNativeModel(this._hass, path, options),
-        scene: (model) => sceneBlob(this._hass, model),
+        scene: (model, variant = "full") =>
+          sceneBlob(this._hass, model, variant),
         entityIcon: (state) => {
           const key = JSON.stringify([
             state.entity_id,
