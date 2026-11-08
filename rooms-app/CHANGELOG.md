@@ -1,6 +1,10 @@
+## 0.29.1
+
+- The entity picker for windows, doors and shades now lists every `binary_sensor`, including contact sensors that have no door/window device class set. In 0.29.0 those were hidden.
+
 ## 0.29.0
 
-- Windows, doors and shades can now be connected to door/window contact sensors (`binary_sensor` with device class door, window, opening or garage door), not only `cover` entities. The sensor's state shows as Open/Closed and moves the window or door in the 3D room. Sensors are read-only, so open/close buttons stay disabled for them. Desk controls still require a `cover`. Existing mappings are unchanged; no migration is needed.
+- Windows, doors and shades can now be connected to door/window contact sensors (`binary_sensor` entities), not only `cover` entities. The sensor's state shows as Open/Closed and moves the window or door in the 3D room. Sensors are read-only, so open/close buttons stay disabled for them. Desk controls still require a `cover`. Existing mappings are unchanged; no migration is needed.
 
 ## 0.28.0
 

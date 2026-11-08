@@ -20,7 +20,6 @@ from homeassistant.exceptions import HomeAssistantError
 from .const import DOMAIN
 from .models import ENTITY, MAX_UPLOAD, number, compatible_entity
 
-OPENING_CLASSES = ("door", "window", "opening", "garage_door")
 
 
 
@@ -44,8 +43,7 @@ class RoomsRuntime:
             "entities": [
                 s.as_dict()
                 for s in self.hass.states.async_all()
-                if s.domain in ("climate", "light", "switch", "cover", "sun", "number", "input_number", "button", "input_button", "script", "scene")
-                or (s.domain == "binary_sensor" and s.attributes.get("device_class") in OPENING_CLASSES)
+                if s.domain in ("climate", "light", "switch", "cover", "sun", "binary_sensor", "number", "input_number", "button", "input_button", "script", "scene")
             ],
         }
 
