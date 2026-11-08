@@ -478,8 +478,17 @@
               </p>
             </div>
             <div class="room-device-actions">
-              <button id="group-lights" type="button">Group lights</button
-              ><span id="control-count"></span>
+              <span id="control-count" class="muted small"></span>
+              <details id="group-menu" class="group-menu">
+                <summary>Group devices</summary>
+                <div class="device-menu-list group-menu-list">
+                  <button id="group-lights" type="button">Lights</button>
+                  <button id="group-shades" type="button" hidden>Shades</button>
+                  <button id="group-openings" type="button" hidden>
+                    Windows &amp; doors
+                  </button>
+                </div>
+              </details>
             </div>
           </div>
           <div id="device-tools" class="device-tools" hidden>

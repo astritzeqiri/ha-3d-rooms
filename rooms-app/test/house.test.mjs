@@ -109,3 +109,44 @@ test("house library summaries describe rooms and floor scope, never entity conne
     "1 room · Upper floor",
   );
 });
+
+test("house and floor views combine room daylight windows at placed positions", () => {
+  const a = room("office", 1),
+    b = room("hallway", 4);
+  a.controls.push({
+    id: "blind",
+    label: "Blind",
+    type: "cover",
+    position: [0, 1, 0],
+    nodeIds: [],
+  });
+  a.daylight = {
+    mode: "day",
+    entity: "sun.sun",
+    windows: [
+      {
+        id: "window",
+        nodeId: "glass",
+        position: [1, 1.5, 0],
+        inward: [0, 0, 1],
+        width: 1,
+        height: 1.2,
+        coverId: "blind",
+      },
+    ],
+  };
+  const views = houseModels([a, b]);
+  const all = views.find((v) => !v.houseFloor),
+    second = views.find((v) => v.houseFloor?.id === "second");
+  assert.equal(all.daylight.mode, "day");
+  assert.deepEqual(all.daylight.windows[0].position, [11, 1.5, 4]);
+  assert.deepEqual(all.daylight.windows[0].inward, [0, 0, 1]);
+  assert.equal(
+    all.daylight.windows[0].coverId,
+    all.controls.find(
+      (c) => c.sourceModel === "office" && c.sourceControl === "blind",
+    ).id,
+  );
+  assert.equal(second.daylight, undefined);
+  assert.equal(a.daylight.windows[0].id, "window");
+});

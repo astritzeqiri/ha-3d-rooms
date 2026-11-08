@@ -121,9 +121,20 @@ const toast = (message) => {
   toast.timer = setTimeout(() => ($("toast").hidden = true), 6000);
 };
 $("toast").onclick = () => ($("toast").hidden = true);
+// Shade vs window/door from the loaded scene's cover motion metadata.
+const coverKind = (id) => {
+  const data =
+    view?.model?.id === selected?.id
+      ? view.nodes?.get(id)?.userData
+      : undefined;
+  if (data?.rollerShade) return "shade";
+  if (data?.hingedDoor || data?.slidingDoor) return "opening";
+  return undefined;
+};
 const lightGroups = initLightGroups({
   model: () => selected,
   entities: () => status.entities,
+  coverKind,
   save: async (id, groups) => {
     await api(`models/${id}/light-groups`, {
       method: "PUT",
@@ -131,10 +142,160 @@ const lightGroups = initLightGroups({
     });
     models = await api("models");
     await choose(id, "devices");
-    toast("Light groups saved.");
+    toast("Groups saved.");
   },
 });
-$("group-lights").onclick = () => lightGroups.open();
+for (const [button, kind] of [
+  ["group-lights", "light"],
+  ["group-shades", "shade"],
+  ["group-openings", "opening"],
+])
+  $(button).onclick = () => {
+    $("group-menu").open = false;
+    lightGroups.open(undefined, kind);
+  };
+// Menus: one open at a time, close on outside click, Escape returns focus.
+document.addEventListener("click", (e) => {
+  for (const menu of document.querySelectorAll(
+    "details.device-menu[open], details#group-menu[open]",
+  ))
+    if (
+      !menu.contains(e.target) ||
+      e.target.closest(".device-menu-list button")
+    )
+      menu.open = false;
+});
+document.addEventListener(
+  "toggle",
+  (e) => {
+    if (
+      !e.target.matches?.("details.device-menu, details#group-menu") ||
+      !e.target.open
+    )
+      return;
+    for (const menu of document.querySelectorAll(
+      "details.device-menu[open], details#group-menu[open]",
+    ))
+      if (menu !== e.target) menu.open = false;
+  },
+  true,
+);
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  const menu = document.activeElement?.closest?.(
+    "details.device-menu[open], details#group-menu[open]",
+  );
+  if (!menu) return;
+  menu.open = false;
+  menu.querySelector("summary")?.focus();
+  e.stopPropagation();
+});
+// Device list: one compact row per device; one row expands at a time and
+// sections fold. Expanded bodies reuse the full per-type device cards.
+let expandedDevice = null;
+const collapsedSections = new Set();
+const ICON_PATHS = {
+  light:
+    '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3Z"/>',
+  shade:
+    '<rect x="4" y="3" width="16" height="4" rx="1"/><path d="M6 7v9h12V7M6 10h12M6 13h12"/><path d="M12 16v3"/><circle cx="12" cy="20" r="1"/>',
+  opening:
+    '<path d="M4 21V4a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v17M2 21h20"/><path d="m15 5 5 2v14"/><circle cx="12" cy="13" r=".8" fill="currentColor"/>',
+  cover:
+    '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M4 9h16M4 15h16"/>',
+  climate:
+    '<rect x="2" y="5" width="20" height="9" rx="2"/><path d="M6 11h12M7 17l-1 2M12 17v3M17 17l1 2"/>',
+  number: '<path d="M4 7h16M4 12h10M4 17h6"/><path d="m17 14 3 3-3 3"/>',
+  button: '<circle cx="12" cy="12" r="8"/><path d="m10 9 5 3-5 3Z"/>',
+};
+const deviceKind = (c) =>
+  c.device
+    ? "number"
+    : c.type === "cover"
+      ? coverKind(c.id) || "cover"
+      : ICON_PATHS[c.type]
+        ? c.type
+        : "light";
+const deviceTypeIcon = (c) =>
+  `<span class="device-icon" data-kind="${deviceKind(c)}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICON_PATHS[deviceKind(c)]}</svg></span>`;
+function deviceRowMeta(c, s, connection) {
+  if (c.hidden) return "Hidden in all views";
+  const group = c.lightGroup
+    ? ` · Group of ${selected.controls.filter((m) => m.lightGroup === c.lightGroup).length}`
+    : "";
+  if (connection.kind === "unmapped" && !c.device)
+    return "Not connected" + group;
+  if (connection.kind === "unavailable") return connection.label + group;
+  if (c.device)
+    return `Adjustable desk${s.value === undefined ? "" : ` · ${s.value} ${c.unit || ""}`}`.trim();
+  if (c.type === "light")
+    return (
+      (s.on
+        ? `On${c.capabilities.includes("brightness") && s.brightness ? ` · ${Math.round((s.brightness / 255) * 100)}%` : ""}`
+        : "Off") + group
+    );
+  if (c.type === "cover")
+    return (
+      (s.position === undefined
+        ? s.label || "Unknown"
+        : s.position <= 0
+          ? "Closed"
+          : s.position >= 100
+            ? "Open"
+            : `${Math.round(s.position)}% open`) + group
+    );
+  if (c.type === "climate")
+    return `${s.mode ?? "Unknown"}${s.currentTemperature === undefined ? "" : ` · ${s.currentTemperature}°`}${s.temperature === undefined ? "" : ` → ${s.temperature}°`}`;
+  if (c.type === "number")
+    return s.value === undefined ? "Unknown" : `${s.value} ${c.unit || ""}`;
+  return connection.label;
+}
+const iconButton = (attrs, label, path) =>
+  `<button type="button" class="quick-icon" ${attrs} aria-label="${label}" title="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></button>`;
+function deviceRowQuick(c, s, connection) {
+  const label = esc(c.label);
+  if (c.hidden)
+    return `<button type="button" class="quick-text" data-device-visibility="${c.id}" data-hidden="false" aria-label="Show ${label}">Show</button>`;
+  if (connection.kind === "unmapped" && !c.device)
+    return `<button type="button" class="quick-text quick-connect" data-device-settings="${c.id}" aria-label="Connect an entity to ${label}">Connect</button>`;
+  const off = !preview && s.unavailable ? "disabled" : "";
+  if (c.type === "light") {
+    const waiting = pending.has(`${selected.id}/${c.id}`);
+    return `<button role="switch" aria-label="${label}" aria-checked="${!!s.on}" class="switch" data-toggle="${c.id}" ${waiting || off ? "disabled" : ""}>${s.on ? "On" : "Off"}</button>`;
+  }
+  if (c.type === "cover") {
+    const f = preview
+      ? { open: true, close: true, stop: true }
+      : coverFeatures(s.entity);
+    const can = (a) =>
+      f[a] && c.capabilities.includes(a === "stop" ? "stop" : "open_close");
+    if (deviceKind(c) === "opening")
+      return `<div class="quick-segment">${["close", "open"]
+        .filter(can)
+        .map(
+          (a) =>
+            `<button type="button" data-cover="${c.id}" data-action="${a}" aria-label="${a === "open" ? "Open" : "Close"} ${label}" aria-pressed="${a === "open" ? (s.position ?? 0) > 0 : (s.position ?? 0) <= 0}" ${off}>${a === "open" ? "Open" : "Closed"}</button>`,
+        )
+        .join("")}</div>`;
+    return `<div class="quick-segment">${[
+      ["open", "Open", '<path d="m6 15 6-6 6 6"/>'],
+      ["stop", "Stop", '<rect x="8" y="8" width="8" height="8" rx="1"/>'],
+      ["close", "Close", '<path d="m6 9 6 6 6-6"/>'],
+    ]
+      .filter(([a]) => can(a))
+      .map(([a, text, path]) =>
+        iconButton(
+          `data-cover="${c.id}" data-action="${a}" ${off}`,
+          `${text} ${label}`,
+          path,
+        ),
+      )
+      .join("")}</div>`;
+  }
+  if (c.type === "button")
+    return `<button type="button" class="quick-text" data-press="${c.id}" aria-label="Run ${label}" ${off}>Run</button>`;
+  return "";
+}
 let deviceFilter = "all",
   deviceQuery = "";
 const openMore = new Set();
@@ -223,8 +384,10 @@ function state(c) {
     entity,
   };
 }
+// One overflow menu per card keeps rarely used actions (entity, group, hide)
+// out of the way; it replaces the gear button and the separate Hide row.
 const deviceSettingsButton = (c) =>
-  `<button class="device-settings" data-device-settings="${c.id}" aria-label="${c.lightGroup ? "Edit light group" : "Edit entity for"} ${esc(c.label)}" title="${c.lightGroup ? "Edit group" : "Change entity"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m9 3-1 3-3 1-2 5 2 5 3 1 1 3h6l1-3 3-1 2-5-2-5-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
+  `<details class="device-menu"><summary class="device-settings" aria-label="More actions for ${esc(c.label)}" title="More actions"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></summary><div class="device-menu-list"><button type="button" data-device-settings="${c.id}">${c.lightGroup ? "Edit group" : selected?.bindings?.[c.id] ? "Change entity" : "Connect an entity"}</button><button type="button" data-device-visibility="${c.id}" data-hidden="true" aria-label="Hide ${esc(c.label)}">Hide device</button></div></details>`;
 const entityNote = (c) =>
   preview
     ? '<span class="muted small device-entity">Simulation only</span>'
@@ -318,9 +481,22 @@ function drawControls() {
     return;
   }
   const entries = deviceEntries(selected, { includeHidden: true });
-  $("group-lights").hidden =
-    !!selected.houseView ||
-    selected.controls.filter((c) => c.type === "light").length < 2;
+  const groupable = (kind) =>
+    !selected.houseView &&
+    selected.controls.filter(
+      (c) =>
+        !c.hidden &&
+        (kind === "light"
+          ? c.type === "light"
+          : c.type === "cover" &&
+            coverKind(c.id) !== (kind === "shade" ? "opening" : "shade")),
+    ).length >= 2;
+  $("group-lights").hidden = !groupable("light");
+  $("group-shades").hidden = !groupable("shade");
+  $("group-openings").hidden = !groupable("opening");
+  $("group-menu").hidden = ["light", "shade", "opening"].every(
+    (kind) => !groupable(kind),
+  );
   const tools = entries.length >= DEVICE_TOOLS_MIN;
   $("device-tools").hidden = !tools;
   for (const chip of document.querySelectorAll("[data-chip]"))
@@ -344,8 +520,9 @@ function drawControls() {
     if (deviceFilter === "off") return !isOn;
     return !selected.bindings[c.id];
   });
-  $("control-count").innerHTML =
-    `<span class="pill" data-live="${!preview}">${preview ? "Simulation" : "Live controls"}</span>${visible.length === entries.length ? entries.length : `${visible.length} of ${entries.length}`} ${entries.length === 1 ? "device" : "devices"}`;
+  // Control mode is already shown by the selector above; keep only the count.
+  $("control-count").textContent =
+    `${visible.length === entries.length ? entries.length : `${visible.length} of ${entries.length}`} ${entries.length === 1 ? "device" : "devices"}`;
   const cardHTML = visible.map((c) => {
     if (c.hidden)
       return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><strong>${esc(c.label)}</strong><span class="pill">Hidden</span></div><p class="muted">Hidden in all 3D Rooms views and dashboards.</p><button type="button" data-device-visibility="${c.id}" data-hidden="false" aria-label="Show ${esc(c.label)}">Show device</button></article>`;
@@ -395,7 +572,7 @@ function drawControls() {
             : preview
               ? `${Math.round(s.position)}% open · preview`
               : s.label;
-      return `<article class="light-card shade-card" data-control="${c.id}"><div class="device-heading"><div><div class="light-label">${label}</div><p class="light-state">${esc(statusLabel)}</p></div>${deviceSettingsButton(c)}</div>
+      return `<article class="light-card shade-card" data-control="${c.id}"><div class="device-heading"><div><div class="light-label">${label}</div>${c.lightGroup ? `<span class="muted small">Group · ${selected.controls.filter((member) => member.lightGroup === c.lightGroup).length} ${coverKind(c.id) === "opening" ? "windows/doors" : coverKind(c.id) === "shade" ? "shades" : "covers"}</span>` : ""}<p class="light-state">${esc(statusLabel)}</p></div>${deviceSettingsButton(c)}</div>
           <div class="shade-actions">${["open", "stop", "close"]
             .filter(
               (action) =>
@@ -468,22 +645,50 @@ function drawControls() {
     ${entityNote(c)}</article>`;
   });
   const categories = [...new Set(visible.map(deviceGroup))];
+  if (expandedDevice && !visible.some((c) => c.id === expandedDevice))
+    expandedDevice = null;
+  const sectionSummary = (members) => {
+    const live = members.filter((c) => !c.hidden);
+    const unmapped = live.filter(
+      (c) => connectionState(c, selected, status, preview).kind === "unmapped",
+    ).length;
+    const lights = live.filter((c) => c.type === "light"),
+      covers = live.filter((c) => c.type === "cover");
+    const parts = [];
+    if (lights.length === live.length && lights.length)
+      parts.push(
+        `${lights.filter((c) => states.get(c.id)?.on).length} of ${lights.length} on`,
+      );
+    else if (covers.length === live.length && covers.length)
+      parts.push(
+        `${covers.filter((c) => (states.get(c.id)?.position ?? 0) > 0).length} of ${covers.length} open`,
+      );
+    else
+      parts.push(`${live.length} ${live.length === 1 ? "device" : "devices"}`);
+    if (unmapped && !preview) parts.push(`${unmapped} need an entity`);
+    return parts.join(" · ");
+  };
   $("controls").innerHTML = categories
-    .map(
-      (group) =>
-        `<section class="device-category"><h3>${esc(group)}</h3><div class="device-category-grid">${visible
-          .map((control, index) => {
-            if (deviceGroup(control) !== group) return "";
-            const connection = connectionState(
-              control,
-              selected,
-              status,
-              preview,
-            );
-            return `<div class="device-with-status"><span class="device-connection" data-kind="${connection.kind}">${esc(connection.label)}</span>${cardHTML[index]}${control.hidden ? "" : `<button type="button" class="hide-device" data-device-visibility="${control.id}" data-hidden="true" aria-label="Hide ${esc(control.label)}">Hide device</button>`}</div>`;
-          })
-          .join("")}</div></section>`,
-    )
+    .map((group) => {
+      const members = visible.filter((c) => deviceGroup(c) === group);
+      const folded = collapsedSections.has(group) && !query;
+      const key = group.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      return `<section class="device-category" data-section="${esc(group)}"><h3><button type="button" class="device-section-toggle" data-section-toggle="${esc(group)}" aria-expanded="${!folded}" aria-controls="device-list-${key}"><svg class="section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg><span>${esc(group)}</span><span class="section-summary">${esc(sectionSummary(members))}</span></button></h3><div class="device-list" id="device-list-${key}" ${folded ? "hidden" : ""}>${members
+        .map((control) => {
+          const index = visible.indexOf(control);
+          const s = states.get(control.id);
+          const connection = connectionState(
+            control,
+            selected,
+            status,
+            preview,
+          );
+          const kind = control.hidden ? "hidden" : connection.kind;
+          const open = expandedDevice === control.id && !control.hidden;
+          return `<div class="device-row" data-control="${control.id}" data-connection="${kind}" data-expanded="${open}"><div class="device-row-main"><button type="button" class="device-row-toggle" data-expand="${control.id}" aria-expanded="${open}" aria-controls="device-body-${control.id}" ${control.hidden ? "disabled" : ""}>${deviceTypeIcon(control)}<span class="device-row-text"><span class="device-row-name">${esc(control.device?.label || control.label)}</span><span class="device-row-meta">${esc(deviceRowMeta(control, s, connection))}</span></span><svg class="row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="device-row-quick">${deviceRowQuick(control, s, connection)}</div>${control.hidden ? "" : deviceSettingsButton(control)}</div>${open ? `<div class="device-row-body" id="device-body-${control.id}">${cardHTML[index]}</div>` : ""}</div>`;
+        })
+        .join("")}</div></section>`;
+    })
     .join("");
   for (const slot of document.querySelectorAll("[data-entity-icon]")) {
     const c = selected.controls.find((c) => c.id === slot.dataset.entityIcon);
@@ -612,7 +817,7 @@ async function moveCover(id, action, position) {
   const model = selected,
     c = model.controls.find((c) => c.id === id);
   if (preview) {
-    simulated.set(id, {
+    const next = {
       ...state(c),
       position:
         action === "open"
@@ -622,7 +827,14 @@ async function moveCover(id, action, position) {
             : action === "position"
               ? position
               : state(c).position,
-    });
+    };
+    // Grouped covers share one entity, so the preview moves them together.
+    for (const member of model.controls.filter(
+      (member) =>
+        member.id === id ||
+        (c.lightGroup && member.lightGroup === c.lightGroup),
+    ))
+      simulated.set(member.id, next);
     drawControls();
     return;
   }
@@ -644,6 +856,27 @@ async function moveCover(id, action, position) {
   }
 }
 $("controls").addEventListener("click", async (e) => {
+  const section = e.target.closest("[data-section-toggle]");
+  if (section) {
+    const name = section.dataset.sectionToggle;
+    collapsedSections.has(name)
+      ? collapsedSections.delete(name)
+      : collapsedSections.add(name);
+    drawControls();
+    document
+      .querySelector(`[data-section-toggle="${CSS.escape(name)}"]`)
+      ?.focus();
+    return;
+  }
+  const expand = e.target.closest("[data-expand]");
+  if (expand) {
+    const id = expand.dataset.expand;
+    expandedDevice = expandedDevice === id ? null : id;
+    view?.highlight(id);
+    drawControls();
+    document.querySelector(`[data-expand="${CSS.escape(id)}"]`)?.focus();
+    return;
+  }
   const visibility = e.target.closest("[data-device-visibility]");
   if (visibility) {
     const model = selected;

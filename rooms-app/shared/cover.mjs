@@ -84,6 +84,24 @@ export function setShadePosition(root, position) {
         100;
     return;
   }
+  // Sliding leaves translate along their parent's local x axis between two
+  // absolute node positions (barn/pocket doors, sliding sashes).
+  const slide = root.userData.slidingDoor;
+  if (slide) {
+    if (
+      !Number.isFinite(position) ||
+      slide.axis !== "x" ||
+      !Number.isFinite(slide.closedOffset) ||
+      !Number.isFinite(slide.openOffset)
+    )
+      return;
+    root.position.x =
+      slide.closedOffset +
+      ((slide.openOffset - slide.closedOffset) *
+        Math.max(0, Math.min(100, position))) /
+        100;
+    return;
+  }
   const shade = root.userData.rollerShade;
   if (
     !shade ||

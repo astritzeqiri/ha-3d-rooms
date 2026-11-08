@@ -1,12 +1,20 @@
-"""Room-local light groups; original fixtures and bindings remain recoverable."""
+"""Room-local device groups (lights, or covers such as shades/windows/doors).
+
+Stored under ``lightGroups`` for compatibility. A group holds members of one
+control type and one shared entity; original controls and bindings remain
+recoverable after ungrouping.
+"""
 from copy import deepcopy
 import re
+
+# Member control type -> compatible shared entity.
+GROUP_ENTITY = {"light": r"(?:light|switch)\.[a-z0-9_]+", "cover": r"cover\.[a-z0-9_]+"}
 
 
 def validate_light_groups(value, controls):
     if not isinstance(value, list) or len(value) > 100:
         raise ValueError("Provide up to 100 light groups.")
-    lights = {c["id"] for c in controls if c["type"] == "light"}
+    types = {c["id"]: c["type"] for c in controls if c["type"] in GROUP_ENTITY}
     ids, members = set(), set()
     clean = []
     for group in value:
@@ -15,11 +23,12 @@ def validate_light_groups(value, controls):
                 or group["id"] in ids or group["id"] in {"constructor", "prototype"}
                 or not isinstance(group["label"], str) or not group["label"].strip() or len(group["label"]) > 160
                 or not isinstance(group["controls"], list) or not 2 <= len(group["controls"]) <= 200
-                or any(not isinstance(c, str) or c not in lights or c in members for c in group["controls"])
+                or any(not isinstance(c, str) or c not in types or c in members for c in group["controls"])
                 or len(set(group["controls"])) != len(group["controls"])
+                or len({types[c] for c in group["controls"]}) != 1
                 or not isinstance(group["entityId"], str)
-                or (group["entityId"] and not re.fullmatch(r"(?:light|switch)\.[a-z0-9_]+", group["entityId"]))):
-            raise ValueError("Give each group a name, at least two distinct room lights and one compatible entity. Lights can belong to only one group.")
+                or (group["entityId"] and not re.fullmatch(GROUP_ENTITY[types[group["controls"][0]]], group["entityId"]))):
+            raise ValueError("Give each group a name, at least two distinct room devices of one kind (lights, or shades/windows/doors) and one compatible entity. A device can belong to only one group.")
         ids.add(group["id"])
         members.update(group["controls"])
         clean.append({**deepcopy(group), "label": group["label"].strip()})
@@ -62,6 +71,6 @@ def apply_light_groups(model):
 
 
 def preserved_groups(previous, controls):
-    ids = {c["id"] for c in controls if c["type"] == "light"}
+    ids = {c["id"] for c in controls if c["type"] in GROUP_ENTITY}
     groups = [{**g, "controls": [c for c in g["controls"] if c in ids]} for g in previous.get("lightGroups", [])]
     return [g for g in groups if len(g["controls"]) >= 2]

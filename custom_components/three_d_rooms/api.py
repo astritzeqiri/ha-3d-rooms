@@ -124,7 +124,7 @@ class RoomsRuntime:
                 for group in groups:
                     entity_id = group.get("entityId") if isinstance(group, dict) else None
                     if entity_id and (not isinstance(entity_id, str) or not self.hass.states.get(entity_id)):
-                        raise ValueError("Choose an existing light entity.")
+                        raise ValueError("Choose an existing entity for the group.")
             result = await self.work(self.store.set_light_groups, data.get("model"), groups)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result

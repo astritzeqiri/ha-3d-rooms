@@ -446,6 +446,17 @@ def validate_glb(data, manifest):
                         or hinge["defaultPosition"] != control.get("defaultPosition", 0)
                         or not hinges[0].get("children")):
                         raise ValueError("Invalid hinged door motion metadata.")
+                slides = [n for n in matches if "slidingDoor" in n.get("extras", {})]
+                if slides:
+                    if len(matches) != 1 or hinges:
+                        raise ValueError("Sliding doors need unique scene roots.")
+                    slide = slides[0]["extras"]["slidingDoor"]
+                    if (not isinstance(slide, dict) or slide.get("axis") != "x"
+                        or not all(number(slide.get(k)) for k in ("closedOffset", "openOffset", "defaultPosition"))
+                        or not 0 < abs(slide["openOffset"] - slide["closedOffset"]) <= 5
+                        or slide["defaultPosition"] != control.get("defaultPosition", 0)
+                        or not slides[0].get("children")):
+                        raise ValueError("Invalid sliding door motion metadata.")
         if control["type"] == "number":
             for node_id in control["nodeIds"]:
                 matches = [n for n in doc.get("nodes", []) if n.get("extras", {}).get("controlId") == node_id]
@@ -1022,7 +1033,21 @@ class ModelStore:
     def set_daylight(self, model_id, settings):
         models = deepcopy(self.models)
         model = next((m for m in models if m["id"] == model_id), None)
-        if model is None or "daylight" not in model:
+        if model is None:
+            # A house/floor view saves its time of day to every daylight room it shows.
+            view = next((v for v in house_models(self.catalog_real()) if v["id"] == model_id), None)
+            if view is None or "daylight" not in view:
+                raise ValueError("This model has no daylight windows. Import a daylight-ready export.")
+            members = {member["model"] for member in view["members"]}
+            rooms = [m for m in models if m["id"] in members and "daylight" in m]
+            for room in rooms:
+                room["daylight"] = validate_daylight(
+                    {**room["daylight"], "mode": settings.get("mode"), "entity": settings.get("entity")},
+                    room["controls"],
+                )
+            self.save(models)
+            return {"daylight": {**deepcopy(view["daylight"]), "mode": settings.get("mode"), "entity": settings.get("entity")}}
+        if "daylight" not in model:
             raise ValueError("This model has no daylight windows. Import a daylight-ready export.")
         value = {**model["daylight"], "mode": settings.get("mode"), "entity": settings.get("entity")}
         model["daylight"] = validate_daylight(value, model["controls"])

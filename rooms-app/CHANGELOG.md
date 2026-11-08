@@ -1,3 +1,18 @@
+## 0.28.0
+
+- House and floor views show the Auto/Day/Night switch again. They combine every room's daylight windows at their placed positions, and changing the time of day on a house or floor card saves it to each room it shows. No migration is needed.
+- Room Devices view redesigned as a compact list:
+  - One slim row per device: type icon, name, status (for example "On · 71%", "70% open", "Not connected") and a quick action. That is a toggle for lights, ▲ ■ ▼ for shades, Closed/Open for windows and doors, or Connect when no entity is linked.
+  - Clicking a row expands the full controls in place, one at a time, and highlights the device in 3D.
+  - Sections fold and show counts ("4 of 9 on · 5 need an entity").
+  - A ⋯ menu on each row holds entity/group and Hide device, and one Group devices menu replaces three header buttons.
+  - Rows stay on one line at phone width, and the phone search box no longer grows to 200px tall.
+- Group shades and group windows & doors, alongside light groups. In a room's Devices tab, choose two or more shades (roller shutters) or windows/doors (hinged or sliding leaves) to share one Home Assistant `cover` entity. They show as one control and move together, with the same editing, ungrouping and binding restoration as light groups. A group holds one kind of device (lights with a `light`/`switch` entity, covers with a `cover` entity). Existing light groups and their storage are unchanged, so no migration is needed.
+- Sliding doors: room packages can mark a cover root with `slidingDoor` motion (`axis: "x"`, `closedOffset`, `openOffset`, `defaultPosition`). The leaf translates along its parent's local x between the two rest positions, works with binary open/closed covers, and is validated on import (unique root, children, 0–5 m travel, not combined with a hinge).
+- House and floor dashboard cards show bottom-right floor buttons (All plus one per floor). The house loads once and floors switch instantly in place, with no reload or extra download. The choice is per card and per browser session; it never changes the saved card or room. Turn it off with `floor_selector: false` or in the card editor; a floor card with the switcher off still loads only its own rooms.
+- Cards gain bottom-right Move camera and Reset view buttons, in one toolbar with the floor buttons, Reload and fullscreen (floors wrap above on narrow screens). Move camera starts from the card's camera-movement setting and only changes this session; Reset view returns to the card framing. Hide them with `camera_controls: false` or in the card editor.
+- Floor-plan cards pan with a one-finger or left drag when camera movement is on, and locked cards let phones scroll the page over the 3D view.
+
 ## 0.27.0
 
 - Reuse decoded models between dashboard cards and tab revisits, with session isolation, revision keys, bounded memory and retry after failure.

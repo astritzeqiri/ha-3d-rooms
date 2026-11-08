@@ -278,3 +278,132 @@ test("house and floor cards toggle their composed bindings and open mapped entit
   await card._toggle("ac");
   assert.deepEqual(calls.slice(1), ["shade", "ac"]);
 });
+
+test("floor buttons switch the loaded house in place and hide when disabled", () => {
+  const card = cardHarness();
+  let loads = 0,
+    built = 0;
+  const shown = [];
+  card._load = () => loads++;
+  card._buildAccess = () => built++;
+  card._states = () => {};
+  card._syncFloorSwitch = () => {};
+  card._syncCameraButtons = () => {};
+  const house = { id: "h-home", houseView: true, controls: [] },
+    upper = { id: "h-home--f2", houseView: true, controls: [] };
+  card._config = { model: "h-home" };
+  card._cameraFree = true;
+  card._model = house;
+  card._views = [house, upper];
+  card._floors = [
+    { id: "h-home", floorId: null, label: "Whole house" },
+    { id: "h-home--f2", floorId: "f2", label: "First floor" },
+  ];
+  card._view = {
+    setHouseView: (view, options) => {
+      assert.equal(options.render, false);
+      shown.push([view.id, options.keepCamera]);
+      return true;
+    },
+  };
+  card._selectFloor("h-home--f2");
+  assert.deepEqual(shown, [["h-home--f2", true]]);
+  assert.equal(card._model, upper);
+  assert.equal(card._floor, "h-home--f2");
+  assert.equal(loads, 0);
+  assert.equal(built, 1);
+  card._selectFloor("h-home--f2");
+  card._selectFloor("h-unknown");
+  assert.equal(shown.length, 1);
+  card._cameraFree = false;
+  card._selectFloor("h-home");
+  assert.deepEqual(shown[1], ["h-home", false]);
+  assert.equal(card._floor, null);
+  // Missing rooms in the loaded scene fall back to a full load.
+  card._view.setHouseView = () => false;
+  card._selectFloor("h-home--f2");
+  assert.equal(loads, 1);
+  card._loading = true;
+  card._selectFloor("h-home");
+  assert.equal(loads, 1);
+});
+
+test("floor switcher stays hidden when turned off or with one view", () => {
+  const card = cardHarness();
+  card._floorSwitch = { hidden: false, dataset: {}, children: [] };
+  card._config = { floor_selector: false };
+  card._floors = [{ id: "a" }, { id: "b" }];
+  card._syncFloorSwitch();
+  assert.equal(card._floorSwitch.hidden, true);
+  card._config = {};
+  card._floors = [{ id: "a" }];
+  card._syncFloorSwitch();
+  assert.equal(card._floorSwitch.hidden, true);
+});
+
+test("model updates compare the displayed floor, not the configured whole house", async () => {
+  const card = cardHarness();
+  let loads = 0;
+  card._load = () => loads++;
+  card._states = () => {};
+  card._syncDaylightSwitch = () => {};
+  card._generation = 1;
+  card._config = { model: "h-home" };
+  card._model = { id: "h-home--f2", houseView: true, controls: [] };
+  card._hass.callWS = async () => [
+    { id: "h-home", houseView: true, controls: [{ id: "x" }] },
+    { id: "h-home--f2", houseView: true, controls: [] },
+  ];
+  await card._modelsChanged();
+  assert.equal(loads, 0);
+  // A change to another loaded floor reloads the house.
+  card._views = [{ id: "h-home", houseView: true, controls: [] }, card._model];
+  await card._modelsChanged();
+  assert.equal(loads, 1);
+});
+
+test("camera buttons toggle movement for this session and reset the framing", () => {
+  const card = cardHarness();
+  const calls = [];
+  const button = () => ({
+    hidden: true,
+    attributes: {},
+    setAttribute(k, v) {
+      this.attributes[k] = v;
+    },
+  });
+  card._moveCamera = button();
+  card._resetCamera = button();
+  card._config = { interactive: false };
+  card._cameraFree = false;
+  card._syncCameraButtons();
+  assert.equal(card._moveCamera.hidden, true, "hidden until a scene loads");
+  card._view = {
+    setInteractive: (on) => calls.push(["interactive", on]),
+    reset: () => calls.push(["reset"]),
+  };
+  card._syncCameraButtons();
+  assert.equal(card._moveCamera.hidden, false);
+  assert.equal(card._moveCamera.attributes["aria-pressed"], "false");
+  assert.equal(card._resetCamera.hidden, true);
+  card._setCameraMovement(true);
+  assert.deepEqual(calls, [["interactive", true]]);
+  assert.equal(card._moveCamera.attributes["aria-pressed"], "true");
+  assert.equal(card._resetCamera.hidden, false);
+  assert.equal(card._cameraTouched, true);
+  card._cameraMoved = true;
+  card._setCameraMovement(false);
+  assert.equal(card._resetCamera.hidden, false, "moved view can still reset");
+  card._resetView();
+  assert.deepEqual(calls.at(-1), ["reset"]);
+  assert.equal(card._cameraMoved, false);
+  assert.equal(card._resetCamera.hidden, true);
+  card._config.camera_controls = false;
+  card._syncCameraButtons();
+  assert.equal(card._moveCamera.hidden, true);
+  assert.equal(card._resetCamera.hidden, true);
+  assert.deepEqual(card._config, {
+    interactive: false,
+    camera_controls: false,
+  });
+});

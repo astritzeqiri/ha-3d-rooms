@@ -214,3 +214,108 @@ test("Floor plan clears an angled camera and uses the exact Top orthographic pre
   assert.equal(view.options.zoom, 1);
   assert.equal(event.source, "preset");
 });
+
+test("house views switch floors in place: rooms, clipping, fixtures and bounds", () => {
+  const room = (id, y) => {
+    const placement = new THREE.Group();
+    placement.userData.pickRoom = id;
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(4, 2, 4),
+      new THREE.MeshStandardMaterial(),
+    );
+    mesh.position.y = y;
+    placement.add(mesh);
+    return placement;
+  };
+  const asset = new THREE.Group();
+  asset.add(room("ground", 1), room("upper", 4));
+  const fixture = (type) => ({
+    type,
+    light: new THREE.PointLight(),
+    marker: new THREE.Object3D(),
+    companion: false,
+  });
+  const view = Object.create(SceneView.prototype);
+  Object.assign(view, {
+    asset,
+    scene: new THREE.Scene(),
+    renderer: { capabilities: { maxTextures: 16 } },
+    options: { mode: "floor", markers: false },
+    fixtures: new Map([
+      ["low", fixture("light")],
+      ["high", fixture("light")],
+    ]),
+    lastStates: new Map(),
+  });
+  let resets = 0,
+    states = 0;
+  view.reset = () => resets++;
+  view.setStates = () => states++;
+  view.render = () => {};
+  view.cutaway = () => {};
+  const member = (model) => ({ model });
+  const whole = {
+    houseView: true,
+    houseId: "home",
+    houseFloor: null,
+    members: [member("ground"), member("upper")],
+    controls: [{ id: "low" }, { id: "high" }],
+  };
+  const upper = {
+    ...whole,
+    houseFloor: { id: "f2", minY: 3, maxY: 6 },
+    members: [member("upper")],
+    controls: [{ id: "high" }],
+  };
+  view.model = whole;
+  view.applyHouseScope();
+  assert.equal(view.bounds.min.y, 0);
+  assert.equal(view.bounds.max.y, 5);
+  assert.equal(view.setHouseView(upper), true);
+  assert.deepEqual(
+    asset.children.map((p) => p.visible),
+    [false, true],
+  );
+  assert.equal(view.fixtures.get("low").light.visible, false);
+  assert.equal(view.fixtures.get("low").light.castShadow, false);
+  assert.equal(view.fixtures.get("high").light.visible, true);
+  assert.equal(view.bounds.min.y, 3);
+  assert.equal(view.bounds.max.y, 5);
+  assert.equal(asset.children[1].children[0].material.clippingPlanes.length, 2);
+  assert.equal(resets, 1);
+  assert.equal(states, 1);
+  assert.equal(view.setHouseView(whole, { keepCamera: true }), true);
+  assert.equal(resets, 1);
+  assert.deepEqual(
+    asset.children.map((p) => p.visible),
+    [true, true],
+  );
+  assert.equal(view.fixtures.get("low").light.visible, true);
+  // Whole house keeps open-ended planes so floor switches avoid recompiles.
+  const [floorPlane, ceiling] =
+    asset.children[0].children[0].material.clippingPlanes;
+  assert.ok(floorPlane.constant >= 1e5 && ceiling.constant >= 1e5);
+  view.setHouseView(upper, { render: false });
+  assert.equal(states, 2);
+  // Views of another house, or needing rooms that were not loaded, are refused.
+  assert.equal(view.setHouseView({ ...upper, houseId: "other" }), false);
+  assert.equal(
+    view.setHouseView({ ...upper, members: [member("attic")] }),
+    false,
+  );
+});
+
+test("camera movement can be locked and unlocked at runtime", () => {
+  const view = Object.create(SceneView.prototype);
+  view.options = { interactive: false };
+  view.orbit = { enabled: false };
+  view.renderer = { domElement: { style: {} } };
+  view.setInteractive(true);
+  assert.equal(view.orbit.enabled, true);
+  assert.equal(view.renderer.domElement.style.touchAction, "none");
+  view.setInteractive(false);
+  assert.equal(view.orbit.enabled, false);
+  assert.equal(view.options.interactive, false);
+  // A locked card lets phones scroll the page over the 3D view.
+  assert.equal(view.renderer.domElement.style.touchAction, "");
+});

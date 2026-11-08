@@ -1,4 +1,5 @@
 import { VIEW_FIELDS, resolveSavedView } from "../shared/saved-view.mjs";
+import { houseFloorOptions } from "../shared/house-floors.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
@@ -37,6 +38,7 @@ function harness() {
   vm.runInNewContext(source, {
     VIEW_FIELDS,
     resolveSavedView,
+    houseFloorOptions,
     document: {
       createElement: () => ({
         append() {},
@@ -269,4 +271,47 @@ test("auto height is a card override and preserves saved camera and view", () =>
   field("height-mode").value = "fixed";
   field("height-mode").onchange();
   assert.equal(events.at(-1).detail.config.height, 500);
+});
+
+test("floor switcher setting appears for houses with floors and saves only when turned off", () => {
+  const { editor, field, events } = harness();
+  editor._models = [
+    { id: "kitchen" },
+    { id: "h-home", houseView: true, houseId: "home", houseFloor: null },
+    {
+      id: "h-home--f1",
+      houseView: true,
+      houseId: "home",
+      houseFloor: { id: "f1", name: "Ground floor" },
+    },
+  ];
+  editor._sync();
+  assert.equal(field("floor-selector-setting").hidden, true);
+  editor.setConfig({ ...editor._config, model: "h-home" });
+  assert.equal(field("floor-selector-setting").hidden, false);
+  assert.equal(field("floor_selector").checked, true);
+  field("floor_selector").checked = false;
+  field("floor_selector").onchange();
+  assert.equal(events.at(-1).detail.config.floor_selector, false);
+  field("floor_selector").checked = true;
+  field("floor_selector").onchange();
+  assert.equal(
+    Object.hasOwn(events.at(-1).detail.config, "floor_selector"),
+    false,
+  );
+});
+
+test("camera buttons setting is on by default and saves only when turned off", () => {
+  const { editor, field, events } = harness();
+  assert.equal(field("camera_controls").checked, true);
+  field("camera_controls").checked = false;
+  field("camera_controls").onchange();
+  assert.equal(events.at(-1).detail.config.camera_controls, false);
+  assert.equal(field("camera_controls").checked, false);
+  field("camera_controls").checked = true;
+  field("camera_controls").onchange();
+  assert.equal(
+    Object.hasOwn(events.at(-1).detail.config, "camera_controls"),
+    false,
+  );
 });

@@ -1,11 +1,59 @@
 import { searchableSelect } from "./searchable-select.js";
 
-/** Groups fixtures from this room under a single existing HA entity. */
-export function initLightGroups({ model, entities, save }) {
+// Each kind groups one control type under a single existing HA entity.
+// Shades and windows/doors are both cover controls; the loaded scene tells them
+// apart (roller shade vs hinged/sliding leaf). Unknown covers fit either.
+export const GROUP_KINDS = {
+  light: {
+    title: "Group lights",
+    edit: "Edit light group",
+    noun: "lights",
+    intro:
+      "Choose modeled lights that share one Home Assistant entity. They will appear as one control and light up together.",
+    entity: /^(light|switch)\./,
+    placeholder: "e.g. Dining lights",
+    prefix: "lg-",
+    member: (c) => c.type === "light",
+  },
+  shade: {
+    title: "Group shades",
+    edit: "Edit shade group",
+    noun: "shades",
+    intro:
+      "Choose modeled shades or shutters that share one Home Assistant cover. They will appear as one control and move together.",
+    entity: /^cover\./,
+    placeholder: "e.g. Living room shutters",
+    prefix: "cg-",
+    member: (c, kind) => c.type === "cover" && kind !== "opening",
+  },
+  opening: {
+    title: "Group windows & doors",
+    edit: "Edit window & door group",
+    noun: "windows or doors",
+    intro:
+      "Choose modeled windows or doors that share one Home Assistant cover. They will appear as one control and open or close together.",
+    entity: /^cover\./,
+    placeholder: "e.g. Dining windows",
+    prefix: "cg-",
+    member: (c, kind) => c.type === "cover" && kind !== "shade",
+  },
+};
+export const groupKindFor = (room, group, coverKind) => {
+  const first = room.controls.find((c) => c.id === group.controls[0]);
+  return first?.type === "light" ? "light" : coverKind(first?.id) || "shade";
+};
+
+/** Groups devices from this room under a single existing HA entity. */
+export function initLightGroups({
+  model,
+  entities,
+  save,
+  coverKind = () => undefined,
+}) {
   const dialog = document.createElement("dialog");
   dialog.id = "light-groups-dialog";
   dialog.setAttribute("aria-labelledby", "light-group-heading");
-  dialog.innerHTML = `<form id="light-group-form"><div class="dialog-top"><div><span class="eyebrow">Room devices</span><h2 id="light-group-heading">Group lights</h2></div><button type="button" data-close class="close" aria-label="Close light group">×</button></div><p class="muted">Choose modeled lights that share one Home Assistant entity. They will appear as one control and light up together.</p><label>Group name<input id="light-group-name" maxlength="160" required placeholder="e.g. Dining lights"></label><label id="light-group-entity-label" for="light-group-entity">Home Assistant entity</label><select id="light-group-entity"></select><p class="muted small">Choose the entity controlling these lights. No new Home Assistant entity is created.</p><fieldset><legend>Lights in this group</legend><input id="light-group-search" type="search" aria-label="Search room lights" placeholder="Search lights…"><div id="light-group-members"></div><p id="light-group-count" class="muted small" role="status"></p></fieldset><p id="light-group-error" class="error" role="alert"></p><div class="actions"><button type="button" id="ungroup-lights" class="danger" hidden>Ungroup</button><button type="button" data-close>Cancel</button><button type="submit" class="primary" id="save-light-group">Save group</button></div></form>`;
+  dialog.innerHTML = `<form id="light-group-form"><div class="dialog-top"><div><span class="eyebrow">Room devices</span><h2 id="light-group-heading">Group lights</h2></div><button type="button" data-close class="close" aria-label="Close light group">×</button></div><p class="muted" id="light-group-intro"></p><label>Group name<input id="light-group-name" maxlength="160" required placeholder=""></label><label id="light-group-entity-label" for="light-group-entity">Home Assistant entity</label><select id="light-group-entity"></select><p class="muted small" id="light-group-entity-help"></p><fieldset><legend id="light-group-legend"></legend><input id="light-group-search" type="search" aria-label="Search room devices" placeholder="Search…"><div id="light-group-members"></div><p id="light-group-count" class="muted small" role="status"></p></fieldset><p id="light-group-error" class="error" role="alert"></p><div class="actions"><button type="button" id="ungroup-lights" class="danger" hidden>Ungroup</button><button type="button" data-close>Cancel</button><button type="submit" class="primary" id="save-light-group">Save group</button></div></form>`;
   document.body.append(dialog);
   const $ = (id) => dialog.querySelector("#" + id);
   const picker = searchableSelect(
@@ -14,15 +62,16 @@ export function initLightGroups({ model, entities, save }) {
   );
   let editing,
     roomId,
+    kind = GROUP_KINDS.light,
     busy = false;
   const count = () => {
     if (
       dialog.querySelectorAll("[name=group-member]:checked").length >= 2 &&
-      $("light-group-error").textContent === "Choose at least two lights."
+      $("light-group-error").textContent === `Choose at least two ${kind.noun}.`
     )
       $("light-group-error").textContent = "";
     $("light-group-count").textContent =
-      `${dialog.querySelectorAll("[name=group-member]:checked").length} selected · choose at least two`;
+      `${dialog.querySelectorAll("[name=group-member]:checked").length} selected · choose at least two ${kind.noun}`;
   };
   dialog.querySelectorAll("[data-close]").forEach(
     (b) =>
@@ -63,7 +112,7 @@ export function initLightGroups({ model, entities, save }) {
       (i) => i.value,
     );
     if (ids.length < 2) {
-      $("light-group-error").textContent = "Choose at least two lights.";
+      $("light-group-error").textContent = `Choose at least two ${kind.noun}.`;
       return;
     }
     if (model()?.id !== roomId) {
@@ -72,7 +121,7 @@ export function initLightGroups({ model, entities, save }) {
       return;
     }
     const group = {
-      id: editing || "lg-" + crypto.randomUUID().replaceAll("-", ""),
+      id: editing || kind.prefix + crypto.randomUUID().replaceAll("-", ""),
       label: $("light-group-name").value.trim(),
       controls: ids,
       entityId: $("light-group-entity").value,
@@ -86,28 +135,34 @@ export function initLightGroups({ model, entities, save }) {
     if (
       !busy &&
       confirm(
-        "Ungroup these lights? Individual controls and their previous entity connections will be restored.",
+        `Ungroup these ${kind.noun}? Individual controls and their previous entity connections will be restored.`,
       )
     )
       persist((model().lightGroups || []).filter((g) => g.id !== editing));
   };
   return {
-    open(id) {
+    open(id, kindName = "light") {
       const room = model();
       if (!room || room.houseView) return;
       editing = id;
       roomId = room.id;
       const group = room.lightGroups?.find((g) => g.id === id);
-      $("light-group-heading").textContent = group
-        ? "Edit light group"
-        : "Group lights";
+      kind =
+        GROUP_KINDS[group ? groupKindFor(room, group, coverKind) : kindName];
+      $("light-group-heading").textContent = group ? kind.edit : kind.title;
+      $("light-group-intro").textContent = kind.intro;
+      $("light-group-legend").textContent =
+        `${kind.noun[0].toUpperCase()}${kind.noun.slice(1)} in this group`;
+      $("light-group-entity-help").textContent =
+        `Choose the entity controlling these ${kind.noun}. No new Home Assistant entity is created.`;
+      $("light-group-name").placeholder = kind.placeholder;
       $("light-group-name").value = group?.label || "";
       $("light-group-search").value = $("light-group-error").textContent = "";
       $("ungroup-lights").hidden = !group;
       const select = $("light-group-entity");
       select.replaceChildren(new Option("Connect an entity later", ""));
       for (const entity of entities().filter((e) =>
-        /^(light|switch)\./.test(e.entity_id),
+        kind.entity.test(e.entity_id),
       ))
         select.add(
           new Option(
@@ -132,7 +187,9 @@ export function initLightGroups({ model, entities, save }) {
           .flatMap((g) => g.controls),
       );
       for (const c of room.controls.filter(
-        (c) => c.type === "light" && !c.hidden,
+        (c) =>
+          !c.hidden &&
+          (kind.member(c, coverKind(c.id)) || group?.controls.includes(c.id)),
       )) {
         const row = document.createElement("label");
         row.className = "light-group-member";

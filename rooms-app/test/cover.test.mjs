@@ -164,3 +164,49 @@ test("hinged doors use their local pivot and restore repeatedly without drift", 
   setShadePosition(door, undefined);
   assert.equal(door.rotation.y, Math.PI / 2);
 });
+
+test("sliding doors translate along local x between authored rest positions", () => {
+  const holder = new THREE.Group();
+  holder.rotation.y = Math.PI;
+  const door = new THREE.Group();
+  door.position.set(-0.39, 0, 0.04);
+  door.userData.slidingDoor = {
+    axis: "x",
+    closedOffset: -0.39,
+    openOffset: 0.45,
+    defaultPosition: 100,
+  };
+  door.add(new THREE.Mesh(new THREE.BoxGeometry(0.95, 2, 0.04)));
+  holder.add(door);
+  for (const position of [0, 100, 50, 0, 100]) {
+    setShadePosition(door, position);
+    assert.ok(
+      Math.abs(door.position.x - (-0.39 + (0.84 * position) / 100)) < 1e-12,
+    );
+    assert.equal(door.position.y, 0);
+    assert.equal(door.position.z, 0.04);
+    assert.equal(door.rotation.y, 0);
+  }
+  // Unknown readings and invalid metadata keep the last rendered position.
+  setShadePosition(door, undefined);
+  assert.ok(Math.abs(door.position.x - 0.45) < 1e-12);
+  door.userData.slidingDoor.axis = "y";
+  setShadePosition(door, 0);
+  assert.ok(Math.abs(door.position.x - 0.45) < 1e-12);
+  // Binary open/closed covers report endpoints.
+  door.userData.slidingDoor.axis = "x";
+  const binary = {
+    entity_id: "cover.slider",
+    attributes: { supported_features: 3 },
+  };
+  setShadePosition(
+    door,
+    coverState({ ...binary, state: "closed" }).motionPosition,
+  );
+  assert.ok(Math.abs(door.position.x + 0.39) < 1e-12);
+  setShadePosition(
+    door,
+    coverState({ ...binary, state: "open" }).motionPosition,
+  );
+  assert.ok(Math.abs(door.position.x - 0.45) < 1e-12);
+});

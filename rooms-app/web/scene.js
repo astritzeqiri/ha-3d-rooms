@@ -49,7 +49,7 @@ export class SceneView {
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
     this.orbit.enableDamping = false;
-    this.orbit.enabled = this.options.interactive;
+    this.setInteractive(this.options.interactive);
     this.orbit.addEventListener("change", () => {
       this.cutaway();
       this.render();
@@ -322,38 +322,10 @@ export class SceneView {
     }
     this.daylight = model.daylight ? createDaylight(model.daylight) : null;
     if (this.daylight) this.scene.add(this.daylight.group);
-    applyShadowBudget(this.scene, this.renderer.capabilities.maxTextures);
     this.daylightMode = model.daylight?.mode ?? "night";
     this.sunEntity = undefined;
     this.lastStates = new Map();
-    // Manual house placements and restored control transforms must reach world space before fitting the camera.
-    this.asset.updateMatrixWorld(true);
-    const box = new THREE.Box3().setFromObject(this.asset),
-      center = box.getCenter(new THREE.Vector3()),
-      size = box.getSize(new THREE.Vector3()).length();
-    if (model.houseFloor) {
-      box.min.y = Math.max(box.min.y, model.houseFloor.minY);
-      box.max.y = Math.min(box.max.y, model.houseFloor.maxY);
-      if (box.max.y < box.min.y) box.max.y = box.min.y + 0.1;
-    }
-    this.renderer.localClippingEnabled = !!model.houseFloor;
-    const planes = model.houseFloor
-      ? [
-          new THREE.Plane(new THREE.Vector3(0, 1, 0), -model.houseFloor.minY),
-          new THREE.Plane(new THREE.Vector3(0, -1, 0), model.houseFloor.maxY),
-        ]
-      : [];
-    this.asset.traverse((object) => {
-      for (const material of Array.isArray(object.material)
-        ? object.material
-        : [object.material])
-        if (material) {
-          material.clippingPlanes = planes;
-          material.clipShadows = true;
-          material.needsUpdate = true;
-        }
-    });
-    this.bounds = box;
+    const { center, size } = this.applyHouseScope();
     this.defaultTarget = model.camera?.target || center.toArray();
     this.defaultPosition =
       model.camera?.position ||
@@ -367,6 +339,98 @@ export class SceneView {
     this.renderer.domElement.dataset.firstRenderMs = Math.round(
       performance.now() - prepared,
     );
+    return true;
+  }
+  /**
+   * Limit a loaded house to one of its views: member rooms, in-scope fixtures,
+   * floor clipping, shadow budget and camera bounds. Rooms use every fixture.
+   */
+  applyHouseScope() {
+    const model = this.model,
+      floor = model.houseFloor,
+      placements = model.members
+        ? this.asset.children.filter((child) => child.userData.pickRoom)
+        : [];
+    const members = new Set((model.members || []).map((m) => m.model));
+    for (const placement of placements)
+      placement.visible = members.has(placement.userData.pickRoom);
+    const scoped = new Set(model.controls.map((c) => c.id));
+    for (const [id, fixture] of this.fixtures) {
+      fixture.outOfScope = !scoped.has(id);
+      fixture.light.visible = !fixture.outOfScope;
+      fixture.light.castShadow =
+        fixture.type === "light" && !fixture.outOfScope;
+      if (fixture.outOfScope) fixture.marker.visible = false;
+    }
+    applyShadowBudget(this.scene, this.renderer.capabilities.maxTextures);
+    // Manual house placements and restored control transforms must reach world space before fitting the camera.
+    this.asset.updateMatrixWorld(true);
+    const box = new THREE.Box3();
+    for (const object of placements.length
+      ? placements.filter((placement) => placement.visible)
+      : [this.asset])
+      box.expandByObject(object);
+    if (box.isEmpty()) box.setFromObject(this.asset);
+    const center = box.getCenter(new THREE.Vector3()),
+      size = box.getSize(new THREE.Vector3()).length();
+    if (floor) {
+      box.min.y = Math.max(box.min.y, floor.minY);
+      box.max.y = Math.min(box.max.y, floor.maxY);
+      if (box.max.y < box.min.y) box.max.y = box.min.y + 0.1;
+    }
+    // Houses always keep two planes (open-ended for the whole house) so a floor
+    // switch only moves them and never recompiles every material.
+    const clipped = !!floor || !!model.houseView;
+    this.renderer.localClippingEnabled = clipped;
+    const planes = clipped
+      ? [
+          new THREE.Plane(new THREE.Vector3(0, 1, 0), -(floor?.minY ?? -1e5)),
+          new THREE.Plane(new THREE.Vector3(0, -1, 0), floor?.maxY ?? 1e5),
+        ]
+      : [];
+    this.asset.traverse((object) => {
+      for (const material of Array.isArray(object.material)
+        ? object.material
+        : [object.material])
+        if (material) {
+          if ((material.clippingPlanes?.length || 0) !== planes.length)
+            material.needsUpdate = true;
+          material.clippingPlanes = planes;
+          material.clipShadows = true;
+        }
+    });
+    this.bounds = box;
+    return { center, size };
+  }
+  /**
+   * Show another view (whole house or one floor) of the loaded house in place.
+   * Returns false when that view needs rooms this scene did not load.
+   */
+  setHouseView(model, { keepCamera = false, render = true } = {}) {
+    if (
+      !this.asset ||
+      !this.model?.houseView ||
+      !model?.houseView ||
+      model.houseId !== this.model.houseId
+    )
+      return false;
+    const loaded = new Set(
+      this.asset.children.map((child) => child.userData.pickRoom),
+    );
+    if (!model.members.every((member) => loaded.has(member.model)))
+      return false;
+    this.model = model;
+    // Draw once at the end; callers that apply new states pass render: false.
+    this.renderSuspended = true;
+    try {
+      this.applyHouseScope();
+      if (this.roomHighlight) this.highlightRoom(null);
+      if (keepCamera) this.cutaway();
+      else this.reset();
+    } finally {
+      this.renderSuspended = false;
+    }
+    if (render) this.setStates(this.lastStates || new Map());
     return true;
   }
   setView(mode) {
@@ -394,7 +458,7 @@ export class SceneView {
     this.orbit.dispose();
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
     this.orbit.enableDamping = false;
-    this.orbit.enabled = this.options.interactive;
+    this.setInteractive(this.options.interactive);
     this.orbit.addEventListener("change", () => {
       this.cutaway();
       this.render();
@@ -402,9 +466,15 @@ export class SceneView {
     });
     this.orbit.enableRotate =
       this.options.allowRotate ?? this.options.mode !== "floor";
+    // Without rotation (floor plans), a one-finger or left drag pans the plan.
+    if (!this.orbit.enableRotate) {
+      this.orbit.mouseButtons.LEFT = THREE.MOUSE.PAN;
+      this.orbit.touches.ONE = THREE.TOUCH.PAN;
+    }
     for (const [id, f] of this.fixtures)
       f.marker.visible =
         !this.model.controls.find((c) => c.id === id)?.hidden &&
+        !f.outOfScope &&
         !f.companion &&
         this.options.markers &&
         this.options.mode !== "floor";
@@ -419,6 +489,14 @@ export class SceneView {
             : "3D model. Drag to orbit; use the device controls below for keyboard access.",
     );
     this.reset();
+  }
+  /** Allow or lock camera movement; locked views leave touch scrolling to the page. */
+  setInteractive(enabled) {
+    this.options.interactive = !!enabled;
+    this.orbit.enabled = this.options.interactive;
+    this.renderer.domElement.style.touchAction = this.options.interactive
+      ? "none"
+      : "";
   }
   setFloorPlan() {
     if (!this.model) return;
@@ -626,6 +704,7 @@ export class SceneView {
     for (const [id, fixture] of this.fixtures) {
       fixture.marker.visible =
         !this.model.controls.find((c) => c.id === id)?.hidden &&
+        !fixture.outOfScope &&
         !fixture.companion &&
         this.options.markers &&
         this.options.mode !== "floor";
@@ -726,6 +805,7 @@ export class SceneView {
     this.climateFrame = requestAnimationFrame(tick);
   }
   render() {
+    if (this.renderSuspended) return;
     this.syncClimateAnimation();
     for (const f of this.fixtures.values())
       for (const effect of f.climateVisuals || [])

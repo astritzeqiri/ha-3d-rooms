@@ -102,3 +102,46 @@ test("a hidden group member cannot be revealed by grouping or tray defaults", ()
   assert.equal(deviceEntries(model, { includeHidden: true }).length, 2);
   assert.equal(source.controls[0].hidden, undefined);
 });
+test("shades and windows group as covers with a cover entity, never mixed with lights", () => {
+  const room = [
+    ...controls,
+    { id: "s1", type: "cover", label: "Shade 1", position: [0, 2, 1] },
+    { id: "s2", type: "cover", label: "Shade 2", position: [2, 2, 1] },
+  ];
+  const shades = {
+    id: "cg-shades",
+    label: "Dining shades",
+    controls: ["s1", "s2"],
+    entityId: "cover.dining_shades",
+  };
+  assert.deepEqual(validateLightGroups([group, shades], room), [group, shades]);
+  for (const bad of [
+    [{ ...shades, controls: ["s1", "a"] }],
+    [{ ...shades, entityId: "light.dining" }],
+    [{ ...group, entityId: "cover.dining" }],
+    [{ ...shades, controls: ["s1", "c"] }],
+  ])
+    assert.throws(() => validateLightGroups(bad, room));
+  const model = applyLightGroups({
+    id: "room",
+    title: "Room",
+    controls: room,
+    bindings: { s1: "cover.old" },
+    lightGroups: [shades],
+  });
+  assert.equal(model.bindings.s1, "cover.dining_shades");
+  assert.equal(model.bindings.s2, "cover.dining_shades");
+  const members = model.controls.filter((c) => c.lightGroup === "cg-shades");
+  assert.deepEqual(
+    members.map((c) => c.lightGroupPrimary),
+    [true, false],
+  );
+  assert.equal(members[0].label, "Dining shades");
+  assert.deepEqual(members[0].markerPosition, [1, 2, 1]);
+  assert.deepEqual(
+    deviceEntries(model)
+      .map((c) => c.label)
+      .filter((l) => /shade/i.test(l)),
+    ["Dining shades"],
+  );
+});

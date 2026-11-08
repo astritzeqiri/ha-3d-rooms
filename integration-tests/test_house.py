@@ -38,6 +38,26 @@ class HouseTests(unittest.TestCase):
             with self.assertRaises(ValueError):models.validate_manifest({**before,"appearance":[{**part,"visible":"false"}]})
             with self.assertRaises(ValueError):store.install(package(manifest_change={"appearance":[part]}))
 
+    def test_house_views_include_room_daylight_and_save_time_of_day_to_rooms(self):
+        window={"id":"window","nodeId":"window-glass","position":[1,1.5,0],"inward":[0,0,1],"width":1,"height":1.2}
+        with tempfile.TemporaryDirectory() as directory:
+            store=models.ModelStore(directory).open()
+            store.install(package(manifest_change={"housePlacement":placement()}))
+            rooms=deepcopy(store.models)
+            rooms[0]["daylight"]={"mode":"day","entity":"sun.sun","windows":[window]}
+            store.save(rooms)
+            whole=next(m for m in store.catalog() if m.get("houseView") and not m.get("houseFloor"))
+            self.assertEqual(whole["daylight"]["mode"],"day")
+            self.assertEqual(whole["daylight"]["windows"][0]["position"],[11,1.5,4])
+            self.assertEqual(whole["daylight"]["windows"][0]["inward"],[0,0,1])
+            second=next(m for m in store.catalog() if (m.get("houseFloor") or {}).get("id")=="second")
+            self.assertNotIn("daylight",second)
+            result=store.set_daylight(whole["id"],{"mode":"night","entity":"sun.sun"})
+            self.assertEqual(result["daylight"]["mode"],"night")
+            self.assertEqual(store.find("kitchen")["daylight"]["mode"],"night")
+            self.assertEqual(store.find("kitchen")["daylight"]["windows"],[window])
+            with self.assertRaises(ValueError):store.set_daylight(second["id"],{"mode":"day","entity":"sun.sun"})
+
     def test_legacy_room_rejects_floor_links_without_mutating_setup(self):
         with tempfile.TemporaryDirectory() as directory:
             store=models.ModelStore(directory).open()

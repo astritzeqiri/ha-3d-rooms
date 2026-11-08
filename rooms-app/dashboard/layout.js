@@ -5,7 +5,7 @@ export class CardLayout {
     this.card = host.shadowRoot.querySelector("ha-card");
     this.scene = host._container;
     this.style = document.createElement("style");
-    this.style.textContent = `ha-card[data-fill]{display:flex;flex-direction:column;box-sizing:border-box}ha-card[data-fill] .scene{flex:1;min-height:0;height:auto!important}ha-card[data-fill] .card-top{flex-shrink:0}ha-card[data-fill] .fixture-tray{flex-shrink:0;max-height:30%;overflow:auto;box-sizing:border-box}ha-card:fullscreen{width:100%;border:0;border-radius:0;padding-bottom:env(safe-area-inset-bottom)}.fullscreen-toggle{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));right:12px;z-index:2;display:grid;place-items:center;width:44px;height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fullscreen-toggle svg{width:22px;height:22px}`;
+    this.style.textContent = `ha-card[data-fill]{display:flex;flex-direction:column;box-sizing:border-box}ha-card[data-fill] .scene{flex:1;min-height:0;height:auto!important}ha-card[data-fill] .card-top{flex-shrink:0}ha-card[data-fill] .fixture-tray{flex-shrink:0;max-height:30%;overflow:auto;box-sizing:border-box}ha-card:fullscreen{width:100%;border:0;border-radius:0;padding-bottom:env(safe-area-inset-bottom)}.fullscreen-toggle svg{width:22px;height:22px}`;
     host.shadowRoot.append(this.style);
     this.button = document.createElement("button");
     this.button.className = "fullscreen-toggle";
@@ -22,7 +22,8 @@ export class CardLayout {
         this.button.title = "Fullscreen is unavailable in this browser";
       }
     };
-    this.scene.append(this.button);
+    // Rightmost item of the card's bottom-right toolbar.
+    (host._controls || this.scene).prepend(this.button);
     this.schedule = () => {
       cancelAnimationFrame(this.frame);
       this.frame = requestAnimationFrame(() => this.update());

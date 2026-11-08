@@ -1,5 +1,10 @@
 import { sceneAssetKey } from "../shared/scene-assets.mjs";
 import { sceneBlob, sceneOwner } from "../shared/scene-download.mjs";
+import { houseLoadPlan } from "../shared/house-floors.mjs";
+/**
+ * With the floor switcher on, a house card loads the whole house once and
+ * reports its views; the card then shows any floor without another load.
+ */
 export async function connectModel(hass, config, origin, fetcher = fetch) {
   if (!config.preview_url && !config.addon) {
     if (hass.user?.is_admin === false)
@@ -11,11 +16,16 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
           type: "three_d_rooms/request",
           operation: "models",
         });
-        const model = models.find((m) => m.id === config.model);
-        if (!model)
+        const configured = models.find((m) => m.id === config.model);
+        if (!configured)
           throw new Error(
             "Model not found. Upload it in the 3D Rooms sidebar first.",
           );
+        const { model, floors, views } = houseLoadPlan(
+          models,
+          configured,
+          config.floor_selector !== false,
+        );
         if (model.members) {
           const layers = [];
           try {
@@ -33,6 +43,9 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
             }
             return {
               model,
+              configured,
+              floors,
+              views,
               layers,
               release: () => layers.forEach((l) => URL.revokeObjectURL(l.url)),
             };
@@ -44,6 +57,9 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
         const sceneURL = URL.createObjectURL(await sceneBlob(hass, model));
         return {
           model,
+          configured,
+          floors,
+          views,
           sceneURL,
           assetCache: { owner: sceneOwner(hass), key: sceneAssetKey(model) },
           release: () => URL.revokeObjectURL(sceneURL),
@@ -118,14 +134,22 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
           "Could not read models. Open the 3D Rooms add-on and try again.",
         );
       const models = await response.json(),
-        model = models.find((m) => m.id === config.model);
-      if (!model)
+        configured = models.find((m) => m.id === config.model);
+      if (!configured)
         throw new Error(
           "Model not found. Upload it in the 3D Rooms add-on first.",
         );
+      const { model, floors, views } = houseLoadPlan(
+        models,
+        configured,
+        config.floor_selector !== false,
+      );
       if (model.members)
         return {
           model,
+          configured,
+          floors,
+          views,
           layers: model.members.map((member) => ({
             ...member,
             url: new URL(
@@ -136,6 +160,9 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
         };
       return {
         model,
+        configured,
+        floors,
+        views,
         sceneURL: new URL(
           `api/models/${encodeURIComponent(model.id)}/scene.glb`,
           base,

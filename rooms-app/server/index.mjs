@@ -205,7 +205,7 @@ export async function createApp({
       if (match) {
         const m = store.find(match[1]);
         const op = match[2];
-        if (m.houseView && op !== "command")
+        if (m.houseView && op !== "command" && op !== "daylight")
           throw new Error(
             "Edit, export or remove the individual source rooms for this house.",
           );
@@ -377,8 +377,22 @@ export async function createApp({
           )
             throw new Error("Choose an existing sun entity.");
           const daylight = { ...m.daylight, mode: b.mode, entity: b.entity };
-          validateDaylight(daylight, m.controls);
-          m.daylight = daylight;
+          if (m.houseView) {
+            // A house/floor view saves its time of day to every daylight room it shows.
+            const members = new Set(m.members.map((member) => member.model));
+            const rooms = store.state.models.filter(
+              (r) => members.has(r.id) && r.daylight,
+            );
+            const next = rooms.map((r) => {
+              const value = { ...r.daylight, mode: b.mode, entity: b.entity };
+              validateDaylight(value, r.controls);
+              return value;
+            });
+            rooms.forEach((r, i) => (r.daylight = next[i]));
+          } else {
+            validateDaylight(daylight, m.controls);
+            m.daylight = daylight;
+          }
           await store.save();
           json(res, 200, { daylight });
           return;

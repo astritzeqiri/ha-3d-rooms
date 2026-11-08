@@ -1,8 +1,14 @@
+// Groups hold lights, or covers (shades, windows, doors), never a mix. Stored as
+// `lightGroups` for compatibility; the member type decides the entity domain.
+export const GROUP_ENTITY = {
+  light: /^(light|switch)\.[a-z0-9_]+$/,
+  cover: /^cover\.[a-z0-9_]+$/,
+};
 export function validateLightGroups(groups = [], controls) {
   if (!Array.isArray(groups) || groups.length > 100)
     throw Error("Provide up to 100 light groups.");
-  const lights = new Set(
-      controls.filter((c) => c.type === "light").map((c) => c.id),
+  const types = new Map(
+      controls.filter((c) => GROUP_ENTITY[c.type]).map((c) => [c.id, c.type]),
     ),
     ids = new Set(),
     members = new Set();
@@ -22,12 +28,13 @@ export function validateLightGroups(groups = [], controls) {
       g.controls.length < 2 ||
       g.controls.length > 200 ||
       new Set(g.controls).size !== g.controls.length ||
-      g.controls.some((id) => !lights.has(id) || members.has(id)) ||
+      g.controls.some((id) => !types.has(id) || members.has(id)) ||
+      new Set(g.controls.map((id) => types.get(id))).size !== 1 ||
       typeof g.entityId !== "string" ||
-      (g.entityId && !/^(light|switch)\.[a-z0-9_]+$/.test(g.entityId))
+      (g.entityId && !GROUP_ENTITY[types.get(g.controls[0])].test(g.entityId))
     )
       throw Error(
-        "Choose a name, two or more distinct room lights and a compatible entity. Each light can belong to one group.",
+        "Choose a name, two or more distinct room devices of one kind (lights, or shades/windows/doors) and a compatible entity. Each device can belong to one group.",
       );
     ids.add(g.id);
     g.controls.forEach((id) => members.add(id));

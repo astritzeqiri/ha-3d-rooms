@@ -1,4 +1,5 @@
 import { VIEW_FIELDS, resolveSavedView } from "../shared/saved-view.mjs";
+import { houseFloorOptions } from "../shared/house-floors.mjs";
 const FIELD_NAMES = {
   model: "Room",
   title: "Title",
@@ -47,7 +48,9 @@ export class ThreeDRoomsEditor extends HTMLElement {
       <label>Height<select id="height-mode" aria-label="Height mode"><option value="fixed">Fixed height</option><option value="auto">Auto · fill available screen</option></select><input id="height" type="number" min="180" max="1600" step="1" aria-label="Height in pixels" aria-describedby="height-note"></label>
       <p id="height-note">Auto fills the space below the dashboard header. Best used in a single-card Panel view.</p>
     </div>
-    <label class="check"><input id="interactive" type="checkbox">Allow camera movement on the dashboard</label>
+    <label class="check"><input id="interactive" type="checkbox">Allow camera movement by default</label>
+    <label class="check"><input id="camera_controls" type="checkbox">Show camera buttons on the card (move camera and reset view)</label>
+    <label class="check" id="floor-selector-setting" hidden><input id="floor_selector" type="checkbox">Show floor switcher (whole house or one floor)</label>
     <label id="daylight-setting" hidden>Time of day<select id="daylight">
       <option value="auto">Automatic · follow the Home Assistant sun</option>
       <option value="day">Always day</option>
@@ -105,6 +108,18 @@ export class ThreeDRoomsEditor extends HTMLElement {
       });
     };
     this._field("component").onchange = () => this._component();
+    this._field("camera_controls").onchange = () => {
+      const config = { ...this._config };
+      if (this._field("camera_controls").checked) delete config.camera_controls;
+      else config.camera_controls = false;
+      this._emit(config);
+    };
+    this._field("floor_selector").onchange = () => {
+      const config = { ...this._config };
+      if (this._field("floor_selector").checked) delete config.floor_selector;
+      else config.floor_selector = false;
+      this._emit(config);
+    };
     this._field("daylight").addEventListener("change", () => this._daylight());
     this._field("retry").onclick = () => this._load();
     this._field("reset").onclick = () => {
@@ -254,6 +269,15 @@ export class ThreeDRoomsEditor extends HTMLElement {
       select.add(new Option(`${model} (not in room library)`, model));
       select.value = model;
     }
+    const house = this._models?.find((m) => m.id === model);
+    this._field("floor-selector-setting").hidden = !houseFloorOptions(
+      this._models,
+      house,
+    ).length;
+    this._field("floor_selector").checked =
+      this._config.floor_selector !== false;
+    this._field("camera_controls").checked =
+      this._config.camera_controls !== false;
     const daylight = this._models?.find((m) => m.id === model)?.daylight;
     this._field("daylight-setting").hidden = !daylight;
     this._field("daylight-note").hidden = !daylight;

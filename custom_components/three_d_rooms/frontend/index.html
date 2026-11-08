@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-uJNhh28v.js"></script>
+    <script type="module" crossorigin src="./assets/index-DVg4mc73.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/camera-view-DI5K_Cq1.js">
     <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-CI3TWnzS.js">
-    <link rel="modulepreload" crossorigin href="./assets/view-cube-DuWnj628.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-Dck2ztZb.css">
+    <link rel="modulepreload" crossorigin href="./assets/view-cube-Vz67zdN7.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-CPSApq1_.css">
   </head>
   <body>
     <header>
@@ -483,8 +483,17 @@
               </p>
             </div>
             <div class="room-device-actions">
-              <button id="group-lights" type="button">Group lights</button
-              ><span id="control-count"></span>
+              <span id="control-count" class="muted small"></span>
+              <details id="group-menu" class="group-menu">
+                <summary>Group devices</summary>
+                <div class="device-menu-list group-menu-list">
+                  <button id="group-lights" type="button">Lights</button>
+                  <button id="group-shades" type="button" hidden>Shades</button>
+                  <button id="group-openings" type="button" hidden>
+                    Windows &amp; doors
+                  </button>
+                </div>
+              </details>
             </div>
           </div>
           <div id="device-tools" class="device-tools" hidden>

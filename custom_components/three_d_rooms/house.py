@@ -94,7 +94,19 @@ def house_models(models):
                     settings = m.get("deviceSettings",{}).get(d["id"])
                     if settings:
                         model["deviceSettings"][device["id"]] = {"macroNames":{key(k):v for k,v in settings.get("macroNames",{}).items()}}
+                daylight = m.get("daylight")
+                if daylight:
+                    # Room windows join one house-wide daylight rig; mode follows the first daylight room.
+                    target = model.setdefault("daylight",{"mode":daylight["mode"],"entity":daylight["entity"],"windows":[]})
+                    for w in daylight.get("windows",[]):
+                        p = placed_point(w["position"],t)
+                        if floor and not floor["minY"] <= p[1] < floor["maxY"]:
+                            continue
+                        inward = [t[i]*w["inward"][0]+t[4+i]*w["inward"][1]+t[8+i]*w["inward"][2] for i in range(3)]
+                        target["windows"].append({**deepcopy(w),"id":"w-"+house_key(m["id"]+"/"+w["id"]),"nodeId":node(w["nodeId"]),"position":p,"inward":inward,**({"coverId":key(w["coverId"])} if w.get("coverId") else {}),"sourceModel":m["id"]})
                 model["members"].append({"model":m["id"],"appearance":deepcopy(m.get("appearance",[])),"transform":t,"sceneRevision":m.get("sceneRevision"),"controlIds":{c["id"]:key(c["id"]) for c in m["controls"]},"nodeIds":{n:node(n) for c in m["controls"] for n in c.get("nodeIds",[])}})
+            if model.get("daylight") and not model["daylight"]["windows"]:
+                del model["daylight"]
             model["sceneRevision"] = house_key(json.dumps(model["members"],sort_keys=True)+json.dumps(floor,sort_keys=True))
             result.append(model)
     return result

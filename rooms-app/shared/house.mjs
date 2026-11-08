@@ -190,6 +190,36 @@ export function houseModels(models) {
                 ),
               };
           }
+        // Room windows join one house-wide daylight rig; mode follows the first daylight room.
+        if (m.daylight) {
+          model.daylight ??= {
+            mode: m.daylight.mode,
+            entity: m.daylight.entity,
+            windows: [],
+          };
+          for (const w of m.daylight.windows || []) {
+            const position = placedPoint(w.position, t);
+            if (
+              floor &&
+              !(position[1] >= floor.minY && position[1] < floor.maxY)
+            )
+              continue;
+            model.daylight.windows.push({
+              ...structuredClone(w),
+              id: `w-${houseKey(m.id + "/" + w.id)}`,
+              nodeId: node(w.nodeId),
+              position,
+              inward: [0, 1, 2].map(
+                (i) =>
+                  t[i] * w.inward[0] +
+                  t[4 + i] * w.inward[1] +
+                  t[8 + i] * w.inward[2],
+              ),
+              ...(w.coverId ? { coverId: key(w.coverId) } : {}),
+              sourceModel: m.id,
+            });
+          }
+        }
         model.members.push({
           model: m.id,
           appearance: structuredClone(m.appearance || []),
@@ -205,6 +235,8 @@ export function houseModels(models) {
           ),
         });
       }
+      if (model.daylight && !model.daylight.windows.length)
+        delete model.daylight;
       model.sceneRevision = houseKey(
         JSON.stringify(model.members) + JSON.stringify(floor),
       );
