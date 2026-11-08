@@ -6746,7 +6746,7 @@ function ws(e) {
 	throw Error(`THREE.TextureUtils: Unknown texture type ${e}.`);
 }
 typeof __THREE_DEVTOOLS__ < "u" && __THREE_DEVTOOLS__.dispatchEvent(new CustomEvent("register", { detail: { revision: "186" } })), typeof window < "u" && (window.__THREE__ ? H("WARNING: Multiple instances of Three.js being imported.") : window.__THREE__ = "186");
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/build/three.module.js
+// node_modules/three/build/three.module.js
 function Ts() {
 	let e = null, t = !1, n = null, r = null;
 	function i(t, a) {
@@ -12662,7 +12662,7 @@ var Vu = class {
 		t.drawingBufferColorSpace = J._getDrawingBufferColorSpace(e), t.unpackColorSpace = J._getUnpackColorSpace();
 	}
 };
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
+// node_modules/three/examples/jsm/utils/BufferGeometryUtils.js
 function Hu(e, t) {
 	if (t === 0) return console.warn("THREE.BufferGeometryUtils.toTrianglesDrawMode(): Geometry already defined as triangles."), e;
 	if (t === 2 || t === 1) {
@@ -12681,7 +12681,7 @@ function Hu(e, t) {
 	}
 	return console.error("THREE.BufferGeometryUtils.toTrianglesDrawMode(): Unknown draw mode:", t), e;
 }
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/utils/SkeletonUtils.js
+// node_modules/three/examples/jsm/utils/SkeletonUtils.js
 function Uu(e) {
 	let t = /* @__PURE__ */ new Map(), n = /* @__PURE__ */ new Map(), r = e.clone();
 	return Wu(e, r, function(e, r) {
@@ -12698,7 +12698,7 @@ function Wu(e, t, n) {
 	n(e, t);
 	for (let r = 0; r < e.children.length; r++) Wu(e.children[r], t.children[r], n);
 }
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/loaders/GLTFLoader.js
+// node_modules/three/examples/jsm/loaders/GLTFLoader.js
 var Gu = class extends xo {
 	constructor(e) {
 		super(e), this.dracoLoader = null, this.ktx2Loader = null, this.meshoptDecoder = null, this.pluginCallbacks = [], this.register(function(e) {
@@ -14360,7 +14360,17 @@ function gf(e) {
 	};
 }
 function _f(e) {
-	let t = !e || ["unknown", "unavailable"].includes(e.state), n = e?.attributes?.current_position, r = t ? void 0 : Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : e.state === "closed" ? 0 : void 0;
+	let t = !e || ["unknown", "unavailable"].includes(e.state);
+	if (e?.entity_id?.startsWith("binary_sensor.")) {
+		let n = t ? void 0 : e.state === "on" ? 100 : 0;
+		return {
+			position: n,
+			motionPosition: n,
+			unavailable: t,
+			label: t ? "Unavailable" : n ? "Open" : "Closed"
+		};
+	}
+	let n = e?.attributes?.current_position, r = t ? void 0 : Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : e.state === "closed" ? 0 : void 0;
 	return {
 		position: r,
 		motionPosition: r ?? (!t && e.state === "open" && !gf(e).position ? 100 : void 0),
@@ -15341,7 +15351,7 @@ function tp(e, t = "front") {
 		camera: void 0
 	};
 }
-// ../../../../../../../../../../../private/tmp/three-d-rooms-release-0.25.0/rooms-app/node_modules/three/examples/jsm/controls/OrbitControls.js
+// node_modules/three/examples/jsm/controls/OrbitControls.js
 var np = { type: "change" }, rp = { type: "start" }, ip = { type: "end" }, ap = new Br(), op = new Nr(), sp = Math.cos(70 * Dt.DEG2RAD), cp = new K(), lp = 2 * Math.PI, up = {
 	NONE: -1,
 	ROTATE: 0,

@@ -210,3 +210,26 @@ test("sliding doors translate along local x between authored rest positions", ()
   );
   assert.ok(Math.abs(door.position.x - 0.45) < 1e-12);
 });
+
+test("door/window contact sensors drive read-only opening state", () => {
+  const sensor = (state) => ({
+    entity_id: "binary_sensor.kitchen_window",
+    state,
+    attributes: { device_class: "window" },
+  });
+  assert.deepEqual(coverState(sensor("on")), {
+    position: 100,
+    motionPosition: 100,
+    unavailable: false,
+    label: "Open",
+  });
+  assert.equal(coverState(sensor("off")).position, 0);
+  assert.equal(coverState(sensor("off")).label, "Closed");
+  assert.equal(coverState(sensor("unavailable")).unavailable, true);
+  assert.deepEqual(coverFeatures(sensor("on")), {
+    open: false,
+    close: false,
+    position: false,
+    stop: false,
+  });
+});

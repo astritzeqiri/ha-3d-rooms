@@ -31,7 +31,7 @@ from .house import validate_placement, house_models
 MAX_UPLOAD = 100 * 1024 * 1024
 MAX_EXPANDED = 300 * 1024 * 1024
 ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,79}\Z")
-ENTITY = re.compile(r"(?:climate|light|switch|cover|number|input_number|button|input_button|script|scene)\.[a-z0-9_]+\Z")
+ENTITY = re.compile(r"(?:binary_sensor|climate|light|switch|cover|number|input_number|button|input_button|script|scene)\.[a-z0-9_]+\Z")
 SAFE_FILE = re.compile(
     r"(?:manifest\.json|house-placement\.json|bindings\.json|scene\.glb|thumbnail\.(?:png|jpg|webp)|textures/[a-zA-Z0-9_./-]+)\Z"
 )
@@ -487,11 +487,11 @@ def validate_glb(data, manifest):
 
 
 def compatible_entity(control, entity_id):
-    """Light/switch mappings stay compatible; covers require cover entities."""
+    """Light/switch mappings stay compatible; shades/doors/windows also accept read-only open/closed binary sensors."""
     return (
         isinstance(entity_id, str)
         and bool(ENTITY.fullmatch(entity_id))
-        and (entity_id.split(".")[0] in ({"climate"} if control.get("type") == "climate" else {"button", "input_button", "script", "scene"} if control.get("type") == "button" else {"number", "input_number"} if control.get("type") == "number" else {"cover"} if control.get("type") == "cover" else {"light", "switch"}))
+        and (entity_id.split(".")[0] in ({"climate"} if control.get("type") == "climate" else {"button", "input_button", "script", "scene"} if control.get("type") == "button" else {"number", "input_number"} if control.get("type") == "number" else ({"cover"} if control.get("motion") == "none" else {"cover", "binary_sensor"}) if control.get("type") == "cover" else {"light", "switch"}))
     )
 
 

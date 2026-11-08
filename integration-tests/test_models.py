@@ -533,3 +533,14 @@ class ComponentTests(unittest.TestCase):
                 with self.assertRaises(OSError):
                     store.put_component({**self.component(), "title": "Changed"})
             self.assertEqual(store.components, previous)
+
+
+class OpeningSensorBindingTests(unittest.TestCase):
+    def test_binary_sensors_bind_to_shades_but_not_desks(self):
+
+        shade = {"type": "cover"}
+        desk = {"type": "cover", "motion": "none"}
+        self.assertTrue(models.compatible_entity(shade, "binary_sensor.kitchen_window"))
+        self.assertTrue(models.compatible_entity(shade, "cover.kitchen_blind"))
+        self.assertFalse(models.compatible_entity(desk, "binary_sensor.kitchen_window"))
+        self.assertFalse(models.compatible_entity({"type": "light"}, "binary_sensor.x"))

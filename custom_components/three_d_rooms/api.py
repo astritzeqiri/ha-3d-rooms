@@ -20,6 +20,10 @@ from homeassistant.exceptions import HomeAssistantError
 from .const import DOMAIN
 from .models import ENTITY, MAX_UPLOAD, number, compatible_entity
 
+OPENING_CLASSES = ("door", "window", "opening", "garage_door")
+
+
+
 
 class RoomsRuntime:
     """Serialize local mutations; use HA's service bus with the caller context."""
@@ -41,6 +45,7 @@ class RoomsRuntime:
                 s.as_dict()
                 for s in self.hass.states.async_all()
                 if s.domain in ("climate", "light", "switch", "cover", "sun", "number", "input_number", "button", "input_button", "script", "scene")
+                or (s.domain == "binary_sensor" and s.attributes.get("device_class") in OPENING_CLASSES)
             ],
         }
 
@@ -133,7 +138,7 @@ class RoomsRuntime:
             if not isinstance(entity_id, str) or (
                 entity_id and not self.hass.states.get(entity_id)
             ):
-                raise ValueError("Choose an existing light, switch or cover entity.")
+                raise ValueError("Choose an existing entity for this device.")
             result = await self.work(
                 self.store.bind, data.get("model"), data.get("controlId"), entity_id
             )

@@ -1,3 +1,7 @@
+## 0.29.0
+
+- Windows, doors and shades can now be connected to door/window contact sensors (`binary_sensor` with device class door, window, opening or garage door), not only `cover` entities. The sensor's state shows as Open/Closed and moves the window or door in the 3D room. Sensors are read-only, so open/close buttons stay disabled for them. Desk controls still require a `cover`. Existing mappings are unchanged; no migration is needed.
+
 ## 0.28.0
 
 - House and floor views show the Auto/Day/Night switch again. They combine every room's daylight windows at their placed positions, and changing the time of day on a house or floor card saves it to each room it shows. No migration is needed.

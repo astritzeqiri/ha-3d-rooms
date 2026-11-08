@@ -1826,7 +1826,9 @@ $("import-form").onsubmit = async (e) => {
   }
 };
 const lightDomains = /^(light|switch)\./,
-  coverDomains = /^cover\./;
+  coverDomains = /^cover\./,
+  // Windows and doors are often only reported by open/closed contact sensors.
+  openingDomains = /^(cover|binary_sensor)\./;
 const deviceIcon = (c) =>
   c.type === "climate"
     ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3"/></svg>'
@@ -1865,7 +1867,9 @@ const pickerContext = (controlId) => {
           : control.type === "number"
             ? /^(number|input_number)\./
             : control.type === "cover"
-              ? coverDomains
+              ? control.motion === "none"
+                ? coverDomains
+                : openingDomains
               : lightDomains,
   };
 };

@@ -13,6 +13,16 @@ export function coverFeatures(entity) {
 export function coverState(entity) {
   const unavailable =
     !entity || ["unknown", "unavailable"].includes(entity.state);
+  // Contact sensors (door/window) are read-only: on = open, off = closed.
+  if (entity?.entity_id?.startsWith("binary_sensor.")) {
+    const position = unavailable ? undefined : entity.state === "on" ? 100 : 0;
+    return {
+      position,
+      motionPosition: position,
+      unavailable,
+      label: unavailable ? "Unavailable" : position ? "Open" : "Closed",
+    };
+  }
   const value = entity?.attributes?.current_position;
   const position = unavailable
     ? undefined
