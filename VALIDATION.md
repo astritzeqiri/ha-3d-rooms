@@ -1,3 +1,9 @@
+# 0.30.0 — house replacement room/device matching, 2026-11-08
+
+Released as 0.30.0, based on v0.29.1.
+
+183 frontend tests, formatting and build pass; 51 host Python tests pass (15 native skipped on host); 15 native tests pass inside Core 2026.10.2. Native API preview of a scratch copy of the user's house ZIP with three rooms given new roomIds matched all five rooms (three by name), kept the living-room AC mapping and removed nothing; a malformed `X-Rooms-Matches` header returned 400. Browser review dialog rendered per-room cards, and room/device choices updated totals and released duplicate room choices, with zero page errors. Preview only: the local library was not replaced. Not checked on the user's production HA or on a narrow phone layout.
+
 # 0.27.0 release validation
 
 Final versioned build, 166 frontend tests and formatting pass. Integration ZIP inspected for correct structure, bundled frontend, version and absence of private room models. Prior native cache and reload checks below apply to the same implementation.

@@ -14665,10 +14665,13 @@ function Nf(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = (
 }
 async function Pf(e, t, n) {
 	if (!(t === "/api/three_d_rooms/models" && n.method === "POST" || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+$/.test(t) && n.method === "PUT" || /^\/api\/three_d_rooms\/houses\/[a-z0-9_-]+$/.test(t) && ["POST", "PUT"].includes(n.method))) throw Error("Unknown model upload.");
+	let r = n.headers?.["X-Rooms-Matches"];
+	if (r !== void 0 && !/^[A-Za-z0-9_-]{1,6000}$/.test(r)) throw Error("Too many room and device choices to send at once.");
 	return e.auth.expired && await e.auth.refreshAccessToken(), Nf(t, {
 		...n,
 		headers: {
 			...n.headers?.["X-Rooms-Revision"] ? { "X-Rooms-Revision": n.headers["X-Rooms-Revision"] } : {},
+			...r ? { "X-Rooms-Matches": r } : {},
 			"Content-Type": "application/zip",
 			Authorization: `Bearer ${e.auth.accessToken}`
 		}

@@ -215,7 +215,7 @@ Update 3D Rooms in HACS, restart Home Assistant itself, then refresh your browse
 
 ## House management (local preview)
 
-Under a house’s Settings, use **Replace house** to preview a full-house ZIP before applying it, or **Delete house** to review all affected rooms and saved views. Replacement matches stable exported room IDs, retaining compatible device mappings and local settings. Missing rooms and their saved views are removed; other houses and Home Assistant devices are unchanged. Dashboard cards referring to removed content need manual updates.
+Under a house’s Settings, use **Replace house** to preview a full-house ZIP before applying it, or **Delete house** to review all affected rooms and saved views. Replacement matches rooms by exported room ID, then by name (rooms re-added in the house app get a new ID), and device mappings by control ID, then by name and type. The preview shows a review for each room: pick which existing room it replaces, see which mappings are kept or not matched, and change any device before confirming. Matched rooms keep their name, area, compatible mappings, light groups and hidden devices. Missing rooms and their saved views are removed; other houses and Home Assistant devices are unchanged. Dashboard cards referring to removed content need manual updates.
 
 **Dashboard views → New view** is the shared creator for houses, floors and rooms. The editor previews the chosen space and saves that scope. The top-right selector changes the main 3D view; the sidebar floor filter only filters the room list.
 

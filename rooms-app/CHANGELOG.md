@@ -1,3 +1,8 @@
+## 0.30.0
+
+- Replacing a full house now matches rooms that were re-added in the house app (new internal room ID) by their name, so they keep their name, area, device mappings, light groups and hidden devices instead of being removed and recreated. Device mappings follow their control by ID, then by name and type.
+- The replacement preview is now a per-room review: choose which existing room each room in the ZIP replaces (or add it as new), see which device mappings are kept, matched by name or not matched, and pick a different device or drop a mapping before confirming. No migration is needed.
+
 ## 0.29.1
 
 - The entity picker for windows, doors and shades now lists every `binary_sensor`, including contact sensors that have no door/window device class set. In 0.29.0 those were hidden.

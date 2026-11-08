@@ -1001,6 +1001,91 @@ summary:focus-visible {
   margin-top: 24px;
   padding-top: 16px;
 }
+.house-match-totals {
+  font-weight: 600;
+}
+.house-match-room {
+  margin-block: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.house-match-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.house-match-head h4 {
+  margin: 0;
+}
+.house-match-replaces {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block: 12px 4px;
+  color: var(--muted);
+}
+.house-match-room select {
+  min-width: 0;
+  max-width: 100%;
+}
+.house-match-room > p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+.house-match-list {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.house-match-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.house-match-list li > div {
+  display: grid;
+  min-width: 0;
+}
+.house-match-list small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.match-pill {
+  padding: 3px 8px;
+  border-radius: var(--r-sm);
+  background: var(--raised);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.match-pill[data-kind="name"],
+.match-pill[data-kind="manual"] {
+  background: var(--glow);
+  color: var(--accent-ink);
+}
+.match-pill[data-kind="missing"] {
+  color: var(--bad);
+}
+@media (max-width: 560px) {
+  .house-match-list li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .house-match-list li > select {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
 /* The row's quick segment already offers Open/Stop/Close for shades. */
 .device-row-body .shade-card > .shade-actions {
   display: none;

@@ -53,6 +53,9 @@ export async function uploadNativeModel(hass, path, options) {
       ["POST", "PUT"].includes(options.method))
   ))
     throw new Error("Unknown model upload.");
+  const matches = options.headers?.["X-Rooms-Matches"];
+  if (matches !== undefined && !/^[A-Za-z0-9_-]{1,6000}$/.test(matches))
+    throw new Error("Too many room and device choices to send at once.");
   if (hass.auth.expired) await hass.auth.refreshAccessToken();
   return uploadJSON(path, {
     ...options,
@@ -60,6 +63,7 @@ export async function uploadNativeModel(hass, path, options) {
       ...(options.headers?.["X-Rooms-Revision"]
         ? { "X-Rooms-Revision": options.headers["X-Rooms-Revision"] }
         : {}),
+      ...(matches ? { "X-Rooms-Matches": matches } : {}),
       "Content-Type": "application/zip",
       Authorization: `Bearer ${hass.auth.accessToken}`,
     },

@@ -27,6 +27,7 @@ from uuid import uuid4
 import zipfile
 
 from .house import validate_placement, house_models
+from .house_matching import match_controls, match_rooms, review, translated, validate_choices
 
 MAX_UPLOAD = 100 * 1024 * 1024
 MAX_EXPANDED = 300 * 1024 * 1024
@@ -775,8 +776,13 @@ class ModelStore:
             shutil.rmtree(self.directory / "models" / model["folder"], ignore_errors=True)
         return {"ok": True, "removedRooms": len(removed), "removedViews": len(previous) - len(self.components)}
 
-    def replace_house(self, house_id, data, revision=None, preview=False):
-        """Validate every room first; commit geometry, settings and views together."""
+    def replace_house(self, house_id, data, revision=None, preview=False, choices=None):
+        """Validate every room first; commit geometry, settings and views together.
+
+        Rooms match by house roomId, then by name; mappings follow controls by ID,
+        then by name and type. ``choices`` carries the user's reviewed overrides.
+        """
+        choices = validate_choices(choices)
         summary = self.house_summary(house_id)
         if not preview and revision != summary["revision"]:
             raise ValueError("The library changed. Preview the replacement again.")
@@ -787,7 +793,6 @@ class ModelStore:
                 raise ValueError("Choose a full-house ZIP exported for Home Assistant.")
         old = [m for m in self.models if m.get("housePlacement", {}).get("houseId") == house_id]
         others = [m for m in self.models if m not in old]
-        by_room = {m["housePlacement"]["roomId"]: m for m in old}
         links = {f["id"]: f["haFloorId"] for m in old for f in m["housePlacement"]["floors"] if f.get("haFloorId")}
         stage = Path(tempfile.mkdtemp(prefix="replace-house-", dir=self.directory))
         moved = []
@@ -796,17 +801,22 @@ class ModelStore:
             incoming = ModelStore(stage).open()
             incoming.install_upload(data)
             pending = incoming.models
+            matching = review(old, pending, compatible_entity) if preview else []
             matched = set()
             removed_bindings = []
+            rooms = match_rooms(old, pending, choices)
             for model in pending:
                 placement = model["housePlacement"]
-                previous = by_room.get(placement["roomId"])
+                previous, _ = rooms[placement["roomId"]]
                 placement["houseId"] = house_id
                 for floor in placement["floors"]:
                     if floor["id"] in links:
                         floor["haFloorId"] = links[floor["id"]]
                 if previous:
                     matched.add(previous["id"])
+                    original = previous
+                    cmap, _ = match_controls(previous, model, choices["controls"].get(placement["roomId"], {}), compatible_entity)
+                    previous = translated(previous, cmap)
                     model["id"] = previous["id"]
                     model["title"] = previous["title"]
                     if "areaId" in previous:
@@ -815,7 +825,9 @@ class ModelStore:
                     model["lightGroups"] = preserved_groups(previous, model["controls"])
                     controls = {c["id"]: c for c in model["controls"]}
                     kept_bindings = {k: v for k, v in previous["bindings"].items() if k in controls and compatible_entity(controls[k], v)}
-                    removed_bindings.extend(f"{previous['title']}: {k}" for k in previous["bindings"] if k not in kept_bindings)
+                    labels = {c["id"]: c.get("label") or c["id"] for c in original["controls"]}
+                    removed_bindings.extend(f"{original['title']}: {labels.get(k, k)}" for k in original["bindings"]
+                                            if cmap.get(k) not in kept_bindings)
                     model["bindings"].update(kept_bindings)
                     visibility = {p["id"]: p["visible"] for p in previous.get("appearance", [])}
                     for part in model.get("appearance", []):
@@ -836,6 +848,7 @@ class ModelStore:
             affected_ids = {m["id"] for m in old} | {v["id"] for v in house_models(old)}
             removed_views = [c for c in self.components if any(l["model"] in affected_ids and l["model"] not in valid_ids for l in c["layers"])]
             result = {**summary, "incomingRooms": [{"id": m["id"], "title": m["title"]} for m in pending],
+                      "matching": matching,
                       "keptRooms": len(matched), "removedBindings": removed_bindings, "removedRooms": [m["title"] for m in old if m["id"] not in matched],
                       "removedViews": [c["title"] for c in removed_views], "viewId": "h-" + house_id}
             if preview:

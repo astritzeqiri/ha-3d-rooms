@@ -5,6 +5,9 @@ from __future__ import annotations
 from .light_groups import apply_light_groups
 
 import asyncio
+import base64
+import binascii
+import json
 import zipfile
 from aiohttp import web
 
@@ -19,6 +22,7 @@ from homeassistant.core import Context
 from homeassistant.exceptions import HomeAssistantError
 from .const import DOMAIN
 from .models import ENTITY, MAX_UPLOAD, number, compatible_entity
+from .house_matching import MAX_CHOICES
 
 
 
@@ -379,6 +383,18 @@ async def read_upload(request):
     return bytes(data)
 
 
+def house_choices(header):
+    """Decode reviewed room/device choices sent as base64url JSON."""
+    if not header:
+        return None
+    if len(header) > MAX_CHOICES:
+        raise ValueError("Too many room matching choices.")
+    try:
+        return json.loads(base64.urlsafe_b64decode(header + "=" * (-len(header) % 4)))
+    except (binascii.Error, ValueError) as error:
+        raise ValueError("Invalid room matching choices.") from error
+
+
 UPLOAD_ERRORS = (ValueError, KeyError, TypeError, UnicodeError, zipfile.BadZipFile)
 
 
@@ -424,7 +440,8 @@ class HouseReplaceView(HomeAssistantView):
             return self.json({"error": "Upload exceeds 100 MB."}, 413)
         try:
             result = await runtime.work(runtime.store.replace_house, house_id, data,
-                                        request.headers.get("X-Rooms-Revision"), preview)
+                                        request.headers.get("X-Rooms-Revision"), preview,
+                                        house_choices(request.headers.get("X-Rooms-Matches")))
         except UPLOAD_ERRORS as error:
             return self.json({"error": str(error)}, 400)
         if not preview:
