@@ -10,7 +10,7 @@ var e = {
 	PAN: 1,
 	DOLLY_PAN: 2,
 	DOLLY_ROTATE: 3
-}, n = "attached", r = 1e3, i = 1001, a = 1002, o = 1003, s = 1004, c = 1005, l = 1006, u = 1007, d = 1008, f = 1009, p = 1010, m = 1011, h = 1012, g = 1013, _ = 1014, v = 1015, y = 1016, b = 1017, x = 1018, S = 1020, C = 35902, w = 35899, T = 1021, E = 1022, D = 1023, O = 1026, k = 1027, A = 1028, ee = 1029, j = 1030, te = 1031, M = 1033, N = 33776, P = 33777, ne = 33778, F = 33779, re = 35840, ie = 35841, ae = 35842, oe = 35843, se = 36196, I = 37492, ce = 37496, le = 37488, ue = 37489, de = 37490, fe = 37491, pe = 37808, me = 37809, he = 37810, ge = 37811, _e = 37812, ve = 37813, ye = 37814, be = 37815, xe = 37816, Se = 37817, Ce = 37818, we = 37819, Te = 37820, Ee = 37821, De = 36492, Oe = 36494, ke = 36495, Ae = 36283, je = 36284, L = 36285, Me = 36286, Ne = 2300, Pe = 2301, R = 2302, Fe = 2303, z = 2400, B = 2401, Ie = 2402, Le = 2500, Re = 3200, ze = "srgb", Be = "srgb-linear", Ve = "linear", He = "srgb", Ue = 7680, We = 35044, Ge = 2e3;
+}, n = "attached", r = 1e3, i = 1001, a = 1002, o = 1003, s = 1004, c = 1005, l = 1006, u = 1007, d = 1008, f = 1009, p = 1010, m = 1011, h = 1012, g = 1013, _ = 1014, v = 1015, y = 1016, b = 1017, x = 1018, S = 1020, C = 35902, w = 35899, T = 1021, E = 1022, D = 1023, O = 1026, k = 1027, A = 1028, j = 1029, M = 1030, ee = 1031, N = 1033, te = 33776, P = 33777, ne = 33778, F = 33779, re = 35840, ie = 35841, ae = 35842, oe = 35843, se = 36196, I = 37492, ce = 37496, le = 37488, ue = 37489, de = 37490, fe = 37491, pe = 37808, me = 37809, he = 37810, ge = 37811, _e = 37812, ve = 37813, ye = 37814, be = 37815, xe = 37816, Se = 37817, Ce = 37818, we = 37819, Te = 37820, Ee = 37821, De = 36492, Oe = 36494, ke = 36495, Ae = 36283, je = 36284, L = 36285, Me = 36286, Ne = 2300, Pe = 2301, R = 2302, Fe = 2303, z = 2400, B = 2401, Ie = 2402, Le = 2500, Re = 3200, ze = "srgb", Be = "srgb-linear", Ve = "linear", He = "srgb", Ue = 7680, We = 35044, Ge = 2e3;
 function Ke(e) {
 	for (let t = e.length - 1; t >= 0; --t) if (e[t] >= 65535) return !0;
 	return !1;
@@ -1680,8 +1680,8 @@ var Kt = class e {
 		return this.multiplyMatrices(e, this);
 	}
 	multiplyMatrices(e, t) {
-		let n = e.elements, r = t.elements, i = this.elements, a = n[0], o = n[4], s = n[8], c = n[12], l = n[1], u = n[5], d = n[9], f = n[13], p = n[2], m = n[6], h = n[10], g = n[14], _ = n[3], v = n[7], y = n[11], b = n[15], x = r[0], S = r[4], C = r[8], w = r[12], T = r[1], E = r[5], D = r[9], O = r[13], k = r[2], A = r[6], ee = r[10], j = r[14], te = r[3], M = r[7], N = r[11], P = r[15];
-		return i[0] = a * x + o * T + s * k + c * te, i[4] = a * S + o * E + s * A + c * M, i[8] = a * C + o * D + s * ee + c * N, i[12] = a * w + o * O + s * j + c * P, i[1] = l * x + u * T + d * k + f * te, i[5] = l * S + u * E + d * A + f * M, i[9] = l * C + u * D + d * ee + f * N, i[13] = l * w + u * O + d * j + f * P, i[2] = p * x + m * T + h * k + g * te, i[6] = p * S + m * E + h * A + g * M, i[10] = p * C + m * D + h * ee + g * N, i[14] = p * w + m * O + h * j + g * P, i[3] = _ * x + v * T + y * k + b * te, i[7] = _ * S + v * E + y * A + b * M, i[11] = _ * C + v * D + y * ee + b * N, i[15] = _ * w + v * O + y * j + b * P, this;
+		let n = e.elements, r = t.elements, i = this.elements, a = n[0], o = n[4], s = n[8], c = n[12], l = n[1], u = n[5], d = n[9], f = n[13], p = n[2], m = n[6], h = n[10], g = n[14], _ = n[3], v = n[7], y = n[11], b = n[15], x = r[0], S = r[4], C = r[8], w = r[12], T = r[1], E = r[5], D = r[9], O = r[13], k = r[2], A = r[6], j = r[10], M = r[14], ee = r[3], N = r[7], te = r[11], P = r[15];
+		return i[0] = a * x + o * T + s * k + c * ee, i[4] = a * S + o * E + s * A + c * N, i[8] = a * C + o * D + s * j + c * te, i[12] = a * w + o * O + s * M + c * P, i[1] = l * x + u * T + d * k + f * ee, i[5] = l * S + u * E + d * A + f * N, i[9] = l * C + u * D + d * j + f * te, i[13] = l * w + u * O + d * M + f * P, i[2] = p * x + m * T + h * k + g * ee, i[6] = p * S + m * E + h * A + g * N, i[10] = p * C + m * D + h * j + g * te, i[14] = p * w + m * O + h * M + g * P, i[3] = _ * x + v * T + y * k + b * ee, i[7] = _ * S + v * E + y * A + b * N, i[11] = _ * C + v * D + y * j + b * te, i[15] = _ * w + v * O + y * M + b * P, this;
 	}
 	multiplyScalar(e) {
 		let t = this.elements;
@@ -3761,15 +3761,15 @@ var lr = /*@__PURE__*/ new G(), ur = /*@__PURE__*/ new W(), dr = 0, fr = class e
 		return this.intersectBox(e, Lr) !== null;
 	}
 	intersectTriangle(e, t, n, r, i) {
-		let a = this.origin, o = this.direction, s = o.x, c = o.y, l = o.z, u = e.x - a.x, d = e.y - a.y, f = e.z - a.z, p = t.x - a.x, m = t.y - a.y, h = t.z - a.z, g = n.x - a.x, _ = n.y - a.y, v = n.z - a.z, y = Math.abs(s), b = Math.abs(c), x = Math.abs(l), S, C, w, T, E, D, O, k, A, ee, j, te;
-		if (y >= b && y >= x ? (w = s, D = u, A = p, te = g, s >= 0 ? (S = c, C = l, T = d, E = f, O = m, k = h, ee = _, j = v) : (S = l, C = c, T = f, E = d, O = h, k = m, ee = v, j = _)) : b >= x ? (w = c, D = d, A = m, te = _, c >= 0 ? (S = l, C = s, T = f, E = u, O = h, k = p, ee = v, j = g) : (S = s, C = l, T = u, E = f, O = p, k = h, ee = g, j = v)) : (w = l, D = f, A = h, te = v, l >= 0 ? (S = s, C = c, T = u, E = d, O = p, k = m, ee = g, j = _) : (S = c, C = s, T = d, E = u, O = m, k = p, ee = _, j = g)), w === 0) return null;
-		let M = S / w, N = C / w, P = 1 / w, ne = T - M * D, F = E - N * D, re = O - M * A, ie = k - N * A, ae = ee - M * te, oe = j - N * te, se = ae * ie - oe * re, I = ne * oe - F * ae, ce = re * F - ie * ne;
+		let a = this.origin, o = this.direction, s = o.x, c = o.y, l = o.z, u = e.x - a.x, d = e.y - a.y, f = e.z - a.z, p = t.x - a.x, m = t.y - a.y, h = t.z - a.z, g = n.x - a.x, _ = n.y - a.y, v = n.z - a.z, y = Math.abs(s), b = Math.abs(c), x = Math.abs(l), S, C, w, T, E, D, O, k, A, j, M, ee;
+		if (y >= b && y >= x ? (w = s, D = u, A = p, ee = g, s >= 0 ? (S = c, C = l, T = d, E = f, O = m, k = h, j = _, M = v) : (S = l, C = c, T = f, E = d, O = h, k = m, j = v, M = _)) : b >= x ? (w = c, D = d, A = m, ee = _, c >= 0 ? (S = l, C = s, T = f, E = u, O = h, k = p, j = v, M = g) : (S = s, C = l, T = u, E = f, O = p, k = h, j = g, M = v)) : (w = l, D = f, A = h, ee = v, l >= 0 ? (S = s, C = c, T = u, E = d, O = p, k = m, j = g, M = _) : (S = c, C = s, T = d, E = u, O = m, k = p, j = _, M = g)), w === 0) return null;
+		let N = S / w, te = C / w, P = 1 / w, ne = T - N * D, F = E - te * D, re = O - N * A, ie = k - te * A, ae = j - N * ee, oe = M - te * ee, se = ae * ie - oe * re, I = ne * oe - F * ae, ce = re * F - ie * ne;
 		if (r) {
 			if (se < 0 || I < 0 || ce < 0) return null;
 		} else if ((se < 0 || I < 0 || ce < 0) && (se > 0 || I > 0 || ce > 0)) return null;
 		let le = se + I + ce;
 		if (le === 0) return null;
-		let ue = P * (se * D + I * A + ce * te);
+		let ue = P * (se * D + I * A + ce * ee);
 		return (le > 0 ? ue < 0 : ue > 0) ? null : this.at(ue / le, i);
 	}
 	applyMatrix4(e) {
@@ -6692,13 +6692,13 @@ function Ds(e, t, n, r) {
 	switch (n) {
 		case T: return e * t;
 		case A: return e * t / i.components * i.byteLength;
-		case ee: return e * t / i.components * i.byteLength;
-		case j: return e * t * 2 / i.components * i.byteLength;
-		case te: return e * t * 2 / i.components * i.byteLength;
+		case j: return e * t / i.components * i.byteLength;
+		case M: return e * t * 2 / i.components * i.byteLength;
+		case ee: return e * t * 2 / i.components * i.byteLength;
 		case E: return e * t * 3 / i.components * i.byteLength;
 		case D: return e * t * 4 / i.components * i.byteLength;
-		case M: return e * t * 4 / i.components * i.byteLength;
-		case N:
+		case N: return e * t * 4 / i.components * i.byteLength;
+		case te:
 		case P: return Math.floor((e + 3) / 4) * Math.floor((t + 3) / 4) * 8;
 		case ne:
 		case F: return Math.floor((e + 3) / 4) * Math.floor((t + 3) / 4) * 16;
@@ -9432,8 +9432,8 @@ function uu(e, t, n, r, i, a) {
 			let e = s.getVertexShaderStage(i), t = s.getFragmentShaderStage(i);
 			s.update(i, e, t), k = e.id, A = t.id;
 		}
-		let ee = e.getRenderTarget(), j = e.state.buffers.depth.getReversed(), te = h.isInstancedMesh === !0, M = h.isBatchedMesh === !0, N = !!i.map, P = !!i.matcap, ne = !!x, F = !!i.aoMap, re = !!i.lightMap, ie = !!i.bumpMap && i.wireframe === !1, ae = !!i.normalMap, oe = !!i.displacementMap, se = !!i.emissiveMap, I = !!i.metalnessMap, ce = !!i.roughnessMap, le = i.anisotropy > 0, ue = i.clearcoat > 0, de = i.dispersion > 0, fe = i.retroreflectivity > 0, pe = i.iridescence > 0, me = i.sheen > 0, he = i.transmission > 0, ge = le && !!i.anisotropyMap, _e = ue && !!i.clearcoatMap, ve = ue && !!i.clearcoatNormalMap, ye = ue && !!i.clearcoatRoughnessMap, be = pe && !!i.iridescenceMap, xe = pe && !!i.iridescenceThicknessMap, Se = me && !!i.sheenColorMap, Ce = me && !!i.sheenRoughnessMap, we = !!i.specularMap, Te = !!i.specularColorMap, Ee = !!i.specularIntensityMap, De = he && !!i.transmissionMap, Oe = he && !!i.thicknessMap, ke = !!i.gradientMap, Ae = !!i.alphaMap, je = i.alphaTest > 0, L = !!i.alphaHash, Me = !!i.extensions, Ne = 0;
-		i.toneMapped && (ee === null || ee.isXRRenderTarget === !0) && (Ne = e.toneMapping);
+		let j = e.getRenderTarget(), M = e.state.buffers.depth.getReversed(), ee = h.isInstancedMesh === !0, N = h.isBatchedMesh === !0, te = !!i.map, P = !!i.matcap, ne = !!x, F = !!i.aoMap, re = !!i.lightMap, ie = !!i.bumpMap && i.wireframe === !1, ae = !!i.normalMap, oe = !!i.displacementMap, se = !!i.emissiveMap, I = !!i.metalnessMap, ce = !!i.roughnessMap, le = i.anisotropy > 0, ue = i.clearcoat > 0, de = i.dispersion > 0, fe = i.retroreflectivity > 0, pe = i.iridescence > 0, me = i.sheen > 0, he = i.transmission > 0, ge = le && !!i.anisotropyMap, _e = ue && !!i.clearcoatMap, ve = ue && !!i.clearcoatNormalMap, ye = ue && !!i.clearcoatRoughnessMap, be = pe && !!i.iridescenceMap, xe = pe && !!i.iridescenceThicknessMap, Se = me && !!i.sheenColorMap, Ce = me && !!i.sheenRoughnessMap, we = !!i.specularMap, Te = !!i.specularColorMap, Ee = !!i.specularIntensityMap, De = he && !!i.transmissionMap, Oe = he && !!i.thicknessMap, ke = !!i.gradientMap, Ae = !!i.alphaMap, je = i.alphaTest > 0, L = !!i.alphaHash, Me = !!i.extensions, Ne = 0;
+		i.toneMapped && (j === null || j.isXRRenderTarget === !0) && (Ne = e.toneMapping);
 		let Pe = {
 			shaderID: C,
 			shaderType: i.type,
@@ -9446,14 +9446,14 @@ function uu(e, t, n, r, i, a) {
 			isRawShaderMaterial: i.isRawShaderMaterial === !0,
 			glslVersion: i.glslVersion,
 			precision: f,
-			batching: M,
-			batchingColor: M && h._colorsTexture !== null,
-			instancing: te,
-			instancingColor: te && h.instanceColor !== null,
-			instancingMorph: te && h.morphTexture !== null,
-			outputColorSpace: ee === null ? e.outputColorSpace : ee.isXRRenderTarget === !0 ? ee.texture.colorSpace : q.workingColorSpace,
+			batching: N,
+			batchingColor: N && h._colorsTexture !== null,
+			instancing: ee,
+			instancingColor: ee && h.instanceColor !== null,
+			instancingMorph: ee && h.morphTexture !== null,
+			outputColorSpace: j === null ? e.outputColorSpace : j.isXRRenderTarget === !0 ? j.texture.colorSpace : q.workingColorSpace,
 			alphaToCoverage: !!i.alphaToCoverage,
-			map: N,
+			map: te,
 			matcap: P,
 			envMap: ne,
 			envMapMode: ne && x.mapping,
@@ -9495,7 +9495,7 @@ function uu(e, t, n, r, i, a) {
 			alphaTest: je,
 			alphaHash: L,
 			combine: i.combine,
-			mapUv: N && m(i.map.channel),
+			mapUv: te && m(i.map.channel),
 			aoMapUv: F && m(i.aoMap.channel),
 			lightMapUv: re && m(i.lightMap.channel),
 			bumpMapUv: ie && m(i.bumpMap.channel),
@@ -9522,14 +9522,14 @@ function uu(e, t, n, r, i, a) {
 			vertexNormals: !!v.attributes.normal,
 			vertexColors: i.vertexColors,
 			vertexAlphas: i.vertexColors === !0 && !!v.attributes.color && v.attributes.color.itemSize === 4,
-			pointsUvs: h.isPoints === !0 && !!v.attributes.uv && (N || Ae),
+			pointsUvs: h.isPoints === !0 && !!v.attributes.uv && (te || Ae),
 			fog: !!_,
 			useFog: i.fog === !0,
 			fogExp2: !!_ && _.isFogExp2,
 			flatShading: i.wireframe === !1 && (i.flatShading === !0 || v.attributes.normal === void 0 && ae === !1 && (i.isMeshLambertMaterial || i.isMeshPhongMaterial || i.isMeshStandardMaterial || i.isMeshPhysicalMaterial)),
 			sizeAttenuation: i.sizeAttenuation === !0,
 			logarithmicDepthBuffer: d,
-			reversedDepthBuffer: j,
+			reversedDepthBuffer: M,
 			skinning: h.isSkinnedMesh === !0,
 			hasPositionAttribute: v.attributes.position !== void 0,
 			morphTargets: v.morphAttributes.position !== void 0,
@@ -9557,7 +9557,7 @@ function uu(e, t, n, r, i, a) {
 			shadowMapEnabled: e.shadowMap.enabled && l.length > 0,
 			shadowMapType: e.shadowMap.type,
 			toneMapping: Ne,
-			decodeVideoTexture: N && i.map.isVideoTexture === !0 && q.getTransfer(i.map.colorSpace) === "srgb",
+			decodeVideoTexture: te && i.map.isVideoTexture === !0 && q.getTransfer(i.map.colorSpace) === "srgb",
 			decodeVideoTextureEmissive: se && i.emissiveMap.isVideoTexture === !0 && q.getTransfer(i.emissiveMap.colorSpace) === "srgb",
 			premultipliedAlpha: i.premultipliedAlpha,
 			doubleSided: i.side === 2,
@@ -9566,7 +9566,7 @@ function uu(e, t, n, r, i, a) {
 			depthPacking: i.depthPacking || 0,
 			index0AttributeName: i.index0AttributeName,
 			extensionClipCullDistance: Me && i.extensions.clipCullDistance === !0 && n.has("WEBGL_clip_cull_distance"),
-			extensionMultiDraw: (Me && i.extensions.multiDraw === !0 || M) && n.has("WEBGL_multi_draw"),
+			extensionMultiDraw: (Me && i.extensions.multiDraw === !0 || N) && n.has("WEBGL_multi_draw"),
 			rendererExtensionParallelShaderCompile: n.has("KHR_parallel_shader_compile"),
 			customProgramCacheKey: i.customProgramCacheKey()
 		};
@@ -10071,7 +10071,7 @@ function Au(e, t, n) {
 						continue;
 					}
 					p.map = new Jt(i.x, i.y, {
-						format: j,
+						format: M,
 						type: y,
 						minFilter: l,
 						magFilter: l,
@@ -10104,7 +10104,7 @@ function Au(e, t, n) {
 	function C(n, r) {
 		let a = t.update(b);
 		m.defines.VSM_SAMPLES !== n.blurSamples && (m.defines.VSM_SAMPLES = n.blurSamples, h.defines.VSM_SAMPLES = n.blurSamples, m.needsUpdate = !0, h.needsUpdate = !0), n.mapPass === null ? n.mapPass = new Jt(i.x, i.y, {
-			format: j,
+			format: M,
 			type: y
 		}) : (n.mapPass.width !== n.map.width || n.mapPass.height !== n.map.height) && n.mapPass.setSize(n.map.width, n.map.height), m.uniforms.shadow_pass.value = n.map.depthTexture, m.uniforms.resolution.value.set(n.map.width, n.map.height), m.uniforms.radius.value = n.radius, e.setRenderTarget(n.mapPass), e.clear(), e.renderBufferDirect(r, null, a, m, b, null), h.uniforms.shadow_pass.value = n.mapPass.texture, h.uniforms.resolution.value.set(n.map.width, n.map.height), h.uniforms.radius.value = n.radius, e.setRenderTarget(n.map), e.clear(), e.renderBufferDirect(r, null, a, h, b, null);
 	}
@@ -10260,8 +10260,8 @@ function ju(e, t) {
 			}
 		};
 	}
-	let a = new n(), o = new r(), s = new i(), c = /* @__PURE__ */ new WeakMap(), l = /* @__PURE__ */ new WeakMap(), u = {}, d = {}, f = {}, p = /* @__PURE__ */ new WeakMap(), m = [], h = null, g = !1, _ = null, v = null, y = null, b = null, x = null, S = null, C = null, w = new Y(0, 0, 0), T = 0, E = !1, D = null, O = null, k = null, A = null, ee = null, j = e.getParameter(e.MAX_COMBINED_TEXTURE_IMAGE_UNITS), te = !1, M = 0, N = e.getParameter(e.VERSION);
-	N.indexOf("WebGL") === -1 ? N.indexOf("OpenGL ES") !== -1 && (M = parseFloat(/^OpenGL ES (\d)/.exec(N)[1]), te = M >= 2) : (M = parseFloat(/^WebGL (\d)/.exec(N)[1]), te = M >= 1);
+	let a = new n(), o = new r(), s = new i(), c = /* @__PURE__ */ new WeakMap(), l = /* @__PURE__ */ new WeakMap(), u = {}, d = {}, f = {}, p = /* @__PURE__ */ new WeakMap(), m = [], h = null, g = !1, _ = null, v = null, y = null, b = null, x = null, S = null, C = null, w = new Y(0, 0, 0), T = 0, E = !1, D = null, O = null, k = null, A = null, j = null, M = e.getParameter(e.MAX_COMBINED_TEXTURE_IMAGE_UNITS), ee = !1, N = 0, te = e.getParameter(e.VERSION);
+	te.indexOf("WebGL") === -1 ? te.indexOf("OpenGL ES") !== -1 && (N = parseFloat(/^OpenGL ES (\d)/.exec(te)[1]), ee = N >= 2) : (N = parseFloat(/^WebGL (\d)/.exec(te)[1]), ee = N >= 1);
 	let P = null, ne = {}, F = e.getParameter(e.SCISSOR_BOX), re = e.getParameter(e.VIEWPORT), ie = new Kt().fromArray(F), ae = new Kt().fromArray(re);
 	function oe(t, n, r, i) {
 		let a = /* @__PURE__ */ new Uint8Array(4), o = e.createTexture();
@@ -10370,19 +10370,19 @@ function ju(e, t) {
 		t === 0 ? ce(e.CULL_FACE) : (I(e.CULL_FACE), t !== O && (t === 1 ? e.cullFace(e.BACK) : t === 2 ? e.cullFace(e.FRONT) : e.cullFace(e.FRONT_AND_BACK))), O = t;
 	}
 	function ve(t) {
-		t !== k && (te && e.lineWidth(t), k = t);
+		t !== k && (ee && e.lineWidth(t), k = t);
 	}
 	function ye(t, n, r) {
-		t ? (I(e.POLYGON_OFFSET_FILL), (A !== n || ee !== r) && (A = n, ee = r, o.getReversed() && (n = -n), e.polygonOffset(n, r))) : ce(e.POLYGON_OFFSET_FILL);
+		t ? (I(e.POLYGON_OFFSET_FILL), (A !== n || j !== r) && (A = n, j = r, o.getReversed() && (n = -n), e.polygonOffset(n, r))) : ce(e.POLYGON_OFFSET_FILL);
 	}
 	function be(t) {
 		t ? I(e.SCISSOR_TEST) : ce(e.SCISSOR_TEST);
 	}
 	function xe(t) {
-		t === void 0 && (t = e.TEXTURE0 + j - 1), P !== t && (e.activeTexture(t), P = t);
+		t === void 0 && (t = e.TEXTURE0 + M - 1), P !== t && (e.activeTexture(t), P = t);
 	}
 	function Se(t, n, r) {
-		r === void 0 && (r = P === null ? e.TEXTURE0 + j - 1 : P);
+		r === void 0 && (r = P === null ? e.TEXTURE0 + M - 1 : P);
 		let i = ne[r];
 		i === void 0 && (i = {
 			type: void 0,
@@ -10486,7 +10486,7 @@ function ju(e, t) {
 		c.get(n) !== r && (e.uniformBlockBinding(n, r, t.__bindingPointIndex), c.set(n, r));
 	}
 	function Ie() {
-		e.disable(e.BLEND), e.disable(e.CULL_FACE), e.disable(e.DEPTH_TEST), e.disable(e.POLYGON_OFFSET_FILL), e.disable(e.SCISSOR_TEST), e.disable(e.STENCIL_TEST), e.disable(e.SAMPLE_ALPHA_TO_COVERAGE), e.blendEquation(e.FUNC_ADD), e.blendFunc(e.ONE, e.ZERO), e.blendFuncSeparate(e.ONE, e.ZERO, e.ONE, e.ZERO), e.blendColor(0, 0, 0, 0), e.colorMask(!0, !0, !0, !0), e.clearColor(0, 0, 0, 0), e.depthMask(!0), e.depthFunc(e.LESS), o.setReversed(!1), e.clearDepth(1), e.stencilMask(4294967295), e.stencilFunc(e.ALWAYS, 0, 4294967295), e.stencilOp(e.KEEP, e.KEEP, e.KEEP), e.clearStencil(0), e.cullFace(e.BACK), e.frontFace(e.CCW), e.polygonOffset(0, 0), e.activeTexture(e.TEXTURE0), e.bindFramebuffer(e.FRAMEBUFFER, null), e.bindFramebuffer(e.DRAW_FRAMEBUFFER, null), e.bindFramebuffer(e.READ_FRAMEBUFFER, null), e.useProgram(null), e.lineWidth(1), e.scissor(0, 0, e.canvas.width, e.canvas.height), e.viewport(0, 0, e.canvas.width, e.canvas.height), e.pixelStorei(e.PACK_ALIGNMENT, 4), e.pixelStorei(e.UNPACK_ALIGNMENT, 4), e.pixelStorei(e.UNPACK_FLIP_Y_WEBGL, !1), e.pixelStorei(e.UNPACK_PREMULTIPLY_ALPHA_WEBGL, !1), e.pixelStorei(e.UNPACK_COLORSPACE_CONVERSION_WEBGL, e.BROWSER_DEFAULT_WEBGL), e.pixelStorei(e.PACK_ROW_LENGTH, 0), e.pixelStorei(e.PACK_SKIP_PIXELS, 0), e.pixelStorei(e.PACK_SKIP_ROWS, 0), e.pixelStorei(e.UNPACK_ROW_LENGTH, 0), e.pixelStorei(e.UNPACK_IMAGE_HEIGHT, 0), e.pixelStorei(e.UNPACK_SKIP_PIXELS, 0), e.pixelStorei(e.UNPACK_SKIP_ROWS, 0), e.pixelStorei(e.UNPACK_SKIP_IMAGES, 0), u = {}, d = {}, P = null, ne = {}, f = {}, p = /* @__PURE__ */ new WeakMap(), m = [], h = null, g = !1, _ = null, v = null, y = null, b = null, x = null, S = null, C = null, w = new Y(0, 0, 0), T = 0, E = !1, D = null, O = null, k = null, A = null, ee = null, ie.set(0, 0, e.canvas.width, e.canvas.height), ae.set(0, 0, e.canvas.width, e.canvas.height), a.reset(), o.reset(), s.reset();
+		e.disable(e.BLEND), e.disable(e.CULL_FACE), e.disable(e.DEPTH_TEST), e.disable(e.POLYGON_OFFSET_FILL), e.disable(e.SCISSOR_TEST), e.disable(e.STENCIL_TEST), e.disable(e.SAMPLE_ALPHA_TO_COVERAGE), e.blendEquation(e.FUNC_ADD), e.blendFunc(e.ONE, e.ZERO), e.blendFuncSeparate(e.ONE, e.ZERO, e.ONE, e.ZERO), e.blendColor(0, 0, 0, 0), e.colorMask(!0, !0, !0, !0), e.clearColor(0, 0, 0, 0), e.depthMask(!0), e.depthFunc(e.LESS), o.setReversed(!1), e.clearDepth(1), e.stencilMask(4294967295), e.stencilFunc(e.ALWAYS, 0, 4294967295), e.stencilOp(e.KEEP, e.KEEP, e.KEEP), e.clearStencil(0), e.cullFace(e.BACK), e.frontFace(e.CCW), e.polygonOffset(0, 0), e.activeTexture(e.TEXTURE0), e.bindFramebuffer(e.FRAMEBUFFER, null), e.bindFramebuffer(e.DRAW_FRAMEBUFFER, null), e.bindFramebuffer(e.READ_FRAMEBUFFER, null), e.useProgram(null), e.lineWidth(1), e.scissor(0, 0, e.canvas.width, e.canvas.height), e.viewport(0, 0, e.canvas.width, e.canvas.height), e.pixelStorei(e.PACK_ALIGNMENT, 4), e.pixelStorei(e.UNPACK_ALIGNMENT, 4), e.pixelStorei(e.UNPACK_FLIP_Y_WEBGL, !1), e.pixelStorei(e.UNPACK_PREMULTIPLY_ALPHA_WEBGL, !1), e.pixelStorei(e.UNPACK_COLORSPACE_CONVERSION_WEBGL, e.BROWSER_DEFAULT_WEBGL), e.pixelStorei(e.PACK_ROW_LENGTH, 0), e.pixelStorei(e.PACK_SKIP_PIXELS, 0), e.pixelStorei(e.PACK_SKIP_ROWS, 0), e.pixelStorei(e.UNPACK_ROW_LENGTH, 0), e.pixelStorei(e.UNPACK_IMAGE_HEIGHT, 0), e.pixelStorei(e.UNPACK_SKIP_PIXELS, 0), e.pixelStorei(e.UNPACK_SKIP_ROWS, 0), e.pixelStorei(e.UNPACK_SKIP_IMAGES, 0), u = {}, d = {}, P = null, ne = {}, f = {}, p = /* @__PURE__ */ new WeakMap(), m = [], h = null, g = !1, _ = null, v = null, y = null, b = null, x = null, S = null, C = null, w = new Y(0, 0, 0), T = 0, E = !1, D = null, O = null, k = null, A = null, j = null, ie.set(0, 0, e.canvas.width, e.canvas.height), ae.set(0, 0, e.canvas.width, e.canvas.height), a.reset(), o.reset(), s.reset();
 	}
 	return {
 		buffers: {
@@ -10572,22 +10572,22 @@ function Mu(e, t, n, f, p, m, h) {
 		}
 		return (l === e.R16F || l === e.R32F || l === e.RG16F || l === e.RG32F || l === e.RGBA16F || l === e.RGBA32F) && t.get("EXT_color_buffer_float"), l;
 	}
-	function ee(t, n) {
+	function j(t, n) {
 		let r;
 		return t ? n === null || n === 1014 || n === 1020 ? r = e.DEPTH24_STENCIL8 : n === 1015 ? r = e.DEPTH32F_STENCIL8 : n === 1012 && (r = e.DEPTH24_STENCIL8, V("DepthTexture: 16 bit depth attachment is not supported with stencil. Using 24-bit attachment.")) : n === null || n === 1014 || n === 1020 ? r = e.DEPTH_COMPONENT24 : n === 1015 ? r = e.DEPTH_COMPONENT32F : n === 1012 && (r = e.DEPTH_COMPONENT16), r;
 	}
-	function j(e, t) {
+	function M(e, t) {
 		return E(e) === !0 || e.isFramebufferTexture && e.minFilter !== 1003 && e.minFilter !== 1006 ? Math.log2(Math.max(t.width, t.height)) + 1 : e.mipmaps !== void 0 && e.mipmaps.length > 0 ? e.mipmaps.length : e.isCompressedTexture && Array.isArray(e.image) ? t.mipmaps.length : 1;
 	}
-	function te(e) {
+	function ee(e) {
 		let t = e.target;
-		t.removeEventListener("dispose", te), N(t), t.isVideoTexture && y.delete(t), t.isHTMLTexture && b.delete(t);
-	}
-	function M(e) {
-		let t = e.target;
-		t.removeEventListener("dispose", M), ne(t);
+		t.removeEventListener("dispose", ee), te(t), t.isVideoTexture && y.delete(t), t.isHTMLTexture && b.delete(t);
 	}
 	function N(e) {
+		let t = e.target;
+		t.removeEventListener("dispose", N), ne(t);
+	}
+	function te(e) {
 		let t = f.get(e);
 		if (t.__webglInit === void 0) return;
 		let n = e.source, r = S.get(n);
@@ -10698,7 +10698,7 @@ function Mu(e, t, n, f, p, m, h) {
 	}
 	function he(t, n) {
 		let r = !1;
-		t.__webglInit === void 0 && (t.__webglInit = !0, n.addEventListener("dispose", te));
+		t.__webglInit === void 0 && (t.__webglInit = !0, n.addEventListener("dispose", ee));
 		let i = n.source, a = S.get(i);
 		a === void 0 && (a = {}, S.set(i, a));
 		let o = se(n);
@@ -10751,8 +10751,8 @@ function Mu(e, t, n, f, p, m, h) {
 			t = Me(r, t);
 			let l = m.convert(r.format, r.colorSpace), u = m.convert(r.type), d = A(r.internalFormat, l, u, r.normalized, r.colorSpace, r.isVideoTexture);
 			me(a, r);
-			let f, h = r.mipmaps, g = r.isVideoTexture !== !0, _ = c.__version === void 0 || o === !0, v = s.dataReady, y = j(r, t);
-			if (r.isDepthTexture) d = ee(r.format === k, r.type), _ && (g ? n.texStorage2D(e.TEXTURE_2D, 1, d, t.width, t.height) : n.texImage2D(e.TEXTURE_2D, 0, d, t.width, t.height, 0, l, u, null));
+			let f, h = r.mipmaps, g = r.isVideoTexture !== !0, _ = c.__version === void 0 || o === !0, v = s.dataReady, y = M(r, t);
+			if (r.isDepthTexture) d = j(r.format === k, r.type), _ && (g ? n.texStorage2D(e.TEXTURE_2D, 1, d, t.width, t.height) : n.texImage2D(e.TEXTURE_2D, 0, d, t.width, t.height, 0, l, u, null));
 			else if (r.isDataTexture) {
 				if (h.length > 0) {
 					g && _ && n.texStorage2D(e.TEXTURE_2D, y, d, h[0].width, h[0].height);
@@ -10850,7 +10850,7 @@ function Mu(e, t, n, f, p, m, h) {
 			n.pixelStorei(e.UNPACK_FLIP_Y_WEBGL, r.flipY), n.pixelStorei(e.UNPACK_PREMULTIPLY_ALPHA_WEBGL, r.premultiplyAlpha), n.pixelStorei(e.UNPACK_ALIGNMENT, r.unpackAlignment), n.pixelStorei(e.UNPACK_COLORSPACE_CONVERSION_WEBGL, l);
 			let u = r.isCompressedTexture || r.image[0].isCompressedTexture, d = r.image[0] && r.image[0].isDataTexture, f = [];
 			for (let e = 0; e < 6; e++) !u && !d ? f[e] = T(r.image[e], !0, p.maxCubemapSize) : f[e] = d ? r.image[e].image : r.image[e], f[e] = Me(r, f[e]);
-			let h = f[0], g = m.convert(r.format, r.colorSpace), _ = m.convert(r.type), v = A(r.internalFormat, g, _, r.normalized, r.colorSpace), y = r.isVideoTexture !== !0, b = s.__version === void 0 || a === !0, x = o.dataReady, S = j(r, h);
+			let h = f[0], g = m.convert(r.format, r.colorSpace), _ = m.convert(r.type), v = A(r.internalFormat, g, _, r.normalized, r.colorSpace), y = r.isVideoTexture !== !0, b = s.__version === void 0 || a === !0, x = o.dataReady, S = M(r, h);
 			me(e.TEXTURE_CUBE_MAP, r);
 			let C;
 			if (u) {
@@ -10896,7 +10896,7 @@ function Mu(e, t, n, f, p, m, h) {
 	}
 	function xe(t, n, r) {
 		if (e.bindRenderbuffer(e.RENDERBUFFER, t), n.depthBuffer) {
-			let i = n.depthTexture, a = i && i.isDepthTexture ? i.type : null, o = ee(n.stencilBuffer, a), s = n.stencilBuffer ? e.DEPTH_STENCIL_ATTACHMENT : e.DEPTH_ATTACHMENT;
+			let i = n.depthTexture, a = i && i.isDepthTexture ? i.type : null, o = j(n.stencilBuffer, a), s = n.stencilBuffer ? e.DEPTH_STENCIL_ATTACHMENT : e.DEPTH_ATTACHMENT;
 			je(n) ? g.renderbufferStorageMultisampleEXT(e.RENDERBUFFER, Ae(n), o, n.width, n.height) : r ? e.renderbufferStorageMultisample(e.RENDERBUFFER, Ae(n), o, n.width, n.height) : e.renderbufferStorage(e.RENDERBUFFER, o, n.width, n.height), e.framebufferRenderbuffer(e.FRAMEBUFFER, s, e.RENDERBUFFER, t);
 		} else {
 			let t = n.textures;
@@ -10912,7 +10912,7 @@ function Mu(e, t, n, f, p, m, h) {
 		if (n.bindFramebuffer(e.FRAMEBUFFER, t), !(r.depthTexture && r.depthTexture.isDepthTexture)) throw Error("THREE.WebGLTextures: renderTarget.depthTexture must be an instance of THREE.DepthTexture.");
 		let o = f.get(r.depthTexture);
 		if (o.__renderTarget = r, o.__webglTexture && r.depthTexture.image.width === r.width && r.depthTexture.image.height === r.height || (r.depthTexture.image.width = r.width, r.depthTexture.image.height = r.height, r.depthTexture.needsUpdate = !0), a) {
-			if (o.__webglInit === void 0 && (o.__webglInit = !0, r.depthTexture.addEventListener("dispose", te)), o.__webglTexture === void 0) {
+			if (o.__webglInit === void 0 && (o.__webglInit = !0, r.depthTexture.addEventListener("dispose", ee)), o.__webglTexture === void 0) {
 				o.__webglTexture = e.createTexture(), n.bindTexture(e.TEXTURE_CUBE_MAP, o.__webglTexture), me(e.TEXTURE_CUBE_MAP, r.depthTexture);
 				let t = m.convert(r.depthTexture.format), i = m.convert(r.depthTexture.type), a;
 				r.depthTexture.format === 1026 ? a = e.DEPTH_COMPONENT24 : r.depthTexture.format === 1027 && (a = e.DEPTH24_STENCIL8);
@@ -10965,7 +10965,7 @@ function Mu(e, t, n, f, p, m, h) {
 	}
 	function Te(t) {
 		let r = t.texture, i = f.get(t), a = f.get(r);
-		t.addEventListener("dispose", M);
+		t.addEventListener("dispose", N);
 		let o = t.textures, s = t.isWebGLCubeRenderTarget === !0, c = o.length > 1;
 		if (c || (a.__webglTexture === void 0 && (a.__webglTexture = e.createTexture()), a.__version = r.version, h.memory.textures++), s) {
 			i.__webglFramebuffer = [];
@@ -11202,11 +11202,11 @@ var Pu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Fu = "
 }, Lu = class extends nt {
 	constructor(e, t) {
 		super();
-		let n = this, r = null, i = 1, a = null, o = "local-floor", s = 1, c = null, l = null, u = null, d = null, p = null, m = null, h = typeof XRWebGLBinding < "u", g = new Iu(), v = {}, y = t.getContextAttributes(), b = null, x = null, C = [], w = [], T = new W(), E = null, A = null, ee = new Go();
-		ee.viewport = new Kt();
-		let j = new Go();
+		let n = this, r = null, i = 1, a = null, o = "local-floor", s = 1, c = null, l = null, u = null, d = null, p = null, m = null, h = typeof XRWebGLBinding < "u", g = new Iu(), v = {}, y = t.getContextAttributes(), b = null, x = null, C = [], w = [], T = new W(), E = null, A = null, j = new Go();
 		j.viewport = new Kt();
-		let te = [ee, j], M = new os(), N = null, P = null;
+		let M = new Go();
+		M.viewport = new Kt();
+		let ee = [j, M], N = new os(), te = null, P = null;
 		this.cameraAutoUpdate = !0, this.enabled = !1, this.isPresenting = !1, this.getController = function(e) {
 			let t = C[e];
 			return t === void 0 && (t = new Dn(), C[e] = t), t.getTargetRaySpace();
@@ -11232,7 +11232,7 @@ var Pu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Fu = "
 				let t = w[e];
 				t !== null && (w[e] = null, C[e].disconnect(t));
 			}
-			N = null, P = null, g.reset();
+			te = null, P = null, g.reset();
 			for (let e in v) delete v[e];
 			if (e.setRenderTarget(b), p = null, d = null, u = null, r = null, x = null, ue.stop(), n.isPresenting = !1, e.setPixelRatio(E), e.setSize(T.width, T.height, !1), A !== null) {
 				let e = A.camera;
@@ -11341,24 +11341,24 @@ var Pu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Fu = "
 		this.updateCamera = function(e) {
 			if (r === null) return;
 			let t = e.near, n = e.far;
-			g.texture !== null && (g.depthNear > 0 && (t = g.depthNear), g.depthFar > 0 && (n = g.depthFar)), M.near = j.near = ee.near = t, M.far = j.far = ee.far = n, (N !== M.near || P !== M.far) && (r.updateRenderState({
-				depthNear: M.near,
-				depthFar: M.far
-			}), N = M.near, P = M.far), M.layers.mask = e.layers.mask | 6, ee.layers.mask = M.layers.mask & -5, j.layers.mask = M.layers.mask & -3;
-			let i = e.parent, a = M.cameras;
-			se(M, i);
+			g.texture !== null && (g.depthNear > 0 && (t = g.depthNear), g.depthFar > 0 && (n = g.depthFar)), N.near = M.near = j.near = t, N.far = M.far = j.far = n, (te !== N.near || P !== N.far) && (r.updateRenderState({
+				depthNear: N.near,
+				depthFar: N.far
+			}), te = N.near, P = N.far), N.layers.mask = e.layers.mask | 6, j.layers.mask = N.layers.mask & -5, M.layers.mask = N.layers.mask & -3;
+			let i = e.parent, a = N.cameras;
+			se(N, i);
 			for (let e = 0; e < a.length; e++) se(a[e], i);
-			a.length === 2 ? oe(M, ee, j) : M.projectionMatrix.copy(ee.projectionMatrix), A === null && e.isPerspectiveCamera && (A = {
+			a.length === 2 ? oe(N, j, M) : N.projectionMatrix.copy(j.projectionMatrix), A === null && e.isPerspectiveCamera && (A = {
 				camera: e,
 				fov: e.fov,
 				zoom: e.zoom
-			}), I(e, M, i);
+			}), I(e, N, i);
 		};
 		function I(e, t, n) {
 			n === null ? e.matrix.copy(t.matrixWorld) : (e.matrix.copy(n.matrixWorld), e.matrix.invert(), e.matrix.multiply(t.matrixWorld)), e.matrix.decompose(e.position, e.quaternion, e.scale), e.updateMatrixWorld(!0), e.projectionMatrix.copy(t.projectionMatrix), e.projectionMatrixInverse.copy(t.projectionMatrixInverse), e.isPerspectiveCamera && (e.fov = ot * 2 * Math.atan(1 / e.projectionMatrix.elements[5]), e.zoom = 1);
 		}
 		this.getCamera = function() {
-			return M;
+			return N;
 		}, this.getFoveation = function() {
 			if (d !== null || p !== null) return s;
 		}, this.setFoveation = function(e) {
@@ -11366,7 +11366,7 @@ var Pu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Fu = "
 		}, this.hasDepthSensing = function() {
 			return g.texture !== null;
 		}, this.getDepthSensingMesh = function() {
-			return g.getMesh(M);
+			return g.getMesh(N);
 		}, this.getCameraTexture = function(e) {
 			return v[e];
 		};
@@ -11376,7 +11376,7 @@ var Pu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Fu = "
 				let t = l.views;
 				p !== null && (e.setRenderTargetFramebuffer(x, p.framebuffer), e.setRenderTarget(x));
 				let i = !1;
-				t.length !== M.cameras.length && (M.cameras.length = 0, i = !0);
+				t.length !== N.cameras.length && (N.cameras.length = 0, i = !0);
 				for (let n = 0; n < t.length; n++) {
 					let r = t[n], a = null;
 					if (p !== null) a = p.getViewport(r);
@@ -11384,8 +11384,8 @@ var Pu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Fu = "
 						let t = u.getViewSubImage(d, r);
 						a = t.viewport, n === 0 && (e.setRenderTargetTextures(x, t.colorTexture, t.depthStencilTexture), e.setRenderTarget(x));
 					}
-					let o = te[n];
-					o === void 0 && (o = new Go(), o.layers.enable(n), o.viewport = new Kt(), te[n] = o), o.matrix.fromArray(r.transform.matrix), o.matrix.decompose(o.position, o.quaternion, o.scale), o.projectionMatrix.fromArray(r.projectionMatrix), o.projectionMatrixInverse.copy(o.projectionMatrix).invert(), o.viewport.set(a.x, a.y, a.width, a.height), n === 0 && (M.matrix.copy(o.matrix), M.matrix.decompose(M.position, M.quaternion, M.scale)), i === !0 && M.cameras.push(o);
+					let o = ee[n];
+					o === void 0 && (o = new Go(), o.layers.enable(n), o.viewport = new Kt(), ee[n] = o), o.matrix.fromArray(r.transform.matrix), o.matrix.decompose(o.position, o.quaternion, o.scale), o.projectionMatrix.fromArray(r.projectionMatrix), o.projectionMatrixInverse.copy(o.projectionMatrix).invert(), o.viewport.set(a.x, a.y, a.width, a.height), n === 0 && (N.matrix.copy(o.matrix), N.matrix.decompose(N.position, N.quaternion, N.scale)), i === !0 && N.cameras.push(o);
 				}
 				let a = r.enabledFeatures;
 				if (a && a.includes("depth-sensing") && r.depthUsage == "gpu-optimized" && h) {
@@ -12088,7 +12088,7 @@ var Hu = new Uint16Array([
 	1183
 ]), Uu = null;
 function Wu() {
-	return Uu === null && (Uu = new mi(Hu, 16, 16, j, y), Uu.name = "DFG_LUT", Uu.minFilter = l, Uu.magFilter = l, Uu.wrapS = i, Uu.wrapT = i, Uu.generateMipmaps = !1, Uu.needsUpdate = !0), Uu;
+	return Uu === null && (Uu = new mi(Hu, 16, 16, M, y), Uu.name = "DFG_LUT", Uu.minFilter = l, Uu.magFilter = l, Uu.wrapS = i, Uu.wrapT = i, Uu.generateMipmaps = !1, Uu.needsUpdate = !0), Uu;
 }
 var Gu = class {
 	constructor(e = {}) {
@@ -12100,9 +12100,9 @@ var Gu = class {
 			g = n.getContextAttributes().alpha;
 		} else g = a;
 		let v = m, C = /* @__PURE__ */ new Set([
-			M,
-			te,
-			ee
+			N,
+			ee,
+			j
 		]), w = /* @__PURE__ */ new Set([
 			f,
 			_,
@@ -12110,7 +12110,7 @@ var Gu = class {
 			S,
 			b,
 			x
-		]), T = /* @__PURE__ */ new Uint32Array(4), E = /* @__PURE__ */ new Int32Array(4), D = new G(), O = null, k = null, A = [], j = [], N = null;
+		]), T = /* @__PURE__ */ new Uint32Array(4), E = /* @__PURE__ */ new Int32Array(4), D = new G(), O = null, k = null, A = [], M = [], te = null;
 		this.domElement = t, this.debug = {
 			checkShaderErrors: !0,
 			diagnostics: { keywords: !1 },
@@ -12155,7 +12155,7 @@ var Gu = class {
 		function it() {
 			Ne = new lc(L), Ne.init(), tt = new Nu(L, Ne), Pe = new Rs(L, Ne, e, tt), R = new ju(L, Ne), Pe.reversedDepthBuffer && p && R.buffers.depth.setReversed(!0), re = L.createFramebuffer(), ie = L.createFramebuffer(), ae = L.createFramebuffer(), Fe = new fc(L), z = new du(), B = new Mu(L, Ne, R, z, Pe, tt, Fe), Ie = new cc(P), Le = new As(L), nt = new Is(L, Le), Re = new uc(L, Le, Fe, nt), Be = new mc(L, Re, Le, nt, Fe), Xe = new pc(L, Pe, B), Ke = new zs(z), Ve = new uu(P, Ie, Ne, Pe, nt, Ke), He = new Bu(P, z), Ue = new hu(), We = new Su(Ne), Je = new Fs(P, Ie, R, Be, g, s), qe = new Au(P, Be, Pe), rt = new Vu(L, Fe, Pe, R), Qe = new Ls(L, Ne, Fe), $e = new dc(L, Ne, Fe), Fe.programs = Ve.programs, P.capabilities = Pe, P.extensions = Ne, P.properties = z, P.renderLists = Ue, P.shadowMap = qe, P.state = R, P.info = Fe;
 		}
-		v !== 1009 && (N = new gc(v, t.width, t.height, o, r, i));
+		v !== 1009 && (te = new gc(v, t.width, t.height, o, r, i));
 		let at = new Lu(P, L);
 		this.xr = at, this.getContext = function() {
 			return L;
@@ -12174,7 +12174,7 @@ var Gu = class {
 		}, this.getSize = function(e) {
 			return e.set(he, ge);
 		}, this.setSize = function(e, n, r = !0) {
-			at.isPresenting ? V("WebGLRenderer: Can't change size while VR device is presenting.") : (he = e, ge = n, t.width = Math.floor(e * _e), t.height = Math.floor(n * _e), r === !0 && (t.style.width = e + "px", t.style.height = n + "px"), N !== null && N.setSize(t.width, t.height), this.setViewport(0, 0, e, n));
+			at.isPresenting ? V("WebGLRenderer: Can't change size while VR device is presenting.") : (he = e, ge = n, t.width = Math.floor(e * _e), t.height = Math.floor(n * _e), r === !0 && (t.style.width = e + "px", t.style.height = n + "px"), te !== null && te.setSize(t.width, t.height), this.setViewport(0, 0, e, n));
 		}, this.getDrawingBufferSize = function(e) {
 			return e.set(he * _e, ge * _e).floor();
 		}, this.setDrawingBufferSize = function(e, n, r) {
@@ -12188,7 +12188,7 @@ var Gu = class {
 						break;
 					}
 				}
-				N.setEffects(e || []);
+				te.setEffects(e || []);
 			}
 		}, this.getCurrentViewport = function(e) {
 			return e.copy(ue);
@@ -12301,7 +12301,7 @@ var Gu = class {
 			F !== null && e.isNodeMaterial && F.setObject(r, e), we === !0 && Ke.setState(e, n, !1), e.transparent === !0 && e.side === 2 && e.forceSinglePass === !1 ? (e.side = 1, e.needsUpdate = !0, St(e, t, r), e.side = 0, e.needsUpdate = !0, St(e, t, r), e.side = 2) : St(e, t, r);
 		}
 		this.compile = function(e, t, n = null) {
-			n === null && (n = e), F !== null && F.renderStart(e, t, n), k = We.get(n), k.init(t), j.push(k), n.traverseVisible(function(e) {
+			n === null && (n = e), F !== null && F.renderStart(e, t, n), k = We.get(n), k.init(t), M.push(k), n.traverseVisible(function(e) {
 				e.isLight && e.layers.test(t.layers) && (k.pushLight(e), e.castShadow && k.pushShadow(e));
 			}), e !== n && e.traverseVisible(function(e) {
 				e.isLight && e.layers.test(t.layers) && (k.pushLight(e), e.castShadow && k.pushShadow(e));
@@ -12317,7 +12317,7 @@ var Gu = class {
 					}
 					else dt(i, n, t, e), r.add(i);
 				}
-			}), k = j.pop(), F !== null && F.renderEnd(), r;
+			}), k = M.pop(), F !== null && F.renderEnd(), r;
 		}, this.compileAsync = function(e, t, n = null) {
 			let r = this.compile(e, t, n);
 			return new Promise((t) => {
@@ -12350,14 +12350,14 @@ var Gu = class {
 			}
 			if (ne === !0) return;
 			F !== null && F.renderStart(e, t);
-			let n = at.enabled === !0 && at.isPresenting === !0, r = N !== null && (I === null || n) && N.begin(P, I);
-			if (e.matrixWorldAutoUpdate === !0 && e.updateMatrixWorld(), t.parent === null && t.matrixWorldAutoUpdate === !0 && t.updateMatrixWorld(), at.enabled === !0 && at.isPresenting === !0 && (N === null || N.isCompositing() === !1) && (at.cameraAutoUpdate === !0 && at.updateCamera(t), t = at.getCamera()), e.isScene === !0 && e.onBeforeRender(P, e, t, I), k = We.get(e, j.length), k.init(t), k.state.textureUnits = B.getTextureUnits(), j.push(k), Ee.multiplyMatrices(t.projectionMatrix, t.matrixWorldInverse), Ce.setFromProjectionMatrix(Ee, Ge, t.reversedDepth), Te = this.localClippingEnabled, we = Ke.init(this.clippingPlanes, Te), O = Ue.get(e, A.length), O.init(), A.push(O), at.enabled === !0 && at.isPresenting === !0) {
+			let n = at.enabled === !0 && at.isPresenting === !0, r = te !== null && (I === null || n) && te.begin(P, I);
+			if (e.matrixWorldAutoUpdate === !0 && e.updateMatrixWorld(), t.parent === null && t.matrixWorldAutoUpdate === !0 && t.updateMatrixWorld(), at.enabled === !0 && at.isPresenting === !0 && (te === null || te.isCompositing() === !1) && (at.cameraAutoUpdate === !0 && at.updateCamera(t), t = at.getCamera()), e.isScene === !0 && e.onBeforeRender(P, e, t, I), k = We.get(e, M.length), k.init(t), k.state.textureUnits = B.getTextureUnits(), M.push(k), Ee.multiplyMatrices(t.projectionMatrix, t.matrixWorldInverse), Ce.setFromProjectionMatrix(Ee, Ge, t.reversedDepth), Te = this.localClippingEnabled, we = Ke.init(this.clippingPlanes, Te), O = Ue.get(e, A.length), O.init(), A.push(O), at.enabled === !0 && at.isPresenting === !0) {
 				let e = P.xr.getDepthSensingMesh();
 				e !== null && _t(e, t, -Infinity, P.sortObjects);
 			}
 			_t(e, t, 0, P.sortObjects), O.finish(), F !== null && F.updateLights(k.state.lightsArray), P.sortObjects === !0 && O.sort(ve, ye), Ae = at.enabled === !1 || at.isPresenting === !1 || at.hasDepthSensing() === !1, Ae && Je.addToRenderList(O, e), this.info.render.frame++, this.info.autoReset === !0 && this.info.reset(), we === !0 && Ke.beginShadows();
 			let i = k.state.shadowsArray;
-			if (qe.render(i, e, t), we === !0 && Ke.endShadows(), (r && N.hasRenderPass()) === !1) {
+			if (qe.render(i, e, t), we === !0 && Ke.endShadows(), (r && te.hasRenderPass()) === !1) {
 				let n = O.opaque, r = O.transmissive;
 				if (k.setupLights(), t.isArrayCamera) {
 					let i = t.cameras;
@@ -12372,7 +12372,7 @@ var Gu = class {
 					}
 				} else r.length > 0 && yt(n, r, e, t), Ae && Je.render(e), vt(O, e, t);
 			}
-			I !== null && se === 0 && (B.updateMultisampleRenderTarget(I), B.updateRenderTargetMipmap(I)), r && N.end(P), e.isScene === !0 && e.onAfterRender(P, e, t), nt.resetDefaultState(), ce = -1, le = null, j.pop(), j.length > 0 ? (k = j[j.length - 1], B.setTextureUnits(k.state.textureUnits), we === !0 && Ke.setGlobalState(P.clippingPlanes, k.state.camera)) : k = null, A.pop(), O = A.length > 0 ? A[A.length - 1] : null, F !== null && F.renderEnd();
+			I !== null && se === 0 && (B.updateMultisampleRenderTarget(I), B.updateRenderTargetMipmap(I)), r && te.end(P), e.isScene === !0 && e.onAfterRender(P, e, t), nt.resetDefaultState(), ce = -1, le = null, M.pop(), M.length > 0 ? (k = M[M.length - 1], B.setTextureUnits(k.state.textureUnits), we === !0 && Ke.setGlobalState(P.clippingPlanes, k.state.camera)) : k = null, A.pop(), O = A.length > 0 ? A[A.length - 1] : null, F !== null && F.renderEnd();
 		};
 		function _t(e, t, n, r) {
 			if (e.visible === !1) return;
@@ -14282,15 +14282,15 @@ function af(e) {
 		alphaSliceByteOffset: x._nextUint32(),
 		alphaSliceByteLength: x._nextUint32()
 	});
-	let k = l + x._offset, A = k + w, ee = A + T, j = ee + E;
+	let k = l + x._offset, A = k + w, j = A + T, M = j + E;
 	return n.globalData = {
 		endpointCount: S,
 		selectorCount: C,
 		imageDescs: O,
 		endpointsData: new Uint8Array(e.buffer, e.byteOffset + k, w),
 		selectorsData: new Uint8Array(e.buffer, e.byteOffset + A, T),
-		tablesData: new Uint8Array(e.buffer, e.byteOffset + ee, E),
-		extendedData: new Uint8Array(e.buffer, e.byteOffset + j, D)
+		tablesData: new Uint8Array(e.buffer, e.byteOffset + j, E),
+		extendedData: new Uint8Array(e.buffer, e.byteOffset + M, D)
 	}, n;
 }
 // node_modules/three/examples/jsm/libs/zstddec.module.js
@@ -14675,20 +14675,20 @@ yf.BasisFormat = {
 var bf = /* @__PURE__ */ new Set([
 	D,
 	E,
-	j,
+	M,
 	A
 ]), xf = /* @__PURE__ */ new Set([91]), Sf = {
 	109: D,
-	103: j,
+	103: M,
 	100: A,
 	97: D,
-	83: j,
+	83: M,
 	76: A,
 	91: D,
 	43: D,
 	37: D,
-	22: j,
-	16: j,
+	22: M,
+	16: M,
 	15: A,
 	9: A,
 	123: E,
@@ -14707,8 +14707,8 @@ var bf = /* @__PURE__ */ new Set([
 	165: _e,
 	134: P,
 	133: P,
-	132: N,
-	131: N,
+	132: te,
+	131: te,
 	138: F,
 	137: F,
 	140: je,
@@ -17137,15 +17137,123 @@ function Em(e) {
 		capture: !0
 	}));
 }
+// shared/light-effects.mjs
+var Dm = {
+	blink: 1.2,
+	breathe: 15,
+	okay: 1.2,
+	channel_change: 8
+}, Om = {
+	blink: "blink",
+	flash: "blink",
+	breathe: "breathe",
+	okay: "okay",
+	channel_change: "channel_change",
+	finish_effect: "stop",
+	stop_effect: "stop",
+	stop: "stop",
+	colorloop: "colorloop",
+	color_loop: "colorloop",
+	colourloop: "colorloop",
+	colour_loop: "colorloop",
+	rainbow: "colorloop",
+	candle: "flicker",
+	candlelight: "flicker",
+	fire: "flicker",
+	fireplace: "flicker",
+	flicker: "flicker",
+	pulse: "pulse",
+	breathing: "pulse",
+	breath: "pulse",
+	strobe: "strobe"
+};
+function km(e) {
+	if (typeof e != "string") return null;
+	let t = e.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""), n = Object.hasOwn(Om, t) ? Om[t] : void 0;
+	return n ? n === "stop" ? { kind: n } : Object.hasOwn(Dm, n) ? {
+		kind: n,
+		oneShot: !0,
+		duration: Dm[n]
+	} : {
+		kind: n,
+		oneShot: !1
+	} : null;
+}
+var Am = (e, t) => .5 - .5 * Math.cos(2 * Math.PI * e / t), jm = (e) => [
+	0,
+	1 / 3,
+	2 / 3
+].map((t) => {
+	let n = Math.abs(((e - t) % 1 + 1) % 1) * 6;
+	return Math.max(0, Math.min(1, Math.abs(n - 3) - 1));
+});
+function Mm(e, t) {
+	if (!e || e.kind === "stop" || !(t >= 0) || e.oneShot && t >= e.duration) return null;
+	switch (e.kind) {
+		case "blink": return { gain: t % .6 < .3 ? .05 : 1 };
+		case "breathe": return { gain: .05 + .95 * Am(t + .5, 1) };
+		case "okay": return {
+			gain: t % .6 < .4 ? 1 : .1,
+			tint: [
+				.15,
+				1,
+				.25
+			]
+		};
+		case "channel_change": return {
+			gain: t < .5 ? 1 : .35,
+			tint: [
+				1,
+				.5,
+				.05
+			]
+		};
+		case "colorloop": return {
+			gain: 1,
+			tint: jm(t / 12)
+		};
+		case "flicker": return { gain: .72 + .14 * Math.sin(t * 9.1) + .09 * Math.sin(t * 23.7 + 1.3) + .05 * Math.sin(t * 41.3 + .4) };
+		case "pulse": return { gain: .25 + .75 * Am(t, 3) };
+		case "strobe": return { gain: t % .5 < .25 ? 1 : .1 };
+		default: return null;
+	}
+}
+function Nm() {
+	let e, t = null, n = 0, r = !1, i = (e, r) => {
+		let i = km(e);
+		t = i && i.kind !== "stop" ? i : null, n = r;
+	};
+	return {
+		report(t, n, a) {
+			let o = typeof t == "string" ? t : "";
+			if (r = !!n, o === e) return;
+			let s = e === void 0;
+			e = o;
+			let c = km(o);
+			s && c?.oneShot || i(o, a);
+		},
+		trigger(e, t) {
+			i(e, t);
+		},
+		sample(e) {
+			if (!t || !t.oneShot && !r) return null;
+			let i = Mm(t, e - n);
+			return i || (t = null), i;
+		},
+		get animating() {
+			return !!t && (t.oneShot || r);
+		}
+	};
+}
 // web/scene.js
-var Dm = class {
+var Pm = class {
 	constructor(e, t = () => {}, n = {}) {
 		this.options = {
 			mode: "dollhouse",
 			markers: !0,
 			interactive: !0,
 			...n
-		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = Kp({
+		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.effectColor = new Y(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = Kp({
 			quality: this.options.quality,
 			mobile: Gp(),
 			devicePixelRatio: globalThis.devicePixelRatio
@@ -17420,7 +17528,10 @@ var Dm = class {
 					continue;
 				}
 				let i = r.on ? (r.brightness ?? 255) / 255 : 0, a = r.rgb ? new Y().setRGB(...r.rgb.map((e) => e / 255), ze) : n.light.color;
-				n.light.color.copy(a), n.light.intensity = n.base * i, n.marker.material.color.set(r.unavailable ? "#88908b" : r.on ? a : "#697b6d");
+				n.light.color.copy(a), n.light.intensity = n.base * i, n.lightBase = {
+					color: n.light.color.clone(),
+					amount: i
+				}, n.effectRun ||= Nm(), n.effectRun.report(r.effect, !!r.on && !r.unavailable, performance.now() / 1e3), n.marker.material.color.set(r.unavailable ? "#88908b" : r.on ? a : "#697b6d");
 				for (let [e, t] of n.mats) e.emissive.copy(a), e.emissiveIntensity = t * i;
 			}
 			this.ambient.intensity = this.daylight ? .12 : this.options.mode === "dollhouse" ? this.model.ambient ?? .22 : Math.max(this.model.ambient ?? .22, .55);
@@ -17484,17 +17595,43 @@ var Dm = class {
 			e.climateVisuals = [];
 		}
 	}
+	triggerLightEffect(e, t) {
+		let n = this.fixtures?.get(e);
+		return !n?.light || !n.lightBase ? !1 : (n.effectRun ||= Nm(), n.effectRun.trigger(t, performance.now() / 1e3), this.render({ cameraOnly: !0 }), n.effectRun.animating);
+	}
+	applyLightEffects(e) {
+		let t = !1;
+		this.reducedMotion === void 0 && (this.reducedMotion = typeof matchMedia == "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+		for (let n of this.fixtures?.values() || []) {
+			if (!n.effectRun || !n.lightBase) continue;
+			let r = this.reducedMotion ? null : n.effectRun.sample(e);
+			if (!r && !n.effectShown) continue;
+			let i = r ? (n.lightBase.amount || 1) * r.gain : n.lightBase.amount, a = r?.tint ? this.effectColor.setRGB(...r.tint, ze) : n.lightBase.color;
+			n.light.color.copy(a), n.light.intensity = n.base * i;
+			for (let [e, t] of n.mats) e.emissive.copy(a), e.emissiveIntensity = t * i;
+			n.effectShown = !!r, t ||= !!r;
+		}
+		return t;
+	}
+	get lightEffectsAnimating() {
+		if (this.reducedMotion) return !1;
+		for (let e of this.fixtures?.values() || []) if (e.effectRun?.animating || e.effectShown) return !0;
+		return !1;
+	}
 	syncClimateAnimation() {
 		let e = [...this.fixtures.values()].flatMap((e) => e.climateVisuals || []);
-		if (document.hidden || !e.some((e) => e.animating)) {
+		if (document.hidden || !e.some((e) => e.animating) && !this.lightEffectsAnimating) {
 			this.climateFrame && cancelAnimationFrame(this.climateFrame), this.climateFrame = 0;
 			return;
 		}
 		if (this.climateFrame) return;
 		let t = (n) => {
-			if (this.climateFrame = 0, !document.hidden && e.some((e) => e.animating)) {
-				for (let t of e) t.update(n / 1e3);
-				this.renderer.shadowMap.needsUpdate ||= !this.shadowsCurrent, this.renderer.render(this.scene, this.camera), this.climateFrame = requestAnimationFrame(t);
+			if (this.climateFrame = 0, !document.hidden) {
+				if (!this.applyLightEffects(performance.now() / 1e3) && !e.some((e) => e.animating)) this.renderer.shadowMap.needsUpdate ||= !this.shadowsCurrent, this.renderer.render(this.scene, this.camera);
+				else {
+					for (let t of e) t.update(n / 1e3);
+					this.renderer.shadowMap.needsUpdate ||= !this.shadowsCurrent, this.renderer.render(this.scene, this.camera), this.climateFrame = requestAnimationFrame(t);
+				}
 			}
 		};
 		this.climateFrame = requestAnimationFrame(t);
@@ -17506,7 +17643,7 @@ var Dm = class {
 		}
 		this.syncClimateAnimation();
 		for (let e of this.fixtures.values()) for (let t of e.climateVisuals || []) t.update(performance.now() / 1e3);
-		this.renderer.shadowMap.needsUpdate = !e || !this.shadowsCurrent, this.renderer.render(this.scene, this.camera), this.shadowsCurrent = !0, this.options.onRender?.();
+		this.applyLightEffects(performance.now() / 1e3), this.renderer.shadowMap.needsUpdate = !e || !this.shadowsCurrent, this.renderer.render(this.scene, this.camera), this.shadowsCurrent = !0, this.options.onRender?.();
 		let t = this.camera.matrixWorld.elements, n = (e) => t.slice(e, e + 3).map((e) => Math.round(e * 1e5) / 1e5);
 		this.container.dispatchEvent(new CustomEvent("room-camera-orientation", { detail: {
 			right: n(0),
@@ -17514,7 +17651,7 @@ var Dm = class {
 			normal: n(8)
 		} }));
 	}
-}, Om = (e) => /^#[0-9a-f]{6}$/i.test(e) ? [
+}, Fm = (e) => /^#[0-9a-f]{6}$/i.test(e) ? [
 	1,
 	3,
 	5
@@ -17523,7 +17660,7 @@ var Dm = class {
 	240,
 	212
 ];
-function km(e) {
+function Im(e) {
 	let t = Math.max(1e3, Math.min(4e4, e)) / 100;
 	return [
 		t <= 66 ? 255 : 329.698727446 * (t - 60) ** -.1332047592,
@@ -17531,9 +17668,9 @@ function km(e) {
 		t >= 66 ? 255 : t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307
 	].map((e) => Math.round(Math.max(0, Math.min(255, e))));
 }
-function Am(e, t = "#fff0d4") {
+function Lm(e, t = "#fff0d4") {
 	let n = e?.attributes || {}, r = Number.isFinite(n.color_temp_kelvin) ? n.color_temp_kelvin : 3e3, i;
-	if (n.color_mode === "color_temp") i = km(r);
+	if (n.color_mode === "color_temp") i = Im(r);
 	else if (Array.isArray(n.rgb_color) && n.rgb_color.length === 3) i = n.rgb_color;
 	else if (Array.isArray(n.rgbw_color)) {
 		let [e, t, r, a] = n.rgbw_color;
@@ -17543,13 +17680,13 @@ function Am(e, t = "#fff0d4") {
 			r + a
 		].map((e) => Math.min(255, e));
 	} else if (Array.isArray(n.rgbww_color)) {
-		let [e, t, r, a, o] = n.rgbww_color, s = km(n.min_color_temp_kelvin || 2e3), c = km(n.max_color_temp_kelvin || 6535);
+		let [e, t, r, a, o] = n.rgbww_color, s = Im(n.min_color_temp_kelvin || 2e3), c = Im(n.max_color_temp_kelvin || 6535);
 		i = [
 			e,
 			t,
 			r
 		].map((e, t) => Math.min(255, e + s[t] * o / 255 + c[t] * a / 255));
-	} else i = Om(t);
+	} else i = Fm(t);
 	return {
 		rgb: i,
 		colorMode: n.color_mode || "rgb",
@@ -17558,7 +17695,7 @@ function Am(e, t = "#fff0d4") {
 	};
 }
 // dashboard/transport.mjs
-async function jm(e, t, n, r = fetch) {
+async function Rm(e, t, n, r = fetch) {
 	if (!t.preview_url && !t.addon) {
 		if (e.user?.is_admin === !1) throw Error("This release requires a Home Assistant administrator.");
 		return {
@@ -17679,7 +17816,7 @@ async function jm(e, t, n, r = fetch) {
 	};
 }
 // shared/room-lights.mjs
-var Mm = {
+var zm = {
 	light: {
 		entity: /^(light|switch)\.[a-z0-9_]+$/,
 		isOn: (e) => !!e.on,
@@ -17697,8 +17834,8 @@ var Mm = {
 		}
 	}
 };
-function Nm(e, t = "light", n = () => !1) {
-	let { entity: r } = Mm[t], i = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), a = /* @__PURE__ */ new Map(), o = new Set((e?.controls || []).filter((e) => e.hidden && i(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
+function Bm(e, t = "light", n = () => !1) {
+	let { entity: r } = zm[t], i = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), a = /* @__PURE__ */ new Map(), o = new Set((e?.controls || []).filter((e) => e.hidden && i(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
 	for (let n of e?.controls || []) {
 		if (!i(n) || n.hidden || n.lightGroupPrimary === !1) continue;
 		let s = n.sourceModel || e.id, c = n.roomTitle || e.title || "Room";
@@ -17721,9 +17858,9 @@ function Nm(e, t = "light", n = () => !1) {
 	}
 	return [...a.values()];
 }
-var Pm = (e) => Nm(e, "light");
-function Fm(e, t) {
-	let { isOn: n } = Mm[e.kind || "light"], r = 0, i = 0;
+var Vm = (e) => Bm(e, "light");
+function Hm(e, t) {
+	let { isOn: n } = zm[e.kind || "light"], r = 0, i = 0;
 	for (let a of e.lights) {
 		let e = t.get(a.id);
 		e && !e.unavailable && (i++, n(e) && r++);
@@ -17734,8 +17871,8 @@ function Fm(e, t) {
 		total: e.lights.length
 	};
 }
-function Im(e, t, n = {}) {
-	let { services: r } = Mm[e.kind || "light"], i = Fm(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
+function Um(e, t, n = {}) {
+	let { services: r } = zm[e.kind || "light"], i = Hm(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
 	for (let t of e.entities) {
 		let e = n[t];
 		if (!e || ["unavailable", "unknown"].includes(e.state)) continue;
@@ -17751,7 +17888,7 @@ function Im(e, t, n = {}) {
 		])
 	};
 }
-function Lm(e) {
+function Wm(e) {
 	return {
 		id: "",
 		kind: e[0]?.kind || "light",
@@ -17761,7 +17898,26 @@ function Lm(e) {
 	};
 }
 // dashboard/card.js
-var Rm = class extends HTMLElement {
+var Gm = {
+	auto: {
+		label: "Auto",
+		hint: "follow the sun",
+		icon: "<path d=\"M12 3a9 9 0 1 0 0 18Z\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"12\" r=\"9\"/>"
+	},
+	day: {
+		label: "Day",
+		hint: "always daylight",
+		icon: "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4\"/>"
+	},
+	night: {
+		label: "Night",
+		hint: "always night",
+		icon: "<path d=\"M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z\"/>"
+	}
+}, Km = (e, t = 1) => {
+	let n = Object.keys(Gm);
+	return n[(n.indexOf(e) + t + n.length) % n.length];
+}, qm = class extends HTMLElement {
 	static getConfigElement() {
 		return document.createElement("three-d-rooms-editor");
 	}
@@ -17773,7 +17929,25 @@ var Rm = class extends HTMLElement {
 		};
 	}
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:\"\";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed=\"true\"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled=\"true\"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active=\"true\"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable=\"true\"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving=\"true\"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(select:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:static;flex-shrink:0;margin-left:auto;min-height:44px;max-width:100%;border-radius:8px;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:-4px}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable=\"true\"]{opacity:.65}.fixture-tray button[data-active=\"true\"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active=\"true\"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed=\"true\"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone=\"locked\"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone=\"unlocked\"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone=\"jammed\"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone=\"moving\"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone=\"light\"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone=\"open\"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone=\"cool\"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone=\"heat\"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone=\"dry\"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone=\"fan_only\"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone=\"auto\"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role=\"switch\"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded=\"true\"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on=\"true\"] ha-state-icon,.light-row[data-on=\"true\"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable=\"true\"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role=\"switch\"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role=\"switch\"]::after{content:\"\";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role=\"switch\"][aria-checked=\"true\"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role=\"switch\"][aria-checked=\"true\"]::after{left:19px}.light-panel button[role=\"switch\"]:disabled{opacity:.4;cursor:default}.light-panel button[role=\"switch\"][aria-busy=\"true\"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight=\"true\"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}</style><ha-card><div class=\"card-top\"><header hidden></header><select class=\"daylight-switch\" aria-label=\"Time of day\" title=\"Time of day\" hidden><option value=\"auto\">Auto</option><option value=\"day\">Day</option><option value=\"night\">Night</option></select></div><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch"), this._daylightSwitch.onchange = () => this._setDaylight(this._daylightSwitch.value), this.shadowRoot.querySelector("button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "Reload models"), this._refresh.title = "Reload models — clear cached models and load again", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M20 7v5h-5M4 17v-5h5\"/><path d=\"M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17\"/></svg>", this._refresh.onclick = () => this._refreshModels(), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._controls.append(this._refresh, this._resetCamera, this._moveCamera), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {};
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:\"\";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed=\"true\"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled=\"true\"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active=\"true\"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable=\"true\"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving=\"true\"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked=\"true\"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode=\"day\"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode=\"night\"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:-4px}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable=\"true\"]{opacity:.65}.fixture-tray button[data-active=\"true\"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active=\"true\"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed=\"true\"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone=\"locked\"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone=\"unlocked\"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone=\"jammed\"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone=\"moving\"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone=\"light\"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone=\"open\"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone=\"cool\"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone=\"heat\"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone=\"dry\"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone=\"fan_only\"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone=\"auto\"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role=\"switch\"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded=\"true\"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on=\"true\"] ha-state-icon,.light-row[data-on=\"true\"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable=\"true\"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role=\"switch\"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role=\"switch\"]::after{content:\"\";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role=\"switch\"][aria-checked=\"true\"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role=\"switch\"][aria-checked=\"true\"]::after{left:19px}.light-panel button[role=\"switch\"]:disabled{opacity:.4;cursor:default}.light-panel button[role=\"switch\"][aria-busy=\"true\"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight=\"true\"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}</style><ha-card><div class=\"card-top\"><header hidden></header><div class=\"daylight-switch\" role=\"radiogroup\" aria-label=\"Time of day\" hidden></div></div><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
+		let e = document.createElement("span");
+		e.className = "daylight-thumb", this._daylightSwitch.append(e);
+		for (let [e, { label: t, hint: n, icon: r }] of Object.entries(Gm)) {
+			let i = document.createElement("button");
+			i.type = "button", i.dataset.mode = e, i.setAttribute("role", "radio"), i.setAttribute("aria-label", t), i.title = `${t} — ${n}`, i.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${r}</svg>`, i.onclick = () => this._chooseDaylight(e), this._daylightSwitch.append(i);
+		}
+		this._daylightSwitch.onkeydown = (e) => {
+			let t = {
+				ArrowRight: 1,
+				ArrowDown: 1,
+				ArrowLeft: -1,
+				ArrowUp: -1
+			}[e.key];
+			if (!t) return;
+			e.preventDefault();
+			let n = Km(this._daylightSwitch.value, t);
+			this._chooseDaylight(n), this._daylightSwitch.querySelector(`[data-mode="${n}"]`)?.focus();
+		}, this._showDaylightMode("auto"), this.shadowRoot.querySelector(".message button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "Reload models"), this._refresh.title = "Reload models — clear cached models and load again", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M20 7v5h-5M4 17v-5h5\"/><path d=\"M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17\"/></svg>", this._refresh.onclick = () => this._refreshModels(), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._controls.append(this._refresh, this._resetCamera, this._moveCamera), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {};
 		for (let [e, t, n, r] of [[
 			"light",
 			"Room lights",
@@ -17845,7 +18019,7 @@ var Rm = class extends HTMLElement {
 		this._layout = new Uf(this), this._applyHeight(), this._hass && this._config && this._load();
 	}
 	disconnectedCallback() {
-		this._layout?.dispose(), this._layout = null, ++this._generation, clearInterval(this._keepalive), this._unsubModels?.(), this._unsubModels = null, this._dialog?.remove(), this._view?.dispose(), this._view = null, this._loading = !1;
+		this._layout?.dispose(), this._layout = null, ++this._generation, clearInterval(this._keepalive), this._unsubModels?.(), this._unsubModels = null, this._unsubEffects?.(), this._unsubEffects = null, this._dialog?.remove(), this._view?.dispose(), this._view = null, this._loading = !1;
 	}
 	async _refreshModels() {
 		!this._loading && this._hass && (Vf(this._hass), Of(Bf(this._hass)), await this._load());
@@ -17869,7 +18043,7 @@ var Rm = class extends HTMLElement {
 				this._message.querySelector("span").textContent = "Choose a room in the visual editor.";
 				return;
 			}
-			let t = await jm(this._hass, this._config, location.origin);
+			let t = await Rm(this._hass, this._config, location.origin);
 			if (e !== this._generation) return;
 			t.session && (document.cookie = `ingress_session=${t.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`);
 			let { model: n, configured: r, floors: i, views: a, sceneURL: o, layers: s, release: c, assetCache: l } = await t.load();
@@ -17877,7 +18051,7 @@ var Rm = class extends HTMLElement {
 				c?.();
 				return;
 			}
-			if (this._view?.dispose(), this._view = new Dm(this._container, (e) => this._pick(e), {
+			if (this._view?.dispose(), this._view = new Pm(this._container, (e) => this._pick(e), {
 				mode: this._config.view,
 				markers: !1,
 				interactive: this._cameraFree,
@@ -17905,7 +18079,7 @@ var Rm = class extends HTMLElement {
 				!this.isConnected || this._unsubModels ? e() : this._unsubModels = e;
 			}
 			if (e !== this._generation) return;
-			t.session && (this._keepalive = setInterval(async () => {
+			this._watchLightEffects(), t.session && (this._keepalive = setInterval(async () => {
 				if (!document.hidden && this.isConnected) try {
 					await this._hass.callWS({
 						type: "supervisor/api",
@@ -17923,6 +18097,23 @@ var Rm = class extends HTMLElement {
 		} finally {
 			e === this._generation && (this._loading = !1, this._refresh.disabled = !1, this._container.setAttribute("aria-busy", "false"), this._recheckAfterLoad());
 		}
+	}
+	async _watchLightEffects() {
+		if (!(this._unsubEffects || this._effectsPending || this._preview || this._config?.addon || !this._hass?.connection?.subscribeEvents)) {
+			this._effectsPending = !0;
+			try {
+				let e = await this._hass.connection.subscribeEvents((e) => this._lightEffectCalled(e?.data), "call_service");
+				!this.isConnected || this._unsubEffects ? e() : this._unsubEffects = e;
+			} catch {} finally {
+				this._effectsPending = !1;
+			}
+		}
+	}
+	_lightEffectCalled(e) {
+		let t = e?.service_data?.effect;
+		if (e?.domain !== "light" || e.service !== "turn_on" || typeof t != "string" || !this._model || !this._view) return;
+		let n = [e.service_data.entity_id].flat().filter(Boolean);
+		for (let e of this._model.controls) e.type === "light" && n.includes(this._model.bindings?.[e.id]) && this._view.triggerLightEffect(e.id, t);
 	}
 	_modelsEvent() {
 		this._loading ? this._changedDuringLoad = !0 : this._modelsChanged();
@@ -17963,13 +18154,24 @@ var Rm = class extends HTMLElement {
 	}
 	_syncDaylightSwitch() {
 		let e = this._model?.daylight;
-		this._daylightSwitch.hidden = !e || !!this._preview, e && (this._daylightSwitch.value = e.mode);
+		this._daylightSwitch.hidden = !e || !!this._preview, e && this._showDaylightMode(e.mode);
+	}
+	_showDaylightMode(e) {
+		let t = this._daylightSwitch, n = Gm[e] ? e : "auto";
+		t.value = n, t.dataset && (t.dataset.mode = n);
+		for (let e of t.querySelectorAll?.("button") || []) {
+			let t = e.dataset.mode === n;
+			e.setAttribute("aria-checked", String(t)), e.tabIndex = t ? 0 : -1;
+		}
+	}
+	_chooseDaylight(e) {
+		e !== this._daylightSwitch.value && this._setDaylight(e);
 	}
 	async _setDaylight(e) {
 		let t = this._model?.daylight;
 		if (!t || this._preview) return;
 		let n = t.mode, r = (e) => {
-			t.mode = e, this._daylightSwitch.value = e, this._signature = null, this._states();
+			t.mode = e, this._showDaylightMode(e), this._signature = null, this._states();
 		};
 		r(e);
 		try {
@@ -18080,8 +18282,8 @@ var Rm = class extends HTMLElement {
 	}
 	_buildLightPanel() {
 		this._panelRooms = {
-			light: this._config?.light_panel === !1 ? [] : Pm(this._model),
-			shade: this._config?.shade_panel === !1 ? [] : Nm(this._model, "shade", (e) => this._isShade(e))
+			light: this._config?.light_panel === !1 ? [] : Vm(this._model),
+			shade: this._config?.shade_panel === !1 ? [] : Bm(this._model, "shade", (e) => this._isShade(e))
 		};
 		for (let [e, t] of Object.entries(this._panelButtons)) t.hidden = !this._panelRooms[e].length;
 		this._panelKind && !this._panelRooms[this._panelKind].length && (this._panelKind = null);
@@ -18135,7 +18337,7 @@ var Rm = class extends HTMLElement {
 		this._lightPanel = n, this._container.append(n), this._syncLightPanel();
 	}
 	_confirmAllLights() {
-		let { on: e, available: t } = Fm(Lm(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
+		let { on: e, available: t } = Hm(Wm(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
 		this._dialog?.remove();
 		let a = document.createElement("dialog");
 		return this._dialog = a, a.className = "confirm-all-lights", a.innerHTML = "<form method=\"dialog\"><h2></h2><p></p><div style=\"display:flex;gap:8px;justify-content:flex-end;margin-top:16px\"><button value=\"cancel\" autofocus>Cancel</button><button value=\"ok\" class=\"confirm\"></button></div></form>", a.querySelector("h2").textContent = `${n ? r.turnOn : r.turnOff} all ${r.noun}?`, a.querySelector("p").textContent = n ? `This will ${r.turnOn.toLowerCase()} ${t} ${i(t)} in ${this._rooms.length === 1 ? this._rooms[0].title : "every room shown"}. Hidden devices are not changed.` : `This will ${r.turnOff.toLowerCase()} the ${e} ${i(e)} that ${e === 1 ? "is" : "are"} ${r.on}. Hidden devices are not changed.`, a.querySelector(".confirm").textContent = n ? `${r.turnOn} all` : `${r.turnOff} all`, this.shadowRoot.append(a), new Promise((e) => {
@@ -18150,12 +18352,12 @@ var Rm = class extends HTMLElement {
 	_syncLightPanel(e = this._lightStates) {
 		let t = this._lightPanel;
 		if (!t || !e) return;
-		let n = this._panelWords(), r = Mm[this._panelKind || "light"].isOn, i = Lm(this._rooms), a = Fm(i, e), o = t.querySelector("h2 [role=\"switch\"]");
+		let n = this._panelWords(), r = zm[this._panelKind || "light"].isOn, i = Wm(this._rooms), a = Hm(i, e), o = t.querySelector("h2 [role=\"switch\"]");
 		t.querySelector("h2 .light-room-count").textContent = a.available ? `${a.on} ${n.on}` : "", o.setAttribute("aria-checked", String(a.on > 0)), o.disabled = !a.available || !this._preview && !i.entities.length, o.title = `${a.on ? n.turnOff : n.turnOn} all ${n.noun}`;
 		for (let i of this._rooms) {
 			let a = [...t.querySelectorAll("[data-room]")].find((e) => e.dataset.room === i.id);
 			if (!a) continue;
-			let o = Fm(i, e);
+			let o = Hm(i, e);
 			a.querySelector(".light-room-count").textContent = o.available ? `${o.on} of ${o.available} ${n.on}` : i.entities.length || this._preview ? "Unavailable" : "Not connected";
 			let s = a.querySelector("[data-room-switch]");
 			s.setAttribute("aria-checked", String(o.on > 0)), s.disabled = !o.available || !this._preview && !i.entities.length, s.title = `${o.on ? n.turnOff : n.turnOn} all ${i.title} ${n.noun}`;
@@ -18170,7 +18372,7 @@ var Rm = class extends HTMLElement {
 		}
 	}
 	async _toggleShade(e) {
-		let t = this._lightStates || /* @__PURE__ */ new Map(), n = Mm.shade.isOn(t.get(e) || {});
+		let t = this._lightStates || /* @__PURE__ */ new Map(), n = zm.shade.isOn(t.get(e) || {});
 		if (this._preview) {
 			this._previewStates.set(e, { position: n ? 0 : 100 }), this._states();
 			return;
@@ -18188,11 +18390,11 @@ var Rm = class extends HTMLElement {
 		t.className = "fixture-feedback", t.setAttribute("role", "alert"), t.textContent = e, this._container.append(t), setTimeout(() => t.remove(), 5e3);
 	}
 	async _toggleRoomLights(e) {
-		let t = e === "" ? this._rooms?.length && Lm(this._rooms) : this._rooms?.find((t) => t.id === e);
+		let t = e === "" ? this._rooms?.length && Wm(this._rooms) : this._rooms?.find((t) => t.id === e);
 		if (!t || this._pendingRooms.has(e)) return;
 		let n = this._lightStates || /* @__PURE__ */ new Map(), r = this._panelWords(t.kind);
 		if (this._preview) {
-			let e = Fm(t, n).on === 0;
+			let e = Hm(t, n).on === 0;
 			for (let n of t.lights) {
 				if (t.kind === "shade") {
 					this._previewStates.set(n.id, { position: e ? 100 : 0 });
@@ -18201,7 +18403,7 @@ var Rm = class extends HTMLElement {
 				let r = this._model.controls.find((e) => e.id === n.id), i = this._previewStates.get(n.id) || {
 					on: !0,
 					brightness: 255,
-					rgb: Om(r?.color || "#fff0d4")
+					rgb: Fm(r?.color || "#fff0d4")
 				};
 				this._previewStates.set(n.id, {
 					...i,
@@ -18211,7 +18413,7 @@ var Rm = class extends HTMLElement {
 			this._states();
 			return;
 		}
-		let { calls: i } = Im(t, n, this._hass.states);
+		let { calls: i } = Um(t, n, this._hass.states);
 		if (!i.length) return;
 		this._pendingRooms.add(e);
 		let a = [...this._lightPanel?.querySelectorAll("[data-room-switch]") || []].find((t) => t.dataset.roomSwitch === e);
@@ -18253,7 +18455,7 @@ var Rm = class extends HTMLElement {
 			let n = this._previewStates.get(e) || {
 				on: !0,
 				brightness: 255,
-				rgb: Om(t.color || "#fff0d4")
+				rgb: Fm(t.color || "#fff0d4")
 			};
 			this._previewStates.set(e, {
 				...n,
@@ -18358,7 +18560,7 @@ var Rm = class extends HTMLElement {
 		let a = { ...this._previewStates.get(e) || {
 			on: !0,
 			brightness: 255,
-			rgb: Om(t.color || "#fff0d4")
+			rgb: Fm(t.color || "#fff0d4")
 		} }, o = i.querySelector("[role=\"switch\"]"), s = i.querySelector("[type=\"range\"]"), c = i.querySelector("[type=\"color\"]"), l = i.querySelectorAll("[type=\"range\"]")[1], u = () => {
 			o.textContent = a.on ? "On" : "Off", o.setAttribute("aria-checked", String(a.on)), o.setAttribute("aria-label", "Light power"), this._previewStates.set(e, { ...a }), this._states();
 		};
@@ -18367,9 +18569,9 @@ var Rm = class extends HTMLElement {
 		}, s.oninput = () => {
 			a.brightness = Number(s.value), u();
 		}, c.oninput = () => {
-			a.rgb = Om(c.value), u();
+			a.rgb = Fm(c.value), u();
 		}, l.oninput = () => {
-			a.colorTempKelvin = Number(l.value), a.rgb = km(a.colorTempKelvin), c.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), u();
+			a.colorTempKelvin = Number(l.value), a.rgb = Im(a.colorTempKelvin), c.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), u();
 		}, this._preview && u(), i.addEventListener("close", () => i.remove()), this.shadowRoot.append(i), i.showModal();
 	}
 	_deskDialog(e) {
@@ -18495,12 +18697,12 @@ var Rm = class extends HTMLElement {
 			} : pp(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : lp(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : dp(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : sp(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
 				on: !0,
 				brightness: 255,
-				rgb: Om(t.color || "#fff0d4")
+				rgb: Fm(t.color || "#fff0d4")
 			} : {
 				on: n?.state === "on",
 				unavailable: !n || ["unavailable", "unknown"].includes(n.state),
 				brightness: n?.attributes?.brightness ?? 255,
-				...Am(n, t.color)
+				...Lm(n, t.color)
 			});
 		}
 		this._updateDeskDialog(), this._lightStates = e, this._syncLightPanel(e);
@@ -18521,10 +18723,10 @@ var Rm = class extends HTMLElement {
 		n !== this._signature && (this._signature = n, this._view.setStates(e), this._view.setDaylight?.(this._model.daylight?.mode ?? "night", t));
 	}
 };
-customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", Rm), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
+customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", qm), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
 	type: "three-d-rooms-card",
 	name: "3D Rooms",
 	description: "Your room in perspective, with live lighting and controls on the modeled fixtures.",
 	preview: !0
 });
-export { Rm as ThreeDRoomsCard };
+export { qm as ThreeDRoomsCard };

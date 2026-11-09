@@ -1,3 +1,12 @@
+## 0.35.0
+
+- **Time of day is a three-icon switch.** The Day/Night/Auto dropdown on dashboard cards is now a row of three icons (auto, sun, moon). Click one and the highlight slides onto it; the choice is saved with the room, as before. Arrow keys move the choice too.
+- **Light effects play in the 3D room.** When a light runs an effect, its modelled lamp and the light it casts animate on dashboard cards and in the manager:
+  - Zigbee identify effects play once for their standard length: `blink`, `breathe` (15 seconds), `okay` (green flashes) and `channel_change` (orange, 8 seconds). `stop_effect` and `finish_effect` end them. They are picked up from the service call, so triggering the same effect again replays it.
+  - Lasting effects play while the light is on and reports them: colour loop/rainbow, candle/fire/flicker, pulse/breathing and strobe (shown at a gentle two flashes a second).
+  - Other effect names are not animated. Nothing animates when your device asks for reduced motion.
+- No migration or re-upload is needed.
+
 ## 0.34.0
 
 - **Markers show their state in colour.** On dashboard cards and in the view editor, a device's marker is filled with its state colour, using your Home Assistant theme's colours:

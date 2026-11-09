@@ -463,3 +463,56 @@ test("loads keep the update subscription instead of dropping it", async () => {
   assert.equal(load.match(/this\._unsubModels\?\.\(\)/g).length, 1);
   assert.match(load, /!this\._unsubModels &&/);
 });
+
+test("time-of-day options mark the chosen one and save only a new choice", async () => {
+  const card = cardHarness(),
+    saved = [],
+    option = (mode) => ({
+      dataset: { mode },
+      attributes: {},
+      setAttribute(name, value) {
+        this.attributes[name] = value;
+      },
+    }),
+    options = ["auto", "day", "night"].map(option);
+  card._daylightSwitch = {
+    hidden: false,
+    dataset: {},
+    querySelectorAll: () => options,
+  };
+  card._model = {
+    id: "kitchen",
+    daylight: { mode: "auto", entity: "sun.sun" },
+  };
+  card._states = () => {};
+  card._hass.callWS = async (message) => {
+    saved.push(message.data.mode);
+    return { daylight: { mode: message.data.mode } };
+  };
+  const checked = () =>
+    options.map((o) => [o.attributes["aria-checked"], o.tabIndex]);
+  card._showDaylightMode("auto");
+  assert.equal(card._daylightSwitch.dataset.mode, "auto");
+  assert.deepEqual(checked(), [
+    ["true", 0],
+    ["false", -1],
+    ["false", -1],
+  ]);
+  card._chooseDaylight("night");
+  // The highlight moves at once; the save follows.
+  assert.equal(card._daylightSwitch.dataset.mode, "night");
+  assert.deepEqual(checked(), [
+    ["false", -1],
+    ["false", -1],
+    ["true", 0],
+  ]);
+  await Promise.resolve();
+  card._chooseDaylight("night");
+  card._chooseDaylight("day");
+  await Promise.resolve();
+  assert.deepEqual(saved, ["night", "day"]);
+  assert.equal(card._model.daylight.mode, "day");
+  // An unknown saved mode is shown as Auto rather than leaving nothing chosen.
+  card._showDaylightMode("dusk");
+  assert.equal(card._daylightSwitch.value, "auto");
+});

@@ -21,6 +21,7 @@ import { floorFrame, perspectiveFrame } from "../shared/floor-view.mjs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadSceneAsset } from "../shared/scene-assets.mjs";
+import { createEffectRun } from "../shared/light-effects.mjs";
 export class SceneView {
   constructor(container, onPick = () => {}, options = {}) {
     this.options = {
@@ -33,6 +34,7 @@ export class SceneView {
     this.onPick = onPick;
     this.materials = [];
     this.fixtures = new Map();
+    this.effectColor = new THREE.Color();
     this.generation = 0;
     this.climateFrame = 0;
     this.visibilityChanged = () => this.syncClimateAnimation();
@@ -739,6 +741,14 @@ export class SceneView {
         : f.light.color;
       f.light.color.copy(color);
       f.light.intensity = f.base * amount;
+      // Remember the plain look; a running effect animates away from it.
+      f.lightBase = { color: f.light.color.clone(), amount };
+      f.effectRun ||= createEffectRun();
+      f.effectRun.report(
+        s.effect,
+        !!s.on && !s.unavailable,
+        performance.now() / 1000,
+      );
       f.marker.material.color.set(
         s.unavailable ? "#88908b" : s.on ? color : "#697b6d",
       );
@@ -855,12 +865,61 @@ export class SceneView {
       f.climateVisuals = [];
     }
   }
+  /** Start a light effect seen as a service call (one-shot effects repeat). */
+  triggerLightEffect(id, name) {
+    const f = this.fixtures?.get(id);
+    if (!f?.light || !f.lightBase) return false;
+    f.effectRun ||= createEffectRun();
+    f.effectRun.trigger(name, performance.now() / 1000);
+    this.render({ cameraOnly: true });
+    return f.effectRun.animating;
+  }
+  /**
+   * Draw each light's running effect for this frame, or put back its plain
+   * look when the effect has ended. Returns whether any effect is running.
+   */
+  applyLightEffects(now) {
+    let animating = false;
+    if (this.reducedMotion === undefined)
+      this.reducedMotion =
+        typeof matchMedia === "function" &&
+        matchMedia("(prefers-reduced-motion: reduce)").matches;
+    for (const f of this.fixtures?.values() || []) {
+      if (!f.effectRun || !f.lightBase) continue;
+      const frame = this.reducedMotion ? null : f.effectRun.sample(now);
+      if (!frame && !f.effectShown) continue;
+      // A one-shot flashes even a light that is off, like the real bulb.
+      const amount = frame
+          ? (f.lightBase.amount || 1) * frame.gain
+          : f.lightBase.amount,
+        color = frame?.tint
+          ? this.effectColor.setRGB(...frame.tint, THREE.SRGBColorSpace)
+          : f.lightBase.color;
+      f.light.color.copy(color);
+      f.light.intensity = f.base * amount;
+      for (const [m, intensity] of f.mats) {
+        m.emissive.copy(color);
+        m.emissiveIntensity = intensity * amount;
+      }
+      f.effectShown = !!frame;
+      animating ||= !!frame;
+    }
+    return animating;
+  }
+  get lightEffectsAnimating() {
+    if (this.reducedMotion) return false;
+    for (const f of this.fixtures?.values() || [])
+      if (f.effectRun?.animating || f.effectShown) return true;
+    return false;
+  }
   syncClimateAnimation() {
     const effects = [...this.fixtures.values()].flatMap(
       (f) => f.climateVisuals || [],
     );
     const shouldRun =
-      !document.hidden && effects.some((effect) => effect.animating);
+      !document.hidden &&
+      (effects.some((effect) => effect.animating) ||
+        this.lightEffectsAnimating);
     if (!shouldRun) {
       if (this.climateFrame) cancelAnimationFrame(this.climateFrame);
       this.climateFrame = 0;
@@ -869,8 +928,14 @@ export class SceneView {
     if (this.climateFrame) return;
     const tick = (time) => {
       this.climateFrame = 0;
-      if (document.hidden || !effects.some((effect) => effect.animating))
+      if (document.hidden) return;
+      const lights = this.applyLightEffects(performance.now() / 1000);
+      if (!lights && !effects.some((effect) => effect.animating)) {
+        // The last effect just ended: draw the lights' plain look once.
+        this.renderer.shadowMap.needsUpdate ||= !this.shadowsCurrent;
+        this.renderer.render(this.scene, this.camera);
         return;
+      }
       for (const effect of effects) effect.update(time / 1000);
       // Climate effects cast no shadows; keep any pending shadow refresh.
       this.renderer.shadowMap.needsUpdate ||= !this.shadowsCurrent;
@@ -889,6 +954,7 @@ export class SceneView {
     for (const f of this.fixtures.values())
       for (const effect of f.climateVisuals || [])
         effect.update(performance.now() / 1000);
+    this.applyLightEffects(performance.now() / 1000);
     this.renderer.shadowMap.needsUpdate = !cameraOnly || !this.shadowsCurrent;
     this.renderer.render(this.scene, this.camera);
     this.shadowsCurrent = true;

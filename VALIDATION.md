@@ -1,3 +1,12 @@
+# 0.35.0 — light effects in the 3D room and a three-icon time-of-day switch, 2026-11-09
+
+Released as 0.35.0, based on v0.34.0.
+
+- Frontend: 227 tests pass, including new tests for every effect's animation, effect runs, the card's service-call handling and the time-of-day switch; Prettier clean; build succeeds. Python host suite passes (native tests skip outside HA); native tests pass inside Core 2026.10.2.
+- Light effects, native checks on the house/room cards with a local test light offering the Zigbee effects and a demo light (`.local/room-lights-evidence/connect-effect-light.cjs`, `effects.cjs`): blink dims and returns, okay turns green, channel_change turns orange then dims, breathe fades, stop_effect and effect "none" restore the lamp's plain colour and brightness, rainbow cycles hue while reported; no page errors.
+- Time-of-day switch (`daylight-toggle.cjs`), on the extracted artifact: each icon and the arrow keys choose and save their mode, with the highlight on the chosen icon; no page errors. An earlier run on the development build showed unrelated mode changes, consistent with the user's own browser using the same shared instance at the same time.
+- Not tested: real Zigbee lights (effect lengths follow the Zigbee specification), a real phone, the HACS download flow.
+
 # 0.34.0 — state colours on markers, 2026-11-09
 
 Released as 0.34.0, based on v0.33.2.
