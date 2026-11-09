@@ -314,6 +314,33 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
             await self.runtime.request("command", {**base, "action": "open"}, "test-user")
         self.assertEqual(len(calls), 4)
 
+    async def test_lock_dispatches_only_explicit_mapped_actions(self):
+        calls = []
+        async def handle(call):
+            calls.append(call)
+        for service in ("lock", "unlock", "open"):
+            self.hass.services.async_register("lock", service, handle)
+        self.store.models[0]["controls"].append({"id": "front-lock", "type": "lock", "capabilities": ["lock_unlock"]})
+        self.store.models[0]["bindings"]["front-lock"] = "lock.front_door"
+        self.hass.states.async_set("lock.front_door", "unlocked", {})
+        self.assertTrue(any(e["entity_id"] == "lock.front_door" for e in self.runtime.status()["entities"]))
+        base = {"model": "kitchen", "controlId": "front-lock"}
+        for action in ("lock", "unlock"):
+            await self.runtime.request("command", {**base, "action": action, "entityId": "lock.injected"}, "test-user")
+        self.assertEqual([c.service for c in calls], ["lock", "unlock"])
+        self.assertTrue(all(c.data == {"entity_id": "lock.front_door"} and c.context.user_id == "test-user" for c in calls))
+        for action in ("open", "toggle", "on", None):
+            with self.assertRaises(ValueError):
+                await self.runtime.request("command", {**base, "action": action}, "test-user")
+        self.hass.states.async_set("lock.front_door", "locked", {"code_format": "^\\d{4}$"})
+        with self.assertRaises(ValueError):
+            await self.runtime.request("command", {**base, "action": "unlock"}, "test-user")
+        for state in ("unavailable", "unknown"):
+            self.hass.states.async_set("lock.front_door", state, {})
+            with self.assertRaises(ValueError):
+                await self.runtime.request("command", {**base, "action": "lock"}, "test-user")
+        self.assertEqual(len(calls), 2)
+
     async def test_existing_area_assignment_and_area_rename(self):
         from homeassistant.helpers import area_registry
         await area_registry.async_load(self.hass)

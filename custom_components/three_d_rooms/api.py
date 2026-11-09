@@ -76,7 +76,7 @@ class RoomsRuntime:
             "entities": [
                 s.as_dict()
                 for s in self.hass.states.async_all()
-                if s.domain in ("climate", "light", "switch", "cover", "sun", "binary_sensor", "number", "input_number", "button", "input_button", "script", "scene")
+                if s.domain in ("climate", "light", "switch", "cover", "lock", "sun", "binary_sensor", "number", "input_number", "button", "input_button", "script", "scene")
             ],
         }
 
@@ -207,6 +207,8 @@ class RoomsRuntime:
                 if data.get("action") != "press" or "press" not in control["capabilities"]:
                     raise ValueError("Use the preset's press action.")
                 service, settings = ("press" if entity.domain in ("button", "input_button") else "turn_on"), {}
+            elif control.get("type") == "lock":
+                service, settings = lock_command(data, control, entity)
             elif control.get("type") == "number":
                 service, settings = number_command(data, control, entity)
             elif is_cover:
@@ -248,6 +250,20 @@ def number_command(data, control, entity):
         if not number(step) or step <= 0 or not math.isclose((value-minimum)/step, round((value-minimum)/step), abs_tol=1e-6, rel_tol=0):
             raise ValueError("Value must follow the allowed step.")
     return "set_value", {"value": value}
+
+
+def lock_command(data, control, entity):
+    """Lock or unlock only; locks that need a code use Home Assistant's own dialog."""
+    action = data.get("action")
+    if (
+        action not in ("lock", "unlock")
+        or entity.domain != "lock"
+        or "lock_unlock" not in control["capabilities"]
+    ):
+        raise ValueError("Choose lock or unlock.")
+    if entity.attributes.get("code_format"):
+        raise ValueError("This lock needs a code; use the Home Assistant lock dialog.")
+    return action, {}
 
 
 def cover_command(data, control, entity):

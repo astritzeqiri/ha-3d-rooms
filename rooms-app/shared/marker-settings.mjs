@@ -1,3 +1,4 @@
+import { isMarkerIcon } from "./marker-icons.mjs";
 /** View-local presentation only. Does not change bindings or modeled geometry. */
 export function validateMarkers(value) {
   if (value === undefined) return undefined;
@@ -20,14 +21,25 @@ export function validateMarkers(value) {
       Array.isArray(options) ||
       Object.keys(options).some(
         (key) =>
-          !["visible", "show_label", "size", "placement", "offset"].includes(
-            key,
-          ),
+          ![
+            "visible",
+            "show_label",
+            "size",
+            "placement",
+            "offset",
+            "icon",
+          ].includes(key),
       )
     )
       throw new Error("Invalid device-marker settings.");
     if (id === "_defaults" && options.offset !== undefined)
       throw new Error("View defaults cannot contain a position offset.");
+    if (id === "_defaults" && options.icon !== undefined)
+      throw new Error("Choose icons per device, not as a view default.");
+    if (options.icon !== undefined && !isMarkerIcon(options.icon))
+      throw new Error(
+        "Choose a Home Assistant icon such as mdi:door or local:front-door.",
+      );
     for (const key of ["visible", "show_label"])
       if (options[key] !== undefined && typeof options[key] !== "boolean")
         throw new Error("Marker visibility and labels must be true or false.");

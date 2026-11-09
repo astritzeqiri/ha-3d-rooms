@@ -1,3 +1,11 @@
+## 0.32.0
+
+- **Door locks.** A new `lock` device type maps to `lock.*` entities. The 3D lock's thumb-turn shows the real locked/unlocked state, and the marker shows Locked, Unlocked or Jammed. The manager has Lock/Unlock buttons under Devices → Locks. On a dashboard, tapping the lock opens Home Assistant's own lock dialog instead of toggling it. Locks that need a code are never unlocked from 3D Rooms.
+- **Nested controls stay clickable.** A lock mounted on a hinged door keeps its own click target when the door moves.
+- **Choose each device's icon per view.** The view editor's pencil panel has an Icon row with Change. Pick from suggestions, search every Material Design icon, or use your own Home Assistant icon sets such as `local:` (listed first). Dashboards draw the icon through Home Assistant. The full icon set loads only when the picker opens.
+- **Switch-backed lights toggle again.** A light marker connected to a `switch.*`, `input_boolean.*` or `fan.*` entity now toggles through that entity's own domain, falling back to `homeassistant.toggle`. Before, a dashboard click on such a marker did nothing.
+- No migration or re-upload is needed for existing rooms. A room that declares a lock needs this version.
+
 ## 0.31.0
 
 - **Faster on phones.** Phones and touch-only tablets render the 3D room with a lighter profile: at most 1.5× pixel density, no edge smoothing on dense screens, smaller shadow maps and a cap on shadow work (window shadows first). Every light still lights the room and stays controllable. On every device, moving the camera reuses the room's shadows instead of redrawing them each frame.

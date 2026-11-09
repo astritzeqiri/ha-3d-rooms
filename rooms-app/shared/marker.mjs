@@ -1,4 +1,5 @@
 import { climateState, climateAppearance } from "./climate.mjs";
+import { lockState } from "./lock.mjs";
 /** Presentation only: actual entity state remains the source of truth. */
 export function markerAppearance(control, entity, state, preview = false) {
   if (control.type === "climate") {
@@ -24,6 +25,27 @@ export function markerAppearance(control, entity, state, preview = false) {
         entity_id: "climate.three_d_rooms_preview",
         state: s.mode || "unavailable",
         attributes: { icon: "mdi:air-conditioner" },
+      },
+    };
+  }
+  if (control.type === "lock") {
+    const s = preview ? state || {} : entity ? lockState(entity) : state || {},
+      connected = preview || !!entity,
+      unavailable = !connected || !!s.unavailable;
+    return {
+      badge: !connected ? "—" : unavailable ? "!" : s.label,
+      description: !connected
+        ? "Not connected"
+        : unavailable
+          ? "Unavailable"
+          : `${s.label}, Home Assistant lock controls`,
+      active: !unavailable && s.locked === true,
+      moving: !!s.moving,
+      unavailable,
+      stateObj: entity || {
+        entity_id: "lock.three_d_rooms_preview",
+        state: s.locked === false ? "unlocked" : "locked",
+        attributes: {},
       },
     };
   }
@@ -133,6 +155,9 @@ export function markerAppearance(control, entity, state, preview = false) {
   };
 }
 
+/** Padlock glyph shared by the viewer and dashboard. */
+export const LOCK_ICON_PATH =
+  '<path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z"/>';
 /** Shared wall-mounted AC glyph for the viewer and dashboard. */
 export const AC_ICON_PATH =
   '<path fill-rule="evenodd" d="M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z"/><path d="M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z"/>';

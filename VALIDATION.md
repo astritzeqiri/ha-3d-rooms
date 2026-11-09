@@ -1,3 +1,19 @@
+# 0.32.0 — door locks, per-view device icons and switch toggles, 2026-11-09
+
+Released as 0.32.0, based on v0.31.0. Includes the switch-backed light toggle fix from the parallel `light-switch-toggle` session (its commit 26da379, applied unchanged).
+
+- Frontend: 204 tests pass; Prettier clean; build succeeds. Generated `web/mdi-catalog.json` and `shared/marker-icon-paths.mjs` are excluded from Prettier and come from `npm run icons`. A test checks that only the picker's lazy catalog imports `@mdi/js` and that the suggestion paths match it.
+- Python: the host suite passes (16 native tests skip outside HA). All native tests pass inside the pinned HA Core 2026.10.2 container, including the new lock dispatch test. Ruff is not installed on this machine.
+- Integration ZIP inspected: version 0.32.0, complete bundled frontend (one lazy `mdi` icon chunk plus the search catalog), notices including Material Design Icons, and no private models, sessions or storage. The extracted artifact matches the source package and runs on the singleton.
+- Native browser checks against the extracted artifact, using demo entities with test mappings removed afterwards:
+  - Lock: state and thumb-turn follow `lock.front_door`, including changes made outside 3D Rooms; `open` is refused; tapping opens HA's lock dialog.
+  - Hinged entrance door: follows its cover; a lock nested in the door keeps its own click target.
+  - Outside light: on/off.
+  - Per-view icons: saved and validated by the backend; drawn by the card through `ha-state-icon`.
+  - Picker: suggestions, full MDI search, and a test `local:` set registered in the page like a custom-icons plugin (listed first, chosen and drawn on the card).
+  - Loading: the full icon set downloads only when the picker opens, never at manager startup.
+- Not tested: a real phone, physical locks and lights, the user's actual custom icon plugins, and the HACS download flow.
+
 # 0.31.0 — faster on phones and lighter room models, 2026-11-08
 
 Released as 0.31.0, based on v0.30.2.

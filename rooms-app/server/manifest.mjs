@@ -5,6 +5,7 @@ import { validateDevices, validateDeviceSettings } from "../shared/device.mjs";
 import { actionCommand } from "../shared/action.mjs";
 import { numberCommand } from "../shared/number.mjs";
 import { coverCommand } from "../shared/cover.mjs";
+import { lockCommand } from "../shared/lock.mjs";
 import { lightFeatures } from "../shared/light.mjs";
 export const ID = /^[a-z0-9][a-z0-9_-]{0,79}$/;
 export function validateDaylight(value, controls) {
@@ -108,8 +109,12 @@ export function validateManifest(m) {
         (c.defaultPosition ?? 0) > 100)
     )
       fail("Covers need nodes and a default position from 0 to 100.");
-    if (!["light", "cover", "number", "button", "climate"].includes(c.type))
-      fail("Use light, cover or number controls.");
+    if (
+      !["light", "cover", "number", "button", "climate", "lock"].includes(
+        c.type,
+      )
+    )
+      fail("Use light, cover, number, button, climate or lock controls.");
     if (typeof c.label !== "string" || !c.label.trim() || c.label.length > 160)
       fail("Every light needs a label.");
     if (!vector(c.position)) fail("Each light needs a position in meters.");
@@ -151,26 +156,30 @@ export function validateManifest(m) {
       !c.capabilities.includes(
         c.type === "climate"
           ? "more_info"
-          : c.type === "button"
-            ? "press"
-            : c.type === "number"
-              ? "set_value"
-              : c.type === "cover"
-                ? "open_close"
-                : "on_off",
+          : c.type === "lock"
+            ? "lock_unlock"
+            : c.type === "button"
+              ? "press"
+              : c.type === "number"
+                ? "set_value"
+                : c.type === "cover"
+                  ? "open_close"
+                  : "on_off",
       ) ||
       c.capabilities.some(
         (v) =>
           !(
             c.type === "climate"
               ? ["more_info"]
-              : c.type === "button"
-                ? ["press"]
-                : c.type === "number"
-                  ? ["set_value"]
-                  : c.type === "cover"
-                    ? ["open_close", "position", "stop"]
-                    : ["on_off", "brightness", "color", "color_temp"]
+              : c.type === "lock"
+                ? ["lock_unlock"]
+                : c.type === "button"
+                  ? ["press"]
+                  : c.type === "number"
+                    ? ["set_value"]
+                    : c.type === "cover"
+                      ? ["open_close", "position", "stop"]
+                      : ["on_off", "brightness", "color", "color_temp"]
           ).includes(v),
       )
     )
@@ -193,13 +202,15 @@ export function compatible(control, entity) {
     entity &&
     (control.type === "climate"
       ? /^climate\./
-      : control.type === "button"
-        ? /^(button|input_button|script|scene)\./
-        : control.type === "number"
-          ? /^(number|input_number)\./
-          : control.type === "cover"
-            ? /^cover\./
-            : /^(light|switch)\./
+      : control.type === "lock"
+        ? /^lock\./
+        : control.type === "button"
+          ? /^(button|input_button|script|scene)\./
+          : control.type === "number"
+            ? /^(number|input_number)\./
+            : control.type === "cover"
+              ? /^cover\./
+              : /^(light|switch)\./
     ).test(entity.entity_id)
   );
 }
@@ -221,6 +232,7 @@ export function commandFor(
       "Use Home Assistant climate controls from the device dialog.",
     );
   if (control.type === "button") return actionCommand(entity, control, action);
+  if (control.type === "lock") return lockCommand(entity, control, action);
   if (control.type === "number")
     return numberCommand(entity, control, action, settings.value);
   if (control.type === "cover")

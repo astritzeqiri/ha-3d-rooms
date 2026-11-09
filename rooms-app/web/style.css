@@ -3457,3 +3457,191 @@ body[data-room-tab="views"] .saved-view-thumb {
     transition: none;
   }
 }
+/* Icon setting: a compact current-icon row and a grouped, searchable picker. */
+.marker-floating-tools .marker-appearance {
+  width: min(272px, calc(100vw - 48px));
+  max-height: 340px;
+}
+.marker-icon-field {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 4px;
+}
+.marker-field-label {
+  font-size: 12px;
+}
+.marker-appearance .marker-icon-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 5px 10px 5px 5px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.marker-appearance .marker-icon-current:hover {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+.marker-icon-swatch {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent-ink);
+}
+.marker-icon-swatch svg,
+.marker-icon-tile svg,
+.marker-icon-default svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+.marker-icon-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+}
+.marker-icon-change {
+  flex: none;
+  font-size: 12px;
+  color: var(--accent-ink);
+}
+.marker-appearance.picking-icon > :not(.marker-icon-picker) {
+  display: none !important;
+}
+.marker-icon-picker {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.marker-icon-picker-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.marker-icon-picker-head strong {
+  font-size: 14px;
+}
+.marker-appearance .marker-icon-back {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+}
+.marker-icon-back svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.marker-appearance .marker-icon-search {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+.marker-icon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 232px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.marker-appearance .marker-icon-default {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+.marker-icon-group {
+  margin: 6px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.marker-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+.marker-appearance .marker-icon-tile {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+}
+.marker-appearance .marker-icon-tile:hover,
+.marker-appearance .marker-icon-default:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+.marker-icon-tile:focus-visible,
+.marker-icon-default:focus-visible,
+.marker-icon-current:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.marker-appearance .marker-icon-tile[aria-pressed="true"],
+.marker-appearance .marker-icon-default[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent-ink);
+}
+.marker-icon-empty {
+  margin: 0;
+}
+.marker-icon-status {
+  margin: 0;
+}
+.marker-icon-results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 232px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.marker-icon-more {
+  margin: 0;
+}

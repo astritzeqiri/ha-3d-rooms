@@ -43,6 +43,8 @@ See [portable placement and floors](docs/house-placement.md) for the package con
 - **Interactive rooms** — orbit, pan and zoom, or use the navigation cube to find the right angle.
 - **Lights** — control supported on/off, brightness, color and white temperature settings, with state reflected in the room.
 - **Roller shades** — open, stop and close compatible covers, with the modeled shade following their position.
+- **Door locks** — map a modeled lock to a `lock.*` entity; the thumb-turn follows its locked state, and dashboards open Home Assistant’s lock dialog.
+- **Your own icons per view** — choose any icon for each device marker in a dashboard view: Material Design icons or your own Home Assistant icon sets such as `local:`.
 - **Adjustable desks** — group height, movement controls and four configurable macros in one device card.
 - **Daylight** — choose Day, Night or Auto for prepared models; window light follows shade openings and the selected sun entity.
 - **Linked dashboard views** — save camera framing once and reuse it across cards, with optional per-card overrides.

@@ -1,4 +1,5 @@
 import { applyShadowBudget } from "../shared/shadow-budget.mjs";
+import { setLockTurn } from "../shared/lock.mjs";
 import {
   capShadowMapSize,
   isMobileDevice,
@@ -329,7 +330,12 @@ export class SceneView {
               )
               .filter(Boolean)
           : [];
+      const lockNodes =
+        c.type === "lock"
+          ? (c.nodeIds || []).map((id) => this.nodes.get(id)).filter(Boolean)
+          : [];
       this.fixtures.set(c.id, {
+        lockNodes,
         climateVisuals,
         numberNodes,
         markerRestY: c.position[1],
@@ -342,6 +348,26 @@ export class SceneView {
         base: c.intensity ?? 12,
       });
     }
+    // Nested controls (a lock on a hinged door) own their own meshes: assign
+    // picking from the outermost control root inwards so the deepest wins.
+    const depth = (o) => {
+      let d = 0;
+      for (let p = o.parent; p; p = p.parent) d++;
+      return d;
+    };
+    model.controls
+      .flatMap((c) =>
+        (c.nodeIds || [])
+          .map((id) => this.nodes.get(id))
+          .filter(Boolean)
+          .map((node) => [c.id, node]),
+      )
+      .sort((a, b) => depth(a[1]) - depth(b[1]))
+      .forEach(([id, node]) =>
+        node.traverse((o) => {
+          o.userData.pickControl = id;
+        }),
+      );
     this.daylight = model.daylight ? createDaylight(model.daylight) : null;
     if (this.daylight) this.scene.add(this.daylight.group);
     this.daylightMode = model.daylight?.mode ?? "night";
@@ -666,6 +692,20 @@ export class SceneView {
       }
       if (f.type === "button") {
         f.marker.material.color.set(s.unavailable ? "#858b86" : "#c3dbab");
+        continue;
+      }
+      if (f.type === "lock") {
+        // Unknown state keeps the exported (unlocked) pose rather than guessing.
+        for (const node of f.lockNodes) setLockTurn(node, s.locked === true);
+        f.marker.material.color.set(
+          s.unavailable
+            ? "#858b86"
+            : s.jammed
+              ? "#d9654f"
+              : s.locked
+                ? "#7fbf8a"
+                : "#e2b45a",
+        );
         continue;
       }
       if (f.type === "climate") {

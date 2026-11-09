@@ -33,7 +33,19 @@ from .optimize import DECODABLE, SERVER_VERSION, VARIANTS, node_metadata, optimi
 MAX_UPLOAD = 100 * 1024 * 1024
 MAX_EXPANDED = 300 * 1024 * 1024
 ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,79}\Z")
-ENTITY = re.compile(r"(?:binary_sensor|climate|light|switch|cover|number|input_number|button|input_button|script|scene)\.[a-z0-9_]+\Z")
+ENTITY = re.compile(r"(?:binary_sensor|climate|light|switch|cover|lock|number|input_number|button|input_button|script|scene)\.[a-z0-9_]+\Z")
+# Device-marker icons: any HA icon name, mdi:door-open or a custom set's local:front-door.
+# Mirrors MARKER_ICON_PATTERN in rooms-app/shared/marker-icons.mjs.
+MARKER_ICON = re.compile(r"[a-z0-9][a-z0-9_-]{0,31}:[A-Za-z0-9][A-Za-z0-9_.-]{0,95}\Z")
+# Required and allowed capabilities for each declared control type.
+CONTROL_CAPABILITIES = {
+    "light": ("on_off", ("on_off", "brightness", "color", "color_temp")),
+    "cover": ("open_close", ("open_close", "position", "stop")),
+    "number": ("set_value", ("set_value",)),
+    "button": ("press", ("press",)),
+    "climate": ("more_info", ("more_info",)),
+    "lock": ("lock_unlock", ("lock_unlock",)),
+}
 SAFE_FILE = re.compile(
     r"(?:manifest\.json|house-placement\.json|bindings\.json|scene\.glb|thumbnail\.(?:png|jpg|webp)|textures/[a-zA-Z0-9_./-]+)\Z"
 )
@@ -137,12 +149,12 @@ def validate_manifest(m):
         if "hidden" in c and not isinstance(c["hidden"], bool):
             raise ValueError("Device hidden must be a boolean.")
         if (
-            c.get("type") not in ("light", "cover", "number", "button", "climate")
+            c.get("type") not in CONTROL_CAPABILITIES
             or not isinstance(c.get("label"), str)
             or not c["label"].strip()
             or len(c["label"]) > 160
         ):
-            raise ValueError("Every control must be a labeled light, cover or number.")
+            raise ValueError("Every control must be a labeled light, cover, number, button, climate or lock.")
         if not vector(c.get("position")):
             raise ValueError("Every control needs a position in meters.")
         if "intensity" in c and (
@@ -177,13 +189,8 @@ def validate_manifest(m):
         caps = c.get("capabilities")
         if (
             not isinstance(caps, list)
-            or ("more_info" if c["type"] == "climate" else "press" if c["type"] == "button" else "set_value" if c["type"] == "number" else "open_close" if c["type"] == "cover" else "on_off") not in caps
-            or any(
-                v not in (
-                    ("more_info",) if c["type"] == "climate" else ("press",) if c["type"] == "button" else ("set_value",) if c["type"] == "number" else ("open_close", "position", "stop") if c["type"] == "cover"
-                    else ("on_off", "brightness", "color", "color_temp")
-                ) for v in caps
-            )
+            or CONTROL_CAPABILITIES[c["type"]][0] not in caps
+            or any(v not in CONTROL_CAPABILITIES[c["type"]][1] for v in caps)
         ):
             raise ValueError("Unsupported control capabilities.")
     if "appearance" in m:
@@ -353,10 +360,16 @@ def validate_markers(value):
     clean = {}
     for control_id, options in value.items():
         if ((control_id != "_defaults" and not valid_id(control_id)) or not isinstance(options, dict) or
-                set(options) - {"visible", "show_label", "size", "placement", "offset"}):
+                set(options) - {"visible", "show_label", "size", "placement", "offset", "icon"}):
             raise ValueError("Invalid device-marker settings.")
         if control_id == "_defaults" and "offset" in options:
             raise ValueError("View defaults cannot contain a position offset.")
+        if control_id == "_defaults" and "icon" in options:
+            raise ValueError("Choose icons per device, not as a view default.")
+        if "icon" in options and (
+            not isinstance(options["icon"], str) or not MARKER_ICON.match(options["icon"])
+        ):
+            raise ValueError("Choose a Home Assistant icon such as mdi:door or local:front-door.")
         for key in ("visible", "show_label"):
             if key in options and not isinstance(options[key], bool):
                 raise ValueError("Marker visibility and labels must be true or false.")
@@ -430,6 +443,18 @@ def validate_glb(data, manifest):
     daylight_nodes = {n.get("extras", {}).get("daylightWindowId") for n in doc.get("nodes", [])}
     if any(w["nodeId"] not in daylight_nodes for w in manifest.get("daylight", {}).get("windows", [])):
         raise ValueError("A daylight window references a missing scene node.")
+    for node in doc.get("nodes", []):
+        turn = node.get("extras", {}).get("lockTurn")
+        # Optional thumb-turn: rotate about a local unit axis when locked.
+        if turn is not None and (
+            not isinstance(turn, dict)
+            or not isinstance(turn.get("axis"), list) or len(turn["axis"]) != 3
+            or not all(number(v) for v in turn["axis"])
+            or not math.isclose(math.hypot(*turn["axis"]), 1, abs_tol=1e-3)
+            or not number(turn.get("lockedAngle"))
+            or not 0 < abs(turn["lockedAngle"]) <= math.pi
+        ):
+            raise ValueError("Invalid lock thumb-turn metadata.")
     nodes = {n.get("extras", {}).get("controlId") for n in doc.get("nodes", [])}
     for control in manifest["controls"]:
         if any(node not in nodes for node in control.get("nodeIds", [])):
@@ -459,6 +484,10 @@ def validate_glb(data, manifest):
                         or slide["defaultPosition"] != control.get("defaultPosition", 0)
                         or not slides[0].get("children")):
                         raise ValueError("Invalid sliding door motion metadata.")
+        if control["type"] == "lock":
+            for node_id in control.get("nodeIds", []):
+                if sum(n.get("extras", {}).get("controlId") == node_id for n in doc.get("nodes", [])) != 1:
+                    raise ValueError("Lock controls need unique scene roots.")
         if control["type"] == "number":
             for node_id in control["nodeIds"]:
                 matches = [n for n in doc.get("nodes", []) if n.get("extras", {}).get("controlId") == node_id]
@@ -493,7 +522,7 @@ def compatible_entity(control, entity_id):
     return (
         isinstance(entity_id, str)
         and bool(ENTITY.fullmatch(entity_id))
-        and (entity_id.split(".")[0] in ({"climate"} if control.get("type") == "climate" else {"button", "input_button", "script", "scene"} if control.get("type") == "button" else {"number", "input_number"} if control.get("type") == "number" else ({"cover"} if control.get("motion") == "none" else {"cover", "binary_sensor"}) if control.get("type") == "cover" else {"light", "switch"}))
+        and (entity_id.split(".")[0] in ({"climate"} if control.get("type") == "climate" else {"lock"} if control.get("type") == "lock" else {"button", "input_button", "script", "scene"} if control.get("type") == "button" else {"number", "input_number"} if control.get("type") == "number" else ({"cover"} if control.get("motion") == "none" else {"cover", "binary_sensor"}) if control.get("type") == "cover" else {"light", "switch"}))
     )
 
 
@@ -504,7 +533,7 @@ def validate_bindings(bindings, manifest):
         for key, value in bindings.items()
     ):
         raise ValueError(
-            "Bindings must connect declared controls to matching light, switch, cover, climate or number entities."
+            "Bindings must connect declared controls to matching light, switch, cover, climate, lock or number entities."
         )
     return dict(bindings)
 

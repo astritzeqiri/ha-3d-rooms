@@ -13,7 +13,13 @@ import { deviceForControl, macroName } from "../shared/device.mjs";
 import { coverFeatures } from "../shared/cover.mjs";
 import { actionState } from "../shared/action.mjs";
 import { numberState } from "../shared/number.mjs";
-import { markerAppearance, AC_ICON_PATH } from "../shared/marker.mjs";
+import {
+  markerAppearance,
+  AC_ICON_PATH,
+  LOCK_ICON_PATH,
+} from "../shared/marker.mjs";
+import { lockState } from "../shared/lock.mjs";
+import { markerIconPath } from "../shared/marker-icons.mjs";
 import { coverState } from "../shared/cover.mjs";
 import { validateCameraSnapshot } from "../shared/camera-view.mjs";
 import "./panel.js";
@@ -568,21 +574,29 @@ export class ThreeDRoomsCard extends HTMLElement {
           : `${label}: click to toggle, hold for more info`;
       // Keep the viewer’s AC glyph; HA resolves other device and state icons.
       // Light-DOM SVG is a fallback for standalone previews without HA elements.
+      // A view may choose its own icon; HA then draws it in place of the state icon.
+      const customIcon = presentation.icon;
       const icon = document.createElement(
-        control.type === "climate" ? "span" : "ha-state-icon",
+        control.type === "climate" && !customIcon ? "span" : "ha-state-icon",
       );
-      if (control.type === "climate") icon.className = "fixture-ac-icon";
+      if (control.type === "climate" && !customIcon)
+        icon.className = "fixture-ac-icon";
+      if (customIcon) icon.icon = presentation.icon;
       icon.setAttribute("aria-hidden", "true");
-      icon.innerHTML =
-        control.type === "climate"
+      // Light-DOM fallback for previews outside HA; HA draws every mdi: name itself.
+      icon.innerHTML = customIcon
+        ? `<svg viewBox="0 0 24 24">${markerIconPath(customIcon) || ""}</svg>`
+        : control.type === "climate"
           ? `<svg viewBox="0 0 24 24">${AC_ICON_PATH}</svg>`
-          : control.type === "button"
-            ? '<svg viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></svg>'
-            : control.type === "number"
-              ? '<svg viewBox="0 0 24 24"><path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/></svg>'
-              : control.type !== "light"
-                ? '<svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>'
-                : '<svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
+          : control.type === "lock"
+            ? `<svg viewBox="0 0 24 24">${LOCK_ICON_PATH}</svg>`
+            : control.type === "button"
+              ? '<svg viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></svg>'
+              : control.type === "number"
+                ? '<svg viewBox="0 0 24 24"><path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/></svg>'
+                : control.type !== "light"
+                  ? '<svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>'
+                  : '<svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
       const badge = document.createElement("span");
       badge.className = "fixture-state";
       badge.setAttribute("aria-hidden", "true");
@@ -681,6 +695,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     }
     if (
       control.type === "climate" ||
+      control.type === "lock" ||
       control.type === "cover" ||
       control.type === "number"
     ) {
@@ -709,7 +724,14 @@ export class ThreeDRoomsCard extends HTMLElement {
     button?.setAttribute("aria-busy", "true");
     this.shadowRoot.querySelector(".fixture-feedback")?.remove();
     try {
-      await this._hass.callService("light", "toggle", { entity_id: entityId });
+      const domain = entityId.split(".")[0];
+      await this._hass.callService(
+        ["light", "switch", "input_boolean", "fan"].includes(domain)
+          ? domain
+          : "homeassistant",
+        "toggle",
+        { entity_id: entityId },
+      );
     } catch {
       const message = document.createElement("div");
       message.className = "fixture-feedback";
@@ -796,6 +818,10 @@ export class ThreeDRoomsCard extends HTMLElement {
     }
     if (control.type === "number") {
       this._numberPreview(control);
+      return;
+    }
+    if (control.type === "lock") {
+      this._lockPreview(control);
       return;
     }
     if (control.type === "cover") {
@@ -1038,6 +1064,32 @@ export class ThreeDRoomsCard extends HTMLElement {
     this.shadowRoot.append(dialog);
     dialog.showModal();
   }
+  _lockPreview(control) {
+    this._dialog?.remove();
+    const dialog = document.createElement("dialog");
+    this._dialog = dialog;
+    dialog.innerHTML =
+      '<form method="dialog"><h2></h2><p></p><div class="preview-controls"><button type="button" data-lock="unlock">Unlock</button><button type="button" data-lock="lock">Lock</button></div><button>Close</button></form>';
+    dialog.querySelector("h2").textContent = control.label;
+    dialog.querySelector("p").textContent = this._preview
+      ? "Local preview · no real device commands"
+      : "Connect this lock to its lock entity in 3D Rooms → Devices. The mapped lock opens Home Assistant's own lock controls.";
+    for (const button of dialog.querySelectorAll("[data-lock]")) {
+      button.disabled = !this._preview;
+      button.onclick = () => {
+        const locked = button.dataset.lock === "lock";
+        this._previewStates.set(control.id, {
+          locked,
+          label: locked ? "Locked" : "Unlocked",
+          unavailable: false,
+        });
+        this._states();
+      };
+    }
+    dialog.addEventListener("close", () => dialog.remove());
+    this.shadowRoot.append(dialog);
+    dialog.showModal();
+  }
   _states() {
     if (!this._model || !this._view) return;
     const states = new Map();
@@ -1045,6 +1097,19 @@ export class ThreeDRoomsCard extends HTMLElement {
       const entity = this._hass.states?.[this._model.bindings[control.id]];
       if (control.type === "climate") {
         states.set(control.id, climateState(entity));
+        continue;
+      }
+      if (control.type === "lock") {
+        states.set(
+          control.id,
+          this._preview
+            ? this._previewStates?.get(control.id) || {
+                locked: true,
+                label: "Locked",
+                unavailable: false,
+              }
+            : lockState(entity),
+        );
         continue;
       }
       if (control.type === "button") {

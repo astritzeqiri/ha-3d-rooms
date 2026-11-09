@@ -48,7 +48,7 @@ export async function createApp({
         : "preview",
     entities: bridge.connected
       ? bridge.entities.filter((e) =>
-          /^(light|switch|cover|sun|number|input_number|button|input_button|script|scene)\./.test(
+          /^(light|switch|cover|lock|sun|number|input_number|button|input_button|script|scene)\./.test(
             e.entity_id,
           ),
         )

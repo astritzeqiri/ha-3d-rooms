@@ -47,9 +47,12 @@ export function libraryGroups(models, query = "") {
 export function deviceGroup(control) {
   if (control.device || control.type === "number") return "Furniture";
   return (
-    { cover: "Shades & doors", climate: "Climate", button: "Actions" }[
-      control.type
-    ] || "Lights"
+    {
+      cover: "Shades & doors",
+      climate: "Climate",
+      button: "Actions",
+      lock: "Locks",
+    }[control.type] || "Lights"
   );
 }
 export function connectionState(control, model, status, simulation = false) {

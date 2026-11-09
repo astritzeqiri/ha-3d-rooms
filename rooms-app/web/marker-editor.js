@@ -1,13 +1,56 @@
-import { markerAppearance, AC_ICON_PATH } from "../shared/marker.mjs";
+import {
+  markerAppearance,
+  AC_ICON_PATH,
+  LOCK_ICON_PATH,
+} from "../shared/marker.mjs";
 import { deviceForControl } from "../shared/device.mjs";
 import {
   markerSettings,
   markerLayout,
   validateMarkers,
 } from "../shared/marker-settings.mjs";
+import {
+  MARKER_ICON_GROUPS,
+  iconLabel,
+  markerIconPath,
+} from "../shared/marker-icons.mjs";
+import { loadIconCatalog } from "./icon-catalog.js";
 
 /** The editor's controls select settings and place anchors; they never send commands. */
 export function initMarkerEditor({ model, scene, onChange }) {
+  // The full icon set loads only when needed (picker search, or a saved
+  // icon outside the suggestions); suggestions are bundled.
+  let catalog = null;
+  const needCatalog = () =>
+    loadIconCatalog()
+      .then((loaded) => {
+        if (!catalog) {
+          catalog = loaded;
+          refresh();
+        }
+        return loaded;
+      })
+      .catch(() => null);
+  // Icon art is { viewBox, html }: bundled suggestions, any MDI icon, or a
+  // custom HA icon set's icon (fetched once, then cached by the catalog).
+  const requested = new Set();
+  const iconArtFor = (icon) => {
+    if (!icon) return undefined;
+    const curated = markerIconPath(icon);
+    if (curated) return { viewBox: "0 0 24 24", html: curated };
+    const known = catalog?.art(icon);
+    if (known || requested.has(icon)) return known;
+    requested.add(icon);
+    needCatalog()
+      .then((loaded) => loaded?.resolve(icon))
+      .then((found) => found && refresh());
+    return undefined;
+  };
+  const paint = (svg, art) => {
+    if (!svg || !art) return;
+    if (svg.innerHTML !== art.html) svg.innerHTML = art.html;
+    svg.setAttribute("viewBox", art.viewBox);
+  };
   const host = document.getElementById("dashboard-marker-settings");
   const viewport = document.getElementById("viewport");
   const feedback = document.getElementById("dashboard-marker-message");
@@ -95,6 +138,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
     if (picker) picker.value = "";
     if (inspector) inspector.hidden = true;
     for (const row of entries.values()) {
+      row.closeIconPicker?.();
       row.details.hidden = true;
       row.details.open = false;
       row.button.setAttribute("aria-pressed", "false");
@@ -153,6 +197,20 @@ export function initMarkerEditor({ model, scene, onChange }) {
         ? "none"
         : "";
       entry.labels.checked = option.show_label;
+      const glyph = iconArtFor(option.icon) || {
+        viewBox: "0 0 24 24",
+        html: entry.defaultPath,
+      };
+      paint(entry.glyph, glyph);
+      paint(entry.iconSwatch, glyph);
+      entry.iconName.textContent = option.icon
+        ? iconLabel(option.icon)
+        : "Default";
+      for (const choice of entry.iconChoices())
+        choice.setAttribute(
+          "aria-pressed",
+          String(choice.dataset.icon === (option.icon || "")),
+        );
       if (![...entry.size.options].some((o) => o.value === String(option.size)))
         entry.size.add(new Option(`${option.size} px`, option.size));
       entry.size.value = option.size;
@@ -172,7 +230,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
       entry.button.dataset.hidden = String(!option.visible);
       const state = owner.lastStates?.get(control.id) || {};
       const climate =
-        control.type === "climate"
+        control.type === "climate" || control.type === "lock"
           ? markerAppearance(control, state.entity, state)
           : null;
       entry.badge.textContent = climate
@@ -382,7 +440,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
       details.className = "marker-device-settings";
       details.name = "marker-device-tools";
       details.hidden = true;
-      details.innerHTML = `<summary><span class="marker-device-name"></span><span class="marker-device-summary"></span></summary><div class="marker-tool-heading"><strong></strong><button type="button" data-close aria-label="Close icon tools">×</button></div><div class="marker-tool-actions"><button type="button" data-undo disabled>Undo</button><button type="button" data-style aria-expanded="false">Edit icon</button><button type="button" data-more aria-expanded="false">Position</button><button type="button" data-eye aria-pressed="false">Hide icon</button></div><p class="marker-tool-hint" hidden>Drag the highlighted icon onto a room surface. Escape cancels.</p><div class="marker-appearance" hidden><p class="muted small" data-inheritance></p><button type="button" data-inherit>Use view defaults</button><div class="marker-tool-checks"><label class="marker-check"><input type="checkbox" data-setting="visible">Visible</label><label class="marker-check"><input type="checkbox" data-setting="show_label">State label</label></div><label>Size<select data-setting="size"><option value="24">Small</option><option value="32">Standard</option><option value="44">Large</option><option value="56">Extra large</option></select></label><label>Display<select data-setting="placement"><option value="room">On room</option><option value="tray">Below room</option></select></label></div><div class="marker-position" hidden><button type="button" data-place>Place icon</button><button type="button" data-reset>Reset</button><details><summary>Precise position</summary><p class="muted small">Offset in metres.</p><div class="marker-axes"><label>X<input data-axis="0" type="number" required min="-1000" max="1000" step="any"></label><label>Y · height<input data-axis="1" type="number" required min="-1000" max="1000" step="any"></label><label>Z<input data-axis="2" type="number" required min="-1000" max="1000" step="any"></label></div></details></div>`;
+      details.innerHTML = `<summary><span class="marker-device-name"></span><span class="marker-device-summary"></span></summary><div class="marker-tool-heading"><strong></strong><button type="button" data-close aria-label="Close icon tools">×</button></div><div class="marker-tool-actions"><button type="button" data-undo disabled>Undo</button><button type="button" data-style aria-expanded="false">Edit icon</button><button type="button" data-more aria-expanded="false">Position</button><button type="button" data-eye aria-pressed="false">Hide icon</button></div><p class="marker-tool-hint" hidden>Drag the highlighted icon onto a room surface. Escape cancels.</p><div class="marker-appearance" hidden><div class="marker-icon-field"><span class="marker-field-label">Icon</span><button type="button" class="marker-icon-current" data-icon-open aria-expanded="false"><span class="marker-icon-swatch" aria-hidden="true"><svg viewBox="0 0 24 24"></svg></span><span class="marker-icon-name"></span><span class="marker-icon-change">Change</span></button></div><p class="muted small" data-inheritance></p><button type="button" data-inherit>Use view defaults</button><div class="marker-tool-checks"><label class="marker-check"><input type="checkbox" data-setting="visible">Visible</label><label class="marker-check"><input type="checkbox" data-setting="show_label">State label</label></div><label>Size<select data-setting="size"><option value="24">Small</option><option value="32">Standard</option><option value="44">Large</option><option value="56">Extra large</option></select></label><label>Display<select data-setting="placement"><option value="room">On room</option><option value="tray">Below room</option></select></label><div class="marker-icon-picker" hidden><div class="marker-icon-picker-head"><button type="button" class="marker-icon-back" data-icon-back aria-label="Back to icon settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><strong>Choose icon</strong></div><input type="search" class="marker-icon-search" data-icon-search placeholder="Search icons" aria-label="Search icons" autocomplete="off"><p class="marker-icon-status muted small" aria-live="polite"></p><div class="marker-icon-list"></div><div class="marker-icon-results" hidden><div class="marker-icon-grid" role="group" aria-label="Search results"></div><p class="marker-icon-more muted small" hidden></p></div><p class="marker-icon-empty muted small" hidden>No icons match.</p></div></div><div class="marker-position" hidden><button type="button" data-place>Place icon</button><button type="button" data-reset>Reset</button><details><summary>Precise position</summary><p class="muted small">Offset in metres.</p><div class="marker-axes"><label>X<input data-axis="0" type="number" required min="-1000" max="1000" step="any"></label><label>Y · height<input data-axis="1" type="number" required min="-1000" max="1000" step="any"></label><label>Z<input data-axis="2" type="number" required min="-1000" max="1000" step="any"></label></div></details></div>`;
       details.querySelector(".marker-device-name").textContent = label(control);
       // Include the device name in every field's accessible name.
       for (const input of details.querySelectorAll("input,select,button")) {
@@ -432,15 +490,191 @@ export function initMarkerEditor({ model, scene, onChange }) {
       button.type = "button";
       button.className = "marker-editor-control";
       const path =
-        control.type === "climate"
-          ? AC_ICON_PATH
-          : control.type === "number"
-            ? '<path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/>'
-            : control.type === "cover"
-              ? '<path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/>'
-              : control.type === "button"
-                ? '<path d="m8 4 12 8-12 8Z"/>'
-                : '<path d="M12 2a7 7 0 0 0-4 12.74V18h8v-3.26A7 7 0 0 0 12 2ZM9 20h6v2H9Z"/>';
+        control.type === "lock"
+          ? LOCK_ICON_PATH
+          : control.type === "climate"
+            ? AC_ICON_PATH
+            : control.type === "number"
+              ? '<path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/>'
+              : control.type === "cover"
+                ? '<path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/>'
+                : control.type === "button"
+                  ? '<path d="m8 4 12 8-12 8Z"/>'
+                  : '<path d="M12 2a7 7 0 0 0-4 12.74V18h8v-3.26A7 7 0 0 0 12 2ZM9 20h6v2H9Z"/>';
+      // Icon: a compact current-icon row opens a searchable, grouped picker
+      // that temporarily replaces the other appearance settings.
+      const iconPicker = details.querySelector(".marker-icon-picker");
+      const iconList = details.querySelector(".marker-icon-list");
+      const iconSearch = details.querySelector("[data-icon-search]");
+      const iconOpen = details.querySelector("[data-icon-open]");
+      const showIconPicker = (open, restoreFocus = true) => {
+        iconPicker.hidden = !open;
+        details
+          .querySelector(".marker-appearance")
+          .classList[open ? "add" : "remove"]("picking-icon");
+        iconOpen.setAttribute("aria-expanded", String(open));
+        if (open) {
+          needCatalog().then(showCustomSets);
+          iconSearch.value = "";
+          filterIcons();
+          iconSearch.focus?.();
+        } else if (restoreFocus) iconOpen.focus?.();
+      };
+      const choose = (value) => {
+        stopPlacement();
+        showIconPicker(false);
+        if (value) {
+          commit(control.id, "icon", value);
+          return;
+        }
+        if (settings[control.id]?.icon === undefined) return;
+        remember(control.id);
+        delete settings[control.id].icon;
+        if (!Object.keys(settings[control.id]).length)
+          delete settings[control.id];
+        refresh();
+        onChange();
+      };
+      const tile = (value, title, art, wide = false) => {
+        const choice = document.createElement("button");
+        choice.type = "button";
+        choice.className = wide ? "marker-icon-default" : "marker-icon-tile";
+        choice.dataset.icon = value;
+        choice.dataset.name = title.toLowerCase();
+        choice.title = title;
+        choice.setAttribute("aria-label", `Icon: ${title}`);
+        choice.setAttribute("aria-pressed", "false");
+        choice.innerHTML = `<svg viewBox="${art?.viewBox || "0 0 24 24"}" aria-hidden="true">${art?.html || ""}</svg>${wide ? `<span>${title}</span>` : ""}`;
+        // Custom-set icons arrive asynchronously from their set.
+        if (!art && value)
+          needCatalog()
+            .then((loaded) => loaded?.resolve(value))
+            .then((found) => paint(choice.querySelector?.("svg"), found));
+        choice.onclick = () => choose(value);
+        return choice;
+      };
+      const iconTiles = [
+        tile("", "Default icon", { viewBox: "0 0 24 24", html: path }, true),
+      ];
+      iconList.append(iconTiles[0]);
+      const iconGroups = [];
+      for (const [group, icons] of MARKER_ICON_GROUPS) {
+        const heading = document.createElement("p");
+        heading.className = "marker-icon-group";
+        heading.textContent = group;
+        const groupGrid = document.createElement("div");
+        groupGrid.className = "marker-icon-grid";
+        groupGrid.setAttribute("role", "group");
+        groupGrid.setAttribute("aria-label", group);
+        const tiles = icons.map(([id, text]) => tile(id, text, iconArtFor(id)));
+        tiles.forEach((t) => groupGrid.append(t));
+        iconTiles.push(...tiles);
+        iconGroups.push({ heading, groupGrid, tiles });
+        iconList.append(heading);
+        iconList.append(groupGrid);
+      }
+      // Your Home Assistant icon sets (local:, …) follow the suggestions.
+      let customShown = false;
+      const showCustomSets = (loaded) => {
+        if (!loaded || customShown) return;
+        customShown = true;
+        const nodes = [];
+        for (const { prefix, count } of loaded.sets) {
+          const heading = document.createElement("p");
+          heading.className = "marker-icon-group";
+          heading.textContent = `${prefix}: icons`;
+          const groupGrid = document.createElement("div");
+          groupGrid.className = "marker-icon-grid";
+          groupGrid.setAttribute("role", "group");
+          groupGrid.setAttribute("aria-label", `${prefix} icons`);
+          const tiles = loaded
+            .list(prefix)
+            .map((entry) =>
+              tile(entry.icon, iconLabel(entry.icon), iconArtFor(entry.icon)),
+            );
+          tiles.forEach((t) => groupGrid.append(t));
+          iconTiles.push(...tiles);
+          nodes.push(heading, groupGrid);
+          if (count > tiles.length) {
+            const hint = document.createElement("p");
+            hint.className = "marker-icon-more muted small";
+            hint.textContent = `Search “${prefix}:” to see all ${count}.`;
+            nodes.push(hint);
+          }
+        }
+        // Your own sets come first, right after "Default icon".
+        iconTiles[0].after(...nodes);
+        refresh();
+        if (!iconSearch.value.trim()) filterIcons();
+      };
+      const results = details.querySelector(".marker-icon-results");
+      const resultGrid = results.querySelector(".marker-icon-grid");
+      const more = details.querySelector(".marker-icon-more");
+      const status = details.querySelector(".marker-icon-status");
+      let resultTiles = [],
+        searchRun = 0;
+      function filterIcons() {
+        const needle = iconSearch.value.trim().toLowerCase();
+        const run = ++searchRun;
+        const empty = details.querySelector(".marker-icon-empty");
+        iconList.hidden = !!needle;
+        if (!needle) {
+          results.hidden = true;
+          empty.hidden = true;
+          status.textContent = catalog
+            ? `Suggestions · search all ${catalog.count.toLocaleString()} icons${catalog.sets.length ? ` (incl. ${catalog.sets.map((set) => set.prefix + ":").join(", ")})` : ""}`
+            : "Suggestions · search to browse every icon";
+          return;
+        }
+        status.textContent = "Loading icons…";
+        needCatalog().then((loaded) => {
+          if (run !== searchRun) return;
+          const current = markerSettings(settings, control.id).icon || "";
+          const found = loaded
+            ? loaded.search(needle)
+            : {
+                total: 0,
+                results: iconGroups
+                  .flatMap((g) => g.tiles)
+                  .filter((t) => t.dataset.name.includes(needle))
+                  .map((t) => ({ icon: t.dataset.icon })),
+              };
+          resultTiles = found.results.map((entry) => {
+            const t = tile(
+              entry.icon,
+              iconLabel(entry.icon),
+              iconArtFor(entry.icon),
+            );
+            t.title = `${iconLabel(entry.icon)} (${entry.icon})`;
+            t.setAttribute("aria-pressed", String(entry.icon === current));
+            return t;
+          });
+          resultGrid.replaceChildren(...resultTiles);
+          const total = loaded ? found.total : resultTiles.length;
+          results.hidden = !resultTiles.length;
+          empty.hidden = !!resultTiles.length;
+          status.textContent = loaded
+            ? `${total.toLocaleString()} ${total === 1 ? "icon" : "icons"}${found.partial ? " matching some words" : ""}`
+            : "Showing suggestions only (icon set unavailable)";
+          more.hidden = total <= resultTiles.length;
+          more.textContent = `Showing ${resultTiles.length} — keep typing to narrow.`;
+        });
+      }
+      let searchTimer;
+      iconSearch.oninput = () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(filterIcons, 120);
+      };
+      iconSearch.onkeydown = (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          showIconPicker(false);
+        }
+      };
+      iconOpen.onclick = () => showIconPicker(true);
+      details.querySelector("[data-icon-back]").onclick = () =>
+        showIconPicker(false);
       button.innerHTML = `<span class="marker-editor-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span><span class="marker-editor-name"></span><span class="marker-editor-badge" aria-hidden="true"></span>`;
       button.querySelector(".marker-editor-name").textContent = label(control);
       button.dataset.markerId = control.id;
@@ -479,6 +713,14 @@ export function initMarkerEditor({ model, scene, onChange }) {
         reset: details.querySelector("[data-reset]"),
         axes: [...details.querySelectorAll("[data-axis]")],
         name: button.querySelector(".marker-editor-name"),
+        defaultPath: path,
+        glyph: button.querySelector(".marker-editor-icon svg"),
+        iconChoices: () => [...iconTiles, ...resultTiles],
+        iconSwatch: details.querySelector(".marker-icon-swatch svg"),
+        iconName: details.querySelector(".marker-icon-name"),
+        closeIconPicker: (restoreFocus = false) => {
+          if (iconPicker.hidden === false) showIconPicker(false, restoreFocus);
+        },
         badge: button.querySelector(".marker-editor-badge"),
       };
       entries.set(control.id, entry);
@@ -507,6 +749,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
       const style = details.querySelector("[data-style]");
       style.onclick = () => {
         stopPlacement();
+        entry.closeIconPicker();
         appearance.hidden = !appearance.hidden;
         entry.position.hidden = true;
         entry.more.setAttribute("aria-expanded", "false");
@@ -752,6 +995,20 @@ export function initMarkerEditor({ model, scene, onChange }) {
   document.addEventListener(
     "keydown",
     (event) => {
+      const pickerEntry = selected && entries.get(selected);
+      if (
+        event.key === "Escape" &&
+        !placing &&
+        !drag &&
+        pickerEntry &&
+        pickerEntry.details.querySelector(".marker-icon-picker").hidden ===
+          false
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        pickerEntry.closeIconPicker(true);
+        return;
+      }
       if (event.key === "Escape" && (placing || drag || selected)) {
         event.preventDefault();
         event.stopImmediatePropagation();

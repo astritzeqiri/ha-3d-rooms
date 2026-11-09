@@ -37,6 +37,8 @@ function harness(extraControls = []) {
       return this.nodes.get(selector);
     }
     querySelectorAll(selector) {
+      if (selector === "[data-icon]")
+        return this.children.filter((c) => c.dataset.icon !== undefined);
       if (selector === "[data-axis]") return this.axes;
       const fields = ["visible", "show_label", "placement", "size"].map((key) =>
         this.querySelector(`[data-setting="${key}"]`),
@@ -53,8 +55,9 @@ function harness(extraControls = []) {
     }
     after() {}
     remove() {}
-    replaceChildren() {
+    replaceChildren(...els) {
       this.children = [];
+      els.forEach((el) => this.append(el));
     }
     setAttribute(key, value) {
       this[key] = value;
@@ -452,5 +455,56 @@ test("view defaults stay inherited while per-device overrides and positions rema
   assert.equal(own.value, 56);
   assert.deepEqual(h.editor.read().light, { offset: [1, 0, 0] });
   assert.equal(h.editor.read()._defaults.size, 56);
+  h.editor.close();
+});
+
+test("icon picker opens from the current-icon row, searches, sets and resets with undo", async () => {
+  const h = harness();
+  const row = h.rows[0];
+  const all = (el) => [el, ...el.children.flatMap(all)];
+  const picker = row.querySelector(".marker-icon-picker");
+  const choices = all(row.querySelector(".marker-icon-list")).filter(
+    (el) => el.dataset.icon !== undefined,
+  );
+  const marker = all(h.viewport).find((el) => el.dataset.markerId === "light");
+  const glyph = marker.querySelector(".marker-editor-icon svg");
+  const original = glyph.html;
+  assert.equal(choices.length, 37);
+  assert.equal(row.querySelector(".marker-icon-name").textContent, "Default");
+  row.querySelector("[data-icon-open]").onclick();
+  assert.equal(picker.hidden, false);
+  const search = row.querySelector("[data-icon-search]");
+  search.value = "printer 3d";
+  search.oninput();
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  const found = row
+    .querySelector(".marker-icon-results")
+    .querySelector(".marker-icon-grid").children;
+  assert.ok(found.length > 0);
+  assert.ok(found.every((t) => /^mdi:printer-3d/.test(t.dataset.icon)));
+  found.find((t) => t.dataset.icon === "mdi:printer-3d-nozzle").onclick();
+  assert.equal(h.editor.read().light.icon, "mdi:printer-3d-nozzle");
+  assert.equal(
+    row.querySelector(".marker-icon-name").textContent,
+    "Printer 3d nozzle",
+  );
+  row.querySelector("[data-icon-open]").onclick();
+  const lamp = choices.find((c) => c.dataset.icon === "mdi:floor-lamp");
+  lamp.onclick();
+  assert.equal(picker.hidden, true);
+  assert.equal(h.editor.read().light.icon, "mdi:floor-lamp");
+  assert.equal(lamp["aria-pressed"], "true");
+  assert.equal(
+    row.querySelector(".marker-icon-name").textContent,
+    "Floor lamp",
+  );
+  assert.notEqual(glyph.html, original);
+  row.querySelector("[data-icon-open]").onclick();
+  assert.equal(row.querySelector(".marker-icon-list").hidden, false);
+  choices[0].onclick();
+  assert.equal(h.editor.read().light, undefined);
+  assert.equal(glyph.html, original);
+  row.querySelector("[data-undo]").onclick();
+  assert.equal(h.editor.read().light.icon, "mdi:floor-lamp");
   h.editor.close();
 });

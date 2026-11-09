@@ -14,6 +14,7 @@ import {
   connectionState,
 } from "../shared/workspace.mjs";
 import { climateState } from "../shared/climate.mjs";
+import { lockState, lockCommand } from "../shared/lock.mjs";
 import { houseViewSummary } from "../shared/house-presentation.mjs";
 import { uploadJSON } from "../shared/upload.mjs";
 import { uploadProgress } from "./upload-progress.js";
@@ -217,6 +218,7 @@ const ICON_PATHS = {
     '<rect x="2" y="5" width="20" height="9" rx="2"/><path d="M6 11h12M7 17l-1 2M12 17v3M17 17l1 2"/>',
   number: '<path d="M4 7h16M4 12h10M4 17h6"/><path d="m17 14 3 3-3 3"/>',
   button: '<circle cx="12" cy="12" r="8"/><path d="m10 9 5 3-5 3Z"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1"/>',
 };
 const deviceKind = (c) =>
   c.device
@@ -254,6 +256,7 @@ function deviceRowMeta(c, s, connection) {
             ? "Open"
             : `${Math.round(s.position)}% open`) + group
     );
+  if (c.type === "lock") return s.label || "Unknown";
   if (c.type === "climate")
     return `${s.mode ?? "Unknown"}${s.currentTemperature === undefined ? "" : ` · ${s.currentTemperature}°`}${s.temperature === undefined ? "" : ` → ${s.temperature}°`}`;
   if (c.type === "number")
@@ -304,13 +307,48 @@ function deviceRowQuick(c, s, connection) {
   }
   if (c.type === "button")
     return `<button type="button" class="quick-text" data-press="${c.id}" aria-label="Run ${label}" ${off}>Run</button>`;
+  if (c.type === "lock") return lockButtons(c, s, off);
   return "";
+}
+// Locks never toggle on a single tap: each button names its explicit action.
+function lockButtons(c, s, off) {
+  const label = esc(c.label);
+  if (!preview && s.needsCode)
+    return `<button type="button" class="quick-text" data-lock-info="${c.id}" aria-label="Open Home Assistant controls for ${label}" ${off}>Open</button>`;
+  return `<div class="quick-segment">${[
+    ["unlock", "Unlocked", s.locked === false],
+    ["lock", "Locked", s.locked === true],
+  ]
+    .map(
+      ([a, text, pressed]) =>
+        `<button type="button" data-lock="${c.id}" data-action="${a}" aria-label="${a === "lock" ? "Lock" : "Unlock"} ${label}" aria-pressed="${pressed}" ${off || s.moving ? "disabled" : ""}>${text}</button>`,
+    )
+    .join("")}</div>`;
 }
 let deviceFilter = "all",
   deviceQuery = "";
 const openMore = new Set();
 const DEVICE_TOOLS_MIN = 5;
 function state(c) {
+  if (c.type === "lock") {
+    if (preview)
+      return (
+        simulated.get(c.id) || {
+          ...LOCK_PREVIEW,
+          locked: true,
+          label: "Locked",
+        }
+      );
+    const entity = status.entities.find(
+      (e) => e.entity_id === selected.bindings[c.id],
+    );
+    const reported = lockState(entity);
+    return {
+      ...reported,
+      entity,
+      unavailable: !status.connected || reported.unavailable,
+    };
+  }
   if (c.type === "climate") {
     const entity = status.entities.find(
       (e) => e.entity_id === selected.bindings[c.id],
@@ -542,6 +580,10 @@ function drawControls() {
       return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${esc(c.label)}</span>${deviceSettingsButton(c)}</div><p>${esc(s.mode)}${s.currentTemperature === undefined ? "" : ` · Current ${s.currentTemperature}°`}${s.temperature === undefined ? "" : ` · Target ${s.temperature}°`}</p><button data-climate="${c.id}" ${s.unavailable || !native?.moreInfo ? "disabled" : ""}>Open Home Assistant AC controls</button>${entityNote(c)}</article>`;
     }
 
+    if (c.type === "lock") {
+      const s = states.get(c.id);
+      return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${esc(c.label)}</span>${deviceSettingsButton(c)}</div><p>${esc(s.label || "Unknown")}${s.jammed ? " · check the door" : ""}</p>${lockButtons(c, s, !preview && s.unavailable ? "disabled" : "")}${entityNote(c)}</article>`;
+    }
     if (c.type === "button") {
       const s = states.get(c.id),
         label = esc(c.label);
@@ -784,6 +826,33 @@ async function command(id, on, settings = {}) {
     drawControls();
   }
 }
+const LOCK_PREVIEW = { unavailable: false, moving: false, needsCode: false };
+async function moveLock(id, action) {
+  const c = selected.controls.find((c) => c.id === id);
+  if (!c) return;
+  view?.highlight(id);
+  if (preview) {
+    const locked = action === "lock";
+    simulated.set(id, {
+      ...LOCK_PREVIEW,
+      locked,
+      label: locked ? "Locked" : "Unlocked",
+    });
+    drawControls();
+    return;
+  }
+  try {
+    lockCommand(state(c).entity, c, action);
+    await api(`models/${selected.id}/command`, {
+      method: "POST",
+      body: JSON.stringify({ controlId: id, action }),
+    });
+    status = await api("status");
+    drawControls();
+  } catch (error) {
+    toast(error.message);
+  }
+}
 async function pressPreset(id) {
   const c = selected.controls.find((c) => c.id === id);
   if (preview) {
@@ -934,6 +1003,11 @@ $("controls").addEventListener("click", async (e) => {
   }
   const preset = e.target.closest("[data-press]");
   if (preset) pressPreset(preset.dataset.press);
+  const lock = e.target.closest("[data-lock]");
+  if (lock) moveLock(lock.dataset.lock, lock.dataset.action);
+  const lockInfo = e.target.closest("[data-lock-info]");
+  if (lockInfo)
+    native?.moreInfo?.(selected.bindings[lockInfo.dataset.lockInfo]);
   const cover = e.target.closest("[data-cover]");
   if (cover) moveCover(cover.dataset.cover, cover.dataset.action);
   const toggle = e.target.closest("[data-toggle]"),
@@ -1510,7 +1584,7 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
         }
         document
           .querySelector(
-            `[data-climate="${id}"], [data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"], [data-number="${id}"], [data-press="${id}"]`,
+            `[data-climate="${id}"], [data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"], [data-number="${id}"], [data-press="${id}"], [data-lock="${id}"]`,
           )
           ?.focus();
       },
@@ -1844,29 +1918,33 @@ const lightDomains = /^(light|switch)\./,
   // Windows and doors are often only reported by open/closed contact sensors.
   openingDomains = /^(cover|binary_sensor)\./;
 const deviceIcon = (c) =>
-  c.type === "climate"
-    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3"/></svg>'
-    : c.type === "button"
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 10 7-10 7Z"/></svg>'
-      : c.type === "number"
-        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h18M5 8v12M19 8v12M9 3h6"/></svg>'
-        : c.type === "cover"
-          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h16M6 4v10M18 4v10M6 8h12M6 11h12"/><path d="M12 14v5"/><circle cx="12" cy="20" r="1"/></svg>'
-          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/></svg>';
+  c.type === "lock"
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${ICON_PATHS.lock}</svg>`
+    : c.type === "climate"
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3"/></svg>'
+      : c.type === "button"
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 10 7-10 7Z"/></svg>'
+        : c.type === "number"
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h18M5 8v12M19 8v12M9 3h6"/></svg>'
+          : c.type === "cover"
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h16M6 4v10M18 4v10M6 8h12M6 11h12"/><path d="M12 14v5"/><circle cx="12" cy="20" r="1"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/></svg>';
 const capabilityText = (c) =>
-  c.type === "climate"
-    ? "Air conditioner · Home Assistant controls"
-    : c.type === "button"
-      ? "Preset · press"
-      : c.type === "number"
-        ? `Height · ${c.min}–${c.max} ${c.unit}`
-        : c.type === "cover"
-          ? c.motion === "none"
-            ? "Desk direction · up, stop, down"
-            : "Shade · open, close, position"
-          : c.capabilities.includes("brightness")
-            ? "Light · dimming, color, white"
-            : "Light · on/off";
+  c.type === "lock"
+    ? "Door lock · lock, unlock"
+    : c.type === "climate"
+      ? "Air conditioner · Home Assistant controls"
+      : c.type === "button"
+        ? "Preset · press"
+        : c.type === "number"
+          ? `Height · ${c.min}–${c.max} ${c.unit}`
+          : c.type === "cover"
+            ? c.motion === "none"
+              ? "Desk direction · up, stop, down"
+              : "Shade · open, close, position"
+            : c.capabilities.includes("brightness")
+              ? "Light · dimming, color, white"
+              : "Light · on/off";
 const pickerContext = (controlId) => {
   const control = selected.controls.find((c) => c.id === controlId);
   return {
@@ -1874,17 +1952,19 @@ const pickerContext = (controlId) => {
     entities: status.entities,
     selectedId: selected.bindings[controlId] || "",
     pattern:
-      control.type === "climate"
-        ? /^climate\./
-        : control.type === "button"
-          ? /^(button|input_button|script|scene)\./
-          : control.type === "number"
-            ? /^(number|input_number)\./
-            : control.type === "cover"
-              ? control.motion === "none"
-                ? coverDomains
-                : openingDomains
-              : lightDomains,
+      control.type === "lock"
+        ? /^lock\./
+        : control.type === "climate"
+          ? /^climate\./
+          : control.type === "button"
+            ? /^(button|input_button|script|scene)\./
+            : control.type === "number"
+              ? /^(number|input_number)\./
+              : control.type === "cover"
+                ? control.motion === "none"
+                  ? coverDomains
+                  : openingDomains
+                : lightDomains,
   };
 };
 const pickerFor = (c) =>

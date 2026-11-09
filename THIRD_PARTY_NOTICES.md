@@ -33,3 +33,21 @@ otherwise explicitly indicated.
 Redistributions or derivative works must include a readable copy of the
 attribution notices from this NOTICE file (see Apache License 2.0 §4(d)).
 ```
+
+## Material Design Icons (`@mdi/js` 7.4.47)
+
+The model manager's icon picker bundles path data from Material Design Icons by
+the Pictogrammers icon group (https://pictogrammers.com/library/mdi/). The full
+set loads only when the picker is opened. The icons are distributed under the
+Pictogrammers Free License: icons under the Apache License 2.0, package code
+under the MIT License. Icon names, aliases and tags for search are generated
+from `@mdi/svg` 7.4.47 metadata under the same terms.
+
+```
+Pictogrammers Free License
+This icon collection is released as free, open source, and GPL friendly by
+the Pictogrammers icon group. You may use it for commercial projects, open
+source projects, or anything really.
+Icons: Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+Code: MIT (https://opensource.org/licenses/MIT)
+```

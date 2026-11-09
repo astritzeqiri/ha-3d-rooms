@@ -66,6 +66,25 @@ test("quick toggle targets the bound light and prevents overlapping commands", a
   await first;
   assert.equal(card._pendingToggles.size, 0);
 });
+test("quick toggle uses the bound entity's own domain for switch-backed lights", async () => {
+  const cases = [
+    ["switch.front_room", "switch"],
+    ["input_boolean.lamp", "input_boolean"],
+    ["group.front_lights", "homeassistant"],
+  ];
+  for (const [entityId, domain] of cases) {
+    const card = cardHarness(),
+      calls = [];
+    card._model.bindings.lamp = entityId;
+    card._hass.states = { [entityId]: { state: "off" } };
+    card._hass.callService = (...args) => calls.push(args);
+    await card._toggle("lamp");
+    assert.deepEqual(
+      calls.map((args) => [args[0], args[1], args[2].entity_id]),
+      [[domain, "toggle", entityId]],
+    );
+  }
+});
 test("unavailable and unbound lights never send commands", async () => {
   const card = cardHarness();
   card._hass.callService = () => assert.fail("unexpected device command");

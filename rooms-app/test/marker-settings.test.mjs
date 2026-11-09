@@ -162,3 +162,114 @@ test("marker circles stay centered on projected model anchors at every size", ()
     { left: 568, top: 352 },
   );
 });
+test("views may choose any HA icon (MDI or a custom set) per device, never as a default", async () => {
+  const { validateMarkers, markerSettings } =
+    await import("../shared/marker-settings.mjs");
+  const { MARKER_ICONS, markerIconPath } =
+    await import("../shared/marker-icons.mjs");
+  const markers = validateMarkers({ lamp: { icon: "mdi:floor-lamp" } });
+  assert.equal(markerSettings(markers, "lamp").icon, "mdi:floor-lamp");
+  assert.equal(markerSettings(markers, "other").icon, undefined);
+  assert.match(markerIconPath("mdi:floor-lamp"), /^<path d="M/);
+  assert.equal(markerIconPath("mdi:printer-3d-nozzle"), undefined);
+  assert.equal(
+    validateMarkers({ lamp: { icon: "mdi:printer-3d-nozzle" } }).lamp.icon,
+    "mdi:printer-3d-nozzle",
+  );
+  for (const bad of [
+    { lamp: { icon: "door" } },
+    { lamp: { icon: "Mdi:door" } },
+    { lamp: { icon: "local:a b" } },
+    { lamp: { icon: "<svg>" } },
+    { _defaults: { icon: "mdi:lamp" } },
+  ])
+    assert.throws(() => validateMarkers(bad));
+  assert.ok(MARKER_ICONS.size >= 30);
+});
+
+test("icon catalog combines MDI with HA's registered custom icon sets", async () => {
+  const { loadIconCatalog, iconArt } = await import("../web/icon-catalog.js");
+  const { MARKER_ICONS, iconLabel } =
+    await import("../shared/marker-icons.mjs");
+  const asked = [];
+  const sets = {
+    local: {
+      getIconList: async () => [
+        { name: "front-door", keywords: ["entrance"] },
+        { name: "hallway_lamp" },
+      ],
+      getIcon: async (name) => {
+        asked.push(name);
+        return name === "front-door"
+          ? { path: "M0 0h24v24H0z", viewBox: "0 0 48 48" }
+          : { path: '"/><script>alert(1)</script>' };
+      },
+    },
+    broken: {
+      getIconList: async () => {
+        throw new Error("offline");
+      },
+    },
+    legacy: { getIcon: async () => ({ path: "M1 1h2" }) },
+  };
+  const catalog = await loadIconCatalog(sets);
+  assert.ok(catalog.mdiCount > 7000);
+  assert.equal(catalog.count, catalog.mdiCount + 2);
+  assert.deepEqual(catalog.sets, [{ prefix: "local", count: 2 }]);
+  for (const icon of MARKER_ICONS.keys()) assert.ok(catalog.art(icon), icon);
+  for (const icon of [
+    "mdi:dice-d20",
+    "mdi:alpha-a-box",
+    "mdi:printer-3d-nozzle",
+  ])
+    assert.ok(catalog.art(icon), icon);
+  const doors = catalog.search("door");
+  assert.ok(doors.total > 10);
+  assert.equal(doors.results[0].icon, "mdi:door");
+  assert.ok(doors.results.some((r) => r.icon === "local:front-door"));
+  assert.deepEqual(
+    catalog.search("local:").results.map((r) => r.icon),
+    ["local:front-door", "local:hallway_lamp"],
+  );
+  assert.equal(catalog.search("entrance").results[0].icon, "local:front-door");
+  assert.ok(
+    catalog.search("bulb").results.some((r) => r.icon === "mdi:lightbulb"),
+  );
+  assert.deepEqual(await catalog.resolve("local:front-door"), {
+    viewBox: "0 0 48 48",
+    html: '<path d="M0 0h24v24H0z"/>',
+  });
+  assert.equal(await catalog.resolve("local:hallway_lamp"), undefined);
+  assert.ok(await catalog.resolve("legacy:any"));
+  await catalog.resolve("local:front-door");
+  assert.equal(asked.filter((n) => n === "front-door").length, 1);
+  assert.equal(
+    iconArt({ path: "M0 0", viewBox: '0 0 24 24"><x' }).viewBox,
+    "0 0 24 24",
+  );
+  assert.equal(iconLabel("local:front_door"), "Front door · local");
+  assert.equal(iconLabel("mdi:garage-open-variant"), "Garage open variant");
+});
+test("only the picker's lazy catalog imports @mdi/js; suggestion paths match it", async () => {
+  const { readdir, readFile: read } = await import("node:fs/promises");
+  for (const dir of ["shared", "web", "dashboard"])
+    for (const file of await readdir(dir)) {
+      if (!/\.(m?js)$/.test(file)) continue;
+      const source = await read(`${dir}/${file}`, "utf8");
+      if (file === "icon-catalog.js") {
+        assert.match(source, /import\("@mdi\/js"\)/);
+        assert.doesNotMatch(source, /from "@mdi\/js"/);
+      } else assert.doesNotMatch(source, /@mdi\/js"/, `${dir}/${file}`);
+    }
+  const all = await import("@mdi/js");
+  const { SUGGESTED_ICON_PATHS } =
+    await import("../shared/marker-icon-paths.mjs");
+  const { MARKER_ICONS, mdiExportName } =
+    await import("../shared/marker-icons.mjs");
+  assert.deepEqual(
+    Object.keys(SUGGESTED_ICON_PATHS).sort(),
+    [...MARKER_ICONS.keys()].sort(),
+  );
+  for (const [icon, path] of Object.entries(SUGGESTED_ICON_PATHS))
+    assert.equal(path, all[mdiExportName(icon)], icon);
+});
