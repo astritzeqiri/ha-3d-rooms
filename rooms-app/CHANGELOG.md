@@ -1,3 +1,13 @@
+## 0.34.0
+
+- **Markers show their state in colour.** On dashboard cards and in the view editor, a device's marker is filled with its state colour, using your Home Assistant theme's colours:
+  - **Locks:** green when locked, red when unlocked or jammed, orange while locking or unlocking.
+  - **Lights:** the light's own colour when it reports one, otherwise amber, while on.
+  - **Air conditioners:** blue cooling, orange-red heating, orange drying, cyan fan only, green auto.
+  - **Shades, windows and doors:** purple while open or moving.
+  - Off, closed, unavailable and unconnected devices stay neutral, as do presets and desks.
+- No migration or re-upload is needed.
+
 ## 0.33.2
 
 - **The 3D Rooms sidebar always shows the current version after an update.** The manager page was loaded from an address without a version, so a browser could keep showing the previous release's page. One visible effect: a door lock listed under Lights as "Light · on/off", offering light and switch entities, because the old page did not know locks. The address now carries the app version, so every update loads a fresh page. Locks appear in their own Locks section and connect only to `lock.*` entities.

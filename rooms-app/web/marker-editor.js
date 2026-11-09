@@ -1,5 +1,6 @@
 import {
   markerAppearance,
+  applyMarkerTone,
   AC_ICON_PATH,
   LOCK_ICON_PATH,
 } from "../shared/marker.mjs";
@@ -255,6 +256,15 @@ export function initMarkerEditor({ model, scene, onChange }) {
         (control.type === "light" || control.type === "climate") &&
           !!state.on &&
           !state.unavailable,
+      );
+      // State colour as on the dashboard card. Scene states carry no entity
+      // for lights and covers, so they are read as given.
+      applyMarkerTone(
+        entry.button,
+        option.visible
+          ? climate ||
+              markerAppearance(control, undefined, state, !state.unavailable)
+          : null,
       );
       entry.button.setAttribute(
         "aria-label",

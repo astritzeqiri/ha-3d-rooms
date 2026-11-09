@@ -1,3 +1,11 @@
+# 0.34.0 — state colours on markers, 2026-11-09
+
+Released as 0.34.0, based on v0.33.2.
+
+- Frontend: 222 tests pass, including new tests for every device type's state colour and for applying/clearing it on a marker; Prettier clean; build succeeds. Python host suite passes (native tests skip outside HA); native tests pass inside Core 2026.10.2.
+- Native check on the extracted artifact (`.local/room-lights-evidence/tones.cjs`, `lock-tone.cjs`) with demo entities on the house card: locked lock green and unlocked red; a light with a colour filled in that colour with a readable icon; the test AC blue while cooling; an open cover purple; off lights, closed covers and unconnected devices neutral; no page errors. Temporary mappings removed and states restored.
+- Not checked live: locking/unlocking (orange) and jammed, the other AC modes, and the view editor's markers (unit tests only). Not tested: a real phone, the HACS download flow.
+
 # 0.33.2 — manager page no longer served stale after updates, 2026-11-09
 
 Released as 0.33.2, based on v0.33.1.

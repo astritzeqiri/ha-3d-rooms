@@ -72,6 +72,8 @@ export function climateAppearance(state = {}) {
       : 1;
   return {
     color: colors[selected] || "#99b5ad",
+    // Marker state colour: what it is doing, else its selected mode.
+    tone: known ? (selected === "heat_cool" ? "auto" : selected) : undefined,
     label: idle
       ? `${names[state.mode] || "On"} · ${action === "defrosting" ? "Defrosting" : "Idle"}`
       : names[selected] || "On",

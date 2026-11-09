@@ -13,6 +13,7 @@ export function markerAppearance(control, entity, state, preview = false) {
       active: s.on,
       unavailable: s.unavailable,
       moving: false,
+      tone: visual.tone,
       badge: s.unavailable
         ? "Unavailable"
         : s.temperature === undefined
@@ -42,6 +43,19 @@ export function markerAppearance(control, entity, state, preview = false) {
       active: !unavailable && s.locked === true,
       moving: !!s.moving,
       unavailable,
+      // State colour, as in Home Assistant: locked green, unlocked red,
+      // locking/unlocking orange, jammed red.
+      tone: unavailable
+        ? undefined
+        : s.jammed
+          ? "jammed"
+          : s.moving
+            ? "moving"
+            : s.locked === true
+              ? "locked"
+              : s.locked === false
+                ? "unlocked"
+                : undefined,
       stateObj: entity || {
         entity_id: "lock.three_d_rooms_preview",
         state: s.locked === false ? "unlocked" : "locked",
@@ -145,6 +159,16 @@ export function markerAppearance(control, entity, state, preview = false) {
               }
             : { brightness: state.brightness },
         };
+  // State colour, as in Home Assistant: a light that is on takes its own
+  // colour when it reports one (amber otherwise); an open cover is purple.
+  const rgb =
+      !cover &&
+      active &&
+      !preview &&
+      Array.isArray(entity?.attributes?.rgb_color)
+        ? entity.attributes.rgb_color.slice(0, 3).map(Number)
+        : undefined,
+    colored = rgb?.length === 3 && rgb.every((v) => v >= 0 && v <= 255);
   return {
     badge,
     description,
@@ -152,7 +176,33 @@ export function markerAppearance(control, entity, state, preview = false) {
     moving,
     unavailable: !connected || unavailable,
     stateObj,
+    tone: !active ? undefined : cover ? "open" : "light",
+    ...(colored
+      ? {
+          toneColor: `rgb(${rgb.map(Math.round).join(",")})`,
+          toneInk: readableInk(rgb),
+        }
+      : {}),
   };
+}
+/** Dark or white icon, whichever reads better on a filled marker. */
+export function readableInk([r, g, b]) {
+  const lin = (v) =>
+    v / 255 <= 0.03928 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4;
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b) > 0.4
+    ? "#1c1c1c"
+    : "#fff";
+}
+/** Apply a marker's state colour (`tone`, optional own colour) to its button. */
+export function applyMarkerTone(button, appearance) {
+  if (appearance?.tone) button.dataset.tone = appearance.tone;
+  else delete button.dataset.tone;
+  for (const [name, value] of [
+    ["--tone", appearance?.tone && appearance.toneColor],
+    ["--tone-ink", appearance?.tone && appearance.toneInk],
+  ])
+    if (value) button.style?.setProperty?.(name, value);
+    else button.style?.removeProperty?.(name);
 }
 
 /** Padlock glyph shared by the viewer and dashboard. */

@@ -2870,6 +2870,42 @@ body[data-room-tab="views"] .saved-view-thumb {
   color: var(--accent-ink);
   border-color: var(--accent);
 }
+/* Lock state colours, as on the dashboard card. */
+.marker-editor-control[data-tone] {
+  color: var(--tone-ink, #fff);
+  border-color: var(--tone);
+  background: var(--tone);
+}
+.marker-editor-control[data-tone="locked"] {
+  --tone: #43a047;
+}
+.marker-editor-control[data-tone="unlocked"],
+.marker-editor-control[data-tone="jammed"] {
+  --tone: #e5533d;
+}
+.marker-editor-control[data-tone="moving"],
+.marker-editor-control[data-tone="dry"] {
+  --tone: #ff9800;
+}
+.marker-editor-control[data-tone="light"] {
+  --tone: #ffc107;
+  --tone-ink: #1c1c1c;
+}
+.marker-editor-control[data-tone="open"] {
+  --tone: #9c27b0;
+}
+.marker-editor-control[data-tone="cool"] {
+  --tone: #2196f3;
+}
+.marker-editor-control[data-tone="heat"] {
+  --tone: #ff5722;
+}
+.marker-editor-control[data-tone="fan_only"] {
+  --tone: #00bcd4;
+}
+.marker-editor-control[data-tone="auto"] {
+  --tone: #4caf50;
+}
 .marker-editor-overlay .marker-editor-badge {
   position: absolute;
   top: calc(var(--marker-size, 32px) - 6px);

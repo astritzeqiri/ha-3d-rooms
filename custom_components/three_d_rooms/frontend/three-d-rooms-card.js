@@ -15228,25 +15228,26 @@ function Gf(e = {}) {
 		"idle",
 		"off",
 		"defrosting"
-	].includes(n), a = Object.hasOwn(t, r) && !i && (n ? [
+	].includes(n), a = Object.hasOwn(t, r), o = a && !i && (n ? [
 		"heating",
 		"cooling",
 		"drying",
 		"fan"
-	].includes(n) : !["auto", "heat_cool"].includes(e.mode)), o = {
+	].includes(n) : !["auto", "heat_cool"].includes(e.mode)), s = {
 		cool: "#74caff",
 		heat: "#ffa06a",
 		dry: "#d7b97d",
 		fan_only: "#c0e4da",
 		auto: "#99cfc1",
 		heat_cool: "#99cfc1"
-	}, s = (e.fanMode || "auto").toLowerCase(), c = /high|turbo|powerful|5/.test(s) ? 1.5 : /low|quiet|silent|1/.test(s) ? .65 : 1;
+	}, c = (e.fanMode || "auto").toLowerCase(), l = /high|turbo|powerful|5/.test(c) ? 1.5 : /low|quiet|silent|1/.test(c) ? .65 : 1;
 	return {
-		color: o[r] || "#99b5ad",
+		color: s[r] || "#99b5ad",
+		tone: a ? r === "heat_cool" ? "auto" : r : void 0,
 		label: i ? `${t[e.mode] || "On"} · ${n === "defrosting" ? "Defrosting" : "Idle"}` : t[r] || "On",
-		flow: a,
-		speed: c,
-		open: a || i
+		flow: o,
+		speed: l,
+		open: o || i
 	};
 }
 // shared/marker-icon-paths.mjs
@@ -15693,6 +15694,7 @@ function hp(e, t, n, r = !1) {
 			active: e.on,
 			unavailable: e.unavailable,
 			moving: !1,
+			tone: r.tone,
 			badge: e.unavailable ? "Unavailable" : e.temperature === void 0 ? r.label : `${r.label} · ${e.temperature}°`,
 			description: e.unavailable ? "Unavailable" : `${r.label}, Home Assistant climate controls`,
 			stateObj: t || {
@@ -15710,6 +15712,7 @@ function hp(e, t, n, r = !1) {
 			active: !a && e.locked === !0,
 			moving: !!e.moving,
 			unavailable: a,
+			tone: a ? void 0 : e.jammed ? "jammed" : e.moving ? "moving" : e.locked === !0 ? "locked" : e.locked === !1 ? "unlocked" : void 0,
 			stateObj: t || {
 				entity_id: "lock.three_d_rooms_preview",
 				state: e.locked === !1 ? "unlocked" : "locked",
@@ -15757,19 +15760,32 @@ function hp(e, t, n, r = !1) {
 			device_class: "shade",
 			...l === void 0 ? {} : { current_position: l }
 		} : { brightness: n.brightness }
-	};
+	}, m = !i && u && !r && Array.isArray(t?.attributes?.rgb_color) ? t.attributes.rgb_color.slice(0, 3).map(Number) : void 0, h = m?.length === 3 && m.every((e) => e >= 0 && e <= 255);
 	return {
 		badge: d,
 		description: f,
 		active: u,
 		moving: c,
 		unavailable: !a || o,
-		stateObj: p
+		stateObj: p,
+		tone: u ? i ? "open" : "light" : void 0,
+		...h ? {
+			toneColor: `rgb(${m.map(Math.round).join(",")})`,
+			toneInk: gp(m)
+		} : {}
 	};
 }
-var gp = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", _p = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
+function gp([e, t, n]) {
+	let r = (e) => e / 255 <= .03928 ? e / 255 / 12.92 : ((e / 255 + .055) / 1.055) ** 2.4;
+	return .2126 * r(e) + .7152 * r(t) + .0722 * r(n) > .4 ? "#1c1c1c" : "#fff";
+}
+function _p(e, t) {
+	t?.tone ? e.dataset.tone = t.tone : delete e.dataset.tone;
+	for (let [n, r] of [["--tone", t?.tone && t.toneColor], ["--tone-ink", t?.tone && t.toneInk]]) r ? e.style?.setProperty?.(n, r) : e.style?.removeProperty?.(n);
+}
+var vp = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", yp = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
 // shared/floor-view.mjs
-function vp(e, t, n, r = 0, i = 0) {
+function bp(e, t, n, r = 0, i = 0) {
 	if (![
 		...e,
 		...t,
@@ -15802,8 +15818,8 @@ function vp(e, t, n, r = 0, i = 0) {
 		far: h + m * 4 + 100
 	};
 }
-function yp(e, t, n, r = 28, i = 0) {
-	let a = vp(e, t, n, r, i), o = Math.max(0, Math.min(180, r)) * Math.PI / 180, s = i * Math.PI / 180, c = [
+function xp(e, t, n, r = 28, i = 0) {
+	let a = bp(e, t, n, r, i), o = Math.max(0, Math.min(180, r)) * Math.PI / 180, s = i * Math.PI / 180, c = [
 		Math.sin(o) * Math.sin(s),
 		Math.cos(o),
 		Math.sin(o) * Math.cos(s)
@@ -15824,10 +15840,10 @@ function yp(e, t, n, r = 28, i = 0) {
 	};
 }
 // shared/camera-view.mjs
-var bp = (e, t) => Math.hypot(...e.map((e, n) => e - t[n])), xp = (e) => Number(e.toFixed(2)), Sp = (e) => e * 180 / Math.PI;
-function Cp(e) {
+var Sp = (e, t) => Math.hypot(...e.map((e, n) => e - t[n])), Cp = (e) => Number(e.toFixed(2)), wp = (e) => e * 180 / Math.PI;
+function Tp(e) {
 	let t = (e) => Array.isArray(e) && e.length === 3 && e.every((e) => Number.isFinite(e) && Math.abs(e) < 1e4), n = (e) => Number.isFinite(e) && e > 0 && e <= 1e4;
-	if (!e || !t(e.position) || !t(e.target) || !t(e.up) || Math.hypot(...e.up) < 1e-8 || bp(e.position, e.target) < 1e-8 || !n(e.aspect) || !n(e.zoom) || !n(e.referenceZoom) || !Number.isFinite(e.heading) || e.heading < 0 || e.heading >= 360 || !Number.isFinite(e.tilt) || e.tilt < 0 || e.tilt > 180 || !["perspective", "orthographic"].includes(e.projection)) throw Error("Invalid saved camera view.");
+	if (!e || !t(e.position) || !t(e.target) || !t(e.up) || Math.hypot(...e.up) < 1e-8 || Sp(e.position, e.target) < 1e-8 || !n(e.aspect) || !n(e.zoom) || !n(e.referenceZoom) || !Number.isFinite(e.heading) || e.heading < 0 || e.heading >= 360 || !Number.isFinite(e.tilt) || e.tilt < 0 || e.tilt > 180 || !["perspective", "orthographic"].includes(e.projection)) throw Error("Invalid saved camera view.");
 	if (e.projection === "perspective" && (!Number.isFinite(e.fov) || e.fov < 1 || e.fov > 179)) throw Error("Invalid saved camera field of view.");
 	if (e.projection === "orthographic" && !n(e.halfHeight)) throw Error("Invalid saved floor view.");
 	return {
@@ -15843,16 +15859,16 @@ function Cp(e) {
 		...e.projection === "perspective" ? { fov: e.fov } : { halfHeight: e.halfHeight }
 	};
 }
-function wp({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, halfHeight: o, min: s, max: c }) {
-	let l = e.map((e, n) => e - t[n]), u = Math.hypot(...l), d = Math.hypot(l[0], l[2]) / u < 1e-8 && Math.hypot(n[0], n[2]) > 1e-8, f = l[1] >= 0 ? -1 : 1, p = xp((Sp(d ? Math.atan2(f * n[0], f * n[2]) : Math.atan2(l[0], l[2])) + 360) % 360) % 360, m = xp(Sp(Math.acos(Math.max(-1, Math.min(1, l[1] / u))))), h = o === void 0 ? "front" : "floor", g = (h === "floor" ? vp : yp)(s, c, r, m, p), _;
-	_ = h === "floor" ? i * g.top / o : i * bp(g.position, g.target) / u * Math.tan(g.fov * Math.PI / 360) / Math.tan(a * Math.PI / 360);
+function Ep({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, halfHeight: o, min: s, max: c }) {
+	let l = e.map((e, n) => e - t[n]), u = Math.hypot(...l), d = Math.hypot(l[0], l[2]) / u < 1e-8 && Math.hypot(n[0], n[2]) > 1e-8, f = l[1] >= 0 ? -1 : 1, p = Cp((wp(d ? Math.atan2(f * n[0], f * n[2]) : Math.atan2(l[0], l[2])) + 360) % 360) % 360, m = Cp(wp(Math.acos(Math.max(-1, Math.min(1, l[1] / u))))), h = o === void 0 ? "front" : "floor", g = (h === "floor" ? bp : xp)(s, c, r, m, p), _;
+	_ = h === "floor" ? i * g.top / o : i * Sp(g.position, g.target) / u * Math.tan(g.fov * Math.PI / 360) / Math.tan(a * Math.PI / 360);
 	let v = Number(Math.max(.01, Math.min(100, _)).toFixed(4));
 	return {
 		view: h,
 		heading: p,
 		tilt: m,
 		zoom: v,
-		camera: Cp({
+		camera: Tp({
 			projection: h === "floor" ? "orthographic" : "perspective",
 			position: [...e],
 			target: [...t],
@@ -15866,7 +15882,7 @@ function wp({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, hal
 		})
 	};
 }
-function Tp(e, t, n, r, i, a) {
+function Dp(e, t, n, r, i, a) {
 	if (!Number.isFinite(r) || r <= 0) throw Error("Invalid camera aspect ratio.");
 	let o = Math.min(1, r / e.aspect);
 	if (!i || !a) return o;
@@ -15886,10 +15902,10 @@ function Tp(e, t, n, r, i, a) {
 	let h = Math.max(m, p / e.aspect), g = Math.max(m, p / r);
 	return g > 0 ? h / g : o;
 }
-function Ep(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.tilt, zoom: o = e.referenceZoom }) {
-	let s = Cp(e), c = [...s.position], l = [...s.up];
+function Op(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.tilt, zoom: o = e.referenceZoom }) {
+	let s = Tp(e), c = [...s.position], l = [...s.up];
 	if (Math.abs(i - s.heading) > 1e-6 || Math.abs(a - s.tilt) > 1e-6) {
-		let e = i * Math.PI / 180, t = a * Math.PI / 180, n = bp(s.position, s.target), r = [
+		let e = i * Math.PI / 180, t = a * Math.PI / 180, n = Sp(s.position, s.target), r = [
 			Math.sin(t) * Math.sin(e),
 			Math.cos(t),
 			Math.sin(t) * Math.cos(e)
@@ -15905,7 +15921,7 @@ function Ep(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.
 		target: [...s.target],
 		up: l,
 		aspect: t,
-		zoom: s.zoom * o / s.referenceZoom * Tp(s, c, l, t, n, r),
+		zoom: s.zoom * o / s.referenceZoom * Dp(s, c, l, t, n, r),
 		...s.projection === "perspective" ? { fov: s.fov } : {
 			left: -s.halfHeight * t,
 			right: s.halfHeight * t,
@@ -15913,11 +15929,11 @@ function Ep(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.
 			bottom: -s.halfHeight
 		},
 		near: .05,
-		far: bp(c, s.target) + 1e3
+		far: Sp(c, s.target) + 1e3
 	};
 }
 // shared/upload.mjs
-function Dp(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
+function kp(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
 	return new Promise((s, c) => {
 		let l = o();
 		l.open(t, e);
@@ -15934,13 +15950,13 @@ function Dp(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = (
 		}, l.send(n);
 	});
 }
-async function Op(e, t, n) {
+async function Ap(e, t, n) {
 	if (!(t === "/api/three_d_rooms/models" && n.method === "POST" || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+$/.test(t) && n.method === "PUT" || /^\/api\/three_d_rooms\/houses\/[a-z0-9_-]+$/.test(t) && ["POST", "PUT"].includes(n.method) || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+\/optimized\/(full|phone)$/.test(t) && n.method === "PUT")) throw Error("Unknown model upload.");
 	let r = t.includes("/optimized/"), i = n.headers?.["X-Rooms-Source-Revision"];
 	if (r && !/^[a-f0-9]{24}$/.test(i || "")) throw Error("Optimized scenes must name the upload they came from.");
 	let a = n.headers?.["X-Rooms-Matches"];
 	if (a !== void 0 && !/^[A-Za-z0-9_-]{1,6000}$/.test(a)) throw Error("Too many room and device choices to send at once.");
-	return e.auth.expired && await e.auth.refreshAccessToken(), Dp(t, {
+	return e.auth.expired && await e.auth.refreshAccessToken(), kp(t, {
 		...n,
 		headers: {
 			...n.headers?.["X-Rooms-Revision"] ? { "X-Rooms-Revision": n.headers["X-Rooms-Revision"] } : {},
@@ -15952,23 +15968,23 @@ async function Op(e, t, n) {
 	});
 }
 // shared/entity-icon.mjs
-function kp(e) {
+function jp(e) {
 	let t = e.querySelector?.("svg");
 	if (t) return t;
 	for (let t of e.querySelectorAll?.("*") || []) if (t.shadowRoot) {
-		let e = kp(t.shadowRoot);
+		let e = jp(t.shadowRoot);
 		if (e) return e;
 	}
 	return null;
 }
-async function Ap(e, t, n, { frames: r = 120 } = {}) {
+async function Mp(e, t, n, { frames: r = 120 } = {}) {
 	let i = e.ownerDocument;
 	if (!i.defaultView.customElements.get("ha-state-icon")) return null;
 	let a = i.createElement("ha-state-icon");
 	a.hass = t, a.stateObj = n, a.setAttribute("aria-hidden", "true"), a.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;width:24px;height:24px", e.append(a);
 	try {
 		for (let e = 0; e < r; e++) {
-			let e = a.shadowRoot && kp(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
+			let e = a.shadowRoot && jp(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
 			if (t?.length) return {
 				viewBox: e.getAttribute("viewBox") || "0 0 24 24",
 				paths: t.map((e) => ({
@@ -15986,7 +16002,7 @@ async function Ap(e, t, n, { frames: r = 120 } = {}) {
 	}
 }
 // shared/room-route.mjs
-function jp(e) {
+function Np(e) {
 	let t = new URLSearchParams(e), n = new URLSearchParams();
 	for (let e of ["model", "saved_view"]) {
 		let r = t.get(e);
@@ -15998,12 +16014,12 @@ function jp(e) {
 		"settings"
 	].includes(t.get("tab")) && n.set("tab", t.get("tab")), ["floor", "front"].includes(t.get("view")) && n.set("view", t.get("view")), n;
 }
-function Mp(e, t = new URLSearchParams()) {
+function Pp(e, t = new URLSearchParams()) {
 	let n = new URLSearchParams(t), r = new URL(e).searchParams.get("v");
 	return r && /^[0-9A-Za-z.+-]{1,40}$/.test(r) && n.set("v", r), new URL(".", e).href + "index.html?" + n;
 }
 // dashboard/preview.js
-function Np(e, t, n) {
+function Fp(e, t, n) {
 	let r = document.createElement("dialog");
 	r.setAttribute("aria-labelledby", "dashboard-preview-title"), r.innerHTML = "<style>\n    dialog.dashboard-preview{box-sizing:border-box;width:min(960px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--divider-color,#777);border-radius:12px;background:var(--primary-background-color,#fafafa);color:var(--primary-text-color,#212121);font:14px/1.5 system-ui}\n    .dashboard-preview::backdrop{background:#0009}\n    .preview-toolbar{position:sticky;top:0;z-index:2;background:var(--primary-background-color,#fafafa);display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px;border-bottom:1px solid var(--divider-color,#777)}\n    .preview-toolbar h2{font-size:18px;margin:0;flex:1;min-width:160px}\n    .preview-actions{display:flex;align-items:center;gap:12px;margin-left:auto}\n    .preview-widths{display:flex;padding:3px;border:1px solid var(--divider-color,#ddd);border-radius:8px;background:var(--secondary-background-color,#eee)}\n    .preview-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:44px;padding:8px 12px;border:0;border-radius:5px;color:var(--secondary-text-color,#555);background:transparent;font:500 14px/20px system-ui;cursor:pointer;white-space:nowrap}\n    .preview-widths button[aria-pressed=\"true\"]{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff);box-shadow:0 1px 3px #0002}\n    .preview-toolbar button:hover{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff)}\n    .preview-toolbar .preview-close{width:44px;padding:10px;border-radius:50%}\n    .preview-toolbar svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}\n    @media(max-width:480px){.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{flex-basis:100%}.preview-actions{width:100%;justify-content:space-between}.preview-widths{flex:1}.preview-widths button{flex:1}}\n    .preview-toolbar :focus-visible{outline:2px solid var(--primary-color,#03a9f4);outline-offset:2px}\n    .preview-note{margin:0;padding:12px 16px;color:var(--secondary-text-color,#555)}\n    .preview-dashboard{padding:16px;background:var(--lovelace-background,var(--primary-background-color,#fafafa))}\n    .preview-card{width:100%;max-width:560px;margin:auto}\n    .preview-card[data-width=\"phone\"]{max-width:360px}\n    @media(max-width:600px){dialog.dashboard-preview{width:100vw;max-width:100vw;max-height:100dvh;margin:auto 0;border-radius:0;overflow:auto;overscroll-behavior:contain}.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{font-size:16px}.preview-note{font-size:13px;padding:12px}.preview-dashboard{padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}}\n  </style><div class=\"preview-toolbar\"><h2 id=\"dashboard-preview-title\">Dashboard preview</h2><div class=\"preview-actions\"><div class=\"preview-widths\" role=\"group\" aria-label=\"Preview card width\"><button type=\"button\" data-width=\"desktop\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 21h8M12 16v5\"/></svg>Desktop</button><button type=\"button\" data-width=\"phone\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></svg>Phone</button></div><button class=\"preview-close\" type=\"button\" aria-label=\"Close preview\" title=\"Close preview\" autofocus><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></div></div><p class=\"preview-note\">Your current changes, without saving. Device controls are live. The final card width depends on your dashboard layout.</p><div class=\"preview-dashboard\"><div class=\"preview-card\"></div></div>", r.className = "dashboard-preview";
 	let i = document.createElement("three-d-rooms-card");
@@ -16033,7 +16049,7 @@ function Np(e, t, n) {
 	};
 }
 // dashboard/panel.js
-var Pp = class extends HTMLElement {
+var Ip = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block;height:100%;min-height:100vh}iframe{display:block;width:100%;height:100vh;border:0}</style><iframe title=\"3D Rooms model library\"></iframe>", this._frame = this.shadowRoot.querySelector("iframe"), this._iconCache = /* @__PURE__ */ new Map(), this._ready = (e) => {
 			if (e.source !== this._frame.contentWindow || e.origin !== location.origin || e.data?.type !== "three-d-rooms-ready") return;
@@ -16047,11 +16063,11 @@ var Pp = class extends HTMLElement {
 				},
 				preview: async (e) => {
 					this._preview?.close();
-					let t = Np(this.shadowRoot, e, this._hass);
+					let t = Fp(this.shadowRoot, e, this._hass);
 					this._preview = t, await t.closed, this._preview === t && (this._preview = null);
 				},
 				navigate: (e) => {
-					if (jp(e).toString() === jp(location.search).toString()) return;
+					if (Np(e).toString() === Np(location.search).toString()) return;
 					let t = new URL(location.href);
 					for (let e of [
 						"model",
@@ -16059,7 +16075,7 @@ var Pp = class extends HTMLElement {
 						"saved_view",
 						"view"
 					]) t.searchParams.delete(e);
-					for (let [n, r] of jp(e)) t.searchParams.set(n, r);
+					for (let [n, r] of Np(e)) t.searchParams.set(n, r);
 					history.replaceState(history.state, "", t);
 				},
 				request: (e, t = {}) => this._hass.callWS({
@@ -16068,7 +16084,7 @@ var Pp = class extends HTMLElement {
 					data: t
 				}),
 				asset: (e, t) => this._hass.fetchWithAuth(e, t),
-				upload: (e, t) => Op(this._hass, e, t),
+				upload: (e, t) => Ap(this._hass, e, t),
 				scene: (e, t = "full") => Hf(this._hass, e, t),
 				entityIcon: (e) => {
 					let t = JSON.stringify([
@@ -16077,7 +16093,7 @@ var Pp = class extends HTMLElement {
 						e.attributes?.icon,
 						e.attributes?.device_class
 					]);
-					return this._iconCache.has(t) || (this._iconCache.set(t, Ap(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
+					return this._iconCache.has(t) || (this._iconCache.set(t, Mp(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
 				},
 				subscribeModels: (e) => this._hass.connection.subscribeEvents(e, "three_d_rooms_updated"),
 				subscribe: (e) => (this._listener = e, this._publish(), () => {
@@ -16099,16 +16115,16 @@ var Pp = class extends HTMLElement {
 	}
 	connectedCallback() {
 		window.addEventListener("message", this._ready);
-		let e = jp(location.search);
-		e.set("native", "1"), this._frame.src = Mp(import.meta.url, e);
+		let e = Np(location.search);
+		e.set("native", "1"), this._frame.src = Pp(import.meta.url, e);
 	}
 	disconnectedCallback() {
 		this._preview?.close(), window.removeEventListener("message", this._ready), this._listener = null;
 	}
 };
-customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", Pp);
+customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", Ip);
 // shared/house-floors.mjs
-function Fp(e, t) {
+function Lp(e, t) {
 	if (!t?.houseView || !Array.isArray(e)) return [];
 	let n = e.filter((e) => e?.houseView && e.houseId === t.houseId);
 	return n.length < 2 ? [] : n.map((e) => ({
@@ -16117,11 +16133,11 @@ function Fp(e, t) {
 		label: e.houseFloor?.name || "Whole house"
 	})).sort((e, t) => e.floorId === null ? -1 : +(t.floorId === null));
 }
-function Ip(e, t, n) {
-	return !n || n === t?.id ? t : Fp(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
+function Rp(e, t, n) {
+	return !n || n === t?.id ? t : Lp(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
 }
-function Lp(e, t, n = !0) {
-	let r = n ? Fp(e, t) : [];
+function zp(e, t, n = !0) {
+	let r = n ? Lp(e, t) : [];
 	if (!r.length) return {
 		model: t,
 		floors: [],
@@ -16135,7 +16151,7 @@ function Lp(e, t, n = !0) {
 	};
 }
 // dashboard/editor.js
-var Rp = {
+var Bp = {
 	model: "Room",
 	title: "Title",
 	show_title: "Show title",
@@ -16145,14 +16161,14 @@ var Rp = {
 	zoom: "Zoom",
 	height: "Height",
 	interactive: "Camera movement"
-}, zp = {
+}, Vp = {
 	show_title: !0,
 	height: 500,
 	view: "front",
 	heading: 0,
 	tilt: 28,
 	zoom: 1
-}, Bp = class extends HTMLElement {
+}, Hp = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>\n      :host{display:block;container-type:inline-size;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}\n      label{display:grid;gap:6px;margin:16px 0}input,select,button{box-sizing:border-box;min-height:44px;width:100%;font:inherit;color:var(--primary-text-color);background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:10px}\n      input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}\n      .field-setting{position:relative;min-width:0;margin:16px 0}.field-setting>label{margin:0;gap:10px}.field-setting:not(.boolean)>label{padding-top:4px}.field-setting.boolean{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}.field-setting.boolean>label{flex:1;min-width:0}.field-setting.boolean>label input{flex-shrink:0}\n      .override-controls{position:absolute;top:0;right:0;display:flex;align-items:center;gap:2px;min-height:28px;color:var(--secondary-text-color);font-size:12px}.boolean .override-controls{position:static;flex-shrink:0}.override-controls .reset-field{display:inline-flex;align-items:center;gap:4px;width:auto;min-height:28px;padding:3px 5px;border:0;background:transparent;color:var(--secondary-text-color);font-size:12px;cursor:pointer}.reset-field svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6}.override-controls .reset-field:hover{color:var(--primary-color);background:color-mix(in srgb,var(--primary-text-color) 5%,transparent)}\n      input:disabled,select:disabled{opacity:.65}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.check{display:flex;align-items:center}.check input{width:22px;margin-right:8px}\n      p{color:var(--secondary-text-color)}[role=alert]{color:var(--error-color)}[hidden]{display:none!important}\n      @container(max-width:420px){.grid{grid-template-columns:1fr}}\n    </style>\n    <p>Choose a room or link a saved view. Linked fields follow changes saved in 3D Rooms. Edit any field for this card. Reset a changed field to follow the saved view again.</p>\n    <p id=\"status\" role=\"status\">Loading rooms…</p><button id=\"retry\" hidden>Retry loading rooms</button>\n    <label>Saved view<select id=\"component\"><option value=\"\">Choose a saved view (optional)</option></select></label>\n    <label>Room<select id=\"model\"><option value=\"\">Choose a room</option></select></label>\n    <label>Title<input id=\"title\" type=\"text\" maxlength=\"160\"></label>\n    <label class=\"check\"><input id=\"show_title\" type=\"checkbox\">Show title on card</label>\n    <label>View<select id=\"view\"><option value=\"front\">Perspective</option><option value=\"floor\">Floor</option></select></label>\n    <div class=\"grid\">\n      <label>Rotation (°)<input id=\"heading\" type=\"number\" min=\"0\" max=\"359.99\" step=\"0.01\"></label>\n      <label>Tilt (°)<input id=\"tilt\" type=\"number\" min=\"0\" max=\"180\" step=\"0.01\"></label>\n      <label>Zoom<input id=\"zoom\" type=\"number\" min=\"0.01\" max=\"100\" step=\"0.01\"></label>\n      <label>Height<select id=\"height-mode\" aria-label=\"Height mode\"><option value=\"fixed\">Fixed height</option><option value=\"auto\">Auto · fill available screen</option></select><input id=\"height\" type=\"number\" min=\"180\" max=\"1600\" step=\"1\" aria-label=\"Height in pixels\" aria-describedby=\"height-note\"></label>\n      <p id=\"height-note\">Auto fills the space below the dashboard header. Best used in a single-card Panel view.</p>\n    </div>\n    <label class=\"check\"><input id=\"interactive\" type=\"checkbox\">Allow camera movement by default</label>\n    <label class=\"check\"><input id=\"camera_controls\" type=\"checkbox\">Show camera buttons on the card (move camera and reset view)</label>\n    <label class=\"check\"><input id=\"light_panel\" type=\"checkbox\">Show the Lights button (each room's lights, with one switch per room)</label>\n    <label class=\"check\"><input id=\"shade_panel\" type=\"checkbox\">Show the Shades button (each room's shades, with one switch per room)</label>\n    <label class=\"check\" id=\"floor-selector-setting\" hidden><input id=\"floor_selector\" type=\"checkbox\">Show floor switcher (whole house or one floor)</label>\n    <label>Rendering quality<select id=\"quality\">\n      <option value=\"auto\">Automatic · lighter on phones and tablets</option>\n      <option value=\"high\">High · full shadows and sharpness</option>\n      <option value=\"low\">Low · faster and uses less battery</option>\n    </select></label>\n    <label id=\"daylight-setting\" hidden>Time of day<select id=\"daylight\">\n      <option value=\"auto\">Automatic · follow the Home Assistant sun</option>\n      <option value=\"day\">Always day</option>\n      <option value=\"night\">Always night</option>\n    </select></label>\n    <p id=\"daylight-note\" hidden>Saved with this room, so every dashboard and the 3D Rooms manager use the same setting.</p>\n    <button id=\"reset\">Reset camera framing</button>\n    <p id=\"error\" role=\"alert\" hidden></p>\n    <p>Upload rooms and manage device mappings in the 3D Rooms sidebar. Save this card with Home Assistant’s Save button.</p>", this._field = (e) => this.shadowRoot.getElementById(e);
 		for (let e of [
@@ -16172,7 +16188,7 @@ var Rp = {
 			let i = document.createElement("div");
 			i.className = "override-controls", i.id = `override-controls-${e}`, i.hidden = !0;
 			let a = document.createElement("button");
-			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${Rp[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
+			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${Bp[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
 		}
 		this._field("height-mode").onchange = () => {
 			this._field("height-mode").disabled || this._emit({
@@ -16258,19 +16274,19 @@ var Rp = {
 			let t = !!this._config.saved_view, r = Object.hasOwn(this._config, e);
 			this._field(`reset-field-${e}`).hidden = !t || !r || !n || this._config[e] === n[e], this._field(`override-controls-${e}`).hidden = this._field(`reset-field-${e}`).hidden, this._field(e).disabled = !1;
 		}
-		for (let t of Object.keys(zp).concat([
+		for (let t of Object.keys(Vp).concat([
 			"model",
 			"title",
 			"interactive"
 		])) {
-			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : zp[t]) ?? "";
+			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : Vp[t]) ?? "";
 			t === "interactive" || t === "show_title" ? n.checked = !!a : n.value = a;
 		}
 		this._field("height-mode").value = e.height === "auto" ? "auto" : "fixed", this._field("height-mode").disabled = this._field("height").disabled, this._field("height").hidden = e.height === "auto";
 		let r = e.model, i = this._field("model");
 		r && ![...i.options].some((e) => e.value === r) && (i.add(new Option(`${r} (not in room library)`, r)), i.value = r);
 		let a = this._models?.find((e) => e.id === r);
-		this._field("floor-selector-setting").hidden = !Fp(this._models, a).length, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("light_panel").checked = this._config.light_panel !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1, this._field("quality").value = this._config.quality || "auto";
+		this._field("floor-selector-setting").hidden = !Lp(this._models, a).length, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("light_panel").checked = this._config.light_panel !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1, this._field("quality").value = this._config.quality || "auto";
 		let o = this._models?.find((e) => e.id === r)?.daylight;
 		this._field("daylight-setting").hidden = !o, this._field("daylight-note").hidden = !o, o && (this._field("daylight").value = o.mode);
 	}
@@ -16393,9 +16409,9 @@ var Rp = {
 		}));
 	}
 };
-customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", Bp);
+customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", Hp);
 // shared/shadow-budget.mjs
-function Vp(e, t, n = Infinity) {
+function Up(e, t, n = Infinity) {
 	let r = 0, i = [];
 	e.traverse((e) => {
 		if (e.isLight && e.castShadow && i.push(e), e.isMesh) for (let t of Array.isArray(e.material) ? e.material : [e.material]) {
@@ -16417,17 +16433,17 @@ function Vp(e, t, n = Infinity) {
 	};
 }
 // shared/render-profile.mjs
-var Hp = [
+var Wp = [
 	"auto",
 	"high",
 	"low"
 ];
-function Up(e = globalThis) {
+function Gp(e = globalThis) {
 	if (e.navigator?.userAgentData?.mobile) return !0;
 	let t = (t) => !!e.matchMedia?.(t)?.matches;
 	return t("(pointer: coarse)") && !t("(any-pointer: fine)");
 }
-function Wp({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {}) {
+function Kp({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {}) {
 	let r = Number.isFinite(n) && n > 0 ? n : 1, i = e === "low" || e !== "high" && t;
 	return i ? {
 		low: i,
@@ -16443,14 +16459,14 @@ function Wp({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {
 		shadowMapSize: Infinity
 	};
 }
-function Gp(e = "auto", t = globalThis) {
-	return Wp({
+function qp(e = "auto", t = globalThis) {
+	return Kp({
 		quality: e,
-		mobile: Up(t),
+		mobile: Gp(t),
 		devicePixelRatio: t.devicePixelRatio
 	}).low ? "phone" : "full";
 }
-function Kp(e, t) {
+function Jp(e, t) {
 	Number.isFinite(t) && e.traverse((e) => {
 		let n = e.isLight && e.shadow;
 		if (!n?.mapSize) return;
@@ -16459,8 +16475,8 @@ function Kp(e, t) {
 	});
 }
 // shared/climate-visual.mjs
-var qp = "\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    vUv = uv;\n    vec4 view = modelViewMatrix * vec4(position, 1.0);\n    vNormal = normalize(normalMatrix * normal);\n    vView = -view.xyz;\n    gl_Position = projectionMatrix * view;\n  }\n", Jp = "\n  uniform vec3 uColor;\n  uniform float uTime;\n  uniform float uPhase;\n  uniform float uStrength;\n  uniform float uCore;\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    float facing = abs(dot(normalize(vNormal), normalize(vView)));\n    float softEdge = pow(facing, mix(2.6, 0.7, uCore));\n    float fade = smoothstep(0.0, 0.06, vUv.x)\n               * (1.0 - smoothstep(0.82, 1.0, vUv.x));\n    float phase = fract(vUv.x * 2.2 - uTime * 0.65 + uPhase);\n    float pulse = smoothstep(0.0, 0.15, phase)\n                * (1.0 - smoothstep(0.40, 0.92, phase));\n    float alpha = uStrength * softEdge * fade * (0.32 + 0.68 * pulse);\n    if (uCore < 0.0) {\n      float across = vUv.y * 2.0 - 1.0;\n      float edge = pow(max(0.0, 1.0 - across * across), 1.4);\n      float wave = pow(0.5 + 0.5 * cos((vUv.x + across * across * 0.10) * 21.0 - uTime * 3.2), 5.0);\n      alpha = uStrength * edge * fade * (0.14 + 0.86 * wave);\n    }\n    vec3 color = mix(uColor, vec3(1.0), clamp(uCore, 0.0, 1.0) * 0.14);\n    gl_FragColor = vec4(color, alpha);\n    #include <colorspace_fragment>\n  }\n";
-function Yp(e, { reducedMotion: t = !1 } = {}) {
+var Yp = "\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    vUv = uv;\n    vec4 view = modelViewMatrix * vec4(position, 1.0);\n    vNormal = normalize(normalMatrix * normal);\n    vView = -view.xyz;\n    gl_Position = projectionMatrix * view;\n  }\n", Xp = "\n  uniform vec3 uColor;\n  uniform float uTime;\n  uniform float uPhase;\n  uniform float uStrength;\n  uniform float uCore;\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    float facing = abs(dot(normalize(vNormal), normalize(vView)));\n    float softEdge = pow(facing, mix(2.6, 0.7, uCore));\n    float fade = smoothstep(0.0, 0.06, vUv.x)\n               * (1.0 - smoothstep(0.82, 1.0, vUv.x));\n    float phase = fract(vUv.x * 2.2 - uTime * 0.65 + uPhase);\n    float pulse = smoothstep(0.0, 0.15, phase)\n                * (1.0 - smoothstep(0.40, 0.92, phase));\n    float alpha = uStrength * softEdge * fade * (0.32 + 0.68 * pulse);\n    if (uCore < 0.0) {\n      float across = vUv.y * 2.0 - 1.0;\n      float edge = pow(max(0.0, 1.0 - across * across), 1.4);\n      float wave = pow(0.5 + 0.5 * cos((vUv.x + across * across * 0.10) * 21.0 - uTime * 3.2), 5.0);\n      alpha = uStrength * edge * fade * (0.14 + 0.86 * wave);\n    }\n    vec3 color = mix(uColor, vec3(1.0), clamp(uCore, 0.0, 1.0) * 0.14);\n    gl_FragColor = vec4(color, alpha);\n    #include <colorspace_fragment>\n  }\n";
+function Zp(e, { reducedMotion: t = !1 } = {}) {
 	let n = e.userData.climateVisual;
 	if (!n || n.version !== 1 || !Array.isArray(n.outlet) || n.outlet.length !== 3 || !n.outlet.every((e) => Number.isFinite(e) && Math.abs(e) < 10) || !Number.isFinite(n.width) || n.width < .1 || n.width > 5) return null;
 	let r = new Tn();
@@ -16475,8 +16491,8 @@ function Yp(e, { reducedMotion: t = !1 } = {}) {
 		]);
 		for (let t of [!1, !0]) {
 			let c = new Fa(s, 40, Ot.clamp(n.width * (t ? .012 : .044), t ? .005 : .02, t ? .014 : .045), 8, !1), l = new Wa({
-				vertexShader: qp,
-				fragmentShader: Jp,
+				vertexShader: Yp,
+				fragmentShader: Xp,
 				uniforms: {
 					uTime: i,
 					uColor: a,
@@ -16513,8 +16529,8 @@ function Yp(e, { reducedMotion: t = !1 } = {}) {
 	let d = new Dr();
 	d.setAttribute("position", new hr(c, 3)), d.setAttribute("uv", new hr(l, 2)), d.setIndex(u), d.computeVertexNormals();
 	let f = new Wa({
-		vertexShader: qp,
-		fragmentShader: Jp,
+		vertexShader: Yp,
+		fragmentShader: Xp,
 		uniforms: {
 			uTime: i,
 			uColor: a,
@@ -16570,7 +16586,7 @@ function Yp(e, { reducedMotion: t = !1 } = {}) {
 	};
 }
 // shared/daylight.mjs
-function Xp(e, t, n = 0) {
+function Qp(e, t, n = 0) {
 	if (e === "day") return 1;
 	if (e === "night") return 0;
 	if (!t || ["unknown", "unavailable"].includes(t.state)) return n;
@@ -16581,7 +16597,7 @@ function Xp(e, t, n = 0) {
 	}
 	return t.state === "above_horizon" ? 1 : t.state === "below_horizon" ? 0 : n;
 }
-function Zp(e) {
+function $p(e) {
 	let t = new Tn();
 	t.name = "daylight-runtime", t.userData.daylightRuntime = !0;
 	let n = new No("#c4dfff", "#a39b82", 0);
@@ -16601,7 +16617,7 @@ function Zp(e) {
 		};
 	}), i = 0, a = /* @__PURE__ */ new Map();
 	function o(e, t, o = /* @__PURE__ */ new Map()) {
-		i = Xp(e, t, i);
+		i = Qp(e, t, i);
 		let s = 0, c = 0;
 		for (let { w: e, light: t, sky: n } of r) {
 			let r = o.get(e.coverId);
@@ -16620,14 +16636,14 @@ function Zp(e) {
 	};
 }
 // shared/view-cube.mjs
-function Qp([e, t, n]) {
+function em([e, t, n]) {
 	return [
 		t > 0 ? "top" : t < 0 ? "bottom" : "",
 		n > 0 ? "front" : n < 0 ? "back" : "",
 		e > 0 ? "right" : e < 0 ? "left" : ""
 	].filter(Boolean).join("-");
 }
-var $p = [];
+var tm = [];
 for (let e of [
 	-1,
 	0,
@@ -16640,8 +16656,8 @@ for (let e of [
 	-1,
 	0,
 	1
-]) (e || t || n) && $p.push({
-	name: Qp([
+]) (e || t || n) && tm.push({
+	name: em([
 		e,
 		t,
 		n
@@ -16662,11 +16678,11 @@ for (let e of [
 	].filter(Boolean).length === 2 ? "edge" : "face"
 });
 // shared/camera-presets.mjs
-var em = Object.freeze(Object.fromEntries($p.map(({ name: e, vector: [t, n, r] }) => [e, {
+var nm = Object.freeze(Object.fromEntries(tm.map(({ name: e, vector: [t, n, r] }) => [e, {
 	heading: (Math.atan2(t, r) * 180 / Math.PI + 360) % 360,
 	tilt: Math.acos(n / Math.hypot(t, n, r)) * 180 / Math.PI
 }])));
-function tm(e, t = "front") {
+function rm(e, t = "front") {
 	let n = t === "floor" ? "floor" : "front";
 	if (e === "reset") return {
 		view: n,
@@ -16675,16 +16691,16 @@ function tm(e, t = "front") {
 		zoom: 1,
 		camera: void 0
 	};
-	if (!Object.hasOwn(em, e)) throw Error("Unknown camera view.");
+	if (!Object.hasOwn(nm, e)) throw Error("Unknown camera view.");
 	return {
 		view: n,
-		...em[e],
+		...nm[e],
 		zoom: 1,
 		camera: void 0
 	};
 }
 // node_modules/three/examples/jsm/controls/OrbitControls.js
-var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = new Vr(), om = new Pr(), sm = Math.cos(70 * Ot.DEG2RAD), cm = new G(), lm = 2 * Math.PI, um = {
+var im = { type: "change" }, am = { type: "start" }, om = { type: "end" }, sm = new Vr(), cm = new Pr(), lm = Math.cos(70 * Ot.DEG2RAD), um = new G(), dm = 2 * Math.PI, fm = {
 	NONE: -1,
 	ROTATE: 0,
 	DOLLY: 1,
@@ -16693,9 +16709,9 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 	TOUCH_PAN: 4,
 	TOUCH_DOLLY_PAN: 5,
 	TOUCH_DOLLY_ROTATE: 6
-}, dm = 1e-6, fm = class extends Es {
+}, pm = 1e-6, mm = class extends Es {
 	constructor(n, r = null) {
-		super(n, r), this.state = um.NONE, this.target = new G(), this.cursor = new G(), this.minDistance = 0, this.maxDistance = Infinity, this.minZoom = 0, this.maxZoom = Infinity, this.minTargetRadius = 0, this.maxTargetRadius = Infinity, this.minPolarAngle = 0, this.maxPolarAngle = Math.PI, this.minAzimuthAngle = -Infinity, this.maxAzimuthAngle = Infinity, this.enableDamping = !1, this.dampingFactor = .05, this.enableZoom = !0, this.zoomSpeed = 1, this.enableRotate = !0, this.rotateSpeed = 1, this.keyRotateSpeed = 1, this.enablePan = !0, this.panSpeed = 1, this.screenSpacePanning = !0, this.keyPanSpeed = 7, this.zoomToCursor = !1, this.autoRotate = !1, this.autoRotateSpeed = 2, this.keys = {
+		super(n, r), this.state = fm.NONE, this.target = new G(), this.cursor = new G(), this.minDistance = 0, this.maxDistance = Infinity, this.minZoom = 0, this.maxZoom = Infinity, this.minTargetRadius = 0, this.maxTargetRadius = Infinity, this.minPolarAngle = 0, this.maxPolarAngle = Math.PI, this.minAzimuthAngle = -Infinity, this.maxAzimuthAngle = Infinity, this.enableDamping = !1, this.dampingFactor = .05, this.enableZoom = !0, this.zoomSpeed = 1, this.enableRotate = !0, this.rotateSpeed = 1, this.keyRotateSpeed = 1, this.enablePan = !0, this.panSpeed = 1, this.screenSpacePanning = !0, this.keyPanSpeed = 7, this.zoomToCursor = !1, this.autoRotate = !1, this.autoRotateSpeed = 2, this.keys = {
 			LEFT: "ArrowLeft",
 			UP: "ArrowUp",
 			RIGHT: "ArrowRight",
@@ -16707,7 +16723,7 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 		}, this.touches = {
 			ONE: t.ROTATE,
 			TWO: t.DOLLY_PAN
-		}, this.target0 = this.target.clone(), this.position0 = this.object.position.clone(), this.zoom0 = this.object.zoom, this._cursorStyle = "auto", this._domElementKeyEvents = null, this._lastPosition = new G(), this._lastQuaternion = new kt(), this._lastTargetPosition = new G(), this._quat = new kt().setFromUnitVectors(n.up, new G(0, 1, 0)), this._quatInverse = this._quat.clone().invert(), this._spherical = new Cs(), this._sphericalDelta = new Cs(), this._scale = 1, this._panOffset = new G(), this._rotateStart = new W(), this._rotateEnd = new W(), this._rotateDelta = new W(), this._panStart = new W(), this._panEnd = new W(), this._panDelta = new W(), this._dollyStart = new W(), this._dollyEnd = new W(), this._dollyDelta = new W(), this._dollyDirection = new G(), this._mouse = new W(), this._performCursorZoom = !1, this._pointers = [], this._pointerPositions = {}, this._controlActive = !1, this._onPointerMove = mm.bind(this), this._onPointerDown = pm.bind(this), this._onPointerUp = hm.bind(this), this._onContextMenu = Sm.bind(this), this._onMouseWheel = vm.bind(this), this._onKeyDown = ym.bind(this), this._onTouchStart = bm.bind(this), this._onTouchMove = xm.bind(this), this._onMouseDown = gm.bind(this), this._onMouseMove = _m.bind(this), this._interceptControlDown = Cm.bind(this), this._interceptControlUp = wm.bind(this), this.domElement !== null && this.connect(this.domElement), this.update();
+		}, this.target0 = this.target.clone(), this.position0 = this.object.position.clone(), this.zoom0 = this.object.zoom, this._cursorStyle = "auto", this._domElementKeyEvents = null, this._lastPosition = new G(), this._lastQuaternion = new kt(), this._lastTargetPosition = new G(), this._quat = new kt().setFromUnitVectors(n.up, new G(0, 1, 0)), this._quatInverse = this._quat.clone().invert(), this._spherical = new Cs(), this._sphericalDelta = new Cs(), this._scale = 1, this._panOffset = new G(), this._rotateStart = new W(), this._rotateEnd = new W(), this._rotateDelta = new W(), this._panStart = new W(), this._panEnd = new W(), this._panDelta = new W(), this._dollyStart = new W(), this._dollyEnd = new W(), this._dollyDelta = new W(), this._dollyDirection = new G(), this._mouse = new W(), this._performCursorZoom = !1, this._pointers = [], this._pointerPositions = {}, this._controlActive = !1, this._onPointerMove = gm.bind(this), this._onPointerDown = hm.bind(this), this._onPointerUp = _m.bind(this), this._onContextMenu = wm.bind(this), this._onMouseWheel = bm.bind(this), this._onKeyDown = xm.bind(this), this._onTouchStart = Sm.bind(this), this._onTouchMove = Cm.bind(this), this._onMouseDown = vm.bind(this), this._onMouseMove = ym.bind(this), this._interceptControlDown = Tm.bind(this), this._interceptControlUp = Em.bind(this), this.domElement !== null && this.connect(this.domElement), this.update();
 	}
 	set cursorStyle(e) {
 		this._cursorStyle = e, e === "grab" ? this.domElement.style.cursor = "grab" : this.domElement.style.cursor = "auto";
@@ -16722,7 +16738,7 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 		}), this.domElement.style.touchAction = "none";
 	}
 	disconnect() {
-		this.state = um.NONE, this.domElement.removeEventListener("pointerdown", this._onPointerDown), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.domElement.removeEventListener("pointercancel", this._onPointerUp), this.domElement.removeEventListener("wheel", this._onMouseWheel), this.domElement.removeEventListener("contextmenu", this._onContextMenu), this.stopListenToKeyEvents();
+		this.state = fm.NONE, this.domElement.removeEventListener("pointerdown", this._onPointerDown), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.domElement.removeEventListener("pointercancel", this._onPointerUp), this.domElement.removeEventListener("wheel", this._onMouseWheel), this.domElement.removeEventListener("contextmenu", this._onContextMenu), this.stopListenToKeyEvents();
 		let e = this.domElement.getRootNode();
 		e.removeEventListener("keydown", this._interceptControlDown, { capture: !0 }), e.removeEventListener("keyup", this._interceptControlUp, { capture: !0 }), this._controlActive = !1, this._pointers.length = 0, this._pointerPositions = {}, this.domElement.style.touchAction = "", this.domElement.style.cursor = "auto";
 	}
@@ -16748,7 +16764,7 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 		this.target0.copy(this.target), this.position0.copy(this.object.position), this.zoom0 = this.object.zoom;
 	}
 	reset() {
-		this.target.copy(this.target0), this.object.position.copy(this.position0), this.object.zoom = this.zoom0, this.object.updateProjectionMatrix(), this.dispatchEvent(nm), this.update(), this.state = um.NONE;
+		this.target.copy(this.target0), this.object.position.copy(this.position0), this.object.zoom = this.zoom0, this.object.updateProjectionMatrix(), this.dispatchEvent(im), this.update(), this.state = fm.NONE;
 	}
 	pan(e, t) {
 		this._pan(e, t), this.update();
@@ -16767,19 +16783,19 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 	}
 	update(e = null) {
 		let t = this.object.position;
-		cm.copy(t).sub(this.target), cm.applyQuaternion(this._quat), this._spherical.setFromVector3(cm), this.autoRotate && this.state === um.NONE && this._rotateLeft(this._getAutoRotationAngle(e)), this.enableDamping ? (this._spherical.theta += this._sphericalDelta.theta * this.dampingFactor, this._spherical.phi += this._sphericalDelta.phi * this.dampingFactor) : (this._spherical.theta += this._sphericalDelta.theta, this._spherical.phi += this._sphericalDelta.phi);
+		um.copy(t).sub(this.target), um.applyQuaternion(this._quat), this._spherical.setFromVector3(um), this.autoRotate && this.state === fm.NONE && this._rotateLeft(this._getAutoRotationAngle(e)), this.enableDamping ? (this._spherical.theta += this._sphericalDelta.theta * this.dampingFactor, this._spherical.phi += this._sphericalDelta.phi * this.dampingFactor) : (this._spherical.theta += this._sphericalDelta.theta, this._spherical.phi += this._sphericalDelta.phi);
 		let n = this.minAzimuthAngle, r = this.maxAzimuthAngle;
-		isFinite(n) && isFinite(r) && (n < -Math.PI ? n += lm : n > Math.PI && (n -= lm), r < -Math.PI ? r += lm : r > Math.PI && (r -= lm), n <= r ? this._spherical.theta = Math.max(n, Math.min(r, this._spherical.theta)) : this._spherical.theta = this._spherical.theta > (n + r) / 2 ? Math.max(n, this._spherical.theta) : Math.min(r, this._spherical.theta)), this._spherical.phi = Math.max(this.minPolarAngle, Math.min(this.maxPolarAngle, this._spherical.phi)), this._spherical.makeSafe(), this.enableDamping === !0 ? this.target.addScaledVector(this._panOffset, this.dampingFactor) : this.target.add(this._panOffset), this.target.sub(this.cursor), this.target.clampLength(this.minTargetRadius, this.maxTargetRadius), this.target.add(this.cursor);
+		isFinite(n) && isFinite(r) && (n < -Math.PI ? n += dm : n > Math.PI && (n -= dm), r < -Math.PI ? r += dm : r > Math.PI && (r -= dm), n <= r ? this._spherical.theta = Math.max(n, Math.min(r, this._spherical.theta)) : this._spherical.theta = this._spherical.theta > (n + r) / 2 ? Math.max(n, this._spherical.theta) : Math.min(r, this._spherical.theta)), this._spherical.phi = Math.max(this.minPolarAngle, Math.min(this.maxPolarAngle, this._spherical.phi)), this._spherical.makeSafe(), this.enableDamping === !0 ? this.target.addScaledVector(this._panOffset, this.dampingFactor) : this.target.add(this._panOffset), this.target.sub(this.cursor), this.target.clampLength(this.minTargetRadius, this.maxTargetRadius), this.target.add(this.cursor);
 		let i = !1;
 		if (this.zoomToCursor && this._performCursorZoom || this.object.isOrthographicCamera) this._spherical.radius = this._clampDistance(this._spherical.radius);
 		else {
 			let e = this._spherical.radius;
 			this._spherical.radius = this._clampDistance(this._spherical.radius * this._scale), i = e != this._spherical.radius;
 		}
-		if (cm.setFromSpherical(this._spherical), cm.applyQuaternion(this._quatInverse), t.copy(this.target).add(cm), this.object.lookAt(this.target), this.enableDamping === !0 ? (this._sphericalDelta.theta *= 1 - this.dampingFactor, this._sphericalDelta.phi *= 1 - this.dampingFactor, this._panOffset.multiplyScalar(1 - this.dampingFactor)) : (this._sphericalDelta.set(0, 0, 0), this._panOffset.set(0, 0, 0)), this.zoomToCursor && this._performCursorZoom) {
+		if (um.setFromSpherical(this._spherical), um.applyQuaternion(this._quatInverse), t.copy(this.target).add(um), this.object.lookAt(this.target), this.enableDamping === !0 ? (this._sphericalDelta.theta *= 1 - this.dampingFactor, this._sphericalDelta.phi *= 1 - this.dampingFactor, this._panOffset.multiplyScalar(1 - this.dampingFactor)) : (this._sphericalDelta.set(0, 0, 0), this._panOffset.set(0, 0, 0)), this.zoomToCursor && this._performCursorZoom) {
 			let e = null;
 			if (this.object.isPerspectiveCamera) {
-				let t = cm.length();
+				let t = um.length();
 				e = this._clampDistance(t * this._scale);
 				let n = t - e;
 				this.object.position.addScaledVector(this._dollyDirection, n), this.object.updateMatrixWorld(), i = !!n;
@@ -16789,17 +16805,17 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 				let n = this.object.zoom;
 				this.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom / this._scale)), this.object.updateProjectionMatrix(), i = n !== this.object.zoom;
 				let r = new G(this._mouse.x, this._mouse.y, 0);
-				r.unproject(this.object), this.object.position.sub(r).add(t), this.object.updateMatrixWorld(), e = cm.length();
+				r.unproject(this.object), this.object.position.sub(r).add(t), this.object.updateMatrixWorld(), e = um.length();
 			} else console.warn("WARNING: OrbitControls.js encountered an unknown camera type - zoom to cursor disabled."), this.zoomToCursor = !1;
-			e !== null && (this.screenSpacePanning ? this.target.set(0, 0, -1).transformDirection(this.object.matrix).multiplyScalar(e).add(this.object.position) : (am.origin.copy(this.object.position), am.direction.set(0, 0, -1).transformDirection(this.object.matrix), Math.abs(this.object.up.dot(am.direction)) < sm ? this.object.lookAt(this.target) : (om.setFromNormalAndCoplanarPoint(this.object.up, this.target), am.intersectPlane(om, this.target))));
+			e !== null && (this.screenSpacePanning ? this.target.set(0, 0, -1).transformDirection(this.object.matrix).multiplyScalar(e).add(this.object.position) : (sm.origin.copy(this.object.position), sm.direction.set(0, 0, -1).transformDirection(this.object.matrix), Math.abs(this.object.up.dot(sm.direction)) < lm ? this.object.lookAt(this.target) : (cm.setFromNormalAndCoplanarPoint(this.object.up, this.target), sm.intersectPlane(cm, this.target))));
 		} else if (this.object.isOrthographicCamera) {
 			let e = this.object.zoom;
 			this.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom / this._scale)), e !== this.object.zoom && (this.object.updateProjectionMatrix(), i = !0);
 		}
-		return this._scale = 1, this._performCursorZoom = !1, i || this._lastPosition.distanceToSquared(this.object.position) > dm || 8 * (1 - this._lastQuaternion.dot(this.object.quaternion)) > dm || this._lastTargetPosition.distanceToSquared(this.target) > dm ? (this.dispatchEvent(nm), this._lastPosition.copy(this.object.position), this._lastQuaternion.copy(this.object.quaternion), this._lastTargetPosition.copy(this.target), !0) : !1;
+		return this._scale = 1, this._performCursorZoom = !1, i || this._lastPosition.distanceToSquared(this.object.position) > pm || 8 * (1 - this._lastQuaternion.dot(this.object.quaternion)) > pm || this._lastTargetPosition.distanceToSquared(this.target) > pm ? (this.dispatchEvent(im), this._lastPosition.copy(this.object.position), this._lastQuaternion.copy(this.object.quaternion), this._lastTargetPosition.copy(this.target), !0) : !1;
 	}
 	_getAutoRotationAngle(e) {
-		return e === null ? lm / 60 / 60 * this.autoRotateSpeed : lm / 60 * this.autoRotateSpeed * e;
+		return e === null ? dm / 60 / 60 * this.autoRotateSpeed : dm / 60 * this.autoRotateSpeed * e;
 	}
 	_getZoomScale(e) {
 		let t = Math.abs(e * .01);
@@ -16812,17 +16828,17 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 		this._sphericalDelta.phi -= e;
 	}
 	_panLeft(e, t) {
-		cm.setFromMatrixColumn(t, 0), cm.multiplyScalar(-e), this._panOffset.add(cm);
+		um.setFromMatrixColumn(t, 0), um.multiplyScalar(-e), this._panOffset.add(um);
 	}
 	_panUp(e, t) {
-		this.screenSpacePanning === !0 ? cm.setFromMatrixColumn(t, 1) : (cm.setFromMatrixColumn(t, 0), cm.crossVectors(this.object.up, cm)), cm.multiplyScalar(e), this._panOffset.add(cm);
+		this.screenSpacePanning === !0 ? um.setFromMatrixColumn(t, 1) : (um.setFromMatrixColumn(t, 0), um.crossVectors(this.object.up, um)), um.multiplyScalar(e), this._panOffset.add(um);
 	}
 	_pan(e, t) {
 		let n = this.domElement;
 		if (this.object.isPerspectiveCamera) {
 			let r = this.object.position;
-			cm.copy(r).sub(this.target);
-			let i = cm.length();
+			um.copy(r).sub(this.target);
+			let i = um.length();
 			i *= Math.tan(this.object.fov / 2 * Math.PI / 180), this._panLeft(2 * e * i / n.clientHeight, this.object.matrix), this._panUp(2 * t * i / n.clientHeight, this.object.matrix);
 		} else this.object.isOrthographicCamera ? (this._panLeft(e * (this.object.right - this.object.left) / this.object.zoom / n.clientWidth, this.object.matrix), this._panUp(t * (this.object.top - this.object.bottom) / this.object.zoom / n.clientHeight, this.object.matrix)) : (console.warn("WARNING: OrbitControls.js encountered an unknown camera type - pan disabled."), this.enablePan = !1);
 	}
@@ -16853,7 +16869,7 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 	_handleMouseMoveRotate(e) {
 		this._rotateEnd.set(e.clientX, e.clientY), this._rotateDelta.subVectors(this._rotateEnd, this._rotateStart).multiplyScalar(this.rotateSpeed);
 		let t = this.domElement;
-		this._rotateLeft(lm * this._rotateDelta.x / t.clientHeight), this._rotateUp(lm * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd), this.update();
+		this._rotateLeft(dm * this._rotateDelta.x / t.clientHeight), this._rotateUp(dm * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd), this.update();
 	}
 	_handleMouseMoveDolly(e) {
 		this._dollyEnd.set(e.clientX, e.clientY), this._dollyDelta.subVectors(this._dollyEnd, this._dollyStart), this._dollyDelta.y > 0 ? this._dollyOut(this._getZoomScale(this._dollyDelta.y)) : this._dollyDelta.y < 0 && this._dollyIn(this._getZoomScale(this._dollyDelta.y)), this._dollyStart.copy(this._dollyEnd), this.update();
@@ -16868,15 +16884,15 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 		let t = !1;
 		switch (e.code) {
 			case this.keys.UP:
-				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(lm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, this.keyPanSpeed), t = !0;
+				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(dm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, this.keyPanSpeed), t = !0;
 				break;
 			case this.keys.BOTTOM:
-				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(-lm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, -this.keyPanSpeed), t = !0;
+				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(-dm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, -this.keyPanSpeed), t = !0;
 				break;
 			case this.keys.LEFT:
-				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(lm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(this.keyPanSpeed, 0), t = !0;
+				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(dm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(this.keyPanSpeed, 0), t = !0;
 				break;
-			case this.keys.RIGHT: e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(-lm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(-this.keyPanSpeed, 0), t = !0;
+			case this.keys.RIGHT: e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(-dm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(-this.keyPanSpeed, 0), t = !0;
 		}
 		t && (e.preventDefault(), this.update());
 	}
@@ -16912,7 +16928,7 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 		}
 		this._rotateDelta.subVectors(this._rotateEnd, this._rotateStart).multiplyScalar(this.rotateSpeed);
 		let t = this.domElement;
-		this._rotateLeft(lm * this._rotateDelta.x / t.clientHeight), this._rotateUp(lm * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd);
+		this._rotateLeft(dm * this._rotateDelta.x / t.clientHeight), this._rotateUp(dm * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd);
 	}
 	_handleTouchMovePan(e) {
 		if (this._pointers.length === 1) this._panEnd.set(e.pageX, e.pageY);
@@ -16971,16 +16987,16 @@ var nm = { type: "change" }, rm = { type: "start" }, im = { type: "end" }, am = 
 		return e.ctrlKey && !this._controlActive && (n.deltaY *= 10), n;
 	}
 };
-function pm(e) {
+function hm(e) {
 	this.enabled !== !1 && (this._pointers.length === 0 && (this.domElement.setPointerCapture(e.pointerId), this.domElement.ownerDocument.addEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.addEventListener("pointerup", this._onPointerUp)), !this._isTrackingPointer(e) && (this._addPointer(e), e.pointerType === "touch" ? this._onTouchStart(e) : this._onMouseDown(e), this._cursorStyle === "grab" && (this.domElement.style.cursor = "grabbing")));
 }
-function mm(e) {
+function gm(e) {
 	this.enabled !== !1 && (e.pointerType === "touch" ? this._onTouchMove(e) : this._onMouseMove(e));
 }
-function hm(e) {
+function _m(e) {
 	switch (this._removePointer(e), this._pointers.length) {
 		case 0:
-			this.domElement.releasePointerCapture(e.pointerId), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.dispatchEvent(im), this.state = um.NONE, this._cursorStyle === "grab" && (this.domElement.style.cursor = "grab");
+			this.domElement.releasePointerCapture(e.pointerId), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.dispatchEvent(om), this.state = fm.NONE, this._cursorStyle === "grab" && (this.domElement.style.cursor = "grab");
 			break;
 		case 1:
 			let t = this._pointers[0], n = this._pointerPositions[t];
@@ -16991,7 +17007,7 @@ function hm(e) {
 			});
 	}
 }
-function gm(t) {
+function vm(t) {
 	let n;
 	switch (t.button) {
 		case 0:
@@ -17008,132 +17024,132 @@ function gm(t) {
 	switch (n) {
 		case e.DOLLY:
 			if (this.enableZoom === !1) return;
-			this._handleMouseDownDolly(t), this.state = um.DOLLY;
+			this._handleMouseDownDolly(t), this.state = fm.DOLLY;
 			break;
 		case e.ROTATE:
 			if (t.ctrlKey || t.metaKey || t.shiftKey) {
 				if (this.enablePan === !1) return;
-				this._handleMouseDownPan(t), this.state = um.PAN;
+				this._handleMouseDownPan(t), this.state = fm.PAN;
 			} else {
 				if (this.enableRotate === !1) return;
-				this._handleMouseDownRotate(t), this.state = um.ROTATE;
+				this._handleMouseDownRotate(t), this.state = fm.ROTATE;
 			}
 			break;
 		case e.PAN:
 			if (t.ctrlKey || t.metaKey || t.shiftKey) {
 				if (this.enableRotate === !1) return;
-				this._handleMouseDownRotate(t), this.state = um.ROTATE;
+				this._handleMouseDownRotate(t), this.state = fm.ROTATE;
 			} else {
 				if (this.enablePan === !1) return;
-				this._handleMouseDownPan(t), this.state = um.PAN;
+				this._handleMouseDownPan(t), this.state = fm.PAN;
 			}
 			break;
-		default: this.state = um.NONE;
+		default: this.state = fm.NONE;
 	}
-	this.state !== um.NONE && this.dispatchEvent(rm);
+	this.state !== fm.NONE && this.dispatchEvent(am);
 }
-function _m(e) {
+function ym(e) {
 	switch (this.state) {
-		case um.ROTATE:
+		case fm.ROTATE:
 			if (this.enableRotate === !1) return;
 			this._handleMouseMoveRotate(e);
 			break;
-		case um.DOLLY:
+		case fm.DOLLY:
 			if (this.enableZoom === !1) return;
 			this._handleMouseMoveDolly(e);
 			break;
-		case um.PAN:
+		case fm.PAN:
 			if (this.enablePan === !1) return;
 			this._handleMouseMovePan(e);
 	}
 }
-function vm(e) {
-	this.enabled !== !1 && this.enableZoom !== !1 && this.state === um.NONE && (e.preventDefault(), this.dispatchEvent(rm), this._handleMouseWheel(this._customWheelEvent(e)), this.dispatchEvent(im));
+function bm(e) {
+	this.enabled !== !1 && this.enableZoom !== !1 && this.state === fm.NONE && (e.preventDefault(), this.dispatchEvent(am), this._handleMouseWheel(this._customWheelEvent(e)), this.dispatchEvent(om));
 }
-function ym(e) {
+function xm(e) {
 	this.enabled !== !1 && this._handleKeyDown(e);
 }
-function bm(e) {
+function Sm(e) {
 	switch (this._trackPointer(e), this._pointers.length) {
 		case 1:
 			switch (this.touches.ONE) {
 				case t.ROTATE:
 					if (this.enableRotate === !1) return;
-					this._handleTouchStartRotate(e), this.state = um.TOUCH_ROTATE;
+					this._handleTouchStartRotate(e), this.state = fm.TOUCH_ROTATE;
 					break;
 				case t.PAN:
 					if (this.enablePan === !1) return;
-					this._handleTouchStartPan(e), this.state = um.TOUCH_PAN;
+					this._handleTouchStartPan(e), this.state = fm.TOUCH_PAN;
 					break;
-				default: this.state = um.NONE;
+				default: this.state = fm.NONE;
 			}
 			break;
 		case 2:
 			switch (this.touches.TWO) {
 				case t.DOLLY_PAN:
 					if (this.enableZoom === !1 && this.enablePan === !1) return;
-					this._handleTouchStartDollyPan(e), this.state = um.TOUCH_DOLLY_PAN;
+					this._handleTouchStartDollyPan(e), this.state = fm.TOUCH_DOLLY_PAN;
 					break;
 				case t.DOLLY_ROTATE:
 					if (this.enableZoom === !1 && this.enableRotate === !1) return;
-					this._handleTouchStartDollyRotate(e), this.state = um.TOUCH_DOLLY_ROTATE;
+					this._handleTouchStartDollyRotate(e), this.state = fm.TOUCH_DOLLY_ROTATE;
 					break;
-				default: this.state = um.NONE;
+				default: this.state = fm.NONE;
 			}
 			break;
-		default: this.state = um.NONE;
+		default: this.state = fm.NONE;
 	}
-	this.state !== um.NONE && this.dispatchEvent(rm);
+	this.state !== fm.NONE && this.dispatchEvent(am);
 }
-function xm(e) {
+function Cm(e) {
 	switch (this._trackPointer(e), this.state) {
-		case um.TOUCH_ROTATE:
+		case fm.TOUCH_ROTATE:
 			if (this.enableRotate === !1) return;
 			this._handleTouchMoveRotate(e), this.update();
 			break;
-		case um.TOUCH_PAN:
+		case fm.TOUCH_PAN:
 			if (this.enablePan === !1) return;
 			this._handleTouchMovePan(e), this.update();
 			break;
-		case um.TOUCH_DOLLY_PAN:
+		case fm.TOUCH_DOLLY_PAN:
 			if (this.enableZoom === !1 && this.enablePan === !1) return;
 			this._handleTouchMoveDollyPan(e), this.update();
 			break;
-		case um.TOUCH_DOLLY_ROTATE:
+		case fm.TOUCH_DOLLY_ROTATE:
 			if (this.enableZoom === !1 && this.enableRotate === !1) return;
 			this._handleTouchMoveDollyRotate(e), this.update();
 			break;
-		default: this.state = um.NONE;
+		default: this.state = fm.NONE;
 	}
 }
-function Sm(e) {
+function wm(e) {
 	this.enabled !== !1 && e.preventDefault();
 }
-function Cm(e) {
+function Tm(e) {
 	e.key === "Control" && (this._controlActive = !0, this.domElement.getRootNode().addEventListener("keyup", this._interceptControlUp, {
 		passive: !0,
 		capture: !0
 	}));
 }
-function wm(e) {
+function Em(e) {
 	e.key === "Control" && (this._controlActive = !1, this.domElement.getRootNode().removeEventListener("keyup", this._interceptControlUp, {
 		passive: !0,
 		capture: !0
 	}));
 }
 // web/scene.js
-var Tm = class {
+var Dm = class {
 	constructor(e, t = () => {}, n = {}) {
 		this.options = {
 			mode: "dollhouse",
 			markers: !0,
 			interactive: !0,
 			...n
-		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = Wp({
+		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = Kp({
 			quality: this.options.quality,
-			mobile: Up(),
+			mobile: Gp(),
 			devicePixelRatio: globalThis.devicePixelRatio
-		}), this.renderer = new Gu({ antialias: this.profile.antialias }), this.renderer.shadowMap.enabled = !0, this.renderer.shadowMap.type = 1, this.renderer.shadowMap.autoUpdate = !1, this.renderer.setPixelRatio(this.profile.pixelRatio), this.renderer.domElement.dataset.renderProfile = this.profile.low ? "low" : "high", this.renderer.outputColorSpace = ze, this.renderer.toneMapping = 4, this.renderer.toneMappingExposure = 1.1, this.renderer.domElement.setAttribute("aria-label", "3D model. Drag to orbit; use the device controls below for keyboard access."), this.renderer.domElement.setAttribute("role", "img"), e.append(this.renderer.domElement), this.scene = new Nn(), this.scene.background = new Y("#242320"), this.camera = new Go(45, 1, .05, 500), this.orbit = new fm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
+		}), this.renderer = new Gu({ antialias: this.profile.antialias }), this.renderer.shadowMap.enabled = !0, this.renderer.shadowMap.type = 1, this.renderer.shadowMap.autoUpdate = !1, this.renderer.setPixelRatio(this.profile.pixelRatio), this.renderer.domElement.dataset.renderProfile = this.profile.low ? "low" : "high", this.renderer.outputColorSpace = ze, this.renderer.toneMapping = 4, this.renderer.toneMappingExposure = 1.1, this.renderer.domElement.setAttribute("aria-label", "3D model. Drag to orbit; use the device controls below for keyboard access."), this.renderer.domElement.setAttribute("role", "img"), e.append(this.renderer.domElement), this.scene = new Nn(), this.scene.background = new Y("#242320"), this.camera = new Go(45, 1, .05, 500), this.orbit = new mm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
 			this.cutaway(), this.render({ cameraOnly: !0 }), this.options.onCameraChange?.({ source: "orbit" });
 		}), this.resize = new ResizeObserver(() => {
 			let { width: t, height: n } = e.getBoundingClientRect();
@@ -17228,7 +17244,7 @@ var Tm = class {
 				let e = c[0].userData.numberMotion;
 				r.position.y = t.position[1] + (t.defaultValue - e.restValue) * e.metersPerUnit;
 			}
-			let l = t.type === "climate" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((e) => Yp(e, { reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches })).filter(Boolean) : [], u = t.type === "lock" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
+			let l = t.type === "climate" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((e) => Zp(e, { reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches })).filter(Boolean) : [], u = t.type === "lock" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
 			this.fixtures.set(t.id, {
 				lockNodes: u,
 				climateVisuals: l,
@@ -17250,7 +17266,7 @@ var Tm = class {
 		};
 		e.controls.flatMap((e) => (e.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((t) => [e.id, t])).sort((e, t) => r(e[1]) - r(t[1])).forEach(([e, t]) => t.traverse((t) => {
 			t.userData.pickControl = e;
-		})), this.daylight = e.daylight ? Zp(e.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = e.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
+		})), this.daylight = e.daylight ? $p(e.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = e.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
 		let { center: i, size: a } = this.applyHouseScope();
 		this.defaultTarget = e.camera?.target || i.toArray(), this.defaultPosition = e.camera?.position || i.clone().add(new G(a * .7, a * .65, a * .7)).toArray();
 		let o = performance.now();
@@ -17264,8 +17280,8 @@ var Tm = class {
 		this.daylight?.group.traverse((e) => {
 			e.isSpotLight && (e.castShadow = !0);
 		});
-		let a = Vp(this.scene, this.renderer.capabilities.maxTextures, this.profile?.shadowPasses);
-		Kp(this.scene, this.profile?.shadowMapSize), this.renderer.domElement && (this.renderer.domElement.dataset.shadowLights = a.shadowLights), this.asset.updateMatrixWorld(!0);
+		let a = Up(this.scene, this.renderer.capabilities.maxTextures, this.profile?.shadowPasses);
+		Jp(this.scene, this.profile?.shadowMapSize), this.renderer.domElement && (this.renderer.domElement.dataset.shadowLights = a.shadowLights), this.asset.updateMatrixWorld(!0);
 		let o = new Jn();
 		for (let e of n.length ? n.filter((e) => e.visible) : [this.asset]) o.expandByObject(e);
 		o.isEmpty() && o.setFromObject(this.asset);
@@ -17294,7 +17310,7 @@ var Tm = class {
 		return n && this.setStates(this.lastStates || /* @__PURE__ */ new Map()), !0;
 	}
 	setView(n) {
-		this.options.camera && n === "floor" != (this.options.camera.projection === "orthographic") && (this.options.camera = void 0), this.options.mode = ["floor", "front"].includes(n) ? n : "dollhouse", this.scene.background.set("#242320"), this.fill && (this.fill.intensity = this.options.mode === "dollhouse" ? .25 : .35), this.camera = this.options.mode === "floor" ? new Xo() : new Go(this.options.mode === "front" ? 35 : 45, 1, .05, 500), this.options.mode !== "dollhouse" && this.fitFloor(), this.orbit.dispose(), this.orbit = new fm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
+		this.options.camera && n === "floor" != (this.options.camera.projection === "orthographic") && (this.options.camera = void 0), this.options.mode = ["floor", "front"].includes(n) ? n : "dollhouse", this.scene.background.set("#242320"), this.fill && (this.fill.intensity = this.options.mode === "dollhouse" ? .25 : .35), this.camera = this.options.mode === "floor" ? new Xo() : new Go(this.options.mode === "front" ? 35 : 45, 1, .05, 500), this.options.mode !== "dollhouse" && this.fitFloor(), this.orbit.dispose(), this.orbit = new mm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
 			this.cutaway(), this.render({ cameraOnly: !0 }), this.options.onCameraChange?.({ source: "orbit" });
 		}), this.orbit.enableRotate = this.options.allowRotate ?? this.options.mode !== "floor", this.orbit.enableRotate || (this.orbit.mouseButtons.LEFT = e.PAN, this.orbit.touches.ONE = t.PAN);
 		for (let [e, t] of this.fixtures) t.marker.visible = !this.model.controls.find((t) => t.id === e)?.hidden && !t.outOfScope && !t.companion && this.options.markers && this.options.mode !== "floor";
@@ -17304,11 +17320,11 @@ var Tm = class {
 		this.options.interactive = !!e, this.orbit.enabled = this.options.interactive, this.renderer.domElement.style.touchAction = this.options.interactive ? "none" : "";
 	}
 	setFloorPlan() {
-		this.model && (Object.assign(this.options, tm("top", "floor")), this.setView("floor"), this.options.onCameraChange?.({ source: "preset" }));
+		this.model && (Object.assign(this.options, rm("top", "floor")), this.setView("floor"), this.options.onCameraChange?.({ source: "preset" }));
 	}
 	setCameraPreset(e) {
 		if (!this.model) return;
-		let t = tm(e, this.options.mode);
+		let t = rm(e, this.options.mode);
 		Object.assign(this.options, t), this.setView(t.view), this.options.onCameraChange?.({ source: "preset" });
 	}
 	rotateCamera(e, t) {
@@ -17320,14 +17336,14 @@ var Tm = class {
 		if (!this.bounds) return;
 		let { width: e, height: t } = this.container.getBoundingClientRect();
 		if (!e || !t) return;
-		let n = this.options.camera ? Ep(this.options.camera, {
+		let n = this.options.camera ? Op(this.options.camera, {
 			aspect: e / t,
 			min: this.bounds.min.toArray(),
 			max: this.bounds.max.toArray(),
 			heading: this.options.heading,
 			tilt: this.options.tilt,
 			zoom: this.options.zoom
-		}) : (this.options.mode === "front" ? yp : vp)(this.bounds.min.toArray(), this.bounds.max.toArray(), e / t, this.options.tilt ?? (this.options.mode === "front" ? 28 : 0), this.options.heading ?? 0);
+		}) : (this.options.mode === "front" ? xp : bp)(this.bounds.min.toArray(), this.bounds.max.toArray(), e / t, this.options.tilt ?? (this.options.mode === "front" ? 28 : 0), this.options.heading ?? 0);
 		Object.assign(this.camera, {
 			aspect: e / t,
 			left: n.left,
@@ -17340,7 +17356,7 @@ var Tm = class {
 		}), this.camera.isPerspectiveCamera && n.fov && (this.camera.fov = n.fov), this.camera.position.fromArray(n.position), this.camera.up.fromArray(n.up), this.orbit.target.fromArray(n.target), this.camera.lookAt(this.orbit.target), this.camera.updateProjectionMatrix();
 	}
 	captureView() {
-		return !this.model || !this.bounds ? null : wp({
+		return !this.model || !this.bounds ? null : Ep({
 			position: this.camera.position.toArray(),
 			target: this.orbit.target.toArray(),
 			up: this.camera.up.toArray(),
@@ -17498,7 +17514,7 @@ var Tm = class {
 			normal: n(8)
 		} }));
 	}
-}, Em = (e) => /^#[0-9a-f]{6}$/i.test(e) ? [
+}, Om = (e) => /^#[0-9a-f]{6}$/i.test(e) ? [
 	1,
 	3,
 	5
@@ -17507,7 +17523,7 @@ var Tm = class {
 	240,
 	212
 ];
-function Dm(e) {
+function km(e) {
 	let t = Math.max(1e3, Math.min(4e4, e)) / 100;
 	return [
 		t <= 66 ? 255 : 329.698727446 * (t - 60) ** -.1332047592,
@@ -17515,9 +17531,9 @@ function Dm(e) {
 		t >= 66 ? 255 : t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307
 	].map((e) => Math.round(Math.max(0, Math.min(255, e))));
 }
-function Om(e, t = "#fff0d4") {
+function Am(e, t = "#fff0d4") {
 	let n = e?.attributes || {}, r = Number.isFinite(n.color_temp_kelvin) ? n.color_temp_kelvin : 3e3, i;
-	if (n.color_mode === "color_temp") i = Dm(r);
+	if (n.color_mode === "color_temp") i = km(r);
 	else if (Array.isArray(n.rgb_color) && n.rgb_color.length === 3) i = n.rgb_color;
 	else if (Array.isArray(n.rgbw_color)) {
 		let [e, t, r, a] = n.rgbw_color;
@@ -17527,13 +17543,13 @@ function Om(e, t = "#fff0d4") {
 			r + a
 		].map((e) => Math.min(255, e));
 	} else if (Array.isArray(n.rgbww_color)) {
-		let [e, t, r, a, o] = n.rgbww_color, s = Dm(n.min_color_temp_kelvin || 2e3), c = Dm(n.max_color_temp_kelvin || 6535);
+		let [e, t, r, a, o] = n.rgbww_color, s = km(n.min_color_temp_kelvin || 2e3), c = km(n.max_color_temp_kelvin || 6535);
 		i = [
 			e,
 			t,
 			r
 		].map((e, t) => Math.min(255, e + s[t] * o / 255 + c[t] * a / 255));
-	} else i = Em(t);
+	} else i = Om(t);
 	return {
 		rgb: i,
 		colorMode: n.color_mode || "rgb",
@@ -17542,7 +17558,7 @@ function Om(e, t = "#fff0d4") {
 	};
 }
 // dashboard/transport.mjs
-async function km(e, t, n, r = fetch) {
+async function jm(e, t, n, r = fetch) {
 	if (!t.preview_url && !t.addon) {
 		if (e.user?.is_admin === !1) throw Error("This release requires a Home Assistant administrator.");
 		return {
@@ -17553,7 +17569,7 @@ async function km(e, t, n, r = fetch) {
 					operation: "models"
 				}), r = n.find((e) => e.id === t.model);
 				if (!r) throw Error("Model not found. Upload it in the 3D Rooms sidebar first.");
-				let i = Gp(t.quality), { model: a, floors: o, views: s } = Lp(n, r, t.floor_selector !== !1);
+				let i = qp(t.quality), { model: a, floors: o, views: s } = zp(n, r, t.floor_selector !== !1);
 				if (a.members) {
 					let t = [];
 					try {
@@ -17642,7 +17658,7 @@ async function km(e, t, n, r = fetch) {
 			if (!e.ok) throw Error("Could not read models. Open the 3D Rooms add-on and try again.");
 			let n = await e.json(), a = n.find((e) => e.id === t.model);
 			if (!a) throw Error("Model not found. Upload it in the 3D Rooms add-on first.");
-			let { model: o, floors: s, views: c } = Lp(n, a, t.floor_selector !== !1);
+			let { model: o, floors: s, views: c } = zp(n, a, t.floor_selector !== !1);
 			return o.members ? {
 				model: o,
 				configured: a,
@@ -17663,7 +17679,7 @@ async function km(e, t, n, r = fetch) {
 	};
 }
 // shared/room-lights.mjs
-var Am = {
+var Mm = {
 	light: {
 		entity: /^(light|switch)\.[a-z0-9_]+$/,
 		isOn: (e) => !!e.on,
@@ -17681,8 +17697,8 @@ var Am = {
 		}
 	}
 };
-function jm(e, t = "light", n = () => !1) {
-	let { entity: r } = Am[t], i = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), a = /* @__PURE__ */ new Map(), o = new Set((e?.controls || []).filter((e) => e.hidden && i(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
+function Nm(e, t = "light", n = () => !1) {
+	let { entity: r } = Mm[t], i = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), a = /* @__PURE__ */ new Map(), o = new Set((e?.controls || []).filter((e) => e.hidden && i(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
 	for (let n of e?.controls || []) {
 		if (!i(n) || n.hidden || n.lightGroupPrimary === !1) continue;
 		let s = n.sourceModel || e.id, c = n.roomTitle || e.title || "Room";
@@ -17705,9 +17721,9 @@ function jm(e, t = "light", n = () => !1) {
 	}
 	return [...a.values()];
 }
-var Mm = (e) => jm(e, "light");
-function Nm(e, t) {
-	let { isOn: n } = Am[e.kind || "light"], r = 0, i = 0;
+var Pm = (e) => Nm(e, "light");
+function Fm(e, t) {
+	let { isOn: n } = Mm[e.kind || "light"], r = 0, i = 0;
 	for (let a of e.lights) {
 		let e = t.get(a.id);
 		e && !e.unavailable && (i++, n(e) && r++);
@@ -17718,8 +17734,8 @@ function Nm(e, t) {
 		total: e.lights.length
 	};
 }
-function Pm(e, t, n = {}) {
-	let { services: r } = Am[e.kind || "light"], i = Nm(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
+function Im(e, t, n = {}) {
+	let { services: r } = Mm[e.kind || "light"], i = Fm(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
 	for (let t of e.entities) {
 		let e = n[t];
 		if (!e || ["unavailable", "unknown"].includes(e.state)) continue;
@@ -17735,7 +17751,7 @@ function Pm(e, t, n = {}) {
 		])
 	};
 }
-function Fm(e) {
+function Lm(e) {
 	return {
 		id: "",
 		kind: e[0]?.kind || "light",
@@ -17745,7 +17761,7 @@ function Fm(e) {
 	};
 }
 // dashboard/card.js
-var Im = class extends HTMLElement {
+var Rm = class extends HTMLElement {
 	static getConfigElement() {
 		return document.createElement("three-d-rooms-editor");
 	}
@@ -17757,7 +17773,7 @@ var Im = class extends HTMLElement {
 		};
 	}
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:\"\";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed=\"true\"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled=\"true\"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active=\"true\"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable=\"true\"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving=\"true\"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(select:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:static;flex-shrink:0;margin-left:auto;min-height:44px;max-width:100%;border-radius:8px;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:-4px}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable=\"true\"]{opacity:.65}.fixture-tray button[data-active=\"true\"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active=\"true\"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed=\"true\"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role=\"switch\"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded=\"true\"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on=\"true\"] ha-state-icon,.light-row[data-on=\"true\"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable=\"true\"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role=\"switch\"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role=\"switch\"]::after{content:\"\";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role=\"switch\"][aria-checked=\"true\"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role=\"switch\"][aria-checked=\"true\"]::after{left:19px}.light-panel button[role=\"switch\"]:disabled{opacity:.4;cursor:default}.light-panel button[role=\"switch\"][aria-busy=\"true\"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight=\"true\"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}</style><ha-card><div class=\"card-top\"><header hidden></header><select class=\"daylight-switch\" aria-label=\"Time of day\" title=\"Time of day\" hidden><option value=\"auto\">Auto</option><option value=\"day\">Day</option><option value=\"night\">Night</option></select></div><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch"), this._daylightSwitch.onchange = () => this._setDaylight(this._daylightSwitch.value), this.shadowRoot.querySelector("button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "Reload models"), this._refresh.title = "Reload models — clear cached models and load again", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M20 7v5h-5M4 17v-5h5\"/><path d=\"M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17\"/></svg>", this._refresh.onclick = () => this._refreshModels(), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._controls.append(this._refresh, this._resetCamera, this._moveCamera), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {};
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:\"\";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed=\"true\"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled=\"true\"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active=\"true\"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable=\"true\"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving=\"true\"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(select:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:static;flex-shrink:0;margin-left:auto;min-height:44px;max-width:100%;border-radius:8px;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:-4px}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable=\"true\"]{opacity:.65}.fixture-tray button[data-active=\"true\"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active=\"true\"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed=\"true\"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone=\"locked\"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone=\"unlocked\"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone=\"jammed\"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone=\"moving\"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone=\"light\"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone=\"open\"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone=\"cool\"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone=\"heat\"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone=\"dry\"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone=\"fan_only\"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone=\"auto\"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role=\"switch\"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded=\"true\"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on=\"true\"] ha-state-icon,.light-row[data-on=\"true\"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable=\"true\"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role=\"switch\"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role=\"switch\"]::after{content:\"\";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role=\"switch\"][aria-checked=\"true\"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role=\"switch\"][aria-checked=\"true\"]::after{left:19px}.light-panel button[role=\"switch\"]:disabled{opacity:.4;cursor:default}.light-panel button[role=\"switch\"][aria-busy=\"true\"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight=\"true\"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}</style><ha-card><div class=\"card-top\"><header hidden></header><select class=\"daylight-switch\" aria-label=\"Time of day\" title=\"Time of day\" hidden><option value=\"auto\">Auto</option><option value=\"day\">Day</option><option value=\"night\">Night</option></select></div><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch"), this._daylightSwitch.onchange = () => this._setDaylight(this._daylightSwitch.value), this.shadowRoot.querySelector("button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "Reload models"), this._refresh.title = "Reload models — clear cached models and load again", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M20 7v5h-5M4 17v-5h5\"/><path d=\"M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17\"/></svg>", this._refresh.onclick = () => this._refreshModels(), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._controls.append(this._refresh, this._resetCamera, this._moveCamera), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {};
 		for (let [e, t, n, r] of [[
 			"light",
 			"Room lights",
@@ -17785,14 +17801,14 @@ var Im = class extends HTMLElement {
 		for (let t of ["tilt", "heading"]) if (e[t] !== void 0 && !Number.isFinite(e[t])) throw Error(`${t} must be a number.`);
 		if (e.tilt !== void 0 && (e.tilt < 0 || e.tilt > 180)) throw Error("Tilt must be between 0 and 180 degrees.");
 		if (e.view !== void 0 && !["front", "floor"].includes(e.view)) throw Error("Choose front or floor view.");
-		if (e.quality !== void 0 && !Hp.includes(e.quality)) throw Error("Quality must be auto, high or low.");
+		if (e.quality !== void 0 && !Wp.includes(e.quality)) throw Error("Quality must be auto, high or low.");
 		for (let t of [
 			"floor_selector",
 			"camera_controls",
 			"light_panel",
 			"shade_panel"
 		]) if (e[t] !== void 0 && typeof e[t] != "boolean") throw Error(`${t} must be true or false.`);
-		let t = e.camera === void 0 ? void 0 : Cp(e.camera);
+		let t = e.camera === void 0 ? void 0 : Tp(e.camera);
 		if (t && (e.view || "front") === "floor" != (t.projection === "orthographic")) throw Error("Saved camera projection must match the selected view.");
 		this._config = {
 			height: 500,
@@ -17853,7 +17869,7 @@ var Im = class extends HTMLElement {
 				this._message.querySelector("span").textContent = "Choose a room in the visual editor.";
 				return;
 			}
-			let t = await km(this._hass, this._config, location.origin);
+			let t = await jm(this._hass, this._config, location.origin);
 			if (e !== this._generation) return;
 			t.session && (document.cookie = `ingress_session=${t.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`);
 			let { model: n, configured: r, floors: i, views: a, sceneURL: o, layers: s, release: c, assetCache: l } = await t.load();
@@ -17861,7 +17877,7 @@ var Im = class extends HTMLElement {
 				c?.();
 				return;
 			}
-			if (this._view?.dispose(), this._view = new Tm(this._container, (e) => this._pick(e), {
+			if (this._view?.dispose(), this._view = new Dm(this._container, (e) => this._pick(e), {
 				mode: this._config.view,
 				markers: !1,
 				interactive: this._cameraFree,
@@ -17883,7 +17899,7 @@ var Im = class extends HTMLElement {
 			}
 			if (e !== this._generation) return;
 			this._views = a || [], this._floors = i || [];
-			let d = Ip(this._views, r || n, this._floor);
+			let d = Rp(this._views, r || n, this._floor);
 			if (d !== n && !u.setHouseView(d) && (d = n), this._floor && d.id !== this._floor && (this._floor = null), this._model = d, this._cameraMoved = !1, this._syncFloorSwitch(), this._syncCameraButtons(), this._previewStates = /* @__PURE__ */ new Map(), this._buildAccess(), this._preview = t.preview, this._signature = null, this._states(), this._syncDaylightSwitch(), this._message.hidden = !0, !this._preview && !this._config.addon && !this._unsubModels && this._hass.connection?.subscribeEvents) {
 				let e = await this._hass.connection.subscribeEvents(() => this._modelsEvent(), "three_d_rooms_updated");
 				!this.isConnected || this._unsubModels ? e() : this._unsubModels = e;
@@ -18016,7 +18032,7 @@ var Im = class extends HTMLElement {
 			let o = Qf(this._config.markers, n.id);
 			i.style.setProperty("--marker-size", o.size + "px"), i.setAttribute("aria-label", n.type === "light" ? `Toggle ${a}. Hold for more info.` : `Control ${a}`), i.title = n.type === "light" ? `${a}: click to toggle, hold for more info` : `${a}: value controls`;
 			let s = o.icon, c = document.createElement(n.type === "climate" && !s ? "span" : "ha-state-icon");
-			n.type === "climate" && !s && (c.className = "fixture-ac-icon"), s && (c.icon = o.icon), c.setAttribute("aria-hidden", "true"), c.innerHTML = s ? `<svg viewBox="0 0 24 24">${Xf(s) || ""}</svg>` : n.type === "climate" ? `<svg viewBox="0 0 24 24">${_p}</svg>` : n.type === "lock" ? `<svg viewBox="0 0 24 24">${gp}</svg>` : n.type === "button" ? "<svg viewBox=\"0 0 24 24\"><path d=\"m8 4 12 8-12 8Z\"/></svg>" : n.type === "number" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z\"/></svg>" : n.type === "light" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z\"/></svg>" : "<svg viewBox=\"0 0 24 24\"><path d=\"M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z\"/></svg>";
+			n.type === "climate" && !s && (c.className = "fixture-ac-icon"), s && (c.icon = o.icon), c.setAttribute("aria-hidden", "true"), c.innerHTML = s ? `<svg viewBox="0 0 24 24">${Xf(s) || ""}</svg>` : n.type === "climate" ? `<svg viewBox="0 0 24 24">${yp}</svg>` : n.type === "lock" ? `<svg viewBox="0 0 24 24">${vp}</svg>` : n.type === "button" ? "<svg viewBox=\"0 0 24 24\"><path d=\"m8 4 12 8-12 8Z\"/></svg>" : n.type === "number" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z\"/></svg>" : n.type === "light" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z\"/></svg>" : "<svg viewBox=\"0 0 24 24\"><path d=\"M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z\"/></svg>";
 			let l = document.createElement("span");
 			if (l.className = "fixture-state", l.setAttribute("aria-hidden", "true"), l.hidden = !o.show_label, i.append(c), o.placement === "tray") {
 				let e = document.createElement("span");
@@ -18064,8 +18080,8 @@ var Im = class extends HTMLElement {
 	}
 	_buildLightPanel() {
 		this._panelRooms = {
-			light: this._config?.light_panel === !1 ? [] : Mm(this._model),
-			shade: this._config?.shade_panel === !1 ? [] : jm(this._model, "shade", (e) => this._isShade(e))
+			light: this._config?.light_panel === !1 ? [] : Pm(this._model),
+			shade: this._config?.shade_panel === !1 ? [] : Nm(this._model, "shade", (e) => this._isShade(e))
 		};
 		for (let [e, t] of Object.entries(this._panelButtons)) t.hidden = !this._panelRooms[e].length;
 		this._panelKind && !this._panelRooms[this._panelKind].length && (this._panelKind = null);
@@ -18119,7 +18135,7 @@ var Im = class extends HTMLElement {
 		this._lightPanel = n, this._container.append(n), this._syncLightPanel();
 	}
 	_confirmAllLights() {
-		let { on: e, available: t } = Nm(Fm(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
+		let { on: e, available: t } = Fm(Lm(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
 		this._dialog?.remove();
 		let a = document.createElement("dialog");
 		return this._dialog = a, a.className = "confirm-all-lights", a.innerHTML = "<form method=\"dialog\"><h2></h2><p></p><div style=\"display:flex;gap:8px;justify-content:flex-end;margin-top:16px\"><button value=\"cancel\" autofocus>Cancel</button><button value=\"ok\" class=\"confirm\"></button></div></form>", a.querySelector("h2").textContent = `${n ? r.turnOn : r.turnOff} all ${r.noun}?`, a.querySelector("p").textContent = n ? `This will ${r.turnOn.toLowerCase()} ${t} ${i(t)} in ${this._rooms.length === 1 ? this._rooms[0].title : "every room shown"}. Hidden devices are not changed.` : `This will ${r.turnOff.toLowerCase()} the ${e} ${i(e)} that ${e === 1 ? "is" : "are"} ${r.on}. Hidden devices are not changed.`, a.querySelector(".confirm").textContent = n ? `${r.turnOn} all` : `${r.turnOff} all`, this.shadowRoot.append(a), new Promise((e) => {
@@ -18134,12 +18150,12 @@ var Im = class extends HTMLElement {
 	_syncLightPanel(e = this._lightStates) {
 		let t = this._lightPanel;
 		if (!t || !e) return;
-		let n = this._panelWords(), r = Am[this._panelKind || "light"].isOn, i = Fm(this._rooms), a = Nm(i, e), o = t.querySelector("h2 [role=\"switch\"]");
+		let n = this._panelWords(), r = Mm[this._panelKind || "light"].isOn, i = Lm(this._rooms), a = Fm(i, e), o = t.querySelector("h2 [role=\"switch\"]");
 		t.querySelector("h2 .light-room-count").textContent = a.available ? `${a.on} ${n.on}` : "", o.setAttribute("aria-checked", String(a.on > 0)), o.disabled = !a.available || !this._preview && !i.entities.length, o.title = `${a.on ? n.turnOff : n.turnOn} all ${n.noun}`;
 		for (let i of this._rooms) {
 			let a = [...t.querySelectorAll("[data-room]")].find((e) => e.dataset.room === i.id);
 			if (!a) continue;
-			let o = Nm(i, e);
+			let o = Fm(i, e);
 			a.querySelector(".light-room-count").textContent = o.available ? `${o.on} of ${o.available} ${n.on}` : i.entities.length || this._preview ? "Unavailable" : "Not connected";
 			let s = a.querySelector("[data-room-switch]");
 			s.setAttribute("aria-checked", String(o.on > 0)), s.disabled = !o.available || !this._preview && !i.entities.length, s.title = `${o.on ? n.turnOff : n.turnOn} all ${i.title} ${n.noun}`;
@@ -18154,7 +18170,7 @@ var Im = class extends HTMLElement {
 		}
 	}
 	async _toggleShade(e) {
-		let t = this._lightStates || /* @__PURE__ */ new Map(), n = Am.shade.isOn(t.get(e) || {});
+		let t = this._lightStates || /* @__PURE__ */ new Map(), n = Mm.shade.isOn(t.get(e) || {});
 		if (this._preview) {
 			this._previewStates.set(e, { position: n ? 0 : 100 }), this._states();
 			return;
@@ -18172,11 +18188,11 @@ var Im = class extends HTMLElement {
 		t.className = "fixture-feedback", t.setAttribute("role", "alert"), t.textContent = e, this._container.append(t), setTimeout(() => t.remove(), 5e3);
 	}
 	async _toggleRoomLights(e) {
-		let t = e === "" ? this._rooms?.length && Fm(this._rooms) : this._rooms?.find((t) => t.id === e);
+		let t = e === "" ? this._rooms?.length && Lm(this._rooms) : this._rooms?.find((t) => t.id === e);
 		if (!t || this._pendingRooms.has(e)) return;
 		let n = this._lightStates || /* @__PURE__ */ new Map(), r = this._panelWords(t.kind);
 		if (this._preview) {
-			let e = Nm(t, n).on === 0;
+			let e = Fm(t, n).on === 0;
 			for (let n of t.lights) {
 				if (t.kind === "shade") {
 					this._previewStates.set(n.id, { position: e ? 100 : 0 });
@@ -18185,7 +18201,7 @@ var Im = class extends HTMLElement {
 				let r = this._model.controls.find((e) => e.id === n.id), i = this._previewStates.get(n.id) || {
 					on: !0,
 					brightness: 255,
-					rgb: Em(r?.color || "#fff0d4")
+					rgb: Om(r?.color || "#fff0d4")
 				};
 				this._previewStates.set(n.id, {
 					...i,
@@ -18195,7 +18211,7 @@ var Im = class extends HTMLElement {
 			this._states();
 			return;
 		}
-		let { calls: i } = Pm(t, n, this._hass.states);
+		let { calls: i } = Im(t, n, this._hass.states);
 		if (!i.length) return;
 		this._pendingRooms.add(e);
 		let a = [...this._lightPanel?.querySelectorAll("[data-room-switch]") || []].find((t) => t.dataset.roomSwitch === e);
@@ -18237,7 +18253,7 @@ var Im = class extends HTMLElement {
 			let n = this._previewStates.get(e) || {
 				on: !0,
 				brightness: 255,
-				rgb: Em(t.color || "#fff0d4")
+				rgb: Om(t.color || "#fff0d4")
 			};
 			this._previewStates.set(e, {
 				...n,
@@ -18342,7 +18358,7 @@ var Im = class extends HTMLElement {
 		let a = { ...this._previewStates.get(e) || {
 			on: !0,
 			brightness: 255,
-			rgb: Em(t.color || "#fff0d4")
+			rgb: Om(t.color || "#fff0d4")
 		} }, o = i.querySelector("[role=\"switch\"]"), s = i.querySelector("[type=\"range\"]"), c = i.querySelector("[type=\"color\"]"), l = i.querySelectorAll("[type=\"range\"]")[1], u = () => {
 			o.textContent = a.on ? "On" : "Off", o.setAttribute("aria-checked", String(a.on)), o.setAttribute("aria-label", "Light power"), this._previewStates.set(e, { ...a }), this._states();
 		};
@@ -18351,9 +18367,9 @@ var Im = class extends HTMLElement {
 		}, s.oninput = () => {
 			a.brightness = Number(s.value), u();
 		}, c.oninput = () => {
-			a.rgb = Em(c.value), u();
+			a.rgb = Om(c.value), u();
 		}, l.oninput = () => {
-			a.colorTempKelvin = Number(l.value), a.rgb = Dm(a.colorTempKelvin), c.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), u();
+			a.colorTempKelvin = Number(l.value), a.rgb = km(a.colorTempKelvin), c.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), u();
 		}, this._preview && u(), i.addEventListener("close", () => i.remove()), this.shadowRoot.append(i), i.showModal();
 	}
 	_deskDialog(e) {
@@ -18479,18 +18495,18 @@ var Im = class extends HTMLElement {
 			} : pp(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : lp(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : dp(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : sp(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
 				on: !0,
 				brightness: 255,
-				rgb: Em(t.color || "#fff0d4")
+				rgb: Om(t.color || "#fff0d4")
 			} : {
 				on: n?.state === "on",
 				unavailable: !n || ["unavailable", "unknown"].includes(n.state),
 				brightness: n?.attributes?.brightness ?? 255,
-				...Om(n, t.color)
+				...Am(n, t.color)
 			});
 		}
 		this._updateDeskDialog(), this._lightStates = e, this._syncLightPanel(e);
 		for (let t of this.shadowRoot.querySelectorAll("[data-control]")) {
 			let n = t.dataset.control, r = this._model.controls.find((e) => e.id === n), i = this._hass.states?.[this._model.bindings[n]], a = hp(r, i, e.get(n), this._preview);
-			t.dataset.active = String(a.active), t.dataset.moving = String(a.moving), t.dataset.unavailable = String(a.unavailable);
+			t.dataset.active = String(a.active), t.dataset.moving = String(a.moving), t.dataset.unavailable = String(a.unavailable), _p(t, a);
 			let o = ip(this._model, n)?.label || r.label || r.name || "Device";
 			t.title = `${o}: ${a.description}`, t.setAttribute("aria-label", `${r.type === "light" ? "Toggle" : "Control"} ${o}, ${a.description}${r.type === "light" ? ". Hold for more info." : ""}`), t.setAttribute("aria-disabled", String(a.unavailable)), r.type === "light" ? t.setAttribute("aria-pressed", String(a.active)) : t.removeAttribute("aria-pressed");
 			let s = t.querySelector("ha-state-icon");
@@ -18505,10 +18521,10 @@ var Im = class extends HTMLElement {
 		n !== this._signature && (this._signature = n, this._view.setStates(e), this._view.setDaylight?.(this._model.daylight?.mode ?? "night", t));
 	}
 };
-customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", Im), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
+customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", Rm), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
 	type: "three-d-rooms-card",
 	name: "3D Rooms",
 	description: "Your room in perspective, with live lighting and controls on the modeled fixtures.",
 	preview: !0
 });
-export { Im as ThreeDRoomsCard };
+export { Rm as ThreeDRoomsCard };
