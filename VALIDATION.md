@@ -1,3 +1,11 @@
+# 0.33.1 — open cards follow room changes made while they load, 2026-11-09
+
+Released as 0.33.1, based on v0.33.0.
+
+- Frontend: 218 tests pass, including new tests that an update arriving mid-load is rechecked once and that loads keep the update subscription; Prettier clean; build succeeds. Python host suite passes (16 native skips); native tests pass inside Core 2026.10.2.
+- Native check on the extracted artifact (`.local/room-lights-evidence/live-hide.cjs`): on an already-open house card, three mappings and a hide made back to back show up within about 2 s; unhiding restores the light. The 0.33.0 panel check (`shades.cjs`) passes again. Mappings, visibility and states restored.
+- Not tested: a real phone, the HACS download flow.
+
 # 0.33.0 — Lights and Shades panels, 2026-11-09
 
 Released as 0.33.0, based on v0.32.0.
@@ -9,7 +17,7 @@ Released as 0.33.0, based on v0.32.0.
   - Room switch turns a room's mapped lights off; the All switch shows a confirmation, Cancel changes nothing, confirming turns off the visible lights while a hidden light on the same room stays on.
   - Shades panel lists roller shades/shutters per room (not doors/windows/desks); a room switch opens its mapped demo cover.
   - Desktop and phone layouts; no page errors.
-- Known limit: hiding a device in the manager while a dashboard card is already open does not update that card's panel until the card reloads (refresh or reopen).
+- Known limit (fixed in 0.33.1): hiding a device while a dashboard card is already open did not update that card's panel until the card reloaded.
 - Not tested: a real phone, physical lights and shades, the HACS download flow.
 
 # 0.32.0 — door locks, per-view device icons and switch toggles, 2026-11-09

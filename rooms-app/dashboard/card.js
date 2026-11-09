@@ -283,8 +283,13 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._container.setAttribute("aria-busy", "true");
     this._reload = false;
     clearInterval(this._keepalive);
-    this._unsubModels?.();
-    this._unsubModels = null;
+    // The update subscription outlives loads: changes made while a room is
+    // loading must not be missed. Previews and the add-on have no events.
+    if (this._config.preview_url || this._config.addon) {
+      this._unsubModels?.();
+      this._unsubModels = null;
+    }
+    this._changedDuringLoad = false;
     this._message.hidden = false;
     this._message.querySelector("span").textContent = "Downloading your room…";
     this._message.querySelector("button").hidden = true;
@@ -391,18 +396,19 @@ export class ThreeDRoomsCard extends HTMLElement {
       if (
         !this._preview &&
         !this._config.addon &&
+        !this._unsubModels &&
         this._hass.connection?.subscribeEvents
       ) {
         const unsubscribe = await this._hass.connection.subscribeEvents(
-          () => this._modelsChanged(),
+          () => this._modelsEvent(),
           "three_d_rooms_updated",
         );
-        if (generation !== this._generation) {
-          unsubscribe();
-          return;
-        }
-        this._unsubModels = unsubscribe;
+        // Keep one subscription: drop this one if the card left the page or
+        // another load subscribed meanwhile.
+        if (!this.isConnected || this._unsubModels) unsubscribe();
+        else this._unsubModels = unsubscribe;
       }
+      if (generation !== this._generation) return;
       if (connection.session)
         this._keepalive = setInterval(async () => {
           if (document.hidden || !this.isConnected) return;
@@ -428,8 +434,19 @@ export class ThreeDRoomsCard extends HTMLElement {
         this._loading = false;
         this._refresh.disabled = false;
         this._container.setAttribute("aria-busy", "false");
+        this._recheckAfterLoad();
       }
     }
+  }
+  /** Rooms changed: check now, or once the current load has finished. */
+  _modelsEvent() {
+    if (this._loading) this._changedDuringLoad = true;
+    else this._modelsChanged();
+  }
+  _recheckAfterLoad() {
+    if (!this._changedDuringLoad || !this.isConnected) return;
+    this._changedDuringLoad = false;
+    this._modelsChanged();
   }
   _syncFloorSwitch() {
     const group = this._floorSwitch;

@@ -1,3 +1,8 @@
+## 0.33.1
+
+- **Open dashboard cards stay up to date.** A card that was reloading when a room changed (for example hiding a device right after another edit) missed that change until the page was refreshed. Cards now keep listening while they load and recheck once loading finishes, so newly hidden devices drop out of the Lights and Shades switches, and new mappings appear, within a couple of seconds.
+- No migration or re-upload is needed.
+
 ## 0.33.0
 
 - **Lights and Shades panels on dashboard cards.** Two new buttons at the top left of the card open a panel listing each room's lights or shades (a house card lists every room; a floor card lists that floor's rooms). Expand a room to switch single devices or open their Home Assistant details; hovering a row highlights its marker in the room.

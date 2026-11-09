@@ -426,3 +426,40 @@ test("camera buttons toggle movement for this session and reset the framing", ()
     camera_controls: false,
   });
 });
+test("room changes during a load are rechecked once the load finishes", () => {
+  const card = cardHarness();
+  let checks = 0;
+  card._modelsChanged = () => checks++;
+  Object.defineProperty(card, "isConnected", { value: true });
+  // While loading, an update (e.g. hiding a device) is remembered, not lost.
+  card._loading = true;
+  card._modelsEvent();
+  card._modelsEvent();
+  assert.equal(checks, 0);
+  card._loading = false;
+  card._recheckAfterLoad();
+  assert.equal(checks, 1);
+  // Nothing pending: no extra check after the next load.
+  card._recheckAfterLoad();
+  assert.equal(checks, 1);
+  // When idle, updates are checked immediately.
+  card._modelsEvent();
+  assert.equal(checks, 2);
+});
+test("loads keep the update subscription instead of dropping it", async () => {
+  const source = await readFile(
+    new URL("../dashboard/card.js", import.meta.url),
+    "utf8",
+  );
+  const load = source.slice(
+    source.indexOf("  async _load() {"),
+    source.indexOf("  /** Rooms changed: check now"),
+  );
+  // Only previews/add-on configurations drop it; normal loads reuse it.
+  assert.match(
+    load,
+    /preview_url \|\| this\._config\.addon\) \{\n\s+this\._unsubModels\?\.\(\);/,
+  );
+  assert.equal(load.match(/this\._unsubModels\?\.\(\)/g).length, 1);
+  assert.match(load, /!this\._unsubModels &&/);
+});

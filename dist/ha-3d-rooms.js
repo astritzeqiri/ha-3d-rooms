@@ -17837,7 +17837,7 @@ var Fm = class extends HTMLElement {
 	async _load() {
 		if (!this._config || !this._hass) return;
 		let e = ++this._generation;
-		this._loading = !0, this._refresh.disabled = !0, this._container.setAttribute("aria-busy", "true"), this._reload = !1, clearInterval(this._keepalive), this._unsubModels?.(), this._unsubModels = null, this._message.hidden = !1, this._message.querySelector("span").textContent = "Downloading your room…", this._message.querySelector("button").hidden = !0;
+		this._loading = !0, this._refresh.disabled = !0, this._container.setAttribute("aria-busy", "true"), this._reload = !1, clearInterval(this._keepalive), (this._config.preview_url || this._config.addon) && (this._unsubModels?.(), this._unsubModels = null), this._changedDuringLoad = !1, this._message.hidden = !1, this._message.querySelector("span").textContent = "Downloading your room…", this._message.querySelector("button").hidden = !0;
 		try {
 			if (this._sourceConfig?.saved_view) {
 				let t = await this._hass.callWS({
@@ -17884,14 +17884,11 @@ var Fm = class extends HTMLElement {
 			if (e !== this._generation) return;
 			this._views = a || [], this._floors = i || [];
 			let d = Fp(this._views, r || n, this._floor);
-			if (d !== n && !u.setHouseView(d) && (d = n), this._floor && d.id !== this._floor && (this._floor = null), this._model = d, this._cameraMoved = !1, this._syncFloorSwitch(), this._syncCameraButtons(), this._previewStates = /* @__PURE__ */ new Map(), this._buildAccess(), this._preview = t.preview, this._signature = null, this._states(), this._syncDaylightSwitch(), this._message.hidden = !0, !this._preview && !this._config.addon && this._hass.connection?.subscribeEvents) {
-				let t = await this._hass.connection.subscribeEvents(() => this._modelsChanged(), "three_d_rooms_updated");
-				if (e !== this._generation) {
-					t();
-					return;
-				}
-				this._unsubModels = t;
+			if (d !== n && !u.setHouseView(d) && (d = n), this._floor && d.id !== this._floor && (this._floor = null), this._model = d, this._cameraMoved = !1, this._syncFloorSwitch(), this._syncCameraButtons(), this._previewStates = /* @__PURE__ */ new Map(), this._buildAccess(), this._preview = t.preview, this._signature = null, this._states(), this._syncDaylightSwitch(), this._message.hidden = !0, !this._preview && !this._config.addon && !this._unsubModels && this._hass.connection?.subscribeEvents) {
+				let e = await this._hass.connection.subscribeEvents(() => this._modelsEvent(), "three_d_rooms_updated");
+				!this.isConnected || this._unsubModels ? e() : this._unsubModels = e;
 			}
+			if (e !== this._generation) return;
 			t.session && (this._keepalive = setInterval(async () => {
 				if (!document.hidden && this.isConnected) try {
 					await this._hass.callWS({
@@ -17908,8 +17905,14 @@ var Fm = class extends HTMLElement {
 			if (e !== this._generation) return;
 			this._message.querySelector("span").textContent = t.message || "Could not display this model.", this._message.querySelector("button").hidden = !1, this._message.hidden = !1;
 		} finally {
-			e === this._generation && (this._loading = !1, this._refresh.disabled = !1, this._container.setAttribute("aria-busy", "false"));
+			e === this._generation && (this._loading = !1, this._refresh.disabled = !1, this._container.setAttribute("aria-busy", "false"), this._recheckAfterLoad());
 		}
+	}
+	_modelsEvent() {
+		this._loading ? this._changedDuringLoad = !0 : this._modelsChanged();
+	}
+	_recheckAfterLoad() {
+		this._changedDuringLoad && this.isConnected && (this._changedDuringLoad = !1, this._modelsChanged());
 	}
 	_syncFloorSwitch() {
 		let e = this._floorSwitch;
