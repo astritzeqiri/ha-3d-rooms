@@ -17,3 +17,16 @@ export function roomRoute(search) {
     output.set("view", input.get("view"));
   return output;
 }
+
+/**
+ * The manager page beside the card module. The module's `v` (the app version
+ * Home Assistant loads it with) is carried over so browsers never keep showing
+ * a previous release's manager page after an update.
+ */
+export function managerURL(moduleURL, query = new URLSearchParams()) {
+  const params = new URLSearchParams(query),
+    version = new URL(moduleURL).searchParams.get("v");
+  if (version && /^[0-9A-Za-z.+-]{1,40}$/.test(version))
+    params.set("v", version);
+  return new URL(".", moduleURL).href + "index.html?" + params;
+}

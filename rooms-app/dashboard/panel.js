@@ -1,6 +1,6 @@
 import { uploadNativeModel } from "../shared/upload.mjs";
 import { resolveEntityIcon } from "../shared/entity-icon.mjs";
-import { roomRoute } from "../shared/room-route.mjs";
+import { roomRoute, managerURL } from "../shared/room-route.mjs";
 import { sceneBlob } from "../shared/scene-download.mjs";
 import { openDashboardPreview } from "./preview.js";
 /** Native HA sidebar wrapper for the existing room manager. No token copying. */
@@ -116,10 +116,7 @@ class ThreeDRoomsPanel extends HTMLElement {
     window.addEventListener("message", this._ready);
     const query = roomRoute(location.search);
     query.set("native", "1");
-    this._frame.src =
-      new URL(/* @vite-ignore */ ".", import.meta.url).href +
-      "index.html?" +
-      query;
+    this._frame.src = managerURL(import.meta.url, query);
   }
   disconnectedCallback() {
     this._preview?.close();

@@ -1,3 +1,8 @@
+## 0.33.2
+
+- **The 3D Rooms sidebar always shows the current version after an update.** The manager page was loaded from an address without a version, so a browser could keep showing the previous release's page. One visible effect: a door lock listed under Lights as "Light · on/off", offering light and switch entities, because the old page did not know locks. The address now carries the app version, so every update loads a fresh page. Locks appear in their own Locks section and connect only to `lock.*` entities.
+- No migration or re-upload is needed.
+
 ## 0.33.1
 
 - **Open dashboard cards stay up to date.** A card that was reloading when a room changed (for example hiding a device right after another edit) missed that change until the page was refreshed. Cards now keep listening while they load and recheck once loading finishes, so newly hidden devices drop out of the Lights and Shades switches, and new mappings appear, within a couple of seconds.

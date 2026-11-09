@@ -1,3 +1,11 @@
+# 0.33.2 — manager page no longer served stale after updates, 2026-11-09
+
+Released as 0.33.2, based on v0.33.1.
+
+- Frontend: 219 tests pass, including a new test for the versioned manager URL; Prettier clean; build succeeds. Python host suite passes (native tests skip outside HA).
+- Native check on the extracted artifact in the pinned HA Core 2026.10.2 container (`.local/room-lights-evidence/manager-lock.cjs`): the sidebar frame loads `index.html?…&v=0.33.2`, and the hallway's `lock` control is listed under Locks, separate from its three lights; no page errors.
+- Not tested: the user's production browser cache (diagnosed from a screenshot), a real phone, the HACS download flow.
+
 # 0.33.1 — open cards follow room changes made while they load, 2026-11-09
 
 Released as 0.33.1, based on v0.33.0.
