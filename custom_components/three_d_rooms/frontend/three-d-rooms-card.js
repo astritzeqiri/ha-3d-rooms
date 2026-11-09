@@ -16154,7 +16154,7 @@ var Lp = {
 	zoom: 1
 }, zp = class extends HTMLElement {
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>\n      :host{display:block;container-type:inline-size;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}\n      label{display:grid;gap:6px;margin:16px 0}input,select,button{box-sizing:border-box;min-height:44px;width:100%;font:inherit;color:var(--primary-text-color);background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:10px}\n      input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}\n      .field-setting{position:relative;min-width:0;margin:16px 0}.field-setting>label{margin:0;gap:10px}.field-setting:not(.boolean)>label{padding-top:4px}.field-setting.boolean{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}.field-setting.boolean>label{flex:1;min-width:0}.field-setting.boolean>label input{flex-shrink:0}\n      .override-controls{position:absolute;top:0;right:0;display:flex;align-items:center;gap:2px;min-height:28px;color:var(--secondary-text-color);font-size:12px}.boolean .override-controls{position:static;flex-shrink:0}.override-controls .reset-field{display:inline-flex;align-items:center;gap:4px;width:auto;min-height:28px;padding:3px 5px;border:0;background:transparent;color:var(--secondary-text-color);font-size:12px;cursor:pointer}.reset-field svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6}.override-controls .reset-field:hover{color:var(--primary-color);background:color-mix(in srgb,var(--primary-text-color) 5%,transparent)}\n      input:disabled,select:disabled{opacity:.65}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.check{display:flex;align-items:center}.check input{width:22px;margin-right:8px}\n      p{color:var(--secondary-text-color)}[role=alert]{color:var(--error-color)}[hidden]{display:none!important}\n      @container(max-width:420px){.grid{grid-template-columns:1fr}}\n    </style>\n    <p>Choose a room or link a saved view. Linked fields follow changes saved in 3D Rooms. Edit any field for this card. Reset a changed field to follow the saved view again.</p>\n    <p id=\"status\" role=\"status\">Loading rooms…</p><button id=\"retry\" hidden>Retry loading rooms</button>\n    <label>Saved view<select id=\"component\"><option value=\"\">Choose a saved view (optional)</option></select></label>\n    <label>Room<select id=\"model\"><option value=\"\">Choose a room</option></select></label>\n    <label>Title<input id=\"title\" type=\"text\" maxlength=\"160\"></label>\n    <label class=\"check\"><input id=\"show_title\" type=\"checkbox\">Show title on card</label>\n    <label>View<select id=\"view\"><option value=\"front\">Perspective</option><option value=\"floor\">Floor</option></select></label>\n    <div class=\"grid\">\n      <label>Rotation (°)<input id=\"heading\" type=\"number\" min=\"0\" max=\"359.99\" step=\"0.01\"></label>\n      <label>Tilt (°)<input id=\"tilt\" type=\"number\" min=\"0\" max=\"180\" step=\"0.01\"></label>\n      <label>Zoom<input id=\"zoom\" type=\"number\" min=\"0.01\" max=\"100\" step=\"0.01\"></label>\n      <label>Height<select id=\"height-mode\" aria-label=\"Height mode\"><option value=\"fixed\">Fixed height</option><option value=\"auto\">Auto · fill available screen</option></select><input id=\"height\" type=\"number\" min=\"180\" max=\"1600\" step=\"1\" aria-label=\"Height in pixels\" aria-describedby=\"height-note\"></label>\n      <p id=\"height-note\">Auto fills the space below the dashboard header. Best used in a single-card Panel view.</p>\n    </div>\n    <label class=\"check\"><input id=\"interactive\" type=\"checkbox\">Allow camera movement by default</label>\n    <label class=\"check\"><input id=\"camera_controls\" type=\"checkbox\">Show camera buttons on the card (move camera and reset view)</label>\n    <label class=\"check\" id=\"floor-selector-setting\" hidden><input id=\"floor_selector\" type=\"checkbox\">Show floor switcher (whole house or one floor)</label>\n    <label>Rendering quality<select id=\"quality\">\n      <option value=\"auto\">Automatic · lighter on phones and tablets</option>\n      <option value=\"high\">High · full shadows and sharpness</option>\n      <option value=\"low\">Low · faster and uses less battery</option>\n    </select></label>\n    <label id=\"daylight-setting\" hidden>Time of day<select id=\"daylight\">\n      <option value=\"auto\">Automatic · follow the Home Assistant sun</option>\n      <option value=\"day\">Always day</option>\n      <option value=\"night\">Always night</option>\n    </select></label>\n    <p id=\"daylight-note\" hidden>Saved with this room, so every dashboard and the 3D Rooms manager use the same setting.</p>\n    <button id=\"reset\">Reset camera framing</button>\n    <p id=\"error\" role=\"alert\" hidden></p>\n    <p>Upload rooms and manage device mappings in the 3D Rooms sidebar. Save this card with Home Assistant’s Save button.</p>", this._field = (e) => this.shadowRoot.getElementById(e);
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>\n      :host{display:block;container-type:inline-size;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}\n      label{display:grid;gap:6px;margin:16px 0}input,select,button{box-sizing:border-box;min-height:44px;width:100%;font:inherit;color:var(--primary-text-color);background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:10px}\n      input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}\n      .field-setting{position:relative;min-width:0;margin:16px 0}.field-setting>label{margin:0;gap:10px}.field-setting:not(.boolean)>label{padding-top:4px}.field-setting.boolean{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}.field-setting.boolean>label{flex:1;min-width:0}.field-setting.boolean>label input{flex-shrink:0}\n      .override-controls{position:absolute;top:0;right:0;display:flex;align-items:center;gap:2px;min-height:28px;color:var(--secondary-text-color);font-size:12px}.boolean .override-controls{position:static;flex-shrink:0}.override-controls .reset-field{display:inline-flex;align-items:center;gap:4px;width:auto;min-height:28px;padding:3px 5px;border:0;background:transparent;color:var(--secondary-text-color);font-size:12px;cursor:pointer}.reset-field svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6}.override-controls .reset-field:hover{color:var(--primary-color);background:color-mix(in srgb,var(--primary-text-color) 5%,transparent)}\n      input:disabled,select:disabled{opacity:.65}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.check{display:flex;align-items:center}.check input{width:22px;margin-right:8px}\n      p{color:var(--secondary-text-color)}[role=alert]{color:var(--error-color)}[hidden]{display:none!important}\n      @container(max-width:420px){.grid{grid-template-columns:1fr}}\n    </style>\n    <p>Choose a room or link a saved view. Linked fields follow changes saved in 3D Rooms. Edit any field for this card. Reset a changed field to follow the saved view again.</p>\n    <p id=\"status\" role=\"status\">Loading rooms…</p><button id=\"retry\" hidden>Retry loading rooms</button>\n    <label>Saved view<select id=\"component\"><option value=\"\">Choose a saved view (optional)</option></select></label>\n    <label>Room<select id=\"model\"><option value=\"\">Choose a room</option></select></label>\n    <label>Title<input id=\"title\" type=\"text\" maxlength=\"160\"></label>\n    <label class=\"check\"><input id=\"show_title\" type=\"checkbox\">Show title on card</label>\n    <label>View<select id=\"view\"><option value=\"front\">Perspective</option><option value=\"floor\">Floor</option></select></label>\n    <div class=\"grid\">\n      <label>Rotation (°)<input id=\"heading\" type=\"number\" min=\"0\" max=\"359.99\" step=\"0.01\"></label>\n      <label>Tilt (°)<input id=\"tilt\" type=\"number\" min=\"0\" max=\"180\" step=\"0.01\"></label>\n      <label>Zoom<input id=\"zoom\" type=\"number\" min=\"0.01\" max=\"100\" step=\"0.01\"></label>\n      <label>Height<select id=\"height-mode\" aria-label=\"Height mode\"><option value=\"fixed\">Fixed height</option><option value=\"auto\">Auto · fill available screen</option></select><input id=\"height\" type=\"number\" min=\"180\" max=\"1600\" step=\"1\" aria-label=\"Height in pixels\" aria-describedby=\"height-note\"></label>\n      <p id=\"height-note\">Auto fills the space below the dashboard header. Best used in a single-card Panel view.</p>\n    </div>\n    <label class=\"check\"><input id=\"interactive\" type=\"checkbox\">Allow camera movement by default</label>\n    <label class=\"check\"><input id=\"camera_controls\" type=\"checkbox\">Show camera buttons on the card (move camera and reset view)</label>\n    <label class=\"check\"><input id=\"light_panel\" type=\"checkbox\">Show the Lights button (each room's lights, with one switch per room)</label>\n    <label class=\"check\"><input id=\"shade_panel\" type=\"checkbox\">Show the Shades button (each room's shades, with one switch per room)</label>\n    <label class=\"check\" id=\"floor-selector-setting\" hidden><input id=\"floor_selector\" type=\"checkbox\">Show floor switcher (whole house or one floor)</label>\n    <label>Rendering quality<select id=\"quality\">\n      <option value=\"auto\">Automatic · lighter on phones and tablets</option>\n      <option value=\"high\">High · full shadows and sharpness</option>\n      <option value=\"low\">Low · faster and uses less battery</option>\n    </select></label>\n    <label id=\"daylight-setting\" hidden>Time of day<select id=\"daylight\">\n      <option value=\"auto\">Automatic · follow the Home Assistant sun</option>\n      <option value=\"day\">Always day</option>\n      <option value=\"night\">Always night</option>\n    </select></label>\n    <p id=\"daylight-note\" hidden>Saved with this room, so every dashboard and the 3D Rooms manager use the same setting.</p>\n    <button id=\"reset\">Reset camera framing</button>\n    <p id=\"error\" role=\"alert\" hidden></p>\n    <p>Upload rooms and manage device mappings in the 3D Rooms sidebar. Save this card with Home Assistant’s Save button.</p>", this._field = (e) => this.shadowRoot.getElementById(e);
 		for (let e of [
 			"model",
 			"title",
@@ -16182,6 +16182,12 @@ var Lp = {
 		}, this._field("component").onchange = () => this._component(), this._field("camera_controls").onchange = () => {
 			let e = { ...this._config };
 			this._field("camera_controls").checked ? delete e.camera_controls : e.camera_controls = !1, this._emit(e);
+		}, this._field("shade_panel").onchange = () => {
+			let e = { ...this._config };
+			this._field("shade_panel").checked ? delete e.shade_panel : e.shade_panel = !1, this._emit(e);
+		}, this._field("light_panel").onchange = () => {
+			let e = { ...this._config };
+			this._field("light_panel").checked ? delete e.light_panel : e.light_panel = !1, this._emit(e);
 		}, this._field("floor_selector").onchange = () => {
 			let e = { ...this._config };
 			this._field("floor_selector").checked ? delete e.floor_selector : e.floor_selector = !1, this._emit(e);
@@ -16264,7 +16270,7 @@ var Lp = {
 		let r = e.model, i = this._field("model");
 		r && ![...i.options].some((e) => e.value === r) && (i.add(new Option(`${r} (not in room library)`, r)), i.value = r);
 		let a = this._models?.find((e) => e.id === r);
-		this._field("floor-selector-setting").hidden = !Pp(this._models, a).length, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("quality").value = this._config.quality || "auto";
+		this._field("floor-selector-setting").hidden = !Pp(this._models, a).length, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("light_panel").checked = this._config.light_panel !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1, this._field("quality").value = this._config.quality || "auto";
 		let o = this._models?.find((e) => e.id === r)?.daylight;
 		this._field("daylight-setting").hidden = !o, this._field("daylight-note").hidden = !o, o && (this._field("daylight").value = o.mode);
 	}
@@ -17656,8 +17662,90 @@ async function Om(e, t, n, r = fetch) {
 		}
 	};
 }
+// shared/room-lights.mjs
+var km = {
+	light: {
+		entity: /^(light|switch)\.[a-z0-9_]+$/,
+		isOn: (e) => !!e.on,
+		services: {
+			on: "turn_on",
+			off: "turn_off"
+		}
+	},
+	shade: {
+		entity: /^cover\.[a-z0-9_]+$/,
+		isOn: (e) => (e.position ?? e.motionPosition ?? 0) > 0,
+		services: {
+			on: "open_cover",
+			off: "close_cover"
+		}
+	}
+};
+function Am(e, t = "light", n = () => !1) {
+	let { entity: r } = km[t], i = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), a = /* @__PURE__ */ new Map(), o = new Set((e?.controls || []).filter((e) => e.hidden && i(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
+	for (let n of e?.controls || []) {
+		if (!i(n) || n.hidden || n.lightGroupPrimary === !1) continue;
+		let s = n.sourceModel || e.id, c = n.roomTitle || e.title || "Room";
+		a.has(s) || a.set(s, {
+			id: s,
+			kind: t,
+			title: c,
+			lights: [],
+			entities: []
+		});
+		let l = a.get(s), u = n.roomTitle ? `${n.roomTitle} · ` : "", d = (n.lightGroup ? n.lightGroupLabel : n.label) || n.name || (t === "light" ? "Light" : "Shade");
+		u && d.startsWith(u) && (d = d.slice(u.length));
+		let f = e.bindings?.[n.id], p = r.test(f || "");
+		l.lights.push({
+			id: n.id,
+			label: d,
+			entityId: p ? f : void 0,
+			group: !!n.lightGroup
+		}), p && !o.has(f) && !l.entities.includes(f) && l.entities.push(f);
+	}
+	return [...a.values()];
+}
+var jm = (e) => Am(e, "light");
+function Mm(e, t) {
+	let { isOn: n } = km[e.kind || "light"], r = 0, i = 0;
+	for (let a of e.lights) {
+		let e = t.get(a.id);
+		e && !e.unavailable && (i++, n(e) && r++);
+	}
+	return {
+		on: r,
+		available: i,
+		total: e.lights.length
+	};
+}
+function Nm(e, t, n = {}) {
+	let { services: r } = km[e.kind || "light"], i = Mm(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
+	for (let t of e.entities) {
+		let e = n[t];
+		if (!e || ["unavailable", "unknown"].includes(e.state)) continue;
+		let r = t.split(".")[0];
+		o.has(r) || o.set(r, []), o.get(r).push(t);
+	}
+	return {
+		turnOn: i,
+		calls: [...o].map(([e, t]) => [
+			e,
+			a,
+			{ entity_id: t }
+		])
+	};
+}
+function Pm(e) {
+	return {
+		id: "",
+		kind: e[0]?.kind || "light",
+		title: "All",
+		lights: e.flatMap((e) => e.lights),
+		entities: [...new Set(e.flatMap((e) => e.entities))]
+	};
+}
 // dashboard/card.js
-var km = class extends HTMLElement {
+var Fm = class extends HTMLElement {
 	static getConfigElement() {
 		return document.createElement("three-d-rooms-editor");
 	}
@@ -17669,7 +17757,25 @@ var km = class extends HTMLElement {
 		};
 	}
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:\"\";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed=\"true\"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled=\"true\"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active=\"true\"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable=\"true\"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving=\"true\"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(select:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:static;flex-shrink:0;margin-left:auto;min-height:44px;max-width:100%;border-radius:8px;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:-4px}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable=\"true\"]{opacity:.65}.fixture-tray button[data-active=\"true\"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active=\"true\"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed=\"true\"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}</style><ha-card><div class=\"card-top\"><header hidden></header><select class=\"daylight-switch\" aria-label=\"Time of day\" title=\"Time of day\" hidden><option value=\"auto\">Auto</option><option value=\"day\">Day</option><option value=\"night\">Night</option></select></div><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch"), this._daylightSwitch.onchange = () => this._setDaylight(this._daylightSwitch.value), this.shadowRoot.querySelector("button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "Reload models"), this._refresh.title = "Reload models — clear cached models and load again", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M20 7v5h-5M4 17v-5h5\"/><path d=\"M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17\"/></svg>", this._refresh.onclick = () => this._refreshModels(), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._controls.append(this._refresh, this._resetCamera, this._moveCamera), this._floorSwitch = document.createElement("div"), this._floorSwitch.className = "floor-switch", this._floorSwitch.setAttribute("role", "group"), this._floorSwitch.setAttribute("aria-label", "Floor"), this._floorSwitch.hidden = !0, this._controls.append(this._floorSwitch), this._floors = [], this._views = [], this._floor = null, this._generation = 0;
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:\"\";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed=\"true\"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled=\"true\"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active=\"true\"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable=\"true\"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving=\"true\"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(select:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:static;flex-shrink:0;margin-left:auto;min-height:44px;max-width:100%;border-radius:8px;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:-4px}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable=\"true\"]{opacity:.65}.fixture-tray button[data-active=\"true\"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active=\"true\"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed=\"true\"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role=\"switch\"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded=\"true\"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on=\"true\"] ha-state-icon,.light-row[data-on=\"true\"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable=\"true\"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role=\"switch\"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role=\"switch\"]::after{content:\"\";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role=\"switch\"][aria-checked=\"true\"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role=\"switch\"][aria-checked=\"true\"]::after{left:19px}.light-panel button[role=\"switch\"]:disabled{opacity:.4;cursor:default}.light-panel button[role=\"switch\"][aria-busy=\"true\"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight=\"true\"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}</style><ha-card><div class=\"card-top\"><header hidden></header><select class=\"daylight-switch\" aria-label=\"Time of day\" title=\"Time of day\" hidden><option value=\"auto\">Auto</option><option value=\"day\">Day</option><option value=\"night\">Night</option></select></div><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch"), this._daylightSwitch.onchange = () => this._setDaylight(this._daylightSwitch.value), this.shadowRoot.querySelector("button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "Reload models"), this._refresh.title = "Reload models — clear cached models and load again", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M20 7v5h-5M4 17v-5h5\"/><path d=\"M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17\"/></svg>", this._refresh.onclick = () => this._refreshModels(), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._controls.append(this._refresh, this._resetCamera, this._moveCamera), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {};
+		for (let [e, t, n, r] of [[
+			"light",
+			"Room lights",
+			"Room lights — switch each room's lights",
+			"<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z\"/></svg>"
+		], [
+			"shade",
+			"Room shades",
+			"Room shades — open or close each room's shades",
+			"<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z\"/></svg>"
+		]]) {
+			let i = document.createElement("button");
+			i.type = "button", i.className = "light-panel-toggle", i.dataset.panel = e, i.setAttribute("aria-label", t), i.setAttribute("aria-expanded", "false"), i.title = n, i.innerHTML = r, i.hidden = !0, i.onclick = () => this._setLightPanel(this._panelKind === e ? null : e), this._panelButtons[e] = i, this._panelToggles.append(i);
+		}
+		this._lightsButton = this._panelButtons.light, this._container.append(this._panelToggles), this._panelKind = null, this._panelRooms = {
+			light: [],
+			shade: []
+		}, this._expandedRooms = /* @__PURE__ */ new Set(), this._pendingRooms = /* @__PURE__ */ new Set(), this._floorSwitch = document.createElement("div"), this._floorSwitch.className = "floor-switch", this._floorSwitch.setAttribute("role", "group"), this._floorSwitch.setAttribute("aria-label", "Floor"), this._floorSwitch.hidden = !0, this._controls.append(this._floorSwitch), this._floors = [], this._views = [], this._floor = null, this._generation = 0;
 	}
 	setConfig(e) {
 		if (e.saved_view !== void 0 && (typeof e.saved_view != "string" || !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(e.saved_view))) throw Error("Choose a valid saved view ID.");
@@ -17680,7 +17786,12 @@ var km = class extends HTMLElement {
 		if (e.tilt !== void 0 && (e.tilt < 0 || e.tilt > 180)) throw Error("Tilt must be between 0 and 180 degrees.");
 		if (e.view !== void 0 && !["front", "floor"].includes(e.view)) throw Error("Choose front or floor view.");
 		if (e.quality !== void 0 && !Vp.includes(e.quality)) throw Error("Quality must be auto, high or low.");
-		for (let t of ["floor_selector", "camera_controls"]) if (e[t] !== void 0 && typeof e[t] != "boolean") throw Error(`${t} must be true or false.`);
+		for (let t of [
+			"floor_selector",
+			"camera_controls",
+			"light_panel",
+			"shade_panel"
+		]) if (e[t] !== void 0 && typeof e[t] != "boolean") throw Error(`${t} must be true or false.`);
 		let t = e.camera === void 0 ? void 0 : Cp(e.camera);
 		if (t && (e.view || "front") === "floor" != (t.projection === "orthographic")) throw Error("Saved camera projection must match the selected view.");
 		this._config = {
@@ -17926,7 +18037,173 @@ var km = class extends HTMLElement {
 				(e.key === "F2" || e.shiftKey && e.key === "Enter") && (e.preventDefault(), this._pick(n.id));
 			}, o.visible && (o.placement === "tray" ? t : e).append(i);
 		}
-		this._container.append(e), this.shadowRoot.querySelector("ha-card").append(t), this._positionButtons();
+		this._container.append(e), this.shadowRoot.querySelector("ha-card").append(t), this._positionButtons(), this._buildLightPanel();
+	}
+	_isShade(e) {
+		return !!this._view?.fixtures?.get(e.id)?.coverNodes?.some((e) => e?.userData?.rollerShade);
+	}
+	_panelWords(e = this._panelKind || "light") {
+		return e === "shade" ? {
+			title: "Shades",
+			noun: "shades",
+			one: "shade",
+			on: "open",
+			turnOn: "Open",
+			turnOff: "Close"
+		} : {
+			title: "Lights",
+			noun: "lights",
+			one: "light",
+			on: "on",
+			turnOn: "Turn on",
+			turnOff: "Turn off"
+		};
+	}
+	_buildLightPanel() {
+		this._panelRooms = {
+			light: this._config?.light_panel === !1 ? [] : jm(this._model),
+			shade: this._config?.shade_panel === !1 ? [] : Am(this._model, "shade", (e) => this._isShade(e))
+		};
+		for (let [e, t] of Object.entries(this._panelButtons)) t.hidden = !this._panelRooms[e].length;
+		this._panelKind && !this._panelRooms[this._panelKind].length && (this._panelKind = null);
+		let e = this._panelKind;
+		this._rooms = this._panelRooms[e || "light"];
+		for (let [t, n] of Object.entries(this._panelButtons)) n.setAttribute("aria-expanded", String(t === e));
+		if (this._lightPanel?.remove(), this._lightPanel = null, !e) return;
+		let t = this._panelWords(e);
+		for (let t of this._rooms) this._rooms.length === 1 && this._expandedRooms.add(e + t.id);
+		let n = document.createElement("div");
+		n.className = "light-panel", n.dataset.kind = e, n.setAttribute("role", "dialog"), n.setAttribute("aria-label", `Room ${t.noun}`), n.innerHTML = "<h2><span></span><span class=\"light-room-count\"></span><button type=\"button\" role=\"switch\" data-room-switch=\"\"></button><button type=\"button\" class=\"panel-close\">×</button></h2><div class=\"light-rooms\"></div>", n.querySelector("h2 span").textContent = t.title, n.querySelector("h2 [role=\"switch\"]").setAttribute("aria-label", `All ${t.noun}`), n.querySelector(".panel-close").setAttribute("aria-label", `Close ${t.noun}`), n.querySelector("h2 [role=\"switch\"]").onclick = async () => {
+			await this._confirmAllLights() && this._toggleRoomLights("");
+		}, n.querySelector(".panel-close").onclick = () => this._setLightPanel(null), n.onkeydown = (t) => {
+			t.key === "Escape" && (t.stopPropagation(), this._setLightPanel(null), this._panelButtons[e].focus());
+		};
+		let r = n.querySelector(".light-rooms");
+		for (let n of this._rooms) {
+			let i = document.createElement("section");
+			i.className = "light-room", i.dataset.room = n.id;
+			let a = document.createElement("div");
+			a.className = "light-room-head";
+			let o = document.createElement("button");
+			o.type = "button", o.innerHTML = "<svg class=\"light-chevron\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"m9 6 6 6-6 6z\"/></svg><span class=\"light-room-title\"></span><span class=\"light-room-count\"></span>", o.querySelector(".light-room-title").textContent = n.title;
+			let s = e + n.id, c = this._expandedRooms.has(s);
+			o.setAttribute("aria-expanded", String(c));
+			let l = document.createElement("button");
+			l.type = "button", l.setAttribute("role", "switch"), l.dataset.roomSwitch = n.id, l.setAttribute("aria-label", `All ${n.title} ${t.noun}`), l.onclick = () => this._toggleRoomLights(n.id), a.append(o, l);
+			let u = document.createElement("ul");
+			u.className = "light-list", u.hidden = !c, o.onclick = () => {
+				let e = u.hidden;
+				u.hidden = !e, o.setAttribute("aria-expanded", String(e)), e ? this._expandedRooms.add(s) : this._expandedRooms.delete(s);
+			};
+			for (let t of n.lights) {
+				let n = document.createElement("li");
+				n.className = "light-row", n.dataset.light = t.id;
+				let r = document.createElement("button");
+				r.type = "button", r.title = `${t.label}: details`;
+				let i = document.createElement("ha-state-icon");
+				i.setAttribute("aria-hidden", "true"), i.innerHTML = this._panelButtons[e].innerHTML;
+				let a = document.createElement("span");
+				a.className = "light-name", a.textContent = t.label, r.append(i, a), r.onclick = () => this._pick(t.id);
+				let o = document.createElement("button");
+				o.type = "button", o.setAttribute("role", "switch"), o.setAttribute("aria-label", t.label), o.onclick = () => e === "shade" ? this._toggleShade(t.id) : this._toggle(t.id), n.append(r, o);
+				let s = (e) => {
+					for (let n of this.shadowRoot.querySelectorAll("[data-control]")) n.dataset.control === t.id && (n.dataset.highlight = String(e));
+				};
+				n.onpointerenter = () => s(!0), n.onpointerleave = () => s(!1), n.addEventListener("focusin", () => s(!0)), n.addEventListener("focusout", () => s(!1)), u.append(n);
+			}
+			i.append(a, u), r.append(i);
+		}
+		this._lightPanel = n, this._container.append(n), this._syncLightPanel();
+	}
+	_confirmAllLights() {
+		let { on: e, available: t } = Mm(Pm(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
+		this._dialog?.remove();
+		let a = document.createElement("dialog");
+		return this._dialog = a, a.className = "confirm-all-lights", a.innerHTML = "<form method=\"dialog\"><h2></h2><p></p><div style=\"display:flex;gap:8px;justify-content:flex-end;margin-top:16px\"><button value=\"cancel\" autofocus>Cancel</button><button value=\"ok\" class=\"confirm\"></button></div></form>", a.querySelector("h2").textContent = `${n ? r.turnOn : r.turnOff} all ${r.noun}?`, a.querySelector("p").textContent = n ? `This will ${r.turnOn.toLowerCase()} ${t} ${i(t)} in ${this._rooms.length === 1 ? this._rooms[0].title : "every room shown"}. Hidden devices are not changed.` : `This will ${r.turnOff.toLowerCase()} the ${e} ${i(e)} that ${e === 1 ? "is" : "are"} ${r.on}. Hidden devices are not changed.`, a.querySelector(".confirm").textContent = n ? `${r.turnOn} all` : `${r.turnOff} all`, this.shadowRoot.append(a), new Promise((e) => {
+			a.addEventListener("close", () => {
+				e(a.returnValue === "ok"), a.remove();
+			}), a.showModal();
+		});
+	}
+	_setLightPanel(e) {
+		this._panelKind = e === !0 ? "light" : e || null, this._buildLightPanel();
+	}
+	_syncLightPanel(e = this._lightStates) {
+		let t = this._lightPanel;
+		if (!t || !e) return;
+		let n = this._panelWords(), r = km[this._panelKind || "light"].isOn, i = Pm(this._rooms), a = Mm(i, e), o = t.querySelector("h2 [role=\"switch\"]");
+		t.querySelector("h2 .light-room-count").textContent = a.available ? `${a.on} ${n.on}` : "", o.setAttribute("aria-checked", String(a.on > 0)), o.disabled = !a.available || !this._preview && !i.entities.length, o.title = `${a.on ? n.turnOff : n.turnOn} all ${n.noun}`;
+		for (let i of this._rooms) {
+			let a = [...t.querySelectorAll("[data-room]")].find((e) => e.dataset.room === i.id);
+			if (!a) continue;
+			let o = Mm(i, e);
+			a.querySelector(".light-room-count").textContent = o.available ? `${o.on} of ${o.available} ${n.on}` : i.entities.length || this._preview ? "Unavailable" : "Not connected";
+			let s = a.querySelector("[data-room-switch]");
+			s.setAttribute("aria-checked", String(o.on > 0)), s.disabled = !o.available || !this._preview && !i.entities.length, s.title = `${o.on ? n.turnOff : n.turnOn} all ${i.title} ${n.noun}`;
+			for (let t of a.querySelectorAll("[data-light]")) {
+				let n = i.lights.find((e) => e.id === t.dataset.light), a = e.get(n.id) || {}, o = this._hass?.states?.[n.entityId], s = !!a.unavailable || !n.entityId, c = !s && r(a);
+				t.dataset.on = String(c), t.dataset.unavailable = String(s);
+				let l = t.querySelector("[role=\"switch\"]");
+				l.setAttribute("aria-checked", String(c)), l.disabled = s && !this._preview;
+				let u = t.querySelector("ha-state-icon");
+				u && o && (u.hass = this._hass, u.stateObj = o);
+			}
+		}
+	}
+	async _toggleShade(e) {
+		let t = this._lightStates || /* @__PURE__ */ new Map(), n = km.shade.isOn(t.get(e) || {});
+		if (this._preview) {
+			this._previewStates.set(e, { position: n ? 0 : 100 }), this._states();
+			return;
+		}
+		let r = this._model.bindings[e], i = this._hass.states?.[r];
+		if (r?.startsWith("cover.") && i && !["unavailable", "unknown"].includes(i.state)) try {
+			await this._hass.callService("cover", n ? "close_cover" : "open_cover", { entity_id: r });
+		} catch {
+			this._panelFeedback("Could not move the shade. Try again.");
+		}
+	}
+	_panelFeedback(e) {
+		this.shadowRoot.querySelector(".fixture-feedback")?.remove();
+		let t = document.createElement("div");
+		t.className = "fixture-feedback", t.setAttribute("role", "alert"), t.textContent = e, this._container.append(t), setTimeout(() => t.remove(), 5e3);
+	}
+	async _toggleRoomLights(e) {
+		let t = e === "" ? this._rooms?.length && Pm(this._rooms) : this._rooms?.find((t) => t.id === e);
+		if (!t || this._pendingRooms.has(e)) return;
+		let n = this._lightStates || /* @__PURE__ */ new Map(), r = this._panelWords(t.kind);
+		if (this._preview) {
+			let e = Mm(t, n).on === 0;
+			for (let n of t.lights) {
+				if (t.kind === "shade") {
+					this._previewStates.set(n.id, { position: e ? 100 : 0 });
+					continue;
+				}
+				let r = this._model.controls.find((e) => e.id === n.id), i = this._previewStates.get(n.id) || {
+					on: !0,
+					brightness: 255,
+					rgb: Tm(r?.color || "#fff0d4")
+				};
+				this._previewStates.set(n.id, {
+					...i,
+					on: e
+				});
+			}
+			this._states();
+			return;
+		}
+		let { calls: i } = Nm(t, n, this._hass.states);
+		if (!i.length) return;
+		this._pendingRooms.add(e);
+		let a = [...this._lightPanel?.querySelectorAll("[data-room-switch]") || []].find((t) => t.dataset.roomSwitch === e);
+		a?.setAttribute("aria-busy", "true"), this.shadowRoot.querySelector(".fixture-feedback")?.remove();
+		try {
+			await Promise.all(i.map((e) => this._hass.callService(...e)));
+		} catch {
+			this._panelFeedback(e ? `Could not change the ${t.title} ${r.noun}. Try again.` : `Could not change the ${r.noun}. Try again.`);
+		} finally {
+			this._pendingRooms.delete(e), a?.removeAttribute("aria-busy");
+		}
 	}
 	_positionButtons() {
 		for (let e of this.shadowRoot.querySelectorAll("[data-control]")) {
@@ -18207,7 +18484,7 @@ var km = class extends HTMLElement {
 				...Dm(n, t.color)
 			});
 		}
-		this._updateDeskDialog();
+		this._updateDeskDialog(), this._lightStates = e, this._syncLightPanel(e);
 		for (let t of this.shadowRoot.querySelectorAll("[data-control]")) {
 			let n = t.dataset.control, r = this._model.controls.find((e) => e.id === n), i = this._hass.states?.[this._model.bindings[n]], a = hp(r, i, e.get(n), this._preview);
 			t.dataset.active = String(a.active), t.dataset.moving = String(a.moving), t.dataset.unavailable = String(a.unavailable);
@@ -18225,10 +18502,10 @@ var km = class extends HTMLElement {
 		n !== this._signature && (this._signature = n, this._view.setStates(e), this._view.setDaylight?.(this._model.daylight?.mode ?? "night", t));
 	}
 };
-customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", km), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
+customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", Fm), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
 	type: "three-d-rooms-card",
 	name: "3D Rooms",
 	description: "Your room in perspective, with live lighting and controls on the modeled fixtures.",
 	preview: !0
 });
-export { km as ThreeDRoomsCard };
+export { Fm as ThreeDRoomsCard };

@@ -1,3 +1,17 @@
+# 0.33.0 — Lights and Shades panels, 2026-11-09
+
+Released as 0.33.0, based on v0.32.0.
+
+- Frontend: 216 tests pass, including new room-panel tests for lights, shades, hidden devices and the All switch; Prettier clean; build succeeds.
+- Python: the host suite passes (16 native tests skip outside HA), including the house-view room name.
+- Native browser checks against the staged package in the pinned HA Core 2026.10.2 container (`.local/room-lights-evidence/native.cjs`, `shades.cjs`), with demo entities temporarily mapped and all mappings, visibility and states restored:
+  - Buttons sit at the top left; room names come from the backend.
+  - Room switch turns a room's mapped lights off; the All switch shows a confirmation, Cancel changes nothing, confirming turns off the visible lights while a hidden light on the same room stays on.
+  - Shades panel lists roller shades/shutters per room (not doors/windows/desks); a room switch opens its mapped demo cover.
+  - Desktop and phone layouts; no page errors.
+- Known limit: hiding a device in the manager while a dashboard card is already open does not update that card's panel until the card reloads (refresh or reopen).
+- Not tested: a real phone, physical lights and shades, the HACS download flow.
+
 # 0.32.0 — door locks, per-view device icons and switch toggles, 2026-11-09
 
 Released as 0.32.0, based on v0.31.0. Includes the switch-backed light toggle fix from the parallel `light-switch-toggle` session (its commit 26da379, applied unchanged).

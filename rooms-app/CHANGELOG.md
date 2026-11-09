@@ -1,3 +1,12 @@
+## 0.33.0
+
+- **Lights and Shades panels on dashboard cards.** Two new buttons at the top left of the card open a panel listing each room's lights or shades (a house card lists every room; a floor card lists that floor's rooms). Expand a room to switch single devices or open their Home Assistant details; hovering a row highlights its marker in the room.
+- **One switch per room, and one for everything.** Each room has a switch for all its lights (or shades), and the panel header has an All switch. If anything is on (or open), the switch turns everything off (or closes it); otherwise it turns everything on (opens it). The All switch asks for confirmation first.
+- **Hidden devices are never switched.** Devices hidden in a room are left out of the panels, and the room and All switches skip any entity that a hidden device also uses.
+- **Shades** are the covers your model animates as roller shades/shutters; doors, windows and desks are not included. Shades connected to read-only contact sensors are listed but cannot be switched.
+- Card options `light_panel: false` and `shade_panel: false` (also in the card editor) hide the buttons. House views now tell the card each device's room name.
+- No migration or re-upload is needed.
+
 ## 0.32.0
 
 - **Door locks.** A new `lock` device type maps to `lock.*` entities. The 3D lock's thumb-turn shows the real locked/unlocked state, and the marker shows Locked, Unlocked or Jammed. The manager has Lock/Unlock buttons under Devices → Locks. On a dashboard, tapping the lock opens Home Assistant's own lock dialog instead of toggling it. Locks that need a code are never unlocked from 3D Rooms.

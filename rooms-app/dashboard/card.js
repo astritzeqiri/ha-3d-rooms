@@ -29,6 +29,14 @@ import { entityAppearance, hexToRgb, kelvinToRgb } from "../shared/light.mjs";
 import { connectModel } from "./transport.mjs";
 import { selectHouseView } from "../shared/house-floors.mjs";
 import { QUALITIES } from "../shared/render-profile.mjs";
+import {
+  roomLights,
+  roomLightSummary,
+  roomLightCommands,
+  roomDevices,
+  allLights,
+  PANEL_KINDS,
+} from "../shared/room-lights.mjs";
 export class ThreeDRoomsCard extends HTMLElement {
   static getConfigElement() {
     return document.createElement("three-d-rooms-editor");
@@ -39,7 +47,7 @@ export class ThreeDRoomsCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(select:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:static;flex-shrink:0;margin-left:auto;min-height:44px;max-width:100%;border-radius:8px;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:-4px}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}</style><ha-card><div class="card-top"><header hidden></header><select class="daylight-switch" aria-label="Time of day" title="Time of day" hidden><option value="auto">Auto</option><option value="day">Day</option><option value="night">Night</option></select></div><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>`;
+    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715)}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;min-height:36px;max-width:calc(100% - 24px);padding:4px 28px 4px 12px;font:500 13px system-ui;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:18px;box-shadow:0 2px 8px #0006;cursor:pointer}.daylight-switch:focus-visible{outline:2px solid var(--primary-color,#aacaab)}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(select:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:static;flex-shrink:0;margin-left:auto;min-height:44px;max-width:100%;border-radius:8px;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:-4px}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}</style><ha-card><div class="card-top"><header hidden></header><select class="daylight-switch" aria-label="Time of day" title="Time of day" hidden><option value="auto">Auto</option><option value="day">Day</option><option value="night">Night</option></select></div><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><button hidden>Retry</button></div></div></ha-card>`;
     this._container = this.shadowRoot.querySelector(".scene");
     this._message = this.shadowRoot.querySelector(".message");
     this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
@@ -77,6 +85,44 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._moveCamera.hidden = true;
     this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree);
     this._controls.append(this._refresh, this._resetCamera, this._moveCamera);
+    // Top-left Lights and Shades buttons; the panel opens just below them.
+    this._panelToggles = document.createElement("div");
+    this._panelToggles.className = "panel-toggles";
+    this._panelButtons = {};
+    for (const [kind, label, title, icon] of [
+      [
+        "light",
+        "Room lights",
+        "Room lights — switch each room's lights",
+        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>',
+      ],
+      [
+        "shade",
+        "Room shades",
+        "Room shades — open or close each room's shades",
+        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>',
+      ],
+    ]) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "light-panel-toggle";
+      button.dataset.panel = kind;
+      button.setAttribute("aria-label", label);
+      button.setAttribute("aria-expanded", "false");
+      button.title = title;
+      button.innerHTML = icon;
+      button.hidden = true;
+      button.onclick = () =>
+        this._setLightPanel(this._panelKind === kind ? null : kind);
+      this._panelButtons[kind] = button;
+      this._panelToggles.append(button);
+    }
+    this._lightsButton = this._panelButtons.light;
+    this._container.append(this._panelToggles);
+    this._panelKind = null;
+    this._panelRooms = { light: [], shade: [] };
+    this._expandedRooms = new Set();
+    this._pendingRooms = new Set();
     this._floorSwitch = document.createElement("div");
     this._floorSwitch.className = "floor-switch";
     this._floorSwitch.setAttribute("role", "group");
@@ -131,7 +177,12 @@ export class ThreeDRoomsCard extends HTMLElement {
       throw new Error("Choose front or floor view.");
     if (config.quality !== undefined && !QUALITIES.includes(config.quality))
       throw new Error("Quality must be auto, high or low.");
-    for (const key of ["floor_selector", "camera_controls"])
+    for (const key of [
+      "floor_selector",
+      "camera_controls",
+      "light_panel",
+      "shade_panel",
+    ])
       if (config[key] !== undefined && typeof config[key] !== "boolean")
         throw new Error(`${key} must be true or false.`);
     const camera =
@@ -658,6 +709,329 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._container.append(access);
     this.shadowRoot.querySelector("ha-card").append(tray);
     this._positionButtons();
+    this._buildLightPanel();
+  }
+  /** Room shades: covers the loaded scene animates as roller shades. */
+  _isShade(control) {
+    return !!this._view?.fixtures
+      ?.get(control.id)
+      ?.coverNodes?.some((node) => node?.userData?.rollerShade);
+  }
+  /** Wording for the open panel's kind. */
+  _panelWords(kind = this._panelKind || "light") {
+    return kind === "shade"
+      ? {
+          title: "Shades",
+          noun: "shades",
+          one: "shade",
+          on: "open",
+          turnOn: "Open",
+          turnOff: "Close",
+        }
+      : {
+          title: "Lights",
+          noun: "lights",
+          one: "light",
+          on: "on",
+          turnOn: "Turn on",
+          turnOff: "Turn off",
+        };
+  }
+  /** Rebuild the Lights/Shades panel for the shown room, house or floor. */
+  _buildLightPanel() {
+    this._panelRooms = {
+      light: this._config?.light_panel === false ? [] : roomLights(this._model),
+      shade:
+        this._config?.shade_panel === false
+          ? []
+          : roomDevices(this._model, "shade", (c) => this._isShade(c)),
+    };
+    for (const [kind, button] of Object.entries(this._panelButtons))
+      button.hidden = !this._panelRooms[kind].length;
+    if (this._panelKind && !this._panelRooms[this._panelKind].length)
+      this._panelKind = null;
+    const kind = this._panelKind;
+    this._rooms = this._panelRooms[kind || "light"];
+    for (const [k, button] of Object.entries(this._panelButtons))
+      button.setAttribute("aria-expanded", String(k === kind));
+    this._lightPanel?.remove();
+    this._lightPanel = null;
+    if (!kind) return;
+    const words = this._panelWords(kind);
+    for (const room of this._rooms)
+      if (this._rooms.length === 1) this._expandedRooms.add(kind + room.id);
+    const panel = document.createElement("div");
+    panel.className = "light-panel";
+    panel.dataset.kind = kind;
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", `Room ${words.noun}`);
+    panel.innerHTML =
+      '<h2><span></span><span class="light-room-count"></span><button type="button" role="switch" data-room-switch=""></button><button type="button" class="panel-close">×</button></h2><div class="light-rooms"></div>';
+    panel.querySelector("h2 span").textContent = words.title;
+    panel
+      .querySelector('h2 [role="switch"]')
+      .setAttribute("aria-label", `All ${words.noun}`);
+    panel
+      .querySelector(".panel-close")
+      .setAttribute("aria-label", `Close ${words.noun}`);
+    panel.querySelector('h2 [role="switch"]').onclick = async () => {
+      if (await this._confirmAllLights()) this._toggleRoomLights("");
+    };
+    panel.querySelector(".panel-close").onclick = () =>
+      this._setLightPanel(null);
+    panel.onkeydown = (event) => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      this._setLightPanel(null);
+      this._panelButtons[kind].focus();
+    };
+    const list = panel.querySelector(".light-rooms");
+    for (const room of this._rooms) {
+      const section = document.createElement("section");
+      section.className = "light-room";
+      section.dataset.room = room.id;
+      const head = document.createElement("div");
+      head.className = "light-room-head";
+      const expand = document.createElement("button");
+      expand.type = "button";
+      expand.innerHTML =
+        '<svg class="light-chevron" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m9 6 6 6-6 6z"/></svg><span class="light-room-title"></span><span class="light-room-count"></span>';
+      expand.querySelector(".light-room-title").textContent = room.title;
+      const key = kind + room.id,
+        expanded = this._expandedRooms.has(key);
+      expand.setAttribute("aria-expanded", String(expanded));
+      const all = document.createElement("button");
+      all.type = "button";
+      all.setAttribute("role", "switch");
+      all.dataset.roomSwitch = room.id;
+      all.setAttribute("aria-label", `All ${room.title} ${words.noun}`);
+      all.onclick = () => this._toggleRoomLights(room.id);
+      head.append(expand, all);
+      const devices = document.createElement("ul");
+      devices.className = "light-list";
+      devices.hidden = !expanded;
+      expand.onclick = () => {
+        const open = devices.hidden;
+        devices.hidden = !open;
+        expand.setAttribute("aria-expanded", String(open));
+        if (open) this._expandedRooms.add(key);
+        else this._expandedRooms.delete(key);
+      };
+      for (const device of room.lights) {
+        const row = document.createElement("li");
+        row.className = "light-row";
+        row.dataset.light = device.id;
+        const name = document.createElement("button");
+        name.type = "button";
+        name.title = `${device.label}: details`;
+        const icon = document.createElement("ha-state-icon");
+        icon.setAttribute("aria-hidden", "true");
+        icon.innerHTML = this._panelButtons[kind].innerHTML;
+        const label = document.createElement("span");
+        label.className = "light-name";
+        label.textContent = device.label;
+        name.append(icon, label);
+        name.onclick = () => this._pick(device.id);
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.setAttribute("role", "switch");
+        toggle.setAttribute("aria-label", device.label);
+        toggle.onclick = () =>
+          kind === "shade"
+            ? this._toggleShade(device.id)
+            : this._toggle(device.id);
+        row.append(name, toggle);
+        // Point at the device's marker in the room while hovering its row.
+        const highlight = (on) => {
+          for (const marker of this.shadowRoot.querySelectorAll(
+            "[data-control]",
+          ))
+            if (marker.dataset.control === device.id)
+              marker.dataset.highlight = String(on);
+        };
+        row.onpointerenter = () => highlight(true);
+        row.onpointerleave = () => highlight(false);
+        row.addEventListener("focusin", () => highlight(true));
+        row.addEventListener("focusout", () => highlight(false));
+        devices.append(row);
+      }
+      section.append(head, devices);
+      list.append(section);
+    }
+    this._lightPanel = panel;
+    this._container.append(panel);
+    this._syncLightPanel();
+  }
+  /** The All switch affects every room shown, so it asks first. */
+  _confirmAllLights() {
+    const everything = allLights(this._rooms || []),
+      states = this._lightStates || new Map(),
+      { on, available } = roomLightSummary(everything, states),
+      turnOn = on === 0,
+      words = this._panelWords(),
+      plural = (n) => (n === 1 ? words.one : words.noun);
+    this._dialog?.remove();
+    const dialog = document.createElement("dialog");
+    this._dialog = dialog;
+    dialog.className = "confirm-all-lights";
+    dialog.innerHTML =
+      '<form method="dialog"><h2></h2><p></p><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button value="cancel" autofocus>Cancel</button><button value="ok" class="confirm"></button></div></form>';
+    dialog.querySelector("h2").textContent =
+      `${turnOn ? words.turnOn : words.turnOff} all ${words.noun}?`;
+    dialog.querySelector("p").textContent = turnOn
+      ? `This will ${words.turnOn.toLowerCase()} ${available} ${plural(available)} in ${this._rooms.length === 1 ? this._rooms[0].title : "every room shown"}. Hidden devices are not changed.`
+      : `This will ${words.turnOff.toLowerCase()} the ${on} ${plural(on)} that ${on === 1 ? "is" : "are"} ${words.on}. Hidden devices are not changed.`;
+    dialog.querySelector(".confirm").textContent = turnOn
+      ? `${words.turnOn} all`
+      : `${words.turnOff} all`;
+    this.shadowRoot.append(dialog);
+    return new Promise((resolve) => {
+      dialog.addEventListener("close", () => {
+        resolve(dialog.returnValue === "ok");
+        dialog.remove();
+      });
+      dialog.showModal();
+    });
+  }
+  /** Open one kind of panel, or close it with null. */
+  _setLightPanel(kind) {
+    this._panelKind = kind === true ? "light" : kind || null;
+    this._buildLightPanel();
+  }
+  /** Reflect live (or preview) states in the panel's switches. */
+  _syncLightPanel(states = this._lightStates) {
+    const panel = this._lightPanel;
+    if (!panel || !states) return;
+    const words = this._panelWords(),
+      isOn = PANEL_KINDS[this._panelKind || "light"].isOn,
+      everything = allLights(this._rooms),
+      total = roomLightSummary(everything, states),
+      master = panel.querySelector('h2 [role="switch"]');
+    panel.querySelector("h2 .light-room-count").textContent = total.available
+      ? `${total.on} ${words.on}`
+      : "";
+    master.setAttribute("aria-checked", String(total.on > 0));
+    master.disabled =
+      !total.available || (!this._preview && !everything.entities.length);
+    master.title = `${total.on ? words.turnOff : words.turnOn} all ${words.noun}`;
+    for (const room of this._rooms) {
+      const section = [...panel.querySelectorAll("[data-room]")].find(
+        (s) => s.dataset.room === room.id,
+      );
+      if (!section) continue;
+      const summary = roomLightSummary(room, states);
+      section.querySelector(".light-room-count").textContent = summary.available
+        ? `${summary.on} of ${summary.available} ${words.on}`
+        : room.entities.length || this._preview
+          ? "Unavailable"
+          : "Not connected";
+      const all = section.querySelector("[data-room-switch]");
+      all.setAttribute("aria-checked", String(summary.on > 0));
+      all.disabled =
+        !summary.available || (!this._preview && !room.entities.length);
+      all.title = `${summary.on ? words.turnOff : words.turnOn} all ${room.title} ${words.noun}`;
+      for (const row of section.querySelectorAll("[data-light]")) {
+        const device = room.lights.find((l) => l.id === row.dataset.light),
+          state = states.get(device.id) || {},
+          entity = this._hass?.states?.[device.entityId],
+          unavailable = !!state.unavailable || !device.entityId,
+          on = !unavailable && isOn(state);
+        row.dataset.on = String(on);
+        row.dataset.unavailable = String(unavailable);
+        const toggle = row.querySelector('[role="switch"]');
+        toggle.setAttribute("aria-checked", String(on));
+        toggle.disabled = unavailable && !this._preview;
+        const icon = row.querySelector("ha-state-icon");
+        if (icon && entity) {
+          icon.hass = this._hass;
+          icon.stateObj = entity;
+        }
+      }
+    }
+  }
+  /** Open a closed shade, close an open one. */
+  async _toggleShade(id) {
+    const states = this._lightStates || new Map(),
+      open = PANEL_KINDS.shade.isOn(states.get(id) || {});
+    if (this._preview) {
+      this._previewStates.set(id, { position: open ? 0 : 100 });
+      this._states();
+      return;
+    }
+    const entityId = this._model.bindings[id];
+    const entity = this._hass.states?.[entityId];
+    if (
+      !entityId?.startsWith("cover.") ||
+      !entity ||
+      ["unavailable", "unknown"].includes(entity.state)
+    )
+      return;
+    try {
+      await this._hass.callService(
+        "cover",
+        open ? "close_cover" : "open_cover",
+        { entity_id: entityId },
+      );
+    } catch {
+      this._panelFeedback("Could not move the shade. Try again.");
+    }
+  }
+  _panelFeedback(text) {
+    this.shadowRoot.querySelector(".fixture-feedback")?.remove();
+    const message = document.createElement("div");
+    message.className = "fixture-feedback";
+    message.setAttribute("role", "alert");
+    message.textContent = text;
+    this._container.append(message);
+    setTimeout(() => message.remove(), 5000);
+  }
+  /** One switch per room: anything on/open turns all off/closed, else on/open. */
+  async _toggleRoomLights(roomId) {
+    const room =
+      roomId === ""
+        ? this._rooms?.length && allLights(this._rooms)
+        : this._rooms?.find((r) => r.id === roomId);
+    if (!room || this._pendingRooms.has(roomId)) return;
+    const states = this._lightStates || new Map();
+    const words = this._panelWords(room.kind);
+    if (this._preview) {
+      const on = roomLightSummary(room, states).on === 0;
+      for (const device of room.lights) {
+        if (room.kind === "shade") {
+          this._previewStates.set(device.id, { position: on ? 100 : 0 });
+          continue;
+        }
+        const control = this._model.controls.find((c) => c.id === device.id);
+        const state = this._previewStates.get(device.id) || {
+          on: true,
+          brightness: 255,
+          rgb: hexToRgb(control?.color || "#fff0d4"),
+        };
+        this._previewStates.set(device.id, { ...state, on });
+      }
+      this._states();
+      return;
+    }
+    const { calls } = roomLightCommands(room, states, this._hass.states);
+    if (!calls.length) return;
+    this._pendingRooms.add(roomId);
+    const all = [
+      ...(this._lightPanel?.querySelectorAll("[data-room-switch]") || []),
+    ].find((b) => b.dataset.roomSwitch === roomId);
+    all?.setAttribute("aria-busy", "true");
+    this.shadowRoot.querySelector(".fixture-feedback")?.remove();
+    try {
+      await Promise.all(calls.map((call) => this._hass.callService(...call)));
+    } catch {
+      this._panelFeedback(
+        roomId
+          ? `Could not change the ${room.title} ${words.noun}. Try again.`
+          : `Could not change the ${words.noun}. Try again.`,
+      );
+    } finally {
+      this._pendingRooms.delete(roomId);
+      all?.removeAttribute("aria-busy");
+    }
   }
   _positionButtons() {
     for (const button of this.shadowRoot.querySelectorAll("[data-control]")) {
@@ -1159,6 +1533,8 @@ export class ThreeDRoomsCard extends HTMLElement {
       );
     }
     this._updateDeskDialog();
+    this._lightStates = states;
+    this._syncLightPanel(states);
     for (const button of this.shadowRoot.querySelectorAll("[data-control]")) {
       const id = button.dataset.control;
       const control = this._model.controls.find((c) => c.id === id);

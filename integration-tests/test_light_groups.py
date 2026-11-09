@@ -68,3 +68,5 @@ class LightGroupTests(unittest.TestCase):
         floor = next(m for m in self.store.catalog() if m.get("houseFloor"))
         self.assertEqual(len(floor["controls"]), 1); c = floor["controls"][0]
         self.assertTrue(c["lightGroupPrimary"]); self.assertEqual(c["markerPosition"], [12,4,0]); self.assertEqual(floor["bindings"][c["id"]], "light.dining")
+        # The card's Lights panel lists house lights under their own room's name.
+        self.assertEqual(c["roomTitle"], self.store.find("kitchen")["title"])

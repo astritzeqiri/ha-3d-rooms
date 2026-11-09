@@ -50,6 +50,8 @@ export class ThreeDRoomsEditor extends HTMLElement {
     </div>
     <label class="check"><input id="interactive" type="checkbox">Allow camera movement by default</label>
     <label class="check"><input id="camera_controls" type="checkbox">Show camera buttons on the card (move camera and reset view)</label>
+    <label class="check"><input id="light_panel" type="checkbox">Show the Lights button (each room's lights, with one switch per room)</label>
+    <label class="check"><input id="shade_panel" type="checkbox">Show the Shades button (each room's shades, with one switch per room)</label>
     <label class="check" id="floor-selector-setting" hidden><input id="floor_selector" type="checkbox">Show floor switcher (whole house or one floor)</label>
     <label>Rendering quality<select id="quality">
       <option value="auto">Automatic · lighter on phones and tablets</option>
@@ -117,6 +119,18 @@ export class ThreeDRoomsEditor extends HTMLElement {
       const config = { ...this._config };
       if (this._field("camera_controls").checked) delete config.camera_controls;
       else config.camera_controls = false;
+      this._emit(config);
+    };
+    this._field("shade_panel").onchange = () => {
+      const config = { ...this._config };
+      if (this._field("shade_panel").checked) delete config.shade_panel;
+      else config.shade_panel = false;
+      this._emit(config);
+    };
+    this._field("light_panel").onchange = () => {
+      const config = { ...this._config };
+      if (this._field("light_panel").checked) delete config.light_panel;
+      else config.light_panel = false;
       this._emit(config);
     };
     this._field("floor_selector").onchange = () => {
@@ -290,6 +304,8 @@ export class ThreeDRoomsEditor extends HTMLElement {
       this._config.floor_selector !== false;
     this._field("camera_controls").checked =
       this._config.camera_controls !== false;
+    this._field("light_panel").checked = this._config.light_panel !== false;
+    this._field("shade_panel").checked = this._config.shade_panel !== false;
     this._field("quality").value = this._config.quality || "auto";
     const daylight = this._models?.find((m) => m.id === model)?.daylight;
     this._field("daylight-setting").hidden = !daylight;

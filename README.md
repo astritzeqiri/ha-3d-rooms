@@ -158,7 +158,7 @@ tilt: 28
 heading: 0
 ```
 
-Use `view: floor` for an orthographic floor plan. Optional fields include `title`, `zoom` and `interactive`. Cards showing a house or one of its floors include bottom-right floor buttons (All, then each floor) that switch instantly without reloading; set `floor_selector: false` to hide them. Every card also has Move camera (starts from `interactive`) and Reset view buttons; set `camera_controls: false` to hide them. To follow a saved view, copy the configuration from **Use in dashboard → Advanced YAML** in the manager.
+Use `view: floor` for an orthographic floor plan. Optional fields include `title`, `zoom` and `interactive`. Cards showing a house or one of its floors include bottom-right floor buttons (All, then each floor) that switch instantly without reloading; set `floor_selector: false` to hide them. Every card also has Move camera (starts from `interactive`) and Reset view buttons; set `camera_controls: false` to hide them. The top-left Lights and Shades buttons list each room's lights or shades, with one switch per room and a confirmed All switch; hidden devices are never switched. Set `light_panel: false` or `shade_panel: false` to hide them. To follow a saved view, copy the configuration from **Use in dashboard → Advanced YAML** in the manager.
 
 </details>
 

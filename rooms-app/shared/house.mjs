@@ -157,6 +157,7 @@ export function houseModels(models) {
             ...(c.group ? { group: key(c.group) } : {}),
             sourceModel: m.id,
             sourceControl: c.id,
+            roomTitle: m.title,
           }))
           .filter(
             (c) =>
