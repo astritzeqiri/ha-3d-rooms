@@ -1364,7 +1364,8 @@ dialog h2 {
   margin-top: 16px;
 }
 .saved-view-actions button {
-  flex: 1;
+  flex: 1 0 auto;
+  white-space: nowrap;
 }
 .saved-view-more {
   margin-top: 8px;
@@ -3680,4 +3681,68 @@ body[data-room-tab="views"] .saved-view-thumb {
 }
 .marker-icon-more {
   margin: 0;
+}
+
+/* Suggested entity matches in the whole-room connect dialog */
+.suggested-matches {
+  margin: 0 0 20px;
+  padding: 16px;
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  background: var(--glow);
+}
+.suggested-matches h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+.suggested-matches ul {
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+.suggested-matches label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 4px 6px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.suggested-matches label:hover {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+.suggested-matches input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+.suggest-device {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.suggest-arrow {
+  color: var(--muted);
+}
+.suggest-entity {
+  overflow-wrap: anywhere;
+}
+.suggest-entity small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .suggested-matches label {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .suggest-arrow {
+    display: none;
+  }
+  .suggest-entity {
+    grid-column: 2;
+  }
 }

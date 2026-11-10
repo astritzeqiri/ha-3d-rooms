@@ -5,6 +5,7 @@ import {
   LOCK_ICON_PATH,
 } from "../shared/marker.mjs";
 import { deviceForControl } from "../shared/device.mjs";
+import { deviceLabel } from "../shared/workspace.mjs";
 import {
   markerSettings,
   markerLayout,
@@ -16,9 +17,26 @@ import {
   markerIconPath,
 } from "../shared/marker-icons.mjs";
 import { loadIconCatalog } from "./icon-catalog.js";
+import { isMarkerIcon } from "../shared/marker-icons.mjs";
 
-/** The editor's controls select settings and place anchors; they never send commands. */
-export function initMarkerEditor({ model, scene, onChange }) {
+/**
+ * The editor's controls select settings and place anchors; they never send commands.
+ *
+ * `mode: "view"` edits one dashboard view's icons (offsets, icons, size, …).
+ * `mode: "room"` edits a room's own icons, which every view starts from: a
+ * move or icon choice is saved at once through `onRoomChange(id, changes)`
+ * (`{ position }` in room metres or `{ icon }`; null resets).
+ */
+export function initMarkerEditor({
+  model,
+  scene,
+  onChange,
+  mode = "view",
+  feedbackId = "dashboard-marker-message",
+  onSelect,
+  onRoomChange,
+}) {
+  const room = mode === "room";
   // The full icon set loads only when needed (picker search, or a saved
   // icon outside the suggestions); suggestions are bundled.
   let catalog = null;
@@ -52,9 +70,11 @@ export function initMarkerEditor({ model, scene, onChange }) {
     if (svg.innerHTML !== art.html) svg.innerHTML = art.html;
     svg.setAttribute("viewBox", art.viewBox);
   };
-  const host = document.getElementById("dashboard-marker-settings");
+  const host = room
+    ? null
+    : document.getElementById("dashboard-marker-settings");
   const viewport = document.getElementById("viewport");
-  const feedback = document.getElementById("dashboard-marker-message");
+  const feedback = document.getElementById(feedbackId);
   let settings = {},
     owner,
     layer,
@@ -82,7 +102,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
       );
     });
   const label = (c) =>
-    deviceForControl(model(), c.id)?.label || c.label || c.name || c.id;
+    deviceForControl(model(), c.id)?.label || deviceLabel(c, c.id);
   const say = (text) => {
     feedback.textContent = text;
   };
@@ -106,7 +126,43 @@ export function initMarkerEditor({ model, scene, onChange }) {
     if (stack.length > 50) stack.shift();
     history.set(id, stack);
   }
+  /** Room mode: save a move or icon now; the scene then holds the new anchor. */
+  async function roomCommit(id, key, value) {
+    const previous = settings[id] ? structuredClone(settings[id]) : undefined;
+    const base = owner.fixturePosition(id);
+    if (key === "offset" && !base) return;
+    if (key === "icon" && value !== null && !isMarkerIcon(value)) return;
+    settings = { ...settings, [id]: { ...settings[id] } };
+    if (value === null) delete settings[id][key];
+    else settings[id][key] = value;
+    refresh();
+    const changes =
+      key === "icon"
+        ? { icon: value }
+        : {
+            position:
+              value === null
+                ? null
+                : base.map((v, axis) => Number((v + value[axis]).toFixed(4))),
+          };
+    try {
+      await onRoomChange?.(id, changes);
+    } catch (error) {
+      if (previous) settings[id] = previous;
+      else delete settings[id];
+      say(error.message || "Could not save this icon.");
+      refresh();
+      return;
+    }
+    delete settings[id]?.offset;
+    if (settings[id] && !Object.keys(settings[id]).length) delete settings[id];
+    refresh();
+  }
   function commit(id, key, value) {
+    if (room && (key === "offset" || key === "icon")) {
+      roomCommit(id, key, value);
+      return;
+    }
     const next = validateMarkers({
       ...settings,
       [id]: { ...settings[id], [key]: value },
@@ -131,6 +187,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
     picker.value = id;
     inspector.hidden = false;
     refresh();
+    onSelect?.(id);
   }
   function deselect() {
     const entry = entries.get(selected);
@@ -198,15 +255,20 @@ export function initMarkerEditor({ model, scene, onChange }) {
         ? "none"
         : "";
       entry.labels.checked = option.show_label;
-      const glyph = iconArtFor(option.icon) || {
-        viewBox: "0 0 24 24",
-        html: entry.defaultPath,
-      };
+      // A view without its own icon shows the room's icon.
+      const roomIcon = room ? undefined : control.icon;
+      const glyph = iconArtFor(option.icon) ||
+        iconArtFor(roomIcon) || {
+          viewBox: "0 0 24 24",
+          html: entry.defaultPath,
+        };
       paint(entry.glyph, glyph);
       paint(entry.iconSwatch, glyph);
       entry.iconName.textContent = option.icon
         ? iconLabel(option.icon)
-        : "Default";
+        : roomIcon
+          ? `${iconLabel(roomIcon)} · room icon`
+          : "Default";
       for (const choice of entry.iconChoices())
         choice.setAttribute(
           "aria-pressed",
@@ -234,23 +296,27 @@ export function initMarkerEditor({ model, scene, onChange }) {
         control.type === "climate" || control.type === "lock"
           ? markerAppearance(control, state.entity, state)
           : null;
+      // Not connected yet reads as a dash, as on dashboard cards.
+      const connected = !model()?.bindings || !!model().bindings[control.id];
       entry.badge.textContent = climate
         ? climate.badge
-        : state.unavailable
-          ? "Unavailable"
-          : control.type === "number"
-            ? state.value === undefined
-              ? "—"
-              : `${state.value} ${control.unit || ""}`
-            : control.type === "cover"
-              ? state.position === undefined
+        : !connected
+          ? "—"
+          : state.unavailable
+            ? "Unavailable"
+            : control.type === "number"
+              ? state.value === undefined
                 ? "—"
-                : `${Math.round(state.position)}%`
-              : control.type === "button"
-                ? "Run"
-                : state.on
-                  ? "On"
-                  : "Off";
+                : `${state.value} ${control.unit || ""}`
+              : control.type === "cover"
+                ? state.position === undefined
+                  ? "—"
+                  : `${Math.round(state.position)}%`
+                : control.type === "button"
+                  ? "Run"
+                  : state.on
+                    ? "On"
+                    : "Off";
       if (!option.visible) entry.badge.textContent = "Hidden";
       entry.button.dataset.active = String(
         (control.type === "light" || control.type === "climate") &&
@@ -274,7 +340,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
         if (document.activeElement !== entry.axes[axis])
           entry.axes[axis].value = option.offset?.[axis] ?? 0;
       }
-      entry.reset.disabled = !option.offset;
+      entry.reset.disabled = room ? !control.markerAnchor : !option.offset;
       if (option.placement === "tray") {
         if (entry.button.parentElement !== tray) tray.append(entry.button);
         entry.button.hidden = false;
@@ -408,7 +474,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
     tray = document.createElement("div");
     tray.className = "marker-editor-tray";
     viewport.after(tray);
-    host.replaceChildren();
+    host?.replaceChildren();
     defaultsBox = document.createElement("section");
     defaultsBox.className = "marker-view-defaults";
     defaultsBox.setAttribute("aria-label", "Device defaults for this view");
@@ -427,7 +493,7 @@ export function initMarkerEditor({ model, scene, onChange }) {
         );
       };
     }
-    host.append(defaultsBox);
+    host?.append(defaultsBox);
     picker = document.createElement("select");
     picker.setAttribute("aria-label", "Choose device icon to edit");
     const placeholder = document.createElement("option");
@@ -435,15 +501,19 @@ export function initMarkerEditor({ model, scene, onChange }) {
     placeholder.textContent = "Choose a device…";
     picker.append(placeholder);
     picker.onchange = () => select(picker.value);
-    host.append(picker);
+    host?.append(picker);
     inspector = document.createElement("div");
-    inspector.className = "marker-floating-tools";
+    inspector.className = room
+      ? "marker-floating-tools room-mode"
+      : "marker-floating-tools";
     inspector.hidden = true;
     inspector.setAttribute("role", "region");
     inspector.setAttribute("aria-label", "Device icon tools");
     viewport.append(inspector);
     say(
-      "Drag a room icon to move it, or click for tools. Undo restores its last edit.",
+      room
+        ? "Drag an icon to move it, or click it to change it. Dashboard views start from these icons."
+        : "Drag a room icon to move it, or click for tools. Undo restores its last edit.",
     );
     for (const control of controls(true)) {
       const details = document.createElement("details");
@@ -538,6 +608,10 @@ export function initMarkerEditor({ model, scene, onChange }) {
           return;
         }
         if (settings[control.id]?.icon === undefined) return;
+        if (room) {
+          roomCommit(control.id, "icon", null);
+          return;
+        }
         remember(control.id);
         delete settings[control.id].icon;
         if (!Object.keys(settings[control.id]).length)
@@ -564,7 +638,19 @@ export function initMarkerEditor({ model, scene, onChange }) {
         return choice;
       };
       const iconTiles = [
-        tile("", "Default icon", { viewBox: "0 0 24 24", html: path }, true),
+        !room && control.icon
+          ? tile(
+              "",
+              "Room icon",
+              iconArtFor(control.icon) || { viewBox: "0 0 24 24", html: path },
+              true,
+            )
+          : tile(
+              "",
+              "Default icon",
+              { viewBox: "0 0 24 24", html: path },
+              true,
+            ),
       ];
       iconList.append(iconTiles[0]);
       const iconGroups = [];
@@ -800,6 +886,11 @@ export function initMarkerEditor({ model, scene, onChange }) {
         };
       entry.reset.onclick = () => {
         stopPlacement();
+        if (room) {
+          if (model()?.controls.find((c) => c.id === control.id)?.markerAnchor)
+            roomCommit(control.id, "offset", null);
+          return;
+        }
         if (!settings[control.id]?.offset) return;
         remember(control.id);
         delete settings[control.id].offset;
@@ -853,8 +944,9 @@ export function initMarkerEditor({ model, scene, onChange }) {
         fixture.marker.visible =
           !model()?.controls.find((c) => c.id === id)?.hidden &&
           !fixture.companion &&
+          !fixture.outOfScope &&
           previousMarkers &&
-          owner.options.mode !== "floor";
+          (owner.options.mode !== "floor" || !!owner.options.floorMarkers);
       owner.render();
     }
     owner = undefined;
@@ -1046,5 +1138,18 @@ export function initMarkerEditor({ model, scene, onChange }) {
     },
     true,
   );
-  return { open, close, read: () => structuredClone(settings) };
+  /** Point out one device's icon (a list row is hovered), or none. */
+  function highlight(id) {
+    for (const [key, entry] of entries)
+      entry.button.dataset.highlight = String(key === id);
+  }
+  return {
+    open,
+    close,
+    highlight,
+    get isOpen() {
+      return !!owner;
+    },
+    read: () => structuredClone(settings),
+  };
 }

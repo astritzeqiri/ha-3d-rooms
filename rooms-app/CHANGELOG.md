@@ -1,3 +1,18 @@
+## 0.36.0
+
+- **A stopped 3D view says so and can be reloaded.** If the browser takes the graphics context away (a GPU reset, memory pressure), dashboard cards and the manager used to show a blank canvas. They now show a message with a "Reload 3D view" button, and redraw on their own when the browser restores the context.
+- **Room names without the scan suffix.** "Office · your scan" and "Corridor · November scan" are shown as "Office" and "Corridor" in the card's Lights and Shades panels, marker labels, device dialogs and the manager's headings. Stored names and ids are unchanged.
+- **Devices tab keeps the model in view.** On wide screens the device list sits beside the 3D room; on narrower screens the room stays pinned above the list. Rooms whose lights are all off are lit enough in the manager to find their devices.
+- **Scrolling no longer zooms by accident.** In the manager, the mouse wheel scrolls the page until you click or drag the model; Ctrl/⌘ + wheel and trackpad pinch always zoom.
+- **Connect a room's devices together.** "Connect devices" lists entities whose names match unconnected devices. Close matches are ticked; one button connects the ticked ones.
+- **Download progress on cards.** Loading shows a progress bar with the room count for houses and a percentage or megabytes for single rooms.
+- **A tidier Devices list.** Each row's expand arrow sits on the left, lined up in every row. Status dots and icons use state colours: green locked, red unlocked, purple open, the light's colour when on, a grey ring when not connected. Control mode (Live or Simulation) moved to the top of the list it affects. Pointing at a row highlights that device in the model, and selecting a device in the model opens its row. Floor plans in the manager show device markers too.
+- **Room icons, set once in the Devices tab.** The room model on the Devices tab shows each device's real icon. Drag an icon to move it, or click it to choose another icon (any Home Assistant icon, including your own icon sets) or put it back. These are saved with the room: dashboard cards, house and floor views, and every dashboard view start from them. A view can still move an icon or pick another one for itself. Replacing a room's model keeps the icons of devices that still exist.
+- **Easier marker taps.** Small device markers on cards keep their size but accept taps in a 44-pixel area.
+- **The My home / Dashboard views switch stays in view.** It used to scroll away with the page; it now stays pinned under the header (at the top on phones), and the Spaces panel sits below it.
+- Smaller fixes: screens open at the top instead of the previous scroll position, clearer floor help in room settings, tidier Dashboard views wording and buttons.
+- No migration or re-upload is needed.
+
 ## 0.35.0
 
 - **Time of day is a three-icon switch.** The Day/Night/Auto dropdown on dashboard cards is now a row of three icons (auto, sun, moon). Click one and the highlight slides onto it; the choice is saved with the room, as before. Arrow keys move the choice too.

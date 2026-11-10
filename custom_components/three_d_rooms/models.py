@@ -238,6 +238,51 @@ def validate_manifest(m):
     }
 
 
+def validate_marker_default(value):
+    """One device's room-level icon: a position in room metres and/or an icon name."""
+    if not isinstance(value, dict) or not value or set(value) - {"position", "icon"}:
+        raise ValueError("Room icon settings take a position and an icon.")
+    if "position" in value and (
+        not vector(value["position"]) or any(abs(v) > 1000 for v in value["position"])
+    ):
+        raise ValueError("Icon positions must be three values within 1000 metres.")
+    if "icon" in value and (not isinstance(value["icon"], str) or not MARKER_ICON.match(value["icon"])):
+        raise ValueError("Choose a Home Assistant icon such as mdi:door or local:front-door.")
+    return {k: (list(v) if k == "position" else v) for k, v in value.items()}
+
+
+def apply_marker_defaults(model):
+    """Serve each device's room icon: a moved anchor and a chosen default icon.
+
+    Views still add their own offsets and icons on top. `markerAnchor` keeps
+    the exported anchor so the manager can put a moved icon back.
+    """
+    defaults = model.get("markerDefaults")
+    if not defaults:
+        return model
+    model = deepcopy(model)
+    for control in model["controls"]:
+        value = defaults.get(control["id"])
+        if not value:
+            continue
+        if "position" in value:
+            control["markerAnchor"] = control.get("markerPosition", control["position"])
+            control["markerPosition"] = list(value["position"])
+        if "icon" in value:
+            control["icon"] = value["icon"]
+    return model
+
+
+def preserve_marker_defaults(previous, incoming):
+    """Keep room icons for devices that still exist after a model replacement."""
+    ids = {c["id"] for c in incoming["controls"]}
+    kept = {k: v for k, v in previous.get("markerDefaults", {}).items() if k in ids}
+    if kept:
+        incoming["markerDefaults"] = kept
+    else:
+        incoming.pop("markerDefaults", None)
+
+
 def preserve_device_visibility(previous, incoming):
     old = {c["id"]: c for c in previous["controls"]}
     for control in incoming["controls"]:
@@ -689,7 +734,7 @@ class ModelStore:
                         floor["name"] = floor_names[linked]
                     else:
                         floor.pop("haFloorId", None)
-        models = [apply_light_groups(m) for m in models]
+        models = [apply_marker_defaults(apply_light_groups(m)) for m in models]
         views = house_models(models)
         return [*models, *views]
 
@@ -703,7 +748,7 @@ class ModelStore:
         raise ValueError("Model not found.")
 
     def catalog_real(self):
-        return [apply_light_groups({**m, "sceneRevision": self.revision(m["id"])}) for m in self.models]
+        return [apply_marker_defaults(apply_light_groups({**m, "sceneRevision": self.revision(m["id"])})) for m in self.models]
 
     def save(self, models):
         temporary = self.directory / "catalog.json.tmp"
@@ -784,6 +829,37 @@ class ModelStore:
                     control.pop("hidden", None)
         self.save(models)
         return {"controls": deepcopy(model["controls"])}
+
+    def set_device_marker(self, model_id, control_id, changes):
+        """Room-level icon for one device: `position` and/or `icon`; None resets that part."""
+        if not isinstance(changes, dict) or not changes or set(changes) - {"position", "icon"}:
+            raise ValueError("Send a position or an icon for this device.")
+        models = deepcopy(self.models)
+        model = next((m for m in models if m["id"] == model_id), None)
+        if model is None or control_id not in {c["id"] for c in model["controls"]}:
+            raise ValueError("Choose a device in its source room.")
+        defaults = model.get("markerDefaults", {})
+        entry = {**defaults.get(control_id, {})}
+        for key, value in changes.items():
+            if value is None:
+                entry.pop(key, None)
+            else:
+                entry[key] = value
+        if entry:
+            defaults[control_id] = validate_marker_default(entry)
+        else:
+            defaults.pop(control_id, None)
+        if defaults:
+            model["markerDefaults"] = defaults
+        else:
+            model.pop("markerDefaults", None)
+        self.save(models)
+        shown = apply_marker_defaults(apply_light_groups(model))
+        control = next(c for c in shown["controls"] if c["id"] == control_id)
+        return {
+            "markerDefaults": deepcopy(model.get("markerDefaults", {})),
+            "control": {k: deepcopy(control[k]) for k in ("markerPosition", "markerAnchor", "icon") if k in control},
+        }
 
     def set_device_settings(self, model_id, device_id, names):
         models = deepcopy(self.models)
@@ -891,6 +967,7 @@ class ModelStore:
                     if "areaId" in previous:
                         model["areaId"] = previous["areaId"]
                     preserve_device_visibility(previous, model)
+                    preserve_marker_defaults(previous, model)
                     model["lightGroups"] = preserved_groups(previous, model["controls"])
                     controls = {c["id"]: c for c in model["controls"]}
                     kept_bindings = {k: v for k, v in previous["bindings"].items() if k in controls and compatible_entity(controls[k], v)}
@@ -1078,6 +1155,7 @@ class ModelStore:
             if settings:
                 manifest["deviceSettings"] = validate_device_settings(settings, manifest["devices"])
             preserve_device_visibility(previous, manifest)
+            preserve_marker_defaults(previous, manifest)
             controls = {c["id"]: c for c in manifest["controls"]}
             bindings = {
                 control_id: entity_id

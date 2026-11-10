@@ -64,6 +64,43 @@ export class SceneView {
     );
     this.renderer.domElement.setAttribute("role", "img");
     container.append(this.renderer.domElement);
+    // The browser can take the graphics context away (GPU reset, memory
+    // pressure, too many 3D views). Stop drawing, tell the owner, and redraw
+    // everything if the browser hands the context back.
+    this.renderer.domElement.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+      this.contextLost = true;
+      if (this.climateFrame) cancelAnimationFrame(this.climateFrame);
+      this.climateFrame = 0;
+      this.options.onContextLost?.();
+    });
+    this.renderer.domElement.addEventListener("webglcontextrestored", () => {
+      this.contextLost = false;
+      this.shadowsCurrent = false;
+      this.render();
+      this.options.onContextRestored?.();
+    });
+    // On a page that scrolls, the wheel scrolls the page until the model has
+    // been clicked or dragged; Ctrl/⌘ + wheel (and trackpad pinch) always zoom.
+    this.wheelGate = (event) => {
+      if (
+        !this.options.scrollSafeZoom ||
+        event.ctrlKey ||
+        event.metaKey ||
+        this.wheelEngaged
+      )
+        return;
+      const page = document.scrollingElement;
+      if (page && page.scrollHeight > page.clientHeight + 1)
+        event.stopPropagation();
+    };
+    container.addEventListener("wheel", this.wheelGate, { capture: true });
+    this.renderer.domElement.addEventListener("pointerdown", () => {
+      this.wheelEngaged = true;
+    });
+    this.renderer.domElement.addEventListener("pointerleave", () => {
+      this.wheelEngaged = false;
+    });
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color("#242320");
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
@@ -284,7 +321,7 @@ export class SceneView {
         !companion &&
         c.lightGroupPrimary !== false &&
         this.options.markers &&
-        this.options.mode !== "floor";
+        (this.options.mode !== "floor" || !!this.options.floorMarkers);
       marker.position.fromArray(c.markerPosition || c.position);
       marker.userData.pickControl = c.id;
       marker.renderOrder = 10;
@@ -538,7 +575,7 @@ export class SceneView {
         !f.outOfScope &&
         !f.companion &&
         this.options.markers &&
-        this.options.mode !== "floor";
+        (this.options.mode !== "floor" || !!this.options.floorMarkers);
     this.renderer.domElement.setAttribute(
       "aria-label",
       this.model.houseView
@@ -765,6 +802,7 @@ export class SceneView {
     for (const [m, color] of this.materials)
       m.color.copy(color).multiplyScalar(0.5);
     this.updateDaylight();
+    this.applyWorkLight();
     this.syncClimateAnimation();
     this.render();
   }
@@ -772,7 +810,20 @@ export class SceneView {
     this.daylightMode = mode;
     this.sunEntity = sunEntity;
     this.updateDaylight();
+    this.applyWorkLight();
     this.render();
+  }
+  /**
+   * With `workLight` (the manager), a room whose lights are all off stays
+   * readable enough to find and connect its devices. Any light that is on
+   * shows the room as it really looks.
+   */
+  applyWorkLight() {
+    if (!this.options.workLight || !this.ambient) return;
+    for (const f of this.fixtures.values())
+      if (f.type === "light" && !f.outOfScope && f.light.intensity > 0) return;
+    this.ambient.intensity = Math.max(this.ambient.intensity, 0.5);
+    this.fill.intensity = Math.max(this.fill.intensity, 0.3);
   }
   updateDaylight() {
     if (!this.daylight) return;
@@ -790,13 +841,13 @@ export class SceneView {
         !fixture.outOfScope &&
         !fixture.companion &&
         this.options.markers &&
-        this.options.mode !== "floor";
+        (this.options.mode !== "floor" || !!this.options.floorMarkers);
     }
     this.render();
   }
   highlight(id) {
     for (const [key, f] of this.fixtures)
-      f.marker.scale.setScalar(key === id ? 2 : 1);
+      f.marker.scale.setScalar(key === id ? 2.6 : 1);
     this.render();
   }
   clear() {
@@ -809,6 +860,9 @@ export class SceneView {
   }
   dispose() {
     document.removeEventListener("visibilitychange", this.visibilityChanged);
+    this.container.removeEventListener("wheel", this.wheelGate, {
+      capture: true,
+    });
     this.clearClimateVisuals();
     ++this.generation;
     this.resize.disconnect();
@@ -816,6 +870,13 @@ export class SceneView {
     this.disposeScene(this.scene);
     this.renderer.dispose();
     this.renderer.domElement.remove();
+  }
+  /** Move a device's marker anchor (room icon moved in the manager). */
+  setMarkerPosition(id, position) {
+    const fixture = this.fixtures?.get(id);
+    if (!fixture || !Array.isArray(position)) return;
+    fixture.marker.position.fromArray(position);
+    this.render({ cameraOnly: true });
   }
   fixturePosition(id) {
     return this.fixtures.get(id)?.marker.position.toArray() || null;
@@ -918,6 +979,7 @@ export class SceneView {
     );
     const shouldRun =
       !document.hidden &&
+      !this.contextLost &&
       (effects.some((effect) => effect.animating) ||
         this.lightEffectsAnimating);
     if (!shouldRun) {
@@ -946,6 +1008,10 @@ export class SceneView {
   }
   /** `cameraOnly` renders that follow camera movement reuse the last shadow maps. */
   render({ cameraOnly = false } = {}) {
+    if (this.contextLost) {
+      this.shadowsCurrent = false;
+      return;
+    }
     if (this.renderSuspended) {
       if (!cameraOnly) this.shadowsCurrent = false;
       return;

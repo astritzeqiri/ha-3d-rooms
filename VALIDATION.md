@@ -1,3 +1,11 @@
+# 0.36.0 — room icons, Devices tab and recovery polish, 2026-11-10
+
+Released as 0.36.0, based on v0.35.0.
+
+- Frontend: 236 tests pass, including new tests for download progress, short room names, suggested entity matches and the view editor; Prettier clean; build succeeds. Python host suite: 81 tests pass (16 native tests skip outside HA), including new room-icon tests (save, reset, validation, kept on replacement).
+- Native checks in the pinned HA Core 2026.10.2 container, at desktop, 1280 px and phone widths: lost graphics context shows "Reload 3D view" in card and manager and recovers; card download progress per room; short room names in the Lights panel; Devices list beside the pinned model; suggested matches connect a device (then disconnected again); row hover highlights the icon and clicking an icon opens its row; dragging a room icon saves its position, which the house view then uses; icon picker opens in room mode; switching tabs closes and reopens the room icons.
+- Not tested: choosing a room icon end to end in the browser (covered by backend tests), a real phone, real GPU context loss (forced with `WEBGL_lose_context`), the HACS download flow.
+
 # 0.35.0 — light effects in the 3D room and a three-icon time-of-day switch, 2026-11-09
 
 Released as 0.35.0, based on v0.34.0.

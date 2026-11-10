@@ -216,18 +216,13 @@
               </button>
             </div>
             <div class="view-footer">
-              <span id="view-hint">Import a room or full-house ZIP</span
-              ><label id="preview-label" hidden
-                ><input id="preview" type="checkbox" checked hidden />
-                <span id="control-mode-label">Control mode</span
-                ><select id="control-mode" aria-label="Control mode">
-                  <option value="simulation">Simulation</option>
-                  <option value="live">Live controls</option>
-                </select>
-                <span id="preview-mode-note" class="muted"
-                  >No device commands</span
-                ></label
-              >
+              <span id="view-hint">Import a room or full-house ZIP</span>
+              <span
+                id="device-marker-message"
+                class="device-marker-message"
+                role="status"
+                hidden
+              ></span>
             </div>
           </div>
           <aside
@@ -473,11 +468,22 @@
           <div class="section-title">
             <div>
               <h2>Room devices</h2>
-              <p class="muted small">
+              <p id="device-list-hint" class="muted small">
                 Select a device below to control it or connect an entity.
               </p>
             </div>
             <div class="room-device-actions">
+              <label id="preview-label" hidden
+                ><input id="preview" type="checkbox" checked hidden />
+                <span id="control-mode-label">Control mode</span
+                ><select id="control-mode" aria-label="Control mode">
+                  <option value="simulation">Simulation</option>
+                  <option value="live">Live controls</option>
+                </select>
+                <span id="preview-mode-note" class="muted"
+                  >No device commands</span
+                ></label
+              >
               <span id="control-count" class="muted small"></span>
               <details id="group-menu" class="group-menu">
                 <summary>Group devices</summary>
@@ -558,10 +564,6 @@
               <button id="create-library-view" class="primary">New view</button>
             </div>
           </div>
-          <p class="views-library-hint">
-            Preview a view to see its dashboard card, or edit it to adjust the
-            framing.
-          </p>
           <div class="view-library-filters">
             <label
               >Find a view<input
@@ -619,10 +621,6 @@
                 </p>
                 <div id="room-floor-links"></div>
               </details>
-              <p class="muted">
-                Select every floor the room spans. Height ranges come from the
-                web house builder; the model stays intact.
-              </p>
             </fieldset>
             <p id="room-area-note" class="muted small">
               Link this 3D room to its area in Home Assistant. Device mappings

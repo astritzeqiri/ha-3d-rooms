@@ -6,6 +6,7 @@
 // "On" means a light is on or a shade is (partly) open. Bulk switches follow
 // Home Assistant's area/group toggles: anything on turns everything off,
 // otherwise everything turns on.
+import { shortRoomTitle } from "./workspace.mjs";
 export const PANEL_KINDS = {
   light: {
     entity: /^(light|switch)\.[a-z0-9_]+$/,
@@ -48,7 +49,7 @@ export function roomDevices(model, kind = "light", isShade = () => false) {
     )
       continue;
     const roomId = control.sourceModel || model.id,
-      title = control.roomTitle || model.title || "Room";
+      title = shortRoomTitle(control.roomTitle || model.title || "Room");
     if (!rooms.has(roomId))
       rooms.set(roomId, { id: roomId, kind, title, lights: [], entities: [] });
     const room = rooms.get(roomId),

@@ -20,8 +20,8 @@
   font-weight: 650;
 }
 #space-library {
-  top: 117px;
-  height: calc(100dvh - 117px);
+  top: 131px;
+  height: calc(100dvh - 131px);
 }
 body[data-workspace="views"] main {
   grid-template-columns: minmax(0, 1fr);
@@ -288,8 +288,18 @@ button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
+/* Keep the My home / Dashboard views switch under the sticky header. */
 .workspace-navigation {
   padding: 10px 24px;
+  position: sticky;
+  top: 56px;
+  z-index: 19;
+}
+/* The header scrolls away on phones, so the switch pins to the top. */
+@media (max-width: 600px) {
+  .workspace-navigation {
+    top: 0;
+  }
 }
 .workspace-switcher {
   display: inline-flex;

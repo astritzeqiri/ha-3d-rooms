@@ -77,7 +77,7 @@ def house_models(models):
                     p = placed_point(c["position"],t)
                     if floor and not floor["minY"] <= p[1] < floor["maxY"]:
                         continue
-                    controls.append({**deepcopy(c),"id":key(c["id"]),"label":m["title"]+" · "+c["label"],"position":p,**({"markerPosition":placed_point(c["markerPosition"],t)} if "markerPosition" in c else {}),**({"lightGroup":key(c["lightGroup"]),"lightGroupLabel":m["title"]+" · "+c["lightGroupLabel"]} if c.get("lightGroup") else {}),"nodeIds":[node(n) for n in c.get("nodeIds",[])],**({"group":key(c["group"])} if c.get("group") else {}),"sourceModel":m["id"],"sourceControl":c["id"],"roomTitle":m["title"]})
+                    controls.append({**{k: v for k, v in deepcopy(c).items() if k != "markerAnchor"},"id":key(c["id"]),"label":m["title"]+" · "+c["label"],"position":p,**({"markerPosition":placed_point(c["markerPosition"],t)} if "markerPosition" in c else {}),**({"lightGroup":key(c["lightGroup"]),"lightGroupLabel":m["title"]+" · "+c["lightGroupLabel"]} if c.get("lightGroup") else {}),"nodeIds":[node(n) for n in c.get("nodeIds",[])],**({"group":key(c["group"])} if c.get("group") else {}),"sourceModel":m["id"],"sourceControl":c["id"],"roomTitle":m["title"]})
                 position_group_markers(controls)
                 model["controls"].extend(controls)
                 visible = {c["id"] for c in controls}

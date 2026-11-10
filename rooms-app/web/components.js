@@ -49,7 +49,9 @@ export function initComponents({
       kind: $("view-kind-filter").value,
     });
     $("view-results").textContent =
-      `${views.length} of ${components.length} views`;
+      views.length === components.length
+        ? `${views.length} ${views.length === 1 ? "view" : "views"}`
+        : `${views.length} of ${components.length} views`;
     $("create-library-view").disabled = !models.length;
     $("saved-view-count").textContent = components.length;
     $("saved-view-count").setAttribute(

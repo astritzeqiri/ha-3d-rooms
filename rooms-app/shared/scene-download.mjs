@@ -10,8 +10,40 @@ export function sceneOwner(hass) {
 export function clearSceneDownloads(hass) {
   sessions.delete(sceneOwner(hass));
 }
-/** `variant` is "original", "full" or "phone"; the server falls back to the upload. */
-export async function sceneBlob(hass, model, variant = "original") {
+/**
+ * Read a response as a Blob, reporting `{ loaded, total }` bytes as they
+ * arrive. `total` is undefined when the size is unknown or the transfer is
+ * compressed (its length then counts compressed bytes).
+ */
+async function readBlob(response, report) {
+  const reader = response.body?.getReader?.();
+  if (!reader) return response.blob();
+  const header = (name) => response.headers?.get?.(name),
+    length = Number(header("content-length")),
+    total =
+      !header("content-encoding") && Number.isFinite(length) && length > 0
+        ? length
+        : undefined,
+    chunks = [];
+  let loaded = 0;
+  report({ loaded, total });
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    loaded += value.byteLength;
+    report({ loaded, total });
+  }
+  return new Blob(chunks, {
+    type: header("content-type") || "model/gltf-binary",
+  });
+}
+/**
+ * `variant` is "original", "full" or "phone"; the server falls back to the upload.
+ * `onProgress({ loaded, total })` follows the download, also when another
+ * card already started it.
+ */
+export async function sceneBlob(hass, model, variant = "original", onProgress) {
   if (hass.user?.is_admin === false)
     throw new Error("Administrator access is required.");
   const owner = sceneOwner(hass);
@@ -25,9 +57,14 @@ export async function sceneBlob(hass, model, variant = "original") {
   if (entry) {
     cache.delete(key);
     cache.set(key, entry);
+    if (onProgress && entry.listeners) {
+      entry.listeners.add(onProgress);
+      if (entry.progress) onProgress(entry.progress);
+    }
     return entry.promise;
   }
-  entry = { bytes: 0, expires: now + MAX_AGE };
+  entry = { bytes: 0, expires: now + MAX_AGE, listeners: new Set() };
+  if (onProgress) entry.listeners.add(onProgress);
   entry.promise = (async () => {
     const path = `/api/three_d_rooms/models/${encodeURIComponent(model.id)}/scene.glb?v=${encodeURIComponent(revision)}&variant=${encodeURIComponent(variant)}`;
     const response = await hass.fetchWithAuth(path);
@@ -35,7 +72,11 @@ export async function sceneBlob(hass, model, variant = "original") {
       throw new Error(
         "Could not download your room. Check your login and the 3D Rooms integration.",
       );
-    const blob = await response.blob();
+    const blob = await readBlob(response, (progress) => {
+      entry.progress = progress;
+      for (const listener of entry.listeners) listener(progress);
+    });
+    entry.listeners = null;
     entry.bytes = blob.size;
     let size = [...cache.values()].reduce((sum, item) => sum + item.bytes, 0);
     for (const [id, item] of cache) {

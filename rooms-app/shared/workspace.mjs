@@ -2,7 +2,30 @@
 export function roomName(model) {
   if (model?.houseView) return model.houseFloor?.name || model.title;
   const title = String(model?.title || "Untitled room");
-  return title.replace(/\s*·\s*(?:your scan|edited)\b/gi, "").trim() || title;
+  return shortRoomTitle(title);
+}
+/** "Office · your scan", "Corridor · November scan · edited" → the room's name. */
+export function shortRoomTitle(title) {
+  const text = String(title ?? "");
+  return (
+    text
+      .replace(
+        /\s*·\s*(?:(?:[\p{L}\p{N}]+\s+)?scan|edited)(?=\s*(?:·|$))/giu,
+        "",
+      )
+      .trim() || text
+  );
+}
+/**
+ * A house view prefixes each device with its room's stored title. Show the
+ * room's short name instead; ids and stored names stay as they are.
+ */
+export function deviceLabel(control, fallback = "Device") {
+  const label = control?.label || control?.name || fallback,
+    prefix = control?.roomTitle ? `${control.roomTitle} · ` : "";
+  return prefix && label.startsWith(prefix)
+    ? `${shortRoomTitle(control.roomTitle)} · ${label.slice(prefix.length)}`
+    : label;
 }
 export function houseId(model) {
   return model?.houseId || model?.housePlacement?.houseId;

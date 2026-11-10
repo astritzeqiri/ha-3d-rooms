@@ -27,14 +27,17 @@ import {
 import { actionState, actionCommand } from "../shared/action.mjs";
 import { numberState, numberCommand } from "../shared/number.mjs";
 import { coverFeatures, coverState, coverCommand } from "../shared/cover.mjs";
+import { markerAppearance } from "../shared/marker.mjs";
 import "./style.css";
 import "./workspace.css";
 import "./views-workspace.css";
 import { mountCameraNavigation } from "./camera-navigation.js";
 import { initDashboardEditor } from "./dashboard-editor.js";
+import { initMarkerEditor } from "./marker-editor.js";
 import { connectNative } from "./native.js";
 import { createOptimizePanel } from "./optimize-panel.js";
 import { initEntityPicker, pickerHTML } from "./entity-picker.js";
+import { suggestBindings } from "../shared/entity-picker.mjs";
 const native = await connectNative().catch((error) => {
   document.getElementById("connection").textContent = error.message;
   throw error;
@@ -325,6 +328,11 @@ function lockButtons(c, s, off) {
     )
     .join("")}</div>`;
 }
+/** State colour for a device row, as on dashboard markers (none when idle). */
+function rowTone(c, s, kind) {
+  if (c.device || !["ready", "simulation"].includes(kind)) return undefined;
+  return markerAppearance(c, preview ? undefined : s.entity, s, preview).tone;
+}
 let deviceFilter = "all",
   deviceQuery = "";
 const openMore = new Set();
@@ -482,6 +490,10 @@ function drawControls() {
     ? "No device commands"
     : "Actions control real devices";
   $("control-mode").value = preview ? "simulation" : "live";
+  $("preview-label").dataset.mode = preview ? "simulation" : "live";
+  $("device-list-hint").textContent = preview
+    ? "Simulation: try devices here without sending anything to Home Assistant."
+    : "Live: switches and buttons here control your real devices.";
   $("preview").setAttribute(
     "aria-label",
     "Simulation: device commands are disabled",
@@ -737,7 +749,8 @@ function drawControls() {
           );
           const kind = control.hidden ? "hidden" : connection.kind;
           const open = expandedDevice === control.id && !control.hidden;
-          return `<div class="device-row" data-control="${control.id}" data-connection="${kind}" data-expanded="${open}"><div class="device-row-main"><button type="button" class="device-row-toggle" data-expand="${control.id}" aria-expanded="${open}" aria-controls="device-body-${control.id}" ${control.hidden ? "disabled" : ""}>${deviceTypeIcon(control)}<span class="device-row-text"><span class="device-row-name">${esc(control.device?.label || control.label)}</span><span class="device-row-meta">${esc(deviceRowMeta(control, s, connection))}</span></span><svg class="row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="device-row-quick">${deviceRowQuick(control, s, connection)}</div>${control.hidden ? "" : deviceSettingsButton(control)}</div>${open ? `<div class="device-row-body" id="device-body-${control.id}">${cardHTML[index]}</div>` : ""}</div>`;
+          const tone = rowTone(control, s, kind);
+          return `<div class="device-row" data-control="${control.id}" data-connection="${kind}" data-expanded="${open}"${tone ? ` data-tone="${tone}"` : ""}><div class="device-row-main"><button type="button" class="device-row-toggle" data-expand="${control.id}" aria-expanded="${open}" aria-controls="device-body-${control.id}" ${control.hidden ? "disabled" : ""}><svg class="row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>${deviceTypeIcon(control)}<span class="device-row-text"><span class="device-row-name">${esc(control.device?.label || control.label)}</span><span class="device-row-meta">${esc(deviceRowMeta(control, s, connection))}</span></span></button><div class="device-row-quick">${deviceRowQuick(control, s, connection)}</div>${control.hidden ? "" : deviceSettingsButton(control)}</div>${open ? `<div class="device-row-body" id="device-body-${control.id}">${cardHTML[index]}</div>` : ""}</div>`;
         })
         .join("")}</div></section>`;
     })
@@ -1203,12 +1216,16 @@ function setRoomTab(tab, { keepEditor = false } = {}) {
     homeModelId = selected?.id;
     homeTab = activeRoomTab;
   }
+  // A new screen starts at its top, not where the last one was scrolled to.
+  if (tab !== activeRoomTab) window.scrollTo?.(0, 0);
   activeRoomTab = tab;
   document.body.dataset.workspace = tab === "views" ? "views" : "home";
   $("nav-home").setAttribute("aria-pressed", String(tab !== "views"));
   $("nav-views").setAttribute("aria-pressed", String(tab === "views"));
   workspace.closeLibrary();
   document.body.dataset.roomTab = tab;
+  if (selected) showViewHint();
+  syncRoomIcons();
   $("dashboard").hidden = true;
   $("preview-label").hidden =
     !selected || !!selected.houseView || tab !== "devices";
@@ -1308,9 +1325,17 @@ function drawRoomSettings() {
     label.append(checkbox, document.createTextNode(floor.name));
     $("room-floor-choices").append(label);
   }
-  $("room-floor-note").textContent = haFloors.length
-    ? "Floors come from Home Assistant. Match exported height ranges below, then check every floor this room occupies."
-    : "No Home Assistant floors found. Create them under Settings → Areas, labels & zones, then refresh areas and floors.";
+  // Ticks follow the house floors linked to Home Assistant floors; without
+  // links every box is empty even though the model places the room.
+  const occupied = (definition?.floors || []).filter((f) =>
+      definition.floorIds.includes(f.id),
+    ),
+    unlinked = occupied.filter((f) => !f.haFloorId);
+  $("room-floor-note").textContent = !haFloors.length
+    ? "No Home Assistant floors found. Create them under Settings → Areas, labels & zones, then refresh areas and floors."
+    : unlinked.length
+      ? `The house model puts this room on ${unlinked.map((f) => f.name).join(" and ")}, which ${unlinked.length === 1 ? "is" : "are"} not linked to a Home Assistant floor yet. Link ${unlinked.length === 1 ? "it" : "them"} under Advanced below, or tick the floors this room occupies.`
+      : "Tick every Home Assistant floor this room occupies. The 3D model is not changed.";
   $("room-name").value = selected.title;
   $("room-area").replaceChildren();
   const add = (value, label) => {
@@ -1432,7 +1457,7 @@ $("room-settings-form").onsubmit = async (event) => {
     selected = models.find((m) => m.id === model.id);
     drawModels();
     if (selected?.id === model.id) {
-      $("title").textContent = model.title;
+      $("title").textContent = roomName(model);
       $("model-type").textContent =
         areas.find((a) => a.area_id === model.areaId)?.name || "3D ROOM";
       drawRoomSettings();
@@ -1456,7 +1481,7 @@ $("replace-form").onsubmit = async (event) => {
   }
   if (
     !confirm(
-      `Replace the 3D model for ${model.title}? Its name, area, daylight setting, saved views and matching device mappings are kept.`,
+      `Replace the 3D model for ${roomName(model)}? Its name, area, daylight setting, saved views and matching device mappings are kept.`,
     )
   )
     return;
@@ -1519,6 +1544,8 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
   }
   cameraNavigation.hidden = true;
   const current = ++selection;
+  roomIcons?.close();
+  if (selected?.id !== id) window.scrollTo?.(0, 0);
   selected = models.find((m) => m.id === id);
   if (selected?.houseView && tab === "devices") tab = "overview";
   $("show-room-settings").hidden = false;
@@ -1564,7 +1591,8 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
   $("controls-section").hidden =
     !!selected.houseView || activeRoomTab !== "devices";
   $("control-count").textContent = `${selected.controls.length} devices`;
-  $("view-hint").textContent = "Drag to rotate · Scroll to zoom";
+  showViewHint();
+  $("retry-scene").textContent = "Retry loading";
   $("retry-scene").hidden = true;
   $("scene-status").hidden = false;
   $("scene-status").dataset.state = "loading";
@@ -1579,7 +1607,7 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
       (id) => {
         view.highlight(id);
         if (activeRoomTab === "devices") {
-          openDeviceSettings(id);
+          revealDevice(id);
           return;
         }
         document
@@ -1588,7 +1616,28 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
           )
           ?.focus();
       },
-      { mode: viewMode, onRoomPick: (id) => workspace.focusRoom(id) },
+      {
+        mode: viewMode,
+        onRoomPick: (id) => workspace.focusRoom(id),
+        scrollSafeZoom: true,
+        workLight: true,
+        floorMarkers: true,
+        // The browser dropped the 3D context: say so and offer a way back.
+        onContextLost: () => {
+          $("viewport").dataset.contextLost = "true";
+          $("scene-status").hidden = false;
+          $("scene-status").dataset.state = "error";
+          $("scene-status").textContent =
+            "The 3D view stopped. Your browser paused its graphics.";
+          $("retry-scene").textContent = "Reload 3D view";
+          $("retry-scene").hidden = false;
+        },
+        onContextRestored: () => {
+          delete $("viewport").dataset.contextLost;
+          $("scene-status").hidden = true;
+          $("retry-scene").hidden = true;
+        },
+      },
     );
     $("scene-status").textContent = "Downloading your room…";
     const layers = [],
@@ -1625,6 +1674,7 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
     $("scene-status").hidden = true;
     cameraNavigation.hidden = false;
     drawControls();
+    syncRoomIcons();
     return true;
   } catch (e) {
     if (current !== selection) return;
@@ -1636,16 +1686,30 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
     return false;
   }
 }
-$("retry-scene").onclick = () => choose(selected.id, activeRoomTab);
+$("retry-scene").onclick = () => {
+  // A lost graphics context cannot be reused: start a fresh 3D view.
+  if (view?.contextLost) {
+    view.dispose();
+    view = undefined;
+  }
+  delete $("viewport").dataset.contextLost;
+  choose(selected.id, activeRoomTab, { forceEditorClose: false });
+};
 $("models").addEventListener("click", (e) => {
   const b = e.target.closest("[data-model]");
   if (b) {
     choose(b.dataset.model);
   }
 });
+// Floor plans pan instead of rotating; say what dragging does.
+function showViewHint() {
+  $("view-hint").textContent =
+    `${viewMode === "floor" ? "Drag to move" : "Drag to rotate"} · Click the model, then scroll to zoom${activeRoomTab === "devices" ? " · Select a device to find it in the list" : ""}`;
+}
 window.addEventListener("rooms-view-camera", (event) => {
   viewMode = event.detail.view;
   $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
+  showViewHint();
 });
 $("home-view").onclick = () => view?.setCameraPreset("reset");
 $("floor-view").onclick = () => {
@@ -1656,6 +1720,7 @@ $("floor-view").onclick = () => {
     view?.setCameraPreset("reset");
   }
   $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
+  showViewHint();
   const url = new URL(location.href);
   if (viewMode === "floor") url.searchParams.set("view", "floor");
   else url.searchParams.delete("view");
@@ -1818,7 +1883,59 @@ initHouseActions({
     );
   },
 });
+// Room icons on the Devices tab: real device icons on the model that can be
+// dragged and given another icon. Dashboard views start from them.
+const roomIcons = initMarkerEditor({
+  mode: "room",
+  model: () => selected,
+  scene: () => view,
+  onChange: () => {},
+  feedbackId: "device-marker-message",
+  onSelect: (id) => revealDevice(id, { focus: false }),
+  onRoomChange: async (id, changes) => {
+    const model = selected;
+    const result = await api(`models/${model.id}/device-marker`, {
+      method: "PUT",
+      body: JSON.stringify({ controlId: id, ...changes }),
+    });
+    const control = model.controls.find((c) => c.id === id);
+    for (const key of ["markerPosition", "markerAnchor", "icon"])
+      if (key in result.control) control[key] = result.control[key];
+      else delete control[key];
+    if (view?.model?.id === model.id)
+      view.setMarkerPosition(id, control.markerPosition || control.position);
+    toast(
+      "icon" in changes
+        ? changes.icon
+          ? "Icon saved. Dashboard views use it unless they choose their own."
+          : "Icon set back to the default."
+        : changes.position
+          ? "Icon position saved. Dashboard views start from it."
+          : "Icon moved back to its original place.",
+    );
+  },
+});
+function syncRoomIcons() {
+  const wanted =
+    !!native &&
+    !!selected &&
+    !selected.houseView &&
+    activeRoomTab === "devices" &&
+    view?.model?.id === selected.id &&
+    !document.body.classList.contains("dashboard-editing");
+  $("device-marker-message").hidden = !wanted;
+  if (!wanted) {
+    if (roomIcons.isOpen) roomIcons.close();
+    return;
+  }
+  if (roomIcons.isOpen) return;
+  const icons = {};
+  for (const control of selected.controls)
+    if (control.icon) icons[control.id] = { icon: control.icon };
+  roomIcons.open(icons);
+}
 const dashboardEditor = initDashboardEditor({
+  beforeOpen: () => roomIcons.close(),
   api,
   preview: native?.preview,
   model: () => selected,
@@ -1976,7 +2093,7 @@ function drawMappings(controlId) {
   const members = device
     ? [device.height, device.motion, ...device.macros]
     : null;
-  $("settings-eyebrow").textContent = selected.title;
+  $("settings-eyebrow").textContent = roomName(selected);
   $("settings-title").textContent = device
     ? device.label
     : controlId
@@ -2018,10 +2135,117 @@ function drawMappings(controlId) {
     )
     .map(mappingRow)
     .join("");
-  $("mappings").innerHTML = deviceRows + other;
+  // The whole-room list offers confident name matches in one step.
+  const suggestions =
+    controlId || !status.connected
+      ? []
+      : suggestBindings(
+          selected.controls
+            .filter(
+              (c) => c.lightGroupPrimary !== false && !memberIds.has(c.id),
+            )
+            .map((c) => ({
+              id: c.id,
+              label: c.label,
+              pattern: pickerContext(c.id).pattern,
+            })),
+          status.entities,
+          { bindings: selected.bindings, context: roomName(selected) },
+        );
+  const suggested = suggestions.length
+    ? `<section class="suggested-matches" aria-labelledby="suggested-title"><h3 id="suggested-title">${suggestions.length} suggested ${suggestions.length === 1 ? "match" : "matches"}</h3><p class="muted small">Entities whose names match these devices. Close matches are ticked; check the list, then connect the ticked ones together.</p><ul>${suggestions
+        .map(
+          (m) =>
+            `<li><label><input type="checkbox" ${m.strong ? "checked" : ""} data-suggest="${esc(m.controlId)}" data-entity="${esc(m.entityId)}"><span class="suggest-device">${esc(selected.controls.find((c) => c.id === m.controlId).label)}</span><span class="suggest-arrow" aria-hidden="true">→</span><span class="suggest-entity">${esc(m.name)}<small>${esc(m.entityId)}</small></span></label></li>`,
+        )
+        .join(
+          "",
+        )}</ul><button type="button" class="primary" data-apply-suggestions>Connect selected</button></section>`
+    : "";
+  $("mappings").innerHTML = suggested + deviceRows + other;
+}
+async function applySuggestions(button) {
+  const chosen = [...$("mappings").querySelectorAll("[data-suggest]:checked")];
+  if (!chosen.length) return;
+  $("mapping-error").textContent = "";
+  button.disabled = true;
+  button.textContent = "Connecting…";
+  let done = 0;
+  try {
+    for (const input of chosen) {
+      const controlId = input.dataset.suggest,
+        entityId = input.dataset.entity;
+      const result = await api(`models/${selected.id}/bindings`, {
+        method: "PUT",
+        body: JSON.stringify({ controlId, entityId }),
+      });
+      selected.bindings = result.bindings;
+      for (const group of selected.lightGroups || [])
+        if (group.controls.includes(controlId)) group.entityId = entityId;
+      done++;
+    }
+  } catch (e) {
+    $("mapping-error").textContent = e.message;
+  }
+  if (done) toast(`${done} ${done === 1 ? "device" : "devices"} connected.`);
+  drawControls();
+  drawMappings();
 }
 
 let mappingControlId;
+/**
+ * A device picked in the 3D room: open its row in the list beside the model
+ * (unfolding its section), or its connect dialog when no row shows it.
+ */
+function revealDevice(id, { focus = true } = {}) {
+  const control = selected?.controls.find((c) => c.id === id);
+  if (!control) return;
+  collapsedSections.delete(deviceGroup(control));
+  const row = () =>
+    $("controls").querySelector(
+      `.device-row[data-control="${CSS.escape(id)}"]`,
+    );
+  if (!row()) {
+    deviceFilter = "all";
+    deviceQuery = $("device-search").value = "";
+  }
+  expandedDevice = id;
+  drawControls();
+  const target = row();
+  if (!target) {
+    openDeviceSettings(id);
+    return;
+  }
+  target.scrollIntoView({
+    block: "nearest",
+    behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "smooth",
+  });
+  if (focus)
+    target.querySelector("[data-expand]")?.focus({ preventScroll: true });
+  target.classList.remove("is-found");
+  void target.offsetWidth;
+  target.classList.add("is-found");
+}
+// Pointing at a row (or focusing it) shows where that device is in the room.
+let pointedDevice = null;
+const pointAt = (id) => {
+  if (id === pointedDevice) return;
+  pointedDevice = id;
+  view?.highlight(id ?? expandedDevice);
+  roomIcons?.highlight(id ?? expandedDevice);
+};
+$("controls").addEventListener("pointerover", (e) =>
+  pointAt(e.target.closest(".device-row")?.dataset.control ?? null),
+);
+$("controls").addEventListener("pointerleave", () => pointAt(null));
+$("controls").addEventListener("focusin", (e) =>
+  pointAt(e.target.closest(".device-row")?.dataset.control ?? null),
+);
+$("controls").addEventListener("focusout", (e) => {
+  if (!$("controls").contains(e.relatedTarget)) pointAt(null);
+});
 function openDeviceSettings(controlId) {
   if (selected?.houseView) return;
   const group = selected?.controls.find((c) => c.id === controlId)?.lightGroup;
@@ -2072,6 +2296,11 @@ $("mappings").addEventListener("change", async (e) => {
   }
 });
 $("mappings").addEventListener("click", (e) => {
+  const apply = e.target.closest("[data-apply-suggestions]");
+  if (apply) {
+    applySuggestions(apply);
+    return;
+  }
   const b = e.target.closest("[data-highlight]");
   if (b) {
     view?.highlight(b.dataset.highlight);
@@ -2150,6 +2379,21 @@ async function refreshDeviceVisibility() {
       const updated = next.controls.find((c) => c.id === control.id);
       if (updated?.hidden) control.hidden = true;
       else delete control.hidden;
+      // Room icons changed elsewhere (another tab or person).
+      if (!updated) continue;
+      const before = JSON.stringify(control.markerPosition);
+      for (const key of ["markerPosition", "markerAnchor", "icon"])
+        if (key in updated) control[key] = updated[key];
+        else delete control[key];
+      if (
+        model === selected &&
+        view?.model?.id === model.id &&
+        JSON.stringify(control.markerPosition) !== before
+      )
+        view.setMarkerPosition(
+          control.id,
+          control.markerPosition || control.position,
+        );
     }
   }
   view?.refreshVisibility();

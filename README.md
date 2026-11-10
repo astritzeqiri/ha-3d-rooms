@@ -206,7 +206,13 @@ Open the top-level **Dashboard views** workspace to browse every saved view acro
 
 ## Editing device icons
 
-Create or edit a view under **Dashboard views**. Click a device icon to open its compact fan-out actions:
+### Room icons (Devices tab)
+
+Open a room's **Devices** tab. The model shows each device's icon, coloured by its state. Drag an icon onto a visible surface to move it, or click it and choose **Edit icon** to pick any Home Assistant icon, including your own icon sets. **Position → Reset** puts it back where the model placed it. Changes save at once and become the starting point for dashboard cards, house and floor views and every dashboard view. Pointing at a device in the list highlights its icon, and clicking an icon opens its row.
+
+### Icons in one dashboard view
+
+Create or edit a view under **Dashboard views**. A view starts from the room icons and can move an icon or pick another one for itself. Click a device icon to open its compact fan-out actions:
 
 - **Eye** hides or shows that control in this view. Hidden controls stay faded and selectable in the editor with a **Hidden** pill; dashboard cards and previews omit them.
 - **Edit icon** changes the state label, size and whether the control appears on the room or below it. The Visible checkbox stays synchronized with the eye.

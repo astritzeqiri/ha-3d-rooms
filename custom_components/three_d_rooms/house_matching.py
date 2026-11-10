@@ -134,6 +134,8 @@ def translated(previous, cmap):
     result["bindings"] = {cmap[k]: v for k, v in previous.get("bindings", {}).items() if cmap.get(k)}
     result["lightGroups"] = [{**g, "controls": [cmap[c] for c in g["controls"] if cmap.get(c)]}
                              for g in previous.get("lightGroups", [])]
+    if "markerDefaults" in previous:
+        result["markerDefaults"] = {cmap[k]: v for k, v in previous["markerDefaults"].items() if cmap.get(k)}
     return result
 
 

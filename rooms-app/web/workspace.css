@@ -1090,3 +1090,277 @@ summary:focus-visible {
 .device-row-body .shade-card > .shade-actions {
   display: none;
 }
+
+/* Devices: keep the model in view while working through the list. */
+@media (min-width: 1240px) {
+  body[data-room-tab="devices"] .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(440px, 44%);
+    column-gap: 28px;
+    align-items: start;
+  }
+  body[data-room-tab="devices"] .workspace > * {
+    grid-column: 1 / -1;
+  }
+  body[data-room-tab="devices"] .workspace > .room-layout {
+    grid-column: 1;
+    position: sticky;
+    top: 73px;
+  }
+  body[data-room-tab="devices"] .workspace > #controls-section {
+    grid-column: 2;
+    margin-top: 0;
+  }
+  body[data-room-tab="devices"] #viewport {
+    height: clamp(320px, calc(100dvh - 230px), 760px);
+  }
+}
+@media (min-width: 641px) and (max-width: 1239px) and (min-height: 640px) {
+  body[data-room-tab="devices"] .room-layout {
+    position: sticky;
+    top: 57px;
+    z-index: 5;
+    margin-top: -12px;
+    padding: 12px 0 8px;
+    background: var(--bg);
+  }
+  body[data-room-tab="devices"] #viewport {
+    height: clamp(200px, 30dvh, 320px);
+    min-height: 200px;
+  }
+}
+
+/* A lost graphics context leaves a blank canvas: show the message instead. */
+#viewport[data-context-lost] canvas {
+  visibility: hidden;
+}
+#viewport[data-context-lost] #scene-status {
+  top: 16px;
+  bottom: auto;
+}
+#viewport[data-context-lost] #retry-scene {
+  top: 72px;
+  bottom: auto;
+}
+
+/* Devices list: polish (2026-11) */
+/* Control mode sits with the list it affects. */
+#controls-section .section-title {
+  align-items: flex-start;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+}
+#controls-section .room-device-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 12px;
+}
+#controls-section #preview-label {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  gap: 0;
+  position: relative;
+}
+#controls-section #control-mode-label,
+#controls-section #preview-mode-note {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+#controls-section #preview-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 4px 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+}
+#controls-section #preview-label:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+#controls-section #control-mode {
+  min-height: 38px;
+  padding: 6px 28px 6px 0;
+  border: 0;
+  border-radius: 999px;
+  background-color: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+#controls-section #control-mode:focus-visible {
+  outline: none;
+}
+/* The dot is part of the pill's own layout, so it always sits centred. */
+#controls-section #preview-label::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--good, #4caf50);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--good, #4caf50) 22%, transparent);
+}
+#controls-section #preview-label[data-mode="simulation"]::before {
+  background: var(--muted);
+  box-shadow: none;
+}
+#device-list-hint {
+  margin-top: 4px;
+}
+
+/* State colours, matching dashboard markers and Home Assistant. */
+.device-row[data-tone="light"] {
+  --tone: var(--accent);
+}
+.device-row[data-tone="locked"] {
+  --tone: #43a047;
+}
+.device-row[data-tone="unlocked"],
+.device-row[data-tone="jammed"] {
+  --tone: #e5533d;
+}
+.device-row[data-tone="moving"],
+.device-row[data-tone="dry"] {
+  --tone: #ff9800;
+}
+.device-row[data-tone="open"] {
+  --tone: #b36ad1;
+}
+.device-row[data-tone="cool"] {
+  --tone: #2196f3;
+}
+.device-row[data-tone="heat"] {
+  --tone: #ff5722;
+}
+.device-row[data-tone="fan_only"] {
+  --tone: #00bcd4;
+}
+.device-row[data-tone="auto"] {
+  --tone: #4caf50;
+}
+/* Status dot: state colour when active, solid grey when idle, ring when not
+   connected, red when unavailable. */
+.device-row[data-connection="ready"] .device-row-meta::before,
+.device-row[data-connection="simulation"] .device-row-meta::before {
+  background: var(--muted);
+  opacity: 0.8;
+}
+.device-row[data-tone] .device-row-meta::before {
+  background: var(--tone);
+  opacity: 1;
+}
+.device-row[data-connection="unmapped"] .device-row-meta::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--muted);
+  opacity: 0.8;
+}
+.device-row[data-tone]:not([data-tone="light"]) .device-icon {
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 16%, var(--raised));
+}
+.device-row[data-tone]:not([data-tone="light"]) {
+  border-color: color-mix(in srgb, var(--tone) 30%, var(--line));
+}
+
+/* Chevron leads the row, as in the section headings, so it lines up in
+   every row whatever the quick action on the right. */
+.device-row-toggle {
+  gap: 10px;
+  padding-left: 4px;
+}
+.row-chevron {
+  margin-left: 0;
+  transform: none;
+}
+.device-row-toggle[aria-expanded="true"] .row-chevron {
+  transform: rotate(90deg);
+}
+.device-row-toggle:disabled .row-chevron {
+  visibility: hidden;
+}
+.device-row-quick {
+  margin-left: auto;
+  justify-content: flex-end;
+}
+.device-row-body {
+  padding-left: 86px;
+}
+@media (max-width: 640px) {
+  .device-row-body {
+    padding-left: 14px;
+  }
+}
+
+/* Pointing at a row highlights its device in the room; picking a device in
+   the room brings its row into view. */
+.device-row:hover:not([data-expanded="true"]) {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+.device-row.is-found {
+  animation: device-found 1.2s ease-out;
+}
+@keyframes device-found {
+  0% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .device-row.is-found {
+    animation: none;
+    outline: 2px solid var(--accent);
+  }
+}
+@media (max-width: 640px) {
+  #controls-section .room-device-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  #controls-section #control-count {
+    margin-left: auto;
+  }
+}
+@media (max-width: 640px) {
+  .device-row-name {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Room icons on the Devices tab: only moving and the icon itself apply to a
+   room; size, labels and visibility belong to each dashboard view. */
+.marker-floating-tools.room-mode [data-undo],
+.marker-floating-tools.room-mode [data-eye],
+.marker-floating-tools.room-mode [data-inherit],
+.marker-floating-tools.room-mode [data-inheritance],
+.marker-floating-tools.room-mode .marker-tool-checks,
+.marker-floating-tools.room-mode label:has(> [data-setting]),
+.marker-floating-tools.room-mode .marker-position details {
+  display: none !important;
+}
+.marker-editor-control[data-highlight="true"] {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  z-index: 2;
+}
+.device-marker-message {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--muted);
+}

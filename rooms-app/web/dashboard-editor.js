@@ -1,6 +1,7 @@
 import { initMarkerEditor } from "./marker-editor.js";
 import { componentYaml, validateComponent } from "../shared/component.mjs";
 import { viewThumbnail } from "./view-thumbnail.js";
+import { roomName } from "../shared/workspace.mjs";
 
 /** Edit the camera in the same scene that will be saved to the dashboard. */
 export function initDashboardEditor({
@@ -11,6 +12,7 @@ export function initDashboardEditor({
   preview,
   onOpen = () => {},
   onClose = () => {},
+  beforeOpen = () => {},
 }) {
   const $ = (id) => document.getElementById(id);
   const panel = $("dashboard-panel");
@@ -166,6 +168,7 @@ export function initDashboardEditor({
     } = {},
   ) {
     if (!panel.hidden && !close()) return false;
+    beforeOpen();
     if (!scene()?.model) {
       toast("Wait for the room to finish loading.");
       return;
@@ -192,7 +195,7 @@ export function initDashboardEditor({
     saved = !!component && !draft;
     savedSnapshot = saved ? JSON.stringify(component) : undefined;
     $("dashboard-title").value =
-      component?.title || `${model().title} overview`;
+      component?.title || `${roomName(model())} overview`;
     $("dashboard-show-title").checked = component
       ? component.show_title !== false
       : false;

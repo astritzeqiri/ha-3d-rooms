@@ -152,6 +152,11 @@ class RoomsRuntime:
             result = await self.work(self.store.set_device_visibility, data.get("model"), data.get("controlId"), data.get("hidden"))
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
+        if operation == "device-marker":
+            changes = {k: data[k] for k in ("position", "icon") if k in data}
+            result = await self.work(self.store.set_device_marker, data.get("model"), data.get("controlId"), changes)
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "device-settings":
             result = await self.work(self.store.set_device_settings, data.get("model"), data.get("deviceId"), data.get("macroNames"))
             self.hass.bus.async_fire("three_d_rooms_updated")

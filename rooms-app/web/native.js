@@ -78,7 +78,7 @@ export async function connectNative() {
       )
         return bridge.request(path);
       const match = path.match(
-        /^models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|device-settings|device-visibility|light-groups))?$/,
+        /^models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|device-settings|device-visibility|device-marker|light-groups))?$/,
       );
       if (!match) throw new Error("Unknown room request.");
       return bridge.request(match[2] || "delete", {

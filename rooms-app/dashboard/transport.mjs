@@ -12,7 +12,8 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
       throw new Error("This release requires a Home Assistant administrator.");
     return {
       preview: false,
-      async load() {
+      // `onProgress({ index, count, loaded, total })` follows the room downloads.
+      async load({ onProgress } = {}) {
         const models = await hass.callWS({
           type: "three_d_rooms/request",
           operation: "models",
@@ -32,9 +33,18 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
         if (model.members) {
           const layers = [];
           try {
-            for (const member of model.members) {
+            for (const [index, member] of model.members.entries()) {
               const source = models.find((m) => m.id === member.model);
               if (!source) throw new Error("A room in this house is missing.");
+              const report =
+                onProgress &&
+                ((progress) =>
+                  onProgress({
+                    ...progress,
+                    index,
+                    count: model.members.length,
+                  }));
+              report?.({ loaded: 0 });
               layers.push({
                 ...member,
                 assetCache: {
@@ -42,7 +52,7 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
                   key: sceneAssetKey(source, variant),
                 },
                 url: URL.createObjectURL(
-                  await sceneBlob(hass, source, variant),
+                  await sceneBlob(hass, source, variant, report),
                 ),
               });
             }
@@ -60,7 +70,13 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
           }
         }
         const sceneURL = URL.createObjectURL(
-          await sceneBlob(hass, model, variant),
+          await sceneBlob(
+            hass,
+            model,
+            variant,
+            onProgress &&
+              ((progress) => onProgress({ ...progress, index: 0, count: 1 })),
+          ),
         );
         return {
           model,
