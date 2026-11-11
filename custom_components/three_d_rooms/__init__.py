@@ -40,7 +40,11 @@ async def async_setup_entry(hass, entry):
     hass.data[DOMAIN]["runtime"] = runtime
     # Existing rooms get lighter copies once, without re-uploading.
     runtime.schedule_optimize()
-    module_url = f"{STATIC_URL}/three-d-rooms-card.js?v={VERSION}"
+    # The version plus the bundle's build time: browsers keep a cached card
+    # otherwise, also between builds that share a version.
+    card = Path(__file__).parent / "frontend" / "three-d-rooms-card.js"
+    built = await hass.async_add_executor_job(lambda: int(card.stat().st_mtime))
+    module_url = f"{STATIC_URL}/three-d-rooms-card.js?v={VERSION}.{built}"
     # HA loads this ES module on every frontend, including dashboard-only visits.
     # No user-managed Lovelace resource or second HACS download is needed.
     frontend.add_extra_js_url(hass, module_url)

@@ -54,5 +54,15 @@ class MarkerDefaultTests(unittest.TestCase):
         self.assertEqual(self.shown("lamp")["icon"], "mdi:ceiling-light")
 
 
+    def test_grouping_icons_is_a_room_setting_off_by_default(self):
+        self.assertNotIn("groupIcons", self.store.find("kitchen"))
+        self.assertTrue(self.store.update_room("kitchen", {"groupIcons": True})["groupIcons"])
+        self.assertTrue(self.store.find("kitchen")["groupIcons"])
+        self.assertFalse(self.store.update_room("kitchen", {"groupIcons": False})["groupIcons"])
+        self.assertNotIn("groupIcons", self.store.find("kitchen"))
+        with self.assertRaises(ValueError):
+            self.store.update_room("kitchen", {"groupIcons": "yes"})
+
+
 if __name__ == "__main__":
     unittest.main()

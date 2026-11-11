@@ -12,6 +12,8 @@ import { resolveSavedView } from "../shared/saved-view.mjs";
 import { deviceForControl, macroName } from "../shared/device.mjs";
 import { deviceLabel } from "../shared/workspace.mjs";
 import { loadProgress } from "../shared/load-progress.mjs";
+import { shortRoomTitle } from "../shared/workspace.mjs";
+import { groupMarkers, roomCrowded } from "../shared/marker-groups.mjs";
 import { coverFeatures } from "../shared/cover.mjs";
 import { actionState } from "../shared/action.mjs";
 import { numberState } from "../shared/number.mjs";
@@ -72,7 +74,7 @@ export class ThreeDRoomsCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`;
+    this.shadowRoot.innerHTML = `<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`;
     this._container = this.shadowRoot.querySelector(".scene");
     this._message = this.shadowRoot.querySelector(".message");
     this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
@@ -186,6 +188,29 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._views = [];
     this._floor = null;
     this._generation = 0;
+    // Crowded house views: room chips, and the room opened to its real icons.
+    this._groupChips = new Map();
+    this._openGroup = null;
+    this._groupOf = new Map();
+    this.shadowRoot.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && this._openGroup) {
+        const room = this._openGroup;
+        this._openGroup = null;
+        this._positionButtons();
+        this._groupChips.get(room)?.focus();
+      }
+    });
+    this._container.addEventListener("pointerdown", (event) => {
+      if (
+        this._openGroup &&
+        !event
+          .composedPath()
+          .some((el) => el?.dataset?.control || el?.dataset?.groupRoom)
+      ) {
+        this._openGroup = null;
+        this._positionButtons();
+      }
+    });
   }
   setConfig(config) {
     if (
@@ -352,13 +377,23 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._message.querySelector("button").textContent = "Retry";
     const bar = this._message.querySelector("progress");
     bar.hidden = true;
+    // A saved view's thumbnail stands in for the room while it downloads.
+    if (!this._view) this._showLoadingPreview(this._cachedThumbnail());
     try {
       if (this._sourceConfig?.saved_view) {
         const components = await this._hass.callWS({
           type: "three_d_rooms/request",
           operation: "components",
+          data: { id: this._sourceConfig.saved_view, include_thumbnails: true },
         });
         if (generation !== this._generation) return;
+        const thumbnail = components.find(
+          (c) => c.id === this._sourceConfig.saved_view,
+        )?.thumbnail;
+        if (thumbnail) {
+          this._cacheThumbnail(thumbnail);
+          if (!this._view) this._showLoadingPreview(thumbnail);
+        }
         this._config = resolveSavedView(this._sourceConfig, components);
         this._config.markers = validateMarkers(this._config.markers);
         if (!this._cameraTouched) this._cameraFree = !!this._config.interactive;
@@ -475,6 +510,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       this._states();
       this._syncDaylightSwitch();
       this._message.hidden = true;
+      this._hideLoadingPreview();
       if (
         !this._preview &&
         !this._config.addon &&
@@ -521,6 +557,48 @@ export class ThreeDRoomsCard extends HTMLElement {
         this._recheckAfterLoad();
       }
     }
+  }
+  _thumbnailKey() {
+    return `three-d-rooms:thumbnail:${this._sourceConfig?.saved_view}`;
+  }
+  /** Per-browser copy, so a revisit shows the picture before any request. */
+  _cachedThumbnail() {
+    if (!this._sourceConfig?.saved_view) return undefined;
+    try {
+      return localStorage.getItem(this._thumbnailKey()) || undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  _cacheThumbnail(value) {
+    try {
+      if (
+        value.length <= 150000 &&
+        localStorage.getItem(this._thumbnailKey()) !== value
+      )
+        localStorage.setItem(this._thumbnailKey(), value);
+    } catch {}
+  }
+  _showLoadingPreview(src) {
+    if (!src?.startsWith("data:image/jpeg;base64,")) return;
+    let image = this._container.querySelector(".loading-preview");
+    if (!image) {
+      image = document.createElement("img");
+      image.className = "loading-preview";
+      image.alt = "";
+      image.setAttribute("aria-hidden", "true");
+      this._container.prepend(image);
+    }
+    image.classList.remove("fading");
+    if (image.getAttribute("src") !== src) image.src = src;
+    this._message.classList.add("over-preview");
+  }
+  _hideLoadingPreview() {
+    this._message.classList.remove("over-preview");
+    const image = this._container.querySelector(".loading-preview");
+    if (!image) return;
+    image.classList.add("fading");
+    setTimeout(() => image.remove(), 320);
   }
   /**
    * One-shot light effects (blink, breathe, …) leave no lasting state, so
@@ -870,6 +948,8 @@ export class ThreeDRoomsCard extends HTMLElement {
     }
     this._container.append(access);
     this.shadowRoot.querySelector("ha-card").append(tray);
+    this._groupChips = new Map();
+    this._openGroup = null;
     this._positionButtons();
     this._buildLightPanel();
   }
@@ -1010,6 +1090,10 @@ export class ThreeDRoomsCard extends HTMLElement {
           ))
             if (marker.dataset.control === device.id)
               marker.dataset.highlight = String(on);
+          // A grouped icon is pointed out through its room chip.
+          const room = this._groupOf?.get(device.id);
+          if (room && this._groupChips.get(room))
+            this._groupChips.get(room).dataset.highlight = String(on);
         };
         row.onpointerenter = () => highlight(true);
         row.onpointerleave = () => highlight(false);
@@ -1196,6 +1280,9 @@ export class ThreeDRoomsCard extends HTMLElement {
     }
   }
   _positionButtons() {
+    const width = this._container.clientWidth,
+      height = this._container.clientHeight,
+      items = [];
     for (const button of this.shadowRoot.querySelectorAll("[data-control]")) {
       const settings = markerSettings(
         this._config?.markers,
@@ -1210,17 +1297,113 @@ export class ThreeDRoomsCard extends HTMLElement {
         settings.offset,
       );
       button.hidden = !settings.visible || !point?.visible;
-      if (point) {
-        const layout = markerLayout(
-          point,
-          settings,
-          this._container.clientWidth,
-          this._container.clientHeight,
-        );
-        button.style.left = layout.left + "px";
-        button.style.top = layout.top + "px";
-      }
+      if (!point) continue;
+      const layout = markerLayout(point, settings, width, height);
+      button.style.left = layout.left + "px";
+      button.style.top = layout.top + "px";
+      if (!button.hidden)
+        items.push({
+          id: button.dataset.control,
+          room: this._model?.controls.find(
+            (c) => c.id === button.dataset.control,
+          )?.sourceModel,
+          x: layout.left + settings.size / 2,
+          y: layout.top + settings.size / 2,
+          size: settings.size,
+          button,
+        });
     }
+    this._groupIcons(items, width, height);
+  }
+  /**
+   * House and floor views: a room whose icons overlap shows one chip; the
+   * chip shows that room's icons in their real places until you tap
+   * elsewhere or press Escape.
+   */
+  _groupIcons(items, width, height) {
+    this._groupChips ||= new Map();
+    // Only rooms set to "Group this room's icons" in their settings group.
+    const grouping = new Set(
+      this._model?.houseView
+        ? (this._model.members || [])
+            .filter((m) => m.groupIcons)
+            .map((m) => m.model)
+        : [],
+    );
+    const enabled = grouping.size > 0;
+    items = items.filter((item) => grouping.has(item.room));
+    const open = this._openGroup;
+    const groups = enabled
+      ? groupMarkers(items, { open: new Set(open ? [open] : []) })
+      : [];
+    // The open room shows its icons where they really are; tapping elsewhere
+    // (or Escape) groups it again. Once its icons no longer overlap it stays
+    // ungrouped on its own.
+    if (open && !(enabled && roomCrowded(items, open))) this._openGroup = null;
+    this._groupOf = new Map();
+    const shown = new Set();
+    for (const group of groups) {
+      shown.add(group.room);
+      for (const id of group.ids) {
+        this._groupOf.set(id, group.room);
+        const item = items.find((i) => i.id === id);
+        if (item) item.button.hidden = true;
+      }
+      let chip = this._groupChips.get(group.room);
+      if (!chip) {
+        chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "room-group";
+        chip.dataset.groupRoom = group.room;
+        chip.onclick = () => {
+          this._openGroup = this._openGroup === group.room ? null : group.room;
+          this._positionButtons();
+          if (this._openGroup)
+            [
+              ...this.shadowRoot.querySelectorAll(
+                ".fixture-access [data-control]",
+              ),
+            ]
+              .find(
+                (b) =>
+                  !b.hidden &&
+                  this._model?.controls.find((c) => c.id === b.dataset.control)
+                    ?.sourceModel === group.room,
+              )
+              ?.focus();
+        };
+        this.shadowRoot.querySelector(".fixture-access")?.append(chip);
+        this._groupChips.set(group.room, chip);
+      }
+      const members = this._model.controls.filter((c) =>
+          group.ids.includes(c.id),
+        ),
+        active = members.filter(
+          (c) =>
+            this.shadowRoot.querySelector(
+              `.fixture-access [data-control="${CSS.escape(c.id)}"]`,
+            )?.dataset.active === "true",
+        ).length,
+        title = shortRoomTitle(
+          this._model.controls.find((c) => c.sourceModel === group.room)
+            ?.roomTitle || "Room",
+        );
+      chip.hidden = false;
+      chip.style.left = group.x + "px";
+      chip.style.top = group.y + "px";
+      chip.dataset.active = String(active > 0);
+      chip.innerHTML =
+        '<span class="group-name"></span><span class="group-count"></span>';
+      chip.querySelector(".group-name").textContent = title;
+      chip.querySelector(".group-count").textContent = group.ids.length;
+      chip.setAttribute(
+        "aria-label",
+        `${title}: ${group.ids.length} devices${active ? `, ${active} on` : ""}. Show them`,
+      );
+      chip.title = `${title} — ${group.ids.length} devices${active ? `, ${active} on` : ""}`;
+    }
+    for (const [room, chip] of this._groupChips)
+      if (!shown.has(room)) chip.hidden = true;
   }
   async _toggle(id) {
     const control = this._model.controls.find((c) => c.id === id);

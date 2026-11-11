@@ -1345,7 +1345,6 @@ summary:focus-visible {
 
 /* Room icons on the Devices tab: only moving and the icon itself apply to a
    room; size, labels and visibility belong to each dashboard view. */
-.marker-floating-tools.room-mode [data-undo],
 .marker-floating-tools.room-mode [data-eye],
 .marker-floating-tools.room-mode [data-inherit],
 .marker-floating-tools.room-mode [data-inheritance],
@@ -1363,4 +1362,173 @@ summary:focus-visible {
   flex-basis: 100%;
   font-size: 12px;
   color: var(--muted);
+}
+
+/* Room settings save as you edit. */
+.name-suggestion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: -4px 0 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.name-suggestion button {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+#room-save-status {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Getting started checklist (Overview panel). */
+.setup-checklist {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 4px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--glow) 60%, var(--surface));
+}
+.setup-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.setup-head h2 {
+  margin-top: 4px;
+  font-size: 17px;
+}
+.setup-hide {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+}
+.setup-meter {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+.setup-meter span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width 0.3s ease;
+}
+.setup-checklist ol {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.setup-checklist ol {
+  gap: 4px;
+}
+.setup-step {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-weight: 400;
+}
+button.setup-step:hover {
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  border: 0;
+}
+.setup-go {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-ink);
+}
+.setup-mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.setup-mark svg {
+  width: 15px;
+  height: 15px;
+}
+.setup-checklist li[data-done="true"] .setup-mark {
+  border-color: var(--good, #4caf50);
+  background: var(--good, #4caf50);
+  color: #fff;
+}
+.setup-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.setup-text strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.setup-text small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.setup-checklist li[data-done="true"] .setup-text strong {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .setup-meter span {
+    transition: none;
+  }
+}
+.room-group-setting {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 4px 0 8px;
+}
+.room-group-setting input {
+  margin-top: 3px;
+}
+.room-group-setting span {
+  display: grid;
+  gap: 2px;
+}
+.room-group-setting small {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.room-settings-card label.room-group-setting {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  margin: 8px 0 12px;
+  cursor: pointer;
+}
+.room-settings-card label.room-group-setting input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
 }

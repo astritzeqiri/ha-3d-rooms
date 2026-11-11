@@ -135,3 +135,75 @@ export function sidebarLabel(model, rooms) {
     ? roomName(model)
     : label;
 }
+
+/** Devices of a room and how many have at least one entity connected. */
+export function roomSetupProgress(room) {
+  const entries = (room?.controls || []).filter(
+    (c) =>
+      !c.hidden &&
+      c.lightGroupPrimary !== false &&
+      !(room.devices || []).some(
+        (d) => d.height !== c.id && [d.motion, ...d.macros].includes(c.id),
+      ),
+  );
+  const connected = entries.filter((c) => {
+    const device = (room.devices || []).find((d) => d.height === c.id);
+    const ids = device
+      ? [device.height, device.motion, ...device.macros]
+      : [c.id];
+    return ids.some((id) => room.bindings?.[id]);
+  }).length;
+  return { total: entries.length, connected };
+}
+
+/**
+ * Getting started with a room or house: connect devices, check the icons,
+ * create a dashboard view. `rooms` are the room models the space shows,
+ * `views` the saved dashboard views, `spaceIds` the ids a view may show
+ * (the room, or the house and its floors and rooms).
+ */
+export function setupChecklist({ rooms, views = [], spaceIds = [] }) {
+  const progress = rooms.map(roomSetupProgress),
+    total = progress.reduce((sum, p) => sum + p.total, 0),
+    connected = progress.reduce((sum, p) => sum + p.connected, 0),
+    // The room with the most devices still to connect is where to go next.
+    next = rooms
+      .map((room, index) => ({
+        room,
+        missing: progress[index].total - progress[index].connected,
+      }))
+      .sort((a, b) => b.missing - a.missing)[0],
+    icons = rooms.some((room) =>
+      (room.controls || []).some((c) => c.markerAnchor || c.icon),
+    ),
+    viewed = views.some((v) =>
+      (v.layers || []).some((layer) => spaceIds.includes(layer.model)),
+    );
+  const steps = [
+    {
+      id: "connect",
+      title: "Connect devices",
+      detail: total
+        ? `${connected} of ${total} connected`
+        : "No devices in this space",
+      done: connected >= total,
+      room: next?.missing ? next.room.id : undefined,
+    },
+    {
+      id: "icons",
+      title: "Place the icons",
+      detail: icons
+        ? "Icons placed"
+        : "Drag icons onto their devices on the Devices tab",
+      done: icons,
+      room: rooms[0]?.id,
+    },
+    {
+      id: "view",
+      title: "Create a dashboard view",
+      detail: viewed ? "View saved" : "Frame the space for your dashboard",
+      done: viewed,
+    },
+  ];
+  return { steps, done: steps.filter((s) => s.done).length };
+}

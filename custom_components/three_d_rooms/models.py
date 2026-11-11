@@ -761,7 +761,7 @@ class ModelStore:
 
     def update_room(self, model_id, settings):
         """Store local room identity without altering geometry or device bindings."""
-        if not isinstance(settings, dict) or set(settings) - {"title", "areaId", "floorIds", "floorLinks", "appearance"}:
+        if not isinstance(settings, dict) or set(settings) - {"title", "areaId", "floorIds", "floorLinks", "appearance", "groupIcons"}:
             raise ValueError("Unsupported room setting.")
         models = deepcopy(self.models)
         model = next((m for m in models if m["id"] == model_id), None)
@@ -777,6 +777,14 @@ class ModelStore:
             if not isinstance(area_id, str) or len(area_id) > 128:
                 raise ValueError("Invalid Home Assistant area.")
             model["areaId"] = area_id
+        if "groupIcons" in settings:
+            # House and floor cards may show this room's crowded icons as one chip.
+            if not isinstance(settings["groupIcons"], bool):
+                raise ValueError("Grouping icons must be true or false.")
+            if settings["groupIcons"]:
+                model["groupIcons"] = True
+            else:
+                model.pop("groupIcons", None)
         if "appearance" in settings:
             parts = validate_appearance(settings["appearance"])
             known = {p["id"]: p["label"] for p in model.get("appearance", [])}
@@ -803,7 +811,7 @@ class ModelStore:
                 raise ValueError("Export this room from the web house builder before assigning house floors.")
             model["housePlacement"] = validate_placement({**model["housePlacement"], "floorIds": settings["floorIds"]})
         self.save(models)
-        return {"title": model["title"], "areaId": model.get("areaId", ""), **({"appearance":deepcopy(model["appearance"])} if "appearance" in model else {}), **({"housePlacement": deepcopy(model["housePlacement"])} if "housePlacement" in model else {})}
+        return {"title": model["title"], "areaId": model.get("areaId", ""), "groupIcons": bool(model.get("groupIcons")), **({"appearance":deepcopy(model["appearance"])} if "appearance" in model else {}), **({"housePlacement": deepcopy(model["housePlacement"])} if "housePlacement" in model else {})}
 
     def set_device_visibility(self, model_id, control_id, hidden):
         """Room-only visibility, shared by all views and grouped device controls."""

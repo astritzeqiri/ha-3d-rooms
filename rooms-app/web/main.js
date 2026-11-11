@@ -76,6 +76,8 @@ const api = async (path, options = {}) => {
   if (!res.ok) throw new Error(data.error || "Request failed.");
   return data;
 };
+let roomSaving = false,
+  roomSaveAgain = false;
 let areas = [],
   haFloors = [],
   savedViews,
@@ -105,6 +107,17 @@ const workspace = initWorkspace({
   api,
   scene: () => view,
   toast: (message) => toast(message),
+  getViews: () => savedViews?.list?.() || [],
+  // Getting started: each step opens the place where it is done.
+  onChecklist: async (step, roomId) => {
+    if (step === "view") {
+      requestViewScope();
+      return;
+    }
+    if (roomId && roomId !== selected?.id) await choose(roomId, "devices");
+    else setRoomTab("devices");
+    if (step === "connect") openDeviceSettings();
+  },
   reload: async (id) => {
     models = await api("models");
     selected = models.find((m) => m.id === id);
@@ -1145,6 +1158,8 @@ for (const id of ["daylight-mode", "sun-entity"])
   };
 function roomSettingsDirty() {
   if (selected?.houseView) return workspace.dirty();
+  // Room settings save as you edit; a save in progress finishes on its own.
+  if (roomSaving) return false;
   return (
     selected &&
     activeRoomTab === "settings" &&
@@ -1180,6 +1195,7 @@ function roomSettingsDirty() {
 }
 function updateRoomSummary() {
   if (!selected) return;
+  workspace.checklist();
   if (selected.houseView) {
     $("room-summary").textContent = houseViewSummary(selected);
     return;
@@ -1337,6 +1353,9 @@ function drawRoomSettings() {
       ? `The house model puts this room on ${unlinked.map((f) => f.name).join(" and ")}, which ${unlinked.length === 1 ? "is" : "are"} not linked to a Home Assistant floor yet. Link ${unlinked.length === 1 ? "it" : "them"} under Advanced below, or tick the floors this room occupies.`
       : "Tick every Home Assistant floor this room occupies. The 3D model is not changed.";
   $("room-name").value = selected.title;
+  showNameSuggestion();
+  $("room-group-setting").hidden = !selected.housePlacement;
+  $("room-group-icons").checked = !!selected.groupIcons;
   $("room-area").replaceChildren();
   const add = (value, label) => {
     const o = document.createElement("option");
@@ -1410,12 +1429,70 @@ async function refreshAreas({ quiet = false } = {}) {
   }
 }
 $("refresh-areas").onclick = () => refreshAreas();
-$("room-settings-form").onsubmit = async (event) => {
+// Room settings save as you edit: a field saves when it changes (text when
+// you leave it or press Enter). Changes made during a save follow after it.
+$("room-name").addEventListener("input", () => showNameSuggestion());
+// Only the part that changed is sent, so a name or area change can never
+// touch the room's floors (or anything else).
+const roomPending = new Set();
+function roomPart(target) {
+  if (target.closest("#room-floor-choices, #room-floor-links")) return "floors";
+  if (target.closest("#room-appearance-choices")) return "appearance";
+  if (target.id === "room-area") return "area";
+  if (target.id === "room-group-icons") return "group";
+  if (target.id === "room-name") return "title";
+  return null;
+}
+$("room-settings-form").addEventListener("change", (event) => {
+  const part = roomPart(event.target);
+  if (part) saveRoomSettings(part);
+});
+$("room-name-clean").onclick = () => {
+  $("room-name").value = roomName(selected);
+  saveRoomSettings("title");
+};
+function showNameSuggestion() {
+  const short = selected && !selected.houseView ? roomName(selected) : "";
+  const value = $("room-name").value.trim();
+  $("room-name-suggestion").hidden = !short || short === value;
+  if ($("room-name-suggestion").hidden) return;
+  $("room-name-suggestion").querySelector("span").textContent =
+    `3D Rooms shows this room as “${short}”. `;
+  $("room-name-clean").textContent = `Rename to “${short}”`;
+}
+$("room-settings-form").onsubmit = (event) => {
   event.preventDefault();
+  saveRoomSettings("title");
+};
+async function saveRoomSettings(part) {
+  if (!selected || selected.houseView) return;
+  if (part) roomPending.add(part);
+  if (roomPending.has("title") && !$("room-name").value.trim()) {
+    $("room-name").reportValidity?.();
+    roomPending.delete("title");
+    return;
+  }
+  if (roomSaving) {
+    roomSaveAgain = true;
+    return;
+  }
+  const parts = new Set(roomPending);
+  roomPending.clear();
+  if (!parts.size) return;
+  roomSaving = true;
+  $("room-save-status").textContent = "Saving…";
   const model = selected;
+  // Floors can only be chosen once a house floor is linked to a Home
+  // Assistant floor; until then the boxes say nothing and are not sent.
+  const floorsLinked =
+    !!model.housePlacement &&
+    (model.housePlacement.floors.some((f) => f.haFloorId) ||
+      [...$("room-floor-links").querySelectorAll("select")].some(
+        (picker) => picker.value,
+      ));
   const data = {
-    title: $("room-name").value.trim(),
-    ...(model.appearance?.length
+    ...(parts.has("title") ? { title: $("room-name").value.trim() } : {}),
+    ...(parts.has("appearance") && model.appearance?.length
       ? {
           appearance: model.appearance.map((part) => ({
             ...part,
@@ -1426,8 +1503,11 @@ $("room-settings-form").onsubmit = async (event) => {
           })),
         }
       : {}),
-    areaId: $("room-area").value,
-    ...(model.housePlacement
+    ...(parts.has("area") ? { areaId: $("room-area").value } : {}),
+    ...(parts.has("group")
+      ? { groupIcons: $("room-group-icons").checked }
+      : {}),
+    ...(parts.has("floors") && floorsLinked
       ? {
           haFloorIds: [
             ...$("room-floor-choices").querySelectorAll("input:checked"),
@@ -1440,7 +1520,13 @@ $("room-settings-form").onsubmit = async (event) => {
         }
       : {}),
   };
-  $("save-room-settings").disabled = true;
+  if (!Object.keys(data).length) {
+    roomSaving = false;
+    $("room-save-status").textContent = parts.has("floors")
+      ? "Link the house floors under Advanced first; floors were not changed."
+      : "";
+    return;
+  }
   $("room-settings-error").textContent = "";
   try {
     const result = await api(`models/${model.id}/room`, {
@@ -1460,16 +1546,24 @@ $("room-settings-form").onsubmit = async (event) => {
       $("title").textContent = roomName(model);
       $("model-type").textContent =
         areas.find((a) => a.area_id === model.areaId)?.name || "3D ROOM";
-      drawRoomSettings();
+      // Keep what is being typed in another field.
+      if (!$("room-settings-form").contains(document.activeElement))
+        drawRoomSettings();
+      else showNameSuggestion();
       $("room-save-status").textContent = "Saved";
     }
-    toast("Room settings saved.");
   } catch (error) {
     $("room-settings-error").textContent = error.message;
+    $("room-save-status").textContent = "Not saved";
   } finally {
-    $("save-room-settings").disabled = false;
+    roomSaving = false;
+    if (roomSaveAgain) {
+      roomSaveAgain = false;
+      if (selected?.id === model.id) saveRoomSettings();
+      else roomPending.clear();
+    }
   }
-};
+}
 $("replace-form").onsubmit = async (event) => {
   event.preventDefault();
   const model = selected;
@@ -1894,9 +1988,10 @@ const roomIcons = initMarkerEditor({
   onSelect: (id) => revealDevice(id, { focus: false }),
   onRoomChange: async (id, changes) => {
     const model = selected;
+    const { undo, ...values } = changes;
     const result = await api(`models/${model.id}/device-marker`, {
       method: "PUT",
-      body: JSON.stringify({ controlId: id, ...changes }),
+      body: JSON.stringify({ controlId: id, ...values }),
     });
     const control = model.controls.find((c) => c.id === id);
     for (const key of ["markerPosition", "markerAnchor", "icon"])
@@ -1905,13 +2000,15 @@ const roomIcons = initMarkerEditor({
     if (view?.model?.id === model.id)
       view.setMarkerPosition(id, control.markerPosition || control.position);
     toast(
-      "icon" in changes
-        ? changes.icon
-          ? "Icon saved. Dashboard views use it unless they choose their own."
-          : "Icon set back to the default."
-        : changes.position
-          ? "Icon position saved. Dashboard views start from it."
-          : "Icon moved back to its original place.",
+      undo
+        ? "Undone."
+        : "icon" in changes && !("position" in changes)
+          ? changes.icon
+            ? "Icon saved. Dashboard views use it unless they choose their own."
+            : "Icon set back to the default."
+          : changes.position
+            ? "Icon position saved. Dashboard views start from it."
+            : "Icon moved back to its original place.",
     );
   },
 });
@@ -2479,6 +2576,7 @@ savedViews = initComponents({
   initialViewId: initialSavedViewId,
   getModels: () => models,
   createView: () => requestViewScope(),
+  onList: () => workspace.checklist(),
   room: () => selected,
   editor: dashboardEditor,
   toast,

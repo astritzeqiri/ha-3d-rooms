@@ -15613,8 +15613,35 @@ function lp(e) {
 		text: t > 1 ? `Downloading room ${n + 1} of ${t}…${i ? "" : s}` : i ? `Downloading your room… ${Math.round(a * 100)}%` : `Downloading your room…${s}`
 	};
 }
+// shared/marker-groups.mjs
+function up(e, { open: t = /* @__PURE__ */ new Set(), overlap: n = .9 } = {}) {
+	let r = /* @__PURE__ */ new Map();
+	for (let t of e) t.room && (r.has(t.room) || r.set(t.room, []), r.get(t.room).push(t));
+	let i = [];
+	for (let [e, a] of r) {
+		if (a.length < 2 || t.has(e)) continue;
+		let r = !1;
+		for (let e = 0; e < a.length && !r; e++) for (let t = e + 1; t < a.length; t++) {
+			let i = a[e], o = a[t];
+			if (Math.hypot(i.x - o.x, i.y - o.y) < (i.size + o.size) / 2 * n) {
+				r = !0;
+				break;
+			}
+		}
+		r && i.push({
+			room: e,
+			ids: a.map((e) => e.id),
+			x: a.reduce((e, t) => e + t.x, 0) / a.length,
+			y: a.reduce((e, t) => e + t.y, 0) / a.length
+		});
+	}
+	return i;
+}
+function dp(e, t, n = .9) {
+	return up(e.filter((e) => e.room === t), { overlap: n }).length > 0;
+}
 // shared/cover.mjs
-function up(e) {
+function fp(e) {
 	let t = e?.entity_id?.startsWith("cover.") && e.attributes?.supported_features || 0;
 	return {
 		open: !!(t & 1),
@@ -15623,7 +15650,7 @@ function up(e) {
 		stop: !!(t & 8)
 	};
 }
-function dp(e) {
+function pp(e) {
 	let t = !e || ["unknown", "unavailable"].includes(e.state);
 	if (e?.entity_id?.startsWith("binary_sensor.")) {
 		let n = t ? void 0 : e.state === "on" ? 100 : 0;
@@ -15637,12 +15664,12 @@ function dp(e) {
 	let n = e?.attributes?.current_position, r = t ? void 0 : Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : e.state === "closed" ? 0 : void 0;
 	return {
 		position: r,
-		motionPosition: r ?? (!t && e.state === "open" && !up(e).position ? 100 : void 0),
+		motionPosition: r ?? (!t && e.state === "open" && !fp(e).position ? 100 : void 0),
 		unavailable: t,
 		label: t ? "Unavailable" : r === void 0 ? e.state : `${Math.round(r)}% open`
 	};
 }
-function fp(e, t) {
+function mp(e, t) {
 	let n = e.userData.hingedDoor;
 	if (n) {
 		if (!Number.isFinite(t) || n.axis !== "y" || !Number.isFinite(n.closedAngle) || !Number.isFinite(n.openAngle)) return;
@@ -15671,11 +15698,11 @@ function fp(e, t) {
 	});
 }
 // shared/action.mjs
-function pp(e) {
+function hp(e) {
 	return { unavailable: !e || !/^(button|input_button|script|scene)\./.test(e.entity_id) || e.state === "unavailable" };
 }
 // shared/number-motion.mjs
-function mp(e, t) {
+function gp(e, t) {
 	let n = e.userData.numberMotion;
 	if (!n || !Number.isFinite(t)) return;
 	let r = (Math.max(n.min, Math.min(n.max, t)) - n.restValue) * n.metersPerUnit;
@@ -15685,7 +15712,7 @@ function mp(e, t) {
 	});
 }
 // shared/number.mjs
-function hp(e, t) {
+function _p(e, t) {
 	let n = typeof e?.state == "string" && e.state.trim() ? Number(e.state) : NaN, r = !e || !/^(number|input_number)\./.test(e.entity_id) || !Number.isFinite(n) || n < t.min || n > t.max || e.attributes?.unit_of_measurement && e.attributes.unit_of_measurement !== t.unit;
 	return {
 		value: r ? void 0 : n,
@@ -15694,7 +15721,7 @@ function hp(e, t) {
 	};
 }
 // shared/lock.mjs
-var gp = {
+var vp = {
 	locked: "Locked",
 	unlocked: "Unlocked",
 	locking: "Locking",
@@ -15703,19 +15730,19 @@ var gp = {
 	open: "Open",
 	opening: "Opening"
 };
-function _p(e) {
-	let t = e?.state, n = !e || !/^lock\./.test(e.entity_id || "") || !(t in gp);
+function yp(e) {
+	let t = e?.state, n = !e || !/^lock\./.test(e.entity_id || "") || !(t in vp);
 	return {
 		state: n ? void 0 : t,
 		locked: n ? void 0 : t === "locked" || t === "locking",
 		moving: t === "locking" || t === "unlocking" || t === "opening",
 		jammed: t === "jammed",
 		needsCode: !!e?.attributes?.code_format,
-		label: n ? "Unavailable" : gp[t],
+		label: n ? "Unavailable" : vp[t],
 		unavailable: n
 	};
 }
-function vp(e, t) {
+function bp(e, t) {
 	e?.traverse?.((e) => {
 		let n = e.userData?.lockTurn;
 		if (!n) return;
@@ -15725,7 +15752,7 @@ function vp(e, t) {
 	});
 }
 // shared/marker.mjs
-function yp(e, t, n, r = !1) {
+function xp(e, t, n, r = !1) {
 	if (e.type === "climate") {
 		let e = t ? Gf(t) : n?.mode ? n : Gf(void 0), r = Kf(e);
 		return {
@@ -15743,7 +15770,7 @@ function yp(e, t, n, r = !1) {
 		};
 	}
 	if (e.type === "lock") {
-		let e = r ? n || {} : t ? _p(t) : n || {}, i = r || !!t, a = !i || !!e.unavailable;
+		let e = r ? n || {} : t ? yp(t) : n || {}, i = r || !!t, a = !i || !!e.unavailable;
 		return {
 			badge: i ? a ? "!" : e.label : "—",
 			description: i ? a ? "Unavailable" : `${e.label}, Home Assistant lock controls` : "Not connected",
@@ -15809,21 +15836,21 @@ function yp(e, t, n, r = !1) {
 		tone: u ? i ? "open" : "light" : void 0,
 		...h ? {
 			toneColor: `rgb(${m.map(Math.round).join(",")})`,
-			toneInk: bp(m)
+			toneInk: Sp(m)
 		} : {}
 	};
 }
-function bp([e, t, n]) {
+function Sp([e, t, n]) {
 	let r = (e) => e / 255 <= .03928 ? e / 255 / 12.92 : ((e / 255 + .055) / 1.055) ** 2.4;
 	return .2126 * r(e) + .7152 * r(t) + .0722 * r(n) > .4 ? "#1c1c1c" : "#fff";
 }
-function xp(e, t) {
+function Cp(e, t) {
 	t?.tone ? e.dataset.tone = t.tone : delete e.dataset.tone;
 	for (let [n, r] of [["--tone", t?.tone && t.toneColor], ["--tone-ink", t?.tone && t.toneInk]]) r ? e.style?.setProperty?.(n, r) : e.style?.removeProperty?.(n);
 }
-var Sp = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", Cp = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
+var wp = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", Tp = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
 // shared/floor-view.mjs
-function wp(e, t, n, r = 0, i = 0) {
+function Ep(e, t, n, r = 0, i = 0) {
 	if (![
 		...e,
 		...t,
@@ -15856,8 +15883,8 @@ function wp(e, t, n, r = 0, i = 0) {
 		far: h + m * 4 + 100
 	};
 }
-function Tp(e, t, n, r = 28, i = 0) {
-	let a = wp(e, t, n, r, i), o = Math.max(0, Math.min(180, r)) * Math.PI / 180, s = i * Math.PI / 180, c = [
+function Dp(e, t, n, r = 28, i = 0) {
+	let a = Ep(e, t, n, r, i), o = Math.max(0, Math.min(180, r)) * Math.PI / 180, s = i * Math.PI / 180, c = [
 		Math.sin(o) * Math.sin(s),
 		Math.cos(o),
 		Math.sin(o) * Math.cos(s)
@@ -15878,10 +15905,10 @@ function Tp(e, t, n, r = 28, i = 0) {
 	};
 }
 // shared/camera-view.mjs
-var Ep = (e, t) => Math.hypot(...e.map((e, n) => e - t[n])), Dp = (e) => Number(e.toFixed(2)), Op = (e) => e * 180 / Math.PI;
-function kp(e) {
+var Op = (e, t) => Math.hypot(...e.map((e, n) => e - t[n])), kp = (e) => Number(e.toFixed(2)), Ap = (e) => e * 180 / Math.PI;
+function jp(e) {
 	let t = (e) => Array.isArray(e) && e.length === 3 && e.every((e) => Number.isFinite(e) && Math.abs(e) < 1e4), n = (e) => Number.isFinite(e) && e > 0 && e <= 1e4;
-	if (!e || !t(e.position) || !t(e.target) || !t(e.up) || Math.hypot(...e.up) < 1e-8 || Ep(e.position, e.target) < 1e-8 || !n(e.aspect) || !n(e.zoom) || !n(e.referenceZoom) || !Number.isFinite(e.heading) || e.heading < 0 || e.heading >= 360 || !Number.isFinite(e.tilt) || e.tilt < 0 || e.tilt > 180 || !["perspective", "orthographic"].includes(e.projection)) throw Error("Invalid saved camera view.");
+	if (!e || !t(e.position) || !t(e.target) || !t(e.up) || Math.hypot(...e.up) < 1e-8 || Op(e.position, e.target) < 1e-8 || !n(e.aspect) || !n(e.zoom) || !n(e.referenceZoom) || !Number.isFinite(e.heading) || e.heading < 0 || e.heading >= 360 || !Number.isFinite(e.tilt) || e.tilt < 0 || e.tilt > 180 || !["perspective", "orthographic"].includes(e.projection)) throw Error("Invalid saved camera view.");
 	if (e.projection === "perspective" && (!Number.isFinite(e.fov) || e.fov < 1 || e.fov > 179)) throw Error("Invalid saved camera field of view.");
 	if (e.projection === "orthographic" && !n(e.halfHeight)) throw Error("Invalid saved floor view.");
 	return {
@@ -15897,16 +15924,16 @@ function kp(e) {
 		...e.projection === "perspective" ? { fov: e.fov } : { halfHeight: e.halfHeight }
 	};
 }
-function Ap({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, halfHeight: o, min: s, max: c }) {
-	let l = e.map((e, n) => e - t[n]), u = Math.hypot(...l), d = Math.hypot(l[0], l[2]) / u < 1e-8 && Math.hypot(n[0], n[2]) > 1e-8, f = l[1] >= 0 ? -1 : 1, p = Dp((Op(d ? Math.atan2(f * n[0], f * n[2]) : Math.atan2(l[0], l[2])) + 360) % 360) % 360, m = Dp(Op(Math.acos(Math.max(-1, Math.min(1, l[1] / u))))), h = o === void 0 ? "front" : "floor", g = (h === "floor" ? wp : Tp)(s, c, r, m, p), _;
-	_ = h === "floor" ? i * g.top / o : i * Ep(g.position, g.target) / u * Math.tan(g.fov * Math.PI / 360) / Math.tan(a * Math.PI / 360);
+function Mp({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, halfHeight: o, min: s, max: c }) {
+	let l = e.map((e, n) => e - t[n]), u = Math.hypot(...l), d = Math.hypot(l[0], l[2]) / u < 1e-8 && Math.hypot(n[0], n[2]) > 1e-8, f = l[1] >= 0 ? -1 : 1, p = kp((Ap(d ? Math.atan2(f * n[0], f * n[2]) : Math.atan2(l[0], l[2])) + 360) % 360) % 360, m = kp(Ap(Math.acos(Math.max(-1, Math.min(1, l[1] / u))))), h = o === void 0 ? "front" : "floor", g = (h === "floor" ? Ep : Dp)(s, c, r, m, p), _;
+	_ = h === "floor" ? i * g.top / o : i * Op(g.position, g.target) / u * Math.tan(g.fov * Math.PI / 360) / Math.tan(a * Math.PI / 360);
 	let v = Number(Math.max(.01, Math.min(100, _)).toFixed(4));
 	return {
 		view: h,
 		heading: p,
 		tilt: m,
 		zoom: v,
-		camera: kp({
+		camera: jp({
 			projection: h === "floor" ? "orthographic" : "perspective",
 			position: [...e],
 			target: [...t],
@@ -15920,7 +15947,7 @@ function Ap({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, hal
 		})
 	};
 }
-function jp(e, t, n, r, i, a) {
+function Np(e, t, n, r, i, a) {
 	if (!Number.isFinite(r) || r <= 0) throw Error("Invalid camera aspect ratio.");
 	let o = Math.min(1, r / e.aspect);
 	if (!i || !a) return o;
@@ -15940,10 +15967,10 @@ function jp(e, t, n, r, i, a) {
 	let h = Math.max(m, p / e.aspect), g = Math.max(m, p / r);
 	return g > 0 ? h / g : o;
 }
-function Mp(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.tilt, zoom: o = e.referenceZoom }) {
-	let s = kp(e), c = [...s.position], l = [...s.up];
+function Pp(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.tilt, zoom: o = e.referenceZoom }) {
+	let s = jp(e), c = [...s.position], l = [...s.up];
 	if (Math.abs(i - s.heading) > 1e-6 || Math.abs(a - s.tilt) > 1e-6) {
-		let e = i * Math.PI / 180, t = a * Math.PI / 180, n = Ep(s.position, s.target), r = [
+		let e = i * Math.PI / 180, t = a * Math.PI / 180, n = Op(s.position, s.target), r = [
 			Math.sin(t) * Math.sin(e),
 			Math.cos(t),
 			Math.sin(t) * Math.cos(e)
@@ -15959,7 +15986,7 @@ function Mp(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.
 		target: [...s.target],
 		up: l,
 		aspect: t,
-		zoom: s.zoom * o / s.referenceZoom * jp(s, c, l, t, n, r),
+		zoom: s.zoom * o / s.referenceZoom * Np(s, c, l, t, n, r),
 		...s.projection === "perspective" ? { fov: s.fov } : {
 			left: -s.halfHeight * t,
 			right: s.halfHeight * t,
@@ -15967,11 +15994,11 @@ function Mp(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.
 			bottom: -s.halfHeight
 		},
 		near: .05,
-		far: Ep(c, s.target) + 1e3
+		far: Op(c, s.target) + 1e3
 	};
 }
 // shared/upload.mjs
-function Np(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
+function Fp(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
 	return new Promise((s, c) => {
 		let l = o();
 		l.open(t, e);
@@ -15988,13 +16015,13 @@ function Np(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = (
 		}, l.send(n);
 	});
 }
-async function Pp(e, t, n) {
+async function Ip(e, t, n) {
 	if (!(t === "/api/three_d_rooms/models" && n.method === "POST" || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+$/.test(t) && n.method === "PUT" || /^\/api\/three_d_rooms\/houses\/[a-z0-9_-]+$/.test(t) && ["POST", "PUT"].includes(n.method) || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+\/optimized\/(full|phone)$/.test(t) && n.method === "PUT")) throw Error("Unknown model upload.");
 	let r = t.includes("/optimized/"), i = n.headers?.["X-Rooms-Source-Revision"];
 	if (r && !/^[a-f0-9]{24}$/.test(i || "")) throw Error("Optimized scenes must name the upload they came from.");
 	let a = n.headers?.["X-Rooms-Matches"];
 	if (a !== void 0 && !/^[A-Za-z0-9_-]{1,6000}$/.test(a)) throw Error("Too many room and device choices to send at once.");
-	return e.auth.expired && await e.auth.refreshAccessToken(), Np(t, {
+	return e.auth.expired && await e.auth.refreshAccessToken(), Fp(t, {
 		...n,
 		headers: {
 			...n.headers?.["X-Rooms-Revision"] ? { "X-Rooms-Revision": n.headers["X-Rooms-Revision"] } : {},
@@ -16006,23 +16033,23 @@ async function Pp(e, t, n) {
 	});
 }
 // shared/entity-icon.mjs
-function Fp(e) {
+function Lp(e) {
 	let t = e.querySelector?.("svg");
 	if (t) return t;
 	for (let t of e.querySelectorAll?.("*") || []) if (t.shadowRoot) {
-		let e = Fp(t.shadowRoot);
+		let e = Lp(t.shadowRoot);
 		if (e) return e;
 	}
 	return null;
 }
-async function Ip(e, t, n, { frames: r = 120 } = {}) {
+async function Rp(e, t, n, { frames: r = 120 } = {}) {
 	let i = e.ownerDocument;
 	if (!i.defaultView.customElements.get("ha-state-icon")) return null;
 	let a = i.createElement("ha-state-icon");
 	a.hass = t, a.stateObj = n, a.setAttribute("aria-hidden", "true"), a.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;width:24px;height:24px", e.append(a);
 	try {
 		for (let e = 0; e < r; e++) {
-			let e = a.shadowRoot && Fp(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
+			let e = a.shadowRoot && Lp(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
 			if (t?.length) return {
 				viewBox: e.getAttribute("viewBox") || "0 0 24 24",
 				paths: t.map((e) => ({
@@ -16040,7 +16067,7 @@ async function Ip(e, t, n, { frames: r = 120 } = {}) {
 	}
 }
 // shared/room-route.mjs
-function Lp(e) {
+function zp(e) {
 	let t = new URLSearchParams(e), n = new URLSearchParams();
 	for (let e of ["model", "saved_view"]) {
 		let r = t.get(e);
@@ -16052,12 +16079,12 @@ function Lp(e) {
 		"settings"
 	].includes(t.get("tab")) && n.set("tab", t.get("tab")), ["floor", "front"].includes(t.get("view")) && n.set("view", t.get("view")), n;
 }
-function Rp(e, t = new URLSearchParams()) {
+function Bp(e, t = new URLSearchParams()) {
 	let n = new URLSearchParams(t), r = new URL(e).searchParams.get("v");
 	return r && /^[0-9A-Za-z.+-]{1,40}$/.test(r) && n.set("v", r), new URL(".", e).href + "index.html?" + n;
 }
 // dashboard/preview.js
-function zp(e, t, n) {
+function Vp(e, t, n) {
 	let r = document.createElement("dialog");
 	r.setAttribute("aria-labelledby", "dashboard-preview-title"), r.innerHTML = "<style>\n    dialog.dashboard-preview{box-sizing:border-box;width:min(960px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--divider-color,#777);border-radius:12px;background:var(--primary-background-color,#fafafa);color:var(--primary-text-color,#212121);font:14px/1.5 system-ui}\n    .dashboard-preview::backdrop{background:#0009}\n    .preview-toolbar{position:sticky;top:0;z-index:2;background:var(--primary-background-color,#fafafa);display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px;border-bottom:1px solid var(--divider-color,#777)}\n    .preview-toolbar h2{font-size:18px;margin:0;flex:1;min-width:160px}\n    .preview-actions{display:flex;align-items:center;gap:12px;margin-left:auto}\n    .preview-widths{display:flex;padding:3px;border:1px solid var(--divider-color,#ddd);border-radius:8px;background:var(--secondary-background-color,#eee)}\n    .preview-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:44px;padding:8px 12px;border:0;border-radius:5px;color:var(--secondary-text-color,#555);background:transparent;font:500 14px/20px system-ui;cursor:pointer;white-space:nowrap}\n    .preview-widths button[aria-pressed=\"true\"]{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff);box-shadow:0 1px 3px #0002}\n    .preview-toolbar button:hover{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff)}\n    .preview-toolbar .preview-close{width:44px;padding:10px;border-radius:50%}\n    .preview-toolbar svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}\n    @media(max-width:480px){.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{flex-basis:100%}.preview-actions{width:100%;justify-content:space-between}.preview-widths{flex:1}.preview-widths button{flex:1}}\n    .preview-toolbar :focus-visible{outline:2px solid var(--primary-color,#03a9f4);outline-offset:2px}\n    .preview-note{margin:0;padding:12px 16px;color:var(--secondary-text-color,#555)}\n    .preview-dashboard{padding:16px;background:var(--lovelace-background,var(--primary-background-color,#fafafa))}\n    .preview-card{width:100%;max-width:560px;margin:auto}\n    .preview-card[data-width=\"phone\"]{max-width:360px}\n    @media(max-width:600px){dialog.dashboard-preview{width:100vw;max-width:100vw;max-height:100dvh;margin:auto 0;border-radius:0;overflow:auto;overscroll-behavior:contain}.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{font-size:16px}.preview-note{font-size:13px;padding:12px}.preview-dashboard{padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}}\n  </style><div class=\"preview-toolbar\"><h2 id=\"dashboard-preview-title\">Dashboard preview</h2><div class=\"preview-actions\"><div class=\"preview-widths\" role=\"group\" aria-label=\"Preview card width\"><button type=\"button\" data-width=\"desktop\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 21h8M12 16v5\"/></svg>Desktop</button><button type=\"button\" data-width=\"phone\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></svg>Phone</button></div><button class=\"preview-close\" type=\"button\" aria-label=\"Close preview\" title=\"Close preview\" autofocus><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></div></div><p class=\"preview-note\">Your current changes, without saving. Device controls are live. The final card width depends on your dashboard layout.</p><div class=\"preview-dashboard\"><div class=\"preview-card\"></div></div>", r.className = "dashboard-preview";
 	let i = document.createElement("three-d-rooms-card");
@@ -16087,7 +16114,7 @@ function zp(e, t, n) {
 	};
 }
 // dashboard/panel.js
-var Bp = class extends HTMLElement {
+var Hp = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block;height:100%;min-height:100vh}iframe{display:block;width:100%;height:100vh;border:0}</style><iframe title=\"3D Rooms model library\"></iframe>", this._frame = this.shadowRoot.querySelector("iframe"), this._iconCache = /* @__PURE__ */ new Map(), this._ready = (e) => {
 			if (e.source !== this._frame.contentWindow || e.origin !== location.origin || e.data?.type !== "three-d-rooms-ready") return;
@@ -16101,11 +16128,11 @@ var Bp = class extends HTMLElement {
 				},
 				preview: async (e) => {
 					this._preview?.close();
-					let t = zp(this.shadowRoot, e, this._hass);
+					let t = Vp(this.shadowRoot, e, this._hass);
 					this._preview = t, await t.closed, this._preview === t && (this._preview = null);
 				},
 				navigate: (e) => {
-					if (Lp(e).toString() === Lp(location.search).toString()) return;
+					if (zp(e).toString() === zp(location.search).toString()) return;
 					let t = new URL(location.href);
 					for (let e of [
 						"model",
@@ -16113,7 +16140,7 @@ var Bp = class extends HTMLElement {
 						"saved_view",
 						"view"
 					]) t.searchParams.delete(e);
-					for (let [n, r] of Lp(e)) t.searchParams.set(n, r);
+					for (let [n, r] of zp(e)) t.searchParams.set(n, r);
 					history.replaceState(history.state, "", t);
 				},
 				request: (e, t = {}) => this._hass.callWS({
@@ -16122,7 +16149,7 @@ var Bp = class extends HTMLElement {
 					data: t
 				}),
 				asset: (e, t) => this._hass.fetchWithAuth(e, t),
-				upload: (e, t) => Pp(this._hass, e, t),
+				upload: (e, t) => Ip(this._hass, e, t),
 				scene: (e, t = "full") => Uf(this._hass, e, t),
 				entityIcon: (e) => {
 					let t = JSON.stringify([
@@ -16131,7 +16158,7 @@ var Bp = class extends HTMLElement {
 						e.attributes?.icon,
 						e.attributes?.device_class
 					]);
-					return this._iconCache.has(t) || (this._iconCache.set(t, Ip(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
+					return this._iconCache.has(t) || (this._iconCache.set(t, Rp(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
 				},
 				subscribeModels: (e) => this._hass.connection.subscribeEvents(e, "three_d_rooms_updated"),
 				subscribe: (e) => (this._listener = e, this._publish(), () => {
@@ -16153,16 +16180,16 @@ var Bp = class extends HTMLElement {
 	}
 	connectedCallback() {
 		window.addEventListener("message", this._ready);
-		let e = Lp(location.search);
-		e.set("native", "1"), this._frame.src = Rp(import.meta.url, e);
+		let e = zp(location.search);
+		e.set("native", "1"), this._frame.src = Bp(import.meta.url, e);
 	}
 	disconnectedCallback() {
 		this._preview?.close(), window.removeEventListener("message", this._ready), this._listener = null;
 	}
 };
-customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", Bp);
+customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", Hp);
 // shared/house-floors.mjs
-function Vp(e, t) {
+function Up(e, t) {
 	if (!t?.houseView || !Array.isArray(e)) return [];
 	let n = e.filter((e) => e?.houseView && e.houseId === t.houseId);
 	return n.length < 2 ? [] : n.map((e) => ({
@@ -16171,11 +16198,11 @@ function Vp(e, t) {
 		label: e.houseFloor?.name || "Whole house"
 	})).sort((e, t) => e.floorId === null ? -1 : +(t.floorId === null));
 }
-function Hp(e, t, n) {
-	return !n || n === t?.id ? t : Vp(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
+function Wp(e, t, n) {
+	return !n || n === t?.id ? t : Up(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
 }
-function Up(e, t, n = !0) {
-	let r = n ? Vp(e, t) : [];
+function Gp(e, t, n = !0) {
+	let r = n ? Up(e, t) : [];
 	if (!r.length) return {
 		model: t,
 		floors: [],
@@ -16189,7 +16216,7 @@ function Up(e, t, n = !0) {
 	};
 }
 // dashboard/editor.js
-var Wp = {
+var Kp = {
 	model: "Room",
 	title: "Title",
 	show_title: "Show title",
@@ -16199,14 +16226,14 @@ var Wp = {
 	zoom: "Zoom",
 	height: "Height",
 	interactive: "Camera movement"
-}, Gp = {
+}, qp = {
 	show_title: !0,
 	height: 500,
 	view: "front",
 	heading: 0,
 	tilt: 28,
 	zoom: 1
-}, Kp = class extends HTMLElement {
+}, Jp = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>\n      :host{display:block;container-type:inline-size;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}\n      label{display:grid;gap:6px;margin:16px 0}input,select,button{box-sizing:border-box;min-height:44px;width:100%;font:inherit;color:var(--primary-text-color);background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:8px;padding:10px}\n      input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--primary-color);outline-offset:2px}\n      .field-setting{position:relative;min-width:0;margin:16px 0}.field-setting>label{margin:0;gap:10px}.field-setting:not(.boolean)>label{padding-top:4px}.field-setting.boolean{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}.field-setting.boolean>label{flex:1;min-width:0}.field-setting.boolean>label input{flex-shrink:0}\n      .override-controls{position:absolute;top:0;right:0;display:flex;align-items:center;gap:2px;min-height:28px;color:var(--secondary-text-color);font-size:12px}.boolean .override-controls{position:static;flex-shrink:0}.override-controls .reset-field{display:inline-flex;align-items:center;gap:4px;width:auto;min-height:28px;padding:3px 5px;border:0;background:transparent;color:var(--secondary-text-color);font-size:12px;cursor:pointer}.reset-field svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6}.override-controls .reset-field:hover{color:var(--primary-color);background:color-mix(in srgb,var(--primary-text-color) 5%,transparent)}\n      input:disabled,select:disabled{opacity:.65}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.check{display:flex;align-items:center}.check input{width:22px;margin-right:8px}\n      p{color:var(--secondary-text-color)}[role=alert]{color:var(--error-color)}[hidden]{display:none!important}\n      @container(max-width:420px){.grid{grid-template-columns:1fr}}\n    </style>\n    <p>Choose a room or link a saved view. Linked fields follow changes saved in 3D Rooms. Edit any field for this card. Reset a changed field to follow the saved view again.</p>\n    <p id=\"status\" role=\"status\">Loading rooms…</p><button id=\"retry\" hidden>Retry loading rooms</button>\n    <label>Saved view<select id=\"component\"><option value=\"\">Choose a saved view (optional)</option></select></label>\n    <label>Room<select id=\"model\"><option value=\"\">Choose a room</option></select></label>\n    <label>Title<input id=\"title\" type=\"text\" maxlength=\"160\"></label>\n    <label class=\"check\"><input id=\"show_title\" type=\"checkbox\">Show title on card</label>\n    <label>View<select id=\"view\"><option value=\"front\">Perspective</option><option value=\"floor\">Floor</option></select></label>\n    <div class=\"grid\">\n      <label>Rotation (°)<input id=\"heading\" type=\"number\" min=\"0\" max=\"359.99\" step=\"0.01\"></label>\n      <label>Tilt (°)<input id=\"tilt\" type=\"number\" min=\"0\" max=\"180\" step=\"0.01\"></label>\n      <label>Zoom<input id=\"zoom\" type=\"number\" min=\"0.01\" max=\"100\" step=\"0.01\"></label>\n      <label>Height<select id=\"height-mode\" aria-label=\"Height mode\"><option value=\"fixed\">Fixed height</option><option value=\"auto\">Auto · fill available screen</option></select><input id=\"height\" type=\"number\" min=\"180\" max=\"1600\" step=\"1\" aria-label=\"Height in pixels\" aria-describedby=\"height-note\"></label>\n      <p id=\"height-note\">Auto fills the space below the dashboard header. Best used in a single-card Panel view.</p>\n    </div>\n    <label class=\"check\"><input id=\"interactive\" type=\"checkbox\">Allow camera movement by default</label>\n    <label class=\"check\"><input id=\"camera_controls\" type=\"checkbox\">Show camera buttons on the card (move camera and reset view)</label>\n    <label class=\"check\"><input id=\"light_panel\" type=\"checkbox\">Show the Lights button (each room's lights, with one switch per room)</label>\n    <label class=\"check\"><input id=\"shade_panel\" type=\"checkbox\">Show the Shades button (each room's shades, with one switch per room)</label>\n    <label class=\"check\" id=\"floor-selector-setting\" hidden><input id=\"floor_selector\" type=\"checkbox\">Show floor switcher (whole house or one floor)</label>\n    <label>Rendering quality<select id=\"quality\">\n      <option value=\"auto\">Automatic · lighter on phones and tablets</option>\n      <option value=\"high\">High · full shadows and sharpness</option>\n      <option value=\"low\">Low · faster and uses less battery</option>\n    </select></label>\n    <label id=\"daylight-setting\" hidden>Time of day<select id=\"daylight\">\n      <option value=\"auto\">Automatic · follow the Home Assistant sun</option>\n      <option value=\"day\">Always day</option>\n      <option value=\"night\">Always night</option>\n    </select></label>\n    <p id=\"daylight-note\" hidden>Saved with this room, so every dashboard and the 3D Rooms manager use the same setting.</p>\n    <button id=\"reset\">Reset camera framing</button>\n    <p id=\"error\" role=\"alert\" hidden></p>\n    <p>Upload rooms and manage device mappings in the 3D Rooms sidebar. Save this card with Home Assistant’s Save button.</p>", this._field = (e) => this.shadowRoot.getElementById(e);
 		for (let e of [
@@ -16226,7 +16253,7 @@ var Wp = {
 			let i = document.createElement("div");
 			i.className = "override-controls", i.id = `override-controls-${e}`, i.hidden = !0;
 			let a = document.createElement("button");
-			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${Wp[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
+			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${Kp[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
 		}
 		this._field("height-mode").onchange = () => {
 			this._field("height-mode").disabled || this._emit({
@@ -16312,19 +16339,19 @@ var Wp = {
 			let t = !!this._config.saved_view, r = Object.hasOwn(this._config, e);
 			this._field(`reset-field-${e}`).hidden = !t || !r || !n || this._config[e] === n[e], this._field(`override-controls-${e}`).hidden = this._field(`reset-field-${e}`).hidden, this._field(e).disabled = !1;
 		}
-		for (let t of Object.keys(Gp).concat([
+		for (let t of Object.keys(qp).concat([
 			"model",
 			"title",
 			"interactive"
 		])) {
-			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : Gp[t]) ?? "";
+			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : qp[t]) ?? "";
 			t === "interactive" || t === "show_title" ? n.checked = !!a : n.value = a;
 		}
 		this._field("height-mode").value = e.height === "auto" ? "auto" : "fixed", this._field("height-mode").disabled = this._field("height").disabled, this._field("height").hidden = e.height === "auto";
 		let r = e.model, i = this._field("model");
 		r && ![...i.options].some((e) => e.value === r) && (i.add(new Option(`${r} (not in room library)`, r)), i.value = r);
 		let a = this._models?.find((e) => e.id === r);
-		this._field("floor-selector-setting").hidden = !Vp(this._models, a).length, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("light_panel").checked = this._config.light_panel !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1, this._field("quality").value = this._config.quality || "auto";
+		this._field("floor-selector-setting").hidden = !Up(this._models, a).length, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("light_panel").checked = this._config.light_panel !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1, this._field("quality").value = this._config.quality || "auto";
 		let o = this._models?.find((e) => e.id === r)?.daylight;
 		this._field("daylight-setting").hidden = !o, this._field("daylight-note").hidden = !o, o && (this._field("daylight").value = o.mode);
 	}
@@ -16447,9 +16474,9 @@ var Wp = {
 		}));
 	}
 };
-customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", Kp);
+customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", Jp);
 // shared/shadow-budget.mjs
-function qp(e, t, n = Infinity) {
+function Yp(e, t, n = Infinity) {
 	let r = 0, i = [];
 	e.traverse((e) => {
 		if (e.isLight && e.castShadow && i.push(e), e.isMesh) for (let t of Array.isArray(e.material) ? e.material : [e.material]) {
@@ -16471,17 +16498,17 @@ function qp(e, t, n = Infinity) {
 	};
 }
 // shared/render-profile.mjs
-var Jp = [
+var Xp = [
 	"auto",
 	"high",
 	"low"
 ];
-function Yp(e = globalThis) {
+function Zp(e = globalThis) {
 	if (e.navigator?.userAgentData?.mobile) return !0;
 	let t = (t) => !!e.matchMedia?.(t)?.matches;
 	return t("(pointer: coarse)") && !t("(any-pointer: fine)");
 }
-function Xp({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {}) {
+function Qp({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {}) {
 	let r = Number.isFinite(n) && n > 0 ? n : 1, i = e === "low" || e !== "high" && t;
 	return i ? {
 		low: i,
@@ -16497,14 +16524,14 @@ function Xp({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {
 		shadowMapSize: Infinity
 	};
 }
-function Zp(e = "auto", t = globalThis) {
-	return Xp({
+function $p(e = "auto", t = globalThis) {
+	return Qp({
 		quality: e,
-		mobile: Yp(t),
+		mobile: Zp(t),
 		devicePixelRatio: t.devicePixelRatio
 	}).low ? "phone" : "full";
 }
-function Qp(e, t) {
+function em(e, t) {
 	Number.isFinite(t) && e.traverse((e) => {
 		let n = e.isLight && e.shadow;
 		if (!n?.mapSize) return;
@@ -16513,8 +16540,8 @@ function Qp(e, t) {
 	});
 }
 // shared/climate-visual.mjs
-var $p = "\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    vUv = uv;\n    vec4 view = modelViewMatrix * vec4(position, 1.0);\n    vNormal = normalize(normalMatrix * normal);\n    vView = -view.xyz;\n    gl_Position = projectionMatrix * view;\n  }\n", em = "\n  uniform vec3 uColor;\n  uniform float uTime;\n  uniform float uPhase;\n  uniform float uStrength;\n  uniform float uCore;\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    float facing = abs(dot(normalize(vNormal), normalize(vView)));\n    float softEdge = pow(facing, mix(2.6, 0.7, uCore));\n    float fade = smoothstep(0.0, 0.06, vUv.x)\n               * (1.0 - smoothstep(0.82, 1.0, vUv.x));\n    float phase = fract(vUv.x * 2.2 - uTime * 0.65 + uPhase);\n    float pulse = smoothstep(0.0, 0.15, phase)\n                * (1.0 - smoothstep(0.40, 0.92, phase));\n    float alpha = uStrength * softEdge * fade * (0.32 + 0.68 * pulse);\n    if (uCore < 0.0) {\n      float across = vUv.y * 2.0 - 1.0;\n      float edge = pow(max(0.0, 1.0 - across * across), 1.4);\n      float wave = pow(0.5 + 0.5 * cos((vUv.x + across * across * 0.10) * 21.0 - uTime * 3.2), 5.0);\n      alpha = uStrength * edge * fade * (0.14 + 0.86 * wave);\n    }\n    vec3 color = mix(uColor, vec3(1.0), clamp(uCore, 0.0, 1.0) * 0.14);\n    gl_FragColor = vec4(color, alpha);\n    #include <colorspace_fragment>\n  }\n";
-function tm(e, { reducedMotion: t = !1 } = {}) {
+var tm = "\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    vUv = uv;\n    vec4 view = modelViewMatrix * vec4(position, 1.0);\n    vNormal = normalize(normalMatrix * normal);\n    vView = -view.xyz;\n    gl_Position = projectionMatrix * view;\n  }\n", nm = "\n  uniform vec3 uColor;\n  uniform float uTime;\n  uniform float uPhase;\n  uniform float uStrength;\n  uniform float uCore;\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    float facing = abs(dot(normalize(vNormal), normalize(vView)));\n    float softEdge = pow(facing, mix(2.6, 0.7, uCore));\n    float fade = smoothstep(0.0, 0.06, vUv.x)\n               * (1.0 - smoothstep(0.82, 1.0, vUv.x));\n    float phase = fract(vUv.x * 2.2 - uTime * 0.65 + uPhase);\n    float pulse = smoothstep(0.0, 0.15, phase)\n                * (1.0 - smoothstep(0.40, 0.92, phase));\n    float alpha = uStrength * softEdge * fade * (0.32 + 0.68 * pulse);\n    if (uCore < 0.0) {\n      float across = vUv.y * 2.0 - 1.0;\n      float edge = pow(max(0.0, 1.0 - across * across), 1.4);\n      float wave = pow(0.5 + 0.5 * cos((vUv.x + across * across * 0.10) * 21.0 - uTime * 3.2), 5.0);\n      alpha = uStrength * edge * fade * (0.14 + 0.86 * wave);\n    }\n    vec3 color = mix(uColor, vec3(1.0), clamp(uCore, 0.0, 1.0) * 0.14);\n    gl_FragColor = vec4(color, alpha);\n    #include <colorspace_fragment>\n  }\n";
+function rm(e, { reducedMotion: t = !1 } = {}) {
 	let n = e.userData.climateVisual;
 	if (!n || n.version !== 1 || !Array.isArray(n.outlet) || n.outlet.length !== 3 || !n.outlet.every((e) => Number.isFinite(e) && Math.abs(e) < 10) || !Number.isFinite(n.width) || n.width < .1 || n.width > 5) return null;
 	let r = new Tn();
@@ -16529,8 +16556,8 @@ function tm(e, { reducedMotion: t = !1 } = {}) {
 		]);
 		for (let t of [!1, !0]) {
 			let c = new Fa(s, 40, Ot.clamp(n.width * (t ? .012 : .044), t ? .005 : .02, t ? .014 : .045), 8, !1), l = new Wa({
-				vertexShader: $p,
-				fragmentShader: em,
+				vertexShader: tm,
+				fragmentShader: nm,
 				uniforms: {
 					uTime: i,
 					uColor: a,
@@ -16567,8 +16594,8 @@ function tm(e, { reducedMotion: t = !1 } = {}) {
 	let d = new Dr();
 	d.setAttribute("position", new hr(c, 3)), d.setAttribute("uv", new hr(l, 2)), d.setIndex(u), d.computeVertexNormals();
 	let f = new Wa({
-		vertexShader: $p,
-		fragmentShader: em,
+		vertexShader: tm,
+		fragmentShader: nm,
 		uniforms: {
 			uTime: i,
 			uColor: a,
@@ -16624,7 +16651,7 @@ function tm(e, { reducedMotion: t = !1 } = {}) {
 	};
 }
 // shared/daylight.mjs
-function nm(e, t, n = 0) {
+function im(e, t, n = 0) {
 	if (e === "day") return 1;
 	if (e === "night") return 0;
 	if (!t || ["unknown", "unavailable"].includes(t.state)) return n;
@@ -16635,7 +16662,7 @@ function nm(e, t, n = 0) {
 	}
 	return t.state === "above_horizon" ? 1 : t.state === "below_horizon" ? 0 : n;
 }
-function rm(e) {
+function am(e) {
 	let t = new Tn();
 	t.name = "daylight-runtime", t.userData.daylightRuntime = !0;
 	let n = new No("#c4dfff", "#a39b82", 0);
@@ -16655,7 +16682,7 @@ function rm(e) {
 		};
 	}), i = 0, a = /* @__PURE__ */ new Map();
 	function o(e, t, o = /* @__PURE__ */ new Map()) {
-		i = nm(e, t, i);
+		i = im(e, t, i);
 		let s = 0, c = 0;
 		for (let { w: e, light: t, sky: n } of r) {
 			let r = o.get(e.coverId);
@@ -16674,14 +16701,14 @@ function rm(e) {
 	};
 }
 // shared/view-cube.mjs
-function im([e, t, n]) {
+function om([e, t, n]) {
 	return [
 		t > 0 ? "top" : t < 0 ? "bottom" : "",
 		n > 0 ? "front" : n < 0 ? "back" : "",
 		e > 0 ? "right" : e < 0 ? "left" : ""
 	].filter(Boolean).join("-");
 }
-var am = [];
+var sm = [];
 for (let e of [
 	-1,
 	0,
@@ -16694,8 +16721,8 @@ for (let e of [
 	-1,
 	0,
 	1
-]) (e || t || n) && am.push({
-	name: im([
+]) (e || t || n) && sm.push({
+	name: om([
 		e,
 		t,
 		n
@@ -16716,11 +16743,11 @@ for (let e of [
 	].filter(Boolean).length === 2 ? "edge" : "face"
 });
 // shared/camera-presets.mjs
-var om = Object.freeze(Object.fromEntries(am.map(({ name: e, vector: [t, n, r] }) => [e, {
+var cm = Object.freeze(Object.fromEntries(sm.map(({ name: e, vector: [t, n, r] }) => [e, {
 	heading: (Math.atan2(t, r) * 180 / Math.PI + 360) % 360,
 	tilt: Math.acos(n / Math.hypot(t, n, r)) * 180 / Math.PI
 }])));
-function sm(e, t = "front") {
+function lm(e, t = "front") {
 	let n = t === "floor" ? "floor" : "front";
 	if (e === "reset") return {
 		view: n,
@@ -16729,16 +16756,16 @@ function sm(e, t = "front") {
 		zoom: 1,
 		camera: void 0
 	};
-	if (!Object.hasOwn(om, e)) throw Error("Unknown camera view.");
+	if (!Object.hasOwn(cm, e)) throw Error("Unknown camera view.");
 	return {
 		view: n,
-		...om[e],
+		...cm[e],
 		zoom: 1,
 		camera: void 0
 	};
 }
 // node_modules/three/examples/jsm/controls/OrbitControls.js
-var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = new Vr(), fm = new Pr(), pm = Math.cos(70 * Ot.DEG2RAD), mm = new G(), hm = 2 * Math.PI, gm = {
+var um = { type: "change" }, dm = { type: "start" }, fm = { type: "end" }, pm = new Vr(), mm = new Pr(), hm = Math.cos(70 * Ot.DEG2RAD), gm = new G(), _m = 2 * Math.PI, vm = {
 	NONE: -1,
 	ROTATE: 0,
 	DOLLY: 1,
@@ -16747,9 +16774,9 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 	TOUCH_PAN: 4,
 	TOUCH_DOLLY_PAN: 5,
 	TOUCH_DOLLY_ROTATE: 6
-}, _m = 1e-6, vm = class extends Es {
+}, ym = 1e-6, bm = class extends Es {
 	constructor(n, r = null) {
-		super(n, r), this.state = gm.NONE, this.target = new G(), this.cursor = new G(), this.minDistance = 0, this.maxDistance = Infinity, this.minZoom = 0, this.maxZoom = Infinity, this.minTargetRadius = 0, this.maxTargetRadius = Infinity, this.minPolarAngle = 0, this.maxPolarAngle = Math.PI, this.minAzimuthAngle = -Infinity, this.maxAzimuthAngle = Infinity, this.enableDamping = !1, this.dampingFactor = .05, this.enableZoom = !0, this.zoomSpeed = 1, this.enableRotate = !0, this.rotateSpeed = 1, this.keyRotateSpeed = 1, this.enablePan = !0, this.panSpeed = 1, this.screenSpacePanning = !0, this.keyPanSpeed = 7, this.zoomToCursor = !1, this.autoRotate = !1, this.autoRotateSpeed = 2, this.keys = {
+		super(n, r), this.state = vm.NONE, this.target = new G(), this.cursor = new G(), this.minDistance = 0, this.maxDistance = Infinity, this.minZoom = 0, this.maxZoom = Infinity, this.minTargetRadius = 0, this.maxTargetRadius = Infinity, this.minPolarAngle = 0, this.maxPolarAngle = Math.PI, this.minAzimuthAngle = -Infinity, this.maxAzimuthAngle = Infinity, this.enableDamping = !1, this.dampingFactor = .05, this.enableZoom = !0, this.zoomSpeed = 1, this.enableRotate = !0, this.rotateSpeed = 1, this.keyRotateSpeed = 1, this.enablePan = !0, this.panSpeed = 1, this.screenSpacePanning = !0, this.keyPanSpeed = 7, this.zoomToCursor = !1, this.autoRotate = !1, this.autoRotateSpeed = 2, this.keys = {
 			LEFT: "ArrowLeft",
 			UP: "ArrowUp",
 			RIGHT: "ArrowRight",
@@ -16761,7 +16788,7 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 		}, this.touches = {
 			ONE: t.ROTATE,
 			TWO: t.DOLLY_PAN
-		}, this.target0 = this.target.clone(), this.position0 = this.object.position.clone(), this.zoom0 = this.object.zoom, this._cursorStyle = "auto", this._domElementKeyEvents = null, this._lastPosition = new G(), this._lastQuaternion = new kt(), this._lastTargetPosition = new G(), this._quat = new kt().setFromUnitVectors(n.up, new G(0, 1, 0)), this._quatInverse = this._quat.clone().invert(), this._spherical = new Cs(), this._sphericalDelta = new Cs(), this._scale = 1, this._panOffset = new G(), this._rotateStart = new W(), this._rotateEnd = new W(), this._rotateDelta = new W(), this._panStart = new W(), this._panEnd = new W(), this._panDelta = new W(), this._dollyStart = new W(), this._dollyEnd = new W(), this._dollyDelta = new W(), this._dollyDirection = new G(), this._mouse = new W(), this._performCursorZoom = !1, this._pointers = [], this._pointerPositions = {}, this._controlActive = !1, this._onPointerMove = bm.bind(this), this._onPointerDown = ym.bind(this), this._onPointerUp = xm.bind(this), this._onContextMenu = Om.bind(this), this._onMouseWheel = wm.bind(this), this._onKeyDown = Tm.bind(this), this._onTouchStart = Em.bind(this), this._onTouchMove = Dm.bind(this), this._onMouseDown = Sm.bind(this), this._onMouseMove = Cm.bind(this), this._interceptControlDown = km.bind(this), this._interceptControlUp = Am.bind(this), this.domElement !== null && this.connect(this.domElement), this.update();
+		}, this.target0 = this.target.clone(), this.position0 = this.object.position.clone(), this.zoom0 = this.object.zoom, this._cursorStyle = "auto", this._domElementKeyEvents = null, this._lastPosition = new G(), this._lastQuaternion = new kt(), this._lastTargetPosition = new G(), this._quat = new kt().setFromUnitVectors(n.up, new G(0, 1, 0)), this._quatInverse = this._quat.clone().invert(), this._spherical = new Cs(), this._sphericalDelta = new Cs(), this._scale = 1, this._panOffset = new G(), this._rotateStart = new W(), this._rotateEnd = new W(), this._rotateDelta = new W(), this._panStart = new W(), this._panEnd = new W(), this._panDelta = new W(), this._dollyStart = new W(), this._dollyEnd = new W(), this._dollyDelta = new W(), this._dollyDirection = new G(), this._mouse = new W(), this._performCursorZoom = !1, this._pointers = [], this._pointerPositions = {}, this._controlActive = !1, this._onPointerMove = Sm.bind(this), this._onPointerDown = xm.bind(this), this._onPointerUp = Cm.bind(this), this._onContextMenu = Am.bind(this), this._onMouseWheel = Em.bind(this), this._onKeyDown = Dm.bind(this), this._onTouchStart = Om.bind(this), this._onTouchMove = km.bind(this), this._onMouseDown = wm.bind(this), this._onMouseMove = Tm.bind(this), this._interceptControlDown = jm.bind(this), this._interceptControlUp = Mm.bind(this), this.domElement !== null && this.connect(this.domElement), this.update();
 	}
 	set cursorStyle(e) {
 		this._cursorStyle = e, e === "grab" ? this.domElement.style.cursor = "grab" : this.domElement.style.cursor = "auto";
@@ -16776,7 +16803,7 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 		}), this.domElement.style.touchAction = "none";
 	}
 	disconnect() {
-		this.state = gm.NONE, this.domElement.removeEventListener("pointerdown", this._onPointerDown), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.domElement.removeEventListener("pointercancel", this._onPointerUp), this.domElement.removeEventListener("wheel", this._onMouseWheel), this.domElement.removeEventListener("contextmenu", this._onContextMenu), this.stopListenToKeyEvents();
+		this.state = vm.NONE, this.domElement.removeEventListener("pointerdown", this._onPointerDown), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.domElement.removeEventListener("pointercancel", this._onPointerUp), this.domElement.removeEventListener("wheel", this._onMouseWheel), this.domElement.removeEventListener("contextmenu", this._onContextMenu), this.stopListenToKeyEvents();
 		let e = this.domElement.getRootNode();
 		e.removeEventListener("keydown", this._interceptControlDown, { capture: !0 }), e.removeEventListener("keyup", this._interceptControlUp, { capture: !0 }), this._controlActive = !1, this._pointers.length = 0, this._pointerPositions = {}, this.domElement.style.touchAction = "", this.domElement.style.cursor = "auto";
 	}
@@ -16802,7 +16829,7 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 		this.target0.copy(this.target), this.position0.copy(this.object.position), this.zoom0 = this.object.zoom;
 	}
 	reset() {
-		this.target.copy(this.target0), this.object.position.copy(this.position0), this.object.zoom = this.zoom0, this.object.updateProjectionMatrix(), this.dispatchEvent(cm), this.update(), this.state = gm.NONE;
+		this.target.copy(this.target0), this.object.position.copy(this.position0), this.object.zoom = this.zoom0, this.object.updateProjectionMatrix(), this.dispatchEvent(um), this.update(), this.state = vm.NONE;
 	}
 	pan(e, t) {
 		this._pan(e, t), this.update();
@@ -16821,19 +16848,19 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 	}
 	update(e = null) {
 		let t = this.object.position;
-		mm.copy(t).sub(this.target), mm.applyQuaternion(this._quat), this._spherical.setFromVector3(mm), this.autoRotate && this.state === gm.NONE && this._rotateLeft(this._getAutoRotationAngle(e)), this.enableDamping ? (this._spherical.theta += this._sphericalDelta.theta * this.dampingFactor, this._spherical.phi += this._sphericalDelta.phi * this.dampingFactor) : (this._spherical.theta += this._sphericalDelta.theta, this._spherical.phi += this._sphericalDelta.phi);
+		gm.copy(t).sub(this.target), gm.applyQuaternion(this._quat), this._spherical.setFromVector3(gm), this.autoRotate && this.state === vm.NONE && this._rotateLeft(this._getAutoRotationAngle(e)), this.enableDamping ? (this._spherical.theta += this._sphericalDelta.theta * this.dampingFactor, this._spherical.phi += this._sphericalDelta.phi * this.dampingFactor) : (this._spherical.theta += this._sphericalDelta.theta, this._spherical.phi += this._sphericalDelta.phi);
 		let n = this.minAzimuthAngle, r = this.maxAzimuthAngle;
-		isFinite(n) && isFinite(r) && (n < -Math.PI ? n += hm : n > Math.PI && (n -= hm), r < -Math.PI ? r += hm : r > Math.PI && (r -= hm), n <= r ? this._spherical.theta = Math.max(n, Math.min(r, this._spherical.theta)) : this._spherical.theta = this._spherical.theta > (n + r) / 2 ? Math.max(n, this._spherical.theta) : Math.min(r, this._spherical.theta)), this._spherical.phi = Math.max(this.minPolarAngle, Math.min(this.maxPolarAngle, this._spherical.phi)), this._spherical.makeSafe(), this.enableDamping === !0 ? this.target.addScaledVector(this._panOffset, this.dampingFactor) : this.target.add(this._panOffset), this.target.sub(this.cursor), this.target.clampLength(this.minTargetRadius, this.maxTargetRadius), this.target.add(this.cursor);
+		isFinite(n) && isFinite(r) && (n < -Math.PI ? n += _m : n > Math.PI && (n -= _m), r < -Math.PI ? r += _m : r > Math.PI && (r -= _m), n <= r ? this._spherical.theta = Math.max(n, Math.min(r, this._spherical.theta)) : this._spherical.theta = this._spherical.theta > (n + r) / 2 ? Math.max(n, this._spherical.theta) : Math.min(r, this._spherical.theta)), this._spherical.phi = Math.max(this.minPolarAngle, Math.min(this.maxPolarAngle, this._spherical.phi)), this._spherical.makeSafe(), this.enableDamping === !0 ? this.target.addScaledVector(this._panOffset, this.dampingFactor) : this.target.add(this._panOffset), this.target.sub(this.cursor), this.target.clampLength(this.minTargetRadius, this.maxTargetRadius), this.target.add(this.cursor);
 		let i = !1;
 		if (this.zoomToCursor && this._performCursorZoom || this.object.isOrthographicCamera) this._spherical.radius = this._clampDistance(this._spherical.radius);
 		else {
 			let e = this._spherical.radius;
 			this._spherical.radius = this._clampDistance(this._spherical.radius * this._scale), i = e != this._spherical.radius;
 		}
-		if (mm.setFromSpherical(this._spherical), mm.applyQuaternion(this._quatInverse), t.copy(this.target).add(mm), this.object.lookAt(this.target), this.enableDamping === !0 ? (this._sphericalDelta.theta *= 1 - this.dampingFactor, this._sphericalDelta.phi *= 1 - this.dampingFactor, this._panOffset.multiplyScalar(1 - this.dampingFactor)) : (this._sphericalDelta.set(0, 0, 0), this._panOffset.set(0, 0, 0)), this.zoomToCursor && this._performCursorZoom) {
+		if (gm.setFromSpherical(this._spherical), gm.applyQuaternion(this._quatInverse), t.copy(this.target).add(gm), this.object.lookAt(this.target), this.enableDamping === !0 ? (this._sphericalDelta.theta *= 1 - this.dampingFactor, this._sphericalDelta.phi *= 1 - this.dampingFactor, this._panOffset.multiplyScalar(1 - this.dampingFactor)) : (this._sphericalDelta.set(0, 0, 0), this._panOffset.set(0, 0, 0)), this.zoomToCursor && this._performCursorZoom) {
 			let e = null;
 			if (this.object.isPerspectiveCamera) {
-				let t = mm.length();
+				let t = gm.length();
 				e = this._clampDistance(t * this._scale);
 				let n = t - e;
 				this.object.position.addScaledVector(this._dollyDirection, n), this.object.updateMatrixWorld(), i = !!n;
@@ -16843,17 +16870,17 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 				let n = this.object.zoom;
 				this.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom / this._scale)), this.object.updateProjectionMatrix(), i = n !== this.object.zoom;
 				let r = new G(this._mouse.x, this._mouse.y, 0);
-				r.unproject(this.object), this.object.position.sub(r).add(t), this.object.updateMatrixWorld(), e = mm.length();
+				r.unproject(this.object), this.object.position.sub(r).add(t), this.object.updateMatrixWorld(), e = gm.length();
 			} else console.warn("WARNING: OrbitControls.js encountered an unknown camera type - zoom to cursor disabled."), this.zoomToCursor = !1;
-			e !== null && (this.screenSpacePanning ? this.target.set(0, 0, -1).transformDirection(this.object.matrix).multiplyScalar(e).add(this.object.position) : (dm.origin.copy(this.object.position), dm.direction.set(0, 0, -1).transformDirection(this.object.matrix), Math.abs(this.object.up.dot(dm.direction)) < pm ? this.object.lookAt(this.target) : (fm.setFromNormalAndCoplanarPoint(this.object.up, this.target), dm.intersectPlane(fm, this.target))));
+			e !== null && (this.screenSpacePanning ? this.target.set(0, 0, -1).transformDirection(this.object.matrix).multiplyScalar(e).add(this.object.position) : (pm.origin.copy(this.object.position), pm.direction.set(0, 0, -1).transformDirection(this.object.matrix), Math.abs(this.object.up.dot(pm.direction)) < hm ? this.object.lookAt(this.target) : (mm.setFromNormalAndCoplanarPoint(this.object.up, this.target), pm.intersectPlane(mm, this.target))));
 		} else if (this.object.isOrthographicCamera) {
 			let e = this.object.zoom;
 			this.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom / this._scale)), e !== this.object.zoom && (this.object.updateProjectionMatrix(), i = !0);
 		}
-		return this._scale = 1, this._performCursorZoom = !1, i || this._lastPosition.distanceToSquared(this.object.position) > _m || 8 * (1 - this._lastQuaternion.dot(this.object.quaternion)) > _m || this._lastTargetPosition.distanceToSquared(this.target) > _m ? (this.dispatchEvent(cm), this._lastPosition.copy(this.object.position), this._lastQuaternion.copy(this.object.quaternion), this._lastTargetPosition.copy(this.target), !0) : !1;
+		return this._scale = 1, this._performCursorZoom = !1, i || this._lastPosition.distanceToSquared(this.object.position) > ym || 8 * (1 - this._lastQuaternion.dot(this.object.quaternion)) > ym || this._lastTargetPosition.distanceToSquared(this.target) > ym ? (this.dispatchEvent(um), this._lastPosition.copy(this.object.position), this._lastQuaternion.copy(this.object.quaternion), this._lastTargetPosition.copy(this.target), !0) : !1;
 	}
 	_getAutoRotationAngle(e) {
-		return e === null ? hm / 60 / 60 * this.autoRotateSpeed : hm / 60 * this.autoRotateSpeed * e;
+		return e === null ? _m / 60 / 60 * this.autoRotateSpeed : _m / 60 * this.autoRotateSpeed * e;
 	}
 	_getZoomScale(e) {
 		let t = Math.abs(e * .01);
@@ -16866,17 +16893,17 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 		this._sphericalDelta.phi -= e;
 	}
 	_panLeft(e, t) {
-		mm.setFromMatrixColumn(t, 0), mm.multiplyScalar(-e), this._panOffset.add(mm);
+		gm.setFromMatrixColumn(t, 0), gm.multiplyScalar(-e), this._panOffset.add(gm);
 	}
 	_panUp(e, t) {
-		this.screenSpacePanning === !0 ? mm.setFromMatrixColumn(t, 1) : (mm.setFromMatrixColumn(t, 0), mm.crossVectors(this.object.up, mm)), mm.multiplyScalar(e), this._panOffset.add(mm);
+		this.screenSpacePanning === !0 ? gm.setFromMatrixColumn(t, 1) : (gm.setFromMatrixColumn(t, 0), gm.crossVectors(this.object.up, gm)), gm.multiplyScalar(e), this._panOffset.add(gm);
 	}
 	_pan(e, t) {
 		let n = this.domElement;
 		if (this.object.isPerspectiveCamera) {
 			let r = this.object.position;
-			mm.copy(r).sub(this.target);
-			let i = mm.length();
+			gm.copy(r).sub(this.target);
+			let i = gm.length();
 			i *= Math.tan(this.object.fov / 2 * Math.PI / 180), this._panLeft(2 * e * i / n.clientHeight, this.object.matrix), this._panUp(2 * t * i / n.clientHeight, this.object.matrix);
 		} else this.object.isOrthographicCamera ? (this._panLeft(e * (this.object.right - this.object.left) / this.object.zoom / n.clientWidth, this.object.matrix), this._panUp(t * (this.object.top - this.object.bottom) / this.object.zoom / n.clientHeight, this.object.matrix)) : (console.warn("WARNING: OrbitControls.js encountered an unknown camera type - pan disabled."), this.enablePan = !1);
 	}
@@ -16907,7 +16934,7 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 	_handleMouseMoveRotate(e) {
 		this._rotateEnd.set(e.clientX, e.clientY), this._rotateDelta.subVectors(this._rotateEnd, this._rotateStart).multiplyScalar(this.rotateSpeed);
 		let t = this.domElement;
-		this._rotateLeft(hm * this._rotateDelta.x / t.clientHeight), this._rotateUp(hm * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd), this.update();
+		this._rotateLeft(_m * this._rotateDelta.x / t.clientHeight), this._rotateUp(_m * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd), this.update();
 	}
 	_handleMouseMoveDolly(e) {
 		this._dollyEnd.set(e.clientX, e.clientY), this._dollyDelta.subVectors(this._dollyEnd, this._dollyStart), this._dollyDelta.y > 0 ? this._dollyOut(this._getZoomScale(this._dollyDelta.y)) : this._dollyDelta.y < 0 && this._dollyIn(this._getZoomScale(this._dollyDelta.y)), this._dollyStart.copy(this._dollyEnd), this.update();
@@ -16922,15 +16949,15 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 		let t = !1;
 		switch (e.code) {
 			case this.keys.UP:
-				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(hm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, this.keyPanSpeed), t = !0;
+				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(_m * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, this.keyPanSpeed), t = !0;
 				break;
 			case this.keys.BOTTOM:
-				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(-hm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, -this.keyPanSpeed), t = !0;
+				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(-_m * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, -this.keyPanSpeed), t = !0;
 				break;
 			case this.keys.LEFT:
-				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(hm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(this.keyPanSpeed, 0), t = !0;
+				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(_m * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(this.keyPanSpeed, 0), t = !0;
 				break;
-			case this.keys.RIGHT: e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(-hm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(-this.keyPanSpeed, 0), t = !0;
+			case this.keys.RIGHT: e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(-_m * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(-this.keyPanSpeed, 0), t = !0;
 		}
 		t && (e.preventDefault(), this.update());
 	}
@@ -16966,7 +16993,7 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 		}
 		this._rotateDelta.subVectors(this._rotateEnd, this._rotateStart).multiplyScalar(this.rotateSpeed);
 		let t = this.domElement;
-		this._rotateLeft(hm * this._rotateDelta.x / t.clientHeight), this._rotateUp(hm * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd);
+		this._rotateLeft(_m * this._rotateDelta.x / t.clientHeight), this._rotateUp(_m * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd);
 	}
 	_handleTouchMovePan(e) {
 		if (this._pointers.length === 1) this._panEnd.set(e.pageX, e.pageY);
@@ -17025,16 +17052,16 @@ var cm = { type: "change" }, lm = { type: "start" }, um = { type: "end" }, dm = 
 		return e.ctrlKey && !this._controlActive && (n.deltaY *= 10), n;
 	}
 };
-function ym(e) {
+function xm(e) {
 	this.enabled !== !1 && (this._pointers.length === 0 && (this.domElement.setPointerCapture(e.pointerId), this.domElement.ownerDocument.addEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.addEventListener("pointerup", this._onPointerUp)), !this._isTrackingPointer(e) && (this._addPointer(e), e.pointerType === "touch" ? this._onTouchStart(e) : this._onMouseDown(e), this._cursorStyle === "grab" && (this.domElement.style.cursor = "grabbing")));
 }
-function bm(e) {
+function Sm(e) {
 	this.enabled !== !1 && (e.pointerType === "touch" ? this._onTouchMove(e) : this._onMouseMove(e));
 }
-function xm(e) {
+function Cm(e) {
 	switch (this._removePointer(e), this._pointers.length) {
 		case 0:
-			this.domElement.releasePointerCapture(e.pointerId), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.dispatchEvent(um), this.state = gm.NONE, this._cursorStyle === "grab" && (this.domElement.style.cursor = "grab");
+			this.domElement.releasePointerCapture(e.pointerId), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.dispatchEvent(fm), this.state = vm.NONE, this._cursorStyle === "grab" && (this.domElement.style.cursor = "grab");
 			break;
 		case 1:
 			let t = this._pointers[0], n = this._pointerPositions[t];
@@ -17045,7 +17072,7 @@ function xm(e) {
 			});
 	}
 }
-function Sm(t) {
+function wm(t) {
 	let n;
 	switch (t.button) {
 		case 0:
@@ -17062,126 +17089,126 @@ function Sm(t) {
 	switch (n) {
 		case e.DOLLY:
 			if (this.enableZoom === !1) return;
-			this._handleMouseDownDolly(t), this.state = gm.DOLLY;
+			this._handleMouseDownDolly(t), this.state = vm.DOLLY;
 			break;
 		case e.ROTATE:
 			if (t.ctrlKey || t.metaKey || t.shiftKey) {
 				if (this.enablePan === !1) return;
-				this._handleMouseDownPan(t), this.state = gm.PAN;
+				this._handleMouseDownPan(t), this.state = vm.PAN;
 			} else {
 				if (this.enableRotate === !1) return;
-				this._handleMouseDownRotate(t), this.state = gm.ROTATE;
+				this._handleMouseDownRotate(t), this.state = vm.ROTATE;
 			}
 			break;
 		case e.PAN:
 			if (t.ctrlKey || t.metaKey || t.shiftKey) {
 				if (this.enableRotate === !1) return;
-				this._handleMouseDownRotate(t), this.state = gm.ROTATE;
+				this._handleMouseDownRotate(t), this.state = vm.ROTATE;
 			} else {
 				if (this.enablePan === !1) return;
-				this._handleMouseDownPan(t), this.state = gm.PAN;
+				this._handleMouseDownPan(t), this.state = vm.PAN;
 			}
 			break;
-		default: this.state = gm.NONE;
+		default: this.state = vm.NONE;
 	}
-	this.state !== gm.NONE && this.dispatchEvent(lm);
+	this.state !== vm.NONE && this.dispatchEvent(dm);
 }
-function Cm(e) {
+function Tm(e) {
 	switch (this.state) {
-		case gm.ROTATE:
+		case vm.ROTATE:
 			if (this.enableRotate === !1) return;
 			this._handleMouseMoveRotate(e);
 			break;
-		case gm.DOLLY:
+		case vm.DOLLY:
 			if (this.enableZoom === !1) return;
 			this._handleMouseMoveDolly(e);
 			break;
-		case gm.PAN:
+		case vm.PAN:
 			if (this.enablePan === !1) return;
 			this._handleMouseMovePan(e);
 	}
 }
-function wm(e) {
-	this.enabled !== !1 && this.enableZoom !== !1 && this.state === gm.NONE && (e.preventDefault(), this.dispatchEvent(lm), this._handleMouseWheel(this._customWheelEvent(e)), this.dispatchEvent(um));
+function Em(e) {
+	this.enabled !== !1 && this.enableZoom !== !1 && this.state === vm.NONE && (e.preventDefault(), this.dispatchEvent(dm), this._handleMouseWheel(this._customWheelEvent(e)), this.dispatchEvent(fm));
 }
-function Tm(e) {
+function Dm(e) {
 	this.enabled !== !1 && this._handleKeyDown(e);
 }
-function Em(e) {
+function Om(e) {
 	switch (this._trackPointer(e), this._pointers.length) {
 		case 1:
 			switch (this.touches.ONE) {
 				case t.ROTATE:
 					if (this.enableRotate === !1) return;
-					this._handleTouchStartRotate(e), this.state = gm.TOUCH_ROTATE;
+					this._handleTouchStartRotate(e), this.state = vm.TOUCH_ROTATE;
 					break;
 				case t.PAN:
 					if (this.enablePan === !1) return;
-					this._handleTouchStartPan(e), this.state = gm.TOUCH_PAN;
+					this._handleTouchStartPan(e), this.state = vm.TOUCH_PAN;
 					break;
-				default: this.state = gm.NONE;
+				default: this.state = vm.NONE;
 			}
 			break;
 		case 2:
 			switch (this.touches.TWO) {
 				case t.DOLLY_PAN:
 					if (this.enableZoom === !1 && this.enablePan === !1) return;
-					this._handleTouchStartDollyPan(e), this.state = gm.TOUCH_DOLLY_PAN;
+					this._handleTouchStartDollyPan(e), this.state = vm.TOUCH_DOLLY_PAN;
 					break;
 				case t.DOLLY_ROTATE:
 					if (this.enableZoom === !1 && this.enableRotate === !1) return;
-					this._handleTouchStartDollyRotate(e), this.state = gm.TOUCH_DOLLY_ROTATE;
+					this._handleTouchStartDollyRotate(e), this.state = vm.TOUCH_DOLLY_ROTATE;
 					break;
-				default: this.state = gm.NONE;
+				default: this.state = vm.NONE;
 			}
 			break;
-		default: this.state = gm.NONE;
+		default: this.state = vm.NONE;
 	}
-	this.state !== gm.NONE && this.dispatchEvent(lm);
+	this.state !== vm.NONE && this.dispatchEvent(dm);
 }
-function Dm(e) {
+function km(e) {
 	switch (this._trackPointer(e), this.state) {
-		case gm.TOUCH_ROTATE:
+		case vm.TOUCH_ROTATE:
 			if (this.enableRotate === !1) return;
 			this._handleTouchMoveRotate(e), this.update();
 			break;
-		case gm.TOUCH_PAN:
+		case vm.TOUCH_PAN:
 			if (this.enablePan === !1) return;
 			this._handleTouchMovePan(e), this.update();
 			break;
-		case gm.TOUCH_DOLLY_PAN:
+		case vm.TOUCH_DOLLY_PAN:
 			if (this.enableZoom === !1 && this.enablePan === !1) return;
 			this._handleTouchMoveDollyPan(e), this.update();
 			break;
-		case gm.TOUCH_DOLLY_ROTATE:
+		case vm.TOUCH_DOLLY_ROTATE:
 			if (this.enableZoom === !1 && this.enableRotate === !1) return;
 			this._handleTouchMoveDollyRotate(e), this.update();
 			break;
-		default: this.state = gm.NONE;
+		default: this.state = vm.NONE;
 	}
 }
-function Om(e) {
+function Am(e) {
 	this.enabled !== !1 && e.preventDefault();
 }
-function km(e) {
+function jm(e) {
 	e.key === "Control" && (this._controlActive = !0, this.domElement.getRootNode().addEventListener("keyup", this._interceptControlUp, {
 		passive: !0,
 		capture: !0
 	}));
 }
-function Am(e) {
+function Mm(e) {
 	e.key === "Control" && (this._controlActive = !1, this.domElement.getRootNode().removeEventListener("keyup", this._interceptControlUp, {
 		passive: !0,
 		capture: !0
 	}));
 }
 // shared/light-effects.mjs
-var jm = {
+var Nm = {
 	blink: 1.2,
 	breathe: 15,
 	okay: 1.2,
 	channel_change: 8
-}, Mm = {
+}, Pm = {
 	blink: "blink",
 	flash: "blink",
 	breathe: "breathe",
@@ -17205,19 +17232,19 @@ var jm = {
 	breath: "pulse",
 	strobe: "strobe"
 };
-function Nm(e) {
+function Fm(e) {
 	if (typeof e != "string") return null;
-	let t = e.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""), n = Object.hasOwn(Mm, t) ? Mm[t] : void 0;
-	return n ? n === "stop" ? { kind: n } : Object.hasOwn(jm, n) ? {
+	let t = e.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""), n = Object.hasOwn(Pm, t) ? Pm[t] : void 0;
+	return n ? n === "stop" ? { kind: n } : Object.hasOwn(Nm, n) ? {
 		kind: n,
 		oneShot: !0,
-		duration: jm[n]
+		duration: Nm[n]
 	} : {
 		kind: n,
 		oneShot: !1
 	} : null;
 }
-var Pm = (e, t) => .5 - .5 * Math.cos(2 * Math.PI * e / t), Fm = (e) => [
+var Im = (e, t) => .5 - .5 * Math.cos(2 * Math.PI * e / t), Lm = (e) => [
 	0,
 	1 / 3,
 	2 / 3
@@ -17225,11 +17252,11 @@ var Pm = (e, t) => .5 - .5 * Math.cos(2 * Math.PI * e / t), Fm = (e) => [
 	let n = Math.abs(((e - t) % 1 + 1) % 1) * 6;
 	return Math.max(0, Math.min(1, Math.abs(n - 3) - 1));
 });
-function Im(e, t) {
+function Rm(e, t) {
 	if (!e || e.kind === "stop" || !(t >= 0) || e.oneShot && t >= e.duration) return null;
 	switch (e.kind) {
 		case "blink": return { gain: t % .6 < .3 ? .05 : 1 };
-		case "breathe": return { gain: .05 + .95 * Pm(t + .5, 1) };
+		case "breathe": return { gain: .05 + .95 * Im(t + .5, 1) };
 		case "okay": return {
 			gain: t % .6 < .4 ? 1 : .1,
 			tint: [
@@ -17248,17 +17275,17 @@ function Im(e, t) {
 		};
 		case "colorloop": return {
 			gain: 1,
-			tint: Fm(t / 12)
+			tint: Lm(t / 12)
 		};
 		case "flicker": return { gain: .72 + .14 * Math.sin(t * 9.1) + .09 * Math.sin(t * 23.7 + 1.3) + .05 * Math.sin(t * 41.3 + .4) };
-		case "pulse": return { gain: .25 + .75 * Pm(t, 3) };
+		case "pulse": return { gain: .25 + .75 * Im(t, 3) };
 		case "strobe": return { gain: t % .5 < .25 ? 1 : .1 };
 		default: return null;
 	}
 }
-function Lm() {
+function zm() {
 	let e, t = null, n = 0, r = !1, i = (e, r) => {
-		let i = Nm(e);
+		let i = Fm(e);
 		t = i && i.kind !== "stop" ? i : null, n = r;
 	};
 	return {
@@ -17267,7 +17294,7 @@ function Lm() {
 			if (r = !!n, o === e) return;
 			let s = e === void 0;
 			e = o;
-			let c = Nm(o);
+			let c = Fm(o);
 			s && c?.oneShot || i(o, a);
 		},
 		trigger(e, t) {
@@ -17275,7 +17302,7 @@ function Lm() {
 		},
 		sample(e) {
 			if (!t || !t.oneShot && !r) return null;
-			let i = Im(t, e - n);
+			let i = Rm(t, e - n);
 			return i || (t = null), i;
 		},
 		get animating() {
@@ -17284,16 +17311,16 @@ function Lm() {
 	};
 }
 // web/scene.js
-var Rm = class {
+var Bm = class {
 	constructor(e, t = () => {}, n = {}) {
 		this.options = {
 			mode: "dollhouse",
 			markers: !0,
 			interactive: !0,
 			...n
-		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.effectColor = new Y(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = Xp({
+		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.effectColor = new Y(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = Qp({
 			quality: this.options.quality,
-			mobile: Yp(),
+			mobile: Zp(),
 			devicePixelRatio: globalThis.devicePixelRatio
 		}), this.renderer = new Gu({ antialias: this.profile.antialias }), this.renderer.shadowMap.enabled = !0, this.renderer.shadowMap.type = 1, this.renderer.shadowMap.autoUpdate = !1, this.renderer.setPixelRatio(this.profile.pixelRatio), this.renderer.domElement.dataset.renderProfile = this.profile.low ? "low" : "high", this.renderer.outputColorSpace = ze, this.renderer.toneMapping = 4, this.renderer.toneMappingExposure = 1.1, this.renderer.domElement.setAttribute("aria-label", "3D model. Drag to orbit; use the device controls below for keyboard access."), this.renderer.domElement.setAttribute("role", "img"), e.append(this.renderer.domElement), this.renderer.domElement.addEventListener("webglcontextlost", (e) => {
 			e.preventDefault(), this.contextLost = !0, this.climateFrame && cancelAnimationFrame(this.climateFrame), this.climateFrame = 0, this.options.onContextLost?.();
@@ -17307,7 +17334,7 @@ var Rm = class {
 			this.wheelEngaged = !0;
 		}), this.renderer.domElement.addEventListener("pointerleave", () => {
 			this.wheelEngaged = !1;
-		}), this.scene = new Nn(), this.scene.background = new Y("#242320"), this.camera = new Go(45, 1, .05, 500), this.orbit = new vm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
+		}), this.scene = new Nn(), this.scene.background = new Y("#242320"), this.camera = new Go(45, 1, .05, 500), this.orbit = new bm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
 			this.cutaway(), this.render({ cameraOnly: !0 }), this.options.onCameraChange?.({ source: "orbit" });
 		}), this.resize = new ResizeObserver(() => {
 			let { width: t, height: n } = e.getBoundingClientRect();
@@ -17395,14 +17422,14 @@ var Rm = class {
 				});
 			}
 			let s = t.type === "cover" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
-			for (let e of s) fp(e, t.defaultPosition ?? 0);
+			for (let e of s) mp(e, t.defaultPosition ?? 0);
 			let c = t.type === "number" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
-			for (let e of c) mp(e, t.defaultValue);
+			for (let e of c) gp(e, t.defaultValue);
 			if (c.length) {
 				let e = c[0].userData.numberMotion;
 				r.position.y = t.position[1] + (t.defaultValue - e.restValue) * e.metersPerUnit;
 			}
-			let l = t.type === "climate" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((e) => tm(e, { reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches })).filter(Boolean) : [], u = t.type === "lock" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
+			let l = t.type === "climate" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((e) => rm(e, { reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches })).filter(Boolean) : [], u = t.type === "lock" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
 			this.fixtures.set(t.id, {
 				lockNodes: u,
 				climateVisuals: l,
@@ -17424,7 +17451,7 @@ var Rm = class {
 		};
 		e.controls.flatMap((e) => (e.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((t) => [e.id, t])).sort((e, t) => r(e[1]) - r(t[1])).forEach(([e, t]) => t.traverse((t) => {
 			t.userData.pickControl = e;
-		})), this.daylight = e.daylight ? rm(e.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = e.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
+		})), this.daylight = e.daylight ? am(e.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = e.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
 		let { center: i, size: a } = this.applyHouseScope();
 		this.defaultTarget = e.camera?.target || i.toArray(), this.defaultPosition = e.camera?.position || i.clone().add(new G(a * .7, a * .65, a * .7)).toArray();
 		let o = performance.now();
@@ -17438,8 +17465,8 @@ var Rm = class {
 		this.daylight?.group.traverse((e) => {
 			e.isSpotLight && (e.castShadow = !0);
 		});
-		let a = qp(this.scene, this.renderer.capabilities.maxTextures, this.profile?.shadowPasses);
-		Qp(this.scene, this.profile?.shadowMapSize), this.renderer.domElement && (this.renderer.domElement.dataset.shadowLights = a.shadowLights), this.asset.updateMatrixWorld(!0);
+		let a = Yp(this.scene, this.renderer.capabilities.maxTextures, this.profile?.shadowPasses);
+		em(this.scene, this.profile?.shadowMapSize), this.renderer.domElement && (this.renderer.domElement.dataset.shadowLights = a.shadowLights), this.asset.updateMatrixWorld(!0);
 		let o = new Jn();
 		for (let e of n.length ? n.filter((e) => e.visible) : [this.asset]) o.expandByObject(e);
 		o.isEmpty() && o.setFromObject(this.asset);
@@ -17468,7 +17495,7 @@ var Rm = class {
 		return n && this.setStates(this.lastStates || /* @__PURE__ */ new Map()), !0;
 	}
 	setView(n) {
-		this.options.camera && n === "floor" != (this.options.camera.projection === "orthographic") && (this.options.camera = void 0), this.options.mode = ["floor", "front"].includes(n) ? n : "dollhouse", this.scene.background.set("#242320"), this.fill && (this.fill.intensity = this.options.mode === "dollhouse" ? .25 : .35), this.camera = this.options.mode === "floor" ? new Xo() : new Go(this.options.mode === "front" ? 35 : 45, 1, .05, 500), this.options.mode !== "dollhouse" && this.fitFloor(), this.orbit.dispose(), this.orbit = new vm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
+		this.options.camera && n === "floor" != (this.options.camera.projection === "orthographic") && (this.options.camera = void 0), this.options.mode = ["floor", "front"].includes(n) ? n : "dollhouse", this.scene.background.set("#242320"), this.fill && (this.fill.intensity = this.options.mode === "dollhouse" ? .25 : .35), this.camera = this.options.mode === "floor" ? new Xo() : new Go(this.options.mode === "front" ? 35 : 45, 1, .05, 500), this.options.mode !== "dollhouse" && this.fitFloor(), this.orbit.dispose(), this.orbit = new bm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
 			this.cutaway(), this.render({ cameraOnly: !0 }), this.options.onCameraChange?.({ source: "orbit" });
 		}), this.orbit.enableRotate = this.options.allowRotate ?? this.options.mode !== "floor", this.orbit.enableRotate || (this.orbit.mouseButtons.LEFT = e.PAN, this.orbit.touches.ONE = t.PAN);
 		for (let [e, t] of this.fixtures) t.marker.visible = !this.model.controls.find((t) => t.id === e)?.hidden && !t.outOfScope && !t.companion && this.options.markers && (this.options.mode !== "floor" || !!this.options.floorMarkers);
@@ -17478,11 +17505,11 @@ var Rm = class {
 		this.options.interactive = !!e, this.orbit.enabled = this.options.interactive, this.renderer.domElement.style.touchAction = this.options.interactive ? "none" : "";
 	}
 	setFloorPlan() {
-		this.model && (Object.assign(this.options, sm("top", "floor")), this.setView("floor"), this.options.onCameraChange?.({ source: "preset" }));
+		this.model && (Object.assign(this.options, lm("top", "floor")), this.setView("floor"), this.options.onCameraChange?.({ source: "preset" }));
 	}
 	setCameraPreset(e) {
 		if (!this.model) return;
-		let t = sm(e, this.options.mode);
+		let t = lm(e, this.options.mode);
 		Object.assign(this.options, t), this.setView(t.view), this.options.onCameraChange?.({ source: "preset" });
 	}
 	rotateCamera(e, t) {
@@ -17494,14 +17521,14 @@ var Rm = class {
 		if (!this.bounds) return;
 		let { width: e, height: t } = this.container.getBoundingClientRect();
 		if (!e || !t) return;
-		let n = this.options.camera ? Mp(this.options.camera, {
+		let n = this.options.camera ? Pp(this.options.camera, {
 			aspect: e / t,
 			min: this.bounds.min.toArray(),
 			max: this.bounds.max.toArray(),
 			heading: this.options.heading,
 			tilt: this.options.tilt,
 			zoom: this.options.zoom
-		}) : (this.options.mode === "front" ? Tp : wp)(this.bounds.min.toArray(), this.bounds.max.toArray(), e / t, this.options.tilt ?? (this.options.mode === "front" ? 28 : 0), this.options.heading ?? 0);
+		}) : (this.options.mode === "front" ? Dp : Ep)(this.bounds.min.toArray(), this.bounds.max.toArray(), e / t, this.options.tilt ?? (this.options.mode === "front" ? 28 : 0), this.options.heading ?? 0);
 		Object.assign(this.camera, {
 			aspect: e / t,
 			left: n.left,
@@ -17514,7 +17541,7 @@ var Rm = class {
 		}), this.camera.isPerspectiveCamera && n.fov && (this.camera.fov = n.fov), this.camera.position.fromArray(n.position), this.camera.up.fromArray(n.up), this.orbit.target.fromArray(n.target), this.camera.lookAt(this.orbit.target), this.camera.updateProjectionMatrix();
 	}
 	captureView() {
-		return !this.model || !this.bounds ? null : Ap({
+		return !this.model || !this.bounds ? null : Mp({
 			position: this.camera.position.toArray(),
 			target: this.orbit.target.toArray(),
 			up: this.camera.up.toArray(),
@@ -17546,7 +17573,7 @@ var Rm = class {
 			for (let [t, n] of this.fixtures) {
 				let r = e.get(t) || { on: !1 };
 				if (n.numberNodes.length) {
-					for (let e of n.numberNodes) mp(e, r.value);
+					for (let e of n.numberNodes) gp(e, r.value);
 					if (Number.isFinite(r.value)) {
 						let e = n.numberNodes[0].userData.numberMotion;
 						n.marker.position.y = n.markerRestY + (Math.max(e.min, Math.min(e.max, r.value)) - e.restValue) * e.metersPerUnit;
@@ -17559,7 +17586,7 @@ var Rm = class {
 					continue;
 				}
 				if (n.type === "lock") {
-					for (let e of n.lockNodes) vp(e, r.locked === !0);
+					for (let e of n.lockNodes) bp(e, r.locked === !0);
 					n.marker.material.color.set(r.unavailable ? "#858b86" : r.jammed ? "#d9654f" : r.locked ? "#7fbf8a" : "#e2b45a");
 					continue;
 				}
@@ -17573,7 +17600,7 @@ var Rm = class {
 					continue;
 				}
 				if (n.type === "cover") {
-					for (let e of n.coverNodes) fp(e, r.position ?? r.motionPosition);
+					for (let e of n.coverNodes) mp(e, r.position ?? r.motionPosition);
 					n.marker.material.color.set(r.unavailable ? "#858b86" : "#c3dbab");
 					continue;
 				}
@@ -17581,7 +17608,7 @@ var Rm = class {
 				n.light.color.copy(a), n.light.intensity = n.base * i, n.lightBase = {
 					color: n.light.color.clone(),
 					amount: i
-				}, n.effectRun ||= Lm(), n.effectRun.report(r.effect, !!r.on && !r.unavailable, performance.now() / 1e3), n.marker.material.color.set(r.unavailable ? "#88908b" : r.on ? a : "#697b6d");
+				}, n.effectRun ||= zm(), n.effectRun.report(r.effect, !!r.on && !r.unavailable, performance.now() / 1e3), n.marker.material.color.set(r.unavailable ? "#88908b" : r.on ? a : "#697b6d");
 				for (let [e, t] of n.mats) e.emissive.copy(a), e.emissiveIntensity = t * i;
 			}
 			this.ambient.intensity = this.daylight ? .12 : this.options.mode === "dollhouse" ? this.model.ambient ?? .22 : Math.max(this.model.ambient ?? .22, .55);
@@ -17657,7 +17684,7 @@ var Rm = class {
 	}
 	triggerLightEffect(e, t) {
 		let n = this.fixtures?.get(e);
-		return !n?.light || !n.lightBase ? !1 : (n.effectRun ||= Lm(), n.effectRun.trigger(t, performance.now() / 1e3), this.render({ cameraOnly: !0 }), n.effectRun.animating);
+		return !n?.light || !n.lightBase ? !1 : (n.effectRun ||= zm(), n.effectRun.trigger(t, performance.now() / 1e3), this.render({ cameraOnly: !0 }), n.effectRun.animating);
 	}
 	applyLightEffects(e) {
 		let t = !1;
@@ -17715,7 +17742,7 @@ var Rm = class {
 			normal: n(8)
 		} }));
 	}
-}, zm = (e) => /^#[0-9a-f]{6}$/i.test(e) ? [
+}, Vm = (e) => /^#[0-9a-f]{6}$/i.test(e) ? [
 	1,
 	3,
 	5
@@ -17724,7 +17751,7 @@ var Rm = class {
 	240,
 	212
 ];
-function Bm(e) {
+function Hm(e) {
 	let t = Math.max(1e3, Math.min(4e4, e)) / 100;
 	return [
 		t <= 66 ? 255 : 329.698727446 * (t - 60) ** -.1332047592,
@@ -17732,9 +17759,9 @@ function Bm(e) {
 		t >= 66 ? 255 : t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307
 	].map((e) => Math.round(Math.max(0, Math.min(255, e))));
 }
-function Vm(e, t = "#fff0d4") {
+function Um(e, t = "#fff0d4") {
 	let n = e?.attributes || {}, r = Number.isFinite(n.color_temp_kelvin) ? n.color_temp_kelvin : 3e3, i;
-	if (n.color_mode === "color_temp") i = Bm(r);
+	if (n.color_mode === "color_temp") i = Hm(r);
 	else if (Array.isArray(n.rgb_color) && n.rgb_color.length === 3) i = n.rgb_color;
 	else if (Array.isArray(n.rgbw_color)) {
 		let [e, t, r, a] = n.rgbw_color;
@@ -17744,13 +17771,13 @@ function Vm(e, t = "#fff0d4") {
 			r + a
 		].map((e) => Math.min(255, e));
 	} else if (Array.isArray(n.rgbww_color)) {
-		let [e, t, r, a, o] = n.rgbww_color, s = Bm(n.min_color_temp_kelvin || 2e3), c = Bm(n.max_color_temp_kelvin || 6535);
+		let [e, t, r, a, o] = n.rgbww_color, s = Hm(n.min_color_temp_kelvin || 2e3), c = Hm(n.max_color_temp_kelvin || 6535);
 		i = [
 			e,
 			t,
 			r
 		].map((e, t) => Math.min(255, e + s[t] * o / 255 + c[t] * a / 255));
-	} else i = zm(t);
+	} else i = Vm(t);
 	return {
 		rgb: i,
 		colorMode: n.color_mode || "rgb",
@@ -17759,7 +17786,7 @@ function Vm(e, t = "#fff0d4") {
 	};
 }
 // dashboard/transport.mjs
-async function Hm(e, t, n, r = fetch) {
+async function Wm(e, t, n, r = fetch) {
 	if (!t.preview_url && !t.addon) {
 		if (e.user?.is_admin === !1) throw Error("This release requires a Home Assistant administrator.");
 		return {
@@ -17770,7 +17797,7 @@ async function Hm(e, t, n, r = fetch) {
 					operation: "models"
 				}), i = r.find((e) => e.id === t.model);
 				if (!i) throw Error("Model not found. Upload it in the 3D Rooms sidebar first.");
-				let a = Zp(t.quality), { model: o, floors: s, views: c } = Up(r, i, t.floor_selector !== !1);
+				let a = $p(t.quality), { model: o, floors: s, views: c } = Gp(r, i, t.floor_selector !== !1);
 				if (o.members) {
 					let t = [];
 					try {
@@ -17868,7 +17895,7 @@ async function Hm(e, t, n, r = fetch) {
 			if (!e.ok) throw Error("Could not read models. Open the 3D Rooms add-on and try again.");
 			let n = await e.json(), a = n.find((e) => e.id === t.model);
 			if (!a) throw Error("Model not found. Upload it in the 3D Rooms add-on first.");
-			let { model: o, floors: s, views: c } = Up(n, a, t.floor_selector !== !1);
+			let { model: o, floors: s, views: c } = Gp(n, a, t.floor_selector !== !1);
 			return o.members ? {
 				model: o,
 				configured: a,
@@ -17889,7 +17916,7 @@ async function Hm(e, t, n, r = fetch) {
 	};
 }
 // shared/room-lights.mjs
-var Um = {
+var Gm = {
 	light: {
 		entity: /^(light|switch)\.[a-z0-9_]+$/,
 		isOn: (e) => !!e.on,
@@ -17907,8 +17934,8 @@ var Um = {
 		}
 	}
 };
-function Wm(e, t = "light", n = () => !1) {
-	let { entity: r } = Um[t], i = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), a = /* @__PURE__ */ new Map(), o = new Set((e?.controls || []).filter((e) => e.hidden && i(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
+function Km(e, t = "light", n = () => !1) {
+	let { entity: r } = Gm[t], i = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), a = /* @__PURE__ */ new Map(), o = new Set((e?.controls || []).filter((e) => e.hidden && i(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
 	for (let n of e?.controls || []) {
 		if (!i(n) || n.hidden || n.lightGroupPrimary === !1) continue;
 		let s = n.sourceModel || e.id, c = sp(n.roomTitle || e.title || "Room");
@@ -17931,9 +17958,9 @@ function Wm(e, t = "light", n = () => !1) {
 	}
 	return [...a.values()];
 }
-var Gm = (e) => Wm(e, "light");
-function Km(e, t) {
-	let { isOn: n } = Um[e.kind || "light"], r = 0, i = 0;
+var qm = (e) => Km(e, "light");
+function Jm(e, t) {
+	let { isOn: n } = Gm[e.kind || "light"], r = 0, i = 0;
 	for (let a of e.lights) {
 		let e = t.get(a.id);
 		e && !e.unavailable && (i++, n(e) && r++);
@@ -17944,8 +17971,8 @@ function Km(e, t) {
 		total: e.lights.length
 	};
 }
-function qm(e, t, n = {}) {
-	let { services: r } = Um[e.kind || "light"], i = Km(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
+function Ym(e, t, n = {}) {
+	let { services: r } = Gm[e.kind || "light"], i = Jm(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
 	for (let t of e.entities) {
 		let e = n[t];
 		if (!e || ["unavailable", "unknown"].includes(e.state)) continue;
@@ -17961,7 +17988,7 @@ function qm(e, t, n = {}) {
 		])
 	};
 }
-function Jm(e) {
+function Xm(e) {
 	return {
 		id: "",
 		kind: e[0]?.kind || "light",
@@ -17971,7 +17998,7 @@ function Jm(e) {
 	};
 }
 // dashboard/card.js
-var Ym = {
+var Zm = {
 	auto: {
 		label: "Auto",
 		hint: "follow the sun",
@@ -17987,10 +18014,10 @@ var Ym = {
 		hint: "always night",
 		icon: "<path d=\"M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z\"/>"
 	}
-}, Xm = (e, t = 1) => {
-	let n = Object.keys(Ym);
+}, Qm = (e, t = 1) => {
+	let n = Object.keys(Zm);
 	return n[(n.indexOf(e) + t + n.length) % n.length];
-}, Zm = class extends HTMLElement {
+}, $m = class extends HTMLElement {
 	static getConfigElement() {
 		return document.createElement("three-d-rooms-editor");
 	}
@@ -18002,10 +18029,10 @@ var Ym = {
 		};
 	}
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:\"\";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed=\"true\"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled=\"true\"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active=\"true\"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable=\"true\"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving=\"true\"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked=\"true\"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode=\"day\"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode=\"night\"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable=\"true\"]{opacity:.65}.fixture-tray button[data-active=\"true\"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active=\"true\"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed=\"true\"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone=\"locked\"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone=\"unlocked\"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone=\"jammed\"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone=\"moving\"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone=\"light\"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone=\"open\"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone=\"cool\"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone=\"heat\"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone=\"dry\"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone=\"fan_only\"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone=\"auto\"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role=\"switch\"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded=\"true\"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on=\"true\"] ha-state-icon,.light-row[data-on=\"true\"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable=\"true\"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role=\"switch\"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role=\"switch\"]::after{content:\"\";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role=\"switch\"][aria-checked=\"true\"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role=\"switch\"][aria-checked=\"true\"]::after{left:19px}.light-panel button[role=\"switch\"]:disabled{opacity:.4;cursor:default}.light-panel button[role=\"switch\"][aria-busy=\"true\"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight=\"true\"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}</style><ha-card><div class=\"card-top\"><header hidden></header><div class=\"daylight-switch\" role=\"radiogroup\" aria-label=\"Time of day\" hidden></div></div><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><progress max=\"1\" aria-label=\"Download progress\" hidden></progress><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block}ha-card{display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;width:100%;height:500px}.scene canvas{display:block;width:100%;height:100%}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:\"\";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed=\"true\"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled=\"true\"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active=\"true\"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable=\"true\"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving=\"true\"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked=\"true\"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode=\"day\"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode=\"night\"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable=\"true\"]{opacity:.65}.fixture-tray button[data-active=\"true\"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active=\"true\"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed=\"true\"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone=\"locked\"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone=\"unlocked\"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone=\"jammed\"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone=\"moving\"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone=\"light\"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone=\"open\"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone=\"cool\"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone=\"heat\"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone=\"dry\"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone=\"fan_only\"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone=\"auto\"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded=\"true\"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role=\"switch\"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded=\"true\"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on=\"true\"] ha-state-icon,.light-row[data-on=\"true\"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable=\"true\"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role=\"switch\"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role=\"switch\"]::after{content:\"\";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role=\"switch\"][aria-checked=\"true\"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role=\"switch\"][aria-checked=\"true\"]::after{left:19px}.light-panel button[role=\"switch\"]:disabled{opacity:.4;cursor:default}.light-panel button[role=\"switch\"][aria-busy=\"true\"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight=\"true\"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:\"\";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active=\"true\"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight=\"true\"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}</style><ha-card><div class=\"card-top\"><header hidden></header><div class=\"daylight-switch\" role=\"radiogroup\" aria-label=\"Time of day\" hidden></div></div><div class=\"scene\"><div class=\"message\" role=\"status\"><span>Connecting to 3D Rooms…</span><progress max=\"1\" aria-label=\"Download progress\" hidden></progress><button hidden>Retry</button></div></div></ha-card>", this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
 		let e = document.createElement("span");
 		e.className = "daylight-thumb", this._daylightSwitch.append(e);
-		for (let [e, { label: t, hint: n, icon: r }] of Object.entries(Ym)) {
+		for (let [e, { label: t, hint: n, icon: r }] of Object.entries(Zm)) {
 			let i = document.createElement("button");
 			i.type = "button", i.dataset.mode = e, i.setAttribute("role", "radio"), i.setAttribute("aria-label", t), i.title = `${t} — ${n}`, i.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${r}</svg>`, i.onclick = () => this._chooseDaylight(e), this._daylightSwitch.append(i);
 		}
@@ -18018,7 +18045,7 @@ var Ym = {
 			}[e.key];
 			if (!t) return;
 			e.preventDefault();
-			let n = Xm(this._daylightSwitch.value, t);
+			let n = Qm(this._daylightSwitch.value, t);
 			this._chooseDaylight(n), this._daylightSwitch.querySelector(`[data-mode="${n}"]`)?.focus();
 		}, this._showDaylightMode("auto"), this.shadowRoot.querySelector(".message button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "Reload models"), this._refresh.title = "Reload models — clear cached models and load again", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M20 7v5h-5M4 17v-5h5\"/><path d=\"M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17\"/></svg>", this._refresh.onclick = () => this._refreshModels(), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._controls.append(this._refresh, this._resetCamera, this._moveCamera), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {};
 		for (let [e, t, n, r] of [[
@@ -18038,7 +18065,14 @@ var Ym = {
 		this._lightsButton = this._panelButtons.light, this._container.append(this._panelToggles), this._panelKind = null, this._panelRooms = {
 			light: [],
 			shade: []
-		}, this._expandedRooms = /* @__PURE__ */ new Set(), this._pendingRooms = /* @__PURE__ */ new Set(), this._floorSwitch = document.createElement("div"), this._floorSwitch.className = "floor-switch", this._floorSwitch.setAttribute("role", "group"), this._floorSwitch.setAttribute("aria-label", "Floor"), this._floorSwitch.hidden = !0, this._controls.append(this._floorSwitch), this._floors = [], this._views = [], this._floor = null, this._generation = 0;
+		}, this._expandedRooms = /* @__PURE__ */ new Set(), this._pendingRooms = /* @__PURE__ */ new Set(), this._floorSwitch = document.createElement("div"), this._floorSwitch.className = "floor-switch", this._floorSwitch.setAttribute("role", "group"), this._floorSwitch.setAttribute("aria-label", "Floor"), this._floorSwitch.hidden = !0, this._controls.append(this._floorSwitch), this._floors = [], this._views = [], this._floor = null, this._generation = 0, this._groupChips = /* @__PURE__ */ new Map(), this._openGroup = null, this._groupOf = /* @__PURE__ */ new Map(), this.shadowRoot.addEventListener("keydown", (e) => {
+			if (e.key === "Escape" && this._openGroup) {
+				let e = this._openGroup;
+				this._openGroup = null, this._positionButtons(), this._groupChips.get(e)?.focus();
+			}
+		}), this._container.addEventListener("pointerdown", (e) => {
+			this._openGroup && !e.composedPath().some((e) => e?.dataset?.control || e?.dataset?.groupRoom) && (this._openGroup = null, this._positionButtons());
+		});
 	}
 	setConfig(e) {
 		if (e.saved_view !== void 0 && (typeof e.saved_view != "string" || !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(e.saved_view))) throw Error("Choose a valid saved view ID.");
@@ -18048,14 +18082,14 @@ var Ym = {
 		for (let t of ["tilt", "heading"]) if (e[t] !== void 0 && !Number.isFinite(e[t])) throw Error(`${t} must be a number.`);
 		if (e.tilt !== void 0 && (e.tilt < 0 || e.tilt > 180)) throw Error("Tilt must be between 0 and 180 degrees.");
 		if (e.view !== void 0 && !["front", "floor"].includes(e.view)) throw Error("Choose front or floor view.");
-		if (e.quality !== void 0 && !Jp.includes(e.quality)) throw Error("Quality must be auto, high or low.");
+		if (e.quality !== void 0 && !Xp.includes(e.quality)) throw Error("Quality must be auto, high or low.");
 		for (let t of [
 			"floor_selector",
 			"camera_controls",
 			"light_panel",
 			"shade_panel"
 		]) if (e[t] !== void 0 && typeof e[t] != "boolean") throw Error(`${t} must be true or false.`);
-		let t = e.camera === void 0 ? void 0 : kp(e.camera);
+		let t = e.camera === void 0 ? void 0 : jp(e.camera);
 		if (t && (e.view || "front") === "floor" != (t.projection === "orthographic")) throw Error("Saved camera projection must match the selected view.");
 		this._config = {
 			height: 500,
@@ -18102,23 +18136,28 @@ var Ym = {
 		let e = ++this._generation;
 		this._loading = !0, this._contextLost = !1, this._refresh.disabled = !0, this._container.setAttribute("aria-busy", "true"), this._reload = !1, clearInterval(this._keepalive), (this._config.preview_url || this._config.addon) && (this._unsubModels?.(), this._unsubModels = null), this._changedDuringLoad = !1, this._message.hidden = !1, this._message.querySelector("span").textContent = "Downloading your room…", this._message.querySelector("button").hidden = !0, this._message.querySelector("button").textContent = "Retry";
 		let t = this._message.querySelector("progress");
-		t.hidden = !0;
+		t.hidden = !0, this._view || this._showLoadingPreview(this._cachedThumbnail());
 		try {
 			if (this._sourceConfig?.saved_view) {
 				let t = await this._hass.callWS({
 					type: "three_d_rooms/request",
-					operation: "components"
+					operation: "components",
+					data: {
+						id: this._sourceConfig.saved_view,
+						include_thumbnails: !0
+					}
 				});
 				if (e !== this._generation) return;
-				this._config = ip(this._sourceConfig, t), this._config.markers = Qf(this._config.markers), this._cameraTouched || (this._cameraFree = !!this._config.interactive), this._applyHeight();
-				let n = this.shadowRoot.querySelector("header");
-				n.textContent = this._config.title || "", n.hidden = !this._config.title || this._config.show_title === !1;
+				let n = t.find((e) => e.id === this._sourceConfig.saved_view)?.thumbnail;
+				n && (this._cacheThumbnail(n), this._view || this._showLoadingPreview(n)), this._config = ip(this._sourceConfig, t), this._config.markers = Qf(this._config.markers), this._cameraTouched || (this._cameraFree = !!this._config.interactive), this._applyHeight();
+				let r = this.shadowRoot.querySelector("header");
+				r.textContent = this._config.title || "", r.hidden = !this._config.title || this._config.show_title === !1;
 			}
 			if (!this._config.model) {
 				this._message.querySelector("span").textContent = "Choose a room in the visual editor.";
 				return;
 			}
-			let n = await Hm(this._hass, this._config, location.origin);
+			let n = await Wm(this._hass, this._config, location.origin);
 			if (e !== this._generation) return;
 			n.session && (document.cookie = `ingress_session=${n.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`);
 			let { model: r, configured: i, floors: a, views: o, sceneURL: s, layers: c, release: l, assetCache: u } = await n.load({ onProgress: (n) => {
@@ -18130,7 +18169,7 @@ var Ym = {
 				l?.();
 				return;
 			}
-			if (this._view?.dispose(), this._view = new Rm(this._container, (e) => this._pick(e), {
+			if (this._view?.dispose(), this._view = new Bm(this._container, (e) => this._pick(e), {
 				mode: this._config.view,
 				markers: !1,
 				interactive: this._cameraFree,
@@ -18158,8 +18197,8 @@ var Ym = {
 			}
 			if (e !== this._generation) return;
 			this._views = o || [], this._floors = a || [];
-			let f = Hp(this._views, i || r, this._floor);
-			if (f !== r && !d.setHouseView(f) && (f = r), this._floor && f.id !== this._floor && (this._floor = null), this._model = f, this._cameraMoved = !1, this._syncFloorSwitch(), this._syncCameraButtons(), this._previewStates = /* @__PURE__ */ new Map(), this._buildAccess(), this._preview = n.preview, this._signature = null, this._states(), this._syncDaylightSwitch(), this._message.hidden = !0, !this._preview && !this._config.addon && !this._unsubModels && this._hass.connection?.subscribeEvents) {
+			let f = Wp(this._views, i || r, this._floor);
+			if (f !== r && !d.setHouseView(f) && (f = r), this._floor && f.id !== this._floor && (this._floor = null), this._model = f, this._cameraMoved = !1, this._syncFloorSwitch(), this._syncCameraButtons(), this._previewStates = /* @__PURE__ */ new Map(), this._buildAccess(), this._preview = n.preview, this._signature = null, this._states(), this._syncDaylightSwitch(), this._message.hidden = !0, this._hideLoadingPreview(), !this._preview && !this._config.addon && !this._unsubModels && this._hass.connection?.subscribeEvents) {
 				let e = await this._hass.connection.subscribeEvents(() => this._modelsEvent(), "three_d_rooms_updated");
 				!this.isConnected || this._unsubModels ? e() : this._unsubModels = e;
 			}
@@ -18182,6 +18221,31 @@ var Ym = {
 		} finally {
 			e === this._generation && (this._loading = !1, this._refresh.disabled = !1, this._container.setAttribute("aria-busy", "false"), this._recheckAfterLoad());
 		}
+	}
+	_thumbnailKey() {
+		return `three-d-rooms:thumbnail:${this._sourceConfig?.saved_view}`;
+	}
+	_cachedThumbnail() {
+		if (this._sourceConfig?.saved_view) try {
+			return localStorage.getItem(this._thumbnailKey()) || void 0;
+		} catch {
+			return;
+		}
+	}
+	_cacheThumbnail(e) {
+		try {
+			e.length <= 15e4 && localStorage.getItem(this._thumbnailKey()) !== e && localStorage.setItem(this._thumbnailKey(), e);
+		} catch {}
+	}
+	_showLoadingPreview(e) {
+		if (!e?.startsWith("data:image/jpeg;base64,")) return;
+		let t = this._container.querySelector(".loading-preview");
+		t || (t = document.createElement("img"), t.className = "loading-preview", t.alt = "", t.setAttribute("aria-hidden", "true"), this._container.prepend(t)), t.classList.remove("fading"), t.getAttribute("src") !== e && (t.src = e), this._message.classList.add("over-preview");
+	}
+	_hideLoadingPreview() {
+		this._message.classList.remove("over-preview");
+		let e = this._container.querySelector(".loading-preview");
+		e && (e.classList.add("fading"), setTimeout(() => e.remove(), 320));
 	}
 	async _watchLightEffects() {
 		if (!(this._unsubEffects || this._effectsPending || this._preview || this._config?.addon || !this._hass?.connection?.subscribeEvents)) {
@@ -18242,7 +18306,7 @@ var Ym = {
 		this._daylightSwitch.hidden = !e || !!this._preview, e && this._showDaylightMode(e.mode);
 	}
 	_showDaylightMode(e) {
-		let t = this._daylightSwitch, n = Ym[e] ? e : "auto";
+		let t = this._daylightSwitch, n = Zm[e] ? e : "auto";
 		t.value = n, t.dataset && (t.dataset.mode = n);
 		for (let e of t.querySelectorAll?.("button") || []) {
 			let t = e.dataset.mode === n;
@@ -18319,7 +18383,7 @@ var Ym = {
 			let o = $f(this._config.markers, n.id);
 			i.style.setProperty("--marker-size", o.size + "px"), i.setAttribute("aria-label", n.type === "light" ? `Toggle ${a}. Hold for more info.` : `Control ${a}`), i.title = n.type === "light" ? `${a}: click to toggle, hold for more info` : `${a}: value controls`;
 			let s = o.icon || n.icon, c = document.createElement(n.type === "climate" && !s ? "span" : "ha-state-icon");
-			n.type === "climate" && !s && (c.className = "fixture-ac-icon"), s && (c.icon = s), c.setAttribute("aria-hidden", "true"), c.innerHTML = s ? `<svg viewBox="0 0 24 24">${Zf(s) || ""}</svg>` : n.type === "climate" ? `<svg viewBox="0 0 24 24">${Cp}</svg>` : n.type === "lock" ? `<svg viewBox="0 0 24 24">${Sp}</svg>` : n.type === "button" ? "<svg viewBox=\"0 0 24 24\"><path d=\"m8 4 12 8-12 8Z\"/></svg>" : n.type === "number" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z\"/></svg>" : n.type === "light" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z\"/></svg>" : "<svg viewBox=\"0 0 24 24\"><path d=\"M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z\"/></svg>";
+			n.type === "climate" && !s && (c.className = "fixture-ac-icon"), s && (c.icon = s), c.setAttribute("aria-hidden", "true"), c.innerHTML = s ? `<svg viewBox="0 0 24 24">${Zf(s) || ""}</svg>` : n.type === "climate" ? `<svg viewBox="0 0 24 24">${Tp}</svg>` : n.type === "lock" ? `<svg viewBox="0 0 24 24">${wp}</svg>` : n.type === "button" ? "<svg viewBox=\"0 0 24 24\"><path d=\"m8 4 12 8-12 8Z\"/></svg>" : n.type === "number" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z\"/></svg>" : n.type === "light" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z\"/></svg>" : "<svg viewBox=\"0 0 24 24\"><path d=\"M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z\"/></svg>";
 			let l = document.createElement("span");
 			if (l.className = "fixture-state", l.setAttribute("aria-hidden", "true"), l.hidden = !o.show_label, i.append(c), o.placement === "tray") {
 				let e = document.createElement("span");
@@ -18343,7 +18407,7 @@ var Ym = {
 				(e.key === "F2" || e.shiftKey && e.key === "Enter") && (e.preventDefault(), this._pick(n.id));
 			}, o.visible && (o.placement === "tray" ? t : e).append(i);
 		}
-		this._container.append(e), this.shadowRoot.querySelector("ha-card").append(t), this._positionButtons(), this._buildLightPanel();
+		this._container.append(e), this.shadowRoot.querySelector("ha-card").append(t), this._groupChips = /* @__PURE__ */ new Map(), this._openGroup = null, this._positionButtons(), this._buildLightPanel();
 	}
 	_isShade(e) {
 		return !!this._view?.fixtures?.get(e.id)?.coverNodes?.some((e) => e?.userData?.rollerShade);
@@ -18367,8 +18431,8 @@ var Ym = {
 	}
 	_buildLightPanel() {
 		this._panelRooms = {
-			light: this._config?.light_panel === !1 ? [] : Gm(this._model),
-			shade: this._config?.shade_panel === !1 ? [] : Wm(this._model, "shade", (e) => this._isShade(e))
+			light: this._config?.light_panel === !1 ? [] : qm(this._model),
+			shade: this._config?.shade_panel === !1 ? [] : Km(this._model, "shade", (e) => this._isShade(e))
 		};
 		for (let [e, t] of Object.entries(this._panelButtons)) t.hidden = !this._panelRooms[e].length;
 		this._panelKind && !this._panelRooms[this._panelKind].length && (this._panelKind = null);
@@ -18414,6 +18478,8 @@ var Ym = {
 				o.type = "button", o.setAttribute("role", "switch"), o.setAttribute("aria-label", t.label), o.onclick = () => e === "shade" ? this._toggleShade(t.id) : this._toggle(t.id), n.append(r, o);
 				let s = (e) => {
 					for (let n of this.shadowRoot.querySelectorAll("[data-control]")) n.dataset.control === t.id && (n.dataset.highlight = String(e));
+					let n = this._groupOf?.get(t.id);
+					n && this._groupChips.get(n) && (this._groupChips.get(n).dataset.highlight = String(e));
 				};
 				n.onpointerenter = () => s(!0), n.onpointerleave = () => s(!1), n.addEventListener("focusin", () => s(!0)), n.addEventListener("focusout", () => s(!1)), u.append(n);
 			}
@@ -18422,7 +18488,7 @@ var Ym = {
 		this._lightPanel = n, this._container.append(n), this._syncLightPanel();
 	}
 	_confirmAllLights() {
-		let { on: e, available: t } = Km(Jm(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
+		let { on: e, available: t } = Jm(Xm(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
 		this._dialog?.remove();
 		let a = document.createElement("dialog");
 		return this._dialog = a, a.className = "confirm-all-lights", a.innerHTML = "<form method=\"dialog\"><h2></h2><p></p><div style=\"display:flex;gap:8px;justify-content:flex-end;margin-top:16px\"><button value=\"cancel\" autofocus>Cancel</button><button value=\"ok\" class=\"confirm\"></button></div></form>", a.querySelector("h2").textContent = `${n ? r.turnOn : r.turnOff} all ${r.noun}?`, a.querySelector("p").textContent = n ? `This will ${r.turnOn.toLowerCase()} ${t} ${i(t)} in ${this._rooms.length === 1 ? this._rooms[0].title : "every room shown"}. Hidden devices are not changed.` : `This will ${r.turnOff.toLowerCase()} the ${e} ${i(e)} that ${e === 1 ? "is" : "are"} ${r.on}. Hidden devices are not changed.`, a.querySelector(".confirm").textContent = n ? `${r.turnOn} all` : `${r.turnOff} all`, this.shadowRoot.append(a), new Promise((e) => {
@@ -18437,12 +18503,12 @@ var Ym = {
 	_syncLightPanel(e = this._lightStates) {
 		let t = this._lightPanel;
 		if (!t || !e) return;
-		let n = this._panelWords(), r = Um[this._panelKind || "light"].isOn, i = Jm(this._rooms), a = Km(i, e), o = t.querySelector("h2 [role=\"switch\"]");
+		let n = this._panelWords(), r = Gm[this._panelKind || "light"].isOn, i = Xm(this._rooms), a = Jm(i, e), o = t.querySelector("h2 [role=\"switch\"]");
 		t.querySelector("h2 .light-room-count").textContent = a.available ? `${a.on} ${n.on}` : "", o.setAttribute("aria-checked", String(a.on > 0)), o.disabled = !a.available || !this._preview && !i.entities.length, o.title = `${a.on ? n.turnOff : n.turnOn} all ${n.noun}`;
 		for (let i of this._rooms) {
 			let a = [...t.querySelectorAll("[data-room]")].find((e) => e.dataset.room === i.id);
 			if (!a) continue;
-			let o = Km(i, e);
+			let o = Jm(i, e);
 			a.querySelector(".light-room-count").textContent = o.available ? `${o.on} of ${o.available} ${n.on}` : i.entities.length || this._preview ? "Unavailable" : "Not connected";
 			let s = a.querySelector("[data-room-switch]");
 			s.setAttribute("aria-checked", String(o.on > 0)), s.disabled = !o.available || !this._preview && !i.entities.length, s.title = `${o.on ? n.turnOff : n.turnOn} all ${i.title} ${n.noun}`;
@@ -18457,7 +18523,7 @@ var Ym = {
 		}
 	}
 	async _toggleShade(e) {
-		let t = this._lightStates || /* @__PURE__ */ new Map(), n = Um.shade.isOn(t.get(e) || {});
+		let t = this._lightStates || /* @__PURE__ */ new Map(), n = Gm.shade.isOn(t.get(e) || {});
 		if (this._preview) {
 			this._previewStates.set(e, { position: n ? 0 : 100 }), this._states();
 			return;
@@ -18475,11 +18541,11 @@ var Ym = {
 		t.className = "fixture-feedback", t.setAttribute("role", "alert"), t.textContent = e, this._container.append(t), setTimeout(() => t.remove(), 5e3);
 	}
 	async _toggleRoomLights(e) {
-		let t = e === "" ? this._rooms?.length && Jm(this._rooms) : this._rooms?.find((t) => t.id === e);
+		let t = e === "" ? this._rooms?.length && Xm(this._rooms) : this._rooms?.find((t) => t.id === e);
 		if (!t || this._pendingRooms.has(e)) return;
 		let n = this._lightStates || /* @__PURE__ */ new Map(), r = this._panelWords(t.kind);
 		if (this._preview) {
-			let e = Km(t, n).on === 0;
+			let e = Jm(t, n).on === 0;
 			for (let n of t.lights) {
 				if (t.kind === "shade") {
 					this._previewStates.set(n.id, { position: e ? 100 : 0 });
@@ -18488,7 +18554,7 @@ var Ym = {
 				let r = this._model.controls.find((e) => e.id === n.id), i = this._previewStates.get(n.id) || {
 					on: !0,
 					brightness: 255,
-					rgb: zm(r?.color || "#fff0d4")
+					rgb: Vm(r?.color || "#fff0d4")
 				};
 				this._previewStates.set(n.id, {
 					...i,
@@ -18498,7 +18564,7 @@ var Ym = {
 			this._states();
 			return;
 		}
-		let { calls: i } = qm(t, n, this._hass.states);
+		let { calls: i } = Ym(t, n, this._hass.states);
 		if (!i.length) return;
 		this._pendingRooms.add(e);
 		let a = [...this._lightPanel?.querySelectorAll("[data-room-switch]") || []].find((t) => t.dataset.roomSwitch === e);
@@ -18512,18 +18578,49 @@ var Ym = {
 		}
 	}
 	_positionButtons() {
-		for (let e of this.shadowRoot.querySelectorAll("[data-control]")) {
-			let t = $f(this._config?.markers, e.dataset.control);
-			if (t.placement === "tray") {
-				e.hidden = !t.visible;
+		let e = this._container.clientWidth, t = this._container.clientHeight, n = [];
+		for (let r of this.shadowRoot.querySelectorAll("[data-control]")) {
+			let i = $f(this._config?.markers, r.dataset.control);
+			if (i.placement === "tray") {
+				r.hidden = !i.visible;
 				continue;
 			}
-			let n = this._view?.fixtureScreenPosition(e.dataset.control, t.offset);
-			if (e.hidden = !t.visible || !n?.visible, n) {
-				let r = tp(n, t, this._container.clientWidth, this._container.clientHeight);
-				e.style.left = r.left + "px", e.style.top = r.top + "px";
-			}
+			let a = this._view?.fixtureScreenPosition(r.dataset.control, i.offset);
+			if (r.hidden = !i.visible || !a?.visible, !a) continue;
+			let o = tp(a, i, e, t);
+			r.style.left = o.left + "px", r.style.top = o.top + "px", r.hidden || n.push({
+				id: r.dataset.control,
+				room: this._model?.controls.find((e) => e.id === r.dataset.control)?.sourceModel,
+				x: o.left + i.size / 2,
+				y: o.top + i.size / 2,
+				size: i.size,
+				button: r
+			});
 		}
+		this._groupIcons(n, e, t);
+	}
+	_groupIcons(e, t, n) {
+		this._groupChips ||= /* @__PURE__ */ new Map();
+		let r = new Set(this._model?.houseView ? (this._model.members || []).filter((e) => e.groupIcons).map((e) => e.model) : []), i = r.size > 0;
+		e = e.filter((e) => r.has(e.room));
+		let a = this._openGroup, o = i ? up(e, { open: new Set(a ? [a] : []) }) : [];
+		a && !(i && dp(e, a)) && (this._openGroup = null), this._groupOf = /* @__PURE__ */ new Map();
+		let s = /* @__PURE__ */ new Set();
+		for (let t of o) {
+			s.add(t.room);
+			for (let n of t.ids) {
+				this._groupOf.set(n, t.room);
+				let r = e.find((e) => e.id === n);
+				r && (r.button.hidden = !0);
+			}
+			let n = this._groupChips.get(t.room);
+			n || (n = document.createElement("button"), n.type = "button", n.className = "room-group", n.dataset.groupRoom = t.room, n.onclick = () => {
+				this._openGroup = this._openGroup === t.room ? null : t.room, this._positionButtons(), this._openGroup && [...this.shadowRoot.querySelectorAll(".fixture-access [data-control]")].find((e) => !e.hidden && this._model?.controls.find((t) => t.id === e.dataset.control)?.sourceModel === t.room)?.focus();
+			}, this.shadowRoot.querySelector(".fixture-access")?.append(n), this._groupChips.set(t.room, n));
+			let r = this._model.controls.filter((e) => t.ids.includes(e.id)).filter((e) => this.shadowRoot.querySelector(`.fixture-access [data-control="${CSS.escape(e.id)}"]`)?.dataset.active === "true").length, i = sp(this._model.controls.find((e) => e.sourceModel === t.room)?.roomTitle || "Room");
+			n.hidden = !1, n.style.left = t.x + "px", n.style.top = t.y + "px", n.dataset.active = String(r > 0), n.innerHTML = "<span class=\"group-name\"></span><span class=\"group-count\"></span>", n.querySelector(".group-name").textContent = i, n.querySelector(".group-count").textContent = t.ids.length, n.setAttribute("aria-label", `${i}: ${t.ids.length} devices${r ? `, ${r} on` : ""}. Show them`), n.title = `${i} — ${t.ids.length} devices${r ? `, ${r} on` : ""}`;
+		}
+		for (let [e, t] of this._groupChips) s.has(e) || (t.hidden = !0);
 	}
 	async _toggle(e) {
 		let t = this._model.controls.find((t) => t.id === e);
@@ -18540,7 +18637,7 @@ var Ym = {
 			let n = this._previewStates.get(e) || {
 				on: !0,
 				brightness: 255,
-				rgb: zm(t.color || "#fff0d4")
+				rgb: Vm(t.color || "#fff0d4")
 			};
 			this._previewStates.set(e, {
 				...n,
@@ -18574,7 +18671,7 @@ var Ym = {
 			return;
 		}
 		let t = this._hass.states?.[this._model.bindings[e.id]];
-		if (!pp(t).unavailable && (this._pendingPresets ||= /* @__PURE__ */ new Set(), !this._pendingPresets.has(e.id))) {
+		if (!hp(t).unavailable && (this._pendingPresets ||= /* @__PURE__ */ new Set(), !this._pendingPresets.has(e.id))) {
 			this._pendingPresets.add(e.id);
 			try {
 				await this._hass.callWS({
@@ -18645,7 +18742,7 @@ var Ym = {
 		let a = { ...this._previewStates.get(e) || {
 			on: !0,
 			brightness: 255,
-			rgb: zm(t.color || "#fff0d4")
+			rgb: Vm(t.color || "#fff0d4")
 		} }, o = i.querySelector("[role=\"switch\"]"), s = i.querySelector("[type=\"range\"]"), c = i.querySelector("[type=\"color\"]"), l = i.querySelectorAll("[type=\"range\"]")[1], u = () => {
 			o.textContent = a.on ? "On" : "Off", o.setAttribute("aria-checked", String(a.on)), o.setAttribute("aria-label", "Light power"), this._previewStates.set(e, { ...a }), this._states();
 		};
@@ -18654,9 +18751,9 @@ var Ym = {
 		}, s.oninput = () => {
 			a.brightness = Number(s.value), u();
 		}, c.oninput = () => {
-			a.rgb = zm(c.value), u();
+			a.rgb = Vm(c.value), u();
 		}, l.oninput = () => {
-			a.colorTempKelvin = Number(l.value), a.rgb = Bm(a.colorTempKelvin), c.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), u();
+			a.colorTempKelvin = Number(l.value), a.rgb = Hm(a.colorTempKelvin), c.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), u();
 		}, this._preview && u(), i.addEventListener("close", () => i.remove()), this.shadowRoot.append(i), i.showModal();
 	}
 	_deskDialog(e) {
@@ -18704,7 +18801,7 @@ var Ym = {
 		if (!e?.dataset?.desk) return;
 		let t = this._model.devices?.find((t) => t.id === e.dataset.desk);
 		if (!t) return;
-		let n = this._model.controls.find((e) => e.id === t.height), r = this._hass.states?.[this._model.bindings[n.id]], i = this._preview ? this._previewStates.get(n.id) || { value: n.defaultValue } : hp(r, n), a = e.querySelector("[data-desk-height]");
+		let n = this._model.controls.find((e) => e.id === t.height), r = this._hass.states?.[this._model.bindings[n.id]], i = this._preview ? this._previewStates.get(n.id) || { value: n.defaultValue } : _p(r, n), a = e.querySelector("[data-desk-height]");
 		Object.assign(a, {
 			min: Math.max(n.min, r?.attributes?.min ?? n.min),
 			max: Math.min(n.max, r?.attributes?.max ?? n.max),
@@ -18715,7 +18812,7 @@ var Ym = {
 			open: !0,
 			close: !0,
 			stop: !0
-		} : up(o), c = !this._preview && dp(o).unavailable;
+		} : fp(o), c = !this._preview && pp(o).unavailable;
 		for (let t of e.querySelectorAll("[data-action]")) t.disabled = c || !s[t.dataset.action];
 		for (let n of e.querySelectorAll("[data-macro]")) {
 			let e = n.dataset.macro, r = this._hass.states?.[this._model.bindings[e]], i = op(this._model, t, e);
@@ -18725,7 +18822,7 @@ var Ym = {
 				entity_id: "button.preview",
 				state: "unknown",
 				attributes: { icon: "mdi:gesture-tap-button" }
-			}, n.disabled = !this._preview && pp(r).unavailable;
+			}, n.disabled = !this._preview && hp(r).unavailable;
 		}
 	}
 	_numberPreview(e) {
@@ -18779,21 +18876,21 @@ var Ym = {
 				locked: !0,
 				label: "Locked",
 				unavailable: !1
-			} : _p(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : pp(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : hp(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : dp(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
+			} : yp(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : hp(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : _p(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : pp(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
 				on: !0,
 				brightness: 255,
-				rgb: zm(t.color || "#fff0d4")
+				rgb: Vm(t.color || "#fff0d4")
 			} : {
 				on: n?.state === "on",
 				unavailable: !n || ["unavailable", "unknown"].includes(n.state),
 				brightness: n?.attributes?.brightness ?? 255,
-				...Vm(n, t.color)
+				...Um(n, t.color)
 			});
 		}
 		this._updateDeskDialog(), this._lightStates = e, this._syncLightPanel(e);
 		for (let t of this.shadowRoot.querySelectorAll("[data-control]")) {
-			let n = t.dataset.control, r = this._model.controls.find((e) => e.id === n), i = this._hass.states?.[this._model.bindings[n]], a = yp(r, i, e.get(n), this._preview);
-			t.dataset.active = String(a.active), t.dataset.moving = String(a.moving), t.dataset.unavailable = String(a.unavailable), xp(t, a);
+			let n = t.dataset.control, r = this._model.controls.find((e) => e.id === n), i = this._hass.states?.[this._model.bindings[n]], a = xp(r, i, e.get(n), this._preview);
+			t.dataset.active = String(a.active), t.dataset.moving = String(a.moving), t.dataset.unavailable = String(a.unavailable), Cp(t, a);
 			let o = ap(this._model, n)?.label || cp(r);
 			t.title = `${o}: ${a.description}`, t.setAttribute("aria-label", `${r.type === "light" ? "Toggle" : "Control"} ${o}, ${a.description}${r.type === "light" ? ". Hold for more info." : ""}`), t.setAttribute("aria-disabled", String(a.unavailable)), r.type === "light" ? t.setAttribute("aria-pressed", String(a.active)) : t.removeAttribute("aria-pressed");
 			let s = t.querySelector("ha-state-icon");
@@ -18808,10 +18905,10 @@ var Ym = {
 		n !== this._signature && (this._signature = n, this._view.setStates(e), this._view.setDaylight?.(this._model.daylight?.mode ?? "night", t));
 	}
 };
-customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", Zm), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
+customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", $m), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
 	type: "three-d-rooms-card",
 	name: "3D Rooms",
 	description: "Your room in perspective, with live lighting and controls on the modeled fixtures.",
 	preview: !0
 });
-export { Zm as ThreeDRoomsCard };
+export { $m as ThreeDRoomsCard };

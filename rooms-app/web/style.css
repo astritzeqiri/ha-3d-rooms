@@ -3746,3 +3746,64 @@ body[data-room-tab="views"] .saved-view-thumb {
     grid-column: 2;
   }
 }
+
+/* View editor: Save stays in reach while the settings scroll. */
+.dashboard-panel .panel-save {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  align-items: center;
+  margin: 0 -24px;
+  padding: 12px 24px max(14px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 -8px 16px -12px rgb(0 0 0 / 0.45);
+}
+.dashboard-panel .panel-save > span {
+  grid-column: 1 / -1;
+  order: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.dashboard-panel .panel-save > span::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+#dashboard-save-state[data-state="changed"],
+#dashboard-save-state[data-state="new"] {
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+#dashboard-save-state[data-state="changed"]::before,
+#dashboard-save-state[data-state="new"]::before {
+  background: var(--accent);
+}
+#dashboard-save-state[data-state="saved"]::before {
+  background: var(--good, #4caf50);
+}
+@media (max-width: 600px) {
+  .dashboard-panel .panel-save {
+    margin: 0 -16px;
+    padding-inline: 16px;
+  }
+}
+.dashboard-panel .panel-save {
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.dashboard-panel .panel-save button {
+  min-height: 40px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.dashboard-panel .panel-save #use-saved-view {
+  grid-column: 1 / -1;
+}

@@ -1,3 +1,12 @@
+# 0.37.0 — room grouping, getting started and editing polish, 2026-11-11
+
+Released as 0.37.0, based on v0.36.0.
+
+- Frontend: 240 tests pass, including new tests for icon grouping and the getting-started checklist; Prettier clean; build succeeds. Python host suite passes (16 native tests skip outside HA), including the new room grouping setting.
+- Native checks in the pinned HA Core 2026.10.2 container: house card shows no chips by default; turning grouping on for the living room shows "Living room · 22" and tapping it shows the icons in their real places; turned off again afterwards. Card shows the saved view's thumbnail while downloading. View editor save bar stays on screen. Room settings save per changed field; a name save and a floor-box change leave the room's floors unchanged. Getting started shows the house progress. Room icon move followed by Undo leaves no saved icon data. The card loads with `?v=0.37.0.<build time>`.
+- Data incident during development: an earlier build of the settings autosave cleared the local test rooms' floors on rename (house floors not linked to HA floors). The floors were restored from a backup and the cause fixed on client and server before release.
+- Not tested: a real phone, light theme, the HACS download flow.
+
 # 0.36.0 — room icons, Devices tab and recovery polish, 2026-11-10
 
 Released as 0.36.0, based on v0.35.0.

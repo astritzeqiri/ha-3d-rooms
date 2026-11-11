@@ -62,6 +62,10 @@ export function initDashboardEditor({
       : saved
         ? "Unsaved changes"
         : "Not saved yet";
+    // The sticky save bar shows at a glance whether there is work to save.
+    const saveState = $("dashboard-save-state");
+    if (saveState.dataset)
+      saveState.dataset.state = unchanged ? "saved" : saved ? "changed" : "new";
     $("use-saved-view").hidden = !unchanged;
     $("save-dashboard-component").classList.toggle("primary", !unchanged);
   }

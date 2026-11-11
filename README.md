@@ -210,6 +210,10 @@ Open the top-level **Dashboard views** workspace to browse every saved view acro
 
 Open a room's **Devices** tab. The model shows each device's icon, coloured by its state. Drag an icon onto a visible surface to move it, or click it and choose **Edit icon** to pick any Home Assistant icon, including your own icon sets. **Position → Reset** puts it back where the model placed it. Changes save at once and become the starting point for dashboard cards, house and floor views and every dashboard view. Pointing at a device in the list highlights its icon, and clicking an icon opens its row.
 
+### Busy rooms in house views
+
+A room with many devices can crowd a house or floor card. Turn on **Room settings → Group this room's icons in house views** to show them as one chip with the room name when they overlap. Tap the chip to see the icons in their real places. It is off by default.
+
 ### Icons in one dashboard view
 
 Create or edit a view under **Dashboard views**. A view starts from the room icons and can move an icon or pick another one for itself. Click a device icon to open its compact fan-out actions:

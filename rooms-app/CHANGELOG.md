@@ -1,3 +1,14 @@
+## 0.37.0
+
+- **Optional room grouping in crowded house views.** A new room setting, "Group this room's icons in house views" (off by default), shows that room's icons on house and floor cards as one chip with the room name and device count (yellow when something is on) when they overlap. Tap the chip to see the icons in their real places; tap elsewhere or press Escape to group them again. Zooming in until the icons separate ungroups the room on its own.
+- **Save stays in reach in the view editor.** The Preview / Save / Use in dashboard buttons sit in a bar at the bottom of the screen while the settings scroll, with a coloured "Unsaved changes" state.
+- **Room settings save as you edit.** Name, area, floors and room appearance save when you change them; there is no Save button any more. Only the changed setting is sent. A room named like "Office · your scan" offers a one-click rename to "Office".
+- **Getting started.** The Overview panel lists three steps for a house or room (connect devices, place the icons, create a dashboard view) with its progress; each step opens the place where it is done. It disappears when done, or with Hide.
+- **Undo for room icons.** On the Devices tab, Undo (and Ctrl/⌘+Z) takes back a room icon's last move or icon change.
+- **Cards show the view's picture while loading.** A card made from a saved view shows that view's thumbnail behind the progress message, then fades to the 3D room. The picture is remembered in the browser for the next visit.
+- Fix: changing a room's name or area could clear its house floors when the house floors were not linked to Home Assistant floors.
+- Browsers now load a new card after every update, also between builds of the same version.
+
 ## 0.36.0
 
 - **A stopped 3D view says so and can be reloaded.** If the browser takes the graphics context away (a GPU reset, memory pressure), dashboard cards and the manager used to show a blank canvas. They now show a message with a "Reload 3D view" button, and redraw on their own when the browser restores the context.

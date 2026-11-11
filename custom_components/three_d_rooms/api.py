@@ -92,7 +92,7 @@ class RoomsRuntime:
                     for a in registry.async_list_areas()]
         if operation == "room":
             from homeassistant.helpers import area_registry
-            settings = {k: data[k] for k in ("title", "areaId", "floorIds", "floorLinks", "appearance") if k in data}
+            settings = {k: data[k] for k in ("title", "areaId", "floorIds", "floorLinks", "appearance", "groupIcons") if k in data}
             if "areaId" in settings:
                 area_id = settings["areaId"]
                 if not isinstance(area_id, str) or (
@@ -113,13 +113,18 @@ class RoomsRuntime:
                     if not placement: raise ValueError("Export house placement and floor heights first.")
                     effective = {f["id"]:links.get(f["id"],f.get("haFloorId","")) for f in placement["floors"]}
                     if any(i not in effective.values() for i in ids): raise ValueError("Match each selected Home Assistant floor to a saved height range first.")
-                    settings["floorIds"] = [key for key,value in effective.items() if value in ids]
+                    # With no house floor linked, the choice says nothing: keep the room's floors.
+                    if any(effective.values()):
+                        settings["floorIds"] = [key for key,value in effective.items() if value in ids]
             result = await self.work(self.store.update_room, data.get("model"), settings)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
         if operation == "components":
             from copy import deepcopy
             components = deepcopy(self.store.components)
+            # A card asks for its own view only, so its thumbnail stays small to send.
+            if isinstance(data.get("id"), str):
+                components = [c for c in components if c.get("id") == data["id"]]
             if not data.get("include_thumbnails", False):
                 for component in components:
                     component.pop("thumbnail", None)

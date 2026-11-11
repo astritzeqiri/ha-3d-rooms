@@ -3,6 +3,7 @@ import {
   sidebarLabel,
   roomName,
   houseId,
+  setupChecklist,
 } from "../shared/workspace.mjs";
 import { deviceEntries } from "../shared/device.mjs";
 const esc = (s) =>
@@ -24,6 +25,8 @@ export function initWorkspace({
   reload,
   scene,
   toast,
+  getViews = () => [],
+  onChecklist = () => {},
 }) {
   let query = "",
     focusedRoom = null,
@@ -202,7 +205,7 @@ export function initWorkspace({
       ? "Rooms in this space"
       : "Room at a glance";
     $("space-inspector").innerHTML =
-      `<div class="inspector-heading"><span class="eyebrow">${model.houseView ? "EXPLORE" : "OVERVIEW"}</span><h2>${heading}</h2></div><p class="muted small">${model.houseView ? "Select a room here or in the 3D model." : "Connect devices and adjust room settings."}</p><div class="space-room-list">${rooms
+      `${checklistHTML(model, rooms)}<div class="inspector-heading"><span class="eyebrow">${model.houseView ? "EXPLORE" : "OVERVIEW"}</span><h2>${heading}</h2></div><p class="muted small">${model.houseView ? "Select a room here or in the 3D model." : "Connect devices and adjust room settings."}</p><div class="space-room-list">${rooms
         .map(
           (room) =>
             `<article class="space-room ${focusedRoom === room.id ? "is-selected" : ""}"><button class="room-select" data-focus-room="${esc(room.id)}" ${model.houseView ? `aria-pressed="${focusedRoom === room.id}"` : ""}><span>${esc(roomName(room))}</span><small>${deviceEntries(room).length} devices · ${esc(
@@ -221,6 +224,64 @@ export function initWorkspace({
     $("house-settings-section").hidden =
       !model.houseView || document.body.dataset.roomTab !== "settings";
   }
+  /**
+   * Getting started: three steps until they are done or hidden. The house
+   * shows its whole progress; each room its own.
+   */
+  const hiddenKey = (model) => `three-d-rooms:setup-hidden:${model.id}`;
+  function checklistHidden(model) {
+    try {
+      return localStorage.getItem(hiddenKey(model)) === "1";
+    } catch {
+      return false;
+    }
+  }
+  function checklistHTML(model, rooms) {
+    if (!rooms.length || checklistHidden(model)) return "";
+    const house = model.houseView
+      ? getModels().filter((m) => m.houseView && m.houseId === model.houseId)
+      : [];
+    const { steps, done } = setupChecklist({
+      rooms,
+      views: getViews(),
+      spaceIds: [
+        model.id,
+        ...house.map((m) => m.id),
+        ...rooms.map((r) => r.id),
+      ],
+    });
+    if (done === steps.length) return "";
+    const check =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+    const action = {
+      connect: "Connect",
+      icons: "Place icons",
+      view: "Create view",
+    };
+    return `<section class="setup-checklist" aria-labelledby="setup-title"><div class="setup-head"><div><span class="eyebrow">GET STARTED</span><h2 id="setup-title">${done} of ${steps.length} done</h2></div><button type="button" class="setup-hide" data-setup-hide aria-label="Hide getting started">Hide</button></div><div class="setup-meter" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="${steps.length}" aria-valuenow="${done}"><span style="width:${(done / steps.length) * 100}%"></span></div><ol>${steps
+      .map(
+        (step, index) =>
+          `<li data-done="${step.done}">${step.done ? `<div class="setup-step"><span class="setup-mark" aria-hidden="true">${check}</span><span class="setup-text"><strong>${esc(step.title)}</strong><small>${esc(step.detail)}</small></span><span class="sr-only">Done</span></div>` : `<button type="button" class="setup-step" data-setup="${step.id}" ${step.room ? `data-setup-room="${esc(step.room)}"` : ""} aria-label="${esc(step.title)}: ${esc(step.detail)}. ${action[step.id]}"><span class="setup-mark" aria-hidden="true">${index + 1}</span><span class="setup-text"><strong>${esc(step.title)}</strong><small>${esc(step.detail)}</small></span><svg class="setup-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>`}</li>`,
+      )
+      .join("")}</ol></section>`;
+  }
+  /** Update only the checklist (after a connection or icon change). */
+  function refreshChecklist() {
+    const model = getSelected();
+    const inspector = $("space-inspector");
+    if (!model || !inspector || inspector.hidden) return;
+    const rooms = model.houseView
+      ? model.members
+          .map((member) => getModels().find((m) => m.id === member.model))
+          .filter(Boolean)
+      : [model];
+    const html = checklistHTML(model, rooms);
+    const current = inspector.querySelector(".setup-checklist");
+    if ((current?.outerHTML || "") === html) return;
+    if (current && !html) current.remove();
+    else if (current) current.outerHTML = html;
+    else if (html) inspector.insertAdjacentHTML("afterbegin", html);
+  }
   function focusRoom(id) {
     if (!getSelected()?.houseView) return;
     focusedRoom = id;
@@ -233,6 +294,20 @@ export function initWorkspace({
   $("space-inspector").onclick = (event) => {
     const target = event.target.closest("button");
     if (!target) return;
+    if (target.hasAttribute("data-setup-hide")) {
+      try {
+        localStorage.setItem(hiddenKey(getSelected()), "1");
+      } catch {}
+      drawContext();
+      toast(
+        "Getting started hidden. Everything stays in the Devices tab and Dashboard views.",
+      );
+      return;
+    }
+    if (target.dataset.setup) {
+      onChecklist(target.dataset.setup, target.dataset.setupRoom);
+      return;
+    }
     if (target.dataset.focusRoom) {
       if (getSelected().houseView) focusRoom(target.dataset.focusRoom);
       else tab("devices");
@@ -330,6 +405,7 @@ export function initWorkspace({
     dirty,
     draw: drawLibrary,
     context: drawContext,
+    checklist: refreshChecklist,
     drawFloors,
     focusRoom,
     closeLibrary,

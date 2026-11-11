@@ -13,6 +13,7 @@ export function initComponents({
   getModels,
   createView,
   initialViewId,
+  onList = () => {},
 }) {
   const $ = (id) => document.getElementById(id);
   let components = [],
@@ -242,6 +243,7 @@ export function initComponents({
       if (current !== generation) return;
       components = next;
       draw();
+      onList();
       const id =
         initialViewId || new URL(location.href).searchParams.get("saved_view");
       if (openLink && id) {
@@ -295,5 +297,5 @@ export function initComponents({
   window.addEventListener("rooms-view-saved", () => refresh());
   window.addEventListener("rooms-view-use", (event) => use(event.detail));
   refresh({ openLink: true });
-  return { refresh };
+  return { refresh, list: () => components };
 }

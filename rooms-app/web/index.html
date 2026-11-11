@@ -604,6 +604,9 @@
                 maxlength="160"
                 required
             /></label>
+            <p id="room-name-suggestion" class="name-suggestion" hidden>
+              <span></span><button type="button" id="room-name-clean"></button>
+            </p>
             <label for="room-area"
               >Home Assistant area<select id="room-area">
                 <option value="">Not assigned</option>
@@ -633,8 +636,25 @@
                 Applies to this room and its house and floor views.
               </p>
             </fieldset>
+            <label
+              class="check room-group-setting"
+              id="room-group-setting"
+              hidden
+              ><input type="checkbox" id="room-group-icons" /><span
+                ><strong>Group this room's icons in house views</strong
+                ><small class="muted"
+                  >When its icons overlap on a house or floor card, they show as
+                  one chip with the room name. Tap the chip to see them.</small
+                ></span
+              ></label
+            >
             <div class="room-settings-actions">
-              <button id="save-room-settings" class="primary" type="submit">
+              <button
+                id="save-room-settings"
+                class="primary"
+                type="submit"
+                hidden
+              >
                 Save room settings</button
               ><button id="refresh-areas" type="button">Refresh areas</button
               ><span id="room-save-status" role="status"></span>

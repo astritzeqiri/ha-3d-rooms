@@ -126,8 +126,38 @@ export function initMarkerEditor({
     if (stack.length > 50) stack.shift();
     history.set(id, stack);
   }
+  // Room mode keeps its own undo: what each save replaced, newest last.
+  const roomHistory = new Map();
+  const roomValue = (id) => {
+    const control = model()?.controls.find((c) => c.id === id);
+    return {
+      position: control?.markerAnchor ? [...control.markerPosition] : null,
+      icon: control?.icon ?? null,
+    };
+  };
+  async function roomUndo(id) {
+    const stack = roomHistory.get(id);
+    if (!stack?.length) return;
+    stopPlacement();
+    const previous = stack.pop();
+    try {
+      await onRoomChange?.(id, { ...previous, undo: true });
+    } catch (error) {
+      stack.push(previous);
+      say(error.message || "Could not undo this icon change.");
+      refresh();
+      return;
+    }
+    if (previous.icon) settings[id] = { icon: previous.icon };
+    else delete settings[id];
+    refresh();
+    say(
+      `Undid the last icon change for ${label(model()?.controls.find((c) => c.id === id) || { id })}.`,
+    );
+  }
   /** Room mode: save a move or icon now; the scene then holds the new anchor. */
   async function roomCommit(id, key, value) {
+    const before = roomValue(id);
     const previous = settings[id] ? structuredClone(settings[id]) : undefined;
     const base = owner.fixturePosition(id);
     if (key === "offset" && !base) return;
@@ -154,6 +184,10 @@ export function initMarkerEditor({
       refresh();
       return;
     }
+    const history = roomHistory.get(id) || [];
+    history.push(before);
+    if (history.length > 50) history.shift();
+    roomHistory.set(id, history);
     delete settings[id]?.offset;
     if (settings[id] && !Object.keys(settings[id]).length) delete settings[id];
     refresh();
@@ -280,7 +314,9 @@ export function initMarkerEditor({
       entry.placement.value = option.placement;
       entry.details.querySelector(".marker-tool-hint").hidden = true;
       entry.more.hidden = option.placement !== "room";
-      entry.undo.disabled = !history.get(control.id)?.length;
+      entry.undo.disabled = room
+        ? !roomHistory.get(control.id)?.length
+        : !history.get(control.id)?.length;
       if (option.placement !== "room") entry.position.hidden = true;
       entry.button.dataset.movable = String(option.placement === "room");
       entry.summary.textContent = !option.visible
@@ -899,6 +935,10 @@ export function initMarkerEditor({
         onChange();
       };
       entry.undo.onclick = () => {
+        if (room) {
+          roomUndo(control.id);
+          return;
+        }
         const stack = history.get(control.id);
         if (!stack?.length) return;
         stopPlacement();
@@ -1109,6 +1149,23 @@ export function initMarkerEditor({
         event.preventDefault();
         event.stopImmediatePropagation();
         pickerEntry.closeIconPicker(true);
+        return;
+      }
+      // Ctrl/⌘+Z undoes the selected room icon's last change.
+      if (
+        room &&
+        owner &&
+        selected &&
+        !placing &&
+        !drag &&
+        (event.metaKey || event.ctrlKey) &&
+        !event.shiftKey &&
+        event.key.toLowerCase() === "z" &&
+        !event.target?.closest?.("input, textarea, select")
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        roomUndo(selected);
         return;
       }
       if (event.key === "Escape" && (placing || drag || selected)) {

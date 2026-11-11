@@ -223,6 +223,7 @@ export function houseModels(models) {
         }
         model.members.push({
           model: m.id,
+          ...(m.groupIcons ? { groupIcons: true } : {}),
           appearance: structuredClone(m.appearance || []),
           transform: t,
           sceneRevision: m.sceneRevision,
