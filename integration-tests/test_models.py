@@ -543,6 +543,27 @@ class ComponentTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 models.validate_component({**value, "show_title": "false"}, ["kitchen"])
 
+    def test_view_background_persists_and_rejects_unsafe_values(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package())
+            value = {**self.component(), "background": "image", "background_image": " /local/garden.jpg ",
+                     "background_shadow": False}
+            store.put_component(value)
+            restored = models.ModelStore(directory).open().components[0]
+            self.assertEqual(restored["background"], "image")
+            self.assertEqual(restored["background_image"], "/local/garden.jpg")
+            self.assertIs(restored["background_shadow"], False)
+            plain = models.validate_component(self.component(), ["kitchen"])
+            self.assertNotIn("background", plain)
+            for bad in ({"background": "neon"}, {"background": "image"},
+                        {"background": "image", "background_image": "javascript:alert(1)"},
+                        {"background_image": "//evil.test/a.png"},
+                        {"background_image": "/a b.png"},
+                        {"background_shadow": "no"}):
+                with self.assertRaises(ValueError, msg=str(bad)):
+                    models.validate_component({**self.component(), **bad}, ["kitchen"])
+
     def test_device_marker_settings_roundtrip_and_validation(self):
         markers = {"_defaults": {"size": 56, "placement": "tray", "show_label": False},
                    "ceiling": {"visible": False, "size": 44, "show_label": False,

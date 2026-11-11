@@ -62,6 +62,8 @@ export class SceneView {
     });
     this.renderer = new THREE.WebGLRenderer({
       antialias: this.profile.antialias,
+      // A transparent canvas lets the card paint its own backdrop behind the room.
+      alpha: !!this.options.transparent,
     });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -118,7 +120,10 @@ export class SceneView {
       this.wheelEngaged = false;
     });
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color("#242320");
+    this.scene.background = this.options.transparent
+      ? null
+      : new THREE.Color("#242320");
+    if (this.options.transparent) this.renderer.setClearColor(0x000000, 0);
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
     this.orbit.enableDamping = false;
@@ -287,6 +292,8 @@ export class SceneView {
     this.clearClimateVisuals();
     this.disposeScene(this.scene);
     this.scene.clear();
+    this.groundShadow = null;
+    this.groundBox = null;
     this.roomHighlight = null;
     this.model = model;
     this.asset = asset;
@@ -497,6 +504,7 @@ export class SceneView {
       box.max.y = Math.min(box.max.y, floor.maxY);
       if (box.max.y < box.min.y) box.max.y = box.min.y + 0.1;
     }
+    this.updateGroundShadow(box);
     // Houses always keep two planes (open-ended for the whole house) so a floor
     // switch only moves them and never recompiles every material.
     const clipped = !!floor || !!model.houseView;
@@ -532,6 +540,56 @@ export class SceneView {
     return { center, size };
   }
   /** Screen position of a world point: `{ x, y, visible }` in container pixels. */
+  /** A soft contact shadow under the model, sized to what is currently shown. */
+  /** Turn the contact shadow on or off for the view being edited. */
+  setGroundShadow(enabled) {
+    this.options.groundShadow = !!enabled;
+    if (this.groundShadow)
+      this.groundShadow.visible = !!enabled && this.options.mode !== "floor";
+    if (enabled && !this.groundShadow && this.groundBox)
+      this.updateGroundShadow(this.groundBox);
+    this.render();
+  }
+  updateGroundShadow(box) {
+    this.groundBox = box.clone();
+    if (!this.options.groundShadow || this.options.mode === "floor") {
+      if (this.groundShadow) this.groundShadow.visible = false;
+      return;
+    }
+    if (!this.groundShadow) {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 128;
+      const context = canvas.getContext("2d"),
+        gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
+      gradient.addColorStop(0, "rgba(0,0,0,0.55)");
+      gradient.addColorStop(0.55, "rgba(0,0,0,0.28)");
+      gradient.addColorStop(1, "rgba(0,0,0,0)");
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, 128, 128);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(1, 1),
+        new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          depthWrite: false,
+          toneMapped: false,
+        }),
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.renderOrder = -1;
+      mesh.name = "ground-shadow";
+      mesh.raycast = () => {};
+      this.groundShadow = mesh;
+      this.scene.add(mesh);
+    }
+    const size = box.getSize(new THREE.Vector3()),
+      center = box.getCenter(new THREE.Vector3());
+    this.groundShadow.position.set(center.x, box.min.y - 0.02, center.z);
+    this.groundShadow.scale.set(size.x * 1.5, size.z * 1.5, 1);
+    this.groundShadow.visible = true;
+  }
   screenPoint(point) {
     const v = new THREE.Vector3(...point).project(this.camera);
     return {
@@ -789,7 +847,10 @@ export class SceneView {
     )
       this.options.camera = undefined;
     this.options.mode = ["floor", "front"].includes(mode) ? mode : "dollhouse";
-    this.scene.background.set("#242320");
+    this.scene.background?.set("#242320");
+    if (this.groundShadow)
+      this.groundShadow.visible =
+        !!this.options.groundShadow && this.options.mode !== "floor";
     if (this.fill)
       this.fill.intensity = this.options.mode !== "dollhouse" ? 0.35 : 0.25;
     this.camera =
@@ -1088,6 +1149,7 @@ export class SceneView {
   setDaylight(mode, sunEntity) {
     this.daylightMode = mode;
     this.sunEntity = sunEntity;
+    this.options.onDaylight?.();
     this.updateDaylight();
     this.applyWorkLight();
     this.render();
@@ -1134,6 +1196,8 @@ export class SceneView {
     ++this.generation;
     this.disposeScene(this.scene);
     this.scene.clear();
+    this.groundShadow = null;
+    this.groundBox = null;
     this.model = null;
     this.render();
   }

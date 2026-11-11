@@ -1,3 +1,13 @@
+# 0.40.0 — card backgrounds, 2026-11-11
+
+Released as 0.40.0, based on v0.39.0.
+
+- Frontend: 305 tests pass (new: background presets and validation, the picker's state rules, saved-view storage and resolution, card editor overrides, dashboard preview passing the background); Prettier clean; build succeeds. Python host suite passes (91 tests, 16 native tests skip outside HA), including saved-view background storage and rejection of unsafe image addresses.
+- Native: the 16 Home Assistant Core tests pass in the pinned Core 2026.11.0 container with the extracted `3d-rooms-0.40.0-integration.zip` package mounted (35 files, version 0.40.0, no private data). The real manager page loads from that package and the picker opens with Sky selected on the saved view.
+- Checked in the local Home Assistant Core (singleton container, Browser pane): the Background button appears in the view editor toolbar only while a view is edited; the picker shows all seven backgrounds behind the view's own house, a large preview for the hovered/selected one, and a Day / Golden hour / Dusk / Night preview; choosing a background repaints the editor live and marks the view as unsaved; Custom image refuses an empty address; dashboard cards read `background`, `background_image` and `background_shadow` (Spotlight, Sky, Blueprint grid, Aurora and Classic rendered, with the soft shadow on and off and in the floor plan view); the card editor shows the view's background; "Preview in dashboard" shows the unsaved background.
+- Not tested: a real phone or wall tablet (GPU cost of the transparent canvas and the Aurora animation), a Custom image served from a real `/local/…` file, the Home Assistant theme background on a light theme, saving a view with a background from a clean install, the HACS download flow. Weather effects, HDRI lighting and image upload are not part of this release.
+- Behaviour change: cards and saved views without a background now use Spotlight (soft light behind the house) instead of the flat dark fill; choosing Classic restores the old look.
+
 # 0.39.0 — faster room switching, Edit button, compact header and state icons, 2026-11-11
 
 Released as 0.39.0, based on v0.38.0. Combines four parallel sessions' work (room loading, icon editor styling, compact manager header, HA icons with On/Off states) into one release.

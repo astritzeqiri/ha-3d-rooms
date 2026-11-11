@@ -1,3 +1,4 @@
+import { BACKGROUND_FIELDS } from "../shared/backdrop.mjs";
 /** Render the actual dashboard card in HA's document and theme, without saving. */
 export function openDashboardPreview(host, component, hass) {
   const dialog = document.createElement("dialog");
@@ -32,6 +33,12 @@ export function openDashboardPreview(host, component, hass) {
     // The preview sits in a dialog, where "auto" has no panel to fill.
     height: component.height === "auto" ? 600 : component.height,
     markers: component.markers,
+    // The saved view's background, so the preview matches the real card.
+    ...Object.fromEntries(
+      BACKGROUND_FIELDS.filter((key) => component[key] !== undefined).map(
+        (key) => [key, component[key]],
+      ),
+    ),
   });
   card.hass = hass;
   dialog.querySelector(".preview-card").append(card);

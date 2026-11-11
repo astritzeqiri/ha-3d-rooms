@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-CFW70s0f.js"></script>
+    <script type="module" crossorigin src="./assets/index-XP7hHSFu.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/camera-view-6gcfcDbI.js">
-    <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-jluYHKn-.js">
+    <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-DbQ30jpJ.js">
     <link rel="modulepreload" crossorigin href="./assets/room-focus-BBEwvTlU.js">
     <link rel="modulepreload" crossorigin href="./assets/preload-helper-CRzLMJPS.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-BCYJuJ5s.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-CGv6473d.css">
   </head>
   <body>
     <header>
@@ -171,6 +171,21 @@
                     <rect x="3" y="3" width="18" height="18" rx="2" />
                     <path d="M3 12h9V3M12 12v9M12 16h9" /></svg
                   >Floor plan
+                </button>
+                <button id="background-open" aria-haspopup="dialog" hidden>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="4" width="18" height="16" rx="2" />
+                    <circle cx="9" cy="10" r="1.8" />
+                    <path d="m21 16-5-5-8 9" /></svg
+                  >Background
                 </button>
                 <button id="home-view" hidden>
                   <svg
@@ -853,6 +868,66 @@
         </button>
         <button id="delete-model" class="danger">Remove model</button>
         <button class="close primary">Done</button>
+      </div>
+    </dialog>
+    <dialog
+      id="background-dialog"
+      class="background-dialog"
+      aria-labelledby="background-title"
+    >
+      <div class="dialog-top">
+        <h2 id="background-title">Card background</h2>
+        <button class="close" type="button" aria-label="Close without changing">
+          ×
+        </button>
+      </div>
+      <p class="muted small">
+        What the dashboard card shows behind the house. The previews use this
+        view’s room.
+      </p>
+      <div class="background-stage">
+        <div id="background-stage-art"></div>
+      </div>
+      <div class="background-caption">
+        <span class="background-caption-text"
+          ><strong id="background-caption-name"></strong
+          ><small id="background-caption-note"></small
+          ><em id="background-caption-state"></em
+        ></span>
+        <div
+          class="background-time"
+          role="group"
+          aria-label="Preview time of day"
+        ></div>
+      </div>
+      <div
+        id="background-tiles"
+        class="background-tiles"
+        role="radiogroup"
+        aria-label="Background"
+      ></div>
+      <label class="panel-field" id="background-image-field" hidden
+        >Image address<input
+          id="background-image"
+          type="url"
+          inputmode="url"
+          maxlength="2000"
+          placeholder="/local/backgrounds/garden.jpg"
+        />
+        <span class="muted small"
+          >A file in Home Assistant’s <code>www</code> folder is
+          <code>/local/…</code>, or use a web address.</span
+        ></label
+      >
+      <label class="card-title-toggle"
+        ><input id="background-shadow" type="checkbox" />Soft shadow under the
+        house</label
+      >
+      <div class="dialog-actions">
+        <button class="close" type="button">Cancel</button>
+        <button id="background-apply" class="primary" type="button">
+          Use this background
+        </button>
       </div>
     </dialog>
     <dialog id="use-view-dialog" aria-labelledby="use-view-title">

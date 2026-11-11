@@ -1,5 +1,12 @@
 import { VIEW_FIELDS, resolveSavedView } from "../shared/saved-view.mjs";
 import { houseFloorOptions } from "../shared/house-floors.mjs";
+import {
+  BACKGROUNDS,
+  BACKGROUND_LABELS,
+  DEFAULT_BACKGROUND,
+  groundShadowEnabled,
+  safeImageUrl,
+} from "../shared/backdrop.mjs";
 const FIELD_NAMES = {
   model: "Room",
   title: "Title",
@@ -55,6 +62,9 @@ export class ThreeDRoomsEditor extends HTMLElement {
     <label class="check"><input id="shade_panel" type="checkbox">Show the Shades button (each room's shades, with one switch per room)</label>
     <label class="check" id="room-focus-setting" hidden><input id="room_focus" type="checkbox">Show a button in front of each room to view that room on its own</label>
     <label class="check" id="floor-selector-setting" hidden><input id="floor_selector" type="checkbox">Show floor switcher (whole house or one floor)</label>
+    <label>Background<select id="background">${BACKGROUNDS.map((id) => `<option value="${id}">${BACKGROUND_LABELS[id]}</option>`).join("")}</select></label>
+    <label id="background-image-setting" hidden>Background image address<input id="background_image" type="url" inputmode="url" maxlength="2000" placeholder="/local/backgrounds/garden.jpg"></label>
+    <label class="check"><input id="background_shadow" type="checkbox">Soft shadow under the house</label>
     <label>Rendering quality<select id="quality">
       <option value="auto">Automatic · lighter on phones and tablets</option>
       <option value="high">High · full shadows and sharpness</option>
@@ -153,6 +163,8 @@ export class ThreeDRoomsEditor extends HTMLElement {
       else config.floor_selector = false;
       this._emit(config);
     };
+    for (const id of ["background", "background_image", "background_shadow"])
+      this._field(id).onchange = () => this._changeBackground();
     this._field("quality").onchange = () => {
       const config = { ...this._config };
       const quality = this._field("quality").value;
@@ -224,6 +236,36 @@ export class ThreeDRoomsEditor extends HTMLElement {
     } finally {
       this._subscribing = false;
     }
+  }
+  /** Store only what differs from the linked saved view (or the defaults). */
+  _changeBackground() {
+    const config = { ...this._config },
+      field = (id) => this._field(id);
+    let inherited = {};
+    if (this._config.saved_view)
+      try {
+        const { saved_view } = this._config;
+        inherited = resolveSavedView({ saved_view }, this._components);
+      } catch {
+        /* An unknown view inherits nothing. */
+      }
+    const background = field("background").value,
+      image = field("background_image").value.trim(),
+      shadow = field("background_shadow").checked;
+    if (background === (inherited.background || DEFAULT_BACKGROUND))
+      delete config.background;
+    else config.background = background;
+    if (background === "image" && image && image !== inherited.background_image)
+      config.background_image = image;
+    else delete config.background_image;
+    const inheritedShadow = groundShadowEnabled({
+      background,
+      background_shadow: inherited.background_shadow,
+      view: "front",
+    });
+    if (shadow === inheritedShadow) delete config.background_shadow;
+    else config.background_shadow = shadow;
+    this._emit(config);
   }
   _sync() {
     if (!this._config) return;
@@ -323,6 +365,19 @@ export class ThreeDRoomsEditor extends HTMLElement {
     this._field("light_panel").checked = this._config.light_panel !== false;
     this._field("edit_button").checked = this._config.edit_button !== false;
     this._field("shade_panel").checked = this._config.shade_panel !== false;
+    const background = resolved.background || DEFAULT_BACKGROUND;
+    this._field("background").value = background;
+    this._field("background-image-setting").hidden = background !== "image";
+    this._field("background_image").value = resolved.background_image || "";
+    this._field("background_image").setCustomValidity(
+      !resolved.background_image || safeImageUrl(resolved.background_image)
+        ? ""
+        : "Use an address starting with /, http:// or https://",
+    );
+    this._field("background_shadow").checked = groundShadowEnabled({
+      ...resolved,
+      view: "front",
+    });
     this._field("quality").value = this._config.quality || "auto";
     const daylight = this._models?.find((m) => m.id === model)?.daylight;
     this._field("daylight-setting").hidden = !daylight;

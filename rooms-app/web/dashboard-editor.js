@@ -1,5 +1,6 @@
 import { initMarkerEditor } from "./marker-editor.js";
 import { initRoomButtonsEditor } from "./room-buttons-editor.js";
+import { initBackgroundEditor } from "./background-editor.js";
 import { componentYaml, validateComponent } from "../shared/component.mjs";
 import { viewThumbnail } from "./view-thumbnail.js";
 import { roomName } from "../shared/workspace.mjs";
@@ -25,6 +26,11 @@ export function initDashboardEditor({
     onChange: update,
     entityFor,
     resolveIcon,
+  });
+  const backgroundEditor = initBackgroundEditor({
+    viewport: $("viewport"),
+    scene,
+    onChange: update,
   });
   const roomButtons = initRoomButtonsEditor({
     viewport: $("viewport"),
@@ -59,6 +65,7 @@ export function initDashboardEditor({
             ? "auto"
             : Number($("dashboard-height").value),
         ...(thumbnail ? { thumbnail } : {}),
+        ...backgroundEditor.read(),
 
         ...(Object.keys(readMarkers()).length
           ? { markers: readMarkers() }
@@ -175,6 +182,7 @@ export function initDashboardEditor({
       return false;
     scene().options.onCameraChange = undefined;
     markerEditor.close();
+    backgroundEditor.close();
     roomButtons.close();
     chromeWatch?.disconnect();
     panel.hidden = true;
@@ -252,6 +260,7 @@ export function initDashboardEditor({
     $("dashboard").setAttribute("aria-expanded", "true");
     $("dashboard-controls").hidden = false;
     showHeight();
+    backgroundEditor.open(component);
     markerEditor.open(component?.markers);
     roomButtons.open(component?.markers);
     applying = false;
@@ -411,7 +420,11 @@ export function initDashboardEditor({
     try {
       const view = scene();
       view.render();
-      return viewThumbnail(view.renderer.domElement);
+      return viewThumbnail(
+        view.renderer.domElement,
+        undefined,
+        backgroundEditor.thumbnailFill(),
+      );
     } catch {
       return undefined;
     }
@@ -422,7 +435,11 @@ export function initDashboardEditor({
       view.render();
       localStorage.setItem(
         `3d-rooms-view-preview-v2:${draftId}`,
-        viewThumbnail(view.renderer.domElement),
+        viewThumbnail(
+          view.renderer.domElement,
+          undefined,
+          backgroundEditor.thumbnailFill(),
+        ),
       );
     } catch {
       /* Thumbnails are optional and remain private to this browser. */

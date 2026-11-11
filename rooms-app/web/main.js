@@ -1712,6 +1712,10 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
       },
       {
         mode: viewMode,
+        // The view editor paints its background behind a transparent canvas.
+        transparent: true,
+        onDaylight: () =>
+          window.dispatchEvent(new CustomEvent("rooms-daylight")),
         onRoomPick: (id) => workspace.focusRoom(id),
         scrollSafeZoom: true,
         workLight: true,

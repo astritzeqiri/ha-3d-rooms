@@ -1,6 +1,7 @@
 import { validateThumbnail } from "./thumbnail.mjs";
 import { validateMarkers } from "./marker-settings.mjs";
 import { validateCameraSnapshot } from "./camera-view.mjs";
+import { BACKGROUND_FIELDS, validateBackground } from "./backdrop.mjs";
 /** Portable saved dashboard views. Layers leave room for future compositions. */
 export function validateComponent(value, modelIds) {
   if (
@@ -21,6 +22,7 @@ export function validateComponent(value, modelIds) {
     throw new Error("This release supports one room per component.");
   if (value.show_title !== undefined && typeof value.show_title !== "boolean")
     throw new Error("Show title must be true or false.");
+  validateBackground(value);
   const layer = value.layers[0];
   if (!layer || !modelIds.includes(layer.model))
     throw new Error("Import the referenced room model first.");
@@ -62,6 +64,12 @@ export function validateComponent(value, modelIds) {
       ? { markers: validateMarkers(value.markers) }
       : {}),
     ...(value.show_title !== undefined ? { show_title: value.show_title } : {}),
+    ...Object.fromEntries(
+      BACKGROUND_FIELDS.filter((key) => value[key] !== undefined).map((key) => [
+        key,
+        key === "background_image" ? value[key].trim() : value[key],
+      ]),
+    ),
     layers: [
       {
         model: layer.model,

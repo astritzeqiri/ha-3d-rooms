@@ -1,3 +1,4 @@
+import { BACKGROUND_FIELDS } from "./backdrop.mjs";
 /** A linked card stores only a view ID and explicit per-field overrides. */
 export const VIEW_FIELDS = [
   "model",
@@ -26,6 +27,12 @@ export function resolveSavedView(config, components) {
     ...(saved.markers !== undefined
       ? { markers: structuredClone(saved.markers) }
       : {}),
+    ...Object.fromEntries(
+      BACKGROUND_FIELDS.filter((key) => saved[key] !== undefined).map((key) => [
+        key,
+        saved[key],
+      ]),
+    ),
     interactive: false,
     ...config,
   };

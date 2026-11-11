@@ -481,6 +481,33 @@ def validate_markers(value):
     return clean
 
 
+BACKGROUNDS = ("spotlight", "classic", "grid", "sky", "aurora", "image", "theme")
+
+
+def validate_background(value):
+    """Return the saved view's background fields; images are paths or web addresses only."""
+    clean = {}
+    if "background" in value:
+        if value["background"] not in BACKGROUNDS:
+            raise ValueError("Choose a listed background.")
+        clean["background"] = value["background"]
+    if "background_shadow" in value:
+        if not isinstance(value["background_shadow"], bool):
+            raise ValueError("Background shadow must be true or false.")
+        clean["background_shadow"] = value["background_shadow"]
+    if "background_image" in value:
+        image = value["background_image"]
+        if not isinstance(image, str) or len(image) > 2000:
+            raise ValueError("Background image must be a web address.")
+        image = image.strip()
+        if image and not re.match(r"^(/(?!/)|https?://)\S+$", image, re.I):
+            raise ValueError("Background image must start with /, http:// or https://.")
+        clean["background_image"] = image
+    if clean.get("background") == "image" and not clean.get("background_image"):
+        raise ValueError("Choose a background image address.")
+    return clean
+
+
 def validate_component(value, model_ids):
     """Validate portable room views without accepting executable configuration."""
     if not isinstance(value, dict) or value.get("schemaVersion") != 1 or not valid_id(value.get("id")):
@@ -510,6 +537,7 @@ def validate_component(value, model_ids):
     return {"schemaVersion": 1, "id": value["id"], "title": title.strip(), "height": height,
             **({"thumbnail": validate_thumbnail(value["thumbnail"])} if "thumbnail" in value else {}),
             **({"show_title": value["show_title"]} if "show_title" in value else {}),
+            **validate_background(value),
             **({"markers": validate_markers(value["markers"])} if "markers" in value else {}),
             "layers": [clean_layer]}
 

@@ -1,6 +1,10 @@
 import { THUMBNAIL_LIMIT } from "../shared/thumbnail.mjs";
 /** Fit the entire capture without distorting it, including older squeezed JPEGs. */
-export function viewThumbnail(source, aspect = source.width / source.height) {
+export function viewThumbnail(
+  source,
+  aspect = source.width / source.height,
+  fill,
+) {
   if (!Number.isFinite(aspect) || aspect <= 0)
     throw new Error("Invalid thumbnail aspect ratio.");
   const canvas = document.createElement("canvas");
@@ -9,6 +13,23 @@ export function viewThumbnail(source, aspect = source.width / source.height) {
   const context = canvas.getContext("2d");
   context.fillStyle = "#25231f";
   context.fillRect(0, 0, canvas.width, canvas.height);
+  if (fill) {
+    const gradient =
+      fill.shape === "linear"
+        ? context.createLinearGradient(0, 0, 0, canvas.height)
+        : context.createRadialGradient(
+            canvas.width / 2,
+            canvas.height * 0.46,
+            0,
+            canvas.width / 2,
+            canvas.height * 0.46,
+            canvas.width * 0.6,
+          );
+    gradient.addColorStop(0, fill.from);
+    gradient.addColorStop(1, fill.to);
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+  }
   const width = Math.min(canvas.width, canvas.height * aspect);
   const height = width / aspect;
   context.drawImage(

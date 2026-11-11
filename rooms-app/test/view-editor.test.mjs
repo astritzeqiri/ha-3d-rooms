@@ -84,6 +84,12 @@ function harness(preview, onClose, modelConfig = {}, requestScope) {
     },
     mountCameraNavigation: () => ({ hidden: true }),
     roomName: (model) => model.title,
+    initBackgroundEditor: () => ({
+      open() {},
+      close() {},
+      read: () => ({}),
+      thumbnailFill: () => undefined,
+    }),
     initMarkerEditor: () => {
       let markers = {};
       return {

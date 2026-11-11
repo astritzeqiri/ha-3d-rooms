@@ -1,5 +1,6 @@
 import { VIEW_FIELDS, resolveSavedView } from "../shared/saved-view.mjs";
 import { houseFloorOptions } from "../shared/house-floors.mjs";
+import * as backdrop from "../shared/backdrop.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
@@ -8,7 +9,7 @@ import { readFile } from "node:fs/promises";
 const source = (
   await readFile(new URL("../dashboard/editor.js", import.meta.url), "utf8")
 )
-  .replace(/^import .*;\n/gm, "")
+  .replace(/^import[\s\S]*?;\n/gm, "")
   .replace("export class", "class");
 function harness() {
   let Editor;
@@ -21,6 +22,7 @@ function harness() {
         hidden: false,
         type: "text",
         checkValidity: () => true,
+        setCustomValidity() {},
         addEventListener() {},
         closest() {
           return { after() {} };
@@ -39,6 +41,7 @@ function harness() {
     VIEW_FIELDS,
     resolveSavedView,
     houseFloorOptions,
+    ...backdrop,
     document: {
       createElement: () => ({
         append() {},
@@ -328,4 +331,80 @@ test("Edit button setting is on by default and saves only when turned off", () =
     Object.hasOwn(events.at(-1).detail.config, "edit_button"),
     false,
   );
+});
+
+test("background defaults to the spotlight and saves only a changed choice", () => {
+  const { field, events } = harness();
+  assert.equal(field("background").value, "spotlight");
+  assert.equal(field("background_shadow").checked, true);
+  assert.equal(field("background-image-setting").hidden, true);
+  field("background").value = "sky";
+  field("background").onchange();
+  assert.equal(events.at(-1).detail.config.background, "sky");
+  field("background").value = "spotlight";
+  field("background").onchange();
+  assert.equal(Object.hasOwn(events.at(-1).detail.config, "background"), false);
+});
+
+test("the shadow checkbox follows the background's default and saves only overrides", () => {
+  const { field, events } = harness();
+  field("background_shadow").checked = false;
+  field("background_shadow").onchange();
+  assert.equal(events.at(-1).detail.config.background_shadow, false);
+  field("background_shadow").checked = true;
+  field("background_shadow").onchange();
+  assert.equal(
+    Object.hasOwn(events.at(-1).detail.config, "background_shadow"),
+    false,
+  );
+  // Classic is flat by default, so turning the shadow on is the override.
+  field("background").value = "classic";
+  field("background_shadow").checked = true;
+  field("background_shadow").onchange();
+  assert.equal(events.at(-1).detail.config.background_shadow, true);
+});
+
+test("the image address field appears only for the custom image background", () => {
+  const { field, events } = harness();
+  field("background").value = "image";
+  field("background").onchange();
+  assert.equal(events.at(-1).detail.config.background, "image");
+  field("background_image").value = "  /local/garden.jpg ";
+  field("background_image").onchange();
+  assert.equal(
+    events.at(-1).detail.config.background_image,
+    "/local/garden.jpg",
+  );
+  field("background_image").value = "";
+  field("background_image").onchange();
+  assert.equal(
+    Object.hasOwn(events.at(-1).detail.config, "background_image"),
+    false,
+  );
+});
+
+test("a linked card shows the saved view's background and stores only overrides", () => {
+  const { editor, field, events } = harness();
+  editor._components = [
+    {
+      id: "saved",
+      title: "Saved",
+      height: 402,
+      background: "sky",
+      layers: [
+        { model: "kitchen", view: "front", heading: 0, tilt: 28, zoom: 1 },
+      ],
+    },
+  ];
+  field("component").value = "saved";
+  editor._component();
+  assert.equal(field("background").value, "sky");
+  // Choosing the view's own value stores nothing.
+  field("background").value = "sky";
+  editor._changeBackground();
+  assert.equal(Object.hasOwn(events.at(-1).detail.config, "background"), false);
+  field("background").value = "grid";
+  editor._changeBackground();
+  assert.equal(events.at(-1).detail.config.background, "grid");
+  assert.equal(events.at(-1).detail.config.saved_view, "saved");
 });
