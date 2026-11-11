@@ -31,3 +31,28 @@ export function validateThumbnail(value) {
   }
   throw new Error("Preview must be a 640 by 400 JPEG.");
 }
+
+/** A transparent WebP of the room; the gallery draws it over the live background. */
+export function validateThumbnailArt(value) {
+  if (
+    typeof value !== "string" ||
+    value.length > THUMBNAIL_LIMIT ||
+    !/^data:image\/webp;base64,[A-Za-z0-9+/]+={0,2}$/.test(value)
+  )
+    throw new Error("Choose a WebP preview under 100 KB.");
+  let bytes;
+  try {
+    bytes = atob(value.slice(23));
+  } catch {
+    throw new Error("Invalid WebP preview.");
+  }
+  const riff = bytes.slice(0, 4) + bytes.slice(8, 12);
+  const size =
+    bytes.charCodeAt(4) +
+    bytes.charCodeAt(5) * 256 +
+    bytes.charCodeAt(6) * 65536 +
+    bytes.charCodeAt(7) * 16777216;
+  if (bytes.length < 16 || riff !== "RIFFWEBP" || size + 8 !== bytes.length)
+    throw new Error("Invalid WebP preview.");
+  return value;
+}

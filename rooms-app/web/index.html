@@ -944,6 +944,26 @@
         <li>Choose <strong>Add card → 3D Rooms</strong>.</li>
         <li>Select this <strong>Saved view</strong>, then save the card.</li>
       </ol>
+      <section id="use-view-page" hidden>
+        <h3>Full-screen page</h3>
+        <p class="muted small">
+          Shows only this view, with no Home Assistant menu or sidebar. Open it
+          on a wall tablet or add it to a phone’s home screen. It uses the Home
+          Assistant login of that device, and administrators only.
+        </p>
+        <input
+          id="use-view-page-url"
+          readonly
+          spellcheck="false"
+          aria-label="Full-screen page address"
+        />
+        <div class="dialog-actions">
+          <button id="copy-view-page" type="button">Copy link</button>
+          <a id="open-view-page" class="button" target="_blank" rel="noopener"
+            >Open page</a
+          >
+        </div>
+      </section>
       <details>
         <summary>Advanced: YAML configuration</summary>
         <textarea

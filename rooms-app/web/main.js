@@ -14,6 +14,7 @@ import {
   connectionState,
 } from "../shared/workspace.mjs";
 import { climateState } from "../shared/climate.mjs";
+import { effectiveElevation, tone } from "../shared/backdrop.mjs";
 import { lockState, lockCommand } from "../shared/lock.mjs";
 import { houseViewSummary } from "../shared/house-presentation.mjs";
 import { uploadJSON } from "../shared/upload.mjs";
@@ -2595,6 +2596,19 @@ savedViews = initComponents({
     return !!loaded && selected?.id === id && view?.model?.id === id;
   },
   initialViewId: initialSavedViewId,
+  standalone: !!native,
+  // The tone a view's own room shows now, for backgrounds that follow the sun.
+  liveTime: (component) => {
+    const room = models.find((m) => m.id === component.layers?.[0]?.model);
+    return tone(
+      effectiveElevation(
+        room?.daylight?.mode ?? "night",
+        status.connected
+          ? status.entities.find((e) => e.entity_id === room?.daylight?.entity)
+          : undefined,
+      ),
+    );
+  },
   getModels: () => models,
   createView: () => requestViewScope(),
   onList: () => workspace.checklist(),

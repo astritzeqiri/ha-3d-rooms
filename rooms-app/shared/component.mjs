@@ -1,4 +1,4 @@
-import { validateThumbnail } from "./thumbnail.mjs";
+import { validateThumbnail, validateThumbnailArt } from "./thumbnail.mjs";
 import { validateMarkers } from "./marker-settings.mjs";
 import { validateCameraSnapshot } from "./camera-view.mjs";
 import { BACKGROUND_FIELDS, validateBackground } from "./backdrop.mjs";
@@ -60,6 +60,9 @@ export function validateComponent(value, modelIds) {
     ...(value.thumbnail !== undefined
       ? { thumbnail: validateThumbnail(value.thumbnail) }
       : {}),
+    ...(value.thumbnailArt !== undefined
+      ? { thumbnailArt: validateThumbnailArt(value.thumbnailArt) }
+      : {}),
     ...(value.markers !== undefined
       ? { markers: validateMarkers(value.markers) }
       : {}),
@@ -84,4 +87,9 @@ export function validateComponent(value, modelIds) {
 }
 export function componentYaml(component) {
   return `type: custom:three-d-rooms-card\nsaved_view: ${component.id}`;
+}
+
+/** The bare full-screen page for a saved view (no Home Assistant menus). */
+export function standaloneViewURL(id, origin) {
+  return new URL(`/three_d_rooms_view/${encodeURIComponent(id)}`, origin).href;
 }

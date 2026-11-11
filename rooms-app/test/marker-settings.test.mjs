@@ -256,7 +256,8 @@ test("only the picker's lazy catalog imports @mdi/js; suggestion paths match it"
     for (const file of await readdir(dir)) {
       if (!/\.(m?js)$/.test(file)) continue;
       const source = await read(`${dir}/${file}`, "utf8");
-      if (file === "icon-catalog.js") {
+      // The standalone page's icon resolver loads the set lazily, like the picker.
+      if (file === "icon-catalog.js" || file === "standalone-icons.mjs") {
         assert.match(source, /import\("@mdi\/js"\)/);
         assert.doesNotMatch(source, /from "@mdi\/js"/);
       } else assert.doesNotMatch(source, /@mdi\/js"/, `${dir}/${file}`);

@@ -162,6 +162,14 @@ Use `view: floor` for an orthographic floor plan. Optional fields include `title
 
 </details>
 
+## Full-screen page for one view
+
+Sometimes a dashboard still shows too much: Home Assistant's sidebar and header around the card. In the manager open **Dashboard views → Add to dashboard** and copy the **Full-screen page** link (`/three_d_rooms_view/<view id>` on your Home Assistant address). That page shows only the saved view, with no Home Assistant menu at all.
+
+- Bookmark it, add it to a phone home screen, or use it as the start page of a wall tablet.
+- It reuses the Home Assistant login of that browser (and sends you to the normal login if there is none), and is for administrators, like the rest of 3D Rooms. Nothing is public.
+- Taps work as on the card (lights, shades, doors, locks). Holding a device opens a compact pop-up for it (power, brightness, colour, shades, locks, climate). Your chosen marker icons, including custom icon sets, are drawn too. The card's Edit button is not part of that page.
+
 ## Faster loading on phones
 
 3D Rooms keeps lighter copies of every room next to your upload. Home Assistant makes them automatically (shared, smaller WebP textures), and phones download a copy with smaller textures. For the biggest gain, open the room in the 3D Rooms sidebar → Room settings → **Faster loading** → **Optimize for phones and desktops**. This compresses geometry and uses GPU-compressed (KTX2) textures; it runs in your browser and also starts automatically after an upload. Your upload is never changed, and Export returns it.

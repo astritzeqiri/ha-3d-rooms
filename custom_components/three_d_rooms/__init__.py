@@ -15,6 +15,7 @@ from .api import (
 )
 from .const import DOMAIN, STATIC_URL, VERSION
 from .models import ModelStore
+from .standalone import StandalonePageView
 
 
 async def async_setup(hass, config):
@@ -27,6 +28,7 @@ async def async_setup(hass, config):
     hass.http.register_view(ModelReplaceView(hass))
     hass.http.register_view(ModelAssetView(hass))
     hass.http.register_view(ModelOptimizedView(hass))
+    hass.http.register_view(StandalonePageView(hass))
     websocket_api.async_register_command(hass, websocket_request)
     hass.data.setdefault(DOMAIN, {})
     return True
@@ -44,6 +46,7 @@ async def async_setup_entry(hass, entry):
     # otherwise, also between builds that share a version.
     card = Path(__file__).parent / "frontend" / "three-d-rooms-card.js"
     built = await hass.async_add_executor_job(lambda: int(card.stat().st_mtime))
+    hass.data[DOMAIN]["assets_version"] = f"{VERSION}.{built}"
     module_url = f"{STATIC_URL}/three-d-rooms-card.js?v={VERSION}.{built}"
     # HA loads this ES module on every frontend, including dashboard-only visits.
     # No user-managed Lovelace resource or second HACS download is needed.
@@ -68,5 +71,6 @@ async def async_unload_entry(hass, entry):
             runtime.optimizer.cancel()
         async with runtime.lock:
             hass.data[DOMAIN].pop("runtime", None)
+    hass.data[DOMAIN].pop("assets_version", None)
     frontend.async_remove_panel(hass, DOMAIN)
     return True

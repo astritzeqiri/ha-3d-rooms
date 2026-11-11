@@ -1,4 +1,4 @@
-import { mkdir, copyFile, cp, rm } from "node:fs/promises";
+import { mkdir, copyFile, cp, rm, readdir } from "node:fs/promises";
 await mkdir("../dist", { recursive: true });
 await copyFile("dist/card/three-d-rooms-card.js", "../dist/ha-3d-rooms.js");
 console.log(
@@ -26,6 +26,9 @@ await copyFile(
   "dist/card/three-d-rooms-card.js",
   `${destination}/three-d-rooms-card.js`,
 );
+// The page script plus the lazily loaded icon chunk beside it.
+for (const file of await readdir("dist/standalone"))
+  await copyFile(`dist/standalone/${file}`, `${destination}/${file}`);
 console.log(
-  "Bundled model manager and dashboard card inside the HACS integration.",
+  "Bundled model manager, dashboard card and standalone page script inside the HACS integration.",
 );

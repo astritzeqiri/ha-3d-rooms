@@ -6,23 +6,8 @@ import { mdiExportName } from "../shared/marker-icons.mjs";
  * `getIcon(name)`. The manager runs in a same-origin frame inside HA, so the
  * sets are read from the HA page.
  */
-const SAFE_PATH = /^[MmLlHhVvCcSsQqTtAaZz0-9eE.,\s+-]+$/;
-const SAFE_VIEWBOX = /^-?[\d.]+(?:[\s,]+-?[\d.]+){3}$/;
-const MDI_VIEWBOX = "0 0 24 24";
-
-/** Icon art as `{ viewBox, html }`, or undefined if a set returned anything but plain path data. */
-export function iconArt({ path, secondaryPath, viewBox } = {}) {
-  if (typeof path !== "string" || !SAFE_PATH.test(path)) return undefined;
-  const box =
-    typeof viewBox === "string" && SAFE_VIEWBOX.test(viewBox.trim())
-      ? viewBox.trim()
-      : MDI_VIEWBOX;
-  const second =
-    typeof secondaryPath === "string" && SAFE_PATH.test(secondaryPath)
-      ? `<path d="${secondaryPath}" opacity="0.5"/>`
-      : "";
-  return { viewBox: box, html: `${second}<path d="${path}"/>` };
-}
+import { iconArt, MDI_VIEWBOX } from "../shared/icon-art.mjs";
+export { iconArt };
 
 /** HA's registered icon sets, from the HA page around this frame (or this page). */
 export function hostIconSets(win = globalThis.window) {

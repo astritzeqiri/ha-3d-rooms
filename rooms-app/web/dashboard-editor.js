@@ -2,7 +2,7 @@ import { initMarkerEditor } from "./marker-editor.js";
 import { initRoomButtonsEditor } from "./room-buttons-editor.js";
 import { initBackgroundEditor } from "./background-editor.js";
 import { componentYaml, validateComponent } from "../shared/component.mjs";
-import { viewThumbnail } from "./view-thumbnail.js";
+import { viewThumbnail, viewThumbnailArt } from "./view-thumbnail.js";
 import { roomName } from "../shared/workspace.mjs";
 
 /** Edit the camera in the same scene that will be saved to the dashboard. */
@@ -47,6 +47,7 @@ export function initDashboardEditor({
   let current,
     draftId,
     thumbnail,
+    thumbnailArt,
     busy = false,
     applying = false,
     saved = false,
@@ -65,6 +66,7 @@ export function initDashboardEditor({
             ? "auto"
             : Number($("dashboard-height").value),
         ...(thumbnail ? { thumbnail } : {}),
+        ...(thumbnailArt ? { thumbnailArt } : {}),
         ...backgroundEditor.read(),
 
         ...(Object.keys(readMarkers()).length
@@ -232,6 +234,7 @@ export function initDashboardEditor({
     }
     draftId = component?.id || crypto.randomUUID();
     thumbnail = component?.thumbnail;
+    thumbnailArt = component?.thumbnailArt;
     saved = !!component && !draft;
     savedSnapshot = saved ? JSON.stringify(component) : undefined;
     $("dashboard-title").value =
@@ -379,6 +382,8 @@ export function initDashboardEditor({
     try {
       sync();
       thumbnail = captureThumbnail() || thumbnail;
+      // Not kept from an earlier save: an old picture could show a stale room.
+      thumbnailArt = captureThumbnailArt();
       const snapshot = read();
       await api("components", {
         method: "PUT",
@@ -425,6 +430,15 @@ export function initDashboardEditor({
         undefined,
         backgroundEditor.thumbnailFill(),
       );
+    } catch {
+      return undefined;
+    }
+  }
+  function captureThumbnailArt() {
+    try {
+      const view = scene();
+      view.render();
+      return viewThumbnailArt(view.renderer.domElement);
     } catch {
       return undefined;
     }

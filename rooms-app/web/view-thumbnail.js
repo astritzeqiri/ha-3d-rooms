@@ -45,3 +45,36 @@ export function viewThumbnail(
   }
   throw new Error("Preview image is too large.");
 }
+
+/**
+ * The room alone on a transparent 640 by 400 WebP, so the gallery can draw the
+ * view's current background behind it. Undefined if the browser cannot encode
+ * WebP with transparency (it then returns PNG) or the picture is too large.
+ */
+export function viewThumbnailArt(
+  source,
+  aspect = source.width / source.height,
+) {
+  if (!Number.isFinite(aspect) || aspect <= 0)
+    throw new Error("Invalid thumbnail aspect ratio.");
+  const canvas = document.createElement("canvas");
+  canvas.width = 640;
+  canvas.height = 400;
+  const width = Math.min(canvas.width, canvas.height * aspect);
+  const height = width / aspect;
+  canvas
+    .getContext("2d")
+    .drawImage(
+      source,
+      (canvas.width - width) / 2,
+      (canvas.height - height) / 2,
+      width,
+      height,
+    );
+  for (const quality of [0.8, 0.65, 0.5, 0.35]) {
+    const image = canvas.toDataURL("image/webp", quality);
+    if (!image.startsWith("data:image/webp;base64,")) return undefined;
+    if (image.length <= THUMBNAIL_LIMIT) return image;
+  }
+  return undefined;
+}

@@ -1,6 +1,11 @@
 import { filterViews, viewScopeLabel } from "../shared/view-library.mjs";
 import { viewThumbnail } from "./view-thumbnail.js";
-import { validateComponent, componentYaml } from "../shared/component.mjs";
+import { BACKDROP_CSS, paintBackdrop } from "../shared/backdrop.mjs";
+import {
+  validateComponent,
+  componentYaml,
+  standaloneViewURL,
+} from "../shared/component.mjs";
 
 /** One library across all houses, floors and rooms. Saved IDs remain unchanged. */
 export function initComponents({
@@ -13,6 +18,8 @@ export function initComponents({
   getModels,
   createView,
   initialViewId,
+  standalone = false,
+  liveTime = () => "night",
   onList = () => {},
 }) {
   const $ = (id) => document.getElementById(id);
@@ -39,6 +46,13 @@ export function initComponents({
   function use(component) {
     $("use-view-name").textContent = `Saved view: ${component.title}`;
     $("use-view-yaml").value = componentYaml(component);
+    // Only inside Home Assistant, which serves the page.
+    $("use-view-page").hidden = !standalone;
+    if (standalone) {
+      const url = standaloneViewURL(component.id, location.origin);
+      $("use-view-page-url").value = url;
+      $("open-view-page").href = url;
+    }
     $("use-view-dialog").showModal();
   }
   function draw() {
@@ -179,48 +193,71 @@ export function initComponents({
       });
       remove.className = "danger";
       more.append(remove);
-      try {
-        const key = `3d-rooms-view-preview-v2:${c.id}`;
-        let cached;
-        try {
-          cached = localStorage.getItem(key);
-        } catch {}
-        const src =
-          c.thumbnail ||
-          cached ||
-          (() => {
-            try {
-              return localStorage.getItem(`3d-rooms-view-preview:${c.id}`);
-            } catch {
-              return null;
-            }
-          })();
-        if (src?.startsWith("data:image/jpeg;base64,")) {
-          const img = document.createElement("img");
-          img.className = "saved-view-thumb";
-          img.dataset.previewSource = c.thumbnail ? "shared" : "browser";
-          img.src = src;
-          img.alt = `${c.title} preview`;
-          img.loading = "lazy";
-          if (!c.thumbnail && !cached && c.layers[0].camera?.aspect) {
-            img.addEventListener(
-              "load",
-              () => {
-                try {
-                  img.src = viewThumbnail(img, c.layers[0].camera.aspect);
-                  localStorage.setItem(key, img.src);
-                } catch {
-                  /* Thumbnail storage is optional. */
-                }
-              },
-              { once: true },
-            );
-          }
-          card.append(img);
+      if (c.thumbnailArt) {
+        // The room is stored on its own; the view's current background (and
+        // time of day) is painted behind it, so the preview never goes stale.
+        if (!document.getElementById("backdrop-css")) {
+          const style = document.createElement("style");
+          style.id = "backdrop-css";
+          style.textContent = BACKDROP_CSS;
+          document.head.append(style);
         }
-      } catch {
-        /* Browser storage is optional. */
-      }
+        const frame = document.createElement("div");
+        frame.className = "saved-view-thumb saved-view-art";
+        frame.dataset.previewSource = "art";
+        const layer = document.createElement("div");
+        layer.className = "backdrop";
+        layer.setAttribute("aria-hidden", "true");
+        paintBackdrop(layer, c, liveTime(c));
+        const img = document.createElement("img");
+        img.src = c.thumbnailArt;
+        img.alt = `${c.title} preview`;
+        img.loading = "lazy";
+        frame.append(layer, img);
+        card.append(frame);
+      } else
+        try {
+          const key = `3d-rooms-view-preview-v2:${c.id}`;
+          let cached;
+          try {
+            cached = localStorage.getItem(key);
+          } catch {}
+          const src =
+            c.thumbnail ||
+            cached ||
+            (() => {
+              try {
+                return localStorage.getItem(`3d-rooms-view-preview:${c.id}`);
+              } catch {
+                return null;
+              }
+            })();
+          if (src?.startsWith("data:image/jpeg;base64,")) {
+            const img = document.createElement("img");
+            img.className = "saved-view-thumb";
+            img.dataset.previewSource = c.thumbnail ? "shared" : "browser";
+            img.src = src;
+            img.alt = `${c.title} preview`;
+            img.loading = "lazy";
+            if (!c.thumbnail && !cached && c.layers[0].camera?.aspect) {
+              img.addEventListener(
+                "load",
+                () => {
+                  try {
+                    img.src = viewThumbnail(img, c.layers[0].camera.aspect);
+                    localStorage.setItem(key, img.src);
+                  } catch {
+                    /* Thumbnail storage is optional. */
+                  }
+                },
+                { once: true },
+              );
+            }
+            card.append(img);
+          }
+        } catch {
+          /* Browser storage is optional. */
+        }
       if (!card.querySelector("img")) {
         const placeholder = document.createElement("div");
         placeholder.className = "saved-view-placeholder";
@@ -255,6 +292,8 @@ export function initComponents({
       if (current === generation) fail(e.message);
     }
   }
+  // The Day / Night switch changes what a sky or spotlight looks like.
+  window.addEventListener("rooms-daylight", () => draw());
   $("copy-view-yaml").onclick = async () => {
     try {
       await navigator.clipboard.writeText($("use-view-yaml").value);
@@ -262,6 +301,15 @@ export function initComponents({
     } catch {
       $("use-view-yaml").select();
       toast("Select and copy the configuration.");
+    }
+  };
+  $("copy-view-page").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText($("use-view-page-url").value);
+      toast("Page link copied.");
+    } catch {
+      $("use-view-page-url").select();
+      toast("Select and copy the link.");
     }
   };
   $("create-library-view").onclick = () => openEditor();

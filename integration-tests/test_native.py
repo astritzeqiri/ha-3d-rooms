@@ -361,6 +361,24 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
         result = await self.runtime.request("room", {"model": "kitchen", "areaId": ""}, "test-user")
         self.assertEqual(result["areaId"], "")
 
+    async def test_standalone_page_serves_only_a_validated_view_id(self):
+        from aiohttp import web
+        standalone = importlib.import_module("custom_components.three_d_rooms.standalone")
+        view = standalone.StandalonePageView(self.hass)
+        self.assertFalse(view.requires_auth)
+        self.hass.data["three_d_rooms"]["assets_version"] = "1.2.3.456"
+        response = await view.get(SimpleNamespace(), "my-house_1")
+        self.assertEqual(response.content_type, "text/html")
+        self.assertEqual(response.headers["Cache-Control"], "no-store")
+        self.assertIn('data-view="my-house_1"', response.text)
+        self.assertIn("three-d-rooms-standalone.js?v=1.2.3.456", response.text)
+        for bad in ['x"><script>', "../x", "A", "", "a" * 81]:
+            with self.assertRaises(web.HTTPNotFound):
+                await view.get(SimpleNamespace(), bad)
+        del self.hass.data["three_d_rooms"]["assets_version"]
+        with self.assertRaises(web.HTTPServiceUnavailable):
+            await view.get(SimpleNamespace(), "my-house_1")
+
     async def test_native_view_and_websocket_deny_non_admin(self):
         from aiohttp import web
         from homeassistant.exceptions import Unauthorized

@@ -536,10 +536,24 @@ def validate_component(value, model_ids):
         clean_layer["camera"] = validate_camera_snapshot(layer["camera"], layer["view"])
     return {"schemaVersion": 1, "id": value["id"], "title": title.strip(), "height": height,
             **({"thumbnail": validate_thumbnail(value["thumbnail"])} if "thumbnail" in value else {}),
+            **({"thumbnailArt": validate_thumbnail_art(value["thumbnailArt"])} if "thumbnailArt" in value else {}),
             **({"show_title": value["show_title"]} if "show_title" in value else {}),
             **validate_background(value),
             **({"markers": validate_markers(value["markers"])} if "markers" in value else {}),
             "layers": [clean_layer]}
+
+
+def validate_thumbnail_art(value):
+    """A transparent WebP of the room, which the manager draws over the view's live background."""
+    if not isinstance(value, str) or len(value) > 140000 or not re.fullmatch(r"data:image/webp;base64,[A-Za-z0-9+/]+={0,2}", value):
+        raise ValueError("Choose a WebP preview under 100 KB.")
+    try:
+        data = base64.b64decode(value[23:], validate=True)
+    except (ValueError, binascii.Error) as error:
+        raise ValueError("Invalid WebP preview.") from error
+    if len(data) < 16 or data[:4] != b"RIFF" or data[8:12] != b"WEBP" or int.from_bytes(data[4:8], "little") + 8 != len(data):
+        raise ValueError("Invalid WebP preview.")
+    return value
 
 
 def validate_glb(data, manifest):

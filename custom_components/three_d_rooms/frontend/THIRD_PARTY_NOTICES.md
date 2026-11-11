@@ -16,6 +16,7 @@ The compiled manager and dashboard card in `custom_components/three_d_rooms/fron
 - [glTF Transform](https://github.com/donmccurdy/glTF-Transform) (`@gltf-transform/core`, `extensions`, `functions`) — MIT License, Copyright © Don McCurdy. Used only by the manager's room optimizer.
 - [meshoptimizer](https://github.com/zeux/meshoptimizer) — MIT License, Copyright © Arseny Kapoulkine. Used by the manager's room optimizer.
 - [ktx2-encoder](https://github.com/gz65555/ktx2-encoder) — MIT License, Copyright © Hu Song. Used only by the manager's room optimizer.
+- [home-assistant-js-websocket](https://github.com/home-assistant/home-assistant-js-websocket) — Apache License 2.0, © its authors. Used by the full-screen view page (`three-d-rooms-standalone.js`) to sign in and connect to Home Assistant; the library ships no NOTICE file. License text: https://www.apache.org/licenses/LICENSE-2.0
 - [Basis Universal](https://github.com/BinomialLLC/basis_universal) — Apache License 2.0. The encoder (`basis_encoder.wasm`, via ktx2-encoder) and the transcoder (`basis/basis_transcoder.*`, via three.js) are precompiled builds of Basis Universal. Its attribution notice, reproduced as required by Apache-2.0 §4(d):
 
 ```

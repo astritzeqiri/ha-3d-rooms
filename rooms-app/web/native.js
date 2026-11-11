@@ -66,7 +66,7 @@ export async function connectNative() {
           options.method === "PUT" ? "save_component" : "components",
           options.method === "PUT"
             ? JSON.parse(options.body || "{}")
-            : { include_thumbnails: true },
+            : { include_thumbnails: true, include_art: true },
         );
       if (path.startsWith("components/") && options.method === "DELETE")
         return bridge.request("delete_component", { id: path.split("/")[1] });

@@ -1,3 +1,13 @@
+# 0.41.0 — full-screen view page and live gallery previews, 2026-11-12
+
+Released as 0.41.0, based on v0.40.0.
+
+- Frontend: 318 tests pass (new: the page's `hass` stand-in and login store, the pop-up's entity model and service calls, icon resolution, colour and relative-time helpers, preview-art validation); Prettier and the build pass.
+- Python: 94 host tests pass (17 native skips); the 17 native Home Assistant Core tests pass inside the pinned Core 2026.11.0 container, including the new page-view test and the preview-art validator.
+- Checked in the local Home Assistant Core (singleton container, headless Chrome with software GL): `/three_d_rooms_view/<id>` redirects a signed-out browser through the Home Assistant login and back, then fills the screen with no Home Assistant chrome; live states update the card; holding a light opens the pop-up without toggling it and its Power button changes the real state; marker icons (curated, other Material icons, a stand-in custom icon set) draw; the AC pop-up shows the arc dial, tiles and icons; cover, lock, switch and fan pop-ups open; the manager's Full-screen page link copies and opens the page; a saved view's gallery preview follows a background change and the night sky. Desktop and phone layouts were screenshotted.
+- Not tested: a real phone or wall tablet, the user's own `local:` icon set, covers/locks/climate commands from the pop-up against real devices, heat/cool range (two-handle) thermostats, Safari (its canvas cannot encode WebP, so previews fall back to the baked picture).
+- Behaviour: the page is for administrators only and shares the browser's Home Assistant login. Views saved before this release keep their baked preview until saved again.
+
 # 0.40.0 — card backgrounds, 2026-11-11
 
 Released as 0.40.0, based on v0.39.0.
