@@ -33,12 +33,14 @@ export function validateComponent(value, modelIds) {
   ])
     if (!Number.isFinite(layer[key]) || layer[key] < min || layer[key] > max)
       throw new Error(`Invalid ${key}.`);
+  // "auto" fills the space the dashboard gives the card, as the card option does.
   if (
-    !Number.isInteger(value.height) ||
-    value.height < 180 ||
-    value.height > 1600
+    value.height !== "auto" &&
+    (!Number.isInteger(value.height) ||
+      value.height < 180 ||
+      value.height > 1600)
   )
-    throw new Error("Height must be 180–1600 pixels.");
+    throw new Error("Height must be auto or 180–1600 pixels.");
   const camera =
     layer.camera === undefined
       ? undefined

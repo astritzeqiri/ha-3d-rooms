@@ -1,3 +1,13 @@
+# 0.38.0 — room view, room buttons and editor polish, 2026-11-11
+
+Released as 0.38.0, based on v0.37.0.
+
+- Frontend: 273 tests pass, including new tests for room focus, room buttons (modes, size, position, angle, saved with views), double-tap, previous/next room, covered-icon detection, automatic view height and editor tooltips; Prettier clean; build succeeds. Python host suite: 89 tests pass (16 native tests skip outside HA), including room-button and automatic-height validation and house `roomTitles`.
+- Native: the 16 Home Assistant Core tests pass in the pinned Core 2026.10.2 container with the extracted release package mounted (the other host tests locate the package by file path and are not run there).
+- Native browser checks against the extracted `3d-rooms-0.38.0-integration.zip` package (`.local/room-focus-evidence/`): room buttons open one room and back (button, Escape, floor switch); buttons show only for rooms hidden behind others, with light counts, hover outline, long-press switching (the Living room light switched and restored) and per-room sizes; double-click opens a room; previous/next buttons and arrow keys; a room's saved opening angle; icons under another room are hidden and recomputed after orbiting, none hidden in floor views; day/night switch aligned with the Lights and Shades buttons; narrow cards (390 px) get 34 px buttons while 1200 px cards keep 44 px; dashboard cards show no custom tooltip bubble. View editor (never saved): round sub-buttons, three-state eye, size, up/down and Shift height drag, angle preview leaves the view's camera untouched, Auto/Fixed height fills the free screen height. No page errors.
+- Not tested: a real phone or touch long-press, performance of the covered-icon check on a phone GPU, a saved Auto-height view on a real dashboard panel, the HACS download flow.
+- Local test data: an Office room button and a saved Auto height in the local "My house overview" view were set by the user during testing; the checks never saved a view.
+
 # 0.37.0 — room grouping, getting started and editing polish, 2026-11-11
 
 Released as 0.37.0, based on v0.36.0.

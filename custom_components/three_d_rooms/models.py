@@ -273,6 +273,10 @@ def apply_marker_defaults(model):
     return model
 
 
+# Room settings a replaced model keeps.
+ROOM_KEEP = ("groupIcons",)
+
+
 def preserve_marker_defaults(previous, incoming):
     """Keep room icons for devices that still exist after a model replacement."""
     ids = {c["id"] for c in incoming["controls"]}
@@ -398,12 +402,56 @@ def validate_thumbnail(value):
         offset += 2 + size
     raise ValueError("Preview must be a 640 by 400 JPEG.")
 
+ROOM_BUTTON_MODES = ("auto", "always", "never")
+
+
+def validate_room_buttons(value):
+    """Room buttons of a house view: when each shows and where (view metres)."""
+    if not isinstance(value, dict) or len(value) > 64:
+        raise ValueError("Use a room-button settings object with at most 64 rooms.")
+    clean = {}
+    for room, options in value.items():
+        if not valid_id(room) or not isinstance(options, dict) or set(options) - {"mode", "position", "heading", "tilt", "size"}:
+            raise ValueError("Invalid room-button settings.")
+        if "mode" in options and options["mode"] not in ROOM_BUTTON_MODES:
+            raise ValueError("Choose when the room button shows.")
+        position = options.get("position")
+        if position is not None and (not isinstance(position, list) or len(position) != 3 or
+                any(not number(v) or abs(v) > 1000 for v in position)):
+            raise ValueError("A room button position must be three numbers.")
+        for key, low, high in (("heading", 0, 360), ("tilt", 0, 180)):
+            value = options.get(key)
+            if value is not None and (not number(value) or not low <= value < high + (key == "tilt")):
+                raise ValueError(f"A room view {key} must be between {low} and {high} degrees.")
+        size = options.get("size", 30)
+        if not isinstance(size, int) or isinstance(size, bool) or not 20 <= size <= 64:
+            raise ValueError("A room button size must be 20–64 pixels.")
+        entry = {}
+        if size != 30:
+            entry["size"] = size
+        for key in ("heading", "tilt"):
+            if key in options:
+                entry[key] = float(options[key])
+        if options.get("mode", "auto") != "auto":
+            entry["mode"] = options["mode"]
+        if position is not None:
+            entry["position"] = [float(v) for v in position]
+        if entry:
+            clean[room] = entry
+    return clean
+
+
 def validate_markers(value):
     """Bounded, view-local control presentation. Coordinates are offsets, not geometry."""
-    if not isinstance(value, dict) or len(set(value) - {"_defaults"}) > 128:
+    if not isinstance(value, dict) or len(set(value) - {"_defaults", "_rooms"}) > 128:
         raise ValueError("Use a device-marker settings object with at most 128 controls.")
     clean = {}
     for control_id, options in value.items():
+        if control_id == "_rooms":
+            rooms = validate_room_buttons(options)
+            if rooms:
+                clean["_rooms"] = rooms
+            continue
         if ((control_id != "_defaults" and not valid_id(control_id)) or not isinstance(options, dict) or
                 set(options) - {"visible", "show_label", "size", "placement", "offset", "icon"}):
             raise ValueError("Invalid device-marker settings.")
@@ -448,8 +496,8 @@ def validate_component(value, model_ids):
         if not number(layer.get(key)) or not minimum <= layer[key] <= maximum:
             raise ValueError(f"Invalid {key}.")
     height = value.get("height")
-    if not isinstance(height, int) or isinstance(height, bool) or not 180 <= height <= 1600:
-        raise ValueError("Height must be 180–1600 pixels.")
+    if height != "auto" and (not isinstance(height, int) or isinstance(height, bool) or not 180 <= height <= 1600):
+        raise ValueError("Height must be auto or 180–1600 pixels.")
     if "show_title" in value and not isinstance(value["show_title"], bool):
         raise ValueError("Show title must be true or false.")
     clean_layer = {key: layer[key] for key in ("model", "view", "heading", "tilt", "zoom")}
@@ -974,6 +1022,9 @@ class ModelStore:
                     model["title"] = previous["title"]
                     if "areaId" in previous:
                         model["areaId"] = previous["areaId"]
+                    for key in ROOM_KEEP:
+                        if key in previous:
+                            model[key] = deepcopy(previous[key])
                     preserve_device_visibility(previous, model)
                     preserve_marker_defaults(previous, model)
                     model["lightGroups"] = preserved_groups(previous, model["controls"])
@@ -1180,6 +1231,7 @@ class ModelStore:
                 "folder": folder,
                 "importedAt": datetime.now(timezone.utc).isoformat(),
                 **({"areaId": previous["areaId"]} if "areaId" in previous else {}),
+                **{k: deepcopy(previous[k]) for k in ROOM_KEEP if k in previous},
             }
             installed = self.directory / "models" / folder
             os.replace(stage, installed)

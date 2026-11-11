@@ -150,3 +150,7 @@ test("house and floor views combine room daylight windows at placed positions", 
   assert.equal(second.daylight, undefined);
   assert.equal(a.daylight.windows[0].id, "window");
 });
+test("house views name their rooms", () => {
+  const [all] = houseModels([room("office", 1), room("hallway", 4)]);
+  assert.deepEqual(all.roomTitles, { office: "office", hallway: "hallway" });
+});

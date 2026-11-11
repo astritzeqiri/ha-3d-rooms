@@ -1,4 +1,5 @@
 import { initMarkerEditor } from "./marker-editor.js";
+import { initRoomButtonsEditor } from "./room-buttons-editor.js";
 import { componentYaml, validateComponent } from "../shared/component.mjs";
 import { viewThumbnail } from "./view-thumbnail.js";
 import { roomName } from "../shared/workspace.mjs";
@@ -17,6 +18,18 @@ export function initDashboardEditor({
   const $ = (id) => document.getElementById(id);
   const panel = $("dashboard-panel");
   const markerEditor = initMarkerEditor({ model, scene, onChange: update });
+  const roomButtons = initRoomButtonsEditor({
+    viewport: $("viewport"),
+    scene,
+    model,
+    onChange: () => update(),
+  });
+  // Device marker settings plus the view's room buttons (`_rooms`).
+  const readMarkers = () => {
+    const { _rooms, ...markers } = markerEditor.read();
+    const rooms = roomButtons.read();
+    return rooms ? { ...markers, _rooms: rooms } : markers;
+  };
   let current,
     draftId,
     thumbnail,
@@ -33,11 +46,14 @@ export function initDashboardEditor({
         id: draftId,
         title: $("dashboard-title").value,
         ...(!$("dashboard-show-title").checked ? { show_title: false } : {}),
-        height: Number($("dashboard-height").value),
+        height:
+          $("dashboard-height-mode").value === "auto"
+            ? "auto"
+            : Number($("dashboard-height").value),
         ...(thumbnail ? { thumbnail } : {}),
 
-        ...(Object.keys(markerEditor.read()).length
-          ? { markers: markerEditor.read() }
+        ...(Object.keys(readMarkers()).length
+          ? { markers: readMarkers() }
           : {}),
         layers: [{ model: model().id, ...current }],
       },
@@ -71,6 +87,8 @@ export function initDashboardEditor({
   }
   function sync(event = {}) {
     if (panel.hidden || applying || !scene()?.model) return;
+    // Turning one room to choose its angle must not change the view's camera.
+    if (roomButtons.previewing()) return;
     // Resizing changes only the rendered fit, never the authored camera.
     if (event.source === "resize") {
       update();
@@ -149,6 +167,8 @@ export function initDashboardEditor({
       return false;
     scene().options.onCameraChange = undefined;
     markerEditor.close();
+    roomButtons.close();
+    chromeWatch?.disconnect();
     panel.hidden = true;
     document.body.classList.remove("dashboard-editing");
     $("viewport").style.height = "";
@@ -203,8 +223,11 @@ export function initDashboardEditor({
     $("dashboard-show-title").checked = component
       ? component.show_title !== false
       : false;
+    // Auto keeps a pixel height too, for switching back to Fixed.
+    $("dashboard-height-mode").value =
+      component?.height === "auto" ? "auto" : "fixed";
     $("dashboard-height").value =
-      component?.height ??
+      (Number.isInteger(component?.height) ? component.height : undefined) ??
       Math.max(
         180,
         Math.min(
@@ -220,7 +243,9 @@ export function initDashboardEditor({
     scene().options.onCameraChange = sync;
     $("dashboard").setAttribute("aria-expanded", "true");
     $("dashboard-controls").hidden = false;
+    showHeight();
     markerEditor.open(component?.markers);
+    roomButtons.open(component?.markers);
     applying = false;
     sync();
     baseline = baselineSnapshot || JSON.stringify(read());
@@ -278,9 +303,55 @@ export function initDashboardEditor({
   $("dashboard-view").onchange = apply;
   $("dashboard-title").oninput = update;
   $("dashboard-show-title").onchange = update;
-  $("dashboard-height").oninput = () => {
+  // Fixed shows the editor at the card's pixel height; Auto leaves the editor
+  // its normal size, as the card will fill whatever space it is given.
+  function showHeight() {
+    const auto = $("dashboard-height-mode").value === "auto";
+    $("dashboard-height").hidden = auto;
+    $("dashboard-height-note").hidden = !auto;
     const input = $("dashboard-height");
-    if (input.validity.valid) $("viewport").style.height = `${input.value}px`;
+    $("viewport").style.height =
+      auto || !input.validity.valid ? "" : `${input.value}px`;
+    if (auto) fitAuto();
+    watchChrome();
+  }
+  /**
+   * Auto: the editor's viewport takes the screen height left under the
+   * sticky preview column (less the tools above and the hints below it), so
+   * the space beside the settings is used. Narrow layouts keep their own size.
+   */
+  function fitAuto() {
+    if (panel.hidden || $("dashboard-height-mode").value !== "auto") return;
+    const viewport = $("viewport"),
+      column = viewport.closest(".room-preview"),
+      top = parseFloat(getComputedStyle(column).top) || 0,
+      chrome = column.offsetHeight - viewport.offsetHeight,
+      room = window.innerHeight - top - chrome - 12;
+    if (Number.isFinite(room))
+      viewport.style.height = `${Math.max(340, Math.round(room))}px`;
+  }
+  window.addEventListener("resize", fitAuto);
+  // The tools above and the hints below the viewport come and go (the device
+  // bar appears when a device is picked): fit again when they change size.
+  let chromeWatch;
+  function watchChrome() {
+    chromeWatch?.disconnect();
+    chromeWatch = undefined;
+    if (typeof ResizeObserver !== "function") return;
+    const viewport = $("viewport"),
+      column = viewport.closest(".room-preview");
+    if (!column?.children) return;
+    chromeWatch = new ResizeObserver(fitAuto);
+    for (const child of column.children)
+      if (child !== viewport && !child.contains(viewport))
+        chromeWatch.observe(child);
+  }
+  $("dashboard-height").oninput = () => {
+    showHeight();
+    update();
+  };
+  $("dashboard-height-mode").onchange = () => {
+    showHeight();
     update();
   };
   $("dashboard-form").onsubmit = async (e) => {

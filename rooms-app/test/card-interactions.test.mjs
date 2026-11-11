@@ -6,6 +6,20 @@ import {
 } from "../shared/marker-settings.mjs";
 import { resolveSavedView } from "../shared/saved-view.mjs";
 import { actionState } from "../shared/action.mjs";
+import {
+  allLights,
+  roomLightCommands,
+  roomLights,
+  roomLightSummary,
+} from "../shared/room-lights.mjs";
+import { shortRoomTitle } from "../shared/workspace.mjs";
+import {
+  focusableRooms,
+  roomTitleOf,
+  roomButtonShows,
+  roomFocusView,
+  spreadButtons,
+} from "../shared/room-focus.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
@@ -16,6 +30,7 @@ const source = (
 )
   .replace(/^import[\s\S]*?;\n/gm, "")
   .replace("export class", "class");
+const timers = { fn: null };
 function cardHarness() {
   let Card;
   const context = vm.createContext({
@@ -26,8 +41,36 @@ function cardHarness() {
         Card = value;
       },
     },
+    setTimeout: (fn) => {
+      timers.fn = fn;
+      return 1;
+    },
+    clearTimeout: () => {
+      timers.fn = null;
+    },
     window: {},
-    document: { createElement: () => ({ setAttribute() {}, remove() {} }) },
+    CSS: { escape: (value) => value },
+    document: {
+      createElement: () => ({
+        dataset: {},
+        style: {
+          setProperty(name, value) {
+            this[name] = value;
+          },
+        },
+        listeners: {},
+        setAttribute() {},
+        addEventListener(type, fn) {
+          this.listeners[type] = fn;
+        },
+        remove() {},
+        focus() {},
+        querySelector(selector) {
+          this.found ||= {};
+          return (this.found[selector] ||= { textContent: "", hidden: true });
+        },
+      }),
+    },
     hexToRgb: () => [255, 240, 212],
     actionState,
     resolveSavedView,
@@ -35,6 +78,16 @@ function cardHarness() {
     markerLayout,
     markerTrayHeight,
     validateMarkers,
+    shortRoomTitle,
+    roomTitleOf,
+    allLights,
+    roomLightCommands,
+    roomLights,
+    roomLightSummary,
+    focusableRooms,
+    roomButtonShows,
+    spreadButtons,
+    roomFocusView,
   });
   vm.runInContext(source, context);
   const card = Object.create(Card.prototype);
@@ -307,6 +360,7 @@ test("floor buttons switch the loaded house in place and hide when disabled", ()
   card._buildAccess = () => built++;
   card._states = () => {};
   card._syncFloorSwitch = () => {};
+  card._syncRoomTags = () => {};
   card._syncCameraButtons = () => {};
   const house = { id: "h-home", houseView: true, controls: [] },
     upper = { id: "h-home--f2", houseView: true, controls: [] };
@@ -515,4 +569,358 @@ test("time-of-day options mark the chosen one and save only a new choice", async
   // An unknown saved mode is shown as Auto rather than leaving nothing chosen.
   card._showDaylightMode("dusk");
   assert.equal(card._daylightSwitch.value, "auto");
+});
+
+test("room buttons focus one room in place and go back to the house or floor", () => {
+  const card = cardHarness();
+  const shown = [],
+    log = [];
+  const element = () => ({
+    hidden: true,
+    dataset: {},
+    style: {},
+    attributes: {},
+    setAttribute(k, v) {
+      this.attributes[k] = v;
+    },
+    querySelector() {
+      return { textContent: "" };
+    },
+    focus() {
+      log.push("focus");
+    },
+  });
+  card._roomTags = {
+    dataset: {},
+    children: [],
+    replaceChildren(...items) {
+      this.children = items;
+    },
+    querySelector: () => null,
+  };
+  card._roomBack = element();
+  card._roomNav = element();
+  card._roomSteps = [element(), element()];
+  card._container = { clientWidth: 500, clientHeight: 400 };
+  card._controls = { offsetTop: 340 };
+  card._loading = false;
+  card._buildAccess = () => log.push("access");
+  card._states = () => log.push("states");
+  card._syncCameraButtons = () => {};
+  card._config = {};
+  const house = {
+    id: "h-home",
+    title: "Home",
+    houseView: true,
+    houseFloor: { id: "f2" },
+    roomTitles: { office: "Office" },
+    members: [{ model: "office" }, { model: "hall" }],
+    controls: [
+      { id: "a", sourceModel: "office" },
+      { id: "b", sourceModel: "hall", roomTitle: "Hallway" },
+    ],
+  };
+  card._model = house;
+  card._view = {
+    setHouseView: (view, options) => {
+      assert.equal(options.render, false);
+      shown.push(view);
+      return true;
+    },
+    roomFrontPoints: () => [
+      { room: "office", x: 40, y: 90, visible: true, exposure: 0.1 },
+      { room: "hall", x: 400, y: 90, visible: false, exposure: 0.1 },
+    ],
+  };
+  card._syncRoomTags();
+  assert.equal(card._roomTags.children.length, 2);
+  assert.equal(card._roomBack.hidden, true);
+  assert.equal(card._roomTags.children[0].hidden, false);
+  assert.equal(
+    card._roomTags.children[0].style.left,
+    "48px",
+    "kept inside the card",
+  );
+  assert.equal(card._roomTags.children[0].style.top, "90px");
+  assert.equal(card._roomTags.children[1].hidden, true, "off screen");
+  // A room that can be seen from the house view has no button unless asked.
+  card._view.roomFrontPoints = () => [
+    { room: "office", x: 40, y: 90, visible: true, exposure: 0.9 },
+    { room: "hall", x: 100, y: 90, visible: true, exposure: 0.9 },
+  ];
+  card._positionRoomTags();
+  assert.equal(card._roomTags.children[0].hidden, true, "seen: no button");
+  card._config.markers = {
+    _rooms: { hall: { mode: "always", position: [1, 2, 3] } },
+  };
+  let asked;
+  card._view.roomFrontPoints = (positions) => {
+    asked = positions;
+    return [
+      { room: "office", x: 40, y: 90, visible: true, exposure: 0.9 },
+      {
+        room: "hall",
+        x: 100,
+        y: 90,
+        visible: true,
+        exposure: 0.9,
+        manual: true,
+      },
+    ];
+  };
+  card._positionRoomTags();
+  assert.equal(
+    JSON.stringify(asked),
+    JSON.stringify({ hall: [1, 2, 3] }),
+    "the room's chosen spot",
+  );
+  assert.equal(card._roomTags.children[1].hidden, false, "always shows");
+  delete card._config.markers;
+  card._view.roomFrontPoints = () => [
+    { room: "office", x: 40, y: 90, visible: true, exposure: 0.1 },
+    { room: "hall", x: 400, y: 90, visible: false, exposure: 0.1 },
+  ];
+  card._positionRoomTags();
+  card._focusRoom("office");
+  const focused = shown[0];
+  assert.equal(focused.id, "h-home", "backend calls keep addressing the house");
+  assert.equal(focused.focusRoom, "office");
+  assert.deepEqual(
+    focused.controls.map((c) => c.id),
+    ["a"],
+  );
+  assert.equal(card._model, focused);
+  assert.equal(card._focus.base, house);
+  assert.equal(card._roomBack.hidden, false);
+  assert.equal(card._roomTags.children.length, 0, "no buttons inside a room");
+  card._focusRoom("hall");
+  assert.equal(shown.length, 1, "already focused");
+  // A model update compares against the house view, not the derived room.
+  card._exitRoom();
+  assert.equal(shown[1], house);
+  assert.equal(card._model, house);
+  assert.equal(card._focus, null);
+  assert.equal(card._roomBack.hidden, true);
+  assert.equal(card._roomTags.children.length, 2);
+  // Picking a floor while focused leaves the room, even for the same view.
+  card._floors = [{ id: "h-home" }, { id: "h-home--f2" }];
+  card._views = [house];
+  card._syncFloorSwitch = () => {};
+  card._focusRoom("hall");
+  card._selectFloor("h-home");
+  assert.equal(card._focus, null);
+  assert.equal(card._model, house);
+  // When the house cannot be shown again in place, reload it.
+  let loads = 0;
+  card._load = () => loads++;
+  card._focusRoom("hall");
+  card._view.setHouseView = () => false;
+  card._exitRoom();
+  assert.equal(loads, 1);
+  // The setting and unfocusable views hide the buttons.
+  card._focus = null;
+  card._model = house;
+  card._config = { room_focus: false };
+  card._syncRoomTags();
+  assert.equal(card._roomTags.children.length, 0);
+});
+
+test("room buttons count the room's lights that are on and a long press switches them", async () => {
+  const card = cardHarness();
+  const calls = [];
+  card._config = {};
+  card._roomTags = {
+    dataset: {},
+    children: [],
+    replaceChildren(...items) {
+      this.children = items;
+    },
+  };
+  card._roomBack = {
+    hidden: true,
+    querySelector: () => ({}),
+    setAttribute() {},
+  };
+  card._roomNav = { hidden: true };
+  card._roomSteps = [{ setAttribute() {} }, { setAttribute() {} }];
+  card._pendingRooms = new Set();
+  card._loading = false;
+  const house = {
+    id: "h-home",
+    houseView: true,
+    roomTitles: { office: "Office", hall: "Hallway" },
+    members: [{ model: "office" }, { model: "hall" }],
+    controls: [
+      { id: "a", type: "light", sourceModel: "office", roomTitle: "Office" },
+      { id: "b", type: "light", sourceModel: "office", roomTitle: "Office" },
+      { id: "c", type: "cover", sourceModel: "hall", roomTitle: "Hallway" },
+    ],
+    bindings: { a: "light.a", b: "light.b" },
+  };
+  card._model = house;
+  card._view = { highlightRoom: (room) => calls.push(["outline", room]) };
+  card._hass = {
+    states: { "light.a": { state: "on" }, "light.b": { state: "on" } },
+    callService: async (...args) => calls.push(args),
+  };
+  card._positionRoomTags = () => {};
+  card._lightStates = new Map([
+    ["a", { on: true }],
+    ["b", { on: false }],
+  ]);
+  card._syncRoomTags();
+  const [office, hall] = card._roomTags.children;
+  assert.equal(office.found[".room-tag-count"].hidden, false);
+  assert.equal(office.found[".room-tag-count"].textContent, 1);
+  assert.equal(office.dataset.active, "true");
+  assert.equal(
+    hall.found[".room-tag-count"].hidden,
+    true,
+    "no lights: no count",
+  );
+  assert.match(office.title, /hold to switch its lights/);
+  assert.doesNotMatch(hall.title, /hold/);
+  // Hovering outlines the room.
+  office.listeners.pointerenter({ pointerType: "mouse" });
+  office.listeners.pointerenter({ pointerType: "touch" });
+  office.listeners.pointerleave();
+  assert.deepEqual(calls.splice(0), [
+    ["outline", "office"],
+    ["outline", null],
+  ]);
+  // A short tap opens the room (here: nothing loaded, so it does nothing),
+  // holding switches the lights: one is on, so all turn off.
+  card._focusRoom = (room) => calls.push(["focus", room]);
+  office.onclick();
+  assert.deepEqual(calls.splice(0), [["focus", "office"]]);
+  office.listeners.pointerdown({ button: 0, clientX: 5, clientY: 5 });
+  assert.equal(office.dataset.pressing, "true");
+  assert.equal(typeof timers.fn, "function");
+  // Moving away cancels the hold.
+  office.listeners.pointermove({ clientX: 60, clientY: 5 });
+  assert.equal(timers.fn, null);
+  assert.equal(office.dataset.pressing, undefined);
+  office.listeners.pointerdown({ button: 0, clientX: 5, clientY: 5 });
+  timers.fn();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(calls.splice(0), [
+    ["light", "turn_off", { entity_id: ["light.a", "light.b"] }],
+  ]);
+  // The click that ends a hold does not also open the room.
+  office.onclick();
+  assert.deepEqual(calls, []);
+  office.onclick();
+  assert.deepEqual(calls, [["focus", "office"]]);
+});
+
+test("in a room, previous and next go to the neighbouring rooms and wrap round", () => {
+  const card = cardHarness();
+  const shown = [],
+    steps = [{ setAttribute() {} }, { setAttribute() {} }];
+  card._roomTags = {
+    dataset: {},
+    children: [],
+    replaceChildren(...items) {
+      this.children = items;
+    },
+    querySelector: () => null,
+  };
+  card._roomBack = {
+    hidden: true,
+    querySelector: () => ({}),
+    setAttribute() {},
+    focus() {},
+  };
+  card._roomNav = { hidden: true };
+  card._roomSteps = steps;
+  card._config = {};
+  card._loading = false;
+  card._buildAccess = () => {};
+  card._states = () => {};
+  card._syncCameraButtons = () => {};
+  const house = {
+    id: "h-home",
+    houseView: true,
+    roomTitles: { a: "Office", b: "Hallway", c: "Living room" },
+    members: [{ model: "a" }, { model: "b" }, { model: "c" }],
+    controls: [],
+  };
+  card._model = house;
+  card._view = {
+    setHouseView: (view) => {
+      shown.push(view.focusRoom ?? "house");
+      return true;
+    },
+    roomFrontPoints: () => [],
+  };
+  card._syncRoomTags();
+  card._focusRoom("a");
+  assert.equal(card._roomNav.hidden, false);
+  assert.match(
+    steps[0].title,
+    /Previous room · Living room/,
+    "wraps to the last",
+  );
+  assert.match(steps[1].title, /Next room · Hallway/);
+  card._stepRoom(1);
+  assert.equal(card._model.focusRoom, "b");
+  assert.equal(card._focus.room, "b");
+  assert.equal(card._focus.base, house, "the house is still the way back");
+  card._stepRoom(1);
+  card._stepRoom(1);
+  assert.equal(card._model.focusRoom, "a", "wraps round to the first");
+  card._stepRoom(-1);
+  assert.equal(card._model.focusRoom, "c");
+  assert.deepEqual(shown, ["a", "b", "c", "a", "c"]);
+  card._exitRoom();
+  assert.equal(card._model, house);
+  assert.equal(card._roomNav.hidden, true);
+  card._stepRoom(1);
+  assert.equal(shown.length, 6, "nothing to step outside a room");
+});
+
+test("icons covered by another room are hidden once the camera settles, and shown again when it clears", () => {
+  const card = cardHarness();
+  const lamp = { dataset: { control: "lamp" }, style: {} },
+    other = { dataset: { control: "other" }, style: {} };
+  card._config = {};
+  card._container = { clientWidth: 500, clientHeight: 400 };
+  card.shadowRoot.querySelectorAll = () => [lamp, other];
+  card._groupIcons = () => {};
+  card._positionRoomTags = () => {};
+  card._model = {
+    houseView: true,
+    controls: [
+      { id: "lamp", sourceModel: "office" },
+      { id: "other", sourceModel: "hall" },
+    ],
+  };
+  let covered = new Set(["lamp"]);
+  const asked = [];
+  card._view = {
+    fixtureScreenPosition: () => ({ x: 100, y: 100, visible: true }),
+    coveredMarkers: (entries) => {
+      asked.push(entries.map((e) => `${e.id}:${e.room}`));
+      return covered;
+    },
+  };
+  card._positionButtons();
+  assert.equal(lamp.hidden, false, "shown until the camera has settled");
+  assert.equal(typeof timers.fn, "function", "check scheduled");
+  timers.fn();
+  assert.equal(
+    JSON.stringify(asked),
+    JSON.stringify([["lamp:office", "other:hall"]]),
+  );
+  assert.equal(lamp.hidden, true, "covered icon hidden");
+  assert.equal(other.hidden, false);
+  // The scene says it is clear again (the camera moved).
+  covered = new Set();
+  card._checkCovered();
+  assert.equal(lamp.hidden, false);
+  // Rooms on their own, and previews without the scene check, are untouched.
+  card._model.focusRoom = "office";
+  card._covered = new Set(["lamp"]);
+  card._scheduleCoverCheck();
+  assert.equal(card._covered.size, 0);
 });

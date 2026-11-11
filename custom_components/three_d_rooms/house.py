@@ -65,7 +65,7 @@ def house_models(models):
             included = [m for m in rooms if not floor or floor["id"] in m["housePlacement"]["floorIds"]]
             if not included:
                 continue
-            model = {"schemaVersion":1,"id":f"h-{house_id}"+(f'--{floor["id"]}' if floor else ""),"title":reference["houseName"]+(f' · {floor["name"]}' if floor else ""),"units":"meters","up":"Y","controls":[],"devices":[],"bindings":{},"ambient":.45,"members":[],"houseView":True,"houseId":house_id,"houseFloor":floor,"deviceSettings":{}}
+            model = {"schemaVersion":1,"id":f"h-{house_id}"+(f'--{floor["id"]}' if floor else ""),"title":reference["houseName"]+(f' · {floor["name"]}' if floor else ""),"units":"meters","up":"Y","controls":[],"devices":[],"bindings":{},"ambient":.45,"members":[],"roomTitles":{},"houseView":True,"houseId":house_id,"houseFloor":floor,"deviceSettings":{}}
             for m in included:
                 t = m["housePlacement"]["transform"]
                 def key(c):
@@ -104,6 +104,7 @@ def house_models(models):
                             continue
                         inward = [t[i]*w["inward"][0]+t[4+i]*w["inward"][1]+t[8+i]*w["inward"][2] for i in range(3)]
                         target["windows"].append({**deepcopy(w),"id":"w-"+house_key(m["id"]+"/"+w["id"]),"nodeId":node(w["nodeId"]),"position":p,"inward":inward,**({"coverId":key(w["coverId"])} if w.get("coverId") else {}),"sourceModel":m["id"]})
+                model["roomTitles"][m["id"]]=m["title"]
                 model["members"].append({"model":m["id"],**({"groupIcons":True} if m.get("groupIcons") else {}),"appearance":deepcopy(m.get("appearance",[])),"transform":t,"sceneRevision":m.get("sceneRevision"),"controlIds":{c["id"]:key(c["id"]) for c in m["controls"]},"nodeIds":{n:node(n) for c in m["controls"] for n in c.get("nodeIds",[])}})
             if model.get("daylight") and not model["daylight"]["windows"]:
                 del model["daylight"]

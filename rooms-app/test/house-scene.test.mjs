@@ -272,6 +272,7 @@ test("house views switch floors in place: rooms, clipping, fixtures and bounds",
   assert.equal(view.bounds.min.y, 0);
   assert.equal(view.bounds.max.y, 5);
   assert.equal(view.setHouseView(upper), true);
+  assert.deepEqual([...view.roomBoxes.keys()], ["upper"]);
   assert.deepEqual(
     asset.children.map((p) => p.visible),
     [false, true],

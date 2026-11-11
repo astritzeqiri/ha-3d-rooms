@@ -30,7 +30,8 @@ function harness(preview, onClose, modelConfig = {}, requestScope) {
         focus() {},
         reportValidity: () => true,
         getBoundingClientRect: () => ({ height: 500 }),
-        closest: () => ({ open: false }),
+        offsetHeight: 400,
+        closest: () => ({ open: false, offsetHeight: 600 }),
       });
     return fields.get(id);
   };
@@ -63,7 +64,9 @@ function harness(preview, onClose, modelConfig = {}, requestScope) {
       activeElement: null,
       body: { classList: { add() {}, remove() {} } },
     },
+    getComputedStyle: () => ({ top: "84px" }),
     window: {
+      innerHeight: 1000,
       addEventListener: (n, fn) => listeners.set(n, fn),
       dispatchEvent() {},
     },
@@ -89,6 +92,17 @@ function harness(preview, onClose, modelConfig = {}, requestScope) {
         },
         close() {},
         read: () => markers,
+      };
+    },
+    initRoomButtonsEditor: () => {
+      let rooms;
+      return {
+        open(value) {
+          rooms = value?._rooms;
+        },
+        close() {},
+        previewing: () => false,
+        read: () => rooms,
       };
     },
     validateComponent,
@@ -309,7 +323,10 @@ test("house view editor retains entity tools and saves marker presentation with 
   });
   h.editor.open({
     ...saved(),
-    markers: { lamp: { size: 44, placement: "tray" } },
+    markers: {
+      lamp: { size: 44, placement: "tray" },
+      _rooms: { hall: { mode: "always", position: [1, 2, 3] } },
+    },
   });
   assert.equal(h.field("dashboard-controls").hidden, false);
   h.field("dashboard-title").value = "Whole house";
@@ -321,6 +338,9 @@ test("house view editor retains entity tools and saves marker presentation with 
   assert.equal(previews[0].layers[0].zoom, 2);
   await h.field("dashboard-form").onsubmit({ preventDefault() {} });
   assert.equal(h.calls[0].markers.lamp.size, 44);
+  assert.deepEqual(h.calls[0].markers._rooms, {
+    hall: { mode: "always", position: [1, 2, 3] },
+  });
   assert.equal(h.calls[0].height, 640);
 });
 test("individual room view editor retains its entity tools", () => {
@@ -383,4 +403,39 @@ test("choosing Floor plan in the editor saves a top-down orthographic view", asy
   assert.equal(h.calls[0].layers[0].view, "floor");
   assert.equal(h.calls[0].layers[0].tilt, 0);
   assert.equal(h.calls[0].layers[0].heading, 0);
+});
+
+test("a view can have an automatic height, which saves as auto and leaves the editor its own size", async () => {
+  const h = harness();
+  h.editor.open(saved());
+  assert.equal(h.field("dashboard-height-mode").value, "fixed");
+  assert.equal(h.field("dashboard-height").value, 500);
+  assert.equal(h.field("viewport").style.height, "500px");
+  h.field("dashboard-height-mode").value = "auto";
+  h.field("dashboard-height-mode").onchange();
+  assert.equal(h.field("dashboard-height").hidden, true);
+  assert.equal(h.field("dashboard-height-note").hidden, false);
+  // The editor uses the screen left under the sticky column: 1000 - 84 -
+  // (600 - 400 of tools and hints) - 12.
+  assert.equal(h.field("viewport").style.height, "704px");
+  await h.field("dashboard-form").onsubmit({ preventDefault() {} });
+  assert.equal(h.calls[0].height, "auto");
+  // Back to fixed keeps the last pixel height.
+  h.field("dashboard-height-mode").value = "fixed";
+  h.field("dashboard-height-mode").onchange();
+  assert.equal(h.field("dashboard-height").hidden, false);
+  assert.equal(h.field("viewport").style.height, "500px");
+});
+
+test("a saved automatic height opens as auto", () => {
+  const h = harness();
+  h.editor.open({ ...saved(), height: "auto" });
+  assert.equal(h.field("dashboard-height-mode").value, "auto");
+  assert.equal(h.field("dashboard-height").hidden, true);
+  assert.equal(h.field("viewport").style.height, "704px");
+  assert.equal(
+    h.field("dashboard-height").value,
+    500,
+    "a pixel height is kept for Fixed",
+  );
 });

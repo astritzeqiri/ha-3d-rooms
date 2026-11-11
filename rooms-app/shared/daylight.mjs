@@ -53,11 +53,20 @@ export function createDaylight(config) {
   });
   let factor = 0;
   const openings = new Map();
+  // House views show some rooms only: windows of other rooms stay off.
+  let scope = null;
+  const shown = (w) => !scope || !w.sourceModel || scope.has(w.sourceModel);
+  function setScope(rooms) {
+    scope = rooms ? new Set(rooms) : null;
+    for (const { w, light, sky } of windows)
+      light.visible = light.target.visible = sky.visible = shown(w);
+  }
   function update(mode, entity, positions = new Map()) {
     factor = daylightFactor(mode, entity, factor);
     let energy = 0,
       area = 0;
     for (const { w, light, sky } of windows) {
+      if (!shown(w)) continue;
       const value = positions.get(w.coverId);
       if (Number.isFinite(value))
         openings.set(w.id, Math.max(0, Math.min(100, value)));
@@ -79,6 +88,7 @@ export function createDaylight(config) {
   return {
     group,
     update,
+    setScope,
     get factor() {
       return factor;
     },

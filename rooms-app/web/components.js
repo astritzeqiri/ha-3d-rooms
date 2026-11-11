@@ -106,7 +106,7 @@ export function initComponents({
       detail.textContent = `${viewScopeLabel(
         models.find((m) => m.id === c.layers[0].model),
         models,
-      )} · ${c.layers[0].view === "floor" ? "Floor plan" : "Perspective"} · ${c.height}px card`;
+      )} · ${c.layers[0].view === "floor" ? "Floor plan" : "Perspective"} · ${c.height === "auto" ? "auto height" : `${c.height}px card`}`;
       const actions = document.createElement("div");
       actions.className = "saved-view-actions";
       const button = (text, action, primary = false) => {

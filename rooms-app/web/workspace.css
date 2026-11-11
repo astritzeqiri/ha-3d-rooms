@@ -1532,3 +1532,206 @@ button.setup-step:hover {
   height: 18px;
   margin: 2px 0 0;
 }
+.room-angle-preview .marker-editor-overlay,
+.room-angle-preview .room-button-ghost,
+.room-angle-preview .room-button-tools,
+.room-angle-preview .room-button-status {
+  display: none !important;
+}
+.room-button-ghost {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--room-tag-size, 30px) * 0.2);
+  height: var(--room-tag-size, 30px);
+  padding: 0 calc(var(--room-tag-size, 30px) * 0.37) 0
+    calc(var(--room-tag-size, 30px) * 0.27);
+  border-radius: calc(var(--room-tag-size, 30px) / 2);
+  transform: translate(-50%, 6px);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  white-space: nowrap;
+  color: var(--text, #1b1612);
+  background: color-mix(in srgb, var(--surface, #fff) 92%, transparent);
+  border: 1px solid var(--accent, #b4472c);
+  box-shadow: 0 2px 8px #0004;
+  font: 500 calc(var(--room-tag-size, 30px) * 0.4) / 1 system-ui;
+}
+.room-button-ghost::before {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+}
+.room-button-ghost[data-manual="true"] {
+  transform: translate(-50%, -50%);
+  z-index: 4;
+}
+.room-button-ghost:hover {
+  z-index: 5;
+}
+.room-button-ghost[data-dim="true"] {
+  z-index: 2;
+  opacity: 0.55;
+  border-style: dashed;
+}
+.room-button-ghost[data-dragging="true"] {
+  z-index: 6;
+  cursor: grabbing;
+  opacity: 1;
+  box-shadow: 0 4px 14px #0006;
+}
+.room-button-ghost svg {
+  width: calc(var(--room-tag-size, 30px) * 0.47);
+  height: calc(var(--room-tag-size, 30px) * 0.47);
+}
+
+.room-button-ghost[data-selected="true"] {
+  outline: 3px solid var(--accent, #b4472c);
+  outline-offset: 2px;
+  z-index: 6;
+}
+/* Round sub-buttons around the selected room button, like the device icons'. */
+.room-button-tools {
+  position: absolute;
+  z-index: 12;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.room-button-tools[hidden],
+.room-button-status[hidden],
+.room-angle-bar[hidden] {
+  display: none !important;
+}
+.room-button-tools button {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 7px;
+  border-radius: 50%;
+  background: var(--surface, #fff);
+  color: var(--text, #1b1612);
+  border: 1px solid var(--line, #d5cec4);
+  box-shadow: 0 3px 10px #0005;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  animation: marker-action-pop 140ms ease-out;
+}
+.room-button-tools button::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+}
+.room-button-tools button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.room-button-tools button[aria-pressed="true"],
+.room-button-tools button[data-mode="always"] {
+  background: var(--accent, #b4472c);
+  color: var(--on-accent, #fff);
+  border-color: var(--accent, #b4472c);
+}
+.room-button-tools button[data-size]:not([data-size="30"]) {
+  background: var(--accent, #b4472c);
+  color: var(--on-accent, #fff);
+  border-color: var(--accent, #b4472c);
+}
+.room-button-tools button[data-mode="never"] {
+  opacity: 0.75;
+  border-style: dashed;
+}
+.room-button-tools button[data-mode="auto"] {
+  background: var(--surface, #fff);
+}
+.room-button-tools button[hidden] {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .room-button-tools button {
+    animation: none;
+  }
+}
+.room-button-status,
+.room-angle-bar {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  z-index: 11;
+  transform: translateX(-50%);
+  max-width: calc(100% - 24px);
+  padding: 8px 12px;
+  color: var(--text, #1b1612);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface, #fff) 94%, transparent);
+  border: 1px solid var(--line, #d5cec4);
+  box-shadow: 0 3px 10px #0004;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+}
+.room-angle-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  pointer-events: auto;
+  border-color: var(--accent, #b4472c);
+}
+.room-angle-bar > span {
+  flex: 1 1 100%;
+  font-size: 13px;
+}
+
+.room-button-ghost[data-lift="true"] {
+  cursor: ns-resize;
+}
+.room-button-guide {
+  position: absolute;
+  z-index: 5;
+  width: 0;
+  border-left: 2px dashed var(--accent, #b4472c);
+  pointer-events: none;
+}
+.room-button-guide::after {
+  content: "";
+  position: absolute;
+  left: -5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent, #b4472c);
+}
+.room-button-guide[data-floor="below"]::after {
+  bottom: -4px;
+}
+.room-button-guide[data-floor="above"]::after {
+  top: -4px;
+}
+.room-button-guide[hidden] {
+  display: none;
+}
+
+/* Tooltips over the 3D view: shown at once on hover or keyboard focus. */
+.rooms-tip {
+  position: absolute;
+  z-index: 30;
+  max-width: min(260px, calc(100% - 12px));
+  padding: 6px 10px;
+  border-radius: 8px;
+  pointer-events: none;
+  color: var(--surface, #fff);
+  background: var(--text, #1b1612);
+  box-shadow: 0 2px 10px #0006;
+  font: 500 12px/1.35 system-ui;
+}
+.rooms-tip[hidden] {
+  display: none;
+}

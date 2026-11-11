@@ -6,13 +6,19 @@ export function validateMarkers(value) {
     !value ||
     typeof value !== "object" ||
     Array.isArray(value) ||
-    Object.keys(value).filter((id) => id !== "_defaults").length > 128
+    Object.keys(value).filter((id) => !["_defaults", "_rooms"].includes(id))
+      .length > 128
   )
     throw new Error(
       "Use a device-marker settings object with at most 128 controls.",
     );
   const clean = {};
   for (const [id, options] of Object.entries(value)) {
+    if (id === "_rooms") {
+      const rooms = validateRoomButtons(options);
+      if (Object.keys(rooms).length) clean._rooms = rooms;
+      continue;
+    }
     if (
       (id !== "_defaults" && !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(id)) ||
       ["constructor", "prototype"].includes(id) ||
@@ -68,6 +74,82 @@ export function validateMarkers(value) {
   }
   return clean;
 }
+export const ROOM_BUTTON_MODES = ["auto", "always", "never"];
+/** Height of a room button in pixels: allowed range and the default. */
+export const ROOM_BUTTON_SIZES = { min: 20, max: 64, standard: 30 };
+/**
+ * Room buttons of a house view: `{ [roomId]: { mode?, position? } }`. `mode`
+ * is auto (the default, so not stored), always or never; `position` is a
+ * point in the view's own metres; `heading` and `tilt` (degrees) frame the
+ * room when it is opened on its own; `size` is the button's height in pixels. Empty entries are dropped.
+ */
+export function validateRoomButtons(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    Object.keys(value).length > 64
+  )
+    throw new Error("Use a room-button settings object with at most 64 rooms.");
+  const clean = {};
+  for (const [room, options] of Object.entries(value)) {
+    if (
+      !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(room) ||
+      ["constructor", "prototype"].includes(room) ||
+      !options ||
+      typeof options !== "object" ||
+      Array.isArray(options) ||
+      Object.keys(options).some(
+        (key) => !["mode", "position", "heading", "tilt", "size"].includes(key),
+      )
+    )
+      throw new Error("Invalid room-button settings.");
+    if (options.mode !== undefined && !ROOM_BUTTON_MODES.includes(options.mode))
+      throw new Error("Choose when the room button shows.");
+    if (
+      options.position !== undefined &&
+      (!Array.isArray(options.position) ||
+        options.position.length !== 3 ||
+        options.position.some((v) => !Number.isFinite(v) || Math.abs(v) > 1000))
+    )
+      throw new Error("A room button position must be three numbers.");
+    if (
+      options.heading !== undefined &&
+      (!Number.isFinite(options.heading) ||
+        options.heading < 0 ||
+        options.heading >= 360)
+    )
+      throw new Error("A room view heading must be 0 to under 360 degrees.");
+    if (
+      options.tilt !== undefined &&
+      (!Number.isFinite(options.tilt) || options.tilt < 0 || options.tilt > 180)
+    )
+      throw new Error("A room view tilt must be 0 to 180 degrees.");
+    if (
+      options.size !== undefined &&
+      (!Number.isInteger(options.size) ||
+        options.size < ROOM_BUTTON_SIZES.min ||
+        options.size > ROOM_BUTTON_SIZES.max)
+    )
+      throw new Error(
+        `A room button size must be ${ROOM_BUTTON_SIZES.min}–${ROOM_BUTTON_SIZES.max} pixels.`,
+      );
+    const entry = {
+      ...(options.mode && options.mode !== "auto"
+        ? { mode: options.mode }
+        : {}),
+      ...(options.position ? { position: [...options.position] } : {}),
+      ...(options.heading !== undefined ? { heading: options.heading } : {}),
+      ...(options.tilt !== undefined ? { tilt: options.tilt } : {}),
+      ...(options.size !== undefined &&
+      options.size !== ROOM_BUTTON_SIZES.standard
+        ? { size: options.size }
+        : {}),
+    };
+    if (Object.keys(entry).length) clean[room] = entry;
+  }
+  return clean;
+}
 export function markerSettings(markers, id) {
   return {
     visible: true,
@@ -100,7 +182,9 @@ export function markerTrayHeight(markers, controls) {
     ? controls
         .filter((c) => !c.hidden && c.lightGroupPrimary !== false)
         .map((c) => c.id)
-    : Object.keys(markers || {}).filter((id) => id !== "_defaults");
+    : Object.keys(markers || {}).filter(
+        (id) => id !== "_defaults" && id !== "_rooms",
+      );
   const count = ids.filter((id) => {
     const options = markerSettings(markers, id);
     return options.visible && options.placement === "tray";

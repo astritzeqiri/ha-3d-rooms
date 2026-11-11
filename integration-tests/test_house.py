@@ -38,6 +38,19 @@ class HouseTests(unittest.TestCase):
             with self.assertRaises(ValueError):models.validate_manifest({**before,"appearance":[{**part,"visible":"false"}]})
             with self.assertRaises(ValueError):store.install(package(manifest_change={"appearance":[part]}))
 
+    def test_house_views_name_their_rooms_without_changing_the_scene_revision_on_rename(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store=models.ModelStore(directory).open()
+            store.install(package(manifest_change={"housePlacement":placement()}))
+            before={v["id"]:v for v in store.catalog() if v.get("houseView")}
+            self.assertTrue(before)
+            for view in before.values():
+                self.assertEqual(view["roomTitles"],{"kitchen":store.find("kitchen")["title"]})
+            store.update_room("kitchen",{"title":"Renamed room"})
+            for view in (v for v in store.catalog() if v.get("houseView")):
+                self.assertEqual(view["roomTitles"],{"kitchen":"Renamed room"})
+                self.assertEqual(view["sceneRevision"],before[view["id"]]["sceneRevision"])
+
     def test_house_views_include_room_daylight_and_save_time_of_day_to_rooms(self):
         window={"id":"window","nodeId":"window-glass","position":[1,1.5,0],"inward":[0,0,1],"width":1,"height":1.2}
         with tempfile.TemporaryDirectory() as directory:

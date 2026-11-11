@@ -18,6 +18,12 @@ import {
   restoreCameraView,
 } from "../shared/camera-view.mjs";
 import { floorFrame, perspectiveFrame } from "../shared/floor-view.mjs";
+import { frontPoint } from "../shared/room-focus.mjs";
+import {
+  coveredByOtherRoom,
+  unpackDepth,
+  viewDistance,
+} from "../shared/occlusion.mjs";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadSceneAsset } from "../shared/scene-assets.mjs";
@@ -149,6 +155,7 @@ export class SceneView {
         while (o) {
           if (this.model?.houseView && o.userData.pickRoom) {
             this.options.onRoomPick?.(o.userData.pickRoom);
+            this.recordRoomTap(o.userData.pickRoom, e.clientX, e.clientY);
             return;
           }
           if (
@@ -449,6 +456,8 @@ export class SceneView {
         fixture.type === "light" && !fixture.outOfScope;
       if (fixture.outOfScope) fixture.marker.visible = false;
     }
+    // Only the shown rooms' windows light the view.
+    this.daylight?.setScope(model.members ? [...members] : null);
     // Re-offer window shadows: an earlier, narrower view may have budgeted them out.
     this.daylight?.group.traverse((o) => {
       if (o.isSpotLight) o.castShadow = true;
@@ -498,7 +507,176 @@ export class SceneView {
         }
     });
     this.bounds = box;
+    this.clipPlanes = planes;
+    // One box per shown room, for the room-focus buttons.
+    this.roomBoxes = new Map();
+    if (model.members)
+      for (const placement of placements)
+        if (placement.visible)
+          this.roomBoxes.set(
+            placement.userData.pickRoom,
+            new THREE.Box3().expandByObject(placement),
+          );
     return { center, size };
+  }
+  /** Screen position of a world point: `{ x, y, visible }` in container pixels. */
+  screenPoint(point) {
+    const v = new THREE.Vector3(...point).project(this.camera);
+    return {
+      x: ((v.x + 1) * this.container.clientWidth) / 2,
+      y: ((1 - v.y) * this.container.clientHeight) / 2,
+      visible:
+        v.z >= -1 && v.z <= 1 && Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1,
+    };
+  }
+  /**
+   * The world point under a screen position on the horizontal plane at
+   * height `y` (or null when the view never meets it). Used to drag room
+   * buttons around, also beside the model.
+   */
+  groundPoint(clientX, clientY, y) {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(
+      new THREE.Vector2(
+        ((clientX - rect.left) / rect.width) * 2 - 1,
+        1 - ((clientY - rect.top) / rect.height) * 2,
+      ),
+      this.camera,
+    );
+    const hit = ray.ray.intersectPlane(
+      new THREE.Plane(new THREE.Vector3(0, 1, 0), -y),
+      new THREE.Vector3(),
+    );
+    return hit ? hit.toArray() : null;
+  }
+  /**
+   * The height (y) of the point under a screen position on the vertical
+   * plane through `point` that faces the camera; null when looking straight
+   * down. Used to raise and lower room buttons.
+   */
+  verticalPoint(clientX, clientY, point) {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    const ray = new THREE.Raycaster(),
+      forward = this.camera.getWorldDirection(new THREE.Vector3());
+    forward.y = 0;
+    if (forward.lengthSq() < 1e-6) return null;
+    ray.setFromCamera(
+      new THREE.Vector2(
+        ((clientX - rect.left) / rect.width) * 2 - 1,
+        1 - ((clientY - rect.top) / rect.height) * 2,
+      ),
+      this.camera,
+    );
+    const hit = ray.ray.intersectPlane(
+      new THREE.Plane().setFromNormalAndCoplanarPoint(
+        forward.normalize(),
+        new THREE.Vector3(...point),
+      ),
+      new THREE.Vector3(),
+    );
+    return hit ? hit.y : null;
+  }
+  /**
+   * Where each shown room's button goes and how much of the room can be seen:
+   * `[{ room, x, y, visible, exposure, manual }]`. `positions` maps a room to
+   * a world point chosen for its button; otherwise the button sits at the
+   * middle of the room's floor edge that is lowest on screen. `exposure` is
+   * the share (0 to 1) of the room's footprint on screen that is not covered
+   * by another room in front of it.
+   */
+  roomFrontPoints(positions = {}) {
+    const boxes = [...(this.roomBoxes || [])];
+    if (!boxes.length) return [];
+    const width = this.container.clientWidth,
+      height = this.container.clientHeight,
+      v = new THREE.Vector3(),
+      point = (p) => {
+        v.set(...p).project(this.camera);
+        return {
+          world: [...p],
+          x: ((v.x + 1) * width) / 2,
+          y: ((1 - v.y) * height) / 2,
+          visible:
+            v.z >= -1 && v.z <= 1 && Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1,
+        };
+      },
+      ray = new THREE.Raycaster(),
+      ndc = new THREE.Vector2(),
+      at = new THREE.Vector3();
+    // The room whose box a screen point sees first.
+    const nearest = (x, y) => {
+      ndc.set((x / width) * 2 - 1, 1 - (y / height) * 2);
+      ray.setFromCamera(ndc, this.camera);
+      let best = null,
+        distance = Infinity;
+      for (const [room, box] of boxes)
+        if (ray.ray.intersectBox(box, at)) {
+          const d = at.distanceToSquared(ray.ray.origin);
+          if (d < distance) {
+            distance = d;
+            best = room;
+          }
+        }
+      return best;
+    };
+    const exposure = (room, box) => {
+      const xs = [],
+        ys = [];
+      for (let corner = 0; corner < 8; corner++) {
+        const p = point(
+          [0, 1, 2].map((i) =>
+            ((corner >> i) & 1 ? box.max : box.min).getComponent(i),
+          ),
+        );
+        xs.push(p.x);
+        ys.push(p.y);
+      }
+      const left = Math.max(0, Math.min(...xs)),
+        right = Math.min(width, Math.max(...xs)),
+        top = Math.max(0, Math.min(...ys)),
+        bottom = Math.min(height, Math.max(...ys));
+      if (right <= left || bottom <= top) return 1;
+      let seen = 0,
+        total = 0;
+      const steps = 8;
+      for (let i = 0; i < steps; i++)
+        for (let j = 0; j < steps; j++) {
+          const x = left + ((i + 0.5) * (right - left)) / steps,
+            y = top + ((j + 0.5) * (bottom - top)) / steps;
+          // Only samples that land on this room's box count.
+          const first = nearest(x, y);
+          if (first === room) seen++;
+          if (first === room || ray.ray.intersectsBox(box)) total++;
+        }
+      return total ? seen / total : 1;
+    };
+    return boxes.map(([room, box]) => {
+      const manual = positions[room];
+      let placed;
+      if (manual) placed = point(manual);
+      else {
+        const cx = (box.min.x + box.max.x) / 2,
+          cz = (box.min.z + box.max.z) / 2,
+          y = box.min.y;
+        placed = frontPoint(
+          [
+            [cx, y, box.min.z],
+            [cx, y, box.max.z],
+            [box.min.x, y, cz],
+            [box.max.x, y, cz],
+          ].map(point),
+        );
+      }
+      return {
+        room,
+        ...placed,
+        exposure: exposure(room, box),
+        manual: !!manual,
+      };
+    });
   }
   /**
    * Show another view (whole house or one floor) of the loaded house in place.
@@ -588,13 +766,34 @@ export class SceneView {
     );
     this.reset();
   }
+  /**
+   * Two quick taps on the same room (not on a device) count as a double tap:
+   * `onRoomDoubleTap(room)`. Returns true when this tap completed one.
+   */
+  recordRoomTap(room, x, y, now = performance.now()) {
+    const last = this.lastRoomTap;
+    if (
+      last &&
+      last.room === room &&
+      now - last.time < 400 &&
+      Math.hypot(x - last.x, y - last.y) < 24
+    ) {
+      this.lastRoomTap = null;
+      this.options.onRoomDoubleTap?.(room);
+      return true;
+    }
+    this.lastRoomTap = { room, x, y, time: now };
+    return false;
+  }
   /** Allow or lock camera movement; locked views leave touch scrolling to the page. */
   setInteractive(enabled) {
     this.options.interactive = !!enabled;
     this.orbit.enabled = this.options.interactive;
     this.renderer.domElement.style.touchAction = this.options.interactive
       ? "none"
-      : "";
+      : this.options.onRoomDoubleTap
+        ? "manipulation"
+        : "";
   }
   setFloorPlan() {
     if (!this.model) return;
@@ -632,22 +831,29 @@ export class SceneView {
     if (!this.bounds) return;
     const { width, height } = this.container.getBoundingClientRect();
     if (!width || !height) return;
-    const f = this.options.camera
-      ? restoreCameraView(this.options.camera, {
-          aspect: width / height,
-          min: this.bounds.min.toArray(),
-          max: this.bounds.max.toArray(),
-          heading: this.options.heading,
-          tilt: this.options.tilt,
-          zoom: this.options.zoom,
-        })
-      : (this.options.mode === "front" ? perspectiveFrame : floorFrame)(
-          this.bounds.min.toArray(),
-          this.bounds.max.toArray(),
-          width / height,
-          this.options.tilt ?? (this.options.mode === "front" ? 28 : 0),
-          this.options.heading ?? 0,
-        );
+    // A focused room is framed on its own; the card's saved camera frames the house.
+    const focused = !!this.model?.focusRoom;
+    // A room may ask for its own angle when opened on its own.
+    const frame = focused ? this.model.focusFrame : undefined;
+    const f =
+      this.options.camera && !focused
+        ? restoreCameraView(this.options.camera, {
+            aspect: width / height,
+            min: this.bounds.min.toArray(),
+            max: this.bounds.max.toArray(),
+            heading: this.options.heading,
+            tilt: this.options.tilt,
+            zoom: this.options.zoom,
+          })
+        : (this.options.mode === "front" ? perspectiveFrame : floorFrame)(
+            this.bounds.min.toArray(),
+            this.bounds.max.toArray(),
+            width / height,
+            frame?.tilt ??
+              this.options.tilt ??
+              (this.options.mode === "front" ? 28 : 0),
+            frame?.heading ?? this.options.heading ?? 0,
+          );
     Object.assign(this.camera, {
       aspect: width / height,
       left: f.left,
@@ -656,7 +862,7 @@ export class SceneView {
       bottom: f.bottom,
       near: f.near,
       far: f.far,
-      zoom: f.zoom ?? this.options.zoom ?? 1,
+      zoom: f.zoom ?? (focused ? 1 : this.options.zoom) ?? 1,
     });
     if (this.camera.isPerspectiveCamera && f.fov) this.camera.fov = f.fov;
     this.camera.position.fromArray(f.position);
@@ -868,6 +1074,8 @@ export class SceneView {
     this.resize.disconnect();
     this.orbit.dispose();
     this.disposeScene(this.scene);
+    this.coverTarget?.dispose();
+    for (const material of this.coverMaterials || []) material?.dispose();
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
@@ -901,6 +1109,151 @@ export class SceneView {
       return materials.some((m) => m && m.visible && m.opacity > 0);
     });
     return hit ? hit.point.toArray() : null;
+  }
+  /**
+   * Which device icons are covered by another room of the house (a light
+   * under the bedroom's floor): the ids among `entries`
+   * (`{ id, room, offset }`, room being the source room's id). Draws each
+   * shown room's surfaces with its number and depth into a small buffer from
+   * the current camera and compares each icon's own depth with it.
+   */
+  coveredMarkers(entries) {
+    const covered = new Set();
+    const placements = (this.asset?.children || []).filter(
+      (child) => child.userData.pickRoom && child.visible,
+    );
+    if (
+      !this.model?.houseView ||
+      this.model.focusRoom ||
+      placements.length < 2 ||
+      !entries.length ||
+      !this.clipPlanes
+    )
+      return covered;
+    const { clientWidth: cw, clientHeight: ch } = this.container;
+    if (!cw || !ch) return covered;
+    const long = 384,
+      w = Math.max(1, Math.round(cw >= ch ? long : (long * cw) / ch)),
+      h = Math.max(1, Math.round(cw >= ch ? (long * ch) / cw : long));
+    if (
+      !this.coverTarget ||
+      this.coverTarget.width !== w ||
+      this.coverTarget.height !== h
+    ) {
+      this.coverTarget?.dispose();
+      this.coverTarget = new THREE.WebGLRenderTarget(w, h, {
+        minFilter: THREE.NearestFilter,
+        magFilter: THREE.NearestFilter,
+        depthBuffer: true,
+      });
+    }
+    this.coverMaterials ||= [];
+    const material = (index) =>
+      (this.coverMaterials[index] ||= new THREE.ShaderMaterial({
+        uniforms: { room: { value: index / 255 } },
+        vertexShader:
+          "#include <clipping_planes_pars_vertex>\nvoid main(){\n#include <begin_vertex>\n#include <project_vertex>\n#include <clipping_planes_vertex>\n}",
+        fragmentShader:
+          "#include <clipping_planes_pars_fragment>\nuniform float room;\nvoid main(){\n#include <clipping_planes_fragment>\nvec3 p=fract(gl_FragCoord.z*vec3(1.,255.,65025.));\np-=p.yzz*vec3(1./255.,1./255.,0.);\ngl_FragColor=vec4(room,p);\n}",
+        clipping: true,
+        side: THREE.DoubleSide,
+        blending: THREE.NoBlending,
+      }));
+    const swaps = [],
+      hidden = [],
+      numbers = new Map(placements.map((p, i) => [p.userData.pickRoom, i + 1]));
+    // Only the shown rooms' solid surfaces: no helpers, glass or daylight.
+    const hide = (object) => {
+      hidden.push([object, object.visible]);
+      object.visible = false;
+    };
+    for (const child of this.scene.children)
+      if (child !== this.asset) hide(child);
+    for (const child of this.asset.children)
+      if (!placements.includes(child)) hide(child);
+    placements.forEach((placement, i) => {
+      const own = material(i + 1);
+      own.clippingPlanes = this.clipPlanes;
+      placement.traverseVisible((object) => {
+        if (!object.isMesh) return;
+        const list = Array.isArray(object.material)
+          ? object.material
+          : [object.material];
+        if (list.some((m) => m?.transparent && m.opacity < 0.95)) {
+          hide(object);
+          return;
+        }
+        swaps.push([object, object.material]);
+        object.material = Array.isArray(object.material)
+          ? object.material.map(() => own)
+          : own;
+      });
+    });
+    const renderer = this.renderer,
+      before = {
+        target: renderer.getRenderTarget(),
+        color: renderer.getClearColor(new THREE.Color()),
+        alpha: renderer.getClearAlpha(),
+        background: this.scene.background,
+      },
+      pixels = new Uint8Array(w * h * 4);
+    try {
+      this.scene.background = null;
+      renderer.setClearColor(0x000000, 0);
+      renderer.setRenderTarget(this.coverTarget);
+      renderer.clear();
+      renderer.render(this.scene, this.camera);
+      renderer.readRenderTargetPixels(this.coverTarget, 0, 0, w, h, pixels);
+    } finally {
+      renderer.setRenderTarget(before.target);
+      renderer.setClearColor(before.color, before.alpha);
+      this.scene.background = before.background;
+      for (const [object, original] of swaps) object.material = original;
+      for (const [object, visible] of hidden) object.visible = visible;
+    }
+    const orthographic = !!this.camera.isOrthographicCamera,
+      point = new THREE.Vector3();
+    for (const { id, room, offset } of entries) {
+      const fixture = this.fixtures.get(id),
+        own = numbers.get(room);
+      if (!fixture || !own) continue;
+      point
+        .fromArray(offsetPoint(fixture.marker.position.toArray(), offset))
+        .project(this.camera);
+      if (Math.abs(point.x) > 1 || Math.abs(point.y) > 1 || point.z > 1)
+        continue;
+      const x = Math.min(
+          w - 1,
+          Math.max(0, Math.floor((point.x * 0.5 + 0.5) * w)),
+        ),
+        y = Math.min(h - 1, Math.max(0, Math.floor((point.y * 0.5 + 0.5) * h))),
+        distance = viewDistance(
+          point.z,
+          this.camera.near,
+          this.camera.far,
+          orthographic,
+        ),
+        samples = [];
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          const sx = x + dx,
+            sy = y + dy;
+          if (sx < 0 || sy < 0 || sx >= w || sy >= h) continue;
+          const at = (sy * w + sx) * 4,
+            z = unpackDepth(pixels[at + 1], pixels[at + 2], pixels[at + 3]);
+          samples.push({
+            room: pixels[at],
+            distance: viewDistance(
+              z * 2 - 1,
+              this.camera.near,
+              this.camera.far,
+              orthographic,
+            ),
+          });
+        }
+      if (coveredByOtherRoom(samples, own, distance)) covered.add(id);
+    }
+    return covered;
   }
   fixtureScreenPosition(id, offset) {
     const fixture = this.fixtures.get(id);

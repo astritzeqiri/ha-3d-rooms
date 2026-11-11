@@ -129,6 +129,7 @@ export function houseModels(models) {
         bindings: {},
         ambient: 0.45,
         members: [],
+        roomTitles: {},
         houseView: true,
         houseId,
         houseFloor: floor,
@@ -221,6 +222,7 @@ export function houseModels(models) {
             });
           }
         }
+        model.roomTitles[m.id] = m.title;
         model.members.push({
           model: m.id,
           ...(m.groupIcons ? { groupIcons: true } : {}),

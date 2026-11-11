@@ -305,18 +305,29 @@
               </details>
               <details class="view-advanced" id="dashboard-advanced">
                 <summary>Advanced camera settings</summary>
-                <label
-                  class="panel-field view-height-field"
-                  for="dashboard-height"
-                  >Height <span class="muted">px</span
-                  ><input
+                <div class="panel-field view-height-field">
+                  <label for="dashboard-height-mode">Height</label>
+                  <select id="dashboard-height-mode">
+                    <option value="fixed">Fixed · pixels</option>
+                    <option value="auto">
+                      Auto · fill the space on the dashboard
+                    </option>
+                  </select>
+                  <input
                     id="dashboard-height"
                     type="number"
                     min="180"
                     max="1600"
                     step="1"
                     required
-                /></label>
+                    aria-label="Height in pixels"
+                  />
+                  <p class="muted small" id="dashboard-height-note" hidden>
+                    The card fills the space the dashboard gives it, best in a
+                    single-card Panel view. This editor uses the free height of
+                    your screen.
+                  </p>
+                </div>
                 <fieldset class="camera-fields">
                   <legend>Camera</legend>
                   <div class="camera-field">

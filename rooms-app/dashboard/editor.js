@@ -52,6 +52,7 @@ export class ThreeDRoomsEditor extends HTMLElement {
     <label class="check"><input id="camera_controls" type="checkbox">Show camera buttons on the card (move camera and reset view)</label>
     <label class="check"><input id="light_panel" type="checkbox">Show the Lights button (each room's lights, with one switch per room)</label>
     <label class="check"><input id="shade_panel" type="checkbox">Show the Shades button (each room's shades, with one switch per room)</label>
+    <label class="check" id="room-focus-setting" hidden><input id="room_focus" type="checkbox">Show a button in front of each room to view that room on its own</label>
     <label class="check" id="floor-selector-setting" hidden><input id="floor_selector" type="checkbox">Show floor switcher (whole house or one floor)</label>
     <label>Rendering quality<select id="quality">
       <option value="auto">Automatic · lighter on phones and tablets</option>
@@ -131,6 +132,12 @@ export class ThreeDRoomsEditor extends HTMLElement {
       const config = { ...this._config };
       if (this._field("light_panel").checked) delete config.light_panel;
       else config.light_panel = false;
+      this._emit(config);
+    };
+    this._field("room_focus").onchange = () => {
+      const config = { ...this._config };
+      if (this._field("room_focus").checked) delete config.room_focus;
+      else config.room_focus = false;
       this._emit(config);
     };
     this._field("floor_selector").onchange = () => {
@@ -300,6 +307,8 @@ export class ThreeDRoomsEditor extends HTMLElement {
       this._models,
       house,
     ).length;
+    this._field("room-focus-setting").hidden = !house?.houseView;
+    this._field("room_focus").checked = this._config.room_focus !== false;
     this._field("floor_selector").checked =
       this._config.floor_selector !== false;
     this._field("camera_controls").checked =

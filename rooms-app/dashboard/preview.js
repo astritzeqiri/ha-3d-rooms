@@ -29,7 +29,8 @@ export function openDashboardPreview(host, component, hass) {
     ...structuredClone(component.layers[0]),
     title: component.title,
     show_title: component.show_title ?? true,
-    height: component.height,
+    // The preview sits in a dialog, where "auto" has no panel to fill.
+    height: component.height === "auto" ? 600 : component.height,
     markers: component.markers,
   });
   card.hass = hass;
