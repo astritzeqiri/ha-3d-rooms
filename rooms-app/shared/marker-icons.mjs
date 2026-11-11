@@ -99,3 +99,20 @@ export function markerIconPath(icon) {
   const found = MARKER_ICONS.get(icon);
   return found ? `<path d="${found.path}"/>` : undefined;
 }
+/**
+ * Which icon a marker shows. A view's own choice wins over the room's; a
+ * single chosen icon covers both states until a separate inactive icon is set.
+ * Returns undefined to let Home Assistant draw the entity's own state icon.
+ */
+export function stateIconName(options = {}, control = {}, active = false) {
+  if (active) return options.icon ?? control.icon;
+  return options.icon_off ?? options.icon ?? control.iconOff ?? control.icon;
+}
+/** Words for a device's two states, or null when it has no on/off look. */
+export function markerStateWords(control) {
+  if (!control || control.type === "button" || control.type === "number")
+    return null;
+  if (control.type === "cover") return ["Open", "Closed"];
+  if (control.type === "lock") return ["Locked", "Unlocked"];
+  return ["On", "Off"];
+}

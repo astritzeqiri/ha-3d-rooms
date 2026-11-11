@@ -315,3 +315,17 @@ test("camera buttons setting is on by default and saves only when turned off", (
     false,
   );
 });
+
+test("Edit button setting is on by default and saves only when turned off", () => {
+  const { field, events } = harness();
+  assert.equal(field("edit_button").checked, true);
+  field("edit_button").checked = false;
+  field("edit_button").onchange();
+  assert.equal(events.at(-1).detail.config.edit_button, false);
+  field("edit_button").checked = true;
+  field("edit_button").onchange();
+  assert.equal(
+    Object.hasOwn(events.at(-1).detail.config, "edit_button"),
+    false,
+  );
+});

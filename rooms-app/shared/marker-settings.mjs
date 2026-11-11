@@ -34,18 +34,23 @@ export function validateMarkers(value) {
             "placement",
             "offset",
             "icon",
+            "icon_off",
           ].includes(key),
       )
     )
       throw new Error("Invalid device-marker settings.");
     if (id === "_defaults" && options.offset !== undefined)
       throw new Error("View defaults cannot contain a position offset.");
-    if (id === "_defaults" && options.icon !== undefined)
+    if (
+      id === "_defaults" &&
+      (options.icon !== undefined || options.icon_off !== undefined)
+    )
       throw new Error("Choose icons per device, not as a view default.");
-    if (options.icon !== undefined && !isMarkerIcon(options.icon))
-      throw new Error(
-        "Choose a Home Assistant icon such as mdi:door or local:front-door.",
-      );
+    for (const key of ["icon", "icon_off"])
+      if (options[key] !== undefined && !isMarkerIcon(options[key]))
+        throw new Error(
+          "Choose a Home Assistant icon such as mdi:door or local:front-door.",
+        );
     for (const key of ["visible", "show_label"])
       if (options[key] !== undefined && typeof options[key] !== "boolean")
         throw new Error("Marker visibility and labels must be true or false.");

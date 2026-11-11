@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-CWuTrb9B.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/camera-view-DXUWlF9I.js">
-    <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-IfSi1KjU.js">
-    <link rel="modulepreload" crossorigin href="./assets/room-focus-BWaR8QDu.js">
+    <script type="module" crossorigin src="./assets/index-CFW70s0f.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/camera-view-6gcfcDbI.js">
+    <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-jluYHKn-.js">
+    <link rel="modulepreload" crossorigin href="./assets/room-focus-BBEwvTlU.js">
     <link rel="modulepreload" crossorigin href="./assets/preload-helper-CRzLMJPS.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-Z_5mSMb8.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-BCYJuJ5s.css">
   </head>
   <body>
     <header>
@@ -105,9 +105,9 @@
         </div>
       </aside>
       <section class="workspace" id="models-workspace">
-        <nav id="space-breadcrumb" aria-label="Location"></nav>
         <div class="toolbar">
           <div>
+            <nav id="space-breadcrumb" aria-label="Location"></nav>
             <span class="eyebrow" id="model-type">YOUR SPACE</span>
             <h1 id="title">Bring your home into view</h1>
           </div>
@@ -128,29 +128,31 @@
             </button>
           </div>
         </div>
-        <div id="room-summary" class="room-summary" role="status"></div>
-        <nav class="room-tabs" aria-label="Room workspace" hidden>
-          <button
-            id="show-overview"
-            aria-pressed="true"
-            data-room-tab="overview"
-          >
-            Overview</button
-          ><button
-            id="show-models"
-            aria-pressed="false"
-            data-room-tab="devices"
-          >
-            Devices
-          </button>
-          <button
-            id="show-room-settings"
-            aria-pressed="false"
-            data-room-tab="settings"
-          >
-            Settings
-          </button>
-        </nav>
+        <div class="room-bar">
+          <nav class="room-tabs" aria-label="Room workspace" hidden>
+            <button
+              id="show-overview"
+              aria-pressed="true"
+              data-room-tab="overview"
+            >
+              Overview</button
+            ><button
+              id="show-models"
+              aria-pressed="false"
+              data-room-tab="devices"
+            >
+              Devices
+            </button>
+            <button
+              id="show-room-settings"
+              aria-pressed="false"
+              data-room-tab="settings"
+            >
+              Settings
+            </button>
+          </nav>
+          <div id="room-summary" class="room-summary" role="status"></div>
+        </div>
         <div class="room-layout">
           <div class="room-preview">
             <div class="view-tools" hidden>

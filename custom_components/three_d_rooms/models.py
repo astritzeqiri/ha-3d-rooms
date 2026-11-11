@@ -240,14 +240,15 @@ def validate_manifest(m):
 
 def validate_marker_default(value):
     """One device's room-level icon: a position in room metres and/or an icon name."""
-    if not isinstance(value, dict) or not value or set(value) - {"position", "icon"}:
-        raise ValueError("Room icon settings take a position and an icon.")
+    if not isinstance(value, dict) or not value or set(value) - {"position", "icon", "icon_off"}:
+        raise ValueError("Room icon settings take a position and icons.")
     if "position" in value and (
         not vector(value["position"]) or any(abs(v) > 1000 for v in value["position"])
     ):
         raise ValueError("Icon positions must be three values within 1000 metres.")
-    if "icon" in value and (not isinstance(value["icon"], str) or not MARKER_ICON.match(value["icon"])):
-        raise ValueError("Choose a Home Assistant icon such as mdi:door or local:front-door.")
+    for key in ("icon", "icon_off"):
+        if key in value and (not isinstance(value[key], str) or not MARKER_ICON.match(value[key])):
+            raise ValueError("Choose a Home Assistant icon such as mdi:door or local:front-door.")
     return {k: (list(v) if k == "position" else v) for k, v in value.items()}
 
 
@@ -270,6 +271,8 @@ def apply_marker_defaults(model):
             control["markerPosition"] = list(value["position"])
         if "icon" in value:
             control["icon"] = value["icon"]
+        if "icon_off" in value:
+            control["iconOff"] = value["icon_off"]
     return model
 
 
@@ -453,16 +456,17 @@ def validate_markers(value):
                 clean["_rooms"] = rooms
             continue
         if ((control_id != "_defaults" and not valid_id(control_id)) or not isinstance(options, dict) or
-                set(options) - {"visible", "show_label", "size", "placement", "offset", "icon"}):
+                set(options) - {"visible", "show_label", "size", "placement", "offset", "icon", "icon_off"}):
             raise ValueError("Invalid device-marker settings.")
         if control_id == "_defaults" and "offset" in options:
             raise ValueError("View defaults cannot contain a position offset.")
-        if control_id == "_defaults" and "icon" in options:
+        if control_id == "_defaults" and ("icon" in options or "icon_off" in options):
             raise ValueError("Choose icons per device, not as a view default.")
-        if "icon" in options and (
-            not isinstance(options["icon"], str) or not MARKER_ICON.match(options["icon"])
-        ):
-            raise ValueError("Choose a Home Assistant icon such as mdi:door or local:front-door.")
+        for key in ("icon", "icon_off"):
+            if key in options and (
+                not isinstance(options[key], str) or not MARKER_ICON.match(options[key])
+            ):
+                raise ValueError("Choose a Home Assistant icon such as mdi:door or local:front-door.")
         for key in ("visible", "show_label"):
             if key in options and not isinstance(options[key], bool):
                 raise ValueError("Marker visibility and labels must be true or false.")
@@ -887,8 +891,8 @@ class ModelStore:
         return {"controls": deepcopy(model["controls"])}
 
     def set_device_marker(self, model_id, control_id, changes):
-        """Room-level icon for one device: `position` and/or `icon`; None resets that part."""
-        if not isinstance(changes, dict) or not changes or set(changes) - {"position", "icon"}:
+        """Room-level icon for one device: `position`, `icon` and/or `icon_off`; None resets that part."""
+        if not isinstance(changes, dict) or not changes or set(changes) - {"position", "icon", "icon_off"}:
             raise ValueError("Send a position or an icon for this device.")
         models = deepcopy(self.models)
         model = next((m for m in models if m["id"] == model_id), None)
@@ -914,7 +918,7 @@ class ModelStore:
         control = next(c for c in shown["controls"] if c["id"] == control_id)
         return {
             "markerDefaults": deepcopy(model.get("markerDefaults", {})),
-            "control": {k: deepcopy(control[k]) for k in ("markerPosition", "markerAnchor", "icon") if k in control},
+            "control": {k: deepcopy(control[k]) for k in ("markerPosition", "markerAnchor", "icon", "iconOff") if k in control},
         }
 
     def set_device_settings(self, model_id, device_id, names):

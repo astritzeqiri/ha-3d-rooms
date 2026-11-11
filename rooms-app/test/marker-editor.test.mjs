@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { initMarkerEditor } from "../web/marker-editor.js";
 
-function harness(extraControls = []) {
+function harness(extraControls = [], extraOptions = {}) {
   class Element {
     constructor() {
       this.children = [];
@@ -121,6 +121,7 @@ function harness(extraControls = []) {
     }),
     scene: () => scene,
     onChange: () => changed++,
+    ...extraOptions,
   });
   editor.open();
   const defaults = fields.get("dashboard-marker-settings").children[0];
@@ -379,6 +380,31 @@ test("outside-click dismissal does not cancel click-to-place", () => {
   h.editor.close();
 });
 
+test("AC editor marker keeps the card's AC glyph instead of Home Assistant's thermostat icon", async () => {
+  const stateObj = {
+    entity_id: "climate.living_room_ac",
+    state: "cool",
+    attributes: {},
+  };
+  const h = harness([{ id: "ac", type: "climate", label: "Air conditioner" }], {
+    entityFor: (id) => (id === "ac" ? stateObj : undefined),
+    resolveIcon: async () => ({
+      viewBox: "0 0 24 24",
+      paths: [{ d: "M1 1h2v2H1z" }],
+    }),
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  h.scene.options.onRender();
+  const layer = h.viewport.children.find(
+    (el) => el.className === "marker-editor-overlay",
+  );
+  const button = layer.children.find((el) => el.dataset.markerId === "ac");
+  const glyph = button.querySelector(".marker-editor-icon svg");
+  assert.match(glyph.html, /M4 3h16/);
+  assert.doesNotMatch(glyph.html, /M1 1h2v2H1z/);
+  h.editor.close();
+});
+
 test("AC editor marker uses a climate icon and reported mode rather than a bulb and On", () => {
   const h = harness([{ id: "ac", type: "climate", label: "Air conditioner" }]);
   const layer = h.viewport.children.find(
@@ -461,6 +487,7 @@ test("view defaults stay inherited while per-device overrides and positions rema
 test("icon picker opens from the current-icon row, searches, sets and resets with undo", async () => {
   const h = harness();
   const row = h.rows[0];
+  const slot = (r, name) => r.querySelector(`[data-icon-slot="${name}"]`);
   const all = (el) => [el, ...el.children.flatMap(all)];
   const picker = row.querySelector(".marker-icon-picker");
   const choices = all(row.querySelector(".marker-icon-list")).filter(
@@ -470,8 +497,11 @@ test("icon picker opens from the current-icon row, searches, sets and resets wit
   const glyph = marker.querySelector(".marker-editor-icon svg");
   const original = glyph.html;
   assert.equal(choices.length, 37);
-  assert.equal(row.querySelector(".marker-icon-name").textContent, "Default");
-  row.querySelector("[data-icon-open]").onclick();
+  assert.equal(
+    slot(row, "icon").querySelector(".marker-icon-name").textContent,
+    "Default",
+  );
+  slot(row, "icon").querySelector("[data-icon-open]").onclick();
   assert.equal(picker.hidden, false);
   const search = row.querySelector("[data-icon-search]");
   search.value = "printer 3d";
@@ -485,26 +515,66 @@ test("icon picker opens from the current-icon row, searches, sets and resets wit
   found.find((t) => t.dataset.icon === "mdi:printer-3d-nozzle").onclick();
   assert.equal(h.editor.read().light.icon, "mdi:printer-3d-nozzle");
   assert.equal(
-    row.querySelector(".marker-icon-name").textContent,
+    slot(row, "icon").querySelector(".marker-icon-name").textContent,
     "Printer 3d nozzle",
   );
-  row.querySelector("[data-icon-open]").onclick();
+  slot(row, "icon").querySelector("[data-icon-open]").onclick();
   const lamp = choices.find((c) => c.dataset.icon === "mdi:floor-lamp");
   lamp.onclick();
   assert.equal(picker.hidden, true);
   assert.equal(h.editor.read().light.icon, "mdi:floor-lamp");
   assert.equal(lamp["aria-pressed"], "true");
   assert.equal(
-    row.querySelector(".marker-icon-name").textContent,
+    slot(row, "icon").querySelector(".marker-icon-name").textContent,
     "Floor lamp",
   );
   assert.notEqual(glyph.html, original);
-  row.querySelector("[data-icon-open]").onclick();
+  slot(row, "icon").querySelector("[data-icon-open]").onclick();
   assert.equal(row.querySelector(".marker-icon-list").hidden, false);
   choices[0].onclick();
   assert.equal(h.editor.read().light, undefined);
   assert.equal(glyph.html, original);
   row.querySelector("[data-undo]").onclick();
   assert.equal(h.editor.read().light.icon, "mdi:floor-lamp");
+  h.editor.close();
+});
+
+test("a device can have its own icon for the active and the inactive state", () => {
+  const h = harness();
+  const row = h.rows[0];
+  const all = (el) => [el, ...el.children.flatMap(all)];
+  const slot = (name) => row.querySelector(`[data-icon-slot="${name}"]`);
+  const pick = (icon) =>
+    all(row.querySelector(".marker-icon-list"))
+      .find((el) => el.dataset.icon === icon)
+      .onclick();
+  assert.equal(slot("icon_off").hidden, false);
+  slot("icon").querySelector("[data-icon-open]").onclick();
+  pick("mdi:ceiling-light");
+  assert.deepEqual(h.editor.read().light, { icon: "mdi:ceiling-light" });
+  assert.equal(
+    slot("icon_off").querySelector(".marker-icon-name").textContent,
+    "Same as on",
+  );
+  slot("icon_off").querySelector("[data-icon-open]").onclick();
+  pick("mdi:lightbulb-outline");
+  assert.deepEqual(h.editor.read().light, {
+    icon: "mdi:ceiling-light",
+    icon_off: "mdi:lightbulb-outline",
+  });
+  assert.equal(
+    slot("icon_off").querySelector(".marker-icon-name").textContent,
+    "Bulb outline",
+  );
+  assert.equal(
+    slot("icon").querySelector(".marker-icon-name").textContent,
+    "Ceiling light",
+  );
+  // The default tile clears only the slot being edited.
+  slot("icon_off").querySelector("[data-icon-open]").onclick();
+  all(row.querySelector(".marker-icon-list"))
+    .find((el) => el.dataset.icon === "")
+    .onclick();
+  assert.deepEqual(h.editor.read().light, { icon: "mdi:ceiling-light" });
   h.editor.close();
 });

@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolveEntityIcon, paintEntityIcon } from "../shared/entity-icon.mjs";
+import {
+  resolveEntityIcon,
+  paintEntityIcon,
+  entityIconArt,
+  entityInState,
+} from "../shared/entity-icon.mjs";
+import { stateIconName, markerStateWords } from "../shared/marker-icons.mjs";
 
 test("HA icons stay in their parent document and only SVG data enters the manager frame", async () => {
   let removed = false,
@@ -105,4 +111,62 @@ test("unresolved icons release the hidden HA element and use a safe fallback", a
   const host = { textContent: "" };
   paintEntityIcon(host, null);
   assert.equal(host.textContent, "▶");
+});
+
+test("entity icon data becomes escaped SVG markup", () => {
+  assert.equal(entityIconArt(null), undefined);
+  const art = entityIconArt({
+    viewBox: "0 0 24 24",
+    paths: [{ d: 'M1 2"<', fillRule: "evenodd", transform: null }],
+  });
+  assert.equal(art.viewBox, "0 0 24 24");
+  assert.equal(art.html, '<path d="M1 2&quot;&lt;" fill-rule="evenodd"/>');
+});
+
+test("an entity can be shown in its active or inactive state", () => {
+  const light = { entity_id: "light.a", state: "off", attributes: {} };
+  assert.equal(entityInState(light, true).state, "on");
+  assert.equal(entityInState(light, false), light);
+  assert.equal(
+    entityInState(
+      { entity_id: "cover.a", state: "open", attributes: {} },
+      false,
+    ).state,
+    "closed",
+  );
+  assert.equal(
+    entityInState(
+      { entity_id: "lock.a", state: "locked", attributes: {} },
+      false,
+    ).state,
+    "unlocked",
+  );
+  const gone = { entity_id: "light.a", state: "unavailable", attributes: {} };
+  assert.equal(entityInState(gone, true), gone);
+});
+
+test("a marker uses its own icon per state, then the room's, then HA's", () => {
+  assert.equal(stateIconName({}, {}, true), undefined);
+  assert.equal(stateIconName({ icon: "mdi:a" }, {}, false), "mdi:a");
+  assert.equal(
+    stateIconName({ icon: "mdi:a", icon_off: "mdi:b" }, {}, false),
+    "mdi:b",
+  );
+  assert.equal(
+    stateIconName({ icon: "mdi:a", icon_off: "mdi:b" }, {}, true),
+    "mdi:a",
+  );
+  assert.equal(
+    stateIconName({}, { icon: "mdi:r", iconOff: "mdi:s" }, false),
+    "mdi:s",
+  );
+  assert.equal(stateIconName({}, { icon: "mdi:r" }, false), "mdi:r");
+  // A view's single icon covers both states over the room's off icon.
+  assert.equal(
+    stateIconName({ icon: "mdi:a" }, { iconOff: "mdi:s" }, false),
+    "mdi:a",
+  );
+  assert.equal(stateIconName({ icon_off: "mdi:b" }, {}, true), undefined);
+  assert.deepEqual(markerStateWords({ type: "cover" }), ["Open", "Closed"]);
+  assert.equal(markerStateWords({ type: "number" }), null);
 });

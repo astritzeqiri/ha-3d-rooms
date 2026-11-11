@@ -34,6 +34,17 @@ class MarkerDefaultTests(unittest.TestCase):
         self.store.set_device_marker("kitchen", "spot", {"icon": None})
         self.assertNotIn("icon", self.shown("spot")); self.assertNotIn("markerDefaults", self.store.find("kitchen"))
 
+    def test_inactive_icon_is_saved_served_and_reset_on_its_own(self):
+        result = self.store.set_device_marker("kitchen", "lamp", {"icon": "mdi:ceiling-light", "icon_off": "mdi:lightbulb-outline"})
+        self.assertEqual(result["control"], {"icon": "mdi:ceiling-light", "iconOff": "mdi:lightbulb-outline"})
+        lamp = self.shown("lamp")
+        self.assertEqual((lamp["icon"], lamp["iconOff"]), ("mdi:ceiling-light", "mdi:lightbulb-outline"))
+        self.store.set_device_marker("kitchen", "lamp", {"icon_off": None})
+        lamp = self.shown("lamp")
+        self.assertEqual(lamp["icon"], "mdi:ceiling-light"); self.assertNotIn("iconOff", lamp)
+        with self.assertRaises(ValueError):
+            self.store.set_device_marker("kitchen", "lamp", {"icon_off": "lamp"})
+
     def test_a_control_without_its_own_anchor_uses_its_position(self):
         self.store.set_device_marker("kitchen", "lamp", {"position": [1, 2.5, 0]})
         self.assertEqual(self.shown("lamp")["markerAnchor"], [1, 2, 0])

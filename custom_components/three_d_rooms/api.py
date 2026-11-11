@@ -158,7 +158,7 @@ class RoomsRuntime:
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
         if operation == "device-marker":
-            changes = {k: data[k] for k in ("position", "icon") if k in data}
+            changes = {k: data[k] for k in ("position", "icon", "icon_off") if k in data}
             result = await self.work(self.store.set_device_marker, data.get("model"), data.get("controlId"), changes)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result

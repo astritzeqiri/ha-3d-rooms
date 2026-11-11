@@ -174,7 +174,7 @@ export function setupChecklist({ rooms, views = [], spaceIds = [] }) {
       }))
       .sort((a, b) => b.missing - a.missing)[0],
     icons = rooms.some((room) =>
-      (room.controls || []).some((c) => c.markerAnchor || c.icon),
+      (room.controls || []).some((c) => c.markerAnchor || c.icon || c.iconOff),
     ),
     viewed = views.some((v) =>
       (v.layers || []).some((layer) => spaceIds.includes(layer.model)),

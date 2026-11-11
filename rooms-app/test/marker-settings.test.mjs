@@ -273,3 +273,13 @@ test("only the picker's lazy catalog imports @mdi/js; suggestion paths match it"
   for (const [icon, path] of Object.entries(SUGGESTED_ICON_PATHS))
     assert.equal(path, all[mdiExportName(icon)], icon);
 });
+
+test("an inactive-state icon is validated like the active icon", () => {
+  assert.deepEqual(
+    validateMarkers({ lamp: { icon: "mdi:lightbulb", icon_off: "mdi:lamp" } })
+      .lamp,
+    { icon: "mdi:lightbulb", icon_off: "mdi:lamp" },
+  );
+  assert.throws(() => validateMarkers({ lamp: { icon_off: "lamp" } }));
+  assert.throws(() => validateMarkers({ _defaults: { icon_off: "mdi:lamp" } }));
+});

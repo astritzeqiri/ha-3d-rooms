@@ -27,3 +27,10 @@ class MarkerIconTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_inactive_icon_is_validated_like_the_active_icon(self):
+        clean = models.validate_markers({"lamp": {"icon": "mdi:lightbulb", "icon_off": "local:lamp-off"}})
+        self.assertEqual(clean["lamp"], {"icon": "mdi:lightbulb", "icon_off": "local:lamp-off"})
+        for bad in ({"lamp": {"icon_off": "lamp"}}, {"lamp": {"icon_off": 3}}, {"_defaults": {"icon_off": "mdi:lamp"}}):
+            with self.assertRaises(ValueError):
+                models.validate_markers(bad)

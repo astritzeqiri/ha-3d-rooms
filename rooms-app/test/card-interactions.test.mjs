@@ -12,6 +12,7 @@ import {
   roomLights,
   roomLightSummary,
 } from "../shared/room-lights.mjs";
+import { roomRoute } from "../shared/room-route.mjs";
 import { shortRoomTitle } from "../shared/workspace.mjs";
 import {
   focusableRooms,
@@ -31,6 +32,7 @@ const source = (
   .replace(/^import[\s\S]*?;\n/gm, "")
   .replace("export class", "class");
 const timers = { fn: null };
+const windowCalls = [];
 function cardHarness() {
   let Card;
   const context = vm.createContext({
@@ -48,7 +50,9 @@ function cardHarness() {
     clearTimeout: () => {
       timers.fn = null;
     },
-    window: {},
+    window: { open: (...args) => windowCalls.push(args) },
+    requestAnimationFrame: (fn) => fn(),
+    URLSearchParams,
     CSS: { escape: (value) => value },
     document: {
       createElement: () => ({
@@ -78,6 +82,7 @@ function cardHarness() {
     markerLayout,
     markerTrayHeight,
     validateMarkers,
+    roomRoute,
     shortRoomTitle,
     roomTitleOf,
     allLights,
@@ -923,4 +928,111 @@ test("icons covered by another room are hidden once the camera settles, and show
   card._covered = new Set(["lamp"]);
   card._scheduleCoverCheck();
   assert.equal(card._covered.size, 0);
+});
+
+test("a view whose shaders are not built yet opens behind a spinner", async () => {
+  const card = cardHarness(),
+    overlay = { hidden: true },
+    label = { textContent: "" },
+    order = [],
+    tick = () => new Promise((done) => setImmediate(done));
+  Object.assign(card, {
+    _switchOverlay: overlay,
+    _switchLabel: label,
+    _container: { setAttribute() {} },
+    _generation: 1,
+    _loading: false,
+  });
+  let ready = false,
+    release;
+  card._view = {
+    isHouseViewPrepared: () => ready,
+    prepareHouseView: () =>
+      new Promise((done) => {
+        release = () => {
+          ready = true;
+          done(true);
+        };
+      }),
+  };
+  const target = { id: "h", houseView: true };
+  card._showView(target, "Living room", () => order.push("applied"));
+  assert.equal(overlay.hidden, false, "spinner shown");
+  assert.equal(label.textContent, "Opening Living room…");
+  assert.deepEqual(order, [], "nothing switches while preparing");
+  card._showView(target, "Office", () => order.push("second"));
+  await tick();
+  release();
+  await tick();
+  assert.equal(overlay.hidden, true);
+  assert.deepEqual(order, ["applied"], "one switch; the second tap is ignored");
+  assert.equal(card._switching, false);
+  // A prepared view switches at once, without a spinner.
+  card._showView(target, "Living room", () => order.push("instant"));
+  assert.deepEqual(order, ["applied", "instant"]);
+  assert.equal(overlay.hidden, true);
+  // A reload that began meanwhile wins: the old switch is dropped.
+  ready = false;
+  card._showView(target, "Living room", () => order.push("stale"));
+  card._generation = 2;
+  await tick();
+  release();
+  await tick();
+  assert.deepEqual(order, ["applied", "instant"]);
+  assert.equal(overlay.hidden, true);
+  // Views without a prepare step (older scenes) still switch at once.
+  card._view = {};
+  card._showView(target, "Living room", () => order.push("plain"));
+  assert.equal(order.at(-1), "plain");
+});
+
+test("the Edit button opens the saved view in the manager, for administrators only", () => {
+  const card = cardHarness();
+  card._editButton = { hidden: true };
+  card._view = {};
+  card._hass = { user: { is_admin: true } };
+  card._config = { model: "h-home--f2" };
+  card._sourceConfig = { saved_view: "my-view" };
+  assert.equal(
+    card._editorURL(),
+    "/three_d_rooms?model=h-home--f2&saved_view=my-view&tab=views",
+  );
+  card._syncEditButton();
+  assert.equal(card._editButton.hidden, false);
+  card._openEditor();
+  assert.deepEqual(windowCalls.at(-1), [
+    "/three_d_rooms?model=h-home--f2&saved_view=my-view&tab=views",
+    "_blank",
+    "noopener",
+  ]);
+  // A card without a saved view opens its room or house.
+  card._sourceConfig = {};
+  assert.equal(card._editorURL(), "/three_d_rooms?model=h-home--f2");
+  // Behind a Home Assistant base URL the link follows it.
+  card._hass.hassUrl = (path) => `https://ha.example${path}`;
+  assert.equal(
+    card._editorURL(),
+    "https://ha.example/three_d_rooms?model=h-home--f2",
+  );
+  delete card._hass.hassUrl;
+  // Not for other users, previews, the option, or an unloaded card.
+  card._hass = { user: { is_admin: false } };
+  card._syncEditButton();
+  assert.equal(card._editButton.hidden, true, "not an administrator");
+  card._hass = { user: { is_admin: true } };
+  card._config.edit_button = false;
+  card._syncEditButton();
+  assert.equal(card._editButton.hidden, true, "turned off");
+  delete card._config.edit_button;
+  card._preview = true;
+  card._syncEditButton();
+  assert.equal(card._editButton.hidden, true, "preview");
+  card._preview = false;
+  card._view = null;
+  card._syncEditButton();
+  assert.equal(card._editButton.hidden, true, "not loaded");
+  // An id the manager route would not accept gives no link.
+  card._view = {};
+  card._config.model = "Bad Id!";
+  assert.equal(card._editorURL(), null);
 });

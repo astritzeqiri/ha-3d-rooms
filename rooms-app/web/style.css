@@ -3169,6 +3169,63 @@ body[data-room-tab="views"] .saved-view-thumb {
   }
 }
 
+/* While one icon is being edited, the others step back and the tools stand out. */
+.marker-editor-overlay:has(.marker-editor-control[aria-pressed="true"])
+  .marker-editor-control:not([aria-pressed="true"]) {
+  opacity: 0.35;
+  transition: opacity 120ms ease-out;
+}
+.marker-editor-overlay:has(.marker-editor-control[aria-pressed="true"])
+  .marker-editor-control:not([aria-pressed="true"]):hover,
+.marker-editor-overlay:has(.marker-editor-control[aria-pressed="true"])
+  .marker-editor-control:not([aria-pressed="true"]):focus-visible {
+  opacity: 1;
+}
+.marker-editor-control[aria-pressed="true"] {
+  z-index: 1;
+  outline-width: 3px;
+}
+/* A dashed ring ties the tools to the icon they belong to. */
+.marker-floating-tools::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--marker-ring, 92px);
+  height: var(--marker-ring, 92px);
+  box-sizing: border-box;
+  border: 2px dashed var(--accent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.marker-floating-tools .marker-tool-actions button {
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 9px;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: 2px solid var(--surface);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 4px 12px #0008;
+}
+.marker-floating-tools .marker-tool-actions button:disabled {
+  opacity: 0.55;
+}
+.marker-floating-tools .marker-tool-actions [aria-pressed="true"],
+.marker-floating-tools .marker-tool-actions [aria-expanded="true"] {
+  background: var(--surface);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.marker-tool-actions svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Smaller visuals retain generous invisible touch targets. */
 .marker-floating-tools .marker-tool-actions button::before {
   content: "";
@@ -3806,4 +3863,7 @@ body[data-room-tab="views"] .saved-view-thumb {
 }
 .dashboard-panel .panel-save #use-saved-view {
   grid-column: 1 / -1;
+}
+.marker-icon-field[hidden] {
+  display: none;
 }

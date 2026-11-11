@@ -76,3 +76,47 @@ export function paintEntityIcon(host, data) {
   }
   host.replaceChildren(svg);
 }
+/** Resolved HA icon data → `{ viewBox, html }` markup for an inline `<svg>`. */
+export function entityIconArt(data) {
+  if (!data?.paths?.length) return undefined;
+  const esc = (value) =>
+    String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;");
+  return {
+    viewBox: data.viewBox || "0 0 24 24",
+    html: data.paths
+      .map(
+        (item) =>
+          `<path d="${esc(item.d)}"${item.fillRule ? ` fill-rule="${esc(item.fillRule)}"` : ""}${item.clipRule ? ` clip-rule="${esc(item.clipRule)}"` : ""}${item.transform ? ` transform="${esc(item.transform)}"` : ""}/>`,
+      )
+      .join(""),
+  };
+}
+/** The same entity as if it were in its active or inactive state. */
+export function entityInState(stateObj, active) {
+  if (!stateObj) return stateObj;
+  const domain = String(stateObj.entity_id || "").split(".")[0];
+  const unavailable = ["unavailable", "unknown"].includes(stateObj.state);
+  if (unavailable) return stateObj;
+  const state =
+    domain === "cover"
+      ? active
+        ? "open"
+        : "closed"
+      : domain === "lock"
+        ? active
+          ? "locked"
+          : "unlocked"
+        : domain === "climate"
+          ? active
+            ? stateObj.state === "off"
+              ? "cool"
+              : stateObj.state
+            : "off"
+          : active
+            ? "on"
+            : "off";
+  return state === stateObj.state ? stateObj : { ...stateObj, state };
+}

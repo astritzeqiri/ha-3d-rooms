@@ -15,7 +15,10 @@ import {
   MARKER_ICON_GROUPS,
   iconLabel,
   markerIconPath,
+  markerStateWords,
+  stateIconName,
 } from "../shared/marker-icons.mjs";
+import { entityIconArt, entityInState } from "../shared/entity-icon.mjs";
 import { loadIconCatalog } from "./icon-catalog.js";
 import { isMarkerIcon } from "../shared/marker-icons.mjs";
 
@@ -35,6 +38,8 @@ export function initMarkerEditor({
   feedbackId = "dashboard-marker-message",
   onSelect,
   onRoomChange,
+  entityFor,
+  resolveIcon,
 }) {
   const room = mode === "room";
   // The full icon set loads only when needed (picker search, or a saved
@@ -69,6 +74,29 @@ export function initMarkerEditor({
     if (!svg || !art) return;
     if (svg.innerHTML !== art.html) svg.innerHTML = art.html;
     svg.setAttribute("viewBox", art.viewBox);
+  };
+  // What Home Assistant itself draws for a device's entity, so the editor
+  // shows the same default icon as the dashboard card.
+  const entityArts = new Map();
+  const entityArtFor = (stateObj) => {
+    if (!resolveIcon || !stateObj) return undefined;
+    const key = JSON.stringify([
+      stateObj.entity_id,
+      stateObj.state,
+      stateObj.attributes?.icon,
+      stateObj.attributes?.device_class,
+    ]);
+    if (entityArts.has(key)) return entityArts.get(key) || undefined;
+    entityArts.set(key, null);
+    Promise.resolve(resolveIcon(stateObj))
+      .then((data) => {
+        const art = entityIconArt(data);
+        if (!art) return;
+        entityArts.set(key, art);
+        refresh();
+      })
+      .catch(() => {});
+    return undefined;
   };
   const host = room
     ? null
@@ -133,6 +161,7 @@ export function initMarkerEditor({
     return {
       position: control?.markerAnchor ? [...control.markerPosition] : null,
       icon: control?.icon ?? null,
+      icon_off: control?.iconOff ?? null,
     };
   };
   async function roomUndo(id) {
@@ -148,7 +177,11 @@ export function initMarkerEditor({
       refresh();
       return;
     }
-    if (previous.icon) settings[id] = { icon: previous.icon };
+    const restored = {
+      ...(previous.icon ? { icon: previous.icon } : {}),
+      ...(previous.icon_off ? { icon_off: previous.icon_off } : {}),
+    };
+    if (Object.keys(restored).length) settings[id] = restored;
     else delete settings[id];
     refresh();
     say(
@@ -161,20 +194,20 @@ export function initMarkerEditor({
     const previous = settings[id] ? structuredClone(settings[id]) : undefined;
     const base = owner.fixturePosition(id);
     if (key === "offset" && !base) return;
-    if (key === "icon" && value !== null && !isMarkerIcon(value)) return;
+    const iconKey = key === "icon" || key === "icon_off";
+    if (iconKey && value !== null && !isMarkerIcon(value)) return;
     settings = { ...settings, [id]: { ...settings[id] } };
     if (value === null) delete settings[id][key];
     else settings[id][key] = value;
     refresh();
-    const changes =
-      key === "icon"
-        ? { icon: value }
-        : {
-            position:
-              value === null
-                ? null
-                : base.map((v, axis) => Number((v + value[axis]).toFixed(4))),
-          };
+    const changes = iconKey
+      ? { [key]: value }
+      : {
+          position:
+            value === null
+              ? null
+              : base.map((v, axis) => Number((v + value[axis]).toFixed(4))),
+        };
     try {
       await onRoomChange?.(id, changes);
     } catch (error) {
@@ -193,7 +226,7 @@ export function initMarkerEditor({
     refresh();
   }
   function commit(id, key, value) {
-    if (room && (key === "offset" || key === "icon")) {
+    if (room && (key === "offset" || key === "icon" || key === "icon_off")) {
       roomCommit(id, key, value);
       return;
     }
@@ -289,24 +322,63 @@ export function initMarkerEditor({
         ? "none"
         : "";
       entry.labels.checked = option.show_label;
+      const state = owner.lastStates?.get(control.id) || {};
+      const climate =
+        control.type === "climate" || control.type === "lock"
+          ? markerAppearance(control, state.entity, state)
+          : null;
+      const current =
+        climate ||
+        markerAppearance(control, undefined, state, !state.unavailable);
+      // The marker shows what the dashboard card shows: the device's own icon
+      // for its state, unless the view or room chose one.
+      const entityState = entityFor?.(control.id) || current.stateObj;
+      const on = !!current.active && !current.unavailable;
+      const fallback = {
+        viewBox: "0 0 24 24",
+        html: entry.defaultPath,
+      };
       // A view without its own icon shows the room's icon.
-      const roomIcon = room ? undefined : control.icon;
-      const glyph = iconArtFor(option.icon) ||
-        iconArtFor(roomIcon) || {
-          viewBox: "0 0 24 24",
-          html: entry.defaultPath,
-        };
-      paint(entry.glyph, glyph);
-      paint(entry.iconSwatch, glyph);
-      entry.iconName.textContent = option.icon
-        ? iconLabel(option.icon)
-        : roomIcon
-          ? `${iconLabel(roomIcon)} · room icon`
-          : "Default";
+      const roomLayer = room ? {} : control;
+      const shown = stateIconName(option, roomLayer, on);
+      // Like the card: an AC with no chosen icon keeps the viewer's AC glyph
+      // rather than Home Assistant's thermostat icon.
+      const keepAcGlyph =
+        control.type === "climate" &&
+        !stateIconName(option, roomLayer, true) &&
+        !stateIconName(option, roomLayer, false);
+      const haArt = (stateObj) =>
+        keepAcGlyph ? undefined : entityArtFor(stateObj);
+      paint(entry.glyph, iconArtFor(shown) || haArt(entityState) || fallback);
+      // Each slot: its own icon, else what is inherited, else HA's icon in
+      // that state.
+      for (const [slot, active] of [
+        ["icon", true],
+        ["icon_off", false],
+      ]) {
+        const item = entry.slots[slot];
+        const chosen = option[slot];
+        const slotName = stateIconName(option, roomLayer, active);
+        const roomOwn = slot === "icon" ? roomLayer.icon : roomLayer.iconOff;
+        const art =
+          iconArtFor(slotName) ||
+          haArt(entityInState(entityState, active)) ||
+          fallback;
+        paint(item.swatch, art);
+        item.name.textContent = chosen
+          ? iconLabel(chosen)
+          : roomOwn
+            ? `${iconLabel(roomOwn)} · room icon`
+            : slot === "icon_off" && slotName
+              ? `Same as ${(markerStateWords(control)?.[0] || "on").toLowerCase()}`
+              : "Default";
+        if (entry.pickedSlot() === slot)
+          paint(entry.defaultTile.querySelector("svg"), art);
+      }
       for (const choice of entry.iconChoices())
         choice.setAttribute(
           "aria-pressed",
-          String(choice.dataset.icon === (option.icon || "")),
+          String(choice.dataset.icon === (option[entry.pickedSlot()] || "")),
         );
       if (![...entry.size.options].some((o) => o.value === String(option.size)))
         entry.size.add(new Option(`${option.size} px`, option.size));
@@ -327,11 +399,6 @@ export function initMarkerEditor({
       entry.button.style.setProperty("--marker-size", option.size + "px");
       entry.badge.hidden = option.visible && !option.show_label;
       entry.button.dataset.hidden = String(!option.visible);
-      const state = owner.lastStates?.get(control.id) || {};
-      const climate =
-        control.type === "climate" || control.type === "lock"
-          ? markerAppearance(control, state.entity, state)
-          : null;
       // Not connected yet reads as a dash, as on dashboard cards.
       const connected = !model()?.bindings || !!model().bindings[control.id];
       entry.badge.textContent = climate
@@ -450,6 +517,7 @@ export function initMarkerEditor({
           (x < 90 || x > viewport.clientWidth - 90) &&
           (y < 100 || y > viewport.clientHeight - 100);
         const radius = Math.max(corner ? 88 : 46, option.size / 2 + 26);
+        inspector.style.setProperty("--marker-ring", radius * 2 + "px");
         action.style.left =
           Math.max(
             24,
@@ -556,7 +624,7 @@ export function initMarkerEditor({
       details.className = "marker-device-settings";
       details.name = "marker-device-tools";
       details.hidden = true;
-      details.innerHTML = `<summary><span class="marker-device-name"></span><span class="marker-device-summary"></span></summary><div class="marker-tool-heading"><strong></strong><button type="button" data-close aria-label="Close icon tools">×</button></div><div class="marker-tool-actions"><button type="button" data-undo disabled>Undo</button><button type="button" data-style aria-expanded="false">Edit icon</button><button type="button" data-more aria-expanded="false">Position</button><button type="button" data-eye aria-pressed="false">Hide icon</button></div><p class="marker-tool-hint" hidden>Drag the highlighted icon onto a room surface. Escape cancels.</p><div class="marker-appearance" hidden><div class="marker-icon-field"><span class="marker-field-label">Icon</span><button type="button" class="marker-icon-current" data-icon-open aria-expanded="false"><span class="marker-icon-swatch" aria-hidden="true"><svg viewBox="0 0 24 24"></svg></span><span class="marker-icon-name"></span><span class="marker-icon-change">Change</span></button></div><p class="muted small" data-inheritance></p><button type="button" data-inherit>Use view defaults</button><div class="marker-tool-checks"><label class="marker-check"><input type="checkbox" data-setting="visible">Visible</label><label class="marker-check"><input type="checkbox" data-setting="show_label">State label</label></div><label>Size<select data-setting="size"><option value="24">Small</option><option value="32">Standard</option><option value="44">Large</option><option value="56">Extra large</option></select></label><label>Display<select data-setting="placement"><option value="room">On room</option><option value="tray">Below room</option></select></label><div class="marker-icon-picker" hidden><div class="marker-icon-picker-head"><button type="button" class="marker-icon-back" data-icon-back aria-label="Back to icon settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><strong>Choose icon</strong></div><input type="search" class="marker-icon-search" data-icon-search placeholder="Search icons" aria-label="Search icons" autocomplete="off"><p class="marker-icon-status muted small" aria-live="polite"></p><div class="marker-icon-list"></div><div class="marker-icon-results" hidden><div class="marker-icon-grid" role="group" aria-label="Search results"></div><p class="marker-icon-more muted small" hidden></p></div><p class="marker-icon-empty muted small" hidden>No icons match.</p></div></div><div class="marker-position" hidden><button type="button" data-place>Place icon</button><button type="button" data-reset>Reset</button><details><summary>Precise position</summary><p class="muted small">Offset in metres.</p><div class="marker-axes"><label>X<input data-axis="0" type="number" required min="-1000" max="1000" step="any"></label><label>Y · height<input data-axis="1" type="number" required min="-1000" max="1000" step="any"></label><label>Z<input data-axis="2" type="number" required min="-1000" max="1000" step="any"></label></div></details></div>`;
+      details.innerHTML = `<summary><span class="marker-device-name"></span><span class="marker-device-summary"></span></summary><div class="marker-tool-heading"><strong></strong><button type="button" data-close aria-label="Close icon tools">×</button></div><div class="marker-tool-actions"><button type="button" data-undo disabled>Undo</button><button type="button" data-style aria-expanded="false">Edit icon</button><button type="button" data-more aria-expanded="false">Position</button><button type="button" data-eye aria-pressed="false">Hide icon</button></div><p class="marker-tool-hint" hidden>Drag the highlighted icon onto a room surface. Escape cancels.</p><div class="marker-appearance" hidden><div class="marker-icon-field" data-icon-slot="icon"><span class="marker-field-label" data-slot-label></span><button type="button" class="marker-icon-current" data-icon-open="icon" aria-expanded="false"><span class="marker-icon-swatch" aria-hidden="true"><svg viewBox="0 0 24 24"></svg></span><span class="marker-icon-name"></span><span class="marker-icon-change">Change</span></button></div><div class="marker-icon-field" data-icon-slot="icon_off"><span class="marker-field-label" data-slot-label></span><button type="button" class="marker-icon-current" data-icon-open="icon_off" aria-expanded="false"><span class="marker-icon-swatch" aria-hidden="true"><svg viewBox="0 0 24 24"></svg></span><span class="marker-icon-name"></span><span class="marker-icon-change">Change</span></button></div><p class="muted small" data-inheritance></p><button type="button" data-inherit>Use view defaults</button><div class="marker-tool-checks"><label class="marker-check"><input type="checkbox" data-setting="visible">Visible</label><label class="marker-check"><input type="checkbox" data-setting="show_label">State label</label></div><label>Size<select data-setting="size"><option value="24">Small</option><option value="32">Standard</option><option value="44">Large</option><option value="56">Extra large</option></select></label><label>Display<select data-setting="placement"><option value="room">On room</option><option value="tray">Below room</option></select></label><div class="marker-icon-picker" hidden><div class="marker-icon-picker-head"><button type="button" class="marker-icon-back" data-icon-back aria-label="Back to icon settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><strong>Choose icon</strong></div><input type="search" class="marker-icon-search" data-icon-search placeholder="Search icons" aria-label="Search icons" autocomplete="off"><p class="marker-icon-status muted small" aria-live="polite"></p><div class="marker-icon-list"></div><div class="marker-icon-results" hidden><div class="marker-icon-grid" role="group" aria-label="Search results"></div><p class="marker-icon-more muted small" hidden></p></div><p class="marker-icon-empty muted small" hidden>No icons match.</p></div></div><div class="marker-position" hidden><button type="button" data-place>Place icon</button><button type="button" data-reset>Reset</button><details><summary>Precise position</summary><p class="muted small">Offset in metres.</p><div class="marker-axes"><label>X<input data-axis="0" type="number" required min="-1000" max="1000" step="any"></label><label>Y · height<input data-axis="1" type="number" required min="-1000" max="1000" step="any"></label><label>Z<input data-axis="2" type="number" required min="-1000" max="1000" step="any"></label></div></details></div>`;
       details.querySelector(".marker-device-name").textContent = label(control);
       // Include the device name in every field's accessible name.
       for (const input of details.querySelectorAll("input,select,button")) {
@@ -622,34 +690,69 @@ export function initMarkerEditor({
       const iconPicker = details.querySelector(".marker-icon-picker");
       const iconList = details.querySelector(".marker-icon-list");
       const iconSearch = details.querySelector("[data-icon-search]");
-      const iconOpen = details.querySelector("[data-icon-open]");
-      const showIconPicker = (open, restoreFocus = true) => {
+      // Two icon slots: shown when active (on, open, locked) and when not.
+      const words = markerStateWords(control);
+      const slots = {};
+      for (const slot of ["icon", "icon_off"]) {
+        const field = details.querySelector(`[data-icon-slot="${slot}"]`);
+        slots[slot] = {
+          field,
+          open: field.querySelector("[data-icon-open]"),
+          swatch: field.querySelector(".marker-icon-swatch svg"),
+          name: field.querySelector(".marker-icon-name"),
+        };
+      }
+      slots.icon.field.querySelector("[data-slot-label]").textContent = words
+        ? `Icon · ${words[0]}`
+        : "Icon";
+      slots.icon_off.field.querySelector("[data-slot-label]").textContent =
+        words ? `Icon · ${words[1]}` : "";
+      slots.icon_off.field.hidden = !words;
+      let pickSlot = "icon";
+      const showIconPicker = (open, restoreFocus = true, slot) => {
+        if (slot) pickSlot = slot;
         iconPicker.hidden = !open;
         details
           .querySelector(".marker-appearance")
           .classList[open ? "add" : "remove"]("picking-icon");
-        iconOpen.setAttribute("aria-expanded", String(open));
+        for (const [key, item] of Object.entries(slots))
+          item.open.setAttribute(
+            "aria-expanded",
+            String(open && key === pickSlot),
+          );
         if (open) {
+          const defaultLabel =
+            pickSlot === "icon_off"
+              ? `Same as ${words?.[0]?.toLowerCase() ?? "on"} icon`
+              : !room && control.icon
+                ? "Room icon"
+                : "Default icon";
+          const defaultTile = iconTiles[0];
+          defaultTile.title = defaultLabel;
+          defaultTile.setAttribute("aria-label", `Icon: ${defaultLabel}`);
+          defaultTile.dataset.name = defaultLabel.toLowerCase();
+          const text = defaultTile.querySelector("span");
+          if (text) text.textContent = defaultLabel;
           needCatalog().then(showCustomSets);
           iconSearch.value = "";
           filterIcons();
           iconSearch.focus?.();
-        } else if (restoreFocus) iconOpen.focus?.();
+        } else if (restoreFocus) slots[pickSlot].open.focus?.();
       };
       const choose = (value) => {
         stopPlacement();
         showIconPicker(false);
         if (value) {
-          commit(control.id, "icon", value);
+          commit(control.id, pickSlot, value);
           return;
         }
-        if (settings[control.id]?.icon === undefined) return;
+        if (settings[control.id]?.[pickSlot] === undefined) return;
         if (room) {
-          roomCommit(control.id, "icon", null);
+          roomCommit(control.id, pickSlot, null);
           return;
         }
         remember(control.id);
-        delete settings[control.id].icon;
+        delete settings[control.id][pickSlot];
         if (!Object.keys(settings[control.id]).length)
           delete settings[control.id];
         refresh();
@@ -761,7 +864,7 @@ export function initMarkerEditor({
         status.textContent = "Loading icons…";
         needCatalog().then((loaded) => {
           if (run !== searchRun) return;
-          const current = markerSettings(settings, control.id).icon || "";
+          const current = markerSettings(settings, control.id)[pickSlot] || "";
           const found = loaded
             ? loaded.search(needle)
             : {
@@ -804,7 +907,8 @@ export function initMarkerEditor({
           showIconPicker(false);
         }
       };
-      iconOpen.onclick = () => showIconPicker(true);
+      for (const [key, item] of Object.entries(slots))
+        item.open.onclick = () => showIconPicker(true, true, key);
       details.querySelector("[data-icon-back]").onclick = () =>
         showIconPicker(false);
       button.innerHTML = `<span class="marker-editor-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${path}</svg></span><span class="marker-editor-name"></span><span class="marker-editor-badge" aria-hidden="true"></span>`;
@@ -848,8 +952,9 @@ export function initMarkerEditor({
         defaultPath: path,
         glyph: button.querySelector(".marker-editor-icon svg"),
         iconChoices: () => [...iconTiles, ...resultTiles],
-        iconSwatch: details.querySelector(".marker-icon-swatch svg"),
-        iconName: details.querySelector(".marker-icon-name"),
+        slots,
+        pickedSlot: () => pickSlot,
+        defaultTile: iconTiles[0],
         closeIconPicker: (restoreFocus = false) => {
           if (iconPicker.hidden === false) showIconPicker(false, restoreFocus);
         },

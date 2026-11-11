@@ -187,7 +187,9 @@ export function initWorkspace({
     const options = house
       ? getModels().filter((m) => m.houseView && m.houseId === house.houseId)
       : [];
-    $("space-floor").hidden = !house;
+    // A single room has its house link in the breadcrumb; the switch only
+    // helps when looking at a house or floor.
+    $("space-floor").hidden = !house || !model.houseView;
     $("space-floor").replaceChildren(
       ...options.map(
         (m) => new Option(m.houseFloor?.name || "Whole house", m.id),

@@ -14,10 +14,18 @@ export function initDashboardEditor({
   onOpen = () => {},
   onClose = () => {},
   beforeOpen = () => {},
+  entityFor,
+  resolveIcon,
 }) {
   const $ = (id) => document.getElementById(id);
   const panel = $("dashboard-panel");
-  const markerEditor = initMarkerEditor({ model, scene, onChange: update });
+  const markerEditor = initMarkerEditor({
+    model,
+    scene,
+    onChange: update,
+    entityFor,
+    resolveIcon,
+  });
   const roomButtons = initRoomButtonsEditor({
     viewport: $("viewport"),
     scene,

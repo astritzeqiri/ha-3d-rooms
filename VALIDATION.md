@@ -1,3 +1,13 @@
+# 0.39.0 — faster room switching, Edit button, compact header and state icons, 2026-11-11
+
+Released as 0.39.0, based on v0.38.0. Combines four parallel sessions' work (room loading, icon editor styling, compact manager header, HA icons with On/Off states) into one release.
+
+- Frontend: 289 tests pass (new: view shader preparation and spinner, Edit button, On/Off marker icons, editor icons matching the card including the AC glyph, fixed-width room navigation); Prettier clean; build succeeds. Python host suite: 90 tests pass (16 native tests skip outside HA).
+- Native: the 16 Home Assistant Core tests pass in the pinned Core 2026.11.0 container with the extracted `3d-rooms-0.39.0-integration.zip` package mounted. The real manager page loads from that package with the `?v=0.39.0.<build time>` card URL and no console errors.
+- Earlier checks by the individual sessions (local Core, headless browser): cold Living-room open went from a 3 s freeze to about 0.1 s behind the spinner and warm switches took 15–64 ms; the manager page fits the window on Overview and Devices; the card swaps On/Off icons when the entity state flips.
+- Not tested: a real phone or touch devices, the Devices-tab room icons in a browser (unit tests only), the new room-navigation widths in the real card (checked in a standalone page with the card's styles), the HACS download flow. Going back from a room to the house still takes about 140–200 ms.
+- The four sessions' source was merged on top of v0.38.0 after confirming the diffs applied without conflicts; the shared local HA now runs this release.
+
 # 0.38.0 — room view, room buttons and editor polish, 2026-11-11
 
 Released as 0.38.0, based on v0.37.0.

@@ -28,6 +28,16 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { loadSceneAsset } from "../shared/scene-assets.mjs";
 import { createEffectRun } from "../shared/light-effects.mjs";
+/**
+ * What decides a view's shader variants: the rooms shown (their materials
+ * and lights). Floors or a whole house that show the same rooms share them.
+ */
+function houseViewKey(model) {
+  return (model?.members || [])
+    .map((member) => member.model)
+    .sort()
+    .join("|");
+}
 export class SceneView {
   constructor(container, onPick = () => {}, options = {}) {
     this.options = {
@@ -272,6 +282,8 @@ export class SceneView {
   }
   prepareAsset(model, asset, started) {
     this.shadowsCurrent = false;
+    // Shader variants belong to the previous scene's materials.
+    this.preparedViews = new Map();
     this.clearClimateVisuals();
     this.disposeScene(this.scene);
     this.scene.clear();
@@ -683,18 +695,7 @@ export class SceneView {
    * Returns false when that view needs rooms this scene did not load.
    */
   setHouseView(model, { keepCamera = false, render = true } = {}) {
-    if (
-      !this.asset ||
-      !this.model?.houseView ||
-      !model?.houseView ||
-      model.houseId !== this.model.houseId
-    )
-      return false;
-    const loaded = new Set(
-      this.asset.children.map((child) => child.userData.pickRoom),
-    );
-    if (!model.members.every((member) => loaded.has(member.model)))
-      return false;
+    if (!this.canShowHouseView(model)) return false;
     this.model = model;
     // Draw once at the end; callers that apply new states pass render: false.
     this.renderSuspended = true;
@@ -708,6 +709,78 @@ export class SceneView {
     }
     if (render) this.setStates(this.lastStates || new Map());
     return true;
+  }
+  /**
+   * True when `setHouseView(model)` can show the view without compiling
+   * shaders. Every distinct set of visible rooms (and so of lights) needs its
+   * own shader variants; the first time one is drawn the page freezes for as
+   * long as the graphics driver takes to build them (seconds on a big room).
+   */
+  isHouseViewPrepared(model) {
+    return (
+      !model?.houseView || this.preparedViews?.get(houseViewKey(model)) === true
+    );
+  }
+  /**
+   * Build the shaders of another view of the loaded house ahead of time,
+   * without showing it. The compile runs in the graphics driver's own
+   * threads, so the page stays responsive; the promise resolves (true) when
+   * the view can be shown without a pause, or false when it cannot be shown.
+   */
+  prepareHouseView(model) {
+    if (!this.canShowHouseView(model)) return Promise.resolve(false);
+    const key = houseViewKey(model);
+    this.preparedViews ||= new Map();
+    if (this.isHouseViewPrepared(model)) return Promise.resolve(true);
+    const views = this.preparedViews,
+      pending = views.get(key);
+    if (pending) return pending;
+    const current = this.model,
+      shadowsCurrent = this.shadowsCurrent;
+    let compiled;
+    this.renderSuspended = true;
+    try {
+      // Show the view's lights and rooms for the length of the compile call
+      // only; nothing is drawn in between.
+      this.model = model;
+      this.applyHouseScope();
+      // three compiles every material of the object it is given, shown or
+      // not; hand it only what this view shows (lights come from the scene).
+      const shown = {
+        traverse: (visit) => this.scene.traverseVisible(visit),
+        traverseVisible: () => {},
+      };
+      compiled = this.renderer.compileAsync(shown, this.camera, this.scene);
+    } catch {
+      compiled = Promise.resolve();
+    } finally {
+      this.model = current;
+      this.applyHouseScope();
+      this.refreshVisibility();
+      this.renderSuspended = false;
+      // Nothing was drawn, so the shadow maps are as current as before.
+      this.shadowsCurrent = shadowsCurrent;
+    }
+    const ready = Promise.resolve(compiled)
+      .catch(() => {})
+      .then(() => {
+        // The scene was replaced meanwhile: these shaders are not its own.
+        if (views !== this.preparedViews) return false;
+        views.set(key, true);
+        return true;
+      });
+    views.set(key, ready);
+    return ready;
+  }
+  /** Whether the loaded house has every room of `model` to show. */
+  canShowHouseView(model) {
+    if (!this.asset || !this.model?.houseView || !model?.houseView)
+      return false;
+    if (model.houseId !== this.model.houseId) return false;
+    const loaded = new Set(
+      this.asset.children.map((child) => child.userData.pickRoom),
+    );
+    return model.members.every((member) => loaded.has(member.model));
   }
   setView(mode) {
     if (
@@ -1377,6 +1450,9 @@ export class SceneView {
     this.renderer.shadowMap.needsUpdate = !cameraOnly || !this.shadowsCurrent;
     this.renderer.render(this.scene, this.camera);
     this.shadowsCurrent = true;
+    // What has been drawn once needs no preparation.
+    if (this.model?.houseView && this.preparedViews)
+      this.preparedViews.set(houseViewKey(this.model), true);
     this.options.onRender?.();
     const e = this.camera.matrixWorld.elements;
     const vector = (offset) =>

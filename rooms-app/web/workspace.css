@@ -92,6 +92,7 @@ main {
 }
 #space-breadcrumb {
   display: flex;
+  justify-content: flex-start;
   align-items: center;
   gap: 8px;
   padding: 0;
@@ -101,6 +102,8 @@ main {
   min-height: 24px;
 }
 #space-breadcrumb button {
+  width: auto;
+  min-width: 0;
   border: 0;
   background: none;
   padding: 0;
@@ -1734,4 +1737,137 @@ button.setup-step:hover {
 }
 .rooms-tip[hidden] {
   display: none;
+}
+
+/* Compact room/house header. One title line (house link, name, type), one
+   bar with the tabs and the device status, and the camera buttons float over
+   the 3D view instead of taking a row. Phones and tablets (below 901px) keep
+   the stacked layout and full-size touch targets. */
+.room-bar {
+  display: contents;
+}
+@media (min-width: 901px) {
+  .workspace {
+    padding: 10px 24px 40px;
+  }
+  .toolbar {
+    margin-bottom: 0;
+    gap: 6px 16px;
+  }
+  .toolbar > div:first-child {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 10px;
+  }
+  #space-breadcrumb {
+    order: 0;
+    align-items: baseline;
+    margin: 0;
+    min-height: 0;
+    gap: 6px;
+    font-size: 13px;
+  }
+  #space-breadcrumb > span:last-child,
+  #space-breadcrumb:not(:has(button)) {
+    display: none;
+  }
+  .toolbar h1 {
+    order: 1;
+    margin: 0;
+    font-size: clamp(22px, 2vw, 26px);
+  }
+  .toolbar .eyebrow {
+    order: 2;
+    font-size: 11px;
+  }
+  .room-bar {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0 16px;
+    margin: 0 0 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .room-bar .room-tabs {
+    margin: 0;
+    border-bottom: 0;
+    gap: 18px;
+  }
+  .room-bar .room-tabs button {
+    margin-bottom: -1px;
+  }
+  .room-bar #room-summary {
+    margin: 0 0 0 auto;
+    min-height: 0;
+    align-self: center;
+  }
+  .room-summary .status-ready {
+    display: none;
+  }
+  body:not(.dashboard-editing) .room-preview {
+    position: relative;
+  }
+  body:not(.dashboard-editing) .view-tools {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 3;
+    margin: 0;
+    pointer-events: none;
+  }
+  body:not(.dashboard-editing) .view-tools-title {
+    display: none;
+  }
+  body:not(.dashboard-editing) .camera-actions {
+    pointer-events: auto;
+  }
+  body:not(.dashboard-editing) .camera-actions button {
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    backdrop-filter: blur(6px);
+  }
+}
+@media (min-width: 901px) and (pointer: fine) {
+  #space-floor,
+  .toolbar-actions button {
+    min-height: 34px;
+    padding-block: 4px;
+  }
+  .room-summary button {
+    min-height: 28px;
+    padding: 2px 8px;
+  }
+  .room-tabs button {
+    min-height: 34px;
+    padding-block: 6px;
+  }
+  .camera-actions button {
+    min-height: 32px;
+    padding: 4px 12px;
+  }
+}
+
+/* Side-by-side overview on a tall window: size the 3D view and the side
+   panel to the space left under the header so the page itself does not
+   scroll (131px = the manager's two top bars). */
+@media (min-width: 1101px) and (min-height: 640px) {
+  body[data-room-tab="overview"]:not(.dashboard-editing) .workspace {
+    padding-bottom: 16px;
+  }
+  body[data-room-tab="overview"]:not(.dashboard-editing) #viewport {
+    height: clamp(360px, calc(100dvh - 131px - 148px), 860px);
+  }
+  body[data-room-tab="overview"]:not(.dashboard-editing) #space-inspector {
+    max-height: clamp(360px, calc(100dvh - 131px - 124px), 884px);
+  }
+}
+
+/* The sticky header plus the My home / Dashboard views bar take 131px, but
+   the page was sized for the header alone (57px), so it always scrolled by
+   the difference even when nothing was below. */
+@media (min-width: 601px) {
+  main {
+    min-height: calc(100dvh - 131px);
+  }
 }

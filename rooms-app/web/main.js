@@ -1979,7 +1979,18 @@ initHouseActions({
 });
 // Room icons on the Devices tab: real device icons on the model that can be
 // dragged and given another icon. Dashboard views start from them.
+// What Home Assistant itself draws for a device, so editor icons match cards.
+const markerIconSource = {
+  entityFor: (id) => {
+    const entityId = selected?.bindings?.[id];
+    return entityId
+      ? status.entities.find((e) => e.entity_id === entityId)
+      : undefined;
+  },
+  resolveIcon: native?.entityIcon ? (state) => native.entityIcon(state) : null,
+};
 const roomIcons = initMarkerEditor({
+  ...markerIconSource,
   mode: "room",
   model: () => selected,
   scene: () => view,
@@ -1994,7 +2005,7 @@ const roomIcons = initMarkerEditor({
       body: JSON.stringify({ controlId: id, ...values }),
     });
     const control = model.controls.find((c) => c.id === id);
-    for (const key of ["markerPosition", "markerAnchor", "icon"])
+    for (const key of ["markerPosition", "markerAnchor", "icon", "iconOff"])
       if (key in result.control) control[key] = result.control[key];
       else delete control[key];
     if (view?.model?.id === model.id)
@@ -2002,8 +2013,9 @@ const roomIcons = initMarkerEditor({
     toast(
       undo
         ? "Undone."
-        : "icon" in changes && !("position" in changes)
-          ? changes.icon
+        : ("icon" in changes || "icon_off" in changes) &&
+            !("position" in changes)
+          ? (changes.icon ?? changes.icon_off)
             ? "Icon saved. Dashboard views use it unless they choose their own."
             : "Icon set back to the default."
           : changes.position
@@ -2028,10 +2040,15 @@ function syncRoomIcons() {
   if (roomIcons.isOpen) return;
   const icons = {};
   for (const control of selected.controls)
-    if (control.icon) icons[control.id] = { icon: control.icon };
+    if (control.icon || control.iconOff)
+      icons[control.id] = {
+        ...(control.icon ? { icon: control.icon } : {}),
+        ...(control.iconOff ? { icon_off: control.iconOff } : {}),
+      };
   roomIcons.open(icons);
 }
 const dashboardEditor = initDashboardEditor({
+  ...markerIconSource,
   beforeOpen: () => roomIcons.close(),
   api,
   preview: native?.preview,
@@ -2479,7 +2496,7 @@ async function refreshDeviceVisibility() {
       // Room icons changed elsewhere (another tab or person).
       if (!updated) continue;
       const before = JSON.stringify(control.markerPosition);
-      for (const key of ["markerPosition", "markerAnchor", "icon"])
+      for (const key of ["markerPosition", "markerAnchor", "icon", "iconOff"])
         if (key in updated) control[key] = updated[key];
         else delete control[key];
       if (
