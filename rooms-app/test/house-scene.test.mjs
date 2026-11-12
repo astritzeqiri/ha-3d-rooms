@@ -79,7 +79,7 @@ test("cancelled house load disposes temporary geometry and leaves current scene 
     GLTFLoader.prototype.loadAsync = original;
   }
 });
-test("floor view clips the same geometry in world height and fits floor bounds", () => {
+test("floor view clips the same geometry in world height and fits floor bounds", async () => {
   const view = Object.create(SceneView.prototype);
   view.renderer = { domElement: { dataset: {} } };
   view.scene = new THREE.Scene();
@@ -100,7 +100,7 @@ test("floor view clips the same geometry in world height and fits floor bounds",
     houseFloor: { minY: 0, maxY: 2.8 },
     ambient: 0.4,
   };
-  assert.equal(view.prepareAsset(model, asset, performance.now()), true);
+  assert.equal(await view.prepareAsset(model, asset, performance.now()), true);
   assert.equal(view.renderer.localClippingEnabled, true);
   assert.equal(view.bounds.max.y, 2.8);
   assert.equal(mesh.material.clippingPlanes.length, 2);
@@ -319,4 +319,64 @@ test("camera movement can be locked and unlocked at runtime", () => {
   assert.equal(view.options.interactive, false);
   // A locked card lets phones scroll the page over the 3D view.
   assert.equal(view.renderer.domElement.style.touchAction, "");
+});
+
+test("a new scene compiles its shaders first and draws its first frame without shadow passes", async () => {
+  const view = Object.create(SceneView.prototype);
+  const calls = [];
+  let frame;
+  globalThis.requestAnimationFrame ??= undefined;
+  const raf = globalThis.requestAnimationFrame;
+  globalThis.requestAnimationFrame = (fn) => {
+    frame = fn;
+    return 1;
+  };
+  try {
+    view.scene = new THREE.Scene();
+    view.disposeScene = () => {};
+    view.options = { mode: "front", markers: false };
+    view.generation = 1;
+    view.fixtures = new Map();
+    view.container = { dispatchEvent: () => {} };
+    view.camera = new THREE.PerspectiveCamera();
+    view.camera.updateMatrixWorld();
+    view.syncClimateAnimation = () => {};
+    view.applyLightEffects = () => {};
+    view.renderer = {
+      domElement: { dataset: {} },
+      capabilities: { maxTextures: 16 },
+      shadowMap: {},
+      compileAsync: async () => {
+        // Nothing may draw while the shaders compile.
+        view.render();
+        calls.push("compile");
+      },
+      render(scene) {
+        let casters = 0;
+        scene.traverse((o) => (casters += o.castShadow && !o.isLight ? 1 : 0));
+        calls.push(
+          this.shadowMap.needsUpdate && casters ? "draw+shadows" : "draw",
+        );
+      },
+    };
+    view.setView = () => view.render({ cameraOnly: true });
+    const asset = new THREE.Group();
+    asset.add(
+      new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial()),
+    );
+    assert.equal(
+      await view.prepareAsset({ controls: [], ambient: 0.4 }, asset, 0),
+      true,
+    );
+    // Shadow maps exist after the first frame, but nothing cast into them.
+    assert.deepEqual(calls, ["compile", "draw"]);
+    assert.equal(view.shadowsCurrent, false);
+    assert.equal(asset.children[0].castShadow, true, "casters restored");
+    frame();
+    assert.deepEqual(calls, ["compile", "draw", "draw+shadows"]);
+    assert.equal(view.shadowsCurrent, true);
+    assert.ok("compileMs" in view.renderer.domElement.dataset);
+  } finally {
+    globalThis.requestAnimationFrame = raf;
+  }
 });

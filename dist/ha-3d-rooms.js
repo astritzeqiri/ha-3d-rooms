@@ -18025,7 +18025,8 @@ var $h = class {
 			throw this.disposeScene(i), e;
 		}
 	}
-	prepareAsset(e, t, n) {
+	async prepareAsset(e, t, n) {
+		let r = this.generation;
 		this.shadowsCurrent = !1, this.preparedViews = /* @__PURE__ */ new Map(), this.clearClimateVisuals(), this.disposeScene(this.scene), this.scene.clear(), this.groundShadow = null, this.groundBox = null, this.roomHighlight = null, this.model = e, this.asset = t, this.scene.add(this.asset), this.materials = [], this.nodes = /* @__PURE__ */ new Map(), this.asset.traverse((e) => {
 			if (e.userData.controlId && this.nodes.set(e.userData.controlId, e), e.isMesh) {
 				e.castShadow = !e.userData.daylightWindowId, e.receiveShadow = !0, e.material = Array.isArray(e.material) ? e.material.map((e) => e.clone()) : e.material.clone();
@@ -18071,18 +18072,36 @@ var $h = class {
 				base: t.intensity ?? 12
 			});
 		}
-		let r = (e) => {
+		let i = (e) => {
 			let t = 0;
 			for (let n = e.parent; n; n = n.parent) t++;
 			return t;
 		};
-		e.controls.flatMap((e) => (e.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((t) => [e.id, t])).sort((e, t) => r(e[1]) - r(t[1])).forEach(([e, t]) => t.traverse((t) => {
+		e.controls.flatMap((e) => (e.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((t) => [e.id, t])).sort((e, t) => i(e[1]) - i(t[1])).forEach(([e, t]) => t.traverse((t) => {
 			t.userData.pickControl = e;
 		})), this.daylight = e.daylight ? oh(e.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = e.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
-		let { center: i, size: a } = this.applyHouseScope();
-		this.defaultTarget = e.camera?.target || i.toArray(), this.defaultPosition = e.camera?.position || i.clone().add(new G(a * .7, a * .65, a * .7)).toArray();
-		let o = performance.now();
-		return this.setView(this.options.mode), this.renderer.domElement.dataset.prepareMs = Math.round(o - n), this.renderer.domElement.dataset.firstRenderMs = Math.round(performance.now() - o), !0;
+		let { center: a, size: o } = this.applyHouseScope();
+		this.defaultTarget = e.camera?.target || a.toArray(), this.defaultPosition = e.camera?.position || a.clone().add(new G(o * .7, o * .65, o * .7)).toArray();
+		let s = performance.now();
+		this.renderer.domElement.dataset.prepareMs = Math.round(s - n);
+		let c = this.compiling = {};
+		this.renderSuspended = !0;
+		try {
+			await this.compileShown();
+		} finally {
+			this.compiling === c && (this.compiling = null, this.renderSuspended = !1);
+		}
+		if (r !== this.generation) return !1;
+		let l = performance.now();
+		return this.renderer.domElement.dataset.compileMs = Math.round(l - s), this.deferShadows = !0, this.setView(this.options.mode), this.renderer.domElement.dataset.firstRenderMs = Math.round(performance.now() - l), !0;
+	}
+	async compileShown() {
+		if (!this.contextLost) try {
+			await this.renderer.compileAsync({
+				traverse: (e) => this.scene.traverseVisible(e),
+				traverseVisible: () => {}
+			}, this.camera, this.scene);
+		} catch {}
 	}
 	applyHouseScope() {
 		let e = this.model, t = e.houseFloor, n = e.members ? this.asset.children.filter((e) => e.userData.pickRoom) : [], r = new Set((e.members || []).map((e) => e.model));
@@ -18582,7 +18601,26 @@ var $h = class {
 		}
 		this.syncClimateAnimation();
 		for (let e of this.fixtures.values()) for (let t of e.climateVisuals || []) t.update(performance.now() / 1e3);
-		this.applyLightEffects(performance.now() / 1e3), this.renderer.shadowMap.needsUpdate = !e || !this.shadowsCurrent, this.renderer.render(this.scene, this.camera), this.shadowsCurrent = !0, this.model?.houseView && this.preparedViews && this.preparedViews.set(Qh(this.model), !0), this.options.onRender?.();
+		if (this.applyLightEffects(performance.now() / 1e3), this.deferShadows) {
+			this.deferShadows = !1;
+			let e = [];
+			this.scene.traverse((t) => {
+				t.castShadow && !t.isLight && (e.push(t), t.castShadow = !1);
+			}), this.renderer.shadowMap.needsUpdate = !0;
+			try {
+				this.renderer.render(this.scene, this.camera);
+			} finally {
+				for (let t of e) t.castShadow = !0;
+			}
+			this.shadowsCurrent = !1;
+			let t = this.generation;
+			requestAnimationFrame(() => {
+				if (t !== this.generation || this.shadowsCurrent) return;
+				let e = performance.now();
+				this.render(), this.renderer.domElement.dataset.shadowsMs = Math.round(performance.now() - e);
+			});
+		} else this.renderer.shadowMap.needsUpdate = !e || !this.shadowsCurrent, this.renderer.render(this.scene, this.camera), this.shadowsCurrent = !0;
+		this.model?.houseView && this.preparedViews && this.preparedViews.set(Qh(this.model), !0), this.options.onRender?.();
 		let t = this.camera.matrixWorld.elements, n = (e) => t.slice(e, e + 3).map((e) => Math.round(e * 1e5) / 1e5);
 		this.container.dispatchEvent(new CustomEvent("room-camera-orientation", { detail: {
 			right: n(0),

@@ -1,6 +1,7 @@
 ## 0.43.1
 
 - **Fixed "Load failed" when reopening the iPhone home-screen app.** In 0.43.0 the stored rooms were saved as files that Safari can lose when the app restarts, so a reopened app could show "Load failed", and Retry failed the same way until **Reload model** was used. Rooms are now stored as plain data and checked when read; copies saved by 0.43.0 are dropped and downloaded once more. If a room still cannot be opened from its stored copy, the card downloads it again by itself instead of showing an error.
+- **The room appears sooner after "Preparing the 3D view…".** The room's shaders are built before the first frame, without freezing the page, and the first frame skips the shadows; they follow a moment later. In iOS Safari (Simulator) the first frame of a five-room house went from about 1.1 s to 0.7 s.
 - **A busy or stuck device store never holds up a room.** If the browser's storage does not answer within two seconds, the room downloads instead of waiting.
 
 ## 0.43.0

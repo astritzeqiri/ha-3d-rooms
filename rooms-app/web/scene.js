@@ -285,7 +285,8 @@ export class SceneView {
       throw error;
     }
   }
-  prepareAsset(model, asset, started) {
+  async prepareAsset(model, asset, started) {
+    const generation = this.generation;
     this.shadowsCurrent = false;
     // Shader variants belong to the previous scene's materials.
     this.preparedViews = new Map();
@@ -447,12 +448,52 @@ export class SceneView {
         .add(new THREE.Vector3(size * 0.7, size * 0.65, size * 0.7))
         .toArray();
     const prepared = performance.now();
-    this.setView(this.options.mode);
     this.renderer.domElement.dataset.prepareMs = Math.round(prepared - started);
+    // Build the shown materials' shaders before the first draw. The graphics
+    // driver compiles them on its own threads (KHR_parallel_shader_compile),
+    // so the page keeps animating its "Preparing" message instead of freezing
+    // inside the first render for as long as the compile takes.
+    // Live state updates must not draw (and compile synchronously) meanwhile.
+    const compiling = (this.compiling = {});
+    this.renderSuspended = true;
+    try {
+      await this.compileShown();
+    } finally {
+      // A newer scene's compile owns the suspension now.
+      if (this.compiling === compiling) {
+        this.compiling = null;
+        this.renderSuspended = false;
+      }
+    }
+    if (generation !== this.generation) return false;
+    const compiled = performance.now();
+    this.renderer.domElement.dataset.compileMs = Math.round(
+      compiled - prepared,
+    );
+    // The first frame skips the shadow passes (each shadow-casting point light
+    // is six extra scene draws, plus their own shaders); shadows follow in
+    // the next frame, so the room appears sooner.
+    this.deferShadows = true;
+    this.setView(this.options.mode);
     this.renderer.domElement.dataset.firstRenderMs = Math.round(
-      performance.now() - prepared,
+      performance.now() - compiled,
     );
     return true;
+  }
+  /** Compile the shaders of what is shown; never rejects. */
+  async compileShown() {
+    if (this.contextLost) return;
+    try {
+      // three compiles every material of the object it is given, shown or
+      // not; hand it only what is visible (lights come from the scene).
+      const shown = {
+        traverse: (visit) => this.scene.traverseVisible(visit),
+        traverseVisible: () => {},
+      };
+      await this.renderer.compileAsync(shown, this.camera, this.scene);
+    } catch {
+      /* The first render compiles whatever is missing. */
+    }
   }
   /**
    * Limit a loaded house to one of its views: member rooms, in-scope fixtures,
@@ -1511,9 +1552,41 @@ export class SceneView {
       for (const effect of f.climateVisuals || [])
         effect.update(performance.now() / 1000);
     this.applyLightEffects(performance.now() / 1000);
-    this.renderer.shadowMap.needsUpdate = !cameraOnly || !this.shadowsCurrent;
-    this.renderer.render(this.scene, this.camera);
-    this.shadowsCurrent = true;
+    if (this.deferShadows) {
+      // First frame of a new scene: shadow maps are created but nothing casts
+      // into them (cheap; a fully lit room), then the next frame draws the
+      // real shadows. Skipping the shadow pass instead leaves the maps
+      // missing, and nothing is drawn. Lights keep casting, so the shaders
+      // are the same ones and nothing compiles twice.
+      this.deferShadows = false;
+      const casters = [];
+      this.scene.traverse((object) => {
+        if (object.castShadow && !object.isLight) {
+          casters.push(object);
+          object.castShadow = false;
+        }
+      });
+      this.renderer.shadowMap.needsUpdate = true;
+      try {
+        this.renderer.render(this.scene, this.camera);
+      } finally {
+        for (const object of casters) object.castShadow = true;
+      }
+      this.shadowsCurrent = false;
+      const generation = this.generation;
+      requestAnimationFrame(() => {
+        if (generation !== this.generation || this.shadowsCurrent) return;
+        const started = performance.now();
+        this.render();
+        this.renderer.domElement.dataset.shadowsMs = Math.round(
+          performance.now() - started,
+        );
+      });
+    } else {
+      this.renderer.shadowMap.needsUpdate = !cameraOnly || !this.shadowsCurrent;
+      this.renderer.render(this.scene, this.camera);
+      this.shadowsCurrent = true;
+    }
     // What has been drawn once needs no preparation.
     if (this.model?.houseView && this.preparedViews)
       this.preparedViews.set(houseViewKey(this.model), true);
