@@ -10,7 +10,7 @@ const source =
       "utf8",
     )
   )
-    .replace(/^import .*;\n/gm, "")
+    .replace(/^import [^;]*;\n/gm, "")
     .replace("export function", "function") +
   "\nglobalThis.makeEditor=initDashboardEditor;";
 function harness(preview, onClose, modelConfig = {}, requestScope) {

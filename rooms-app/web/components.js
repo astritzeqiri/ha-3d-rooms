@@ -135,6 +135,18 @@ export function initComponents({
         button("Edit view", () => openEditor(c)),
         button("Add to dashboard", () => use(c), true),
       );
+      if (standalone) {
+        const open = button("Open full screen", () =>
+          window.open(
+            standaloneViewURL(c.id, location.origin),
+            "_blank",
+            "noopener",
+          ),
+        );
+        open.className = "saved-view-open";
+        open.title = "Open this view as a full-screen page in a new tab";
+        actions.insertBefore(open, actions.firstChild);
+      }
       if (preview) {
         const previewButton = button("Preview in dashboard", async () => {
           try {

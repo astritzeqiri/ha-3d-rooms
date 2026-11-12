@@ -1,7 +1,11 @@
 import { initMarkerEditor } from "./marker-editor.js";
 import { initRoomButtonsEditor } from "./room-buttons-editor.js";
 import { initBackgroundEditor } from "./background-editor.js";
-import { componentYaml, validateComponent } from "../shared/component.mjs";
+import {
+  componentYaml,
+  standaloneViewURL,
+  validateComponent,
+} from "../shared/component.mjs";
 import { viewThumbnail, viewThumbnailArt } from "./view-thumbnail.js";
 import { roomName } from "../shared/workspace.mjs";
 
@@ -17,6 +21,7 @@ export function initDashboardEditor({
   beforeOpen = () => {},
   entityFor,
   resolveIcon,
+  standalone = false,
 }) {
   const $ = (id) => document.getElementById(id);
   const panel = $("dashboard-panel");
@@ -27,6 +32,17 @@ export function initDashboardEditor({
     entityFor,
     resolveIcon,
   });
+  // The full-screen page shows the saved view, so only a saved view has one.
+  const fullscreen = $("fullscreen-open");
+  const syncFullscreen = () => {
+    fullscreen.hidden = !standalone || !saved;
+  };
+  fullscreen.onclick = () =>
+    window.open(
+      standaloneViewURL(draftId, location.origin),
+      "_blank",
+      "noopener",
+    );
   const backgroundEditor = initBackgroundEditor({
     viewport: $("viewport"),
     scene,
@@ -185,6 +201,7 @@ export function initDashboardEditor({
     scene().options.onCameraChange = undefined;
     markerEditor.close();
     backgroundEditor.close();
+    fullscreen.hidden = true;
     roomButtons.close();
     chromeWatch?.disconnect();
     panel.hidden = true;
@@ -236,6 +253,7 @@ export function initDashboardEditor({
     thumbnail = component?.thumbnail;
     thumbnailArt = component?.thumbnailArt;
     saved = !!component && !draft;
+    syncFullscreen();
     savedSnapshot = saved ? JSON.stringify(component) : undefined;
     $("dashboard-title").value =
       component?.title || `${roomName(model())} overview`;
@@ -390,6 +408,7 @@ export function initDashboardEditor({
         body: JSON.stringify(snapshot),
       });
       saved = true;
+      syncFullscreen();
       savedSnapshot = JSON.stringify(snapshot);
       baseline = savedSnapshot;
       cachePreview();

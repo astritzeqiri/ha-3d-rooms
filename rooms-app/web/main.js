@@ -2054,6 +2054,7 @@ function syncRoomIcons() {
 }
 const dashboardEditor = initDashboardEditor({
   ...markerIconSource,
+  standalone: !!native,
   beforeOpen: () => roomIcons.close(),
   api,
   preview: native?.preview,

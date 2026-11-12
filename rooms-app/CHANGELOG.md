@@ -1,3 +1,7 @@
+## 0.41.1
+
+- **One click to the full-screen page.** Every card in **Dashboard views** has an **Open full screen** button, and the view editor's toolbar has a **Full screen** button beside Background. Both open the view's full-screen page in a new tab (the editor button appears once the view is saved, since the page shows the saved view).
+
 ## 0.41.0
 
 - **Dashboard view previews follow the background.** A saved view's gallery preview used to be a flat picture with the sky or spotlight baked in at the moment you saved, so it went stale when the background changed, or when the room switched between day and night. Saving now also stores the room on its own, and the gallery draws it over the view's current background, so the preview always matches the card. Views saved before this keep their old preview until you save them again.

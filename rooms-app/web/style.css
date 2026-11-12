@@ -2511,8 +2511,12 @@ li[aria-selected="true"] .opt-name {
   flex: 0 0 18px;
   padding: 0;
 }
-.saved-view-actions .saved-view-preview {
-  flex: 1 0 100%;
+.saved-view-actions .saved-view-preview,
+.saved-view-actions .saved-view-open {
+  flex: 1 0 calc(50% - 4px);
+}
+.saved-view-actions .saved-view-preview:only-child {
+  flex-basis: 100%;
 }
 
 /* Dashboard views is a library; the room canvas belongs to its editor. */
@@ -4055,10 +4059,12 @@ body[data-room-tab="views"] .saved-view-thumb {
   height: 100%;
   pointer-events: none;
 }
-#background-open {
+#background-open,
+#fullscreen-open {
   display: none;
 }
-.dashboard-editing #background-open:not([hidden]) {
+.dashboard-editing #background-open:not([hidden]),
+.dashboard-editing #fullscreen-open:not([hidden]) {
   display: inline-flex;
 }
 #background-image-field {

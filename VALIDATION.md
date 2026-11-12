@@ -1,3 +1,11 @@
+# 0.41.1 — one-click access to the full-screen page, 2026-11-12
+
+Released as 0.41.1, based on 0.41.0.
+
+- Frontend: 318 tests pass; Prettier and the build pass. The view-editor test harness now strips multi-line imports.
+- Checked in the local Home Assistant Core (singleton container, headless Chrome): the Open full screen button on a Dashboard views card and the Full screen button in the view editor's toolbar (beside Background) each open `/three_d_rooms_view/<id>` in a new tab; the editor button is hidden until the view is saved.
+- Not tested: a new, unsaved view's editor on a real phone; the rest is as for 0.41.0.
+
 # 0.41.0 — full-screen view page and live gallery previews, 2026-11-12
 
 Released as 0.41.0, based on v0.40.0.
