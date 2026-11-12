@@ -341,11 +341,11 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
       main = makeSlider(doc, {
         orient: "v",
         label: "Brightness",
-        min: 1,
-        max: 255,
-        step: 1,
+        min: bright.min,
+        max: bright.max,
+        step: bright.step,
         value: bright.value,
-        format: (v) => `${Math.round((v / 255) * 100)}%`,
+        format: bright.format,
         onCommit: (v) => call(d, bright, v),
       });
       center.append(main.el);
@@ -529,7 +529,7 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
         const c = find(nd, (x) => x.key === "brightness");
         main.set(on ? (c?.value ?? 0) : 0);
         main.el.querySelector(".mi-big").textContent = on
-          ? `${Math.round(((c?.value ?? 0) / 255) * 100)}%`
+          ? bright.format(c?.value ?? 0)
           : "Off";
         main.caption(on ? "On" : "");
       } else {

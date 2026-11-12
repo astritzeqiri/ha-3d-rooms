@@ -103,6 +103,20 @@ test("light commands go to the light domain with the changed value only", () => 
   ]);
 });
 
+test("dragging light brightness to the bottom turns the light off", () => {
+  const d = describeEntity(light({ supported_color_modes: ["brightness"] }));
+  const brightness = d.controls[1];
+  assert.equal(brightness.min, 0);
+  assert.deepEqual(controlCall(d, brightness, 0), [
+    "light",
+    "turn_off",
+    { entity_id: "light.lamp" },
+  ]);
+  assert.equal(brightness.format(0), "Off");
+  assert.equal(brightness.format(1), "1%");
+  assert.equal(brightness.format(255), "100%");
+});
+
 test("icon resolver: curated and custom icons, modules loaded once and only when needed", async () => {
   let loads = 0;
   const sets = {};

@@ -123,11 +123,13 @@ export function describeEntity(entity) {
         kind: "slider",
         key: "brightness",
         label: "Brightness",
-        min: 1,
+        // 0 turns the light off, as Home Assistant's own slider does.
+        min: 0,
         max: 255,
         step: 1,
-        value: num(a.brightness) ?? 0,
-        format: (v) => `${Math.round((v / 255) * 100)}%`,
+        value: entity.state === "on" ? (num(a.brightness) ?? 0) : 0,
+        format: (v) =>
+          v > 0 ? `${Math.max(1, Math.round((v / 255) * 100))}%` : "Off",
       });
     if (f.temperature)
       out.controls.push({
@@ -285,6 +287,8 @@ export function controlCall(description, control, value) {
     control.kind === "select"
   ) {
     if (domain === "light") {
+      if (control.key === "brightness" && !(value > 0))
+        return ["light", "turn_off", { entity_id: id }];
       if (control.key === "effect" && !value)
         return ["light", "turn_on", { entity_id: id, effect: "None" }];
       return ["light", "turn_on", { entity_id: id, [control.key]: value }];

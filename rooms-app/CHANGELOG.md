@@ -1,3 +1,12 @@
+## 0.41.4
+
+- **The full-screen page really fills an iPhone home-screen app.** The page's own full-height styles made iOS shrink its viewport by the status bar, so the room and its bottom controls stopped short of the bottom of the screen above an empty band (0.41.3 made the clipping worse). The page now lets iOS size it, and the room reaches the bottom edge with its controls above the home bar. Reproduced and checked in an iOS 27.2 home-screen app.
+- **Bigger, easier-to-tap controls on phones.** The top-left lights and shades buttons, the time-of-day switch and the bottom-right toolbar (floors, camera, reload) are 44 px on phone-sized cards, as on larger screens. On the full-screen page the top row sits a little further below the status bar.
+- **No text selection when holding a device.** Holding a marker to open its pop-up no longer selects text or shows the iOS Copy / Look Up menu.
+- **A Home Assistant-style desk pop-up.** The adjustable desk opens a pop-up like the light one: a header with close, the desk's height, a large vertical height slider, round Up / Stop / Down buttons and the desk's macros with their icons. On phones it slides up from the bottom. It follows the Home Assistant theme on dashboards.
+- **Tap outside to close the lights and shades panels.** On dashboards and on the full-screen page, tapping anywhere outside the open Room lights or Room shades panel closes it.
+- **0% turns a light off.** On the full-screen page's light pop-up, dragging brightness to the bottom turns the light off instead of leaving it on at its lowest level, and a light that is on never shows 0%.
+
 ## 0.41.3
 
 - **No empty band at the bottom of the full-screen page on iPhone.** In a home-screen app, iOS reports a screen height that leaves out the status bar, so the page stopped about one status bar short of the bottom of the screen. The page now measures the status bar and, when the reported height plus the status bar matches the screen exactly, uses the full screen height. It checks again on rotation. Browser tabs, split views and screens that already report the right height are unchanged.

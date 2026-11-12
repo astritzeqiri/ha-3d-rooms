@@ -10,7 +10,7 @@ var e = {
 	PAN: 1,
 	DOLLY_PAN: 2,
 	DOLLY_ROTATE: 3
-}, n = "attached", r = 1e3, i = 1001, a = 1002, o = 1003, s = 1004, c = 1005, l = 1006, u = 1007, d = 1008, f = 1009, p = 1010, m = 1011, h = 1012, g = 1013, _ = 1014, v = 1015, y = 1016, b = 1017, x = 1018, S = 1020, C = 35902, w = 35899, T = 1021, E = 1022, D = 1023, O = 1026, k = 1027, A = 1028, ee = 1029, j = 1030, te = 1031, M = 1033, N = 33776, P = 33777, ne = 33778, F = 33779, re = 35840, ie = 35841, ae = 35842, oe = 35843, se = 36196, I = 37492, ce = 37496, le = 37488, ue = 37489, de = 37490, fe = 37491, pe = 37808, me = 37809, he = 37810, ge = 37811, _e = 37812, ve = 37813, ye = 37814, be = 37815, xe = 37816, Se = 37817, Ce = 37818, we = 37819, Te = 37820, Ee = 37821, De = 36492, Oe = 36494, ke = 36495, Ae = 36283, je = 36284, L = 36285, Me = 36286, Ne = 2300, Pe = 2301, R = 2302, Fe = 2303, z = 2400, B = 2401, Ie = 2402, Le = 2500, Re = 3200, ze = "srgb", Be = "srgb-linear", Ve = "linear", He = "srgb", Ue = 7680, We = 35044, Ge = 2e3;
+}, n = "attached", r = 1e3, i = 1001, a = 1002, o = 1003, s = 1004, c = 1005, l = 1006, u = 1007, d = 1008, f = 1009, p = 1010, m = 1011, h = 1012, g = 1013, _ = 1014, v = 1015, y = 1016, b = 1017, x = 1018, S = 1020, C = 35902, w = 35899, T = 1021, E = 1022, D = 1023, O = 1026, k = 1027, A = 1028, j = 1029, M = 1030, ee = 1031, N = 1033, te = 33776, P = 33777, ne = 33778, F = 33779, re = 35840, ie = 35841, ae = 35842, oe = 35843, se = 36196, I = 37492, ce = 37496, le = 37488, ue = 37489, de = 37490, fe = 37491, pe = 37808, me = 37809, he = 37810, ge = 37811, _e = 37812, ve = 37813, ye = 37814, be = 37815, xe = 37816, Se = 37817, Ce = 37818, we = 37819, Te = 37820, Ee = 37821, De = 36492, Oe = 36494, ke = 36495, Ae = 36283, je = 36284, L = 36285, Me = 36286, Ne = 2300, Pe = 2301, R = 2302, Fe = 2303, z = 2400, B = 2401, Ie = 2402, Le = 2500, Re = 3200, ze = "srgb", Be = "srgb-linear", Ve = "linear", He = "srgb", Ue = 7680, We = 35044, Ge = 2e3;
 function Ke(e) {
 	for (let t = e.length - 1; t >= 0; --t) if (e[t] >= 65535) return !0;
 	return !1;
@@ -1680,8 +1680,8 @@ var Kt = class e {
 		return this.multiplyMatrices(e, this);
 	}
 	multiplyMatrices(e, t) {
-		let n = e.elements, r = t.elements, i = this.elements, a = n[0], o = n[4], s = n[8], c = n[12], l = n[1], u = n[5], d = n[9], f = n[13], p = n[2], m = n[6], h = n[10], g = n[14], _ = n[3], v = n[7], y = n[11], b = n[15], x = r[0], S = r[4], C = r[8], w = r[12], T = r[1], E = r[5], D = r[9], O = r[13], k = r[2], A = r[6], ee = r[10], j = r[14], te = r[3], M = r[7], N = r[11], P = r[15];
-		return i[0] = a * x + o * T + s * k + c * te, i[4] = a * S + o * E + s * A + c * M, i[8] = a * C + o * D + s * ee + c * N, i[12] = a * w + o * O + s * j + c * P, i[1] = l * x + u * T + d * k + f * te, i[5] = l * S + u * E + d * A + f * M, i[9] = l * C + u * D + d * ee + f * N, i[13] = l * w + u * O + d * j + f * P, i[2] = p * x + m * T + h * k + g * te, i[6] = p * S + m * E + h * A + g * M, i[10] = p * C + m * D + h * ee + g * N, i[14] = p * w + m * O + h * j + g * P, i[3] = _ * x + v * T + y * k + b * te, i[7] = _ * S + v * E + y * A + b * M, i[11] = _ * C + v * D + y * ee + b * N, i[15] = _ * w + v * O + y * j + b * P, this;
+		let n = e.elements, r = t.elements, i = this.elements, a = n[0], o = n[4], s = n[8], c = n[12], l = n[1], u = n[5], d = n[9], f = n[13], p = n[2], m = n[6], h = n[10], g = n[14], _ = n[3], v = n[7], y = n[11], b = n[15], x = r[0], S = r[4], C = r[8], w = r[12], T = r[1], E = r[5], D = r[9], O = r[13], k = r[2], A = r[6], j = r[10], M = r[14], ee = r[3], N = r[7], te = r[11], P = r[15];
+		return i[0] = a * x + o * T + s * k + c * ee, i[4] = a * S + o * E + s * A + c * N, i[8] = a * C + o * D + s * j + c * te, i[12] = a * w + o * O + s * M + c * P, i[1] = l * x + u * T + d * k + f * ee, i[5] = l * S + u * E + d * A + f * N, i[9] = l * C + u * D + d * j + f * te, i[13] = l * w + u * O + d * M + f * P, i[2] = p * x + m * T + h * k + g * ee, i[6] = p * S + m * E + h * A + g * N, i[10] = p * C + m * D + h * j + g * te, i[14] = p * w + m * O + h * M + g * P, i[3] = _ * x + v * T + y * k + b * ee, i[7] = _ * S + v * E + y * A + b * N, i[11] = _ * C + v * D + y * j + b * te, i[15] = _ * w + v * O + y * M + b * P, this;
 	}
 	multiplyScalar(e) {
 		let t = this.elements;
@@ -3761,15 +3761,15 @@ var lr = /*@__PURE__*/ new G(), ur = /*@__PURE__*/ new W(), dr = 0, fr = class e
 		return this.intersectBox(e, Lr) !== null;
 	}
 	intersectTriangle(e, t, n, r, i) {
-		let a = this.origin, o = this.direction, s = o.x, c = o.y, l = o.z, u = e.x - a.x, d = e.y - a.y, f = e.z - a.z, p = t.x - a.x, m = t.y - a.y, h = t.z - a.z, g = n.x - a.x, _ = n.y - a.y, v = n.z - a.z, y = Math.abs(s), b = Math.abs(c), x = Math.abs(l), S, C, w, T, E, D, O, k, A, ee, j, te;
-		if (y >= b && y >= x ? (w = s, D = u, A = p, te = g, s >= 0 ? (S = c, C = l, T = d, E = f, O = m, k = h, ee = _, j = v) : (S = l, C = c, T = f, E = d, O = h, k = m, ee = v, j = _)) : b >= x ? (w = c, D = d, A = m, te = _, c >= 0 ? (S = l, C = s, T = f, E = u, O = h, k = p, ee = v, j = g) : (S = s, C = l, T = u, E = f, O = p, k = h, ee = g, j = v)) : (w = l, D = f, A = h, te = v, l >= 0 ? (S = s, C = c, T = u, E = d, O = p, k = m, ee = g, j = _) : (S = c, C = s, T = d, E = u, O = m, k = p, ee = _, j = g)), w === 0) return null;
-		let M = S / w, N = C / w, P = 1 / w, ne = T - M * D, F = E - N * D, re = O - M * A, ie = k - N * A, ae = ee - M * te, oe = j - N * te, se = ae * ie - oe * re, I = ne * oe - F * ae, ce = re * F - ie * ne;
+		let a = this.origin, o = this.direction, s = o.x, c = o.y, l = o.z, u = e.x - a.x, d = e.y - a.y, f = e.z - a.z, p = t.x - a.x, m = t.y - a.y, h = t.z - a.z, g = n.x - a.x, _ = n.y - a.y, v = n.z - a.z, y = Math.abs(s), b = Math.abs(c), x = Math.abs(l), S, C, w, T, E, D, O, k, A, j, M, ee;
+		if (y >= b && y >= x ? (w = s, D = u, A = p, ee = g, s >= 0 ? (S = c, C = l, T = d, E = f, O = m, k = h, j = _, M = v) : (S = l, C = c, T = f, E = d, O = h, k = m, j = v, M = _)) : b >= x ? (w = c, D = d, A = m, ee = _, c >= 0 ? (S = l, C = s, T = f, E = u, O = h, k = p, j = v, M = g) : (S = s, C = l, T = u, E = f, O = p, k = h, j = g, M = v)) : (w = l, D = f, A = h, ee = v, l >= 0 ? (S = s, C = c, T = u, E = d, O = p, k = m, j = g, M = _) : (S = c, C = s, T = d, E = u, O = m, k = p, j = _, M = g)), w === 0) return null;
+		let N = S / w, te = C / w, P = 1 / w, ne = T - N * D, F = E - te * D, re = O - N * A, ie = k - te * A, ae = j - N * ee, oe = M - te * ee, se = ae * ie - oe * re, I = ne * oe - F * ae, ce = re * F - ie * ne;
 		if (r) {
 			if (se < 0 || I < 0 || ce < 0) return null;
 		} else if ((se < 0 || I < 0 || ce < 0) && (se > 0 || I > 0 || ce > 0)) return null;
 		let le = se + I + ce;
 		if (le === 0) return null;
-		let ue = P * (se * D + I * A + ce * te);
+		let ue = P * (se * D + I * A + ce * ee);
 		return (le > 0 ? ue < 0 : ue > 0) ? null : this.at(ue / le, i);
 	}
 	applyMatrix4(e) {
@@ -6696,13 +6696,13 @@ function Os(e, t, n, r) {
 	switch (n) {
 		case T: return e * t;
 		case A: return e * t / i.components * i.byteLength;
-		case ee: return e * t / i.components * i.byteLength;
-		case j: return e * t * 2 / i.components * i.byteLength;
-		case te: return e * t * 2 / i.components * i.byteLength;
+		case j: return e * t / i.components * i.byteLength;
+		case M: return e * t * 2 / i.components * i.byteLength;
+		case ee: return e * t * 2 / i.components * i.byteLength;
 		case E: return e * t * 3 / i.components * i.byteLength;
 		case D: return e * t * 4 / i.components * i.byteLength;
-		case M: return e * t * 4 / i.components * i.byteLength;
-		case N:
+		case N: return e * t * 4 / i.components * i.byteLength;
+		case te:
 		case P: return Math.floor((e + 3) / 4) * Math.floor((t + 3) / 4) * 8;
 		case ne:
 		case F: return Math.floor((e + 3) / 4) * Math.floor((t + 3) / 4) * 16;
@@ -9436,8 +9436,8 @@ function du(e, t, n, r, i, a) {
 			let e = s.getVertexShaderStage(i), t = s.getFragmentShaderStage(i);
 			s.update(i, e, t), k = e.id, A = t.id;
 		}
-		let ee = e.getRenderTarget(), j = e.state.buffers.depth.getReversed(), te = h.isInstancedMesh === !0, M = h.isBatchedMesh === !0, N = !!i.map, P = !!i.matcap, ne = !!x, F = !!i.aoMap, re = !!i.lightMap, ie = !!i.bumpMap && i.wireframe === !1, ae = !!i.normalMap, oe = !!i.displacementMap, se = !!i.emissiveMap, I = !!i.metalnessMap, ce = !!i.roughnessMap, le = i.anisotropy > 0, ue = i.clearcoat > 0, de = i.dispersion > 0, fe = i.retroreflectivity > 0, pe = i.iridescence > 0, me = i.sheen > 0, he = i.transmission > 0, ge = le && !!i.anisotropyMap, _e = ue && !!i.clearcoatMap, ve = ue && !!i.clearcoatNormalMap, ye = ue && !!i.clearcoatRoughnessMap, be = pe && !!i.iridescenceMap, xe = pe && !!i.iridescenceThicknessMap, Se = me && !!i.sheenColorMap, Ce = me && !!i.sheenRoughnessMap, we = !!i.specularMap, Te = !!i.specularColorMap, Ee = !!i.specularIntensityMap, De = he && !!i.transmissionMap, Oe = he && !!i.thicknessMap, ke = !!i.gradientMap, Ae = !!i.alphaMap, je = i.alphaTest > 0, L = !!i.alphaHash, Me = !!i.extensions, Ne = 0;
-		i.toneMapped && (ee === null || ee.isXRRenderTarget === !0) && (Ne = e.toneMapping);
+		let j = e.getRenderTarget(), M = e.state.buffers.depth.getReversed(), ee = h.isInstancedMesh === !0, N = h.isBatchedMesh === !0, te = !!i.map, P = !!i.matcap, ne = !!x, F = !!i.aoMap, re = !!i.lightMap, ie = !!i.bumpMap && i.wireframe === !1, ae = !!i.normalMap, oe = !!i.displacementMap, se = !!i.emissiveMap, I = !!i.metalnessMap, ce = !!i.roughnessMap, le = i.anisotropy > 0, ue = i.clearcoat > 0, de = i.dispersion > 0, fe = i.retroreflectivity > 0, pe = i.iridescence > 0, me = i.sheen > 0, he = i.transmission > 0, ge = le && !!i.anisotropyMap, _e = ue && !!i.clearcoatMap, ve = ue && !!i.clearcoatNormalMap, ye = ue && !!i.clearcoatRoughnessMap, be = pe && !!i.iridescenceMap, xe = pe && !!i.iridescenceThicknessMap, Se = me && !!i.sheenColorMap, Ce = me && !!i.sheenRoughnessMap, we = !!i.specularMap, Te = !!i.specularColorMap, Ee = !!i.specularIntensityMap, De = he && !!i.transmissionMap, Oe = he && !!i.thicknessMap, ke = !!i.gradientMap, Ae = !!i.alphaMap, je = i.alphaTest > 0, L = !!i.alphaHash, Me = !!i.extensions, Ne = 0;
+		i.toneMapped && (j === null || j.isXRRenderTarget === !0) && (Ne = e.toneMapping);
 		let Pe = {
 			shaderID: C,
 			shaderType: i.type,
@@ -9450,14 +9450,14 @@ function du(e, t, n, r, i, a) {
 			isRawShaderMaterial: i.isRawShaderMaterial === !0,
 			glslVersion: i.glslVersion,
 			precision: f,
-			batching: M,
-			batchingColor: M && h._colorsTexture !== null,
-			instancing: te,
-			instancingColor: te && h.instanceColor !== null,
-			instancingMorph: te && h.morphTexture !== null,
-			outputColorSpace: ee === null ? e.outputColorSpace : ee.isXRRenderTarget === !0 ? ee.texture.colorSpace : q.workingColorSpace,
+			batching: N,
+			batchingColor: N && h._colorsTexture !== null,
+			instancing: ee,
+			instancingColor: ee && h.instanceColor !== null,
+			instancingMorph: ee && h.morphTexture !== null,
+			outputColorSpace: j === null ? e.outputColorSpace : j.isXRRenderTarget === !0 ? j.texture.colorSpace : q.workingColorSpace,
 			alphaToCoverage: !!i.alphaToCoverage,
-			map: N,
+			map: te,
 			matcap: P,
 			envMap: ne,
 			envMapMode: ne && x.mapping,
@@ -9499,7 +9499,7 @@ function du(e, t, n, r, i, a) {
 			alphaTest: je,
 			alphaHash: L,
 			combine: i.combine,
-			mapUv: N && m(i.map.channel),
+			mapUv: te && m(i.map.channel),
 			aoMapUv: F && m(i.aoMap.channel),
 			lightMapUv: re && m(i.lightMap.channel),
 			bumpMapUv: ie && m(i.bumpMap.channel),
@@ -9526,14 +9526,14 @@ function du(e, t, n, r, i, a) {
 			vertexNormals: !!v.attributes.normal,
 			vertexColors: i.vertexColors,
 			vertexAlphas: i.vertexColors === !0 && !!v.attributes.color && v.attributes.color.itemSize === 4,
-			pointsUvs: h.isPoints === !0 && !!v.attributes.uv && (N || Ae),
+			pointsUvs: h.isPoints === !0 && !!v.attributes.uv && (te || Ae),
 			fog: !!_,
 			useFog: i.fog === !0,
 			fogExp2: !!_ && _.isFogExp2,
 			flatShading: i.wireframe === !1 && (i.flatShading === !0 || v.attributes.normal === void 0 && ae === !1 && (i.isMeshLambertMaterial || i.isMeshPhongMaterial || i.isMeshStandardMaterial || i.isMeshPhysicalMaterial)),
 			sizeAttenuation: i.sizeAttenuation === !0,
 			logarithmicDepthBuffer: d,
-			reversedDepthBuffer: j,
+			reversedDepthBuffer: M,
 			skinning: h.isSkinnedMesh === !0,
 			hasPositionAttribute: v.attributes.position !== void 0,
 			morphTargets: v.morphAttributes.position !== void 0,
@@ -9561,7 +9561,7 @@ function du(e, t, n, r, i, a) {
 			shadowMapEnabled: e.shadowMap.enabled && l.length > 0,
 			shadowMapType: e.shadowMap.type,
 			toneMapping: Ne,
-			decodeVideoTexture: N && i.map.isVideoTexture === !0 && q.getTransfer(i.map.colorSpace) === "srgb",
+			decodeVideoTexture: te && i.map.isVideoTexture === !0 && q.getTransfer(i.map.colorSpace) === "srgb",
 			decodeVideoTextureEmissive: se && i.emissiveMap.isVideoTexture === !0 && q.getTransfer(i.emissiveMap.colorSpace) === "srgb",
 			premultipliedAlpha: i.premultipliedAlpha,
 			doubleSided: i.side === 2,
@@ -9570,7 +9570,7 @@ function du(e, t, n, r, i, a) {
 			depthPacking: i.depthPacking || 0,
 			index0AttributeName: i.index0AttributeName,
 			extensionClipCullDistance: Me && i.extensions.clipCullDistance === !0 && n.has("WEBGL_clip_cull_distance"),
-			extensionMultiDraw: (Me && i.extensions.multiDraw === !0 || M) && n.has("WEBGL_multi_draw"),
+			extensionMultiDraw: (Me && i.extensions.multiDraw === !0 || N) && n.has("WEBGL_multi_draw"),
 			rendererExtensionParallelShaderCompile: n.has("KHR_parallel_shader_compile"),
 			customProgramCacheKey: i.customProgramCacheKey()
 		};
@@ -10075,7 +10075,7 @@ function ju(e, t, n) {
 						continue;
 					}
 					p.map = new Jt(i.x, i.y, {
-						format: j,
+						format: M,
 						type: y,
 						minFilter: l,
 						magFilter: l,
@@ -10108,7 +10108,7 @@ function ju(e, t, n) {
 	function C(n, r) {
 		let a = t.update(b);
 		m.defines.VSM_SAMPLES !== n.blurSamples && (m.defines.VSM_SAMPLES = n.blurSamples, h.defines.VSM_SAMPLES = n.blurSamples, m.needsUpdate = !0, h.needsUpdate = !0), n.mapPass === null ? n.mapPass = new Jt(i.x, i.y, {
-			format: j,
+			format: M,
 			type: y
 		}) : (n.mapPass.width !== n.map.width || n.mapPass.height !== n.map.height) && n.mapPass.setSize(n.map.width, n.map.height), m.uniforms.shadow_pass.value = n.map.depthTexture, m.uniforms.resolution.value.set(n.map.width, n.map.height), m.uniforms.radius.value = n.radius, e.setRenderTarget(n.mapPass), e.clear(), e.renderBufferDirect(r, null, a, m, b, null), h.uniforms.shadow_pass.value = n.mapPass.texture, h.uniforms.resolution.value.set(n.map.width, n.map.height), h.uniforms.radius.value = n.radius, e.setRenderTarget(n.map), e.clear(), e.renderBufferDirect(r, null, a, h, b, null);
 	}
@@ -10264,8 +10264,8 @@ function Mu(e, t) {
 			}
 		};
 	}
-	let a = new n(), o = new r(), s = new i(), c = /* @__PURE__ */ new WeakMap(), l = /* @__PURE__ */ new WeakMap(), u = {}, d = {}, f = {}, p = /* @__PURE__ */ new WeakMap(), m = [], h = null, g = !1, _ = null, v = null, y = null, b = null, x = null, S = null, C = null, w = new Y(0, 0, 0), T = 0, E = !1, D = null, O = null, k = null, A = null, ee = null, j = e.getParameter(e.MAX_COMBINED_TEXTURE_IMAGE_UNITS), te = !1, M = 0, N = e.getParameter(e.VERSION);
-	N.indexOf("WebGL") === -1 ? N.indexOf("OpenGL ES") !== -1 && (M = parseFloat(/^OpenGL ES (\d)/.exec(N)[1]), te = M >= 2) : (M = parseFloat(/^WebGL (\d)/.exec(N)[1]), te = M >= 1);
+	let a = new n(), o = new r(), s = new i(), c = /* @__PURE__ */ new WeakMap(), l = /* @__PURE__ */ new WeakMap(), u = {}, d = {}, f = {}, p = /* @__PURE__ */ new WeakMap(), m = [], h = null, g = !1, _ = null, v = null, y = null, b = null, x = null, S = null, C = null, w = new Y(0, 0, 0), T = 0, E = !1, D = null, O = null, k = null, A = null, j = null, M = e.getParameter(e.MAX_COMBINED_TEXTURE_IMAGE_UNITS), ee = !1, N = 0, te = e.getParameter(e.VERSION);
+	te.indexOf("WebGL") === -1 ? te.indexOf("OpenGL ES") !== -1 && (N = parseFloat(/^OpenGL ES (\d)/.exec(te)[1]), ee = N >= 2) : (N = parseFloat(/^WebGL (\d)/.exec(te)[1]), ee = N >= 1);
 	let P = null, ne = {}, F = e.getParameter(e.SCISSOR_BOX), re = e.getParameter(e.VIEWPORT), ie = new Kt().fromArray(F), ae = new Kt().fromArray(re);
 	function oe(t, n, r, i) {
 		let a = /* @__PURE__ */ new Uint8Array(4), o = e.createTexture();
@@ -10374,19 +10374,19 @@ function Mu(e, t) {
 		t === 0 ? ce(e.CULL_FACE) : (I(e.CULL_FACE), t !== O && (t === 1 ? e.cullFace(e.BACK) : t === 2 ? e.cullFace(e.FRONT) : e.cullFace(e.FRONT_AND_BACK))), O = t;
 	}
 	function ve(t) {
-		t !== k && (te && e.lineWidth(t), k = t);
+		t !== k && (ee && e.lineWidth(t), k = t);
 	}
 	function ye(t, n, r) {
-		t ? (I(e.POLYGON_OFFSET_FILL), (A !== n || ee !== r) && (A = n, ee = r, o.getReversed() && (n = -n), e.polygonOffset(n, r))) : ce(e.POLYGON_OFFSET_FILL);
+		t ? (I(e.POLYGON_OFFSET_FILL), (A !== n || j !== r) && (A = n, j = r, o.getReversed() && (n = -n), e.polygonOffset(n, r))) : ce(e.POLYGON_OFFSET_FILL);
 	}
 	function be(t) {
 		t ? I(e.SCISSOR_TEST) : ce(e.SCISSOR_TEST);
 	}
 	function xe(t) {
-		t === void 0 && (t = e.TEXTURE0 + j - 1), P !== t && (e.activeTexture(t), P = t);
+		t === void 0 && (t = e.TEXTURE0 + M - 1), P !== t && (e.activeTexture(t), P = t);
 	}
 	function Se(t, n, r) {
-		r === void 0 && (r = P === null ? e.TEXTURE0 + j - 1 : P);
+		r === void 0 && (r = P === null ? e.TEXTURE0 + M - 1 : P);
 		let i = ne[r];
 		i === void 0 && (i = {
 			type: void 0,
@@ -10490,7 +10490,7 @@ function Mu(e, t) {
 		c.get(n) !== r && (e.uniformBlockBinding(n, r, t.__bindingPointIndex), c.set(n, r));
 	}
 	function Ie() {
-		e.disable(e.BLEND), e.disable(e.CULL_FACE), e.disable(e.DEPTH_TEST), e.disable(e.POLYGON_OFFSET_FILL), e.disable(e.SCISSOR_TEST), e.disable(e.STENCIL_TEST), e.disable(e.SAMPLE_ALPHA_TO_COVERAGE), e.blendEquation(e.FUNC_ADD), e.blendFunc(e.ONE, e.ZERO), e.blendFuncSeparate(e.ONE, e.ZERO, e.ONE, e.ZERO), e.blendColor(0, 0, 0, 0), e.colorMask(!0, !0, !0, !0), e.clearColor(0, 0, 0, 0), e.depthMask(!0), e.depthFunc(e.LESS), o.setReversed(!1), e.clearDepth(1), e.stencilMask(4294967295), e.stencilFunc(e.ALWAYS, 0, 4294967295), e.stencilOp(e.KEEP, e.KEEP, e.KEEP), e.clearStencil(0), e.cullFace(e.BACK), e.frontFace(e.CCW), e.polygonOffset(0, 0), e.activeTexture(e.TEXTURE0), e.bindFramebuffer(e.FRAMEBUFFER, null), e.bindFramebuffer(e.DRAW_FRAMEBUFFER, null), e.bindFramebuffer(e.READ_FRAMEBUFFER, null), e.useProgram(null), e.lineWidth(1), e.scissor(0, 0, e.canvas.width, e.canvas.height), e.viewport(0, 0, e.canvas.width, e.canvas.height), e.pixelStorei(e.PACK_ALIGNMENT, 4), e.pixelStorei(e.UNPACK_ALIGNMENT, 4), e.pixelStorei(e.UNPACK_FLIP_Y_WEBGL, !1), e.pixelStorei(e.UNPACK_PREMULTIPLY_ALPHA_WEBGL, !1), e.pixelStorei(e.UNPACK_COLORSPACE_CONVERSION_WEBGL, e.BROWSER_DEFAULT_WEBGL), e.pixelStorei(e.PACK_ROW_LENGTH, 0), e.pixelStorei(e.PACK_SKIP_PIXELS, 0), e.pixelStorei(e.PACK_SKIP_ROWS, 0), e.pixelStorei(e.UNPACK_ROW_LENGTH, 0), e.pixelStorei(e.UNPACK_IMAGE_HEIGHT, 0), e.pixelStorei(e.UNPACK_SKIP_PIXELS, 0), e.pixelStorei(e.UNPACK_SKIP_ROWS, 0), e.pixelStorei(e.UNPACK_SKIP_IMAGES, 0), u = {}, d = {}, P = null, ne = {}, f = {}, p = /* @__PURE__ */ new WeakMap(), m = [], h = null, g = !1, _ = null, v = null, y = null, b = null, x = null, S = null, C = null, w = new Y(0, 0, 0), T = 0, E = !1, D = null, O = null, k = null, A = null, ee = null, ie.set(0, 0, e.canvas.width, e.canvas.height), ae.set(0, 0, e.canvas.width, e.canvas.height), a.reset(), o.reset(), s.reset();
+		e.disable(e.BLEND), e.disable(e.CULL_FACE), e.disable(e.DEPTH_TEST), e.disable(e.POLYGON_OFFSET_FILL), e.disable(e.SCISSOR_TEST), e.disable(e.STENCIL_TEST), e.disable(e.SAMPLE_ALPHA_TO_COVERAGE), e.blendEquation(e.FUNC_ADD), e.blendFunc(e.ONE, e.ZERO), e.blendFuncSeparate(e.ONE, e.ZERO, e.ONE, e.ZERO), e.blendColor(0, 0, 0, 0), e.colorMask(!0, !0, !0, !0), e.clearColor(0, 0, 0, 0), e.depthMask(!0), e.depthFunc(e.LESS), o.setReversed(!1), e.clearDepth(1), e.stencilMask(4294967295), e.stencilFunc(e.ALWAYS, 0, 4294967295), e.stencilOp(e.KEEP, e.KEEP, e.KEEP), e.clearStencil(0), e.cullFace(e.BACK), e.frontFace(e.CCW), e.polygonOffset(0, 0), e.activeTexture(e.TEXTURE0), e.bindFramebuffer(e.FRAMEBUFFER, null), e.bindFramebuffer(e.DRAW_FRAMEBUFFER, null), e.bindFramebuffer(e.READ_FRAMEBUFFER, null), e.useProgram(null), e.lineWidth(1), e.scissor(0, 0, e.canvas.width, e.canvas.height), e.viewport(0, 0, e.canvas.width, e.canvas.height), e.pixelStorei(e.PACK_ALIGNMENT, 4), e.pixelStorei(e.UNPACK_ALIGNMENT, 4), e.pixelStorei(e.UNPACK_FLIP_Y_WEBGL, !1), e.pixelStorei(e.UNPACK_PREMULTIPLY_ALPHA_WEBGL, !1), e.pixelStorei(e.UNPACK_COLORSPACE_CONVERSION_WEBGL, e.BROWSER_DEFAULT_WEBGL), e.pixelStorei(e.PACK_ROW_LENGTH, 0), e.pixelStorei(e.PACK_SKIP_PIXELS, 0), e.pixelStorei(e.PACK_SKIP_ROWS, 0), e.pixelStorei(e.UNPACK_ROW_LENGTH, 0), e.pixelStorei(e.UNPACK_IMAGE_HEIGHT, 0), e.pixelStorei(e.UNPACK_SKIP_PIXELS, 0), e.pixelStorei(e.UNPACK_SKIP_ROWS, 0), e.pixelStorei(e.UNPACK_SKIP_IMAGES, 0), u = {}, d = {}, P = null, ne = {}, f = {}, p = /* @__PURE__ */ new WeakMap(), m = [], h = null, g = !1, _ = null, v = null, y = null, b = null, x = null, S = null, C = null, w = new Y(0, 0, 0), T = 0, E = !1, D = null, O = null, k = null, A = null, j = null, ie.set(0, 0, e.canvas.width, e.canvas.height), ae.set(0, 0, e.canvas.width, e.canvas.height), a.reset(), o.reset(), s.reset();
 	}
 	return {
 		buffers: {
@@ -10576,22 +10576,22 @@ function Nu(e, t, n, f, p, m, h) {
 		}
 		return (l === e.R16F || l === e.R32F || l === e.RG16F || l === e.RG32F || l === e.RGBA16F || l === e.RGBA32F) && t.get("EXT_color_buffer_float"), l;
 	}
-	function ee(t, n) {
+	function j(t, n) {
 		let r;
 		return t ? n === null || n === 1014 || n === 1020 ? r = e.DEPTH24_STENCIL8 : n === 1015 ? r = e.DEPTH32F_STENCIL8 : n === 1012 && (r = e.DEPTH24_STENCIL8, V("DepthTexture: 16 bit depth attachment is not supported with stencil. Using 24-bit attachment.")) : n === null || n === 1014 || n === 1020 ? r = e.DEPTH_COMPONENT24 : n === 1015 ? r = e.DEPTH_COMPONENT32F : n === 1012 && (r = e.DEPTH_COMPONENT16), r;
 	}
-	function j(e, t) {
+	function M(e, t) {
 		return E(e) === !0 || e.isFramebufferTexture && e.minFilter !== 1003 && e.minFilter !== 1006 ? Math.log2(Math.max(t.width, t.height)) + 1 : e.mipmaps !== void 0 && e.mipmaps.length > 0 ? e.mipmaps.length : e.isCompressedTexture && Array.isArray(e.image) ? t.mipmaps.length : 1;
 	}
-	function te(e) {
+	function ee(e) {
 		let t = e.target;
-		t.removeEventListener("dispose", te), N(t), t.isVideoTexture && y.delete(t), t.isHTMLTexture && b.delete(t);
-	}
-	function M(e) {
-		let t = e.target;
-		t.removeEventListener("dispose", M), ne(t);
+		t.removeEventListener("dispose", ee), te(t), t.isVideoTexture && y.delete(t), t.isHTMLTexture && b.delete(t);
 	}
 	function N(e) {
+		let t = e.target;
+		t.removeEventListener("dispose", N), ne(t);
+	}
+	function te(e) {
 		let t = f.get(e);
 		if (t.__webglInit === void 0) return;
 		let n = e.source, r = S.get(n);
@@ -10702,7 +10702,7 @@ function Nu(e, t, n, f, p, m, h) {
 	}
 	function he(t, n) {
 		let r = !1;
-		t.__webglInit === void 0 && (t.__webglInit = !0, n.addEventListener("dispose", te));
+		t.__webglInit === void 0 && (t.__webglInit = !0, n.addEventListener("dispose", ee));
 		let i = n.source, a = S.get(i);
 		a === void 0 && (a = {}, S.set(i, a));
 		let o = se(n);
@@ -10755,8 +10755,8 @@ function Nu(e, t, n, f, p, m, h) {
 			t = Me(r, t);
 			let l = m.convert(r.format, r.colorSpace), u = m.convert(r.type), d = A(r.internalFormat, l, u, r.normalized, r.colorSpace, r.isVideoTexture);
 			me(a, r);
-			let f, h = r.mipmaps, g = r.isVideoTexture !== !0, _ = c.__version === void 0 || o === !0, v = s.dataReady, y = j(r, t);
-			if (r.isDepthTexture) d = ee(r.format === k, r.type), _ && (g ? n.texStorage2D(e.TEXTURE_2D, 1, d, t.width, t.height) : n.texImage2D(e.TEXTURE_2D, 0, d, t.width, t.height, 0, l, u, null));
+			let f, h = r.mipmaps, g = r.isVideoTexture !== !0, _ = c.__version === void 0 || o === !0, v = s.dataReady, y = M(r, t);
+			if (r.isDepthTexture) d = j(r.format === k, r.type), _ && (g ? n.texStorage2D(e.TEXTURE_2D, 1, d, t.width, t.height) : n.texImage2D(e.TEXTURE_2D, 0, d, t.width, t.height, 0, l, u, null));
 			else if (r.isDataTexture) {
 				if (h.length > 0) {
 					g && _ && n.texStorage2D(e.TEXTURE_2D, y, d, h[0].width, h[0].height);
@@ -10854,7 +10854,7 @@ function Nu(e, t, n, f, p, m, h) {
 			n.pixelStorei(e.UNPACK_FLIP_Y_WEBGL, r.flipY), n.pixelStorei(e.UNPACK_PREMULTIPLY_ALPHA_WEBGL, r.premultiplyAlpha), n.pixelStorei(e.UNPACK_ALIGNMENT, r.unpackAlignment), n.pixelStorei(e.UNPACK_COLORSPACE_CONVERSION_WEBGL, l);
 			let u = r.isCompressedTexture || r.image[0].isCompressedTexture, d = r.image[0] && r.image[0].isDataTexture, f = [];
 			for (let e = 0; e < 6; e++) !u && !d ? f[e] = T(r.image[e], !0, p.maxCubemapSize) : f[e] = d ? r.image[e].image : r.image[e], f[e] = Me(r, f[e]);
-			let h = f[0], g = m.convert(r.format, r.colorSpace), _ = m.convert(r.type), v = A(r.internalFormat, g, _, r.normalized, r.colorSpace), y = r.isVideoTexture !== !0, b = s.__version === void 0 || a === !0, x = o.dataReady, S = j(r, h);
+			let h = f[0], g = m.convert(r.format, r.colorSpace), _ = m.convert(r.type), v = A(r.internalFormat, g, _, r.normalized, r.colorSpace), y = r.isVideoTexture !== !0, b = s.__version === void 0 || a === !0, x = o.dataReady, S = M(r, h);
 			me(e.TEXTURE_CUBE_MAP, r);
 			let C;
 			if (u) {
@@ -10900,7 +10900,7 @@ function Nu(e, t, n, f, p, m, h) {
 	}
 	function xe(t, n, r) {
 		if (e.bindRenderbuffer(e.RENDERBUFFER, t), n.depthBuffer) {
-			let i = n.depthTexture, a = i && i.isDepthTexture ? i.type : null, o = ee(n.stencilBuffer, a), s = n.stencilBuffer ? e.DEPTH_STENCIL_ATTACHMENT : e.DEPTH_ATTACHMENT;
+			let i = n.depthTexture, a = i && i.isDepthTexture ? i.type : null, o = j(n.stencilBuffer, a), s = n.stencilBuffer ? e.DEPTH_STENCIL_ATTACHMENT : e.DEPTH_ATTACHMENT;
 			je(n) ? g.renderbufferStorageMultisampleEXT(e.RENDERBUFFER, Ae(n), o, n.width, n.height) : r ? e.renderbufferStorageMultisample(e.RENDERBUFFER, Ae(n), o, n.width, n.height) : e.renderbufferStorage(e.RENDERBUFFER, o, n.width, n.height), e.framebufferRenderbuffer(e.FRAMEBUFFER, s, e.RENDERBUFFER, t);
 		} else {
 			let t = n.textures;
@@ -10916,7 +10916,7 @@ function Nu(e, t, n, f, p, m, h) {
 		if (n.bindFramebuffer(e.FRAMEBUFFER, t), !(r.depthTexture && r.depthTexture.isDepthTexture)) throw Error("THREE.WebGLTextures: renderTarget.depthTexture must be an instance of THREE.DepthTexture.");
 		let o = f.get(r.depthTexture);
 		if (o.__renderTarget = r, o.__webglTexture && r.depthTexture.image.width === r.width && r.depthTexture.image.height === r.height || (r.depthTexture.image.width = r.width, r.depthTexture.image.height = r.height, r.depthTexture.needsUpdate = !0), a) {
-			if (o.__webglInit === void 0 && (o.__webglInit = !0, r.depthTexture.addEventListener("dispose", te)), o.__webglTexture === void 0) {
+			if (o.__webglInit === void 0 && (o.__webglInit = !0, r.depthTexture.addEventListener("dispose", ee)), o.__webglTexture === void 0) {
 				o.__webglTexture = e.createTexture(), n.bindTexture(e.TEXTURE_CUBE_MAP, o.__webglTexture), me(e.TEXTURE_CUBE_MAP, r.depthTexture);
 				let t = m.convert(r.depthTexture.format), i = m.convert(r.depthTexture.type), a;
 				r.depthTexture.format === 1026 ? a = e.DEPTH_COMPONENT24 : r.depthTexture.format === 1027 && (a = e.DEPTH24_STENCIL8);
@@ -10969,7 +10969,7 @@ function Nu(e, t, n, f, p, m, h) {
 	}
 	function Te(t) {
 		let r = t.texture, i = f.get(t), a = f.get(r);
-		t.addEventListener("dispose", M);
+		t.addEventListener("dispose", N);
 		let o = t.textures, s = t.isWebGLCubeRenderTarget === !0, c = o.length > 1;
 		if (c || (a.__webglTexture === void 0 && (a.__webglTexture = e.createTexture()), a.__version = r.version, h.memory.textures++), s) {
 			i.__webglFramebuffer = [];
@@ -11206,11 +11206,11 @@ var Fu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Iu = "
 }, Ru = class extends nt {
 	constructor(e, t) {
 		super();
-		let n = this, r = null, i = 1, a = null, o = "local-floor", s = 1, c = null, l = null, u = null, d = null, p = null, m = null, h = typeof XRWebGLBinding < "u", g = new Lu(), v = {}, y = t.getContextAttributes(), b = null, x = null, C = [], w = [], T = new W(), E = null, A = null, ee = new Ko();
-		ee.viewport = new Kt();
-		let j = new Ko();
+		let n = this, r = null, i = 1, a = null, o = "local-floor", s = 1, c = null, l = null, u = null, d = null, p = null, m = null, h = typeof XRWebGLBinding < "u", g = new Lu(), v = {}, y = t.getContextAttributes(), b = null, x = null, C = [], w = [], T = new W(), E = null, A = null, j = new Ko();
 		j.viewport = new Kt();
-		let te = [ee, j], M = new ss(), N = null, P = null;
+		let M = new Ko();
+		M.viewport = new Kt();
+		let ee = [j, M], N = new ss(), te = null, P = null;
 		this.cameraAutoUpdate = !0, this.enabled = !1, this.isPresenting = !1, this.getController = function(e) {
 			let t = C[e];
 			return t === void 0 && (t = new Dn(), C[e] = t), t.getTargetRaySpace();
@@ -11236,7 +11236,7 @@ var Fu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Iu = "
 				let t = w[e];
 				t !== null && (w[e] = null, C[e].disconnect(t));
 			}
-			N = null, P = null, g.reset();
+			te = null, P = null, g.reset();
 			for (let e in v) delete v[e];
 			if (e.setRenderTarget(b), p = null, d = null, u = null, r = null, x = null, ue.stop(), n.isPresenting = !1, e.setPixelRatio(E), e.setSize(T.width, T.height, !1), A !== null) {
 				let e = A.camera;
@@ -11345,24 +11345,24 @@ var Fu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Iu = "
 		this.updateCamera = function(e) {
 			if (r === null) return;
 			let t = e.near, n = e.far;
-			g.texture !== null && (g.depthNear > 0 && (t = g.depthNear), g.depthFar > 0 && (n = g.depthFar)), M.near = j.near = ee.near = t, M.far = j.far = ee.far = n, (N !== M.near || P !== M.far) && (r.updateRenderState({
-				depthNear: M.near,
-				depthFar: M.far
-			}), N = M.near, P = M.far), M.layers.mask = e.layers.mask | 6, ee.layers.mask = M.layers.mask & -5, j.layers.mask = M.layers.mask & -3;
-			let i = e.parent, a = M.cameras;
-			se(M, i);
+			g.texture !== null && (g.depthNear > 0 && (t = g.depthNear), g.depthFar > 0 && (n = g.depthFar)), N.near = M.near = j.near = t, N.far = M.far = j.far = n, (te !== N.near || P !== N.far) && (r.updateRenderState({
+				depthNear: N.near,
+				depthFar: N.far
+			}), te = N.near, P = N.far), N.layers.mask = e.layers.mask | 6, j.layers.mask = N.layers.mask & -5, M.layers.mask = N.layers.mask & -3;
+			let i = e.parent, a = N.cameras;
+			se(N, i);
 			for (let e = 0; e < a.length; e++) se(a[e], i);
-			a.length === 2 ? oe(M, ee, j) : M.projectionMatrix.copy(ee.projectionMatrix), A === null && e.isPerspectiveCamera && (A = {
+			a.length === 2 ? oe(N, j, M) : N.projectionMatrix.copy(j.projectionMatrix), A === null && e.isPerspectiveCamera && (A = {
 				camera: e,
 				fov: e.fov,
 				zoom: e.zoom
-			}), I(e, M, i);
+			}), I(e, N, i);
 		};
 		function I(e, t, n) {
 			n === null ? e.matrix.copy(t.matrixWorld) : (e.matrix.copy(n.matrixWorld), e.matrix.invert(), e.matrix.multiply(t.matrixWorld)), e.matrix.decompose(e.position, e.quaternion, e.scale), e.updateMatrixWorld(!0), e.projectionMatrix.copy(t.projectionMatrix), e.projectionMatrixInverse.copy(t.projectionMatrixInverse), e.isPerspectiveCamera && (e.fov = ot * 2 * Math.atan(1 / e.projectionMatrix.elements[5]), e.zoom = 1);
 		}
 		this.getCamera = function() {
-			return M;
+			return N;
 		}, this.getFoveation = function() {
 			if (d !== null || p !== null) return s;
 		}, this.setFoveation = function(e) {
@@ -11370,7 +11370,7 @@ var Fu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Iu = "
 		}, this.hasDepthSensing = function() {
 			return g.texture !== null;
 		}, this.getDepthSensingMesh = function() {
-			return g.getMesh(M);
+			return g.getMesh(N);
 		}, this.getCameraTexture = function(e) {
 			return v[e];
 		};
@@ -11380,7 +11380,7 @@ var Fu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Iu = "
 				let t = l.views;
 				p !== null && (e.setRenderTargetFramebuffer(x, p.framebuffer), e.setRenderTarget(x));
 				let i = !1;
-				t.length !== M.cameras.length && (M.cameras.length = 0, i = !0);
+				t.length !== N.cameras.length && (N.cameras.length = 0, i = !0);
 				for (let n = 0; n < t.length; n++) {
 					let r = t[n], a = null;
 					if (p !== null) a = p.getViewport(r);
@@ -11388,8 +11388,8 @@ var Fu = "\nvoid main() {\n\n	gl_Position = vec4( position, 1.0 );\n\n}", Iu = "
 						let t = u.getViewSubImage(d, r);
 						a = t.viewport, n === 0 && (e.setRenderTargetTextures(x, t.colorTexture, t.depthStencilTexture), e.setRenderTarget(x));
 					}
-					let o = te[n];
-					o === void 0 && (o = new Ko(), o.layers.enable(n), o.viewport = new Kt(), te[n] = o), o.matrix.fromArray(r.transform.matrix), o.matrix.decompose(o.position, o.quaternion, o.scale), o.projectionMatrix.fromArray(r.projectionMatrix), o.projectionMatrixInverse.copy(o.projectionMatrix).invert(), o.viewport.set(a.x, a.y, a.width, a.height), n === 0 && (M.matrix.copy(o.matrix), M.matrix.decompose(M.position, M.quaternion, M.scale)), i === !0 && M.cameras.push(o);
+					let o = ee[n];
+					o === void 0 && (o = new Ko(), o.layers.enable(n), o.viewport = new Kt(), ee[n] = o), o.matrix.fromArray(r.transform.matrix), o.matrix.decompose(o.position, o.quaternion, o.scale), o.projectionMatrix.fromArray(r.projectionMatrix), o.projectionMatrixInverse.copy(o.projectionMatrix).invert(), o.viewport.set(a.x, a.y, a.width, a.height), n === 0 && (N.matrix.copy(o.matrix), N.matrix.decompose(N.position, N.quaternion, N.scale)), i === !0 && N.cameras.push(o);
 				}
 				let a = r.enabledFeatures;
 				if (a && a.includes("depth-sensing") && r.depthUsage == "gpu-optimized" && h) {
@@ -12092,7 +12092,7 @@ var Uu = new Uint16Array([
 	1183
 ]), Wu = null;
 function Gu() {
-	return Wu === null && (Wu = new mi(Uu, 16, 16, j, y), Wu.name = "DFG_LUT", Wu.minFilter = l, Wu.magFilter = l, Wu.wrapS = i, Wu.wrapT = i, Wu.generateMipmaps = !1, Wu.needsUpdate = !0), Wu;
+	return Wu === null && (Wu = new mi(Uu, 16, 16, M, y), Wu.name = "DFG_LUT", Wu.minFilter = l, Wu.magFilter = l, Wu.wrapS = i, Wu.wrapT = i, Wu.generateMipmaps = !1, Wu.needsUpdate = !0), Wu;
 }
 var Ku = class {
 	constructor(e = {}) {
@@ -12104,9 +12104,9 @@ var Ku = class {
 			g = n.getContextAttributes().alpha;
 		} else g = a;
 		let v = m, C = /* @__PURE__ */ new Set([
-			M,
-			te,
-			ee
+			N,
+			ee,
+			j
 		]), w = /* @__PURE__ */ new Set([
 			f,
 			_,
@@ -12114,7 +12114,7 @@ var Ku = class {
 			S,
 			b,
 			x
-		]), T = /* @__PURE__ */ new Uint32Array(4), E = /* @__PURE__ */ new Int32Array(4), D = new G(), O = null, k = null, A = [], j = [], N = null;
+		]), T = /* @__PURE__ */ new Uint32Array(4), E = /* @__PURE__ */ new Int32Array(4), D = new G(), O = null, k = null, A = [], M = [], te = null;
 		this.domElement = t, this.debug = {
 			checkShaderErrors: !0,
 			diagnostics: { keywords: !1 },
@@ -12159,7 +12159,7 @@ var Ku = class {
 		function it() {
 			Ne = new uc(L), Ne.init(), tt = new Pu(L, Ne), Pe = new zs(L, Ne, e, tt), R = new Mu(L, Ne), Pe.reversedDepthBuffer && p && R.buffers.depth.setReversed(!0), re = L.createFramebuffer(), ie = L.createFramebuffer(), ae = L.createFramebuffer(), Fe = new pc(L), z = new fu(), B = new Nu(L, Ne, R, z, Pe, tt, Fe), Ie = new lc(P), Le = new js(L), nt = new Ls(L, Le), Re = new dc(L, Le, Fe, nt), Be = new hc(L, Re, Le, nt, Fe), Xe = new mc(L, Pe, B), Ke = new Bs(z), Ve = new du(P, Ie, Ne, Pe, nt, Ke), He = new Vu(P, z), Ue = new gu(), We = new Cu(Ne), Je = new Is(P, Ie, R, Be, g, s), qe = new ju(P, Be, Pe), rt = new Hu(L, Fe, Pe, R), Qe = new Rs(L, Ne, Fe), $e = new fc(L, Ne, Fe), Fe.programs = Ve.programs, P.capabilities = Pe, P.extensions = Ne, P.properties = z, P.renderLists = Ue, P.shadowMap = qe, P.state = R, P.info = Fe;
 		}
-		v !== 1009 && (N = new _c(v, t.width, t.height, o, r, i));
+		v !== 1009 && (te = new _c(v, t.width, t.height, o, r, i));
 		let at = new Ru(P, L);
 		this.xr = at, this.getContext = function() {
 			return L;
@@ -12178,7 +12178,7 @@ var Ku = class {
 		}, this.getSize = function(e) {
 			return e.set(he, ge);
 		}, this.setSize = function(e, n, r = !0) {
-			at.isPresenting ? V("WebGLRenderer: Can't change size while VR device is presenting.") : (he = e, ge = n, t.width = Math.floor(e * _e), t.height = Math.floor(n * _e), r === !0 && (t.style.width = e + "px", t.style.height = n + "px"), N !== null && N.setSize(t.width, t.height), this.setViewport(0, 0, e, n));
+			at.isPresenting ? V("WebGLRenderer: Can't change size while VR device is presenting.") : (he = e, ge = n, t.width = Math.floor(e * _e), t.height = Math.floor(n * _e), r === !0 && (t.style.width = e + "px", t.style.height = n + "px"), te !== null && te.setSize(t.width, t.height), this.setViewport(0, 0, e, n));
 		}, this.getDrawingBufferSize = function(e) {
 			return e.set(he * _e, ge * _e).floor();
 		}, this.setDrawingBufferSize = function(e, n, r) {
@@ -12192,7 +12192,7 @@ var Ku = class {
 						break;
 					}
 				}
-				N.setEffects(e || []);
+				te.setEffects(e || []);
 			}
 		}, this.getCurrentViewport = function(e) {
 			return e.copy(ue);
@@ -12305,7 +12305,7 @@ var Ku = class {
 			F !== null && e.isNodeMaterial && F.setObject(r, e), we === !0 && Ke.setState(e, n, !1), e.transparent === !0 && e.side === 2 && e.forceSinglePass === !1 ? (e.side = 1, e.needsUpdate = !0, St(e, t, r), e.side = 0, e.needsUpdate = !0, St(e, t, r), e.side = 2) : St(e, t, r);
 		}
 		this.compile = function(e, t, n = null) {
-			n === null && (n = e), F !== null && F.renderStart(e, t, n), k = We.get(n), k.init(t), j.push(k), n.traverseVisible(function(e) {
+			n === null && (n = e), F !== null && F.renderStart(e, t, n), k = We.get(n), k.init(t), M.push(k), n.traverseVisible(function(e) {
 				e.isLight && e.layers.test(t.layers) && (k.pushLight(e), e.castShadow && k.pushShadow(e));
 			}), e !== n && e.traverseVisible(function(e) {
 				e.isLight && e.layers.test(t.layers) && (k.pushLight(e), e.castShadow && k.pushShadow(e));
@@ -12321,7 +12321,7 @@ var Ku = class {
 					}
 					else dt(i, n, t, e), r.add(i);
 				}
-			}), k = j.pop(), F !== null && F.renderEnd(), r;
+			}), k = M.pop(), F !== null && F.renderEnd(), r;
 		}, this.compileAsync = function(e, t, n = null) {
 			let r = this.compile(e, t, n);
 			return new Promise((t) => {
@@ -12354,14 +12354,14 @@ var Ku = class {
 			}
 			if (ne === !0) return;
 			F !== null && F.renderStart(e, t);
-			let n = at.enabled === !0 && at.isPresenting === !0, r = N !== null && (I === null || n) && N.begin(P, I);
-			if (e.matrixWorldAutoUpdate === !0 && e.updateMatrixWorld(), t.parent === null && t.matrixWorldAutoUpdate === !0 && t.updateMatrixWorld(), at.enabled === !0 && at.isPresenting === !0 && (N === null || N.isCompositing() === !1) && (at.cameraAutoUpdate === !0 && at.updateCamera(t), t = at.getCamera()), e.isScene === !0 && e.onBeforeRender(P, e, t, I), k = We.get(e, j.length), k.init(t), k.state.textureUnits = B.getTextureUnits(), j.push(k), Ee.multiplyMatrices(t.projectionMatrix, t.matrixWorldInverse), Ce.setFromProjectionMatrix(Ee, Ge, t.reversedDepth), Te = this.localClippingEnabled, we = Ke.init(this.clippingPlanes, Te), O = Ue.get(e, A.length), O.init(), A.push(O), at.enabled === !0 && at.isPresenting === !0) {
+			let n = at.enabled === !0 && at.isPresenting === !0, r = te !== null && (I === null || n) && te.begin(P, I);
+			if (e.matrixWorldAutoUpdate === !0 && e.updateMatrixWorld(), t.parent === null && t.matrixWorldAutoUpdate === !0 && t.updateMatrixWorld(), at.enabled === !0 && at.isPresenting === !0 && (te === null || te.isCompositing() === !1) && (at.cameraAutoUpdate === !0 && at.updateCamera(t), t = at.getCamera()), e.isScene === !0 && e.onBeforeRender(P, e, t, I), k = We.get(e, M.length), k.init(t), k.state.textureUnits = B.getTextureUnits(), M.push(k), Ee.multiplyMatrices(t.projectionMatrix, t.matrixWorldInverse), Ce.setFromProjectionMatrix(Ee, Ge, t.reversedDepth), Te = this.localClippingEnabled, we = Ke.init(this.clippingPlanes, Te), O = Ue.get(e, A.length), O.init(), A.push(O), at.enabled === !0 && at.isPresenting === !0) {
 				let e = P.xr.getDepthSensingMesh();
 				e !== null && _t(e, t, -Infinity, P.sortObjects);
 			}
 			_t(e, t, 0, P.sortObjects), O.finish(), F !== null && F.updateLights(k.state.lightsArray), P.sortObjects === !0 && O.sort(ve, ye), Ae = at.enabled === !1 || at.isPresenting === !1 || at.hasDepthSensing() === !1, Ae && Je.addToRenderList(O, e), this.info.render.frame++, this.info.autoReset === !0 && this.info.reset(), we === !0 && Ke.beginShadows();
 			let i = k.state.shadowsArray;
-			if (qe.render(i, e, t), we === !0 && Ke.endShadows(), (r && N.hasRenderPass()) === !1) {
+			if (qe.render(i, e, t), we === !0 && Ke.endShadows(), (r && te.hasRenderPass()) === !1) {
 				let n = O.opaque, r = O.transmissive;
 				if (k.setupLights(), t.isArrayCamera) {
 					let i = t.cameras;
@@ -12376,7 +12376,7 @@ var Ku = class {
 					}
 				} else r.length > 0 && yt(n, r, e, t), Ae && Je.render(e), vt(O, e, t);
 			}
-			I !== null && se === 0 && (B.updateMultisampleRenderTarget(I), B.updateRenderTargetMipmap(I)), r && N.end(P), e.isScene === !0 && e.onAfterRender(P, e, t), nt.resetDefaultState(), ce = -1, le = null, j.pop(), j.length > 0 ? (k = j[j.length - 1], B.setTextureUnits(k.state.textureUnits), we === !0 && Ke.setGlobalState(P.clippingPlanes, k.state.camera)) : k = null, A.pop(), O = A.length > 0 ? A[A.length - 1] : null, F !== null && F.renderEnd();
+			I !== null && se === 0 && (B.updateMultisampleRenderTarget(I), B.updateRenderTargetMipmap(I)), r && te.end(P), e.isScene === !0 && e.onAfterRender(P, e, t), nt.resetDefaultState(), ce = -1, le = null, M.pop(), M.length > 0 ? (k = M[M.length - 1], B.setTextureUnits(k.state.textureUnits), we === !0 && Ke.setGlobalState(P.clippingPlanes, k.state.camera)) : k = null, A.pop(), O = A.length > 0 ? A[A.length - 1] : null, F !== null && F.renderEnd();
 		};
 		function _t(e, t, n, r) {
 			if (e.visible === !1) return;
@@ -14286,15 +14286,15 @@ function of(e) {
 		alphaSliceByteOffset: x._nextUint32(),
 		alphaSliceByteLength: x._nextUint32()
 	});
-	let k = l + x._offset, A = k + w, ee = A + T, j = ee + E;
+	let k = l + x._offset, A = k + w, j = A + T, M = j + E;
 	return n.globalData = {
 		endpointCount: S,
 		selectorCount: C,
 		imageDescs: O,
 		endpointsData: new Uint8Array(e.buffer, e.byteOffset + k, w),
 		selectorsData: new Uint8Array(e.buffer, e.byteOffset + A, T),
-		tablesData: new Uint8Array(e.buffer, e.byteOffset + ee, E),
-		extendedData: new Uint8Array(e.buffer, e.byteOffset + j, D)
+		tablesData: new Uint8Array(e.buffer, e.byteOffset + j, E),
+		extendedData: new Uint8Array(e.buffer, e.byteOffset + M, D)
 	}, n;
 }
 // node_modules/three/examples/jsm/libs/zstddec.module.js
@@ -14679,20 +14679,20 @@ bf.BasisFormat = {
 var xf = /* @__PURE__ */ new Set([
 	D,
 	E,
-	j,
+	M,
 	A
 ]), Sf = /* @__PURE__ */ new Set([91]), Cf = {
 	109: D,
-	103: j,
+	103: M,
 	100: A,
 	97: D,
-	83: j,
+	83: M,
 	76: A,
 	91: D,
 	43: D,
 	37: D,
-	22: j,
-	16: j,
+	22: M,
+	16: M,
 	15: A,
 	9: A,
 	123: E,
@@ -14711,8 +14711,8 @@ var xf = /* @__PURE__ */ new Set([
 	165: _e,
 	134: P,
 	133: P,
-	132: N,
-	131: N,
+	132: te,
+	131: te,
 	138: F,
 	137: F,
 	140: je,
@@ -15179,7 +15179,7 @@ async function Wf(e, t, n = "original", r) {
 // dashboard/layout.js
 var Gf = class {
 	constructor(e) {
-		this.host = e, this.card = e.shadowRoot.querySelector("ha-card"), this.scene = e._container, this.style = document.createElement("style"), this.style.textContent = "ha-card[data-fill]{display:flex;flex-direction:column;box-sizing:border-box}ha-card[data-fill] .scene{flex:1;min-height:0;height:auto!important}ha-card[data-fill] .card-top{flex-shrink:0}ha-card[data-fill] .fixture-tray{flex-shrink:0;max-height:30%;overflow:auto;box-sizing:border-box}ha-card:fullscreen{width:100%;border:0;border-radius:0;padding-bottom:env(safe-area-inset-bottom)}.fullscreen-toggle svg{width:22px;height:22px}:host([fill-page]) ha-card{border-radius:0}:host([fill-page]) .card-top,:host([fill-page]) .panel-toggles,:host([fill-page]) .room-nav,:host([fill-page]) .light-panel{margin-top:env(safe-area-inset-top,0px)}:host([fill-page]) .panel-toggles,:host([fill-page]) .light-panel,:host([fill-page]) .card-controls{margin-left:env(safe-area-inset-left,0px)}:host([fill-page]) .card-top,:host([fill-page]) .card-controls{margin-right:env(safe-area-inset-right,0px)}:host([fill-page]) .light-panel{max-height:calc(100% - 132px - env(safe-area-inset-top,0px))}", e.shadowRoot.append(this.style), this.button = document.createElement("button"), this.button.className = "fullscreen-toggle", this.button.type = "button", this.button.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5\"/></svg>", this.button.hidden = !document.fullscreenEnabled || !this.card.requestFullscreen, this.button.onclick = async () => {
+		this.host = e, this.card = e.shadowRoot.querySelector("ha-card"), this.scene = e._container, this.style = document.createElement("style"), this.style.textContent = "ha-card[data-fill]{display:flex;flex-direction:column;box-sizing:border-box}ha-card[data-fill] .scene{flex:1;min-height:0;height:auto!important}ha-card[data-fill] .card-top{flex-shrink:0}ha-card[data-fill] .fixture-tray{flex-shrink:0;max-height:30%;overflow:auto;box-sizing:border-box}ha-card:fullscreen{width:100%;border:0;border-radius:0;padding-bottom:env(safe-area-inset-bottom)}.fullscreen-toggle svg{width:22px;height:22px}:host([fill-page]) ha-card{border-radius:0}:host([fill-page]) .card-top,:host([fill-page]) .panel-toggles,:host([fill-page]) .room-nav,:host([fill-page]) .light-panel{margin-top:calc(env(safe-area-inset-top,0px) + 16px)}:host([fill-page]) .panel-toggles,:host([fill-page]) .light-panel,:host([fill-page]) .card-controls{margin-left:env(safe-area-inset-left,0px)}:host([fill-page]) .card-top,:host([fill-page]) .card-controls{margin-right:env(safe-area-inset-right,0px)}:host([fill-page]) .light-panel{max-height:calc(100% - 150px - env(safe-area-inset-top,0px))}", e.shadowRoot.append(this.style), this.button = document.createElement("button"), this.button.className = "fullscreen-toggle", this.button.type = "button", this.button.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5\"/></svg>", this.button.hidden = !document.fullscreenEnabled || !this.card.requestFullscreen, this.button.onclick = async () => {
 			try {
 				this.fullscreen ? await document.exitFullscreen() : await this.card.requestFullscreen();
 			} catch {
@@ -15898,8 +15898,26 @@ function Rp(e, t) {
 		label: r ? "Unavailable" : `${n} ${t.unit}`
 	};
 }
+// dashboard/desk-dialog.mjs
+var zp = "\ndialog.dm{--dm-bg:var(--ha-card-background,var(--card-background-color,#1c1c1c));--dm-fg:var(--primary-text-color,#e1e1e1);--dm-muted:var(--secondary-text-color,#9b9b9b);--dm-line:var(--divider-color,#ffffff1f);--dm-surface:color-mix(in srgb,var(--dm-fg) 8%,transparent);--dm-surface-2:color-mix(in srgb,var(--dm-fg) 14%,transparent);--dm-accent:var(--primary-color,#03a9f4);--dm-accent-ink:var(--text-primary-color,#fff);\n box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-width:none;max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--dm-bg);color:var(--dm-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:dm-in .22s cubic-bezier(.2,.8,.2,1)}\n@media (prefers-color-scheme:light){dialog.dm{--dm-bg:var(--ha-card-background,var(--card-background-color,#fff));--dm-fg:var(--primary-text-color,#212121);--dm-muted:var(--secondary-text-color,#727272);--dm-line:var(--divider-color,#0000001f);box-shadow:0 24px 64px #0004}}\ndialog.dm::backdrop{background:#000a}\n@keyframes dm-in{from{opacity:0;transform:translateY(20px) scale(.98)}}\n@media (max-width:600px){dialog.dm{width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;padding-bottom:env(safe-area-inset-bottom);animation-name:dm-up}@keyframes dm-up{from{transform:translateY(100%)}}}\n@media (prefers-reduced-motion:reduce){dialog.dm{animation:none}.dm *{transition:none!important}}\n.dm form{display:flex;flex-direction:column;max-height:inherit;margin:0}\n.dm-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}\n.dm-titles{flex:1;min-width:0;padding-left:4px}\ndialog.dm h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\ndialog.dm p{margin:0;color:var(--dm-muted);font-size:13px;line-height:1.45}\ndialog.dm button{min-height:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;cursor:pointer}\ndialog.dm button:focus-visible,.dm-slider:focus-visible{outline:2px solid var(--dm-accent);outline-offset:3px}\n.dm-close{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;border-radius:50%!important;transition:background .15s}\n.dm-close:hover{background:var(--dm-surface)!important}\n.dm svg{width:24px;height:24px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}\n.dm-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:8px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:20px}\n.dm-slider{position:relative;width:132px;height:min(300px,38vh);min-height:200px;border-radius:28px;overflow:hidden;background:var(--dm-surface);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}\n.dm-slider:hover{background:var(--dm-surface-2)}\n.dm-slider[aria-disabled=true]{opacity:.5;cursor:default}\n.dm-fill{position:absolute;left:0;right:0;bottom:0;background:var(--dm-accent);opacity:.92;transition:height .2s}\n.dm-slider.dm-dragging .dm-fill{transition:none}\n.dm-readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;text-shadow:0 1px 2px #0004}\n.dm-big{font:500 34px/1.1 Roboto,system-ui,sans-serif}\n.dm-small{font-size:14px;opacity:.85}\n.dm-row{display:flex;justify-content:center;flex-wrap:wrap;gap:14px 10px;width:100%}\n.dm-round{display:flex!important;flex-direction:column;align-items:center;gap:6px;width:76px;font-size:12px!important}\n.dm-disc{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--dm-surface-2);transition:background .15s,color .15s}\n.dm-round:hover .dm-disc{background:color-mix(in srgb,var(--dm-surface-2) 70%,var(--dm-fg) 14%)}\n.dm-round:active .dm-disc{background:var(--dm-accent);color:var(--dm-accent-ink)}\n.dm-round:disabled{opacity:.4;cursor:default!important}\n.dm-round>span:last-child{max-width:100%;color:var(--dm-muted);text-align:center;overflow-wrap:anywhere;line-height:1.3}\n.dm-round ha-state-icon{--mdc-icon-size:24px;width:24px;height:24px;display:flex}\n.dm-section{width:100%;border-top:1px solid var(--dm-line);padding-top:16px;display:grid;gap:14px}\n.dm-section h3{margin:0;font-size:14px;font-weight:500}\n.dm-error:empty{display:none}\ndialog.dm .dm-error{color:var(--error-color,#db4437)}\n", Bp = {
+	close: "<path d=\"M6 6l12 12M18 6 6 18\"/>",
+	up: "<path d=\"M12 19V5M6 11l6-6 6 6\"/>",
+	stop: "<rect x=\"7\" y=\"7\" width=\"10\" height=\"10\" rx=\"1.5\" fill=\"currentColor\" stroke=\"none\"/>",
+	down: "<path d=\"M12 5v14M6 13l6 6 6-6\"/>"
+}, Vp = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true">${Bp[e]}</svg>`, Hp = (e, t, n) => `<button type="button" class="dm-round" data-action="${e}"><span class="dm-disc">${Vp(n)}</span><span>${t}</span></button>`, Up = `<style>${zp}</style><form method="dialog"><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${Vp("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${Hp("open", "Up", "up")}${Hp("stop", "Stop", "stop")}${Hp("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
+function Wp(e, { min: t, max: n, step: r }) {
+	let i = t + Math.round((Math.min(n, Math.max(t, e)) - t) / (r || 1)) * (r || 1);
+	return Number(Math.min(n, i).toFixed(6));
+}
+function Gp(e, t, n) {
+	let r = t.height ? 1 - (e - t.top) / t.height : 0;
+	return Wp(n.min + r * (n.max - n.min), n);
+}
+function Kp(e, { min: t, max: n }) {
+	return !Number.isFinite(e) || n <= t ? 0 : Math.min(1, Math.max(0, (e - t) / (n - t)));
+}
 // shared/lock.mjs
-var zp = {
+var qp = {
 	locked: "Locked",
 	unlocked: "Unlocked",
 	locking: "Locking",
@@ -15908,19 +15926,19 @@ var zp = {
 	open: "Open",
 	opening: "Opening"
 };
-function Bp(e) {
-	let t = e?.state, n = !e || !/^lock\./.test(e.entity_id || "") || !(t in zp);
+function Jp(e) {
+	let t = e?.state, n = !e || !/^lock\./.test(e.entity_id || "") || !(t in qp);
 	return {
 		state: n ? void 0 : t,
 		locked: n ? void 0 : t === "locked" || t === "locking",
 		moving: t === "locking" || t === "unlocking" || t === "opening",
 		jammed: t === "jammed",
 		needsCode: !!e?.attributes?.code_format,
-		label: n ? "Unavailable" : zp[t],
+		label: n ? "Unavailable" : qp[t],
 		unavailable: n
 	};
 }
-function Vp(e, t) {
+function Yp(e, t) {
 	e?.traverse?.((e) => {
 		let n = e.userData?.lockTurn;
 		if (!n) return;
@@ -15930,7 +15948,7 @@ function Vp(e, t) {
 	});
 }
 // shared/marker.mjs
-function Hp(e, t, n, r = !1) {
+function Xp(e, t, n, r = !1) {
 	if (e.type === "climate") {
 		let e = t ? Kf(t) : n?.mode ? n : Kf(void 0), r = qf(e);
 		return {
@@ -15948,7 +15966,7 @@ function Hp(e, t, n, r = !1) {
 		};
 	}
 	if (e.type === "lock") {
-		let e = r ? n || {} : t ? Bp(t) : n || {}, i = r || !!t, a = !i || !!e.unavailable;
+		let e = r ? n || {} : t ? Jp(t) : n || {}, i = r || !!t, a = !i || !!e.unavailable;
 		return {
 			badge: i ? a ? "!" : e.label : "—",
 			description: i ? a ? "Unavailable" : `${e.label}, Home Assistant lock controls` : "Not connected",
@@ -16014,21 +16032,21 @@ function Hp(e, t, n, r = !1) {
 		tone: u ? i ? "open" : "light" : void 0,
 		...h ? {
 			toneColor: `rgb(${m.map(Math.round).join(",")})`,
-			toneInk: Up(m)
+			toneInk: Zp(m)
 		} : {}
 	};
 }
-function Up([e, t, n]) {
+function Zp([e, t, n]) {
 	let r = (e) => e / 255 <= .03928 ? e / 255 / 12.92 : ((e / 255 + .055) / 1.055) ** 2.4;
 	return .2126 * r(e) + .7152 * r(t) + .0722 * r(n) > .4 ? "#1c1c1c" : "#fff";
 }
-function Wp(e, t) {
+function Qp(e, t) {
 	t?.tone ? e.dataset.tone = t.tone : delete e.dataset.tone;
 	for (let [n, r] of [["--tone", t?.tone && t.toneColor], ["--tone-ink", t?.tone && t.toneInk]]) r ? e.style?.setProperty?.(n, r) : e.style?.removeProperty?.(n);
 }
-var Gp = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", Kp = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
+var $p = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", em = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
 // shared/floor-view.mjs
-function qp(e, t, n, r = 0, i = 0) {
+function tm(e, t, n, r = 0, i = 0) {
 	if (![
 		...e,
 		...t,
@@ -16061,8 +16079,8 @@ function qp(e, t, n, r = 0, i = 0) {
 		far: h + m * 4 + 100
 	};
 }
-function Jp(e, t, n, r = 28, i = 0) {
-	let a = qp(e, t, n, r, i), o = Math.max(0, Math.min(180, r)) * Math.PI / 180, s = i * Math.PI / 180, c = [
+function nm(e, t, n, r = 28, i = 0) {
+	let a = tm(e, t, n, r, i), o = Math.max(0, Math.min(180, r)) * Math.PI / 180, s = i * Math.PI / 180, c = [
 		Math.sin(o) * Math.sin(s),
 		Math.cos(o),
 		Math.sin(o) * Math.cos(s)
@@ -16083,10 +16101,10 @@ function Jp(e, t, n, r = 28, i = 0) {
 	};
 }
 // shared/camera-view.mjs
-var Yp = (e, t) => Math.hypot(...e.map((e, n) => e - t[n])), Xp = (e) => Number(e.toFixed(2)), Zp = (e) => e * 180 / Math.PI;
-function Qp(e) {
+var rm = (e, t) => Math.hypot(...e.map((e, n) => e - t[n])), im = (e) => Number(e.toFixed(2)), am = (e) => e * 180 / Math.PI;
+function om(e) {
 	let t = (e) => Array.isArray(e) && e.length === 3 && e.every((e) => Number.isFinite(e) && Math.abs(e) < 1e4), n = (e) => Number.isFinite(e) && e > 0 && e <= 1e4;
-	if (!e || !t(e.position) || !t(e.target) || !t(e.up) || Math.hypot(...e.up) < 1e-8 || Yp(e.position, e.target) < 1e-8 || !n(e.aspect) || !n(e.zoom) || !n(e.referenceZoom) || !Number.isFinite(e.heading) || e.heading < 0 || e.heading >= 360 || !Number.isFinite(e.tilt) || e.tilt < 0 || e.tilt > 180 || !["perspective", "orthographic"].includes(e.projection)) throw Error("Invalid saved camera view.");
+	if (!e || !t(e.position) || !t(e.target) || !t(e.up) || Math.hypot(...e.up) < 1e-8 || rm(e.position, e.target) < 1e-8 || !n(e.aspect) || !n(e.zoom) || !n(e.referenceZoom) || !Number.isFinite(e.heading) || e.heading < 0 || e.heading >= 360 || !Number.isFinite(e.tilt) || e.tilt < 0 || e.tilt > 180 || !["perspective", "orthographic"].includes(e.projection)) throw Error("Invalid saved camera view.");
 	if (e.projection === "perspective" && (!Number.isFinite(e.fov) || e.fov < 1 || e.fov > 179)) throw Error("Invalid saved camera field of view.");
 	if (e.projection === "orthographic" && !n(e.halfHeight)) throw Error("Invalid saved floor view.");
 	return {
@@ -16102,16 +16120,16 @@ function Qp(e) {
 		...e.projection === "perspective" ? { fov: e.fov } : { halfHeight: e.halfHeight }
 	};
 }
-function $p({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, halfHeight: o, min: s, max: c }) {
-	let l = e.map((e, n) => e - t[n]), u = Math.hypot(...l), d = Math.hypot(l[0], l[2]) / u < 1e-8 && Math.hypot(n[0], n[2]) > 1e-8, f = l[1] >= 0 ? -1 : 1, p = Xp((Zp(d ? Math.atan2(f * n[0], f * n[2]) : Math.atan2(l[0], l[2])) + 360) % 360) % 360, m = Xp(Zp(Math.acos(Math.max(-1, Math.min(1, l[1] / u))))), h = o === void 0 ? "front" : "floor", g = (h === "floor" ? qp : Jp)(s, c, r, m, p), _;
-	_ = h === "floor" ? i * g.top / o : i * Yp(g.position, g.target) / u * Math.tan(g.fov * Math.PI / 360) / Math.tan(a * Math.PI / 360);
+function sm({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, halfHeight: o, min: s, max: c }) {
+	let l = e.map((e, n) => e - t[n]), u = Math.hypot(...l), d = Math.hypot(l[0], l[2]) / u < 1e-8 && Math.hypot(n[0], n[2]) > 1e-8, f = l[1] >= 0 ? -1 : 1, p = im((am(d ? Math.atan2(f * n[0], f * n[2]) : Math.atan2(l[0], l[2])) + 360) % 360) % 360, m = im(am(Math.acos(Math.max(-1, Math.min(1, l[1] / u))))), h = o === void 0 ? "front" : "floor", g = (h === "floor" ? tm : nm)(s, c, r, m, p), _;
+	_ = h === "floor" ? i * g.top / o : i * rm(g.position, g.target) / u * Math.tan(g.fov * Math.PI / 360) / Math.tan(a * Math.PI / 360);
 	let v = Number(Math.max(.01, Math.min(100, _)).toFixed(4));
 	return {
 		view: h,
 		heading: p,
 		tilt: m,
 		zoom: v,
-		camera: Qp({
+		camera: om({
 			projection: h === "floor" ? "orthographic" : "perspective",
 			position: [...e],
 			target: [...t],
@@ -16125,7 +16143,7 @@ function $p({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, hal
 		})
 	};
 }
-function em(e, t, n, r, i, a) {
+function cm(e, t, n, r, i, a) {
 	if (!Number.isFinite(r) || r <= 0) throw Error("Invalid camera aspect ratio.");
 	let o = Math.min(1, r / e.aspect);
 	if (!i || !a) return o;
@@ -16145,10 +16163,10 @@ function em(e, t, n, r, i, a) {
 	let h = Math.max(m, p / e.aspect), g = Math.max(m, p / r);
 	return g > 0 ? h / g : o;
 }
-function tm(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.tilt, zoom: o = e.referenceZoom }) {
-	let s = Qp(e), c = [...s.position], l = [...s.up];
+function lm(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.tilt, zoom: o = e.referenceZoom }) {
+	let s = om(e), c = [...s.position], l = [...s.up];
 	if (Math.abs(i - s.heading) > 1e-6 || Math.abs(a - s.tilt) > 1e-6) {
-		let e = i * Math.PI / 180, t = a * Math.PI / 180, n = Yp(s.position, s.target), r = [
+		let e = i * Math.PI / 180, t = a * Math.PI / 180, n = rm(s.position, s.target), r = [
 			Math.sin(t) * Math.sin(e),
 			Math.cos(t),
 			Math.sin(t) * Math.cos(e)
@@ -16164,7 +16182,7 @@ function tm(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.
 		target: [...s.target],
 		up: l,
 		aspect: t,
-		zoom: s.zoom * o / s.referenceZoom * em(s, c, l, t, n, r),
+		zoom: s.zoom * o / s.referenceZoom * cm(s, c, l, t, n, r),
 		...s.projection === "perspective" ? { fov: s.fov } : {
 			left: -s.halfHeight * t,
 			right: s.halfHeight * t,
@@ -16172,11 +16190,11 @@ function tm(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.
 			bottom: -s.halfHeight
 		},
 		near: .05,
-		far: Yp(c, s.target) + 1e3
+		far: rm(c, s.target) + 1e3
 	};
 }
 // shared/upload.mjs
-function nm(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
+function um(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
 	return new Promise((s, c) => {
 		let l = o();
 		l.open(t, e);
@@ -16193,13 +16211,13 @@ function nm(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = (
 		}, l.send(n);
 	});
 }
-async function rm(e, t, n) {
+async function dm(e, t, n) {
 	if (!(t === "/api/three_d_rooms/models" && n.method === "POST" || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+$/.test(t) && n.method === "PUT" || /^\/api\/three_d_rooms\/houses\/[a-z0-9_-]+$/.test(t) && ["POST", "PUT"].includes(n.method) || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+\/optimized\/(full|phone)$/.test(t) && n.method === "PUT")) throw Error("Unknown model upload.");
 	let r = t.includes("/optimized/"), i = n.headers?.["X-Rooms-Source-Revision"];
 	if (r && !/^[a-f0-9]{24}$/.test(i || "")) throw Error("Optimized scenes must name the upload they came from.");
 	let a = n.headers?.["X-Rooms-Matches"];
 	if (a !== void 0 && !/^[A-Za-z0-9_-]{1,6000}$/.test(a)) throw Error("Too many room and device choices to send at once.");
-	return e.auth.expired && await e.auth.refreshAccessToken(), nm(t, {
+	return e.auth.expired && await e.auth.refreshAccessToken(), um(t, {
 		...n,
 		headers: {
 			...n.headers?.["X-Rooms-Revision"] ? { "X-Rooms-Revision": n.headers["X-Rooms-Revision"] } : {},
@@ -16211,23 +16229,23 @@ async function rm(e, t, n) {
 	});
 }
 // shared/entity-icon.mjs
-function im(e) {
+function fm(e) {
 	let t = e.querySelector?.("svg");
 	if (t) return t;
 	for (let t of e.querySelectorAll?.("*") || []) if (t.shadowRoot) {
-		let e = im(t.shadowRoot);
+		let e = fm(t.shadowRoot);
 		if (e) return e;
 	}
 	return null;
 }
-async function am(e, t, n, { frames: r = 120 } = {}) {
+async function pm(e, t, n, { frames: r = 120 } = {}) {
 	let i = e.ownerDocument;
 	if (!i.defaultView.customElements.get("ha-state-icon")) return null;
 	let a = i.createElement("ha-state-icon");
 	a.hass = t, a.stateObj = n, a.setAttribute("aria-hidden", "true"), a.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;width:24px;height:24px", e.append(a);
 	try {
 		for (let e = 0; e < r; e++) {
-			let e = a.shadowRoot && im(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
+			let e = a.shadowRoot && fm(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
 			if (t?.length) return {
 				viewBox: e.getAttribute("viewBox") || "0 0 24 24",
 				paths: t.map((e) => ({
@@ -16245,7 +16263,7 @@ async function am(e, t, n, { frames: r = 120 } = {}) {
 	}
 }
 // dashboard/preview.js
-function om(e, t, n) {
+function mm(e, t, n) {
 	let r = document.createElement("dialog");
 	r.setAttribute("aria-labelledby", "dashboard-preview-title"), r.innerHTML = "<style>\n    dialog.dashboard-preview{box-sizing:border-box;width:min(960px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--divider-color,#777);border-radius:12px;background:var(--primary-background-color,#fafafa);color:var(--primary-text-color,#212121);font:14px/1.5 system-ui}\n    .dashboard-preview::backdrop{background:#0009}\n    .preview-toolbar{position:sticky;top:0;z-index:2;background:var(--primary-background-color,#fafafa);display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px;border-bottom:1px solid var(--divider-color,#777)}\n    .preview-toolbar h2{font-size:18px;margin:0;flex:1;min-width:160px}\n    .preview-actions{display:flex;align-items:center;gap:12px;margin-left:auto}\n    .preview-widths{display:flex;padding:3px;border:1px solid var(--divider-color,#ddd);border-radius:8px;background:var(--secondary-background-color,#eee)}\n    .preview-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:44px;padding:8px 12px;border:0;border-radius:5px;color:var(--secondary-text-color,#555);background:transparent;font:500 14px/20px system-ui;cursor:pointer;white-space:nowrap}\n    .preview-widths button[aria-pressed=\"true\"]{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff);box-shadow:0 1px 3px #0002}\n    .preview-toolbar button:hover{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff)}\n    .preview-toolbar .preview-close{width:44px;padding:10px;border-radius:50%}\n    .preview-toolbar svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}\n    @media(max-width:480px){.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{flex-basis:100%}.preview-actions{width:100%;justify-content:space-between}.preview-widths{flex:1}.preview-widths button{flex:1}}\n    .preview-toolbar :focus-visible{outline:2px solid var(--primary-color,#03a9f4);outline-offset:2px}\n    .preview-note{margin:0;padding:12px 16px;color:var(--secondary-text-color,#555)}\n    .preview-dashboard{padding:16px;background:var(--lovelace-background,var(--primary-background-color,#fafafa))}\n    .preview-card{width:100%;max-width:560px;margin:auto}\n    .preview-card[data-width=\"phone\"]{max-width:360px}\n    @media(max-width:600px){dialog.dashboard-preview{width:100vw;max-width:100vw;max-height:100dvh;margin:auto 0;border-radius:0;overflow:auto;overscroll-behavior:contain}.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{font-size:16px}.preview-note{font-size:13px;padding:12px}.preview-dashboard{padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}}\n  </style><div class=\"preview-toolbar\"><h2 id=\"dashboard-preview-title\">Dashboard preview</h2><div class=\"preview-actions\"><div class=\"preview-widths\" role=\"group\" aria-label=\"Preview card width\"><button type=\"button\" data-width=\"desktop\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 21h8M12 16v5\"/></svg>Desktop</button><button type=\"button\" data-width=\"phone\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></svg>Phone</button></div><button class=\"preview-close\" type=\"button\" aria-label=\"Close preview\" title=\"Close preview\" autofocus><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></div></div><p class=\"preview-note\">Your current changes, without saving. Device controls are live. The final card width depends on your dashboard layout.</p><div class=\"preview-dashboard\"><div class=\"preview-card\"></div></div>", r.className = "dashboard-preview";
 	let i = document.createElement("three-d-rooms-card");
@@ -16276,7 +16294,7 @@ function om(e, t, n) {
 	};
 }
 // dashboard/panel.js
-var sm = class extends HTMLElement {
+var hm = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block;height:100%;min-height:100vh}iframe{display:block;width:100%;height:100vh;border:0}</style><iframe title=\"3D Rooms model library\"></iframe>", this._frame = this.shadowRoot.querySelector("iframe"), this._iconCache = /* @__PURE__ */ new Map(), this._ready = (e) => {
 			if (e.source !== this._frame.contentWindow || e.origin !== location.origin || e.data?.type !== "three-d-rooms-ready") return;
@@ -16290,7 +16308,7 @@ var sm = class extends HTMLElement {
 				},
 				preview: async (e) => {
 					this._preview?.close();
-					let t = om(this.shadowRoot, e, this._hass);
+					let t = mm(this.shadowRoot, e, this._hass);
 					this._preview = t, await t.closed, this._preview === t && (this._preview = null);
 				},
 				navigate: (e) => {
@@ -16311,7 +16329,7 @@ var sm = class extends HTMLElement {
 					data: t
 				}),
 				asset: (e, t) => this._hass.fetchWithAuth(e, t),
-				upload: (e, t) => rm(this._hass, e, t),
+				upload: (e, t) => dm(this._hass, e, t),
 				scene: (e, t = "full") => Wf(this._hass, e, t),
 				entityIcon: (e) => {
 					let t = JSON.stringify([
@@ -16320,7 +16338,7 @@ var sm = class extends HTMLElement {
 						e.attributes?.icon,
 						e.attributes?.device_class
 					]);
-					return this._iconCache.has(t) || (this._iconCache.set(t, am(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
+					return this._iconCache.has(t) || (this._iconCache.set(t, pm(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
 				},
 				subscribeModels: (e) => this._hass.connection.subscribeEvents(e, "three_d_rooms_updated"),
 				subscribe: (e) => (this._listener = e, this._publish(), () => {
@@ -16349,9 +16367,9 @@ var sm = class extends HTMLElement {
 		this._preview?.close(), window.removeEventListener("message", this._ready), this._listener = null;
 	}
 };
-customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", sm);
+customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", hm);
 // shared/house-floors.mjs
-function cm(e, t) {
+function gm(e, t) {
 	if (!t?.houseView || !Array.isArray(e)) return [];
 	let n = e.filter((e) => e?.houseView && e.houseId === t.houseId);
 	return n.length < 2 ? [] : n.map((e) => ({
@@ -16360,11 +16378,11 @@ function cm(e, t) {
 		label: e.houseFloor?.name || "Whole house"
 	})).sort((e, t) => e.floorId === null ? -1 : +(t.floorId === null));
 }
-function lm(e, t, n) {
-	return !n || n === t?.id ? t : cm(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
+function _m(e, t, n) {
+	return !n || n === t?.id ? t : gm(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
 }
-function um(e, t, n = !0) {
-	let r = n ? cm(e, t) : [];
+function vm(e, t, n = !0) {
+	let r = n ? gm(e, t) : [];
 	if (!r.length) return {
 		model: t,
 		floors: [],
@@ -16378,7 +16396,7 @@ function um(e, t, n = !0) {
 	};
 }
 // dashboard/editor.js
-var dm = {
+var ym = {
 	model: "Room",
 	title: "Title",
 	show_title: "Show title",
@@ -16388,14 +16406,14 @@ var dm = {
 	zoom: "Zoom",
 	height: "Height",
 	interactive: "Camera movement"
-}, fm = {
+}, bm = {
 	show_title: !0,
 	height: 500,
 	view: "front",
 	heading: 0,
 	tilt: 28,
 	zoom: 1
-}, pm = class extends HTMLElement {
+}, xm = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>
       :host{display:block;container-type:inline-size;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}
@@ -16462,7 +16480,7 @@ var dm = {
 			let i = document.createElement("div");
 			i.className = "override-controls", i.id = `override-controls-${e}`, i.hidden = !0;
 			let a = document.createElement("button");
-			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${dm[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
+			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${ym[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
 		}
 		this._field("height-mode").onchange = () => {
 			this._field("height-mode").disabled || this._emit({
@@ -16573,19 +16591,19 @@ var dm = {
 			let t = !!this._config.saved_view, r = Object.hasOwn(this._config, e);
 			this._field(`reset-field-${e}`).hidden = !t || !r || !n || this._config[e] === n[e], this._field(`override-controls-${e}`).hidden = this._field(`reset-field-${e}`).hidden, this._field(e).disabled = !1;
 		}
-		for (let t of Object.keys(fm).concat([
+		for (let t of Object.keys(bm).concat([
 			"model",
 			"title",
 			"interactive"
 		])) {
-			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : fm[t]) ?? "";
+			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : bm[t]) ?? "";
 			t === "interactive" || t === "show_title" ? n.checked = !!a : n.value = a;
 		}
 		this._field("height-mode").value = e.height === "auto" ? "auto" : "fixed", this._field("height-mode").disabled = this._field("height").disabled, this._field("height").hidden = e.height === "auto";
 		let r = e.model, i = this._field("model");
 		r && ![...i.options].some((e) => e.value === r) && (i.add(new Option(`${r} (not in room library)`, r)), i.value = r);
 		let a = this._models?.find((e) => e.id === r);
-		this._field("floor-selector-setting").hidden = !cm(this._models, a).length, this._field("room-focus-setting").hidden = !a?.houseView, this._field("room_focus").checked = this._config.room_focus !== !1, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("light_panel").checked = this._config.light_panel !== !1, this._field("edit_button").checked = this._config.edit_button !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1;
+		this._field("floor-selector-setting").hidden = !gm(this._models, a).length, this._field("room-focus-setting").hidden = !a?.houseView, this._field("room_focus").checked = this._config.room_focus !== !1, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("light_panel").checked = this._config.light_panel !== !1, this._field("edit_button").checked = this._config.edit_button !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1;
 		let o = e.background || "spotlight";
 		this._field("background").value = o, this._field("background-image-setting").hidden = o !== "image", this._field("background_image").value = e.background_image || "", this._field("background_image").setCustomValidity(!e.background_image || pp(e.background_image) ? "" : "Use an address starting with /, http:// or https://"), this._field("background_shadow").checked = mp({
 			...e,
@@ -16713,9 +16731,9 @@ var dm = {
 		}));
 	}
 };
-customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", pm);
+customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", xm);
 // shared/shadow-budget.mjs
-function mm(e, t, n = Infinity) {
+function Sm(e, t, n = Infinity) {
 	let r = 0, i = [];
 	e.traverse((e) => {
 		if (e.isLight && e.castShadow && i.push(e), e.isMesh) for (let t of Array.isArray(e.material) ? e.material : [e.material]) {
@@ -16737,17 +16755,17 @@ function mm(e, t, n = Infinity) {
 	};
 }
 // shared/render-profile.mjs
-var hm = [
+var Cm = [
 	"auto",
 	"high",
 	"low"
 ];
-function gm(e = globalThis) {
+function wm(e = globalThis) {
 	if (e.navigator?.userAgentData?.mobile) return !0;
 	let t = (t) => !!e.matchMedia?.(t)?.matches;
 	return t("(pointer: coarse)") && !t("(any-pointer: fine)");
 }
-function _m({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {}) {
+function Tm({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {}) {
 	let r = Number.isFinite(n) && n > 0 ? n : 1, i = e === "low" || e !== "high" && t;
 	return i ? {
 		low: i,
@@ -16763,14 +16781,14 @@ function _m({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {
 		shadowMapSize: Infinity
 	};
 }
-function vm(e = "auto", t = globalThis) {
-	return _m({
+function Em(e = "auto", t = globalThis) {
+	return Tm({
 		quality: e,
-		mobile: gm(t),
+		mobile: wm(t),
 		devicePixelRatio: t.devicePixelRatio
 	}).low ? "phone" : "full";
 }
-function ym(e, t) {
+function Dm(e, t) {
 	Number.isFinite(t) && e.traverse((e) => {
 		let n = e.isLight && e.shadow;
 		if (!n?.mapSize) return;
@@ -16779,8 +16797,8 @@ function ym(e, t) {
 	});
 }
 // shared/climate-visual.mjs
-var bm = "\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    vUv = uv;\n    vec4 view = modelViewMatrix * vec4(position, 1.0);\n    vNormal = normalize(normalMatrix * normal);\n    vView = -view.xyz;\n    gl_Position = projectionMatrix * view;\n  }\n", xm = "\n  uniform vec3 uColor;\n  uniform float uTime;\n  uniform float uPhase;\n  uniform float uStrength;\n  uniform float uCore;\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    float facing = abs(dot(normalize(vNormal), normalize(vView)));\n    float softEdge = pow(facing, mix(2.6, 0.7, uCore));\n    float fade = smoothstep(0.0, 0.06, vUv.x)\n               * (1.0 - smoothstep(0.82, 1.0, vUv.x));\n    float phase = fract(vUv.x * 2.2 - uTime * 0.65 + uPhase);\n    float pulse = smoothstep(0.0, 0.15, phase)\n                * (1.0 - smoothstep(0.40, 0.92, phase));\n    float alpha = uStrength * softEdge * fade * (0.32 + 0.68 * pulse);\n    if (uCore < 0.0) {\n      float across = vUv.y * 2.0 - 1.0;\n      float edge = pow(max(0.0, 1.0 - across * across), 1.4);\n      float wave = pow(0.5 + 0.5 * cos((vUv.x + across * across * 0.10) * 21.0 - uTime * 3.2), 5.0);\n      alpha = uStrength * edge * fade * (0.14 + 0.86 * wave);\n    }\n    vec3 color = mix(uColor, vec3(1.0), clamp(uCore, 0.0, 1.0) * 0.14);\n    gl_FragColor = vec4(color, alpha);\n    #include <colorspace_fragment>\n  }\n";
-function Sm(e, { reducedMotion: t = !1 } = {}) {
+var Om = "\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    vUv = uv;\n    vec4 view = modelViewMatrix * vec4(position, 1.0);\n    vNormal = normalize(normalMatrix * normal);\n    vView = -view.xyz;\n    gl_Position = projectionMatrix * view;\n  }\n", km = "\n  uniform vec3 uColor;\n  uniform float uTime;\n  uniform float uPhase;\n  uniform float uStrength;\n  uniform float uCore;\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    float facing = abs(dot(normalize(vNormal), normalize(vView)));\n    float softEdge = pow(facing, mix(2.6, 0.7, uCore));\n    float fade = smoothstep(0.0, 0.06, vUv.x)\n               * (1.0 - smoothstep(0.82, 1.0, vUv.x));\n    float phase = fract(vUv.x * 2.2 - uTime * 0.65 + uPhase);\n    float pulse = smoothstep(0.0, 0.15, phase)\n                * (1.0 - smoothstep(0.40, 0.92, phase));\n    float alpha = uStrength * softEdge * fade * (0.32 + 0.68 * pulse);\n    if (uCore < 0.0) {\n      float across = vUv.y * 2.0 - 1.0;\n      float edge = pow(max(0.0, 1.0 - across * across), 1.4);\n      float wave = pow(0.5 + 0.5 * cos((vUv.x + across * across * 0.10) * 21.0 - uTime * 3.2), 5.0);\n      alpha = uStrength * edge * fade * (0.14 + 0.86 * wave);\n    }\n    vec3 color = mix(uColor, vec3(1.0), clamp(uCore, 0.0, 1.0) * 0.14);\n    gl_FragColor = vec4(color, alpha);\n    #include <colorspace_fragment>\n  }\n";
+function Am(e, { reducedMotion: t = !1 } = {}) {
 	let n = e.userData.climateVisual;
 	if (!n || n.version !== 1 || !Array.isArray(n.outlet) || n.outlet.length !== 3 || !n.outlet.every((e) => Number.isFinite(e) && Math.abs(e) < 10) || !Number.isFinite(n.width) || n.width < .1 || n.width > 5) return null;
 	let r = new Tn();
@@ -16795,8 +16813,8 @@ function Sm(e, { reducedMotion: t = !1 } = {}) {
 		]);
 		for (let t of [!1, !0]) {
 			let c = new Ia(s, 40, Ot.clamp(n.width * (t ? .012 : .044), t ? .005 : .02, t ? .014 : .045), 8, !1), l = new Ga({
-				vertexShader: bm,
-				fragmentShader: xm,
+				vertexShader: Om,
+				fragmentShader: km,
 				uniforms: {
 					uTime: i,
 					uColor: a,
@@ -16833,8 +16851,8 @@ function Sm(e, { reducedMotion: t = !1 } = {}) {
 	let d = new Dr();
 	d.setAttribute("position", new hr(c, 3)), d.setAttribute("uv", new hr(l, 2)), d.setIndex(u), d.computeVertexNormals();
 	let f = new Ga({
-		vertexShader: bm,
-		fragmentShader: xm,
+		vertexShader: Om,
+		fragmentShader: km,
 		uniforms: {
 			uTime: i,
 			uColor: a,
@@ -16890,7 +16908,7 @@ function Sm(e, { reducedMotion: t = !1 } = {}) {
 	};
 }
 // shared/daylight.mjs
-function Cm(e, t, n = 0) {
+function jm(e, t, n = 0) {
 	if (e === "day") return 1;
 	if (e === "night") return 0;
 	if (!t || ["unknown", "unavailable"].includes(t.state)) return n;
@@ -16901,7 +16919,7 @@ function Cm(e, t, n = 0) {
 	}
 	return t.state === "above_horizon" ? 1 : t.state === "below_horizon" ? 0 : n;
 }
-function wm(e) {
+function Mm(e) {
 	let t = new Tn();
 	t.name = "daylight-runtime", t.userData.daylightRuntime = !0;
 	let n = new Po("#c4dfff", "#a39b82", 0);
@@ -16925,7 +16943,7 @@ function wm(e) {
 		for (let { w: e, light: t, sky: n } of r) t.visible = t.target.visible = n.visible = s(e);
 	}
 	function l(e, t, o = /* @__PURE__ */ new Map()) {
-		i = Cm(e, t, i);
+		i = jm(e, t, i);
 		let c = 0, l = 0;
 		for (let { w: e, light: t, sky: n } of r) {
 			if (!s(e)) continue;
@@ -16946,14 +16964,14 @@ function wm(e) {
 	};
 }
 // shared/view-cube.mjs
-function Tm([e, t, n]) {
+function Nm([e, t, n]) {
 	return [
 		t > 0 ? "top" : t < 0 ? "bottom" : "",
 		n > 0 ? "front" : n < 0 ? "back" : "",
 		e > 0 ? "right" : e < 0 ? "left" : ""
 	].filter(Boolean).join("-");
 }
-var Em = [];
+var Pm = [];
 for (let e of [
 	-1,
 	0,
@@ -16966,8 +16984,8 @@ for (let e of [
 	-1,
 	0,
 	1
-]) (e || t || n) && Em.push({
-	name: Tm([
+]) (e || t || n) && Pm.push({
+	name: Nm([
 		e,
 		t,
 		n
@@ -16988,11 +17006,11 @@ for (let e of [
 	].filter(Boolean).length === 2 ? "edge" : "face"
 });
 // shared/camera-presets.mjs
-var Dm = Object.freeze(Object.fromEntries(Em.map(({ name: e, vector: [t, n, r] }) => [e, {
+var Fm = Object.freeze(Object.fromEntries(Pm.map(({ name: e, vector: [t, n, r] }) => [e, {
 	heading: (Math.atan2(t, r) * 180 / Math.PI + 360) % 360,
 	tilt: Math.acos(n / Math.hypot(t, n, r)) * 180 / Math.PI
 }])));
-function Om(e, t = "front") {
+function Im(e, t = "front") {
 	let n = t === "floor" ? "floor" : "front";
 	if (e === "reset") return {
 		view: n,
@@ -17001,45 +17019,45 @@ function Om(e, t = "front") {
 		zoom: 1,
 		camera: void 0
 	};
-	if (!Object.hasOwn(Dm, e)) throw Error("Unknown camera view.");
+	if (!Object.hasOwn(Fm, e)) throw Error("Unknown camera view.");
 	return {
 		view: n,
-		...Dm[e],
+		...Fm[e],
 		zoom: 1,
 		camera: void 0
 	};
 }
 // shared/room-focus.mjs
-function km(e, t) {
+function Lm(e, t) {
 	return e?.roomTitles?.[t] || e?.controls?.find((e) => e.sourceModel === t)?.roomTitle || "Room";
 }
-function Am(e) {
+function Rm(e) {
 	return !e?.houseView || e.focusRoom || (e.members?.length || 0) < 2 ? [] : e.members.map((t) => ({
 		room: t.model,
-		title: Ep(km(e, t.model))
+		title: Ep(Lm(e, t.model))
 	}));
 }
-function jm(e, t) {
+function zm(e, t) {
 	let n = e?.members?.find((e) => e.model === t);
-	return !n || !Am(e).length ? null : {
+	return !n || !Rm(e).length ? null : {
 		...e,
-		title: km(e, t),
+		title: Lm(e, t),
 		members: [n],
 		controls: e.controls.filter((e) => e.sourceModel === t),
 		houseFloor: null,
 		focusRoom: t
 	};
 }
-function Mm(e) {
+function Bm(e) {
 	let t = null;
 	for (let n of e) (!t || n.y > t.y) && (t = n);
 	return t;
 }
-var Nm = .6, Pm = .7;
-function Fm(e, t, n = !1) {
-	return e === "always" || e !== "never" && t < (n ? Pm : Nm);
+var Vm = .6, Hm = .7;
+function Um(e, t, n = !1) {
+	return e === "always" || e !== "never" && t < (n ? Hm : Vm);
 }
-function Im(e, t = 4) {
+function Wm(e, t = 4) {
 	let n = [], r = e.map((e) => e.y), i = e.map((e, t) => t).sort((t, n) => Number(!!e[n].fixed) - Number(!!e[t].fixed) || e[t].y - e[n].y);
 	for (let a of i) {
 		let i = e[a], o = i.y;
@@ -17058,17 +17076,17 @@ function Im(e, t = 4) {
 	return r;
 }
 // shared/occlusion.mjs
-function Lm(e, t, n) {
+function Gm(e, t, n) {
 	return e / 255 + t / 255 / 255 + n / 255 / 65025;
 }
-function Rm(e, t, n, r = !1) {
+function Km(e, t, n, r = !1) {
 	return r ? (e * (n - t) + (n + t)) / 2 : 2 * t * n / (n + t - e * (n - t));
 }
-function zm(e, t, n, { tolerance: r = .1, share: i = .55 } = {}) {
+function qm(e, t, n, { tolerance: r = .1, share: i = .55 } = {}) {
 	return e.length ? e.filter((e) => e.room !== 0 && e.room !== t && e.distance < n - r).length / e.length >= i : !1;
 }
 // node_modules/three/examples/jsm/controls/OrbitControls.js
-var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = new Vr(), Wm = new Pr(), Gm = Math.cos(70 * Ot.DEG2RAD), Km = new G(), qm = 2 * Math.PI, Jm = {
+var Jm = { type: "change" }, Ym = { type: "start" }, Xm = { type: "end" }, Zm = new Vr(), Qm = new Pr(), $m = Math.cos(70 * Ot.DEG2RAD), eh = new G(), th = 2 * Math.PI, nh = {
 	NONE: -1,
 	ROTATE: 0,
 	DOLLY: 1,
@@ -17077,9 +17095,9 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 	TOUCH_PAN: 4,
 	TOUCH_DOLLY_PAN: 5,
 	TOUCH_DOLLY_ROTATE: 6
-}, Ym = 1e-6, Xm = class extends Ds {
+}, rh = 1e-6, ih = class extends Ds {
 	constructor(n, r = null) {
-		super(n, r), this.state = Jm.NONE, this.target = new G(), this.cursor = new G(), this.minDistance = 0, this.maxDistance = Infinity, this.minZoom = 0, this.maxZoom = Infinity, this.minTargetRadius = 0, this.maxTargetRadius = Infinity, this.minPolarAngle = 0, this.maxPolarAngle = Math.PI, this.minAzimuthAngle = -Infinity, this.maxAzimuthAngle = Infinity, this.enableDamping = !1, this.dampingFactor = .05, this.enableZoom = !0, this.zoomSpeed = 1, this.enableRotate = !0, this.rotateSpeed = 1, this.keyRotateSpeed = 1, this.enablePan = !0, this.panSpeed = 1, this.screenSpacePanning = !0, this.keyPanSpeed = 7, this.zoomToCursor = !1, this.autoRotate = !1, this.autoRotateSpeed = 2, this.keys = {
+		super(n, r), this.state = nh.NONE, this.target = new G(), this.cursor = new G(), this.minDistance = 0, this.maxDistance = Infinity, this.minZoom = 0, this.maxZoom = Infinity, this.minTargetRadius = 0, this.maxTargetRadius = Infinity, this.minPolarAngle = 0, this.maxPolarAngle = Math.PI, this.minAzimuthAngle = -Infinity, this.maxAzimuthAngle = Infinity, this.enableDamping = !1, this.dampingFactor = .05, this.enableZoom = !0, this.zoomSpeed = 1, this.enableRotate = !0, this.rotateSpeed = 1, this.keyRotateSpeed = 1, this.enablePan = !0, this.panSpeed = 1, this.screenSpacePanning = !0, this.keyPanSpeed = 7, this.zoomToCursor = !1, this.autoRotate = !1, this.autoRotateSpeed = 2, this.keys = {
 			LEFT: "ArrowLeft",
 			UP: "ArrowUp",
 			RIGHT: "ArrowRight",
@@ -17091,7 +17109,7 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 		}, this.touches = {
 			ONE: t.ROTATE,
 			TWO: t.DOLLY_PAN
-		}, this.target0 = this.target.clone(), this.position0 = this.object.position.clone(), this.zoom0 = this.object.zoom, this._cursorStyle = "auto", this._domElementKeyEvents = null, this._lastPosition = new G(), this._lastQuaternion = new kt(), this._lastTargetPosition = new G(), this._quat = new kt().setFromUnitVectors(n.up, new G(0, 1, 0)), this._quatInverse = this._quat.clone().invert(), this._spherical = new ws(), this._sphericalDelta = new ws(), this._scale = 1, this._panOffset = new G(), this._rotateStart = new W(), this._rotateEnd = new W(), this._rotateDelta = new W(), this._panStart = new W(), this._panEnd = new W(), this._panDelta = new W(), this._dollyStart = new W(), this._dollyEnd = new W(), this._dollyDelta = new W(), this._dollyDirection = new G(), this._mouse = new W(), this._performCursorZoom = !1, this._pointers = [], this._pointerPositions = {}, this._controlActive = !1, this._onPointerMove = Qm.bind(this), this._onPointerDown = Zm.bind(this), this._onPointerUp = $m.bind(this), this._onContextMenu = oh.bind(this), this._onMouseWheel = nh.bind(this), this._onKeyDown = rh.bind(this), this._onTouchStart = ih.bind(this), this._onTouchMove = ah.bind(this), this._onMouseDown = eh.bind(this), this._onMouseMove = th.bind(this), this._interceptControlDown = sh.bind(this), this._interceptControlUp = ch.bind(this), this.domElement !== null && this.connect(this.domElement), this.update();
+		}, this.target0 = this.target.clone(), this.position0 = this.object.position.clone(), this.zoom0 = this.object.zoom, this._cursorStyle = "auto", this._domElementKeyEvents = null, this._lastPosition = new G(), this._lastQuaternion = new kt(), this._lastTargetPosition = new G(), this._quat = new kt().setFromUnitVectors(n.up, new G(0, 1, 0)), this._quatInverse = this._quat.clone().invert(), this._spherical = new ws(), this._sphericalDelta = new ws(), this._scale = 1, this._panOffset = new G(), this._rotateStart = new W(), this._rotateEnd = new W(), this._rotateDelta = new W(), this._panStart = new W(), this._panEnd = new W(), this._panDelta = new W(), this._dollyStart = new W(), this._dollyEnd = new W(), this._dollyDelta = new W(), this._dollyDirection = new G(), this._mouse = new W(), this._performCursorZoom = !1, this._pointers = [], this._pointerPositions = {}, this._controlActive = !1, this._onPointerMove = oh.bind(this), this._onPointerDown = ah.bind(this), this._onPointerUp = sh.bind(this), this._onContextMenu = mh.bind(this), this._onMouseWheel = uh.bind(this), this._onKeyDown = dh.bind(this), this._onTouchStart = fh.bind(this), this._onTouchMove = ph.bind(this), this._onMouseDown = ch.bind(this), this._onMouseMove = lh.bind(this), this._interceptControlDown = hh.bind(this), this._interceptControlUp = gh.bind(this), this.domElement !== null && this.connect(this.domElement), this.update();
 	}
 	set cursorStyle(e) {
 		this._cursorStyle = e, e === "grab" ? this.domElement.style.cursor = "grab" : this.domElement.style.cursor = "auto";
@@ -17106,7 +17124,7 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 		}), this.domElement.style.touchAction = "none";
 	}
 	disconnect() {
-		this.state = Jm.NONE, this.domElement.removeEventListener("pointerdown", this._onPointerDown), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.domElement.removeEventListener("pointercancel", this._onPointerUp), this.domElement.removeEventListener("wheel", this._onMouseWheel), this.domElement.removeEventListener("contextmenu", this._onContextMenu), this.stopListenToKeyEvents();
+		this.state = nh.NONE, this.domElement.removeEventListener("pointerdown", this._onPointerDown), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.domElement.removeEventListener("pointercancel", this._onPointerUp), this.domElement.removeEventListener("wheel", this._onMouseWheel), this.domElement.removeEventListener("contextmenu", this._onContextMenu), this.stopListenToKeyEvents();
 		let e = this.domElement.getRootNode();
 		e.removeEventListener("keydown", this._interceptControlDown, { capture: !0 }), e.removeEventListener("keyup", this._interceptControlUp, { capture: !0 }), this._controlActive = !1, this._pointers.length = 0, this._pointerPositions = {}, this.domElement.style.touchAction = "", this.domElement.style.cursor = "auto";
 	}
@@ -17132,7 +17150,7 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 		this.target0.copy(this.target), this.position0.copy(this.object.position), this.zoom0 = this.object.zoom;
 	}
 	reset() {
-		this.target.copy(this.target0), this.object.position.copy(this.position0), this.object.zoom = this.zoom0, this.object.updateProjectionMatrix(), this.dispatchEvent(Bm), this.update(), this.state = Jm.NONE;
+		this.target.copy(this.target0), this.object.position.copy(this.position0), this.object.zoom = this.zoom0, this.object.updateProjectionMatrix(), this.dispatchEvent(Jm), this.update(), this.state = nh.NONE;
 	}
 	pan(e, t) {
 		this._pan(e, t), this.update();
@@ -17151,19 +17169,19 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 	}
 	update(e = null) {
 		let t = this.object.position;
-		Km.copy(t).sub(this.target), Km.applyQuaternion(this._quat), this._spherical.setFromVector3(Km), this.autoRotate && this.state === Jm.NONE && this._rotateLeft(this._getAutoRotationAngle(e)), this.enableDamping ? (this._spherical.theta += this._sphericalDelta.theta * this.dampingFactor, this._spherical.phi += this._sphericalDelta.phi * this.dampingFactor) : (this._spherical.theta += this._sphericalDelta.theta, this._spherical.phi += this._sphericalDelta.phi);
+		eh.copy(t).sub(this.target), eh.applyQuaternion(this._quat), this._spherical.setFromVector3(eh), this.autoRotate && this.state === nh.NONE && this._rotateLeft(this._getAutoRotationAngle(e)), this.enableDamping ? (this._spherical.theta += this._sphericalDelta.theta * this.dampingFactor, this._spherical.phi += this._sphericalDelta.phi * this.dampingFactor) : (this._spherical.theta += this._sphericalDelta.theta, this._spherical.phi += this._sphericalDelta.phi);
 		let n = this.minAzimuthAngle, r = this.maxAzimuthAngle;
-		isFinite(n) && isFinite(r) && (n < -Math.PI ? n += qm : n > Math.PI && (n -= qm), r < -Math.PI ? r += qm : r > Math.PI && (r -= qm), n <= r ? this._spherical.theta = Math.max(n, Math.min(r, this._spherical.theta)) : this._spherical.theta = this._spherical.theta > (n + r) / 2 ? Math.max(n, this._spherical.theta) : Math.min(r, this._spherical.theta)), this._spherical.phi = Math.max(this.minPolarAngle, Math.min(this.maxPolarAngle, this._spherical.phi)), this._spherical.makeSafe(), this.enableDamping === !0 ? this.target.addScaledVector(this._panOffset, this.dampingFactor) : this.target.add(this._panOffset), this.target.sub(this.cursor), this.target.clampLength(this.minTargetRadius, this.maxTargetRadius), this.target.add(this.cursor);
+		isFinite(n) && isFinite(r) && (n < -Math.PI ? n += th : n > Math.PI && (n -= th), r < -Math.PI ? r += th : r > Math.PI && (r -= th), n <= r ? this._spherical.theta = Math.max(n, Math.min(r, this._spherical.theta)) : this._spherical.theta = this._spherical.theta > (n + r) / 2 ? Math.max(n, this._spherical.theta) : Math.min(r, this._spherical.theta)), this._spherical.phi = Math.max(this.minPolarAngle, Math.min(this.maxPolarAngle, this._spherical.phi)), this._spherical.makeSafe(), this.enableDamping === !0 ? this.target.addScaledVector(this._panOffset, this.dampingFactor) : this.target.add(this._panOffset), this.target.sub(this.cursor), this.target.clampLength(this.minTargetRadius, this.maxTargetRadius), this.target.add(this.cursor);
 		let i = !1;
 		if (this.zoomToCursor && this._performCursorZoom || this.object.isOrthographicCamera) this._spherical.radius = this._clampDistance(this._spherical.radius);
 		else {
 			let e = this._spherical.radius;
 			this._spherical.radius = this._clampDistance(this._spherical.radius * this._scale), i = e != this._spherical.radius;
 		}
-		if (Km.setFromSpherical(this._spherical), Km.applyQuaternion(this._quatInverse), t.copy(this.target).add(Km), this.object.lookAt(this.target), this.enableDamping === !0 ? (this._sphericalDelta.theta *= 1 - this.dampingFactor, this._sphericalDelta.phi *= 1 - this.dampingFactor, this._panOffset.multiplyScalar(1 - this.dampingFactor)) : (this._sphericalDelta.set(0, 0, 0), this._panOffset.set(0, 0, 0)), this.zoomToCursor && this._performCursorZoom) {
+		if (eh.setFromSpherical(this._spherical), eh.applyQuaternion(this._quatInverse), t.copy(this.target).add(eh), this.object.lookAt(this.target), this.enableDamping === !0 ? (this._sphericalDelta.theta *= 1 - this.dampingFactor, this._sphericalDelta.phi *= 1 - this.dampingFactor, this._panOffset.multiplyScalar(1 - this.dampingFactor)) : (this._sphericalDelta.set(0, 0, 0), this._panOffset.set(0, 0, 0)), this.zoomToCursor && this._performCursorZoom) {
 			let e = null;
 			if (this.object.isPerspectiveCamera) {
-				let t = Km.length();
+				let t = eh.length();
 				e = this._clampDistance(t * this._scale);
 				let n = t - e;
 				this.object.position.addScaledVector(this._dollyDirection, n), this.object.updateMatrixWorld(), i = !!n;
@@ -17173,17 +17191,17 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 				let n = this.object.zoom;
 				this.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom / this._scale)), this.object.updateProjectionMatrix(), i = n !== this.object.zoom;
 				let r = new G(this._mouse.x, this._mouse.y, 0);
-				r.unproject(this.object), this.object.position.sub(r).add(t), this.object.updateMatrixWorld(), e = Km.length();
+				r.unproject(this.object), this.object.position.sub(r).add(t), this.object.updateMatrixWorld(), e = eh.length();
 			} else console.warn("WARNING: OrbitControls.js encountered an unknown camera type - zoom to cursor disabled."), this.zoomToCursor = !1;
-			e !== null && (this.screenSpacePanning ? this.target.set(0, 0, -1).transformDirection(this.object.matrix).multiplyScalar(e).add(this.object.position) : (Um.origin.copy(this.object.position), Um.direction.set(0, 0, -1).transformDirection(this.object.matrix), Math.abs(this.object.up.dot(Um.direction)) < Gm ? this.object.lookAt(this.target) : (Wm.setFromNormalAndCoplanarPoint(this.object.up, this.target), Um.intersectPlane(Wm, this.target))));
+			e !== null && (this.screenSpacePanning ? this.target.set(0, 0, -1).transformDirection(this.object.matrix).multiplyScalar(e).add(this.object.position) : (Zm.origin.copy(this.object.position), Zm.direction.set(0, 0, -1).transformDirection(this.object.matrix), Math.abs(this.object.up.dot(Zm.direction)) < $m ? this.object.lookAt(this.target) : (Qm.setFromNormalAndCoplanarPoint(this.object.up, this.target), Zm.intersectPlane(Qm, this.target))));
 		} else if (this.object.isOrthographicCamera) {
 			let e = this.object.zoom;
 			this.object.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.object.zoom / this._scale)), e !== this.object.zoom && (this.object.updateProjectionMatrix(), i = !0);
 		}
-		return this._scale = 1, this._performCursorZoom = !1, i || this._lastPosition.distanceToSquared(this.object.position) > Ym || 8 * (1 - this._lastQuaternion.dot(this.object.quaternion)) > Ym || this._lastTargetPosition.distanceToSquared(this.target) > Ym ? (this.dispatchEvent(Bm), this._lastPosition.copy(this.object.position), this._lastQuaternion.copy(this.object.quaternion), this._lastTargetPosition.copy(this.target), !0) : !1;
+		return this._scale = 1, this._performCursorZoom = !1, i || this._lastPosition.distanceToSquared(this.object.position) > rh || 8 * (1 - this._lastQuaternion.dot(this.object.quaternion)) > rh || this._lastTargetPosition.distanceToSquared(this.target) > rh ? (this.dispatchEvent(Jm), this._lastPosition.copy(this.object.position), this._lastQuaternion.copy(this.object.quaternion), this._lastTargetPosition.copy(this.target), !0) : !1;
 	}
 	_getAutoRotationAngle(e) {
-		return e === null ? qm / 60 / 60 * this.autoRotateSpeed : qm / 60 * this.autoRotateSpeed * e;
+		return e === null ? th / 60 / 60 * this.autoRotateSpeed : th / 60 * this.autoRotateSpeed * e;
 	}
 	_getZoomScale(e) {
 		let t = Math.abs(e * .01);
@@ -17196,17 +17214,17 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 		this._sphericalDelta.phi -= e;
 	}
 	_panLeft(e, t) {
-		Km.setFromMatrixColumn(t, 0), Km.multiplyScalar(-e), this._panOffset.add(Km);
+		eh.setFromMatrixColumn(t, 0), eh.multiplyScalar(-e), this._panOffset.add(eh);
 	}
 	_panUp(e, t) {
-		this.screenSpacePanning === !0 ? Km.setFromMatrixColumn(t, 1) : (Km.setFromMatrixColumn(t, 0), Km.crossVectors(this.object.up, Km)), Km.multiplyScalar(e), this._panOffset.add(Km);
+		this.screenSpacePanning === !0 ? eh.setFromMatrixColumn(t, 1) : (eh.setFromMatrixColumn(t, 0), eh.crossVectors(this.object.up, eh)), eh.multiplyScalar(e), this._panOffset.add(eh);
 	}
 	_pan(e, t) {
 		let n = this.domElement;
 		if (this.object.isPerspectiveCamera) {
 			let r = this.object.position;
-			Km.copy(r).sub(this.target);
-			let i = Km.length();
+			eh.copy(r).sub(this.target);
+			let i = eh.length();
 			i *= Math.tan(this.object.fov / 2 * Math.PI / 180), this._panLeft(2 * e * i / n.clientHeight, this.object.matrix), this._panUp(2 * t * i / n.clientHeight, this.object.matrix);
 		} else this.object.isOrthographicCamera ? (this._panLeft(e * (this.object.right - this.object.left) / this.object.zoom / n.clientWidth, this.object.matrix), this._panUp(t * (this.object.top - this.object.bottom) / this.object.zoom / n.clientHeight, this.object.matrix)) : (console.warn("WARNING: OrbitControls.js encountered an unknown camera type - pan disabled."), this.enablePan = !1);
 	}
@@ -17237,7 +17255,7 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 	_handleMouseMoveRotate(e) {
 		this._rotateEnd.set(e.clientX, e.clientY), this._rotateDelta.subVectors(this._rotateEnd, this._rotateStart).multiplyScalar(this.rotateSpeed);
 		let t = this.domElement;
-		this._rotateLeft(qm * this._rotateDelta.x / t.clientHeight), this._rotateUp(qm * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd), this.update();
+		this._rotateLeft(th * this._rotateDelta.x / t.clientHeight), this._rotateUp(th * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd), this.update();
 	}
 	_handleMouseMoveDolly(e) {
 		this._dollyEnd.set(e.clientX, e.clientY), this._dollyDelta.subVectors(this._dollyEnd, this._dollyStart), this._dollyDelta.y > 0 ? this._dollyOut(this._getZoomScale(this._dollyDelta.y)) : this._dollyDelta.y < 0 && this._dollyIn(this._getZoomScale(this._dollyDelta.y)), this._dollyStart.copy(this._dollyEnd), this.update();
@@ -17252,15 +17270,15 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 		let t = !1;
 		switch (e.code) {
 			case this.keys.UP:
-				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(qm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, this.keyPanSpeed), t = !0;
+				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(th * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, this.keyPanSpeed), t = !0;
 				break;
 			case this.keys.BOTTOM:
-				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(-qm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, -this.keyPanSpeed), t = !0;
+				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateUp(-th * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(0, -this.keyPanSpeed), t = !0;
 				break;
 			case this.keys.LEFT:
-				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(qm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(this.keyPanSpeed, 0), t = !0;
+				e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(th * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(this.keyPanSpeed, 0), t = !0;
 				break;
-			case this.keys.RIGHT: e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(-qm * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(-this.keyPanSpeed, 0), t = !0;
+			case this.keys.RIGHT: e.ctrlKey || e.metaKey || e.shiftKey ? this.enableRotate && this._rotateLeft(-th * this.keyRotateSpeed / this.domElement.clientHeight) : this.enablePan && this._pan(-this.keyPanSpeed, 0), t = !0;
 		}
 		t && (e.preventDefault(), this.update());
 	}
@@ -17296,7 +17314,7 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 		}
 		this._rotateDelta.subVectors(this._rotateEnd, this._rotateStart).multiplyScalar(this.rotateSpeed);
 		let t = this.domElement;
-		this._rotateLeft(qm * this._rotateDelta.x / t.clientHeight), this._rotateUp(qm * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd);
+		this._rotateLeft(th * this._rotateDelta.x / t.clientHeight), this._rotateUp(th * this._rotateDelta.y / t.clientHeight), this._rotateStart.copy(this._rotateEnd);
 	}
 	_handleTouchMovePan(e) {
 		if (this._pointers.length === 1) this._panEnd.set(e.pageX, e.pageY);
@@ -17355,16 +17373,16 @@ var Bm = { type: "change" }, Vm = { type: "start" }, Hm = { type: "end" }, Um = 
 		return e.ctrlKey && !this._controlActive && (n.deltaY *= 10), n;
 	}
 };
-function Zm(e) {
+function ah(e) {
 	this.enabled !== !1 && (this._pointers.length === 0 && (this.domElement.setPointerCapture(e.pointerId), this.domElement.ownerDocument.addEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.addEventListener("pointerup", this._onPointerUp)), !this._isTrackingPointer(e) && (this._addPointer(e), e.pointerType === "touch" ? this._onTouchStart(e) : this._onMouseDown(e), this._cursorStyle === "grab" && (this.domElement.style.cursor = "grabbing")));
 }
-function Qm(e) {
+function oh(e) {
 	this.enabled !== !1 && (e.pointerType === "touch" ? this._onTouchMove(e) : this._onMouseMove(e));
 }
-function $m(e) {
+function sh(e) {
 	switch (this._removePointer(e), this._pointers.length) {
 		case 0:
-			this.domElement.releasePointerCapture(e.pointerId), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.dispatchEvent(Hm), this.state = Jm.NONE, this._cursorStyle === "grab" && (this.domElement.style.cursor = "grab");
+			this.domElement.releasePointerCapture(e.pointerId), this.domElement.ownerDocument.removeEventListener("pointermove", this._onPointerMove), this.domElement.ownerDocument.removeEventListener("pointerup", this._onPointerUp), this.dispatchEvent(Xm), this.state = nh.NONE, this._cursorStyle === "grab" && (this.domElement.style.cursor = "grab");
 			break;
 		case 1:
 			let t = this._pointers[0], n = this._pointerPositions[t];
@@ -17375,7 +17393,7 @@ function $m(e) {
 			});
 	}
 }
-function eh(t) {
+function ch(t) {
 	let n;
 	switch (t.button) {
 		case 0:
@@ -17392,126 +17410,126 @@ function eh(t) {
 	switch (n) {
 		case e.DOLLY:
 			if (this.enableZoom === !1) return;
-			this._handleMouseDownDolly(t), this.state = Jm.DOLLY;
+			this._handleMouseDownDolly(t), this.state = nh.DOLLY;
 			break;
 		case e.ROTATE:
 			if (t.ctrlKey || t.metaKey || t.shiftKey) {
 				if (this.enablePan === !1) return;
-				this._handleMouseDownPan(t), this.state = Jm.PAN;
+				this._handleMouseDownPan(t), this.state = nh.PAN;
 			} else {
 				if (this.enableRotate === !1) return;
-				this._handleMouseDownRotate(t), this.state = Jm.ROTATE;
+				this._handleMouseDownRotate(t), this.state = nh.ROTATE;
 			}
 			break;
 		case e.PAN:
 			if (t.ctrlKey || t.metaKey || t.shiftKey) {
 				if (this.enableRotate === !1) return;
-				this._handleMouseDownRotate(t), this.state = Jm.ROTATE;
+				this._handleMouseDownRotate(t), this.state = nh.ROTATE;
 			} else {
 				if (this.enablePan === !1) return;
-				this._handleMouseDownPan(t), this.state = Jm.PAN;
+				this._handleMouseDownPan(t), this.state = nh.PAN;
 			}
 			break;
-		default: this.state = Jm.NONE;
+		default: this.state = nh.NONE;
 	}
-	this.state !== Jm.NONE && this.dispatchEvent(Vm);
+	this.state !== nh.NONE && this.dispatchEvent(Ym);
 }
-function th(e) {
+function lh(e) {
 	switch (this.state) {
-		case Jm.ROTATE:
+		case nh.ROTATE:
 			if (this.enableRotate === !1) return;
 			this._handleMouseMoveRotate(e);
 			break;
-		case Jm.DOLLY:
+		case nh.DOLLY:
 			if (this.enableZoom === !1) return;
 			this._handleMouseMoveDolly(e);
 			break;
-		case Jm.PAN:
+		case nh.PAN:
 			if (this.enablePan === !1) return;
 			this._handleMouseMovePan(e);
 	}
 }
-function nh(e) {
-	this.enabled !== !1 && this.enableZoom !== !1 && this.state === Jm.NONE && (e.preventDefault(), this.dispatchEvent(Vm), this._handleMouseWheel(this._customWheelEvent(e)), this.dispatchEvent(Hm));
+function uh(e) {
+	this.enabled !== !1 && this.enableZoom !== !1 && this.state === nh.NONE && (e.preventDefault(), this.dispatchEvent(Ym), this._handleMouseWheel(this._customWheelEvent(e)), this.dispatchEvent(Xm));
 }
-function rh(e) {
+function dh(e) {
 	this.enabled !== !1 && this._handleKeyDown(e);
 }
-function ih(e) {
+function fh(e) {
 	switch (this._trackPointer(e), this._pointers.length) {
 		case 1:
 			switch (this.touches.ONE) {
 				case t.ROTATE:
 					if (this.enableRotate === !1) return;
-					this._handleTouchStartRotate(e), this.state = Jm.TOUCH_ROTATE;
+					this._handleTouchStartRotate(e), this.state = nh.TOUCH_ROTATE;
 					break;
 				case t.PAN:
 					if (this.enablePan === !1) return;
-					this._handleTouchStartPan(e), this.state = Jm.TOUCH_PAN;
+					this._handleTouchStartPan(e), this.state = nh.TOUCH_PAN;
 					break;
-				default: this.state = Jm.NONE;
+				default: this.state = nh.NONE;
 			}
 			break;
 		case 2:
 			switch (this.touches.TWO) {
 				case t.DOLLY_PAN:
 					if (this.enableZoom === !1 && this.enablePan === !1) return;
-					this._handleTouchStartDollyPan(e), this.state = Jm.TOUCH_DOLLY_PAN;
+					this._handleTouchStartDollyPan(e), this.state = nh.TOUCH_DOLLY_PAN;
 					break;
 				case t.DOLLY_ROTATE:
 					if (this.enableZoom === !1 && this.enableRotate === !1) return;
-					this._handleTouchStartDollyRotate(e), this.state = Jm.TOUCH_DOLLY_ROTATE;
+					this._handleTouchStartDollyRotate(e), this.state = nh.TOUCH_DOLLY_ROTATE;
 					break;
-				default: this.state = Jm.NONE;
+				default: this.state = nh.NONE;
 			}
 			break;
-		default: this.state = Jm.NONE;
+		default: this.state = nh.NONE;
 	}
-	this.state !== Jm.NONE && this.dispatchEvent(Vm);
+	this.state !== nh.NONE && this.dispatchEvent(Ym);
 }
-function ah(e) {
+function ph(e) {
 	switch (this._trackPointer(e), this.state) {
-		case Jm.TOUCH_ROTATE:
+		case nh.TOUCH_ROTATE:
 			if (this.enableRotate === !1) return;
 			this._handleTouchMoveRotate(e), this.update();
 			break;
-		case Jm.TOUCH_PAN:
+		case nh.TOUCH_PAN:
 			if (this.enablePan === !1) return;
 			this._handleTouchMovePan(e), this.update();
 			break;
-		case Jm.TOUCH_DOLLY_PAN:
+		case nh.TOUCH_DOLLY_PAN:
 			if (this.enableZoom === !1 && this.enablePan === !1) return;
 			this._handleTouchMoveDollyPan(e), this.update();
 			break;
-		case Jm.TOUCH_DOLLY_ROTATE:
+		case nh.TOUCH_DOLLY_ROTATE:
 			if (this.enableZoom === !1 && this.enableRotate === !1) return;
 			this._handleTouchMoveDollyRotate(e), this.update();
 			break;
-		default: this.state = Jm.NONE;
+		default: this.state = nh.NONE;
 	}
 }
-function oh(e) {
+function mh(e) {
 	this.enabled !== !1 && e.preventDefault();
 }
-function sh(e) {
+function hh(e) {
 	e.key === "Control" && (this._controlActive = !0, this.domElement.getRootNode().addEventListener("keyup", this._interceptControlUp, {
 		passive: !0,
 		capture: !0
 	}));
 }
-function ch(e) {
+function gh(e) {
 	e.key === "Control" && (this._controlActive = !1, this.domElement.getRootNode().removeEventListener("keyup", this._interceptControlUp, {
 		passive: !0,
 		capture: !0
 	}));
 }
 // shared/light-effects.mjs
-var lh = {
+var _h = {
 	blink: 1.2,
 	breathe: 15,
 	okay: 1.2,
 	channel_change: 8
-}, uh = {
+}, vh = {
 	blink: "blink",
 	flash: "blink",
 	breathe: "breathe",
@@ -17535,19 +17553,19 @@ var lh = {
 	breath: "pulse",
 	strobe: "strobe"
 };
-function dh(e) {
+function yh(e) {
 	if (typeof e != "string") return null;
-	let t = e.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""), n = Object.hasOwn(uh, t) ? uh[t] : void 0;
-	return n ? n === "stop" ? { kind: n } : Object.hasOwn(lh, n) ? {
+	let t = e.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""), n = Object.hasOwn(vh, t) ? vh[t] : void 0;
+	return n ? n === "stop" ? { kind: n } : Object.hasOwn(_h, n) ? {
 		kind: n,
 		oneShot: !0,
-		duration: lh[n]
+		duration: _h[n]
 	} : {
 		kind: n,
 		oneShot: !1
 	} : null;
 }
-var fh = (e, t) => .5 - .5 * Math.cos(2 * Math.PI * e / t), ph = (e) => [
+var bh = (e, t) => .5 - .5 * Math.cos(2 * Math.PI * e / t), xh = (e) => [
 	0,
 	1 / 3,
 	2 / 3
@@ -17555,11 +17573,11 @@ var fh = (e, t) => .5 - .5 * Math.cos(2 * Math.PI * e / t), ph = (e) => [
 	let n = Math.abs(((e - t) % 1 + 1) % 1) * 6;
 	return Math.max(0, Math.min(1, Math.abs(n - 3) - 1));
 });
-function mh(e, t) {
+function Sh(e, t) {
 	if (!e || e.kind === "stop" || !(t >= 0) || e.oneShot && t >= e.duration) return null;
 	switch (e.kind) {
 		case "blink": return { gain: t % .6 < .3 ? .05 : 1 };
-		case "breathe": return { gain: .05 + .95 * fh(t + .5, 1) };
+		case "breathe": return { gain: .05 + .95 * bh(t + .5, 1) };
 		case "okay": return {
 			gain: t % .6 < .4 ? 1 : .1,
 			tint: [
@@ -17578,17 +17596,17 @@ function mh(e, t) {
 		};
 		case "colorloop": return {
 			gain: 1,
-			tint: ph(t / 12)
+			tint: xh(t / 12)
 		};
 		case "flicker": return { gain: .72 + .14 * Math.sin(t * 9.1) + .09 * Math.sin(t * 23.7 + 1.3) + .05 * Math.sin(t * 41.3 + .4) };
-		case "pulse": return { gain: .25 + .75 * fh(t, 3) };
+		case "pulse": return { gain: .25 + .75 * bh(t, 3) };
 		case "strobe": return { gain: t % .5 < .25 ? 1 : .1 };
 		default: return null;
 	}
 }
-function hh() {
+function Ch() {
 	let e, t = null, n = 0, r = !1, i = (e, r) => {
-		let i = dh(e);
+		let i = yh(e);
 		t = i && i.kind !== "stop" ? i : null, n = r;
 	};
 	return {
@@ -17597,7 +17615,7 @@ function hh() {
 			if (r = !!n, o === e) return;
 			let s = e === void 0;
 			e = o;
-			let c = dh(o);
+			let c = yh(o);
 			s && c?.oneShot || i(o, a);
 		},
 		trigger(e, t) {
@@ -17605,7 +17623,7 @@ function hh() {
 		},
 		sample(e) {
 			if (!t || !t.oneShot && !r) return null;
-			let i = mh(t, e - n);
+			let i = Sh(t, e - n);
 			return i || (t = null), i;
 		},
 		get animating() {
@@ -17614,19 +17632,19 @@ function hh() {
 	};
 }
 // web/scene.js
-function gh(e) {
+function wh(e) {
 	return (e?.members || []).map((e) => e.model).sort().join("|");
 }
-var _h = class {
+var Th = class {
 	constructor(e, t = () => {}, n = {}) {
 		this.options = {
 			mode: "dollhouse",
 			markers: !0,
 			interactive: !0,
 			...n
-		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.effectColor = new Y(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = _m({
+		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.effectColor = new Y(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = Tm({
 			quality: this.options.quality,
-			mobile: gm(),
+			mobile: wm(),
 			devicePixelRatio: globalThis.devicePixelRatio
 		}), this.renderer = new Ku({
 			antialias: this.profile.antialias,
@@ -17643,7 +17661,7 @@ var _h = class {
 			this.wheelEngaged = !0;
 		}), this.renderer.domElement.addEventListener("pointerleave", () => {
 			this.wheelEngaged = !1;
-		}), this.scene = new Nn(), this.scene.background = this.options.transparent ? null : new Y("#242320"), this.options.transparent && this.renderer.setClearColor(0, 0), this.camera = new Ko(45, 1, .05, 500), this.orbit = new Xm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
+		}), this.scene = new Nn(), this.scene.background = this.options.transparent ? null : new Y("#242320"), this.options.transparent && this.renderer.setClearColor(0, 0), this.camera = new Ko(45, 1, .05, 500), this.orbit = new ih(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
 			this.cutaway(), this.render({ cameraOnly: !0 }), this.options.onCameraChange?.({ source: "orbit" });
 		}), this.resize = new ResizeObserver(() => {
 			let { width: t, height: n } = e.getBoundingClientRect();
@@ -17738,7 +17756,7 @@ var _h = class {
 				let e = c[0].userData.numberMotion;
 				r.position.y = t.position[1] + (t.defaultValue - e.restValue) * e.metersPerUnit;
 			}
-			let l = t.type === "climate" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((e) => Sm(e, { reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches })).filter(Boolean) : [], u = t.type === "lock" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
+			let l = t.type === "climate" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((e) => Am(e, { reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches })).filter(Boolean) : [], u = t.type === "lock" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
 			this.fixtures.set(t.id, {
 				lockNodes: u,
 				climateVisuals: l,
@@ -17760,7 +17778,7 @@ var _h = class {
 		};
 		e.controls.flatMap((e) => (e.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((t) => [e.id, t])).sort((e, t) => r(e[1]) - r(t[1])).forEach(([e, t]) => t.traverse((t) => {
 			t.userData.pickControl = e;
-		})), this.daylight = e.daylight ? wm(e.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = e.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
+		})), this.daylight = e.daylight ? Mm(e.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = e.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
 		let { center: i, size: a } = this.applyHouseScope();
 		this.defaultTarget = e.camera?.target || i.toArray(), this.defaultPosition = e.camera?.position || i.clone().add(new G(a * .7, a * .65, a * .7)).toArray();
 		let o = performance.now();
@@ -17774,8 +17792,8 @@ var _h = class {
 		this.daylight?.setScope(e.members ? [...r] : null), this.daylight?.group.traverse((e) => {
 			e.isSpotLight && (e.castShadow = !0);
 		});
-		let a = mm(this.scene, this.renderer.capabilities.maxTextures, this.profile?.shadowPasses);
-		ym(this.scene, this.profile?.shadowMapSize), this.renderer.domElement && (this.renderer.domElement.dataset.shadowLights = a.shadowLights), this.asset.updateMatrixWorld(!0);
+		let a = Sm(this.scene, this.renderer.capabilities.maxTextures, this.profile?.shadowPasses);
+		Dm(this.scene, this.profile?.shadowMapSize), this.renderer.domElement && (this.renderer.domElement.dataset.shadowLights = a.shadowLights), this.asset.updateMatrixWorld(!0);
 		let o = new Jn();
 		for (let e of n.length ? n.filter((e) => e.visible) : [this.asset]) o.expandByObject(e);
 		o.isEmpty() && o.setFromObject(this.asset);
@@ -17883,7 +17901,7 @@ var _h = class {
 			if (r) i = a(r);
 			else {
 				let e = (n.min.x + n.max.x) / 2, t = (n.min.z + n.max.z) / 2, r = n.min.y;
-				i = Mm([
+				i = Bm([
 					[
 						e,
 						r,
@@ -17925,11 +17943,11 @@ var _h = class {
 		return n && this.setStates(this.lastStates || /* @__PURE__ */ new Map()), !0;
 	}
 	isHouseViewPrepared(e) {
-		return !e?.houseView || this.preparedViews?.get(gh(e)) === !0;
+		return !e?.houseView || this.preparedViews?.get(wh(e)) === !0;
 	}
 	prepareHouseView(e) {
 		if (!this.canShowHouseView(e)) return Promise.resolve(!1);
-		let t = gh(e);
+		let t = wh(e);
 		if (this.preparedViews ||= /* @__PURE__ */ new Map(), this.isHouseViewPrepared(e)) return Promise.resolve(!0);
 		let n = this.preparedViews, r = n.get(t);
 		if (r) return r;
@@ -17954,7 +17972,7 @@ var _h = class {
 		return e.members.every((e) => t.has(e.model));
 	}
 	setView(n) {
-		this.options.camera && n === "floor" != (this.options.camera.projection === "orthographic") && (this.options.camera = void 0), this.options.mode = ["floor", "front"].includes(n) ? n : "dollhouse", this.scene.background?.set("#242320"), this.groundShadow && (this.groundShadow.visible = !!this.options.groundShadow && this.options.mode !== "floor"), this.fill && (this.fill.intensity = this.options.mode === "dollhouse" ? .25 : .35), this.camera = this.options.mode === "floor" ? new Zo() : new Ko(this.options.mode === "front" ? 35 : 45, 1, .05, 500), this.options.mode !== "dollhouse" && this.fitFloor(), this.orbit.dispose(), this.orbit = new Xm(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
+		this.options.camera && n === "floor" != (this.options.camera.projection === "orthographic") && (this.options.camera = void 0), this.options.mode = ["floor", "front"].includes(n) ? n : "dollhouse", this.scene.background?.set("#242320"), this.groundShadow && (this.groundShadow.visible = !!this.options.groundShadow && this.options.mode !== "floor"), this.fill && (this.fill.intensity = this.options.mode === "dollhouse" ? .25 : .35), this.camera = this.options.mode === "floor" ? new Zo() : new Ko(this.options.mode === "front" ? 35 : 45, 1, .05, 500), this.options.mode !== "dollhouse" && this.fitFloor(), this.orbit.dispose(), this.orbit = new ih(this.camera, this.renderer.domElement), this.orbit.enableDamping = !1, this.setInteractive(this.options.interactive), this.orbit.addEventListener("change", () => {
 			this.cutaway(), this.render({ cameraOnly: !0 }), this.options.onCameraChange?.({ source: "orbit" });
 		}), this.orbit.enableRotate = this.options.allowRotate ?? this.options.mode !== "floor", this.orbit.enableRotate || (this.orbit.mouseButtons.LEFT = e.PAN, this.orbit.touches.ONE = t.PAN);
 		for (let [e, t] of this.fixtures) t.marker.visible = !this.model.controls.find((t) => t.id === e)?.hidden && !t.outOfScope && !t.companion && this.options.markers && (this.options.mode !== "floor" || !!this.options.floorMarkers);
@@ -17973,11 +17991,11 @@ var _h = class {
 		this.options.interactive = !!e, this.orbit.enabled = this.options.interactive, this.renderer.domElement.style.touchAction = this.options.interactive ? "none" : this.options.onRoomDoubleTap ? "manipulation" : "";
 	}
 	setFloorPlan() {
-		this.model && (Object.assign(this.options, Om("top", "floor")), this.setView("floor"), this.options.onCameraChange?.({ source: "preset" }));
+		this.model && (Object.assign(this.options, Im("top", "floor")), this.setView("floor"), this.options.onCameraChange?.({ source: "preset" }));
 	}
 	setCameraPreset(e) {
 		if (!this.model) return;
-		let t = Om(e, this.options.mode);
+		let t = Im(e, this.options.mode);
 		Object.assign(this.options, t), this.setView(t.view), this.options.onCameraChange?.({ source: "preset" });
 	}
 	rotateCamera(e, t) {
@@ -17989,14 +18007,14 @@ var _h = class {
 		if (!this.bounds) return;
 		let { width: e, height: t } = this.container.getBoundingClientRect();
 		if (!e || !t) return;
-		let n = !!this.model?.focusRoom, r = n ? this.model.focusFrame : void 0, i = this.options.camera && !n ? tm(this.options.camera, {
+		let n = !!this.model?.focusRoom, r = n ? this.model.focusFrame : void 0, i = this.options.camera && !n ? lm(this.options.camera, {
 			aspect: e / t,
 			min: this.bounds.min.toArray(),
 			max: this.bounds.max.toArray(),
 			heading: this.options.heading,
 			tilt: this.options.tilt,
 			zoom: this.options.zoom
-		}) : (this.options.mode === "front" ? Jp : qp)(this.bounds.min.toArray(), this.bounds.max.toArray(), e / t, r?.tilt ?? this.options.tilt ?? (this.options.mode === "front" ? 28 : 0), r?.heading ?? this.options.heading ?? 0);
+		}) : (this.options.mode === "front" ? nm : tm)(this.bounds.min.toArray(), this.bounds.max.toArray(), e / t, r?.tilt ?? this.options.tilt ?? (this.options.mode === "front" ? 28 : 0), r?.heading ?? this.options.heading ?? 0);
 		Object.assign(this.camera, {
 			aspect: e / t,
 			left: i.left,
@@ -18009,7 +18027,7 @@ var _h = class {
 		}), this.camera.isPerspectiveCamera && i.fov && (this.camera.fov = i.fov), this.camera.position.fromArray(i.position), this.camera.up.fromArray(i.up), this.orbit.target.fromArray(i.target), this.camera.lookAt(this.orbit.target), this.camera.updateProjectionMatrix();
 	}
 	captureView() {
-		return !this.model || !this.bounds ? null : $p({
+		return !this.model || !this.bounds ? null : sm({
 			position: this.camera.position.toArray(),
 			target: this.orbit.target.toArray(),
 			up: this.camera.up.toArray(),
@@ -18054,7 +18072,7 @@ var _h = class {
 					continue;
 				}
 				if (n.type === "lock") {
-					for (let e of n.lockNodes) Vp(e, r.locked === !0);
+					for (let e of n.lockNodes) Yp(e, r.locked === !0);
 					n.marker.material.color.set(r.unavailable ? "#858b86" : r.jammed ? "#d9654f" : r.locked ? "#7fbf8a" : "#e2b45a");
 					continue;
 				}
@@ -18076,7 +18094,7 @@ var _h = class {
 				n.light.color.copy(a), n.light.intensity = n.base * i, n.lightBase = {
 					color: n.light.color.clone(),
 					amount: i
-				}, n.effectRun ||= hh(), n.effectRun.report(r.effect, !!r.on && !r.unavailable, performance.now() / 1e3), n.marker.material.color.set(r.unavailable ? "#88908b" : r.on ? a : "#697b6d");
+				}, n.effectRun ||= Ch(), n.effectRun.report(r.effect, !!r.on && !r.unavailable, performance.now() / 1e3), n.marker.material.color.set(r.unavailable ? "#88908b" : r.on ? a : "#697b6d");
 				for (let [e, t] of n.mats) e.emissive.copy(a), e.emissiveIntensity = t * i;
 			}
 			this.ambient.intensity = this.daylight ? .12 : this.options.mode === "dollhouse" ? this.model.ambient ?? .22 : Math.max(this.model.ambient ?? .22, .55);
@@ -18181,17 +18199,17 @@ var _h = class {
 		for (let { id: n, room: r, offset: i } of e) {
 			let e = this.fixtures.get(n), o = d.get(r);
 			if (!e || !o || (_.fromArray(ap(e.marker.position.toArray(), i)).project(this.camera), Math.abs(_.x) > 1 || Math.abs(_.y) > 1 || _.z > 1)) continue;
-			let c = Math.min(a - 1, Math.max(0, Math.floor((_.x * .5 + .5) * a))), l = Math.min(s - 1, Math.max(0, Math.floor((_.y * .5 + .5) * s))), u = Rm(_.z, this.camera.near, this.camera.far, g), f = [];
+			let c = Math.min(a - 1, Math.max(0, Math.floor((_.x * .5 + .5) * a))), l = Math.min(s - 1, Math.max(0, Math.floor((_.y * .5 + .5) * s))), u = Km(_.z, this.camera.near, this.camera.far, g), f = [];
 			for (let e = -1; e <= 1; e++) for (let t = -1; t <= 1; t++) {
 				let n = c + t, r = l + e;
 				if (n < 0 || r < 0 || n >= a || r >= s) continue;
-				let i = (r * a + n) * 4, o = Lm(h[i + 1], h[i + 2], h[i + 3]);
+				let i = (r * a + n) * 4, o = Gm(h[i + 1], h[i + 2], h[i + 3]);
 				f.push({
 					room: h[i],
-					distance: Rm(o * 2 - 1, this.camera.near, this.camera.far, g)
+					distance: Km(o * 2 - 1, this.camera.near, this.camera.far, g)
 				});
 			}
-			zm(f, o, u) && t.add(n);
+			qm(f, o, u) && t.add(n);
 		}
 		return t;
 	}
@@ -18214,7 +18232,7 @@ var _h = class {
 	}
 	triggerLightEffect(e, t) {
 		let n = this.fixtures?.get(e);
-		return !n?.light || !n.lightBase ? !1 : (n.effectRun ||= hh(), n.effectRun.trigger(t, performance.now() / 1e3), this.render({ cameraOnly: !0 }), n.effectRun.animating);
+		return !n?.light || !n.lightBase ? !1 : (n.effectRun ||= Ch(), n.effectRun.trigger(t, performance.now() / 1e3), this.render({ cameraOnly: !0 }), n.effectRun.animating);
 	}
 	applyLightEffects(e) {
 		let t = !1;
@@ -18264,7 +18282,7 @@ var _h = class {
 		}
 		this.syncClimateAnimation();
 		for (let e of this.fixtures.values()) for (let t of e.climateVisuals || []) t.update(performance.now() / 1e3);
-		this.applyLightEffects(performance.now() / 1e3), this.renderer.shadowMap.needsUpdate = !e || !this.shadowsCurrent, this.renderer.render(this.scene, this.camera), this.shadowsCurrent = !0, this.model?.houseView && this.preparedViews && this.preparedViews.set(gh(this.model), !0), this.options.onRender?.();
+		this.applyLightEffects(performance.now() / 1e3), this.renderer.shadowMap.needsUpdate = !e || !this.shadowsCurrent, this.renderer.render(this.scene, this.camera), this.shadowsCurrent = !0, this.model?.houseView && this.preparedViews && this.preparedViews.set(wh(this.model), !0), this.options.onRender?.();
 		let t = this.camera.matrixWorld.elements, n = (e) => t.slice(e, e + 3).map((e) => Math.round(e * 1e5) / 1e5);
 		this.container.dispatchEvent(new CustomEvent("room-camera-orientation", { detail: {
 			right: n(0),
@@ -18272,7 +18290,7 @@ var _h = class {
 			normal: n(8)
 		} }));
 	}
-}, vh = (e) => /^#[0-9a-f]{6}$/i.test(e) ? [
+}, Eh = (e) => /^#[0-9a-f]{6}$/i.test(e) ? [
 	1,
 	3,
 	5
@@ -18281,7 +18299,7 @@ var _h = class {
 	240,
 	212
 ];
-function yh(e) {
+function Dh(e) {
 	let t = Math.max(1e3, Math.min(4e4, e)) / 100;
 	return [
 		t <= 66 ? 255 : 329.698727446 * (t - 60) ** -.1332047592,
@@ -18289,9 +18307,9 @@ function yh(e) {
 		t >= 66 ? 255 : t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307
 	].map((e) => Math.round(Math.max(0, Math.min(255, e))));
 }
-function bh(e, t = "#fff0d4") {
+function Oh(e, t = "#fff0d4") {
 	let n = e?.attributes || {}, r = Number.isFinite(n.color_temp_kelvin) ? n.color_temp_kelvin : 3e3, i;
-	if (n.color_mode === "color_temp") i = yh(r);
+	if (n.color_mode === "color_temp") i = Dh(r);
 	else if (Array.isArray(n.rgb_color) && n.rgb_color.length === 3) i = n.rgb_color;
 	else if (Array.isArray(n.rgbw_color)) {
 		let [e, t, r, a] = n.rgbw_color;
@@ -18301,13 +18319,13 @@ function bh(e, t = "#fff0d4") {
 			r + a
 		].map((e) => Math.min(255, e));
 	} else if (Array.isArray(n.rgbww_color)) {
-		let [e, t, r, a, o] = n.rgbww_color, s = yh(n.min_color_temp_kelvin || 2e3), c = yh(n.max_color_temp_kelvin || 6535);
+		let [e, t, r, a, o] = n.rgbww_color, s = Dh(n.min_color_temp_kelvin || 2e3), c = Dh(n.max_color_temp_kelvin || 6535);
 		i = [
 			e,
 			t,
 			r
 		].map((e, t) => Math.min(255, e + s[t] * o / 255 + c[t] * a / 255));
-	} else i = vh(t);
+	} else i = Eh(t);
 	return {
 		rgb: i,
 		colorMode: n.color_mode || "rgb",
@@ -18316,7 +18334,7 @@ function bh(e, t = "#fff0d4") {
 	};
 }
 // dashboard/transport.mjs
-async function xh(e, t, n, r = fetch) {
+async function kh(e, t, n, r = fetch) {
 	if (!t.preview_url && !t.addon) {
 		if (e.user?.is_admin === !1) throw Error("This release requires a Home Assistant administrator.");
 		return {
@@ -18327,7 +18345,7 @@ async function xh(e, t, n, r = fetch) {
 					operation: "models"
 				}), i = r.find((e) => e.id === t.model);
 				if (!i) throw Error("Model not found. Upload it in the 3D Rooms sidebar first.");
-				let a = vm(t.quality), { model: o, floors: s, views: c } = um(r, i, t.floor_selector !== !1);
+				let a = Em(t.quality), { model: o, floors: s, views: c } = vm(r, i, t.floor_selector !== !1);
 				if (o.members) {
 					let t = [];
 					try {
@@ -18425,7 +18443,7 @@ async function xh(e, t, n, r = fetch) {
 			if (!e.ok) throw Error("Could not read models. Open the 3D Rooms add-on and try again.");
 			let n = await e.json(), a = n.find((e) => e.id === t.model);
 			if (!a) throw Error("Model not found. Upload it in the 3D Rooms add-on first.");
-			let { model: o, floors: s, views: c } = um(n, a, t.floor_selector !== !1);
+			let { model: o, floors: s, views: c } = vm(n, a, t.floor_selector !== !1);
 			return o.members ? {
 				model: o,
 				configured: a,
@@ -18446,7 +18464,7 @@ async function xh(e, t, n, r = fetch) {
 	};
 }
 // shared/room-lights.mjs
-var Sh = {
+var Ah = {
 	light: {
 		entity: /^(light|switch)\.[a-z0-9_]+$/,
 		isOn: (e) => !!e.on,
@@ -18464,8 +18482,8 @@ var Sh = {
 		}
 	}
 };
-function Ch(e, t = "light", n = () => !1) {
-	let { entity: r } = Sh[t], i = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), a = /* @__PURE__ */ new Map(), o = new Set((e?.controls || []).filter((e) => e.hidden && i(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
+function jh(e, t = "light", n = () => !1) {
+	let { entity: r } = Ah[t], i = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), a = /* @__PURE__ */ new Map(), o = new Set((e?.controls || []).filter((e) => e.hidden && i(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
 	for (let n of e?.controls || []) {
 		if (!i(n) || n.hidden || n.lightGroupPrimary === !1) continue;
 		let s = n.sourceModel || e.id, c = Ep(n.roomTitle || e.title || "Room");
@@ -18488,9 +18506,9 @@ function Ch(e, t = "light", n = () => !1) {
 	}
 	return [...a.values()];
 }
-var wh = (e) => Ch(e, "light");
-function Th(e, t) {
-	let { isOn: n } = Sh[e.kind || "light"], r = 0, i = 0;
+var Mh = (e) => jh(e, "light");
+function Nh(e, t) {
+	let { isOn: n } = Ah[e.kind || "light"], r = 0, i = 0;
 	for (let a of e.lights) {
 		let e = t.get(a.id);
 		e && !e.unavailable && (i++, n(e) && r++);
@@ -18501,8 +18519,8 @@ function Th(e, t) {
 		total: e.lights.length
 	};
 }
-function Eh(e, t, n = {}) {
-	let { services: r } = Sh[e.kind || "light"], i = Th(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
+function Ph(e, t, n = {}) {
+	let { services: r } = Ah[e.kind || "light"], i = Nh(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
 	for (let t of e.entities) {
 		let e = n[t];
 		if (!e || ["unavailable", "unknown"].includes(e.state)) continue;
@@ -18518,7 +18536,7 @@ function Eh(e, t, n = {}) {
 		])
 	};
 }
-function Dh(e) {
+function Fh(e) {
 	return {
 		id: "",
 		kind: e[0]?.kind || "light",
@@ -18528,7 +18546,7 @@ function Dh(e) {
 	};
 }
 // dashboard/card.js
-var Oh = {
+var Ih = {
 	auto: {
 		label: "Auto",
 		hint: "follow the sun",
@@ -18544,10 +18562,10 @@ var Oh = {
 		hint: "always night",
 		icon: "<path d=\"M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z\"/>"
 	}
-}, kh = (e, t = 1) => {
-	let n = Object.keys(Oh);
+}, Lh = (e, t = 1) => {
+	let n = Object.keys(Ih);
 	return n[(n.indexOf(e) + t + n.length) % n.length];
-}, Ah = class extends HTMLElement {
+}, Rh = class extends HTMLElement {
 	static getConfigElement() {
 		return document.createElement("three-d-rooms-editor");
 	}
@@ -18559,10 +18577,10 @@ var Oh = {
 		};
 	}
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>:host{display:block}.switching{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;cursor:progress;background:color-mix(in srgb,var(--card-background-color,#101715) 40%,transparent);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px)}.switching-pill{display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:10px 18px 10px 14px;border-radius:999px;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#101715) 90%,transparent);box-shadow:0 2px 8px #0006;font:500 14px/1.3 system-ui}.switching-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spinner{flex-shrink:0;width:18px;height:18px;box-sizing:border-box;border:2px solid color-mix(in srgb,var(--primary-text-color,#edf2eb) 25%,transparent);border-top-color:var(--primary-color,#aacaab);border-radius:50%;will-change:transform;animation:switch-spin .8s linear infinite}@keyframes switch-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}ha-card{container:card-root/inline-size;display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;isolation:isolate;width:100%;height:500px;container:card-scene/inline-size}.scene canvas{display:block;width:100%;height:100%}${xp}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}.room-tags{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}.room-tags .room-tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--room-tag-size,30px)*.2);box-sizing:border-box;height:var(--room-tag-size,30px);min-height:var(--room-tag-size,30px);padding:0 calc(var(--room-tag-size,30px)*.37) 0 calc(var(--room-tag-size,30px)*.27);border-radius:calc(var(--room-tag-size,30px)/2);transform:translate(-50%,6px);white-space:nowrap;pointer-events:auto;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#202923) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006;font:500 calc(var(--room-tag-size,30px)*.4)/1 system-ui}.room-tags .room-tag::before{content:"";position:absolute;inset:-8px -4px}.room-tags .room-tag svg{width:calc(var(--room-tag-size,30px)*.47);height:calc(var(--room-tag-size,30px)*.47);flex-shrink:0;opacity:.8}.room-tags .room-tag[data-manual="true"]{transform:translate(-50%,-50%)}.room-tags .room-tag .room-tag-count{display:grid;place-items:center;min-width:calc(var(--room-tag-size,30px)*.6);height:calc(var(--room-tag-size,30px)*.6);padding:0 calc(var(--room-tag-size,30px)*.17);box-sizing:border-box;border-radius:calc(var(--room-tag-size,30px)*.3);background:var(--state-light-active-color,#ffc107);color:#1c1c1c;font-size:calc(var(--room-tag-size,30px)*.37);font-weight:600}.room-tags .room-tag[data-pressing="true"]{animation:room-tag-hold .55s linear forwards}@keyframes room-tag-hold{from{box-shadow:0 2px 8px #0006,inset 0 0 0 0 var(--state-light-active-color,#ffc107)}to{box-shadow:0 2px 8px #0006,inset 0 0 0 20px var(--state-light-active-color,#ffc107)}}@media(prefers-reduced-motion:reduce){.room-tags .room-tag[data-pressing="true"]{animation:none;border-color:var(--state-light-active-color,#ffc107)}}.room-tags .room-tag:hover{background:var(--card-background-color,#202923);border-color:var(--primary-color,#aacaab)}.room-nav{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px}.room-nav .room-step{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:0;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.room-nav .room-step svg{width:22px;height:22px}.room-back{display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;height:44px;min-height:44px;flex:0 0 auto;width:clamp(150px,calc(100cqw - 404px),260px);justify-content:center;padding:0 16px 0 10px;white-space:nowrap;color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab);box-shadow:0 2px 8px #0006;font:600 14px/1 system-ui}.room-back svg{width:20px;height:20px;flex-shrink:0}.room-back>span:not(.room-back-name){flex-shrink:0}.room-back .room-back-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.85;padding-left:8px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent)}.room-back .room-back-name:empty{display:none}@container card-root (max-width:520px){.card-controls{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px}.card-controls>button,.light-panel-toggle{width:34px;height:34px;min-height:34px;padding:8px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.card-controls>button::before,.light-panel-toggle::before{content:"";position:absolute;inset:-5px}.card-controls>button svg,.light-panel-toggle svg{width:18px;height:18px;opacity:.85}.panel-toggles{top:8px;left:8px;gap:6px}.floor-switch{height:34px;padding:2px;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.floor-switch button{height:28px;min-width:36px;padding:0 9px;font:500 12px system-ui}.card-top.card-top:has(header[hidden]){top:8px;right:8px}.daylight-switch{height:34px;padding:2px;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.daylight-switch button{width:32px;height:28px}.daylight-switch svg{width:16px;height:16px}.daylight-thumb{top:2px;left:2px;width:32px;height:28px}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(32px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(64px)}.light-panel{top:50px;left:8px;bottom:52px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 106px)}.room-nav{top:50px;gap:6px}.room-nav .room-step{width:34px;height:34px;min-height:34px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.room-nav .room-step::before{content:"";position:absolute;inset:-5px}.room-nav .room-step svg{width:18px;height:18px}.room-back{height:34px;min-height:34px;width:clamp(130px,calc(100cqw - 112px),200px);padding:0 12px 0 8px;font:600 12px/1 system-ui;box-shadow:0 1px 4px #0004}.room-back svg{width:16px;height:16px}}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="backdrop" aria-hidden="true"></div><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`, this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>:host{display:block;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}.switching{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;cursor:progress;background:color-mix(in srgb,var(--card-background-color,#101715) 40%,transparent);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px)}.switching-pill{display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:10px 18px 10px 14px;border-radius:999px;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#101715) 90%,transparent);box-shadow:0 2px 8px #0006;font:500 14px/1.3 system-ui}.switching-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spinner{flex-shrink:0;width:18px;height:18px;box-sizing:border-box;border:2px solid color-mix(in srgb,var(--primary-text-color,#edf2eb) 25%,transparent);border-top-color:var(--primary-color,#aacaab);border-radius:50%;will-change:transform;animation:switch-spin .8s linear infinite}@keyframes switch-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}ha-card{container:card-root/inline-size;display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;isolation:isolate;width:100%;height:500px;container:card-scene/inline-size}.scene canvas{display:block;width:100%;height:100%}${xp}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}.room-tags{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}.room-tags .room-tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--room-tag-size,30px)*.2);box-sizing:border-box;height:var(--room-tag-size,30px);min-height:var(--room-tag-size,30px);padding:0 calc(var(--room-tag-size,30px)*.37) 0 calc(var(--room-tag-size,30px)*.27);border-radius:calc(var(--room-tag-size,30px)/2);transform:translate(-50%,6px);white-space:nowrap;pointer-events:auto;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#202923) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006;font:500 calc(var(--room-tag-size,30px)*.4)/1 system-ui}.room-tags .room-tag::before{content:"";position:absolute;inset:-8px -4px}.room-tags .room-tag svg{width:calc(var(--room-tag-size,30px)*.47);height:calc(var(--room-tag-size,30px)*.47);flex-shrink:0;opacity:.8}.room-tags .room-tag[data-manual="true"]{transform:translate(-50%,-50%)}.room-tags .room-tag .room-tag-count{display:grid;place-items:center;min-width:calc(var(--room-tag-size,30px)*.6);height:calc(var(--room-tag-size,30px)*.6);padding:0 calc(var(--room-tag-size,30px)*.17);box-sizing:border-box;border-radius:calc(var(--room-tag-size,30px)*.3);background:var(--state-light-active-color,#ffc107);color:#1c1c1c;font-size:calc(var(--room-tag-size,30px)*.37);font-weight:600}.room-tags .room-tag[data-pressing="true"]{animation:room-tag-hold .55s linear forwards}@keyframes room-tag-hold{from{box-shadow:0 2px 8px #0006,inset 0 0 0 0 var(--state-light-active-color,#ffc107)}to{box-shadow:0 2px 8px #0006,inset 0 0 0 20px var(--state-light-active-color,#ffc107)}}@media(prefers-reduced-motion:reduce){.room-tags .room-tag[data-pressing="true"]{animation:none;border-color:var(--state-light-active-color,#ffc107)}}.room-tags .room-tag:hover{background:var(--card-background-color,#202923);border-color:var(--primary-color,#aacaab)}.room-nav{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px}.room-nav .room-step{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:0;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.room-nav .room-step svg{width:22px;height:22px}.room-back{display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;height:44px;min-height:44px;flex:0 0 auto;width:clamp(150px,calc(100cqw - 404px),260px);justify-content:center;padding:0 16px 0 10px;white-space:nowrap;color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab);box-shadow:0 2px 8px #0006;font:600 14px/1 system-ui}.room-back svg{width:20px;height:20px;flex-shrink:0}.room-back>span:not(.room-back-name){flex-shrink:0}.room-back .room-back-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.85;padding-left:8px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent)}.room-back .room-back-name:empty{display:none}@container card-root (max-width:520px){.card-controls{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px}.card-controls>button,.light-panel-toggle{width:44px;height:44px;min-height:44px;padding:10px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.card-controls>button::before,.light-panel-toggle::before{content:"";position:absolute;inset:-5px}.card-controls>button svg,.light-panel-toggle svg{width:22px;height:22px;opacity:.85}.panel-toggles{top:8px;left:8px;gap:6px}.floor-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.floor-switch button{height:36px;min-width:44px;padding:0 12px;font:500 14px system-ui}.card-top.card-top:has(header[hidden]){top:8px;right:8px}.daylight-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.daylight-switch button{width:40px;height:36px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{top:3px;left:3px;width:40px;height:36px}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}.light-panel{top:60px;left:8px;bottom:62px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 122px)}.room-nav{top:60px;gap:6px}.room-nav .room-step{width:44px;height:44px;min-height:44px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.room-nav .room-step::before{content:"";position:absolute;inset:-5px}.room-nav .room-step svg{width:22px;height:22px}.room-back{height:44px;min-height:44px;width:clamp(130px,calc(100cqw - 132px),200px);padding:0 12px 0 8px;font:600 12px/1 system-ui;box-shadow:0 1px 4px #0004}.room-back svg{width:16px;height:16px}}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="backdrop" aria-hidden="true"></div><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`, this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
 		let e = document.createElement("span");
 		e.className = "daylight-thumb", this._daylightSwitch.append(e);
-		for (let [e, { label: t, hint: n, icon: r }] of Object.entries(Oh)) {
+		for (let [e, { label: t, hint: n, icon: r }] of Object.entries(Ih)) {
 			let i = document.createElement("button");
 			i.type = "button", i.dataset.mode = e, i.setAttribute("role", "radio"), i.setAttribute("aria-label", t), i.title = `${t} — ${n}`, i.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${r}</svg>`, i.onclick = () => this._chooseDaylight(e), this._daylightSwitch.append(i);
 		}
@@ -18575,7 +18593,7 @@ var Oh = {
 			}[e.key];
 			if (!t) return;
 			e.preventDefault();
-			let n = kh(this._daylightSwitch.value, t);
+			let n = Lh(this._daylightSwitch.value, t);
 			this._chooseDaylight(n), this._daylightSwitch.querySelector(`[data-mode="${n}"]`)?.focus();
 		}, this._showDaylightMode("auto"), this.shadowRoot.querySelector(".message button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "Reload models"), this._refresh.title = "Reload models — clear cached models and load again", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M20 7v5h-5M4 17v-5h5\"/><path d=\"M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17\"/></svg>", this._refresh.onclick = () => this._refreshModels(), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._editButton = document.createElement("button"), this._editButton.type = "button", this._editButton.className = "card-edit", this._editButton.hidden = !0, this._editButton.setAttribute("aria-label", "Edit in 3D Rooms"), this._editButton.title = "Edit in 3D Rooms — opens this view in the editor in a new tab", this._editButton.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z\"/></svg>", this._editButton.onclick = () => this._openEditor(), this._controls.append(this._refresh, this._editButton, this._resetCamera, this._moveCamera), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {};
 		for (let [e, t, n, r] of [[
@@ -18617,7 +18635,7 @@ var Oh = {
 		for (let t of ["tilt", "heading"]) if (e[t] !== void 0 && !Number.isFinite(e[t])) throw Error(`${t} must be a number.`);
 		if (e.tilt !== void 0 && (e.tilt < 0 || e.tilt > 180)) throw Error("Tilt must be between 0 and 180 degrees.");
 		if (e.view !== void 0 && !["front", "floor"].includes(e.view)) throw Error("Choose front or floor view.");
-		if (fp(e), e.quality !== void 0 && !hm.includes(e.quality)) throw Error("Quality must be auto, high or low.");
+		if (fp(e), e.quality !== void 0 && !Cm.includes(e.quality)) throw Error("Quality must be auto, high or low.");
 		for (let t of [
 			"floor_selector",
 			"camera_controls",
@@ -18626,7 +18644,7 @@ var Oh = {
 			"room_focus",
 			"edit_button"
 		]) if (e[t] !== void 0 && typeof e[t] != "boolean") throw Error(`${t} must be true or false.`);
-		let t = e.camera === void 0 ? void 0 : Qp(e.camera);
+		let t = e.camera === void 0 ? void 0 : om(e.camera);
 		if (t && (e.view || "front") === "floor" != (t.projection === "orthographic")) throw Error("Saved camera projection must match the selected view.");
 		this._config = {
 			height: 500,
@@ -18660,10 +18678,14 @@ var Oh = {
 		this._layout ? this._layout.update() : this._container.style.height = this._config?.height === "auto" ? "500px" : `${this._config?.height || 500}px`;
 	}
 	connectedCallback() {
-		this._layout = new Gf(this), this._applyHeight(), this._hass && this._config && this._load();
+		this._outsidePanel ??= (e) => {
+			if (!this._lightPanel) return;
+			let t = e.composedPath();
+			t.includes(this._lightPanel) || t.includes(this._panelToggles) || t.some((e) => e instanceof HTMLDialogElement) || this._setLightPanel(null);
+		}, document.addEventListener("pointerdown", this._outsidePanel, !0), this._layout = new Gf(this), this._applyHeight(), this._hass && this._config && this._load();
 	}
 	disconnectedCallback() {
-		this._layout?.dispose(), this._layout = null, ++this._generation, clearInterval(this._keepalive), this._unsubModels?.(), this._unsubModels = null, this._unsubEffects?.(), this._unsubEffects = null, this._dialog?.remove(), clearTimeout(this._coverTimer), clearTimeout(this._warmTimer), this._switching = !1, this._switchOverlay.hidden = !0, this._view?.dispose(), this._view = null, this._loading = !1;
+		document.removeEventListener("pointerdown", this._outsidePanel, !0), this._layout?.dispose(), this._layout = null, ++this._generation, clearInterval(this._keepalive), this._unsubModels?.(), this._unsubModels = null, this._unsubEffects?.(), this._unsubEffects = null, this._dialog?.remove(), clearTimeout(this._coverTimer), clearTimeout(this._warmTimer), this._switching = !1, this._switchOverlay.hidden = !0, this._view?.dispose(), this._view = null, this._loading = !1;
 	}
 	async _refreshModels() {
 		!this._loading && this._hass && (Hf(this._hass), kf(Vf(this._hass)), await this._load());
@@ -18694,7 +18716,7 @@ var Oh = {
 				this._message.querySelector("span").textContent = "Choose a room in the visual editor.";
 				return;
 			}
-			let n = await xh(this._hass, this._config, location.origin);
+			let n = await kh(this._hass, this._config, location.origin);
 			if (e !== this._generation) return;
 			n.session && (document.cookie = `ingress_session=${n.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`);
 			let { model: r, configured: i, floors: a, views: o, sceneURL: s, layers: c, release: l, assetCache: u } = await n.load({ onProgress: (n) => {
@@ -18706,7 +18728,7 @@ var Oh = {
 				l?.();
 				return;
 			}
-			if (this._view?.dispose(), this._view = new _h(this._container, (e) => this._pick(e), {
+			if (this._view?.dispose(), this._view = new Th(this._container, (e) => this._pick(e), {
 				mode: this._config.view,
 				markers: !1,
 				interactive: this._cameraFree,
@@ -18739,7 +18761,7 @@ var Oh = {
 			}
 			if (e !== this._generation) return;
 			this._views = o || [], this._floors = a || [];
-			let f = lm(this._views, i || r, this._floor);
+			let f = _m(this._views, i || r, this._floor);
 			if (f !== r && !d.setHouseView(f) && (f = r), this._floor && f.id !== this._floor && (this._floor = null), this._model = f, this._focus = null, this._cameraMoved = !1, this._syncFloorSwitch(), this._syncCameraButtons(), this._previewStates = /* @__PURE__ */ new Map(), this._buildAccess(), this._syncRoomTags(), this._preview = n.preview, this._signature = null, this._states(), this._syncDaylightSwitch(), this._syncEditButton(), this._message.hidden = !0, this._hideLoadingPreview(), this._warmViews(), !this._preview && !this._config.addon && !this._unsubModels && this._hass.connection?.subscribeEvents) {
 				let e = await this._hass.connection.subscribeEvents(() => this._modelsEvent(), "three_d_rooms_updated");
 				!this.isConnected || this._unsubModels ? e() : this._unsubModels = e;
@@ -18854,7 +18876,7 @@ var Oh = {
 		let e = this._view, t = this._generation;
 		if (!e?.prepareHouseView || !this._model?.houseView) return;
 		let n = [this._model, ...this._views.filter((e) => e !== this._model)], r = [];
-		if (this._config?.room_focus !== !1) for (let e of n) for (let { room: t } of Am(e)) {
+		if (this._config?.room_focus !== !1) for (let e of n) for (let { room: t } of Rm(e)) {
 			let n = this._roomTarget(e, t);
 			n && r.push(n);
 		}
@@ -18871,7 +18893,7 @@ var Oh = {
 		this._warmTimer = setTimeout(i, 800);
 	}
 	_roomTarget(e, t) {
-		let n = jm(e, t), r = this._config?.markers?._rooms?.[t];
+		let n = zm(e, t), r = this._config?.markers?._rooms?.[t];
 		return n && (r?.heading !== void 0 || r?.tilt !== void 0) && (n.focusFrame = {
 			heading: r.heading,
 			tilt: r.tilt
@@ -18905,7 +18927,7 @@ var Oh = {
 		this._openGroup = null, this._cameraMoved = !1, this._model = e, this._buildAccess(), this._signature = null, this._states(), this._syncRoomTags(), this._syncCameraButtons();
 	}
 	_syncRoomTags() {
-		let e = this._config?.room_focus === !1 || !this._view ? [] : Am(this._model), t = JSON.stringify(e);
+		let e = this._config?.room_focus === !1 || !this._view ? [] : Rm(this._model), t = JSON.stringify(e);
 		this._roomTags.dataset.rooms !== t && (this._roomTags.dataset.rooms = t, this._roomTags.replaceChildren(...e.map(({ room: e, title: t }) => {
 			let n = document.createElement("button");
 			return n.type = "button", n.className = "room-tag", n.dataset.room = e, n.hidden = !0, n.title = `Show ${t} on its own${this._roomLightsOf(e) ? " · hold to switch its lights" : ""}`, n.setAttribute("aria-label", `Show ${t} on its own`), n.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5\"/></svg><span class=\"room-tag-name\"></span><span class=\"room-tag-count\" hidden></span>", n.querySelector(".room-tag-name").textContent = t, this._wireRoomTag(n, e), n;
@@ -18914,7 +18936,7 @@ var Oh = {
 		if (this._roomBack.hidden = !n, this._roomNav.hidden = !n, n) {
 			let e = this._focus.base.members, t = e.findIndex((e) => e.model === this._focus.room);
 			this._roomSteps.forEach((n, r) => {
-				let i = e[(t + (r ? 1 : -1) + e.length) % e.length], a = Ep(km(this._focus.base, i.model));
+				let i = e[(t + (r ? 1 : -1) + e.length) % e.length], a = Ep(Lm(this._focus.base, i.model));
 				n.hidden = e.length < 2, n.title = `${r ? "Next" : "Previous"} room · ${a}`, n.setAttribute("aria-label", n.title);
 			});
 			let n = this._model.title || "";
@@ -18923,7 +18945,7 @@ var Oh = {
 		this._positionRoomTags();
 	}
 	_roomLightsOf(e) {
-		return wh(this._model).find((t) => t.id === e && t.lights.length);
+		return Mh(this._model).find((t) => t.id === e && t.lights.length);
 	}
 	_wireRoomTag(e, t) {
 		let n = null, r, i = !1, a = () => {
@@ -18952,9 +18974,9 @@ var Oh = {
 	_syncRoomTagStates() {
 		let e = [...this._roomTags?.children || []];
 		if (!e.length) return;
-		let t = new Map(wh(this._model).map((e) => [e.id, e])), n = this._lightStates || /* @__PURE__ */ new Map();
+		let t = new Map(Mh(this._model).map((e) => [e.id, e])), n = this._lightStates || /* @__PURE__ */ new Map();
 		for (let r of e) {
-			let e = t.get(r.dataset.room), i = e ? Th(e, n).on : 0, a = r.querySelector(".room-tag-count");
+			let e = t.get(r.dataset.room), i = e ? Nh(e, n).on : 0, a = r.querySelector(".room-tag-count");
 			r.dataset.active = String(i > 0), a && (a.hidden = i === 0, a.textContent = i, a.title = `${i} on`);
 		}
 	}
@@ -18963,7 +18985,7 @@ var Oh = {
 		if (!e.length) return;
 		let t = this._config?.markers?._rooms || {}, n = Object.fromEntries(Object.entries(t).filter(([, e]) => e.position).map(([e, t]) => [e, t.position])), r = new Map((this._view?.roomFrontPoints?.(n) || []).map((e) => [e.room, e])), i = this._container?.clientWidth || 0, a = Math.max(40, (this._controls?.offsetTop || this._container?.clientHeight || 0) - 44), o = [];
 		for (let n of e) {
-			let e = r.get(n.dataset.room), s = !!e?.visible && Fm(t[n.dataset.room]?.mode || "auto", e.exposure ?? 1, n.dataset.shown === "true");
+			let e = r.get(n.dataset.room), s = !!e?.visible && Um(t[n.dataset.room]?.mode || "auto", e.exposure ?? 1, n.dataset.shown === "true");
 			if (n.dataset.shown = String(s), n.dataset.manual = String(!!e?.manual), n.hidden = !s, !s) continue;
 			let c = t[n.dataset.room]?.size ?? 30;
 			n.style.setProperty("--room-tag-size", c + "px");
@@ -18978,7 +19000,7 @@ var Oh = {
 				y: Math.max(8, Math.min(a, e.y)) + (e.manual ? -c / 2 : 6)
 			});
 		}
-		let s = Im(o);
+		let s = Wm(o);
 		o.forEach((e, t) => {
 			e.tag.style.left = e.x + "px", e.tag.style.top = Math.min(a, s[t] - e.offset) + "px";
 		});
@@ -19024,7 +19046,7 @@ var Oh = {
 		this._daylightSwitch.hidden = !e || !!this._preview, e && this._showDaylightMode(e.mode);
 	}
 	_showDaylightMode(e) {
-		let t = this._daylightSwitch, n = Oh[e] ? e : "auto";
+		let t = this._daylightSwitch, n = Ih[e] ? e : "auto";
 		t.value = n, t.dataset && (t.dataset.mode = n);
 		for (let e of t.querySelectorAll?.("button") || []) {
 			let t = e.dataset.mode === n;
@@ -19101,7 +19123,7 @@ var Oh = {
 			let o = ip(this._config.markers, n.id);
 			i.style.setProperty("--marker-size", o.size + "px"), i.setAttribute("aria-label", n.type === "light" ? `Toggle ${a}. Hold for more info.` : `Control ${a}`), i.title = n.type === "light" ? `${a}: click to toggle, hold for more info` : `${a}: value controls`;
 			let s = $f(o, n, !1), c = s || $f(o, n, !0), l = document.createElement(n.type === "climate" && !c ? "span" : "ha-state-icon");
-			n.type === "climate" && !c && (l.className = "fixture-ac-icon"), s && (l.icon = s), l.setAttribute("aria-hidden", "true"), l.innerHTML = s ? `<svg viewBox="0 0 24 24">${Qf(s) || ""}</svg>` : n.type === "climate" ? `<svg viewBox="0 0 24 24">${Kp}</svg>` : n.type === "lock" ? `<svg viewBox="0 0 24 24">${Gp}</svg>` : n.type === "button" ? "<svg viewBox=\"0 0 24 24\"><path d=\"m8 4 12 8-12 8Z\"/></svg>" : n.type === "number" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z\"/></svg>" : n.type === "light" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z\"/></svg>" : "<svg viewBox=\"0 0 24 24\"><path d=\"M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z\"/></svg>";
+			n.type === "climate" && !c && (l.className = "fixture-ac-icon"), s && (l.icon = s), l.setAttribute("aria-hidden", "true"), l.innerHTML = s ? `<svg viewBox="0 0 24 24">${Qf(s) || ""}</svg>` : n.type === "climate" ? `<svg viewBox="0 0 24 24">${em}</svg>` : n.type === "lock" ? `<svg viewBox="0 0 24 24">${$p}</svg>` : n.type === "button" ? "<svg viewBox=\"0 0 24 24\"><path d=\"m8 4 12 8-12 8Z\"/></svg>" : n.type === "number" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z\"/></svg>" : n.type === "light" ? "<svg viewBox=\"0 0 24 24\"><path d=\"M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z\"/></svg>" : "<svg viewBox=\"0 0 24 24\"><path d=\"M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z\"/></svg>";
 			let u = document.createElement("span");
 			if (u.className = "fixture-state", u.setAttribute("aria-hidden", "true"), u.hidden = !o.show_label, i.append(l), o.placement === "tray") {
 				let e = document.createElement("span");
@@ -19149,8 +19171,8 @@ var Oh = {
 	}
 	_buildLightPanel() {
 		this._panelRooms = {
-			light: this._config?.light_panel === !1 ? [] : wh(this._model),
-			shade: this._config?.shade_panel === !1 ? [] : Ch(this._model, "shade", (e) => this._isShade(e))
+			light: this._config?.light_panel === !1 ? [] : Mh(this._model),
+			shade: this._config?.shade_panel === !1 ? [] : jh(this._model, "shade", (e) => this._isShade(e))
 		};
 		for (let [e, t] of Object.entries(this._panelButtons)) t.hidden = !this._panelRooms[e].length;
 		this._panelKind && !this._panelRooms[this._panelKind].length && (this._panelKind = null);
@@ -19206,7 +19228,7 @@ var Oh = {
 		this._lightPanel = n, this._container.append(n), this._syncLightPanel();
 	}
 	_confirmAllLights() {
-		let { on: e, available: t } = Th(Dh(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
+		let { on: e, available: t } = Nh(Fh(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
 		this._dialog?.remove();
 		let a = document.createElement("dialog");
 		return this._dialog = a, a.className = "confirm-all-lights", a.innerHTML = "<form method=\"dialog\"><h2></h2><p></p><div style=\"display:flex;gap:8px;justify-content:flex-end;margin-top:16px\"><button value=\"cancel\" autofocus>Cancel</button><button value=\"ok\" class=\"confirm\"></button></div></form>", a.querySelector("h2").textContent = `${n ? r.turnOn : r.turnOff} all ${r.noun}?`, a.querySelector("p").textContent = n ? `This will ${r.turnOn.toLowerCase()} ${t} ${i(t)} in ${this._rooms.length === 1 ? this._rooms[0].title : "every room shown"}. Hidden devices are not changed.` : `This will ${r.turnOff.toLowerCase()} the ${e} ${i(e)} that ${e === 1 ? "is" : "are"} ${r.on}. Hidden devices are not changed.`, a.querySelector(".confirm").textContent = n ? `${r.turnOn} all` : `${r.turnOff} all`, this.shadowRoot.append(a), new Promise((e) => {
@@ -19221,12 +19243,12 @@ var Oh = {
 	_syncLightPanel(e = this._lightStates) {
 		let t = this._lightPanel;
 		if (!t || !e) return;
-		let n = this._panelWords(), r = Sh[this._panelKind || "light"].isOn, i = Dh(this._rooms), a = Th(i, e), o = t.querySelector("h2 [role=\"switch\"]");
+		let n = this._panelWords(), r = Ah[this._panelKind || "light"].isOn, i = Fh(this._rooms), a = Nh(i, e), o = t.querySelector("h2 [role=\"switch\"]");
 		t.querySelector("h2 .light-room-count").textContent = a.available ? `${a.on} ${n.on}` : "", o.setAttribute("aria-checked", String(a.on > 0)), o.disabled = !a.available || !this._preview && !i.entities.length, o.title = `${a.on ? n.turnOff : n.turnOn} all ${n.noun}`;
 		for (let i of this._rooms) {
 			let a = [...t.querySelectorAll("[data-room]")].find((e) => e.dataset.room === i.id);
 			if (!a) continue;
-			let o = Th(i, e);
+			let o = Nh(i, e);
 			a.querySelector(".light-room-count").textContent = o.available ? `${o.on} of ${o.available} ${n.on}` : i.entities.length || this._preview ? "Unavailable" : "Not connected";
 			let s = a.querySelector("[data-room-switch]");
 			s.setAttribute("aria-checked", String(o.on > 0)), s.disabled = !o.available || !this._preview && !i.entities.length, s.title = `${o.on ? n.turnOff : n.turnOn} all ${i.title} ${n.noun}`;
@@ -19241,7 +19263,7 @@ var Oh = {
 		}
 	}
 	async _toggleShade(e) {
-		let t = this._lightStates || /* @__PURE__ */ new Map(), n = Sh.shade.isOn(t.get(e) || {});
+		let t = this._lightStates || /* @__PURE__ */ new Map(), n = Ah.shade.isOn(t.get(e) || {});
 		if (this._preview) {
 			this._previewStates.set(e, { position: n ? 0 : 100 }), this._states();
 			return;
@@ -19259,11 +19281,11 @@ var Oh = {
 		t.className = "fixture-feedback", t.setAttribute("role", "alert"), t.textContent = e, this._container.append(t), setTimeout(() => t.remove(), 5e3);
 	}
 	async _toggleRoomLights(e, t) {
-		let n = t || (e === "" ? this._rooms?.length && Dh(this._rooms) : this._rooms?.find((t) => t.id === e));
+		let n = t || (e === "" ? this._rooms?.length && Fh(this._rooms) : this._rooms?.find((t) => t.id === e));
 		if (!n || this._pendingRooms.has(e)) return;
 		let r = this._lightStates || /* @__PURE__ */ new Map(), i = this._panelWords(n.kind);
 		if (this._preview) {
-			let e = Th(n, r).on === 0;
+			let e = Nh(n, r).on === 0;
 			for (let t of n.lights) {
 				if (n.kind === "shade") {
 					this._previewStates.set(t.id, { position: e ? 100 : 0 });
@@ -19272,7 +19294,7 @@ var Oh = {
 				let r = this._model.controls.find((e) => e.id === t.id), i = this._previewStates.get(t.id) || {
 					on: !0,
 					brightness: 255,
-					rgb: vh(r?.color || "#fff0d4")
+					rgb: Eh(r?.color || "#fff0d4")
 				};
 				this._previewStates.set(t.id, {
 					...i,
@@ -19282,7 +19304,7 @@ var Oh = {
 			this._states();
 			return;
 		}
-		let { calls: a } = Eh(n, r, this._hass.states);
+		let { calls: a } = Ph(n, r, this._hass.states);
 		if (!a.length) return;
 		this._pendingRooms.add(e);
 		let o = [...this._lightPanel?.querySelectorAll("[data-room-switch]") || []].find((t) => t.dataset.roomSwitch === e);
@@ -19380,7 +19402,7 @@ var Oh = {
 			let n = this._previewStates.get(e) || {
 				on: !0,
 				brightness: 255,
-				rgb: vh(t.color || "#fff0d4")
+				rgb: Eh(t.color || "#fff0d4")
 			};
 			this._previewStates.set(e, {
 				...n,
@@ -19485,7 +19507,7 @@ var Oh = {
 		let a = { ...this._previewStates.get(e) || {
 			on: !0,
 			brightness: 255,
-			rgb: vh(t.color || "#fff0d4")
+			rgb: Eh(t.color || "#fff0d4")
 		} }, o = i.querySelector("[role=\"switch\"]"), s = i.querySelector("[type=\"range\"]"), c = i.querySelector("[type=\"color\"]"), l = i.querySelectorAll("[type=\"range\"]")[1], u = () => {
 			o.textContent = a.on ? "On" : "Off", o.setAttribute("aria-checked", String(a.on)), o.setAttribute("aria-label", "Light power"), this._previewStates.set(e, { ...a }), this._states();
 		};
@@ -19494,26 +19516,61 @@ var Oh = {
 		}, s.oninput = () => {
 			a.brightness = Number(s.value), u();
 		}, c.oninput = () => {
-			a.rgb = vh(c.value), u();
+			a.rgb = Eh(c.value), u();
 		}, l.oninput = () => {
-			a.colorTempKelvin = Number(l.value), a.rgb = yh(a.colorTempKelvin), c.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), u();
+			a.colorTempKelvin = Number(l.value), a.rgb = Dh(a.colorTempKelvin), c.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), u();
 		}, this._preview && u(), i.addEventListener("close", () => i.remove()), this.shadowRoot.append(i), i.showModal();
 	}
 	_deskDialog(e) {
 		this._dialog?.remove();
 		let t = document.createElement("dialog");
-		this._dialog = t, t.dataset.desk = e.id, t.innerHTML = "<style>.desk-main{display:grid;gap:16px;margin:20px 0}.desk-directions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.desk-macros{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.desk-macros button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px}.desk-macros ha-state-icon{--mdc-icon-size:24px;width:24px;height:24px}</style><form method=\"dialog\"><h2></h2><div class=\"desk-main\"><label>Height <output></output><input data-desk-height type=\"range\" aria-label=\"Desk height\"></label><div class=\"desk-directions\"><button type=\"button\" data-action=\"open\">↑ Up</button><button type=\"button\" data-action=\"stop\">■ Stop</button><button type=\"button\" data-action=\"close\">↓ Down</button></div></div><div class=\"desk-macros\"></div><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p><p data-desk-error role=\"alert\"></p><button>Close</button></form>", t.querySelector("h2").textContent = e.label;
-		for (let [n, r] of e.macros.entries()) {
+		this._dialog = t, t.className = "dm", t.dataset.desk = e.id, t.innerHTML = Up, t.querySelector("h2").textContent = e.label;
+		let n = t.querySelector(".dm-macros");
+		for (let [t, r] of e.macros.entries()) {
 			let e = document.createElement("button");
-			e.type = "button", e.dataset.macro = r, e.setAttribute("aria-label", "Macro " + (n + 1));
-			let i = document.createElement("ha-state-icon"), a = document.createElement("span");
-			i.setAttribute("aria-hidden", "true"), e.append(i, a), t.querySelector(".desk-macros").append(e), e.onclick = () => this._deskCommand(r, "press");
+			e.type = "button", e.className = "dm-round", e.dataset.macro = r, e.setAttribute("aria-label", "Macro " + (t + 1));
+			let i = document.createElement("span"), a = document.createElement("ha-state-icon"), o = document.createElement("span");
+			i.className = "dm-disc", a.setAttribute("aria-hidden", "true"), i.append(a), e.append(i, o), n.append(e), e.onclick = () => this._deskCommand(r, "press");
 		}
+		t.querySelector("[data-desk-macros-section]").hidden = !e.macros.length;
 		for (let n of t.querySelectorAll("[data-action]")) n.onclick = () => this._deskCommand(e.motion, n.dataset.action);
-		let n = t.querySelector("[data-desk-height]");
-		n.oninput = () => {
-			t.querySelector("output").textContent = n.value + " cm";
-		}, n.onchange = () => this._deskCommand(e.height, "set_value", Number(n.value)), t.addEventListener("close", () => t.remove()), this.shadowRoot.append(t), this._updateDeskDialog(), t.showModal();
+		let r = t.querySelector(".dm-slider"), i, a = () => t._deskRange, o = (e) => this._showDeskHeight(e), s = (t) => this._deskCommand(e.height, "set_value", t);
+		r.onpointerdown = (e) => {
+			if (r.getAttribute("aria-disabled") === "true" || !a()) return;
+			e.preventDefault(), r.setPointerCapture(e.pointerId), r.classList.add("dm-dragging"), t._deskDragging = !0;
+			let n = (e) => Gp(e.clientY, r.getBoundingClientRect(), a());
+			t._deskValue = n(e), o(t._deskValue), r.onpointermove = (e) => {
+				t._deskValue = n(e), o(t._deskValue);
+			}, r.onpointerup = r.onpointercancel = (e) => {
+				r.onpointermove = r.onpointerup = r.onpointercancel = null, r.classList.remove("dm-dragging"), t._deskDragging = !1, e.type === "pointerup" ? s(t._deskValue) : this._updateDeskDialog();
+			};
+		}, r.onkeydown = (e) => {
+			let n = a();
+			if (!n || r.getAttribute("aria-disabled") === "true") return;
+			let c = Math.max(n.step, (n.max - n.min) / 10), l = {
+				ArrowUp: n.step,
+				ArrowRight: n.step,
+				ArrowDown: -n.step,
+				ArrowLeft: -n.step,
+				PageUp: c,
+				PageDown: -c
+			}[e.key], u = e.key === "Home" ? n.min : e.key === "End" ? n.max : l === void 0 ? void 0 : (t._deskValue ?? n.min) + l;
+			u !== void 0 && (e.preventDefault(), t._deskDragging = !0, t._deskValue = Wp(u, n), o(t._deskValue), clearTimeout(i), i = setTimeout(() => {
+				t._deskDragging = !1, s(t._deskValue);
+			}, 500));
+		}, t.addEventListener("click", (e) => {
+			e.target === t && t.close();
+		}), t.addEventListener("close", () => {
+			clearTimeout(i), t.remove();
+		}), this.shadowRoot.append(t), this._updateDeskDialog(), t.showModal();
+	}
+	_showDeskHeight(e) {
+		let t = this._dialog, n = t?._deskRange;
+		if (!n) return;
+		let r = Number.isFinite(e);
+		t.querySelector(".dm-fill").style.height = Kp(e, n) * 100 + "%", t.querySelector(".dm-big").textContent = r ? `${e} ${n.unit}` : "—";
+		let i = t.querySelector(".dm-slider");
+		i.setAttribute("aria-valuemin", n.min), i.setAttribute("aria-valuemax", n.max), r ? (i.setAttribute("aria-valuenow", e), i.setAttribute("aria-valuetext", `${e} ${n.unit}`)) : i.removeAttribute("aria-valuenow");
 	}
 	async _deskCommand(e, t, n) {
 		let r = this._model.controls.find((t) => t.id === e);
@@ -19544,22 +19601,22 @@ var Oh = {
 		if (!e?.dataset?.desk) return;
 		let t = this._model.devices?.find((t) => t.id === e.dataset.desk);
 		if (!t) return;
-		let n = this._model.controls.find((e) => e.id === t.height), r = this._hass.states?.[this._model.bindings[n.id]], i = this._preview ? this._previewStates.get(n.id) || { value: n.defaultValue } : Rp(r, n), a = e.querySelector("[data-desk-height]");
-		Object.assign(a, {
+		let n = this._model.controls.find((e) => e.id === t.height), r = this._hass.states?.[this._model.bindings[n.id]], i = this._preview ? this._previewStates.get(n.id) || { value: n.defaultValue } : Rp(r, n);
+		e._deskRange = {
 			min: Math.max(n.min, r?.attributes?.min ?? n.min),
 			max: Math.min(n.max, r?.attributes?.max ?? n.max),
 			step: Math.max(n.step, r?.attributes?.step || n.step),
-			disabled: !!i.unavailable
-		}), this.shadowRoot.activeElement !== a && (a.value = i.value ?? n.defaultValue), e.querySelector("output").textContent = i.value === void 0 ? "Unknown" : i.value + " " + n.unit;
-		let o = this._hass.states?.[this._model.bindings[t.motion]], s = this._preview ? {
+			unit: n.unit
+		}, e.querySelector(".dm-slider").setAttribute("aria-disabled", String(!!i.unavailable)), e.querySelector("[data-desk-status]").textContent = i.unavailable ? "Unavailable" : i.value === void 0 ? "Height unknown" : `Height ${i.value} ${n.unit}`, e._deskDragging || (e._deskValue = i.value, this._showDeskHeight(i.value));
+		let a = this._hass.states?.[this._model.bindings[t.motion]], o = this._preview ? {
 			open: !0,
 			close: !0,
 			stop: !0
-		} : Np(o), c = !this._preview && Pp(o).unavailable;
-		for (let t of e.querySelectorAll("[data-action]")) t.disabled = c || !s[t.dataset.action];
+		} : Np(a), s = !this._preview && Pp(a).unavailable;
+		for (let t of e.querySelectorAll("[data-action]")) t.disabled = s || !o[t.dataset.action];
 		for (let n of e.querySelectorAll("[data-macro]")) {
 			let e = n.dataset.macro, r = this._hass.states?.[this._model.bindings[e]], i = Tp(this._model, t, e);
-			n.querySelector("span").textContent = i || "Name macro", n.setAttribute("aria-label", i || "Macro " + (t.macros.indexOf(e) + 1));
+			n.querySelector("span:last-child").textContent = i || "Name macro", n.setAttribute("aria-label", i || "Macro " + (t.macros.indexOf(e) + 1));
 			let a = n.querySelector("ha-state-icon");
 			a.hass = this._hass, a.stateObj = r || {
 				entity_id: "button.preview",
@@ -19619,21 +19676,21 @@ var Oh = {
 				locked: !0,
 				label: "Locked",
 				unavailable: !1
-			} : Bp(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : Ip(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : Rp(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : Pp(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
+			} : Jp(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : Ip(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : Rp(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : Pp(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
 				on: !0,
 				brightness: 255,
-				rgb: vh(t.color || "#fff0d4")
+				rgb: Eh(t.color || "#fff0d4")
 			} : {
 				on: n?.state === "on",
 				unavailable: !n || ["unavailable", "unknown"].includes(n.state),
 				brightness: n?.attributes?.brightness ?? 255,
-				...bh(n, t.color)
+				...Oh(n, t.color)
 			});
 		}
 		this._updateDeskDialog(), this._lightStates = e, this._syncLightPanel(e), this._syncRoomTagStates();
 		for (let t of this.shadowRoot.querySelectorAll("[data-control]")) {
-			let n = t.dataset.control, r = this._model.controls.find((e) => e.id === n), i = this._hass.states?.[this._model.bindings[n]], a = Hp(r, i, e.get(n), this._preview);
-			t.dataset.active = String(a.active), t.dataset.moving = String(a.moving), t.dataset.unavailable = String(a.unavailable), Wp(t, a);
+			let n = t.dataset.control, r = this._model.controls.find((e) => e.id === n), i = this._hass.states?.[this._model.bindings[n]], a = Xp(r, i, e.get(n), this._preview);
+			t.dataset.active = String(a.active), t.dataset.moving = String(a.moving), t.dataset.unavailable = String(a.unavailable), Qp(t, a);
 			let o = wp(this._model, n)?.label || Dp(r);
 			t.title = `${o}: ${a.description}`, t.setAttribute("aria-label", `${r.type === "light" ? "Toggle" : "Control"} ${o}, ${a.description}${r.type === "light" ? ". Hold for more info." : ""}`), t.setAttribute("aria-disabled", String(a.unavailable)), r.type === "light" ? t.setAttribute("aria-pressed", String(a.active)) : t.removeAttribute("aria-pressed");
 			let s = t.querySelector("ha-state-icon");
@@ -19653,10 +19710,10 @@ var Oh = {
 		n !== this._signature && (this._signature = n, this._applyBackdrop(t), this._view.setStates(e), this._view.setDaylight?.(this._model.daylight?.mode ?? "night", t));
 	}
 };
-customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", Ah), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
+customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", Rh), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
 	type: "three-d-rooms-card",
 	name: "3D Rooms",
 	description: "Your room in perspective, with live lighting and controls on the modeled fixtures.",
 	preview: !0
 });
-export { Ah as ThreeDRoomsCard };
+export { Rh as ThreeDRoomsCard };

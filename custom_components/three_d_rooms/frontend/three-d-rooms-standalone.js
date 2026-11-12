@@ -1087,11 +1087,11 @@ function Te(e) {
 			kind: "slider",
 			key: "brightness",
 			label: "Brightness",
-			min: 1,
+			min: 0,
 			max: 255,
 			step: 1,
-			value: W(r.brightness) ?? 0,
-			format: (e) => `${Math.round(e / 255 * 100)}%`
+			value: e.state === "on" ? W(r.brightness) ?? 0 : 0,
+			format: (e) => e > 0 ? `${Math.max(1, Math.round(e / 255 * 100))}%` : "Off"
 		}), t.temperature && i.controls.push({
 			kind: "slider",
 			key: "color_temp_kelvin",
@@ -1257,7 +1257,11 @@ function Ee(e, t, n) {
 		n,
 		{ entity_id: i }
 	];
-	if (t.kind === "slider" || t.kind === "stepper" || t.kind === "select") return r === "light" ? t.key === "effect" && !n ? [
+	if (t.kind === "slider" || t.kind === "stepper" || t.kind === "select") return r === "light" ? t.key === "brightness" && !(n > 0) ? [
+		"light",
+		"turn_off",
+		{ entity_id: i }
+	] : t.key === "effect" && !n ? [
 		"light",
 		"turn_on",
 		{
@@ -1388,11 +1392,11 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		r ? (u = X(i, {
 			orient: "v",
 			label: "Brightness",
-			min: 1,
-			max: 255,
-			step: 1,
+			min: r.min,
+			max: r.max,
+			step: r.step,
 			value: r.value,
-			format: (e) => `${Math.round(e / 255 * 100)}%`,
+			format: r.format,
 			onCommit: (t) => _(e, r, t)
 		}), l.append(u.el)) : (u = Y(i, "button", "mi-tall", `${G("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => _(e, n, u.getAttribute("aria-checked") !== "true"), l.append(u));
 		let d = Y(i, "div", "mi-row"), f = Z(i, "power", "Power", () => {
@@ -1485,7 +1489,7 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			];
 			if (a.style.setProperty("--mi-accent", K(o)), a.style.setProperty("--mi-accent-ink", n ? Oe(o) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), v(e, (e) => e.kind === "toggle"), r) {
 				let t = v(e, (e) => e.key === "brightness");
-				u.set(n ? t?.value ?? 0 : 0), u.el.querySelector(".mi-big").textContent = n ? `${Math.round((t?.value ?? 0) / 255 * 100)}%` : "Off", u.caption(n ? "On" : "");
+				u.set(n ? t?.value ?? 0 : 0), u.el.querySelector(".mi-big").textContent = n ? r.format(t?.value ?? 0) : "Off", u.caption(n ? "On" : "");
 			} else u.setAttribute("aria-checked", String(n)), u.querySelector("span").textContent = n ? "On" : "Off";
 			for (let t of y) t(e);
 		};

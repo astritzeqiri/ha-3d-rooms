@@ -1,3 +1,12 @@
+# 0.41.4 — full-screen page on iPhone, bigger phone controls, desk pop-up, 2026-11-12
+
+Released as 0.41.4, based on 0.41.3.
+
+- Reproduced the user's bottom band in an iOS 27.2 iPhone 18 Pro Simulator home-screen app (local Home Assistant Core, signed in through the app's own Home Assistant login). With the page's `html,body{height:100%;overflow:hidden}` and a `position:fixed` card, iOS reported a 812 pt viewport on an 874 pt screen and clipped the card; the band showed the page background. With `html,body{overflow:hidden}` kept (so the page cannot scroll or shift under the status bar), no `height:100%`, and an absolutely positioned card, the viewport is 874 pt and the room and controls reach the bottom. Checked after a cold relaunch. An iOS 26.5 Simulator did not show the problem.
+- In that Simulator: phone controls measured 44 px; holding a desk and a light marker for 2 s opened their pop-ups with no text selection or callout; the new desk pop-up opened (the local test desk has no entities, so its controls show as unavailable); dragging a light's brightness to the bottom turned the light off in Home Assistant; tapping the room outside the open shades panel closed it, and clicking the Home Assistant sidebar outside a dashboard card closed its lights panel (desktop browser).
+- Frontend: 326 tests pass, including new desk slider and light 0% tests; Prettier and the build pass. Python: the integration tests pass, with the native Home Assistant tests skipped on the host.
+- Not tested: the user's own iPhone; moving a real desk with the new slider.
+
 # 0.41.3 — full-screen page height on an iPhone home-screen app, 2026-11-12
 
 Released as 0.41.3, based on 0.41.2.
