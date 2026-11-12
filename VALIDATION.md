@@ -6,7 +6,9 @@ Released as 0.43.1, based on 0.43.0. Reported on an iPhone home-screen app: the 
 - Frontend: 347 tests pass (new: Blob/damaged entries dropped, stuck store times out, the card's one fresh retry); Prettier and the build pass. Python: the integration tests pass, with the native Home Assistant tests skipped on the host.
 - Checked with the extracted 0.43.1 integration ZIP's frontend, served on a side port and mounted on the local Home Assistant origin (`localhost:18123`, which has its own browser storage; the shared instance had another session's preview staged and was not restaged). Five-room house view on the full-screen page: (1) over five Blob entries written by 0.43.0, all were dropped, 5 rooms downloaded and stored as data, and the house opened; (2) the revisit opened with 0 downloads; (3) with one stored room overwritten by same-sized garbage, the parse failed, the card downloaded the rooms again by itself (no Retry), the house opened and all 5 stored copies were valid GLBs again.
 - During checks, a first version of the retry never ran (a `return` inside `catch` skipped it); fixed and covered by a test before release.
-- Not tested: a real iPhone home-screen app, where the original bug happens.
+- iOS Simulator (iPhone 18 Pro, iOS 27.2, Mobile Safari), through a local proxy in front of the same Home Assistant that served either build's frontend: with 0.43.0 the house loaded once and the next load showed "Load failed" with Retry — the reported bug, reproduced. Switched to 0.43.1 over those same stored entries: the house opened. After force-quitting Safari and reopening, it opened from the stored copies with no `scene.glb` requests. The reload menu opened; Reload model downloaded all 5 rooms; after another force-quit and reopen, the house opened again with no downloads.
+- In the Simulator, toolbar buttons (floors, reload) take a first tap as hover and act on the second; this is not new in 0.43.x and was not changed.
+- Not tested: a real iPhone, and the home-screen app itself (Simulator checks used Safari).
 
 # 0.43.0 — rooms kept on the device, reload menu, extra entities follow view defaults, 2026-11-13
 
