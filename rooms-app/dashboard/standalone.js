@@ -11,10 +11,13 @@ import {
   registryIcons,
 } from "./standalone-icons.mjs";
 import { openMoreInfo } from "./more-info.mjs";
+import { fitPage } from "./standalone-fit.mjs";
 /**
  * Full-screen page for one saved dashboard view, with no Home Assistant
  * chrome. The card bundle is loaded by the page beside this script.
  */
+// Size the page before anything is drawn (iOS home-screen apps misreport it).
+fitPage();
 const status = document.getElementById("status");
 const say = (text) => {
   status.hidden = false;

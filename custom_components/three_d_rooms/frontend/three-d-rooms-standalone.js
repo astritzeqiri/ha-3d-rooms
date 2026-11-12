@@ -1733,11 +1733,34 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		dialog: a
 	};
 }
+// dashboard/standalone-fit.mjs
+function Ae({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
+	if (!e || !(a > 0)) return n;
+	let o = n >= t ? Math.max(r, i) : Math.min(r, i);
+	return Math.abs(n + a - o) <= 2 ? n + a : n;
+}
+function je(e = window) {
+	let t = e.document, n = t.createElement("div");
+	n.style.cssText = "position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none", t.documentElement.append(n);
+	let r = () => {
+		let r = Ae({
+			standalone: e.navigator.standalone === !0 || e.matchMedia?.("(display-mode: standalone)").matches === !0,
+			innerWidth: e.innerWidth,
+			innerHeight: e.innerHeight,
+			screenWidth: e.screen.width,
+			screenHeight: e.screen.height,
+			insetTop: n.getBoundingClientRect().height
+		});
+		t.documentElement.style.setProperty("--three-d-rooms-page-height", `${Math.round(r)}px`);
+	};
+	return r(), e.addEventListener("resize", r), e.addEventListener("orientationchange", () => setTimeout(r, 250)), e.visualViewport?.addEventListener("resize", r), r;
+}
 // dashboard/standalone.js
+je();
 var Q = document.getElementById("status"), $ = (e) => {
 	Q.hidden = !1, Q.textContent = e;
 };
-async function Ae() {
+async function Me() {
 	let e = document.body.dataset.view;
 	await customElements.whenDefined("three-d-rooms-card");
 	let t = await j({
@@ -1797,6 +1820,6 @@ async function Ae() {
 		l.setStates(t), e();
 	})), c.hass = l.build(), Q.hidden = !0, document.body.append(c);
 }
-Ae().catch((e) => {
+Me().catch((e) => {
 	console.error(e), $(e?.message || "Could not connect to Home Assistant. Reload to try again.");
 });

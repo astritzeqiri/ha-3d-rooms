@@ -1,3 +1,7 @@
+## 0.41.3
+
+- **No empty band at the bottom of the full-screen page on iPhone.** In a home-screen app, iOS reports a screen height that leaves out the status bar, so the page stopped about one status bar short of the bottom of the screen. The page now measures the status bar and, when the reported height plus the status bar matches the screen exactly, uses the full screen height. It checks again on rotation. Browser tabs, split views and screens that already report the right height are unchanged.
+
 ## 0.41.2
 
 - **Full-screen page fits an iPhone home-screen app.** Added to the home screen from Safari, the page drew under the status bar: its buttons at the top (room lights and shades, time of day, room navigation) were hidden behind the clock and the Dynamic Island, and the room stopped short of the bottom of the screen because iOS reports a viewport that is too short there. The page now fills the whole screen, and its floating controls stay inside the safe area (below the status bar, clear of the notch in landscape, above the home bar) while the room itself still runs edge to edge. Dashboard cards are unchanged. If you already added the page to your home screen, remove it and add it again after updating so iOS picks up the new layout.

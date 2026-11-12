@@ -1,3 +1,12 @@
+# 0.41.3 — full-screen page height on an iPhone home-screen app, 2026-11-12
+
+Released as 0.41.3, based on 0.41.2.
+
+- On a real iPhone home-screen app, 0.41.2 kept the top controls clear of the status bar but left an empty band at the bottom, the height of the status bar: the viewport there is short by the top safe-area inset, including `100vh` and `100dvh`.
+- Frontend: 322 tests pass, including new tests for the height correction (short home-screen viewport, correct viewport, browser tab, split view, landscape); Prettier and the build pass. Python: the integration tests pass, with the native Home Assistant tests skipped on the host.
+- Checked in the local Home Assistant Core (singleton container, built-in browser at 375×812): the page sets its height to the full 812 px and draws with no console errors; with no safe-area inset in a desktop browser, nothing is corrected.
+- Not tested: the real iPhone home-screen app after this change.
+
 # 0.41.2 — full-screen page on an iPhone home-screen app, 2026-11-12
 
 Released as 0.41.2, based on 0.41.1.
