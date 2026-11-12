@@ -73,6 +73,8 @@ async function start() {
   // `height: auto` fills the screen. Home Assistant's more-info dialog is part
   // of its own frontend, so the Edit shortcut to the manager is left out.
   card.setConfig({ saved_view: view, height: "auto", edit_button: false });
+  // Sized by the page and kept clear of the iPhone status bar and notch.
+  card.setAttribute("fill-page", "");
   const standalone = createStandaloneHass({
     auth,
     connection,

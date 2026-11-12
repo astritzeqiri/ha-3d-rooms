@@ -1775,7 +1775,7 @@ async function Ae() {
 		saved_view: e,
 		height: "auto",
 		edit_button: !1
-	});
+	}), c.setAttribute("fill-page", "");
 	let l = fe({
 		auth: t,
 		connection: r,

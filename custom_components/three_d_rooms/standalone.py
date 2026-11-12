@@ -37,7 +37,7 @@ PAGE = """<!doctype html>
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:,">
 <title>3D Rooms</title>
-<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101715;color:#edf2eb;font:14px/1.5 system-ui}three-d-rooms-card{display:block;width:100%;height:100%}.status{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}</style>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101715;color:#edf2eb;font:14px/1.5 system-ui}three-d-rooms-card{display:block;position:fixed;top:0;left:0;width:100%;height:100vh;height:100dvh}@media (display-mode:standalone){three-d-rooms-card{height:max(100vh,100dvh)}}.status{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}</style>
 </head>
 <body data-view="@VIEW@" data-modules="@MODULES@">
 <div class="status" id="status" role="status">Connecting to Home Assistant…</div>

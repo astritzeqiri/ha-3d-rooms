@@ -1,3 +1,11 @@
+# 0.41.2 — full-screen page on an iPhone home-screen app, 2026-11-12
+
+Released as 0.41.2, based on 0.41.1.
+
+- Frontend: 318 tests pass; Prettier and the build pass. Python: the integration tests pass, with the native Home Assistant tests skipped on the host.
+- Checked in the local Home Assistant Core (singleton container, built-in browser at 375×812): `/three_d_rooms_view/<id>` serves 0.41.2, the card is marked `fill-page`, fills the full viewport height through the page's CSS instead of the measured viewport, and shows its top and bottom controls with no console errors. Desktop browsers report zero safe-area insets, so the controls sit where they did before.
+- Not tested: a real iPhone home-screen app (status bar, Dynamic Island and landscape notch insets), which is the case this release fixes.
+
 # 0.41.1 — one-click access to the full-screen page, 2026-11-12
 
 Released as 0.41.1, based on 0.41.0.

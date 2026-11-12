@@ -1,3 +1,7 @@
+## 0.41.2
+
+- **Full-screen page fits an iPhone home-screen app.** Added to the home screen from Safari, the page drew under the status bar: its buttons at the top (room lights and shades, time of day, room navigation) were hidden behind the clock and the Dynamic Island, and the room stopped short of the bottom of the screen because iOS reports a viewport that is too short there. The page now fills the whole screen, and its floating controls stay inside the safe area (below the status bar, clear of the notch in landscape, above the home bar) while the room itself still runs edge to edge. Dashboard cards are unchanged. If you already added the page to your home screen, remove it and add it again after updating so iOS picks up the new layout.
+
 ## 0.41.1
 
 - **One click to the full-screen page.** Every card in **Dashboard views** has an **Open full screen** button, and the view editor's toolbar has a **Full screen** button beside Background. Both open the view's full-screen page in a new tab (the editor button appears once the view is saved, since the page shows the saved view).
