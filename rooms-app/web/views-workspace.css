@@ -70,26 +70,6 @@ body[data-workspace="views"] .workspace {
 #view-results {
   padding-bottom: 12px;
 }
-.view-content-summary {
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  margin-bottom: 20px;
-  background: var(--bg);
-}
-.view-content-summary h3 {
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-.view-content-summary p {
-  line-height: 1.5;
-  margin: 8px 0;
-  overflow-wrap: anywhere;
-}
-.view-content-summary button {
-  min-height: 44px;
-  margin: 4px 0;
-}
 #view-scope-dialog {
   width: min(640px, calc(100vw - 32px));
 }
@@ -358,24 +338,6 @@ button:focus-visible {
   border-color: var(--accent);
   color: var(--accent-ink);
 }
-.dashboard-panel .panel-heading {
-  flex-direction: column-reverse;
-  align-items: flex-start;
-  gap: 18px;
-}
-.dashboard-panel .panel-close {
-  width: auto;
-  padding: 8px 10px;
-  min-height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 13px;
-}
-.dashboard-panel .panel-close:hover {
-  background: var(--raised);
-}
 @media (max-width: 600px) {
   .workspace-navigation {
     padding: 8px 16px;
@@ -475,4 +437,425 @@ button:focus-visible {
   gap: 8px;
   justify-content: flex-end;
   flex-wrap: wrap;
+}
+
+/* View editor sidebar: a compact header, titled sections and a save bar. */
+.dashboard-panel {
+  gap: 0;
+  padding: 0 20px;
+}
+.dashboard-panel .panel-heading {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 18px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+.dashboard-panel .panel-heading-text {
+  min-width: 0;
+}
+.dashboard-panel .panel-heading .eyebrow {
+  font-size: 11px;
+}
+.dashboard-panel .panel-heading h2 {
+  margin-top: 2px;
+  font-size: 19px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.dashboard-panel .panel-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text);
+}
+.dashboard-panel .panel-close svg {
+  width: 18px;
+  height: 18px;
+}
+.dashboard-panel .panel-close:hover:not(:disabled) {
+  background: var(--raised);
+}
+#dashboard-form {
+  display: block;
+}
+.editor-section {
+  display: grid;
+  gap: 12px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+.editor-section-title {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.editor-section > p.muted {
+  margin-top: -6px;
+}
+.dashboard-panel .panel-field,
+.dashboard-panel .view-height-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.dashboard-panel .panel-field-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.dashboard-panel .card-title-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.dashboard-panel .card-title-toggle input[role="switch"] {
+  width: 44px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* What to show */
+.view-content-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg);
+}
+.view-content-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--accent-ink);
+}
+.view-content-row p {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.view-content-row button {
+  flex: none;
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+#view-content-note:empty {
+  display: none;
+}
+
+/* Collapsible groups */
+.editor-section-list {
+  gap: 0;
+  padding-bottom: 6px;
+}
+.editor-section-list .editor-section-title {
+  margin-bottom: 4px;
+}
+.editor-collapsible {
+  min-width: 0;
+  border-top: 1px solid var(--line);
+}
+.editor-section-list .editor-collapsible:first-of-type {
+  border-top: 0;
+}
+.view-advanced.editor-collapsible {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 0 12px;
+}
+.editor-collapsible > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+.editor-collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+.editor-collapsible > summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin: 0 4px 3px auto;
+  border-right: 1.8px solid var(--muted);
+  border-bottom: 1.8px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform var(--ease);
+}
+.editor-collapsible[open] > summary::after {
+  margin-bottom: -3px;
+  transform: rotate(-135deg);
+}
+.editor-collapsible > summary:hover {
+  color: var(--accent-ink);
+}
+.editor-collapsible .entity-count:not(:empty) {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--raised);
+  color: var(--muted);
+  font-size: 12px;
+}
+.editor-collapsible-body {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 2px 0 16px;
+}
+.editor-collapsible-body > p.muted:empty {
+  display: none;
+}
+.dashboard-config textarea {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+.dashboard-config .editor-collapsible-body > button {
+  justify-self: start;
+}
+
+/* Save bar: stays in reach while the settings scroll. Saved: status,
+   Preview and Use in dashboard. Unsaved: it turns into an accent banner
+   with a full-width Save view. */
+.dashboard-panel .panel-save {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 12px;
+  margin: 0 -20px;
+  padding: 12px 20px max(14px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 -8px 16px -12px rgb(0 0 0 / 0.45);
+  transition:
+    background-color var(--ease),
+    border-color var(--ease);
+}
+.dashboard-panel .panel-save > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+}
+.dashboard-panel .panel-save > span::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.dashboard-panel .panel-save button {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+#preview-dashboard {
+  grid-column: 2;
+}
+#save-dashboard-component,
+#use-saved-view {
+  grid-column: 1 / -1;
+}
+#dashboard-save-state[data-state="saved"]::before {
+  background: var(--good, #4caf50);
+}
+/* Nothing to save: only the next step is offered. */
+.panel-save:has(#dashboard-save-state[data-state="saved"])
+  #save-dashboard-component {
+  display: none;
+}
+/* Unsaved changes or a new view: the save bar leaves the sidebar and
+   becomes a solid banner across the bottom of the whole page. */
+.dashboard-panel
+  .panel-save:has(
+    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+  ) {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 40;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  margin: 0;
+  padding: 14px max(24px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  border: 0;
+  border-radius: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+  backdrop-filter: none;
+  box-shadow: 0 -10px 30px -8px rgb(0 0 0 / 0.55);
+  animation: save-bar-attention 320ms var(--ease);
+}
+/* Keep the end of the page reachable above the banner. */
+body:has(
+  #dashboard-panel:not([hidden])
+    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+) {
+  padding-bottom: 96px;
+}
+#dashboard-save-state:is([data-state="changed"], [data-state="new"]) {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  color: var(--on-accent);
+  font-size: 15px;
+  font-weight: 700;
+}
+#dashboard-save-state:is([data-state="changed"], [data-state="new"])::before {
+  grid-row: span 2;
+  width: 10px;
+  height: 10px;
+  background: var(--on-accent);
+  box-shadow: 0 0 0 5px rgb(255 255 255 / 0.25);
+  animation: save-dot-pulse 1.6s ease-in-out infinite;
+}
+#dashboard-save-state:is([data-state="changed"], [data-state="new"])::after {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.85;
+}
+#dashboard-save-state[data-state="changed"]::after {
+  content: "Save to update this view and every card that uses it.";
+}
+#dashboard-save-state[data-state="new"]::after {
+  content: "Save it to add this view to your dashboards.";
+}
+.panel-save:has(
+    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+  )
+  button {
+  min-height: 44px;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+.panel-save:has(
+    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+  )
+  #preview-dashboard {
+  grid-column: 2;
+  border-color: color-mix(in srgb, var(--on-accent) 55%, transparent);
+  background: transparent;
+  color: var(--on-accent);
+}
+.panel-save:has(
+    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+  )
+  #preview-dashboard:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+.dashboard-panel
+  .panel-save:has(
+    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+  )
+  #save-dashboard-component {
+  grid-column: 3;
+  min-width: 150px;
+  border-color: var(--surface);
+  background: var(--surface);
+  color: var(--accent-ink);
+  font-weight: 700;
+  box-shadow: 0 4px 14px -6px rgb(0 0 0 / 0.5);
+}
+.dashboard-panel
+  .panel-save:has(
+    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+  )
+  #save-dashboard-component:hover:not(:disabled) {
+  background: var(--raised);
+}
+@media (max-width: 600px) {
+  .dashboard-panel
+    .panel-save:has(
+      #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+    ) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-inline: 16px;
+  }
+  .dashboard-panel
+    .panel-save:has(
+      #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+    )
+    #save-dashboard-component {
+    grid-column: 1 / -1;
+  }
+  body:has(
+    #dashboard-panel:not([hidden])
+      #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+  ) {
+    padding-bottom: 150px;
+  }
+}
+@keyframes save-bar-attention {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes save-dot-pulse {
+  50% {
+    box-shadow: 0 0 0 8px rgb(255 255 255 / 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-panel .panel-save,
+  #dashboard-save-state::before {
+    animation: none !important;
+  }
+}
+#dashboard-error:empty {
+  display: none;
+}
+#dashboard-error {
+  margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .dashboard-panel {
+    padding: 0 16px;
+  }
+  .dashboard-panel .panel-save {
+    margin: 0 -16px;
+    padding-inline: 16px;
+  }
+  .dashboard-panel .panel-close {
+    width: 44px;
+    height: 44px;
+  }
 }

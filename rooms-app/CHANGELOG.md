@@ -1,3 +1,9 @@
+## 0.44.0
+
+- **A tidier view editor sidebar.** The dashboard view editor is now grouped into clear sections: **Details** (the name and a switch to show it on the card), **What to show** (the space, with a compact **Change** button), **Camera** (Perspective or Floor plan and the preset side by side, with **Fine-tune camera and height** folded underneath) and **On the card** (Device icons, Extra entities and the YAML configuration as matching fold-out rows). The back arrow now sits beside the title.
+- **Unsaved changes are impossible to miss.** As soon as a view has changes that are not saved (or is new), a banner in the accent colour spans the bottom of the whole page, saying what saving will do, with **Preview** and a large **Save view** button. Once saved it returns to the sidebar and offers **Use in dashboard**.
+- Nothing about saved views, cards or rooms changes.
+
 ## 0.43.1
 
 - **Fixed "Load failed" when reopening the iPhone home-screen app.** In 0.43.0 the stored rooms were saved as files that Safari can lose when the app restarts, so a reopened app could show "Load failed", and Retry failed the same way until **Reload model** was used. Rooms are now stored as plain data and checked when read; copies saved by 0.43.0 are dropped and downloaded once more. If a room still cannot be opened from its stored copy, the card downloads it again by itself instead of showing an error.

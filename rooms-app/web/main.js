@@ -2073,7 +2073,7 @@ const dashboardEditor = initDashboardEditor({
     setRoomTab("views", { keepEditor: true });
     $("view-content-name").textContent = viewScopeLabel(selected, models);
     $("view-content-note").textContent =
-      "Choose visible device controls below. Connections follow the rooms configured in My home.";
+      "Device connections follow the rooms set up in My home.";
     viewMode = view.options.mode;
     $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
   },

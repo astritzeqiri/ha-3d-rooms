@@ -58,7 +58,7 @@ Room-name and plain text/number inputs now match the dark form controls, with pa
 
 ## Camera navigation (0.15.0)
 
-The room viewer has a compact, always-visible view cube. Drag it to rotate the room or use arrow keys when focused. Click a face, edge or corner to snap to that angle; Home resets and fits the room. The cube remains visible while editing saved views, including when Advanced camera settings is closed.
+The room viewer has a compact, always-visible view cube. Drag it to rotate the room or use arrow keys when focused. Click a face, edge or corner to snap to that angle; Home resets and fits the room. The cube remains visible while editing saved views, including when **Fine-tune camera and height** is closed.
 
 ## Adjustable desk · 0.16.0
 
@@ -66,7 +66,7 @@ Desk-enabled models group height, Up/Stop/Down and four optional macros in one d
 
 ## 0.20.0 dashboard preview
 
-The native integration manager can preview draft and saved views in the real Home Assistant dashboard card. Desktop/Phone controls change card width; × or Escape closes the preview. Device controls remain live. Show title on card controls the header independently of the saved view name, and linked cards inherit it unless overridden. Existing views preserve their title behavior. Thumbnails retain proportions, with older caches repaired from saved camera aspect ratios when available.
+The native integration manager can preview draft and saved views in the real Home Assistant dashboard card. Desktop/Phone controls change card width; × or Escape closes the preview. Device controls remain live. **Show the name on the card** controls the header independently of the saved view name, and linked cards inherit it unless overridden. Existing views preserve their title behavior. Thumbnails retain proportions, with older caches repaired from saved camera aspect ratios when available.
 
 ### Dashboard views gallery
 
@@ -81,11 +81,11 @@ Create or edit a view under **Dashboard views**. Click a device icon to open its
 - **Position** offers click-to-place, reset and precise X/Y/Z offsets in metres. You can also drag an icon directly onto a visible model surface. Escape cancels an unfinished placement.
 - **Undo** steps through up to 50 icon edits for the selected device during the current editing session. Opening another view resets this history.
 
-Click outside the icons/tools to close the fan and clear selection. The device picker under **Device controls** provides another way to select a control. Editing icons never sends device commands; **Preview in dashboard** uses live controls. Save the view to retain presentation and position changes. Linked cards inherit saved marker settings unless explicitly overridden.
+Click outside the icons/tools to close the fan and clear selection. The device picker under **Device icons** provides another way to select a control. Editing icons never sends device commands; **Preview** uses live controls. Save the view to retain presentation and position changes. Linked cards inherit saved marker settings unless explicitly overridden.
 
 Camera framing is retained when reopening, resizing and saving views. Saved views now include a bounded JPEG thumbnail shared across gallery browsers; older views gain one on their next save. Phone/tablet layouts keep preview actions accessible while scrolling.
 
-Device controls include **Defaults for this view**: set visibility, state labels, size and display position once for the view. Individual device settings override only the fields you change. **Use view defaults** removes appearance overrides and retains the device’s position. Existing saved customizations remain intact.
+**Device icons** include **Defaults for this view**: set visibility, state labels, size and display position once for the view. Individual device settings override only the fields you change. **Use view defaults** removes appearance overrides and retains the device’s position. Existing saved customizations remain intact.
 
 ## Auto height and fullscreen (local preview)
 

@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-DvW6zNfc.js"></script>
+    <script type="module" crossorigin src="./assets/index-H4uQfGaE.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/camera-view-z8Qybv8r.js">
     <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-B0du1dI4.js">
     <link rel="modulepreload" crossorigin href="./assets/room-focus-x7MbfcYl.js">
     <link rel="modulepreload" crossorigin href="./assets/preload-helper-CRzLMJPS.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-Ce7172iA.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-BrO6RBpw.css">
   </head>
   <body>
     <header>
@@ -273,14 +273,12 @@
             hidden
           >
             <div class="panel-heading">
-              <div>
-                <span class="eyebrow">DASHBOARD VIEW</span>
-                <h2 id="dashboard-panel-title">Save this view</h2>
-              </div>
               <button
                 id="close-dashboard"
                 class="panel-close"
+                type="button"
                 aria-label="Back to views"
+                title="Back to views"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -291,175 +289,261 @@
                   stroke-linejoin="round"
                   aria-hidden="true"
                 >
-                  <path d="m10 6-6 6 6 6M4 12h16" /></svg
-                >Back to views
+                  <path d="m10 6-6 6 6 6M4 12h16" />
+                </svg>
               </button>
+              <div class="panel-heading-text">
+                <span class="eyebrow">Dashboard view</span>
+                <h2 id="dashboard-panel-title">Save this view</h2>
+              </div>
             </div>
-            <p class="muted">
-              Drag the room to frame your view, or choose a camera preset.
-            </p>
             <form id="dashboard-form">
               <section
-                class="view-content-summary"
+                class="editor-section"
+                aria-labelledby="view-details-heading"
+              >
+                <h3 id="view-details-heading" class="editor-section-title">
+                  Details
+                </h3>
+                <label class="panel-field" for="dashboard-title"
+                  >Name<input id="dashboard-title" maxlength="160" required
+                /></label>
+                <label class="card-title-toggle"
+                  ><span>Show the name on the card</span
+                  ><input
+                    id="dashboard-show-title"
+                    type="checkbox"
+                    role="switch"
+                /></label>
+              </section>
+              <section
+                class="editor-section view-content-summary"
                 aria-labelledby="view-content-heading"
               >
-                <h3 id="view-content-heading">What to show</h3>
-                <p id="view-content-name"></p>
-                <button id="change-view-content" type="button">
-                  Change space
-                </button>
+                <h3 id="view-content-heading" class="editor-section-title">
+                  What to show
+                </h3>
+                <div class="view-content-row">
+                  <svg
+                    class="view-content-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"
+                    />
+                  </svg>
+                  <p id="view-content-name"></p>
+                  <button id="change-view-content" type="button">Change</button>
+                </div>
                 <p id="view-content-note" class="muted small"></p>
               </section>
-              <label class="panel-field"
-                >Camera preset<select id="dashboard-preset">
-                  <option value="">Current view</option>
-                  <option value="reset">Room overview</option>
-                  <option value="front">Front</option>
-                  <option value="top">Top</option>
-                  <option value="left">Left</option>
-                  <option value="right">Right</option>
-                </select></label
+              <section
+                class="editor-section"
+                aria-labelledby="view-camera-heading"
               >
-              <label class="panel-field" for="dashboard-title"
-                >View name<input id="dashboard-title" maxlength="160" required
-              /></label>
-              <label class="card-title-toggle"
-                ><input id="dashboard-show-title" type="checkbox" />Show title
-                on card</label
-              >
-              <div class="panel-field-row">
-                <label class="panel-field" for="dashboard-view"
-                  >View<select id="dashboard-view">
-                    <option value="front">Perspective</option>
-                    <option value="floor">Floor plan</option>
-                  </select></label
-                >
-              </div>
-              <details id="dashboard-controls" class="view-controls-settings">
-                <summary>Device controls</summary>
-                <p
-                  id="dashboard-marker-message"
-                  class="muted small"
-                  role="status"
-                ></p>
-                <div id="dashboard-marker-settings"></div>
-              </details>
-              <details id="dashboard-entities" class="view-controls-settings">
-                <summary>
-                  Extra entities<span class="entity-count"></span>
-                </summary>
-                <div id="dashboard-entity-settings"></div>
-              </details>
-              <details class="view-advanced" id="dashboard-advanced">
-                <summary>Advanced camera settings</summary>
-                <div class="panel-field view-height-field">
-                  <label for="dashboard-height-mode">Height</label>
-                  <select id="dashboard-height-mode">
-                    <option value="fixed">Fixed · pixels</option>
-                    <option value="auto">
-                      Auto · fill the space on the dashboard
-                    </option>
-                  </select>
-                  <input
-                    id="dashboard-height"
-                    type="number"
-                    min="180"
-                    max="1600"
-                    step="1"
-                    required
-                    aria-label="Height in pixels"
-                  />
-                  <p class="muted small" id="dashboard-height-note" hidden>
-                    The card fills the space the dashboard gives it, best in a
-                    single-card Panel view. This editor uses the free height of
-                    your screen.
-                  </p>
+                <h3 id="view-camera-heading" class="editor-section-title">
+                  Camera
+                </h3>
+                <p class="muted small">
+                  Drag the room to frame the view, or start from a preset.
+                </p>
+                <div class="panel-field-row">
+                  <label class="panel-field" for="dashboard-view"
+                    >Style<select id="dashboard-view">
+                      <option value="front">Perspective</option>
+                      <option value="floor">Floor plan</option>
+                    </select></label
+                  >
+                  <label class="panel-field" for="dashboard-preset"
+                    >Preset<select id="dashboard-preset">
+                      <option value="">Current view</option>
+                      <option value="reset">Room overview</option>
+                      <option value="front">Front</option>
+                      <option value="top">Top</option>
+                      <option value="left">Left</option>
+                      <option value="right">Right</option>
+                    </select></label
+                  >
                 </div>
-                <fieldset class="camera-fields">
-                  <legend>Camera</legend>
-                  <div class="camera-field">
-                    <label for="dashboard-heading">Rotation</label>
-                    <div class="camera-adjust">
+                <details
+                  class="view-advanced editor-collapsible"
+                  id="dashboard-advanced"
+                >
+                  <summary>Fine-tune camera and height</summary>
+                  <div class="editor-collapsible-body">
+                    <div class="panel-field view-height-field">
+                      <label for="dashboard-height-mode">Card height</label>
+                      <select id="dashboard-height-mode">
+                        <option value="fixed">Fixed · pixels</option>
+                        <option value="auto">
+                          Auto · fill the space on the dashboard
+                        </option>
+                      </select>
                       <input
-                        id="dashboard-heading-range"
-                        type="range"
-                        min="0"
-                        max="359.99"
-                        step="0.01"
-                        value="0"
-                        aria-label="Rotation slider"
+                        id="dashboard-height"
+                        type="number"
+                        min="180"
+                        max="1600"
+                        step="1"
+                        required
+                        aria-label="Height in pixels"
                       />
-                      <div class="camera-number">
-                        <input
-                          id="dashboard-heading"
-                          type="number"
-                          min="0"
-                          max="359.99"
-                          step="0.01"
-                          value="0"
-                          required
-                        /><span aria-hidden="true">°</span>
-                      </div>
+                      <p class="muted small" id="dashboard-height-note" hidden>
+                        The card fills the space the dashboard gives it, best in
+                        a single-card Panel view. This editor uses the free
+                        height of your screen.
+                      </p>
                     </div>
-                  </div>
-                  <div class="camera-field">
-                    <label for="dashboard-tilt">Tilt</label>
-                    <div class="camera-adjust">
-                      <input
-                        id="dashboard-tilt-range"
-                        type="range"
-                        min="0"
-                        max="180"
-                        step="0.01"
-                        value="28"
-                        aria-label="Tilt slider"
-                      />
-                      <div class="camera-number">
-                        <input
-                          id="dashboard-tilt"
-                          type="number"
-                          min="0"
-                          max="180"
-                          step="0.01"
-                          value="28"
-                          required
-                        /><span aria-hidden="true">°</span>
+                    <fieldset class="camera-fields">
+                      <legend>Camera angle</legend>
+                      <div class="camera-field">
+                        <label for="dashboard-heading">Rotation</label>
+                        <div class="camera-adjust">
+                          <input
+                            id="dashboard-heading-range"
+                            type="range"
+                            min="0"
+                            max="359.99"
+                            step="0.01"
+                            value="0"
+                            aria-label="Rotation slider"
+                          />
+                          <div class="camera-number">
+                            <input
+                              id="dashboard-heading"
+                              type="number"
+                              min="0"
+                              max="359.99"
+                              step="0.01"
+                              value="0"
+                              required
+                            /><span aria-hidden="true">°</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  <div class="camera-field">
-                    <label for="dashboard-zoom">Zoom</label>
-                    <div class="camera-adjust">
-                      <input
-                        id="dashboard-zoom-range"
-                        type="range"
-                        min="0.25"
-                        max="100"
-                        step="0.0001"
-                        value="1"
-                        aria-label="Zoom slider"
-                      />
-                      <div class="camera-number">
-                        <input
-                          id="dashboard-zoom"
-                          type="number"
-                          min="0.01"
-                          max="100"
-                          step="0.0001"
-                          value="1"
-                          required
-                        /><span aria-hidden="true">×</span>
+                      <div class="camera-field">
+                        <label for="dashboard-tilt">Tilt</label>
+                        <div class="camera-adjust">
+                          <input
+                            id="dashboard-tilt-range"
+                            type="range"
+                            min="0"
+                            max="180"
+                            step="0.01"
+                            value="28"
+                            aria-label="Tilt slider"
+                          />
+                          <div class="camera-number">
+                            <input
+                              id="dashboard-tilt"
+                              type="number"
+                              min="0"
+                              max="180"
+                              step="0.01"
+                              value="28"
+                              required
+                            /><span aria-hidden="true">°</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                      <div class="camera-field">
+                        <label for="dashboard-zoom">Zoom</label>
+                        <div class="camera-adjust">
+                          <input
+                            id="dashboard-zoom-range"
+                            type="range"
+                            min="0.25"
+                            max="100"
+                            step="0.0001"
+                            value="1"
+                            aria-label="Zoom slider"
+                          />
+                          <div class="camera-number">
+                            <input
+                              id="dashboard-zoom"
+                              type="number"
+                              min="0.01"
+                              max="100"
+                              step="0.0001"
+                              value="1"
+                              required
+                            /><span aria-hidden="true">×</span>
+                          </div>
+                        </div>
+                      </div>
+                    </fieldset>
                   </div>
-                </fieldset>
-              </details>
+                </details>
+              </section>
+              <section
+                class="editor-section editor-section-list"
+                aria-labelledby="view-more-heading"
+              >
+                <h3 id="view-more-heading" class="editor-section-title">
+                  On the card
+                </h3>
+                <details
+                  id="dashboard-controls"
+                  class="view-controls-settings editor-collapsible"
+                >
+                  <summary>Device icons</summary>
+                  <div class="editor-collapsible-body">
+                    <p
+                      id="dashboard-marker-message"
+                      class="muted small"
+                      role="status"
+                    ></p>
+                    <div id="dashboard-marker-settings"></div>
+                  </div>
+                </details>
+                <details
+                  id="dashboard-entities"
+                  class="view-controls-settings editor-collapsible"
+                >
+                  <summary>
+                    Extra entities<span class="entity-count"></span>
+                  </summary>
+                  <div class="editor-collapsible-body">
+                    <div id="dashboard-entity-settings"></div>
+                  </div>
+                </details>
+                <details class="dashboard-config editor-collapsible">
+                  <summary>YAML configuration</summary>
+                  <div class="editor-collapsible-body">
+                    <p class="muted small">
+                      Add a Manual card in Home Assistant and paste this
+                      configuration.
+                    </p>
+                    <label class="sr-only" for="dashboard-yaml"
+                      >Dashboard card configuration</label
+                    ><textarea
+                      id="dashboard-yaml"
+                      readonly
+                      rows="7"
+                      spellcheck="false"
+                    ></textarea
+                    ><button id="copy-dashboard" type="button">
+                      Copy configuration
+                    </button>
+                  </div>
+                </details>
+              </section>
               <p id="dashboard-error" class="error" role="alert"></p>
               <div class="panel-save">
-                <button id="preview-dashboard" type="button" hidden>
-                  Preview in dashboard
-                </button>
-                <button
+                <span
+                  id="dashboard-save-state"
+                  class="muted small"
+                  role="status"
+                  >Not saved yet</span
+                ><button id="preview-dashboard" type="button" hidden>
+                  Preview</button
+                ><button
                   id="save-dashboard-component"
                   class="primary"
                   type="submit"
@@ -471,33 +555,10 @@
                   type="button"
                   hidden
                 >
-                  Use in dashboard</button
-                ><span
-                  id="dashboard-save-state"
-                  class="muted small"
-                  role="status"
-                  >Not saved yet</span
-                >
+                  Use in dashboard
+                </button>
               </div>
             </form>
-            <details class="dashboard-config">
-              <summary>Advanced: YAML configuration</summary>
-              <p class="muted small">
-                Add a Manual card in Home Assistant and paste this
-                configuration.
-              </p>
-              <label class="sr-only" for="dashboard-yaml"
-                >Dashboard card configuration</label
-              ><textarea
-                id="dashboard-yaml"
-                readonly
-                rows="7"
-                spellcheck="false"
-              ></textarea
-              ><button id="copy-dashboard" type="button">
-                Copy configuration
-              </button>
-            </details>
           </aside>
           <aside id="space-inspector" aria-label="Room details"></aside>
         </div>

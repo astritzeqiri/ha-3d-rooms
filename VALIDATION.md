@@ -1,3 +1,11 @@
+# 0.44.0 — view editor sidebar and unsaved-changes banner, 2026-11-13
+
+Released as 0.44.0, based on 0.43.1. Markup and CSS only (`rooms-app/web/index.html`, `web/views-workspace.css`, removed overrides in `web/style.css`, one note string in `web/main.js`); all element IDs kept, so the editor logic and stored views are unchanged.
+
+- 348 frontend tests, the format check and the build pass; 99 host Python tests pass with 17 native-only skips.
+- Checked in the shared local Home Assistant (Core 2026.11.0) with this package staged, in the real manager page (`/three_d_rooms`, saved view "My house overview"): at 1440×900 and 375×812 the sidebar shows the Details, What to show, Camera and On the card sections, the fold-outs open and close, and the page has no horizontal scroll. Turning "Show the name on the card" on makes the save bar a fixed accent banner across the whole manager page (0 to the frame's full width) with Preview and Save view, and on a phone Save view takes its own full-width row; turning it back returns "Saved view", the bar goes back into the sidebar with Use in dashboard, Save view is hidden and the page padding is removed. Back to views closes the editor. Nothing was saved.
+- Not checked: Safari/iOS rendering of the banner (it relies on CSS `:has`, supported by current Safari, Chrome and Firefox), and the light theme beyond reading the token values.
+
 # 0.43.1 — fix "Load failed" when reopening the home-screen app, 2026-11-13
 
 Released as 0.43.1, based on 0.43.0. Reported on an iPhone home-screen app: the first open worked, a reopened app showed "Load failed" and Retry failed the same way until Reload model was used. Cause: 0.43.0 stored rooms as Blobs in IndexedDB, and Safari can return a stored Blob whose data is gone after the app restarts.

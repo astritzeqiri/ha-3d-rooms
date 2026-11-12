@@ -1592,35 +1592,8 @@ body.dashboard-editing #dashboard {
   color: var(--muted);
   pointer-events: none;
 }
-.panel-save {
-  display: grid;
-  gap: 8px;
-}
-.panel-save span {
-  text-align: center;
-}
 .dashboard-panel > button {
   width: 100%;
-}
-.view-advanced,
-.dashboard-config {
-  min-width: 0;
-  border-top: 1px solid var(--line);
-}
-.dashboard-config summary {
-  display: list-item;
-  align-content: center;
-}
-.dashboard-config textarea {
-  margin-top: 8px;
-  font-size: 12px;
-}
-.dashboard-config button {
-  margin-top: 8px;
-}
-.view-advanced .camera-fields {
-  border: 0;
-  padding: 0;
 }
 
 /* Legacy saved-component layout (kept for compatibility) */
@@ -2496,21 +2469,6 @@ li[aria-selected="true"] .opt-name {
   }
 }
 
-.card-title-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  margin-bottom: 12px;
-  cursor: pointer;
-}
-.dashboard-panel .card-title-toggle input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  min-height: 18px;
-  flex: 0 0 18px;
-  padding: 0;
-}
 .saved-view-actions .saved-view-preview,
 .saved-view-actions .saved-view-open {
   flex: 1 0 calc(50% - 4px);
@@ -2639,17 +2597,6 @@ body[data-room-tab="views"] .saved-view-thumb {
   }
 }
 
-.dashboard-panel .panel-close {
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 12px;
-  line-height: 20px;
-  flex-shrink: 0;
-}
-.dashboard-panel .panel-heading {
-  flex-wrap: wrap;
-}
-
 /* Phone and small tablet layouts keep the room and form usable together. */
 .saved-view-card {
   min-width: 0;
@@ -2752,9 +2699,6 @@ body[data-room-tab="views"] .saved-view-thumb {
   .dashboard-panel .panel-close {
     min-height: 44px;
   }
-  .panel-save {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
   dialog {
     max-width: calc(100vw - 24px);
     overflow-wrap: anywhere;
@@ -2810,11 +2754,6 @@ body[data-room-tab="views"] .saved-view-thumb {
 }
 
 /* Device marker presentation inside the saved-view editor. */
-.view-controls-settings > summary {
-  min-height: 44px;
-  padding: 10px 0;
-  font-weight: 600;
-}
 .marker-device-settings {
   border-top: 1px solid var(--line);
 }
@@ -3859,66 +3798,6 @@ body[data-room-tab="views"] .saved-view-thumb {
   }
 }
 
-/* View editor: Save stays in reach while the settings scroll. */
-.dashboard-panel .panel-save {
-  position: sticky;
-  bottom: 0;
-  z-index: 3;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  align-items: center;
-  margin: 0 -24px;
-  padding: 12px 24px max(14px, env(safe-area-inset-bottom));
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 -8px 16px -12px rgb(0 0 0 / 0.45);
-}
-.dashboard-panel .panel-save > span {
-  grid-column: 1 / -1;
-  order: -1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.dashboard-panel .panel-save > span::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--muted);
-}
-#dashboard-save-state[data-state="changed"],
-#dashboard-save-state[data-state="new"] {
-  color: var(--accent-ink);
-  font-weight: 600;
-}
-#dashboard-save-state[data-state="changed"]::before,
-#dashboard-save-state[data-state="new"]::before {
-  background: var(--accent);
-}
-#dashboard-save-state[data-state="saved"]::before {
-  background: var(--good, #4caf50);
-}
-@media (max-width: 600px) {
-  .dashboard-panel .panel-save {
-    margin: 0 -16px;
-    padding-inline: 16px;
-  }
-}
-.dashboard-panel .panel-save {
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.dashboard-panel .panel-save button {
-  min-height: 40px;
-  padding: 8px 10px;
-  font-size: 13px;
-}
-.dashboard-panel .panel-save #use-saved-view {
-  grid-column: 1 / -1;
-}
 .marker-icon-field[hidden] {
   display: none;
 }
