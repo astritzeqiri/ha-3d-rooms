@@ -1,4 +1,7 @@
 import { isMarkerIcon } from "./marker-icons.mjs";
+import { validateCustomEntities } from "./custom-entities.mjs";
+/** Keys of a view's markers that are not device ids. */
+export const MARKER_SPECIAL_KEYS = ["_defaults", "_rooms", "_entities"];
 /** View-local presentation only. Does not change bindings or modeled geometry. */
 export function validateMarkers(value) {
   if (value === undefined) return undefined;
@@ -6,7 +9,7 @@ export function validateMarkers(value) {
     !value ||
     typeof value !== "object" ||
     Array.isArray(value) ||
-    Object.keys(value).filter((id) => !["_defaults", "_rooms"].includes(id))
+    Object.keys(value).filter((id) => !MARKER_SPECIAL_KEYS.includes(id))
       .length > 128
   )
     throw new Error(
@@ -17,6 +20,11 @@ export function validateMarkers(value) {
     if (id === "_rooms") {
       const rooms = validateRoomButtons(options);
       if (Object.keys(rooms).length) clean._rooms = rooms;
+      continue;
+    }
+    if (id === "_entities") {
+      const entities = validateCustomEntities(options);
+      if (Object.keys(entities).length) clean._entities = entities;
       continue;
     }
     if (
@@ -188,7 +196,7 @@ export function markerTrayHeight(markers, controls) {
         .filter((c) => !c.hidden && c.lightGroupPrimary !== false)
         .map((c) => c.id)
     : Object.keys(markers || {}).filter(
-        (id) => id !== "_defaults" && id !== "_rooms",
+        (id) => !MARKER_SPECIAL_KEYS.includes(id),
       );
   const count = ids.filter((id) => {
     const options = markerSettings(markers, id);

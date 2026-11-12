@@ -245,6 +245,7 @@ export function initRoomButtonsEditor({ viewport, scene, model, onChange }) {
       previous?.();
       paint();
     };
+    Object.assign(hook, previous);
     hook.roomButtons = true;
     owner.options.onRender = hook;
   }

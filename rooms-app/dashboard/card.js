@@ -31,6 +31,13 @@ import {
   LOCK_ICON_PATH,
 } from "../shared/marker.mjs";
 import { lockState } from "../shared/lock.mjs";
+import {
+  customEntityDefaultIcon,
+  customEntitySettings,
+  customEntityShown,
+  customEntityState,
+  customEntityTap,
+} from "../shared/custom-entities.mjs";
 import { markerIconPath, stateIconName } from "../shared/marker-icons.mjs";
 import { coverState } from "../shared/cover.mjs";
 import { validateCameraSnapshot } from "../shared/camera-view.mjs";
@@ -1473,12 +1480,202 @@ export class ThreeDRoomsCard extends HTMLElement {
       if (presentation.visible)
         (presentation.placement === "tray" ? tray : access).append(button);
     }
+    this._buildCustomEntities(access);
     this._container.append(access);
     this.shadowRoot.querySelector("ha-card").append(tray);
     this._groupChips = new Map();
     this._openGroup = null;
     this._positionButtons();
     this._buildLightPanel();
+  }
+  /**
+   * The view's extra entities (`markers._entities`): any entity, as an icon
+   * at the spot the view chose. Tap toggles what can be toggled (or presses
+   * buttons and scenes) and opens Home Assistant's dialog for the rest;
+   * holding always opens the dialog.
+   */
+  _buildCustomEntities(access) {
+    const entries = Object.entries(this._config?.markers?._entities || {});
+    for (const [id, raw] of entries) {
+      const options = customEntitySettings(raw);
+      if (!options.visible) continue;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.custom = id;
+      button.hidden = true;
+      button.style.setProperty("--marker-size", options.size + "px");
+      const icon = document.createElement("ha-state-icon");
+      icon.setAttribute("aria-hidden", "true");
+      const firstIcon = stateIconName(options, {}, false);
+      if (firstIcon) icon.icon = firstIcon;
+      icon.innerHTML = `<svg viewBox="0 0 24 24">${
+        (firstIcon && markerIconPath(firstIcon)) ||
+        '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm-2 5h3v6h1.5v2h-5v-2H11v-4h-1Z"/>'
+      }</svg>`;
+      const badge = document.createElement("span");
+      badge.className = "fixture-state";
+      badge.setAttribute("aria-hidden", "true");
+      badge.hidden = !options.show_state;
+      button.append(icon, badge);
+      let timer,
+        origin,
+        held = false;
+      const cancel = () => {
+        clearTimeout(timer);
+        origin = null;
+      };
+      button.onpointerdown = (event) => {
+        if (event.button !== 0) return;
+        held = false;
+        origin = [event.clientX, event.clientY];
+        button.setPointerCapture(event.pointerId);
+        timer = setTimeout(() => {
+          held = true;
+          this._moreInfo(options.entity);
+        }, 500);
+      };
+      button.onpointermove = (event) => {
+        if (
+          origin &&
+          Math.hypot(event.clientX - origin[0], event.clientY - origin[1]) > 8
+        ) {
+          held = true;
+          cancel();
+        }
+      };
+      button.onpointerup = cancel;
+      button.onpointercancel = () => {
+        held = true;
+        cancel();
+      };
+      button.onlostpointercapture = cancel;
+      button.oncontextmenu = (event) => event.preventDefault();
+      button.onclick = () => {
+        if (!held) this._tapCustom(id);
+        held = false;
+      };
+      button.onkeydown = (event) => {
+        if (event.key === "F2" || (event.shiftKey && event.key === "Enter")) {
+          event.preventDefault();
+          this._moreInfo(options.entity);
+        }
+      };
+      access.append(button);
+    }
+  }
+  _moreInfo(entityId) {
+    if (this._preview || !entityId) return;
+    if (this._layout?.fullscreen) {
+      document
+        .exitFullscreen()
+        .then(() => this._moreInfo(entityId))
+        .catch(() => {});
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent("hass-more-info", {
+        detail: { entityId },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+  async _tapCustom(id) {
+    const options = this._config?.markers?._entities?.[id];
+    if (!options || this._preview) return;
+    const tap = customEntityTap(options.entity),
+      entity = this._hass?.states?.[options.entity];
+    if (!tap || !entity) {
+      this._moreInfo(options.entity);
+      return;
+    }
+    if (entity.state === "unavailable") return;
+    this._pendingCustom ||= new Set();
+    if (this._pendingCustom.has(id)) return;
+    this._pendingCustom.add(id);
+    const button = this.shadowRoot.querySelector(`[data-custom="${id}"]`);
+    button?.setAttribute("aria-busy", "true");
+    this.shadowRoot.querySelector(".fixture-feedback")?.remove();
+    try {
+      await this._hass.callService(tap.domain, tap.service, {
+        entity_id: options.entity,
+      });
+    } catch {
+      const message = document.createElement("div");
+      message.className = "fixture-feedback";
+      message.setAttribute("role", "alert");
+      message.textContent = "Could not change it. Try again.";
+      this._container.append(message);
+    } finally {
+      this._pendingCustom.delete(id);
+      button?.removeAttribute("aria-busy");
+    }
+  }
+  /** Keep the extra entities on their spots as the camera moves. */
+  _positionCustomEntities(width, height) {
+    const entities = this._config?.markers?._entities || {},
+      shownRooms = this._model?.houseView ? this._view?.roomBoxes : null;
+    for (const button of this.shadowRoot.querySelectorAll("[data-custom]")) {
+      const raw = entities[button.dataset.custom];
+      if (!raw) continue;
+      const options = customEntitySettings(raw),
+        point = this._view?.screenPoint?.(options.position);
+      button.hidden =
+        !point?.visible || !customEntityShown(options, shownRooms);
+      if (button.hidden) continue;
+      const layout = markerLayout(
+        point,
+        { size: options.size, show_label: options.show_state },
+        width,
+        height,
+      );
+      button.style.left = layout.left + "px";
+      button.style.top = layout.top + "px";
+    }
+  }
+  /** State, icon and words of the extra entities. */
+  _customEntityStates() {
+    const entities = this._config?.markers?._entities || {},
+      format = this._hass?.formatEntityState?.bind(this._hass);
+    for (const button of this.shadowRoot.querySelectorAll("[data-custom]")) {
+      const options = entities[button.dataset.custom];
+      if (!options) continue;
+      const entity = this._preview
+          ? undefined
+          : this._hass?.states?.[options.entity],
+        look = this._preview
+          ? {
+              active: false,
+              unavailable: false,
+              badge: "",
+              description: options.entity,
+            }
+          : customEntityState(entity, format),
+        name =
+          options.name || entity?.attributes?.friendly_name || options.entity,
+        tap = customEntityTap(options.entity);
+      button.dataset.active = String(look.active);
+      button.dataset.unavailable = String(look.unavailable);
+      button.title = `${name}: ${look.description}${tap ? " · hold for more info" : ""}`;
+      button.setAttribute(
+        "aria-label",
+        `${name}, ${look.description}${tap ? ". Tap to switch, hold for more info." : ". Opens more info."}`,
+      );
+      const icon = button.querySelector("ha-state-icon");
+      if (icon)
+        icon.dataset.defaultIcon = customEntityDefaultIcon(
+          options.entity,
+          entity,
+        );
+      if (icon && entity) {
+        icon.hass = this._hass;
+        icon.stateObj = entity;
+        // Its own icon for the current look, else Home Assistant's.
+        const named = stateIconName(options, {}, look.active);
+        if (icon.icon !== named) icon.icon = named;
+      }
+      button.querySelector(".fixture-state").textContent = look.badge;
+    }
   }
   /** Room shades: covers the loaded scene animates as roller shades. */
   _isShade(control) {
@@ -1880,6 +2077,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         });
     }
     this._groupIcons(items, width, height);
+    this._positionCustomEntities(width, height);
     this._positionRoomTags();
     if (!afterCoverCheck) this._scheduleCoverCheck();
   }
@@ -2544,6 +2742,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._lightStates = states;
     this._syncLightPanel(states);
     this._syncRoomTagStates();
+    this._customEntityStates();
     for (const button of this.shadowRoot.querySelectorAll("[data-control]")) {
       const id = button.dataset.control;
       const control = this._model.controls.find((c) => c.id === id);

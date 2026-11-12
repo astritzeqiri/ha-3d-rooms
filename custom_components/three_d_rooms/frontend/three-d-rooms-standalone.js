@@ -849,48 +849,48 @@ var pe = (e) => ({
 			P["mdi:star"]
 		]
 	]]
-], F = new Map(me.flatMap(([, e]) => e.map(([e, t, n]) => [e, {
+], he = new Map(me.flatMap(([, e]) => e.map(([e, t, n]) => [e, {
 	label: t,
 	path: n
 }])));
-function I(e) {
+function F(e) {
 	return "mdi" + e.replace(/^mdi:/, "").split("-").map((e) => e.charAt(0).toUpperCase() + e.slice(1)).join("");
 }
 // shared/icon-art.mjs
-var L = /^[MmLlHhVvCcSsQqTtAaZz0-9eE.,\s+-]+$/, R = /^-?[\d.]+(?:[\s,]+-?[\d.]+){3}$/, z = "0 0 24 24";
-function B({ path: e, secondaryPath: t, viewBox: n } = {}) {
-	if (typeof e == "string" && L.test(e)) return {
-		viewBox: typeof n == "string" && R.test(n.trim()) ? n.trim() : z,
-		html: `${typeof t == "string" && L.test(t) ? `<path d="${t}" opacity="0.5"/>` : ""}<path d="${e}"/>`
+var I = /^[MmLlHhVvCcSsQqTtAaZz0-9eE.,\s+-]+$/, L = /^-?[\d.]+(?:[\s,]+-?[\d.]+){3}$/, R = "0 0 24 24";
+function z({ path: e, secondaryPath: t, viewBox: n } = {}) {
+	if (typeof e == "string" && I.test(e)) return {
+		viewBox: typeof n == "string" && L.test(n.trim()) ? n.trim() : R,
+		html: `${typeof t == "string" && I.test(t) ? `<path d="${t}" opacity="0.5"/>` : ""}<path d="${e}"/>`
 	};
 }
 // dashboard/standalone-icons.mjs
-function he({ customIcons: e = () => globalThis.window?.customIcons || {}, loadModules: t = async () => {}, loadMdi: n = () => import("./mdi-CGHzqUII.js") } = {}) {
+function ge({ customIcons: e = () => globalThis.window?.customIcons || {}, loadModules: t = async () => {}, loadMdi: n = () => import("./mdi-CGHzqUII.js") } = {}) {
 	let r = /* @__PURE__ */ new Map(), i, a = async (r) => {
 		let a = r.indexOf(":"), o = r.slice(0, a);
 		if (o === "mdi") {
-			let e = F.get(r);
+			let e = he.get(r);
 			if (e) return {
-				viewBox: z,
+				viewBox: R,
 				html: `<path d="${e.path}"/>`
 			};
-			let t = (await n())[I(r)];
-			return B({ path: t });
+			let t = (await n())[F(r)];
+			return z({ path: t });
 		}
 		e()[o] || (i ||= Promise.resolve(t()).catch(() => {}), await i);
 		let s = e()[o];
-		if (typeof s?.getIcon == "function") return B(await s.getIcon(r.slice(a + 1)));
+		if (typeof s?.getIcon == "function") return z(await s.getIcon(r.slice(a + 1)));
 	};
 	return { resolve(e) {
 		return typeof e != "string" || !e.includes(":") ? Promise.resolve(void 0) : (r.has(e) || r.set(e, a(e).catch(() => void 0)), r.get(e));
 	} };
 }
-function ge(e) {
+function _e(e) {
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e?.entities || []) n.ei && typeof n.ic == "string" && t.set(n.ei, n.ic);
 	return (e) => t.get(e);
 }
-function _e({ resolver: e, registryIcon: t = () => void 0 }) {
+function ve({ resolver: e, registryIcon: t = () => void 0 }) {
 	if (customElements.get("ha-state-icon")) return;
 	class n extends HTMLElement {
 		constructor() {
@@ -912,7 +912,7 @@ function _e({ resolver: e, registryIcon: t = () => void 0 }) {
 			this._hass = e;
 		}
 		_sync() {
-			let n = this._icon || this._stateObj?.attributes?.icon || t(this._stateObj?.entity_id);
+			let n = this._icon || this._stateObj?.attributes?.icon || t(this._stateObj?.entity_id) || this.dataset.defaultIcon;
 			if (n === this._name) return;
 			this._name = n;
 			let r = ++this._token;
@@ -928,7 +928,7 @@ function _e({ resolver: e, registryIcon: t = () => void 0 }) {
 	customElements.define("ha-state-icon", n);
 }
 // dashboard/more-info-icons.mjs
-var V = {
+var B = {
 	close: "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z",
 	power: "M16.56,5.44L15.11,6.89C16.84,7.94 18,9.83 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12C6,9.83 7.16,7.94 8.88,6.88L7.44,5.44C5.36,6.88 4,9.28 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,9.28 18.64,6.88 16.56,5.44M13,3H11V13H13",
 	palette: "M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8A1.5,1.5 0 0,1 13,6.5A1.5,1.5 0 0,1 14.5,5A1.5,1.5 0 0,1 16,6.5A1.5,1.5 0 0,1 14.5,8M9.5,8A1.5,1.5 0 0,1 8,6.5A1.5,1.5 0 0,1 9.5,5A1.5,1.5 0 0,1 11,6.5A1.5,1.5 0 0,1 9.5,8M6.5,12A1.5,1.5 0 0,1 5,10.5A1.5,1.5 0 0,1 6.5,9A1.5,1.5 0 0,1 8,10.5A1.5,1.5 0 0,1 6.5,12M12,3A9,9 0 0,0 3,12A9,9 0 0,0 12,21A1.5,1.5 0 0,0 13.5,19.5C13.5,19.11 13.35,18.76 13.11,18.5C12.88,18.23 12.73,17.88 12.73,17.5A1.5,1.5 0 0,1 14.23,16H16A5,5 0 0,0 21,11C21,6.58 16.97,3 12,3Z",
@@ -959,24 +959,32 @@ var V = {
 	swing: "M6 14H9L5 18L1 14H4C4 11.3 5.7 6.6 11 6.1V8.1C7.6 8.6 6 11.9 6 14M20 14C20 11.3 18.3 6.6 13 6.1V8.1C16.4 8.7 18 11.9 18 14H15L19 18L23 14H20Z",
 	swingh: "M6.45,17.45L1,12L6.45,6.55L7.86,7.96L4.83,11H19.17L16.14,7.96L17.55,6.55L23,12L17.55,17.45L16.14,16.04L19.17,13H4.83L7.86,16.04L6.45,17.45Z",
 	preset: "M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z",
-	fanAuto: "M12.5 2C8.93 2 8.14 5.96 10.13 9.65C9.72 9.97 9.4 10.39 9.21 10.87C8.28 10.68 7.23 10.25 6.73 9.26C5.56 6.89 2 7 2 11.5C2 15.07 5.95 15.85 9.64 13.87C9.96 14.27 10.39 14.59 10.88 14.79C10.68 15.71 10.24 16.75 9.26 17.24C6.9 18.42 7 22 11.5 22C12.31 22 13 21.78 13.5 21.41C13.19 20.67 13 19.86 13 19C13 17.59 13.5 16.3 14.3 15.28C14.17 14.97 14.03 14.65 13.86 14.34C14.26 14 14.57 13.59 14.77 13.11C15.26 13.21 15.78 13.39 16.25 13.67C17.07 13.25 18 13 19 13C20.05 13 21.03 13.27 21.89 13.74C21.95 13.37 22 12.96 22 12.5C22 8.92 18.03 8.13 14.33 10.13C14 9.73 13.59 9.42 13.11 9.22C13.3 8.29 13.74 7.24 14.73 6.75C17.09 5.57 17 2 12.5 2M12 11C12.54 11 13 11.45 13 12C13 12.55 12.54 13 12 13C11.43 13 11 12.55 11 12C11 11.45 11.43 11 12 11M18 15C16.89 15 16 15.9 16 17V23H18V21H20V23H22V17C22 15.9 21.1 15 20 15M18 17H20V19H18Z"
-}, H = [
+	fanAuto: "M12.5 2C8.93 2 8.14 5.96 10.13 9.65C9.72 9.97 9.4 10.39 9.21 10.87C8.28 10.68 7.23 10.25 6.73 9.26C5.56 6.89 2 7 2 11.5C2 15.07 5.95 15.85 9.64 13.87C9.96 14.27 10.39 14.59 10.88 14.79C10.68 15.71 10.24 16.75 9.26 17.24C6.9 18.42 7 22 11.5 22C12.31 22 13 21.78 13.5 21.41C13.19 20.67 13 19.86 13 19C13 17.59 13.5 16.3 14.3 15.28C14.17 14.97 14.03 14.65 13.86 14.34C14.26 14 14.57 13.59 14.77 13.11C15.26 13.21 15.78 13.39 16.25 13.67C17.07 13.25 18 13 19 13C20.05 13 21.03 13.27 21.89 13.74C21.95 13.37 22 12.96 22 12.5C22 8.92 18.03 8.13 14.33 10.13C14 9.73 13.59 9.42 13.11 9.22C13.3 8.29 13.74 7.24 14.73 6.75C17.09 5.57 17 2 12.5 2M12 11C12.54 11 13 11.45 13 12C13 12.55 12.54 13 12 13C11.43 13 11 12.55 11 12C11 11.45 11.43 11 12 11M18 15C16.89 15 16 15.9 16 17V23H18V21H20V23H22V17C22 15.9 21.1 15 20 15M18 17H20V19H18Z",
+	garage: "M19,20H17V11H7V20H5V9L12,5L19,9V20M8,12H16V14H8V12M8,15H16V17H8V15M16,18V20H8V18H16Z",
+	garageOpen: "M19,20H17V11H7V20H5V9L12,5L19,9V20M8,12H16V14H8V12Z",
+	shutter: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9M8 12H16V14H8V12M8 15H16V17H8V15M8 18H16V20H8V18Z",
+	shutterOpen: "M3 4H21V8H19V20H17V8H7V20H5V8H3V4M8 9H16V11H8V9Z",
+	doorClosed: "M16,11H18V13H16V11M12,3H19C20.11,3 21,3.89 21,5V19H22V21H2V19H10V5C10,3.89 10.89,3 12,3M12,5V19H19V5H12Z",
+	doorOpen: "M12,3C10.89,3 10,3.89 10,5H3V19H2V21H22V19H21V5C21,3.89 20.11,3 19,3H12M12,5H19V19H12V5M5,11H7V13H5V11Z",
+	blindsClosed: "M20 19V3H4V19H2V21H13.25C13.25 21.97 14.03 22.75 15 22.75S16.75 21.97 16.75 21H22V19H20M18 11H16V9H18V11M14 11H6V9H14V11M14 13V15H6V13H14M16 13H18V15H16V13M18 7H16V5H18V7M14 5V7H6V5H14M6 19V17H14V19H6M16 19V17H18V19H16Z",
+	blindsOpen: "M20 19V3H4V19H2V21H22V19H20M16 9H18V11H16V9M14 11H6V9H14V11M18 7H16V5H18V7M14 5V7H6V5H14M6 19V13H14V14.82C13.55 15.14 13.25 15.66 13.25 16.25C13.25 17.22 14.03 18 15 18S16.75 17.22 16.75 16.25C16.75 15.66 16.45 15.13 16 14.82V13H18V19H6Z"
+}, V = [
 	"hs",
 	"xy",
 	"rgb",
 	"rgbw",
 	"rgbww"
 ];
-function ve(e) {
+function ye(e) {
 	let t = e?.attributes || {}, n = t.supported_color_modes || [], r = e?.entity_id?.startsWith("light."), i = Number.isFinite(t.min_color_temp_kelvin) ? t.min_color_temp_kelvin : 2e3, a = Number.isFinite(t.max_color_temp_kelvin) ? t.max_color_temp_kelvin : 6535;
 	return {
 		brightness: !!r && n.some((e) => [
 			"brightness",
 			"color_temp",
 			"white",
-			...H
+			...V
 		].includes(e)),
-		color: !!r && n.some((e) => H.includes(e)),
+		color: !!r && n.some((e) => V.includes(e)),
 		temperature: !!r && n.includes("color_temp") && i > 0 && a >= i,
 		minKelvin: i,
 		maxKelvin: a,
@@ -984,7 +992,7 @@ function ve(e) {
 		transition: !!r && !!(t.supported_features & 32)
 	};
 }
-function U(e) {
+function H(e) {
 	let t = Math.max(1e3, Math.min(4e4, e)) / 100;
 	return [
 		t <= 66 ? 255 : 329.698727446 * (t - 60) ** -.1332047592,
@@ -993,11 +1001,11 @@ function U(e) {
 	].map((e) => Math.round(Math.max(0, Math.min(255, e))));
 }
 // dashboard/more-info-model.mjs
-function ye([e, t, n]) {
+function be([e, t, n]) {
 	let r = Math.max(e, t, n), i = r - Math.min(e, t, n), a = 0;
 	return i && (a = r === e ? (t - n) / i % 6 : r === t ? (n - e) / i + 2 : (e - t) / i + 4, a *= 60, a < 0 && (a += 360)), [Math.round(a), Math.round(r ? i / r * 100 : 0)];
 }
-function be([e, t], n = 1) {
+function xe([e, t], n = 1) {
 	let r = t / 100 * n, i = r * (1 - Math.abs(e / 60 % 2 - 1)), a = n - r, [o, s, c] = e < 60 ? [
 		r,
 		i,
@@ -1029,7 +1037,7 @@ function be([e, t], n = 1) {
 		c
 	].map((e) => Math.round((e + a) * 255));
 }
-function xe(e, t = Date.now()) {
+function Se(e, t = Date.now()) {
 	let n = Date.parse(e);
 	if (!Number.isFinite(n)) return "";
 	let r = Math.round((n - t) / 1e3);
@@ -1042,7 +1050,26 @@ function xe(e, t = Date.now()) {
 	]) if (Math.abs(r) >= t) return i.format(Math.round(r / t), e);
 	return "just now";
 }
-var Se = /* @__PURE__ */ new Set([
+function U(e, t = Date.now()) {
+	let n = Date.parse(e);
+	if (!Number.isFinite(n)) return "";
+	let r = Math.round((n - t) / 1e3), i = new Intl.RelativeTimeFormat(void 0, { numeric: "auto" });
+	for (let [e, t] of [
+		["day", 86400],
+		["hour", 3600],
+		["minute", 60]
+	]) if (Math.abs(r) >= t) return i.format(Math.round(r / t), e);
+	return Math.abs(r) < 2 ? "just now" : i.format(r, "second");
+}
+function Ce(e, t) {
+	let n = ["garage", "gate"].includes(e) ? "garage" : e === "door" ? "door" : [
+		"blind",
+		"shade",
+		"curtain"
+	].includes(e) ? "blinds" : "shutter";
+	return n === "door" ? t ? "doorOpen" : "doorClosed" : t ? `${n}Open` : n === "blinds" ? "blindsClosed" : n;
+}
+var we = /* @__PURE__ */ new Set([
 	"friendly_name",
 	"icon",
 	"entity_picture",
@@ -1059,27 +1086,29 @@ var Se = /* @__PURE__ */ new Set([
 	"editable",
 	"restored"
 ]);
-function Ce(e = {}) {
-	return Object.entries(e).filter(([e, t]) => !Se.has(e) && t !== null && t !== "").slice(0, 14).map(([e, t]) => {
+function Te(e = {}) {
+	return Object.entries(e).filter(([e, t]) => !we.has(e) && t !== null && t !== "").slice(0, 14).map(([e, t]) => {
 		let n = e.replace(/_/g, " ").replace(/^./, (e) => e.toUpperCase()), r = Array.isArray(t) && t.every((e) => typeof e != "object") ? t.join(", ") : typeof t == "object" ? JSON.stringify(t) : String(t);
 		return [n, r.length > 120 ? r.slice(0, 117) + "…" : r];
 	});
 }
-var W = (e) => Number.isFinite(e) ? e : void 0, we = /* @__PURE__ */ new Set(["unavailable", "unknown"]);
-function Te(e) {
+var W = (e) => Number.isFinite(e) ? e : void 0, Ee = /* @__PURE__ */ new Set(["unavailable", "unknown"]);
+function De(e) {
 	let t = e?.entity_id || "", n = t.split(".")[0], r = e?.attributes || {}, i = {
 		id: t,
 		domain: n,
 		name: r.friendly_name || t,
 		state: e?.state,
-		unavailable: !e || we.has(e.state),
-		changed: xe(e?.last_changed),
-		attributes: Ce(r),
+		unavailable: !e || Ee.has(e.state),
+		changed: Se(e?.last_changed),
+		since: U(e?.last_changed),
+		deviceClass: r.device_class,
+		attributes: Te(r),
 		controls: []
 	};
 	if (i.unavailable) return i;
 	if (n === "light") {
-		let t = ve(e);
+		let t = ye(e);
 		i.controls.push({
 			kind: "toggle",
 			on: e.state === "on"
@@ -1105,7 +1134,7 @@ function Te(e) {
 			kind: "color",
 			key: "hs_color",
 			label: "Colour",
-			value: Array.isArray(r.hs_color) ? [r.hs_color[0], r.hs_color[1]] : ye(Array.isArray(r.rgb_color) ? r.rgb_color : U(W(r.color_temp_kelvin) ?? 3e3))
+			value: Array.isArray(r.hs_color) ? [r.hs_color[0], r.hs_color[1]] : be(Array.isArray(r.rgb_color) ? r.rgb_color : H(W(r.color_temp_kelvin) ?? 3e3))
 		}), t.effects.length && i.controls.push({
 			kind: "select",
 			key: "effect",
@@ -1137,7 +1166,7 @@ function Te(e) {
 				service: e,
 				label: t
 			}))
-		}), e & 4 && i.controls.push({
+		}), !(e & 4) && e & 1 && e & 2 && i.controls.push({ kind: "cover-toggle" }), e & 4 && i.controls.push({
 			kind: "slider",
 			key: "position",
 			service: "set_cover_position",
@@ -1245,7 +1274,7 @@ function Te(e) {
 	});
 	return i;
 }
-function Ee(e, t, n) {
+function Oe(e, t, n) {
 	let { domain: r, id: i } = e;
 	if (t.kind === "toggle") return [
 		r === "light" || r === "switch" ? r : "homeassistant",
@@ -1294,7 +1323,7 @@ function Ee(e, t, n) {
 	throw Error("Unknown control");
 }
 // dashboard/more-info.mjs
-var De = "\ndialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f;--mi-surface:#ffffff14;--mi-surface-2:#ffffff24;--mi-primary:#03a9f4;--mi-ink:#fff;--mi-accent:var(--mi-primary);--mi-accent-ink:#fff;\n box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--mi-bg);color:var(--mi-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:mi-in .22s cubic-bezier(.2,.8,.2,1)}\n@media (prefers-color-scheme:light){dialog.mi{--mi-bg:#fff;--mi-fg:#212121;--mi-muted:#727272;--mi-line:#0000001f;--mi-surface:#0000000d;--mi-surface-2:#0000001a;--mi-ink:#212121;box-shadow:0 24px 64px #0004}}\ndialog.mi::backdrop{background:#000a}\n@media (prefers-color-scheme:light){dialog.mi::backdrop{background:#0006}}\n@keyframes mi-in{from{opacity:0;transform:translateY(20px) scale(.98)}}\n@media (prefers-reduced-motion:reduce){dialog.mi{animation:none}.mi *{transition:none!important}}\n@media (max-width:600px){dialog.mi{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;animation-name:mi-up}@keyframes mi-up{from{transform:translateY(100%)}}}\n.mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}\n@media (max-width:600px){.mi-frame{max-height:94vh}}\n.mi-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}\n.mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}\n.mi-head h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-head p{margin:0;color:var(--mi-muted);font-size:13px}\n.mi-iconbtn{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;transition:background .15s}\n.mi-iconbtn:hover{background:var(--mi-surface)}\n.mi svg{width:24px;height:24px;fill:currentColor;display:block}\n.mi-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:8px 24px 24px}\n.mi-center{display:flex;flex-direction:column;align-items:center;gap:20px}\n.mi button:focus-visible,.mi [role=slider]:focus-visible{outline:2px solid var(--mi-primary);outline-offset:3px}\n/* sliders */\n.mi-slider{position:relative;overflow:hidden;background:var(--mi-surface);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}\n.mi-slider:hover{background:var(--mi-surface-2)}\n.mi-slider .mi-fill{position:absolute;background:var(--mi-accent);opacity:.92;transition:background .3s}\n.mi-slider.mi-dragging .mi-fill{transition:none}\n.mi-slider.mi-v{width:132px;height:min(300px,38vh);min-height:200px;border-radius:28px}\n.mi-v .mi-fill{left:0;right:0;bottom:0}\n.mi-v .mi-readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;color:var(--mi-accent-ink);text-shadow:0 1px 2px #0004}\n.mi-v .mi-big{font:500 34px/1.1 Roboto,system-ui,sans-serif}\n.mi-v .mi-small{font-size:14px;opacity:.85}\n.mi-slider.mi-h{width:100%;height:48px;border-radius:14px}\n.mi-h .mi-fill{left:0;top:0;bottom:0}\n.mi-h.mi-track{background-image:var(--mi-gradient);background-color:transparent}\n.mi-h.mi-track .mi-fill{display:none}\n.mi-h .mi-thumb{position:absolute;top:8px;bottom:8px;width:6px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 0 1.5px #0004;pointer-events:none}\n.mi-field{width:100%;display:grid;gap:8px}\n.mi-field>.mi-label{display:flex;justify-content:space-between;font-weight:500}\n.mi-field output{color:var(--mi-muted);font-weight:400}\n/* round buttons */\n.mi-row{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;width:100%}\n.mi-round{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;padding:0;color:inherit;font:inherit;font-size:12px;cursor:pointer;min-width:64px}\n.mi-round .mi-disc{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--mi-surface-2);transition:background .15s,color .15s}\n.mi-round:hover .mi-disc{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-round[aria-pressed=true] .mi-disc{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-round:disabled{opacity:.4;cursor:default}\n.mi-round>span:last-child{color:var(--mi-muted)}\n.mi-round[aria-pressed=true]>span:last-child{color:var(--mi-fg)}\n/* panels & lists */\n.mi-panel{width:100%;display:grid;gap:18px;padding:16px;border-radius:20px;background:var(--mi-surface)}\n.mi-panel[hidden]{display:none}\n.mi-list{display:grid;gap:2px;margin:0;padding:0;list-style:none;max-height:220px;overflow:auto}\n.mi-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}\n.mi-list button:hover{background:var(--mi-surface-2)}\n.mi-list button[aria-checked=true]{color:var(--mi-primary);font-weight:500}\n.mi-list button[aria-checked=true]::after{content:\"✓\"}\n/* big tall switch and lock */\n.mi-tall{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:132px;height:min(240px,32vh);min-height:170px;border:0;border-radius:28px;background:var(--mi-surface-2);color:var(--mi-muted);font:500 16px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}\n.mi-tall svg{width:44px;height:44px}\n.mi-tall[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-lock{display:grid;place-items:center;width:176px;height:176px;border:0;border-radius:50%;background:color-mix(in srgb,var(--mi-accent) 22%,transparent);color:var(--mi-accent);cursor:pointer;transition:background .2s,color .2s;box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--mi-accent) 55%,transparent)}\n.mi-lock svg{width:72px;height:72px}\n.mi-lock:disabled{opacity:.5;cursor:default}\n.mi-state{font:500 20px Roboto,system-ui,sans-serif}\n.mi-sub{color:var(--mi-muted);margin-top:-12px}\n/* climate */\n.mi-temp{display:flex;align-items:center;justify-content:center;gap:20px;width:100%}\n.mi-temp output{display:flex;flex-direction:column;align-items:center;min-width:140px;font:500 56px/1 Roboto,system-ui,sans-serif}\n.mi-temp output small{margin-top:8px;font:400 14px Roboto,system-ui,sans-serif;color:var(--mi-muted)}\n.mi-temp .mi-iconbtn{width:56px;height:56px;background:var(--mi-surface-2)}\n.mi-temp .mi-iconbtn:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-pill{min-height:48px;padding:0 28px;border:0;border-radius:24px;background:var(--mi-primary);color:#fff;font:500 15px Roboto,system-ui,sans-serif;cursor:pointer}\n.mi-pill:hover{filter:brightness(1.08)}\n/* climate dial */\n.mi-climate{gap:12px}\n.mi-current{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mi-muted)}\n.mi-current strong{color:var(--mi-fg);font:500 20px Roboto,system-ui,sans-serif}\n.mi-dial{position:relative;width:min(300px,100%);aspect-ratio:1;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;border-radius:50%}\n.mi-dial svg{width:100%;height:100%;overflow:visible}\n.mi-dial svg path{fill:none;stroke-width:20;stroke-linecap:round}\n.mi-arc-track{stroke:var(--mi-surface-2)}\n.mi-arc-fill{stroke:var(--mi-accent);transition:stroke .3s}\n.mi-cur{fill:var(--mi-muted)}\n.mi-handle{fill:#fff;stroke:var(--mi-bg);stroke-width:0;filter:drop-shadow(0 1px 3px #0006)}\n.mi-dial.mi-dragging .mi-handle{r:13}\n.mi-dial-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none}\n.mi-dial-state{font:400 18px Roboto,system-ui,sans-serif}\n.mi-dial-value{display:flex;align-items:flex-start;font:400 72px/1 Roboto,system-ui,sans-serif;letter-spacing:-1px}\n.mi-sup{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:6px 0 0 4px;font:400 22px/1 Roboto,system-ui,sans-serif;letter-spacing:0}\n.mi-dec{font-size:22px;color:var(--mi-fg)}\n.mi-dialbtns{display:flex;gap:36px;margin-top:-58px;position:relative}\n.mi-outline{display:grid;place-items:center;width:56px;height:56px;padding:0;border:1px solid var(--mi-muted);border-radius:50%;background:var(--mi-bg);color:var(--mi-fg);cursor:pointer}\n.mi-outline:hover{background:var(--mi-surface-2)}\n.mi-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px}\n.mi-tile{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 14px;border:0;border-radius:16px;background:var(--mi-surface);color:inherit;font:inherit;text-align:left;cursor:pointer;min-width:0}\n.mi-tile:hover{background:var(--mi-surface-2)}\n.mi-tile-icon svg{width:24px;height:24px}\n.mi-tile-text{display:flex;flex-direction:column;min-width:0}\n.mi-tile-label{color:var(--mi-muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-tile-value{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n/* attributes */\n.mi-attrs{margin-top:24px;border-top:1px solid var(--mi-line);padding-top:4px}\n.mi-attrs summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-weight:500;cursor:pointer;list-style:none}\n.mi-attrs summary::-webkit-details-marker{display:none}\n.mi-attrs summary svg{transition:transform .2s}\n.mi-attrs[open] summary svg{transform:rotate(180deg)}\n.mi-attrs dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px 16px;margin:0 0 4px}\n.mi-attrs dt{color:var(--mi-muted)}\n.mi-attrs dd{margin:0;text-align:right;overflow-wrap:anywhere}\n.mi-error{margin:12px 0 0;color:#db4437;text-align:center}\n", G = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${V[e]}"/></svg>`, K = (e) => `rgb(${e.join(",")})`, Oe = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", q = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), J = {
+var ke = "\ndialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f;--mi-surface:#ffffff14;--mi-surface-2:#ffffff24;--mi-primary:#03a9f4;--mi-ink:#fff;--mi-accent:var(--mi-primary);--mi-accent-ink:#fff;\n box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--mi-bg);color:var(--mi-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:mi-in .22s cubic-bezier(.2,.8,.2,1)}\n@media (prefers-color-scheme:light){dialog.mi{--mi-bg:#fff;--mi-fg:#212121;--mi-muted:#727272;--mi-line:#0000001f;--mi-surface:#0000000d;--mi-surface-2:#0000001a;--mi-ink:#212121;box-shadow:0 24px 64px #0004}}\ndialog.mi::backdrop{background:#000a}\n@media (prefers-color-scheme:light){dialog.mi::backdrop{background:#0006}}\n@keyframes mi-in{from{opacity:0;transform:translateY(20px) scale(.98)}}\n@media (prefers-reduced-motion:reduce){dialog.mi{animation:none}.mi *{transition:none!important;animation:none!important}}\n@media (max-width:600px){dialog.mi{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;animation-name:mi-up}@keyframes mi-up{from{transform:translateY(100%)}}}\n.mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}\n@media (max-width:600px){.mi-frame{max-height:94vh}}\n.mi-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}\n.mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}\n.mi-head h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-head p{margin:0;color:var(--mi-muted);font-size:13px}\n.mi-iconbtn{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;transition:background .15s}\n.mi-iconbtn:hover{background:var(--mi-surface)}\n.mi svg{width:24px;height:24px;fill:currentColor;display:block}\n.mi-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:8px 24px 24px}\n.mi-center{display:flex;flex-direction:column;align-items:center;gap:20px}\n.mi button:focus-visible,.mi [role=slider]:focus-visible{outline:2px solid var(--mi-primary);outline-offset:3px}\n/* sliders */\n.mi-slider{position:relative;overflow:hidden;background:var(--mi-surface);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}\n.mi-slider:hover{background:var(--mi-surface-2)}\n.mi-slider .mi-fill{position:absolute;background:var(--mi-accent);opacity:.92;transition:background .3s}\n.mi-slider.mi-dragging .mi-fill{transition:none}\n.mi-slider.mi-v{width:132px;height:min(300px,38vh);min-height:200px;border-radius:28px}\n.mi-v .mi-fill{left:0;right:0;bottom:0}\n.mi-v .mi-readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;color:var(--mi-accent-ink);text-shadow:0 1px 2px #0004}\n.mi-v .mi-big{font:500 34px/1.1 Roboto,system-ui,sans-serif}\n.mi-v .mi-small{font-size:14px;opacity:.85}\n.mi-slider.mi-h{width:100%;height:48px;border-radius:14px}\n.mi-h .mi-fill{left:0;top:0;bottom:0}\n.mi-h.mi-track{background-image:var(--mi-gradient);background-color:transparent}\n.mi-h.mi-track .mi-fill{display:none}\n.mi-h .mi-thumb{position:absolute;top:8px;bottom:8px;width:6px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 0 1.5px #0004;pointer-events:none}\n.mi-field{width:100%;display:grid;gap:8px}\n.mi-field>.mi-label{display:flex;justify-content:space-between;font-weight:500}\n.mi-field output{color:var(--mi-muted);font-weight:400}\n/* round buttons */\n.mi-row{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;width:100%}\n.mi-round{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;padding:0;color:inherit;font:inherit;font-size:12px;cursor:pointer;min-width:64px}\n.mi-round .mi-disc{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--mi-surface-2);transition:background .15s,color .15s}\n.mi-round:hover .mi-disc{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-round[aria-pressed=true] .mi-disc{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-round:disabled{opacity:.4;cursor:default}\n.mi-round>span:last-child{color:var(--mi-muted)}\n.mi-round[aria-pressed=true]>span:last-child{color:var(--mi-fg)}\n/* panels & lists */\n.mi-panel{width:100%;display:grid;gap:18px;padding:16px;border-radius:20px;background:var(--mi-surface)}\n.mi-panel[hidden]{display:none}\n.mi-list{display:grid;gap:2px;margin:0;padding:0;list-style:none;max-height:220px;overflow:auto}\n.mi-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}\n.mi-list button:hover{background:var(--mi-surface-2)}\n.mi-list button[aria-checked=true]{color:var(--mi-primary);font-weight:500}\n.mi-list button[aria-checked=true]::after{content:\"✓\"}\n/* big tall switch and lock */\n.mi-tall{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:132px;height:min(240px,32vh);min-height:170px;border:0;border-radius:28px;background:var(--mi-surface-2);color:var(--mi-muted);font:500 16px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}\n.mi-tall svg{width:44px;height:44px}\n.mi-tall[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-lock{display:grid;place-items:center;width:176px;height:176px;border:0;border-radius:50%;background:color-mix(in srgb,var(--mi-accent) 22%,transparent);color:var(--mi-accent);cursor:pointer;transition:background .2s,color .2s;box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--mi-accent) 55%,transparent)}\n.mi-lock svg{width:72px;height:72px}\n.mi-lock:disabled{opacity:.5;cursor:default}\n/* cover: big state, then a tall two-way switch or a position slider */\n.mi-statehead{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px 0 4px;text-align:center}\n.mi-statehead strong{font:400 40px/1.15 Roboto,system-ui,sans-serif;letter-spacing:-.5px}\n.mi-statehead span{color:var(--mi-muted);font-size:16px}\n.mi-cover-switch{position:relative;box-sizing:border-box;width:132px;height:min(330px,40vh);min-height:220px;padding:8px;border:0;border-radius:32px;background:var(--mi-surface-2);color:inherit;cursor:pointer;touch-action:none}\n.mi-cover-switch:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 10%)}\n.mi-cover-knob{position:absolute;left:8px;right:8px;bottom:calc(8px + (50% - 8px) * var(--mi-pos,0));height:calc(50% - 8px);display:grid;place-items:center;border-radius:24px;background:#9e9e9e;color:#fff;pointer-events:none;transition:bottom .25s cubic-bezier(.3,.7,.3,1),background .25s}\n.mi-cover-switch.mi-dragging .mi-cover-knob{transition:background .25s}\n.mi-cover-switch[aria-checked=true] .mi-cover-knob{background:var(--mi-accent)}\n.mi-cover-switch[data-moving=true]{background:color-mix(in srgb,var(--mi-accent) 28%,var(--mi-surface-2))}\n.mi-cover-switch[data-moving=true] .mi-cover-knob{background:var(--mi-accent);animation:mi-moving 1.2s ease-in-out infinite}\n@keyframes mi-moving{50%{opacity:.7}}\n.mi-cover-knob svg{width:30px;height:30px}\n.mi-cover-switch:disabled{opacity:.5;cursor:default}\n.mi-cover-buttons{display:flex;gap:0;padding:4px;border-radius:24px;background:var(--mi-surface)}\n.mi-cover-buttons .mi-iconbtn{width:64px;height:48px;border-radius:20px}\n.mi-cover-buttons .mi-iconbtn:hover{background:var(--mi-surface-2)}\n.mi-state{font:500 20px Roboto,system-ui,sans-serif}\n.mi-sub{color:var(--mi-muted);margin-top:-12px}\n/* climate */\n.mi-temp{display:flex;align-items:center;justify-content:center;gap:20px;width:100%}\n.mi-temp output{display:flex;flex-direction:column;align-items:center;min-width:140px;font:500 56px/1 Roboto,system-ui,sans-serif}\n.mi-temp output small{margin-top:8px;font:400 14px Roboto,system-ui,sans-serif;color:var(--mi-muted)}\n.mi-temp .mi-iconbtn{width:56px;height:56px;background:var(--mi-surface-2)}\n.mi-temp .mi-iconbtn:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-pill{min-height:48px;padding:0 28px;border:0;border-radius:24px;background:var(--mi-primary);color:#fff;font:500 15px Roboto,system-ui,sans-serif;cursor:pointer}\n.mi-pill:hover{filter:brightness(1.08)}\n/* climate dial */\n.mi-climate{gap:12px}\n.mi-current{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mi-muted)}\n.mi-current strong{color:var(--mi-fg);font:500 20px Roboto,system-ui,sans-serif}\n.mi-dial{position:relative;width:min(300px,100%);aspect-ratio:1;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;border-radius:50%}\n.mi-dial svg{width:100%;height:100%;overflow:visible}\n.mi-dial svg path{fill:none;stroke-width:20;stroke-linecap:round}\n.mi-arc-track{stroke:var(--mi-surface-2)}\n.mi-arc-fill{stroke:var(--mi-accent);transition:stroke .3s}\n.mi-cur{fill:var(--mi-muted)}\n.mi-handle{fill:#fff;stroke:var(--mi-bg);stroke-width:0;filter:drop-shadow(0 1px 3px #0006)}\n.mi-dial.mi-dragging .mi-handle{r:13}\n.mi-dial-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none}\n.mi-dial-state{font:400 18px Roboto,system-ui,sans-serif}\n.mi-dial-value{display:flex;align-items:flex-start;font:400 72px/1 Roboto,system-ui,sans-serif;letter-spacing:-1px}\n.mi-sup{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:6px 0 0 4px;font:400 22px/1 Roboto,system-ui,sans-serif;letter-spacing:0}\n.mi-dec{font-size:22px;color:var(--mi-fg)}\n.mi-dialbtns{display:flex;gap:36px;margin-top:-58px;position:relative}\n.mi-outline{display:grid;place-items:center;width:56px;height:56px;padding:0;border:1px solid var(--mi-muted);border-radius:50%;background:var(--mi-bg);color:var(--mi-fg);cursor:pointer}\n.mi-outline:hover{background:var(--mi-surface-2)}\n.mi-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px}\n.mi-tile{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 14px;border:0;border-radius:16px;background:var(--mi-surface);color:inherit;font:inherit;text-align:left;cursor:pointer;min-width:0}\n.mi-tile:hover{background:var(--mi-surface-2)}\n.mi-tile-icon svg{width:24px;height:24px}\n.mi-tile-text{display:flex;flex-direction:column;min-width:0}\n.mi-tile-label{color:var(--mi-muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-tile-value{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n/* attributes */\n.mi-attrs{margin-top:24px;border-top:1px solid var(--mi-line);padding-top:4px}\n.mi-attrs summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-weight:500;cursor:pointer;list-style:none}\n.mi-attrs summary::-webkit-details-marker{display:none}\n.mi-attrs summary svg{transition:transform .2s}\n.mi-attrs[open] summary svg{transform:rotate(180deg)}\n.mi-attrs dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px 16px;margin:0 0 4px}\n.mi-attrs dt{color:var(--mi-muted)}\n.mi-attrs dd{margin:0;text-align:right;overflow-wrap:anywhere}\n.mi-error{margin:12px 0 0;color:#db4437;text-align:center}\n", G = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${B[e]}"/></svg>`, K = (e) => `rgb(${e.join(",")})`, Ae = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", q = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), je = {
 	heat: "#ff8100",
 	cool: "#2b9af9",
 	heat_cool: "#ffab00",
@@ -1302,15 +1331,15 @@ var De = "\ndialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-li
 	dry: "#efbd07",
 	fan_only: "#8a8a8a"
 };
-function Y(e, t, n, r) {
+function J(e, t, n, r) {
 	let i = e.createElement(t);
 	return n && (i.className = n), r !== void 0 && (i.innerHTML = r), i;
 }
-function X(e, t) {
-	let n = t.orient === "v", r = Y(e, "div", `mi-slider ${n ? "mi-v" : "mi-h"}`), i = Y(e, "div", "mi-fill");
+function Y(e, t) {
+	let n = t.orient === "v", r = J(e, "div", `mi-slider ${n ? "mi-v" : "mi-h"}`), i = J(e, "div", "mi-fill");
 	r.append(i);
 	let a, o;
-	n && (a = Y(e, "div", "mi-readout", "<span class=\"mi-big\"></span><span class=\"mi-small\"></span>"), r.append(a)), t.gradient && (r.classList.add("mi-track"), r.style.setProperty("--mi-gradient", t.gradient)), n || (o = Y(e, "div", "mi-thumb"), r.append(o)), r.setAttribute("role", "slider"), r.tabIndex = 0, r.setAttribute("aria-label", t.label), r.setAttribute("aria-orientation", n ? "vertical" : "horizontal"), r.setAttribute("aria-valuemin", t.min), r.setAttribute("aria-valuemax", t.max);
+	n && (a = J(e, "div", "mi-readout", "<span class=\"mi-big\"></span><span class=\"mi-small\"></span>"), r.append(a)), t.gradient && (r.classList.add("mi-track"), r.style.setProperty("--mi-gradient", t.gradient)), n || (o = J(e, "div", "mi-thumb"), r.append(o)), r.setAttribute("role", "slider"), r.tabIndex = 0, r.setAttribute("aria-label", t.label), r.setAttribute("aria-orientation", n ? "vertical" : "horizontal"), r.setAttribute("aria-valuemin", t.min), r.setAttribute("aria-valuemax", t.max);
 	let s = t.value ?? t.min, c = !1, l = t.max - t.min, u = () => {
 		let e = Math.min(1, Math.max(0, (s - t.min) / l)) * 100;
 		n ? i.style.height = `${e}%` : (i.style.width = `${e}%`, o.style.left = `${e}%`), r.setAttribute("aria-valuenow", s), r.setAttribute("aria-valuetext", t.format ? t.format(s) : s), a && (a.querySelector(".mi-big").textContent = t.format ? t.format(s) : s);
@@ -1361,35 +1390,35 @@ function X(e, t) {
 		}
 	};
 }
-function Z(e, t, n, r, i) {
-	let a = Y(e, "button", "mi-round", `<span class="mi-disc">${G(t)}</span><span>${n}</span>`);
+function X(e, t, n, r, i) {
+	let a = J(e, "button", "mi-round", `<span class="mi-disc">${G(t)}</span><span>${n}</span>`);
 	return a.type = "button", i !== void 0 && a.setAttribute("aria-pressed", String(i)), a.onclick = r, a;
 }
-function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
-	let i = e.ownerDocument, a = Y(i, "dialog", "mi");
+function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
+	let i = e.ownerDocument, a = J(i, "dialog", "mi");
 	a.setAttribute("aria-labelledby", "mi-title");
-	let o = Y(i, "div", "mi-frame"), s = Y(i, "div", "mi-head"), c = Y(i, "button", "mi-iconbtn", G("close"));
+	let o = J(i, "div", "mi-frame"), s = J(i, "div", "mi-head"), c = J(i, "button", "mi-iconbtn", G("close"));
 	c.type = "button", c.setAttribute("aria-label", "Close");
-	let l = Y(i, "div", "mi-titles"), u = Y(i, "h2");
+	let l = J(i, "div", "mi-titles"), u = J(i, "h2");
 	u.id = "mi-title";
-	let d = Y(i, "p");
+	let d = J(i, "p");
 	l.append(u, d), s.append(c, l);
-	let f = Y(i, "div", "mi-body"), p = Y(i, "style");
-	p.textContent = De, o.append(s, f), a.append(p, o), e.append(a);
+	let f = J(i, "div", "mi-body"), p = J(i, "style");
+	p.textContent = ke, o.append(s, f), a.append(p, o), e.append(a);
 	let m = "", h, g = (e) => {
-		h ||= f.appendChild(Y(i, "p", "mi-error")), h.textContent = e || "", h.hidden = !e;
+		h ||= f.appendChild(J(i, "p", "mi-error")), h.textContent = e || "", h.hidden = !e;
 	}, _ = async (e, n, i) => {
 		try {
 			g("");
-			let [r, a, o] = Ee(e, n, i);
-			await t().callService(r, a, o);
+			let [r, a, o] = Oe(e, n, i);
+			return await t().callService(r, a, o), !0;
 		} catch (e) {
-			g(e?.message || "The command failed."), r(e);
+			return g(e?.message || "The command failed."), r(e), !1;
 		}
 	}, v = (e, t) => e.controls.find(t);
 	function y(e, t) {
-		let n = v(e, (e) => e.kind === "toggle"), r = v(e, (e) => e.key === "brightness"), o = v(e, (e) => e.key === "color_temp_kelvin"), s = v(e, (e) => e.kind === "color"), c = v(e, (e) => e.key === "effect"), l = Y(i, "div", "mi-center"), u;
-		r ? (u = X(i, {
+		let n = v(e, (e) => e.kind === "toggle"), r = v(e, (e) => e.key === "brightness"), o = v(e, (e) => e.key === "color_temp_kelvin"), s = v(e, (e) => e.kind === "color"), c = v(e, (e) => e.key === "effect"), l = J(i, "div", "mi-center"), u;
+		r ? (u = Y(i, {
 			orient: "v",
 			label: "Brightness",
 			min: r.min,
@@ -1398,8 +1427,8 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			value: r.value,
 			format: r.format,
 			onCommit: (t) => _(e, r, t)
-		}), l.append(u.el)) : (u = Y(i, "button", "mi-tall", `${G("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => _(e, n, u.getAttribute("aria-checked") !== "true"), l.append(u));
-		let d = Y(i, "div", "mi-row"), f = Z(i, "power", "Power", () => {
+		}), l.append(u.el)) : (u = J(i, "button", "mi-tall", `${G("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => _(e, n, u.getAttribute("aria-checked") !== "true"), l.append(u));
+		let d = J(i, "div", "mi-row"), f = X(i, "power", "Power", () => {
 			let t = f.getAttribute("aria-pressed") === "true";
 			_(e, n, !t);
 		}, !1);
@@ -1410,12 +1439,12 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				p[t].hidden = !n, m[t].setAttribute("aria-pressed", String(n));
 			}
 		}, g = (e, t, n, r) => {
-			m[e] = Z(i, t, n, () => h(e), !1), p[e] = r, r.hidden = !0, d.append(m[e]);
+			m[e] = X(i, t, n, () => h(e), !1), p[e] = r, r.hidden = !0, d.append(m[e]);
 		}, y = [];
 		if (o) {
-			let t = Y(i, "output"), n = Y(i, "div", "mi-field"), r = Y(i, "div", "mi-label", "<span>Colour temperature</span>");
+			let t = J(i, "output"), n = J(i, "div", "mi-field"), r = J(i, "div", "mi-label", "<span>Colour temperature</span>");
 			r.append(t);
-			let a = X(i, {
+			let a = Y(i, {
 				orient: "h",
 				label: "Colour temperature",
 				min: o.min,
@@ -1428,14 +1457,14 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				onCommit: (t) => _(e, o, t)
 			});
 			n.append(r, a.el);
-			let s = Y(i, "div", "mi-panel");
+			let s = J(i, "div", "mi-panel");
 			s.append(n), g("temp", "thermo", "Temperature", s), y.push((e) => {
 				let n = v(e, (e) => e.key === "color_temp_kelvin");
 				n && (a.set(n.value), t.textContent = `${Math.round(n.value)} K`);
 			});
 		}
 		if (s) {
-			let t = Y(i, "output"), n = Y(i, "output"), r = s.value[0], a = s.value[1], o = () => `linear-gradient(90deg,#fff,${K(be([r, 100]))})`, c = X(i, {
+			let t = J(i, "output"), n = J(i, "output"), r = s.value[0], a = s.value[1], o = () => `linear-gradient(90deg,#fff,${K(xe([r, 100]))})`, c = Y(i, {
 				orient: "h",
 				label: "Hue",
 				min: 0,
@@ -1447,7 +1476,7 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 					r = e, t.textContent = `${e}°`, l.el.style.setProperty("--mi-gradient", o());
 				},
 				onCommit: () => _(e, s, [r, a])
-			}), l = X(i, {
+			}), l = Y(i, {
 				orient: "h",
 				label: "Saturation",
 				min: 0,
@@ -1459,9 +1488,9 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 					a = e, n.textContent = `${e}%`;
 				},
 				onCommit: () => _(e, s, [r, a])
-			}), u = Y(i, "div", "mi-field"), d = Y(i, "div", "mi-field"), f = Y(i, "div", "mi-label", "<span>Hue</span>"), p = Y(i, "div", "mi-label", "<span>Saturation</span>");
+			}), u = J(i, "div", "mi-field"), d = J(i, "div", "mi-field"), f = J(i, "div", "mi-label", "<span>Hue</span>"), p = J(i, "div", "mi-label", "<span>Saturation</span>");
 			f.append(t), p.append(n), u.append(f, c.el), d.append(p, l.el), t.textContent = `${r}°`, n.textContent = `${a}%`;
-			let m = Y(i, "div", "mi-panel");
+			let m = J(i, "div", "mi-panel");
 			m.append(u, d), g("color", "palette", "Colour", m), y.push((e) => {
 				let i = v(e, (e) => e.kind === "color");
 				!i || c.dragging || l.dragging || ([r, a] = i.value, c.set(r), l.set(a), t.textContent = `${r}°`, n.textContent = `${a}%`, l.el.style.setProperty("--mi-gradient", o()));
@@ -1469,63 +1498,121 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		}
 		let b = [];
 		if (c) {
-			let t = Y(i, "ul", "mi-list");
+			let t = J(i, "ul", "mi-list");
 			t.setAttribute("role", "radiogroup");
 			for (let n of ["", ...c.options]) {
-				let r = Y(i, "li"), a = Y(i, "button");
+				let r = J(i, "li"), a = J(i, "button");
 				a.type = "button", a.setAttribute("role", "radio"), a.textContent = n || "None", a.dataset.value = n, a.onclick = () => _(e, c, n), r.append(a), t.append(r), b.push(a);
 			}
-			let n = Y(i, "div", "mi-panel");
+			let n = J(i, "div", "mi-panel");
 			n.append(t), g("effect", "effects", "Effect", n), y.push((e) => {
 				let t = v(e, (e) => e.key === "effect");
 				for (let e of b) e.setAttribute("aria-checked", String(e.dataset.value === (t?.value || "")));
 			});
 		}
 		return l.append(d, ...Object.values(p)), t.append(l), (e, t) => {
-			let n = e.state === "on", i = t?.attributes || {}, o = Array.isArray(i.rgb_color) ? i.rgb_color : i.color_temp_kelvin ? U(i.color_temp_kelvin) : [
+			let n = e.state === "on", i = t?.attributes || {}, o = Array.isArray(i.rgb_color) ? i.rgb_color : i.color_temp_kelvin ? H(i.color_temp_kelvin) : [
 				255,
 				193,
 				7
 			];
-			if (a.style.setProperty("--mi-accent", K(o)), a.style.setProperty("--mi-accent-ink", n ? Oe(o) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), v(e, (e) => e.kind === "toggle"), r) {
+			if (a.style.setProperty("--mi-accent", K(o)), a.style.setProperty("--mi-accent-ink", n ? Ae(o) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), v(e, (e) => e.kind === "toggle"), r) {
 				let t = v(e, (e) => e.key === "brightness");
 				u.set(n ? t?.value ?? 0 : 0), u.el.querySelector(".mi-big").textContent = n ? r.format(t?.value ?? 0) : "Off", u.caption(n ? "On" : "");
 			} else u.setAttribute("aria-checked", String(n)), u.querySelector("span").textContent = n ? "On" : "Off";
 			for (let t of y) t(e);
 		};
 	}
-	function b(e, t) {
-		let n = v(e, (e) => e.key === "position"), r = v(e, (e) => e.kind === "buttons"), o = Y(i, "div", "mi-center"), s;
-		n && (s = X(i, {
+	function b(e, r) {
+		let o = v(e, (e) => e.key === "position"), s = v(e, (e) => e.kind === "buttons"), c = !!v(e, (e) => e.kind === "cover-toggle"), l = J(i, "div", "mi-center"), u = J(i, "div", "mi-statehead", "<strong></strong><span></span>");
+		l.append(u), d.hidden = !0;
+		let f, p, m = null, h, g = null, y = (e) => p?.style.setProperty("--mi-pos", String(e));
+		if (c) {
+			p = J(i, "button", "mi-cover-switch", "<span class=\"mi-cover-knob\"></span>"), p.type = "button", p.setAttribute("role", "switch"), p.setAttribute("aria-label", e.name);
+			let r = () => p.getAttribute("aria-checked") === "true", a = async (r) => {
+				let i = t().states?.[n], a = ["open", "closed"].includes(i?.state);
+				m = r, clearTimeout(h), a && i.state === "open" === r ? m = null : h = setTimeout(() => {
+					m = null, k();
+				}, 6e4), k(), m !== null && (await _(e, s, r ? "open_cover" : "close_cover") || (m = null, k()));
+			};
+			p.addEventListener("pointerdown", (e) => {
+				if (!(e.button !== 0 || p.disabled)) {
+					g = {
+						id: e.pointerId,
+						y: e.clientY,
+						from: +!!r(),
+						pos: +!!r(),
+						dragging: !1
+					};
+					try {
+						p.setPointerCapture(e.pointerId);
+					} catch {}
+				}
+			}), p.addEventListener("pointermove", (e) => {
+				if (!g || e.pointerId !== g.id) return;
+				let t = g.y - e.clientY;
+				if (!g.dragging && Math.abs(t) < 6) return;
+				g.dragging = !0, p.classList.add("mi-dragging");
+				let n = Math.max(1, p.clientHeight / 2 - 8);
+				g.pos = Math.min(1, Math.max(0, g.from + t / n)), y(g.pos);
+			});
+			let o = (e) => {
+				if (!g || e.pointerId !== g.id) return;
+				let { dragging: t, pos: n, from: i } = g;
+				g = null, p.classList.remove("mi-dragging"), e.type === "pointercancel" ? y(i) : a(t ? n >= .5 : !r());
+			};
+			p.addEventListener("pointerup", o), p.addEventListener("pointercancel", o), p.onclick = (e) => {
+				e.detail === 0 && a(!r());
+			}, p.onkeydown = (e) => {
+				(e.key === "ArrowUp" || e.key === "ArrowDown") && (e.preventDefault(), a(e.key === "ArrowUp"));
+			}, l.append(p);
+		}
+		o && (f = Y(i, {
 			orient: "v",
 			label: "Position",
 			min: 0,
 			max: 100,
 			step: 1,
-			value: n.value,
+			value: o.value,
 			format: (e) => `${Math.round(e)}%`,
-			onCommit: (t) => _(e, n, t)
-		}), o.append(s.el));
-		let c = Y(i, "div", "mi-row"), l = {
+			onCommit: (t) => _(e, o, t)
+		}), l.append(f.el));
+		let b = J(i, "div", "mi-row"), x = {
 			open_cover: "up",
 			stop_cover: "stop",
 			close_cover: "down"
-		}, u = {
+		}, S = {
 			open_cover: "Open",
 			stop_cover: "Stop",
 			close_cover: "Close"
 		};
-		for (let t of r?.buttons || []) c.append(Z(i, l[t.service], u[t.service], () => _(e, r, t.service)));
-		return o.append(c), t.append(o), (e) => {
-			a.style.setProperty("--mi-accent", "#9c27b0");
-			let t = v(e, (e) => e.key === "position");
-			s && t && (s.set(t.value), s.caption(q(e.state)));
+		if (!c) {
+			b.className = "mi-cover-buttons";
+			for (let t of s?.buttons || []) {
+				let n = J(i, "button", "mi-iconbtn", G(x[t.service]));
+				n.type = "button", n.title = S[t.service], n.setAttribute("aria-label", S[t.service]), n.onclick = () => _(e, s, t.service), b.append(n);
+			}
+			l.append(b);
+		}
+		r.append(l);
+		let C = setInterval(() => {
+			if (!a.isConnected) return clearInterval(C);
+			let e = t().states?.[n];
+			u.lastChild.textContent = U(e?.last_changed);
+		}, 5e3);
+		return (e, t) => {
+			if (a.style.setProperty("--mi-accent", "#9c27b0"), u.firstChild.textContent = e.unavailable ? "Unavailable" : q(e.state), u.lastChild.textContent = e.since, p) {
+				let t = ["open", "opening"].includes(e.state), n = ["opening", "closing"].includes(e.state);
+				m !== null && (!n && t === m ? (m = null, clearTimeout(h)) : (n || (u.firstChild.textContent = m ? "Opening" : "Closing"), t = m, n = !0)), p.setAttribute("aria-checked", String(t)), g?.dragging || y(+!!t), p.dataset.moving = String(n), p.firstChild.innerHTML = G(Ce(e.deviceClass, t));
+			}
+			let n = v(e, (e) => e.key === "position");
+			f && n && (f.set(n.value), f.caption(q(e.state)));
 		};
 	}
 	function x(e, t) {
-		let n = v(e, (e) => e.kind === "buttons"), r = Y(i, "div", "mi-center"), o = Y(i, "button", "mi-lock");
+		let n = v(e, (e) => e.kind === "buttons"), r = J(i, "div", "mi-center"), o = J(i, "button", "mi-lock");
 		o.type = "button";
-		let s = Y(i, "div", "mi-state");
+		let s = J(i, "div", "mi-state");
 		return o.onclick = () => _(e, n, o.dataset.locked === "true" ? "unlock" : "lock"), r.append(o, s), t.append(r), (e) => {
 			let t = e.state === "locked", n = [
 				"locking",
@@ -1536,7 +1623,7 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		};
 	}
 	function S(e, n) {
-		let r = v(e, (e) => e.kind === "stepper"), o = e.controls.filter((e) => e.kind === "select"), s = Y(i, "div", "mi-center mi-climate"), c = () => t().config?.unit_system?.temperature || "°C", l = Y(i, "div", "mi-current");
+		let r = v(e, (e) => e.kind === "stepper"), o = e.controls.filter((e) => e.kind === "select"), s = J(i, "div", "mi-center mi-climate"), c = () => t().config?.unit_system?.temperature || "°C", l = J(i, "div", "mi-current");
 		s.append(l);
 		let u, d;
 		if (r) {
@@ -1548,7 +1635,7 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				let [r, i] = t(e), [a, o] = t(n);
 				return `M${r.toFixed(2)} ${i.toFixed(2)}A92 92 0 ${+(n - e > 180)} 1 ${a.toFixed(2)} ${o.toFixed(2)}`;
 			};
-			u = Y(i, "div", "mi-dial", `<svg viewBox="0 0 220 220" aria-hidden="true"><path class="mi-arc-track" d="${n(135, 405)}"/><path class="mi-arc-fill"/><circle class="mi-cur" r="3.5"/><circle class="mi-handle" r="11"/></svg><div class="mi-dial-text"><span class="mi-dial-state"></span><span class="mi-dial-value"><span class="mi-int"></span><span class="mi-sup"><span class="mi-unit"></span><span class="mi-dec"></span></span></span></div>`), u.setAttribute("role", "slider"), u.tabIndex = 0, u.setAttribute("aria-label", "Target temperature"), u.setAttribute("aria-valuemin", r.min), u.setAttribute("aria-valuemax", r.max);
+			u = J(i, "div", "mi-dial", `<svg viewBox="0 0 220 220" aria-hidden="true"><path class="mi-arc-track" d="${n(135, 405)}"/><path class="mi-arc-fill"/><circle class="mi-cur" r="3.5"/><circle class="mi-handle" r="11"/></svg><div class="mi-dial-text"><span class="mi-dial-state"></span><span class="mi-dial-value"><span class="mi-int"></span><span class="mi-sup"><span class="mi-unit"></span><span class="mi-dec"></span></span></span></div>`), u.setAttribute("role", "slider"), u.tabIndex = 0, u.setAttribute("aria-label", "Target temperature"), u.setAttribute("aria-valuemin", r.min), u.setAttribute("aria-valuemax", r.max);
 			let a = u.querySelector(".mi-arc-fill"), o = u.querySelector(".mi-handle"), l = u.querySelector(".mi-cur"), f = r.max - r.min, p = (e) => 135 + Math.min(1, Math.max(0, (e - r.min) / f)) * 270, m = r.value, h = !1, g = e.state, y, b = (e) => {
 				let t = Math.round((e - r.min) / r.step) * r.step;
 				return Math.min(r.max, Math.max(r.min, Math.round((r.min + t) * 100) / 100));
@@ -1587,7 +1674,7 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				}[e.key];
 				t !== void 0 && (e.preventDefault(), C(b(m + t * r.step)), T());
 			});
-			let D = Y(i, "div", "mi-dialbtns");
+			let D = J(i, "div", "mi-dialbtns");
 			for (let [e, t, n] of [[
 				-1,
 				"minus",
@@ -1597,7 +1684,7 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				"plus",
 				"Raise target temperature"
 			]]) {
-				let a = Y(i, "button", "mi-outline", G(t));
+				let a = J(i, "button", "mi-outline", G(t));
 				a.type = "button", a.setAttribute("aria-label", n), a.onclick = () => {
 					C(b(m + e * r.step)), T();
 				}, D.append(a);
@@ -1615,16 +1702,16 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			swing_mode: "swing",
 			swing_horizontal_mode: "swingh",
 			preset_mode: "preset"
-		}, p = Y(i, "div", "mi-tiles"), m = Y(i, "div", "mi-panel");
+		}, p = J(i, "div", "mi-tiles"), m = J(i, "div", "mi-panel");
 		m.hidden = !0;
-		let h = Y(i, "ul", "mi-list");
+		let h = J(i, "ul", "mi-list");
 		h.setAttribute("role", "radiogroup"), m.append(h);
 		let g, y = /* @__PURE__ */ new Map(), b = (t) => {
 			if (g === t.key) g = void 0, m.hidden = !0;
 			else {
 				g = t.key, h.replaceChildren();
 				for (let n of t.options) {
-					let r = Y(i, "li"), a = Y(i, "button");
+					let r = J(i, "li"), a = J(i, "button");
 					a.type = "button", a.setAttribute("role", "radio"), a.dataset.value = n, a.textContent = q(n), a.onclick = () => {
 						_(e, t, n), g = void 0, m.hidden = !0;
 					}, r.append(a), h.append(r);
@@ -1636,30 +1723,30 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			for (let e of h.querySelectorAll("button")) e.setAttribute("aria-checked", String(e.dataset.value === t?.value));
 		};
 		for (let e of o) {
-			let t = Y(i, "button", "mi-tile", "<span class=\"mi-tile-icon\"></span><span class=\"mi-tile-text\"><span class=\"mi-tile-label\"></span><span class=\"mi-tile-value\"></span></span>");
+			let t = J(i, "button", "mi-tile", "<span class=\"mi-tile-icon\"></span><span class=\"mi-tile-text\"><span class=\"mi-tile-label\"></span><span class=\"mi-tile-value\"></span></span>");
 			t.type = "button", t.querySelector(".mi-tile-label").textContent = e.label, t.onclick = () => b(e), p.append(t), y.set(e.key, t);
 		}
 		return o.length && s.append(p, m), n.append(s), (e, t) => {
 			x = e;
 			let n = t?.attributes || {};
-			a.style.setProperty("--mi-accent", J[e.state] || "var(--mi-muted)"), l.hidden = !Number.isFinite(n.current_temperature), l.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${c()}</strong>`, d?.(e, t);
+			a.style.setProperty("--mi-accent", je[e.state] || "var(--mi-muted)"), l.hidden = !Number.isFinite(n.current_temperature), l.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${c()}</strong>`, d?.(e, t);
 			for (let t of e.controls.filter((e) => e.kind === "select")) {
 				let e = y.get(t.key);
 				if (!e) continue;
 				e.querySelector(".mi-tile-value").textContent = q(t.value) || "—";
-				let n = t.key === "hvac_mode" ? V[t.value] ? t.value : "power" : f[t.key];
+				let n = t.key === "hvac_mode" ? B[t.value] ? t.value : "power" : f[t.key];
 				e.querySelector(".mi-tile-icon").innerHTML = G(n);
 			}
 			S(e);
 		};
 	}
 	function C(e, t) {
-		let n = v(e, (e) => e.kind === "toggle"), r = v(e, (e) => e.key === "percentage"), o = Y(i, "div", "mi-center"), s = Y(i, "button", "mi-tall", `${G("power")}<span></span>`);
+		let n = v(e, (e) => e.kind === "toggle"), r = v(e, (e) => e.key === "percentage"), o = J(i, "div", "mi-center"), s = J(i, "button", "mi-tall", `${G("power")}<span></span>`);
 		s.type = "button", s.setAttribute("role", "switch"), s.onclick = () => _(e, n, s.getAttribute("aria-checked") !== "true"), o.append(s);
 		let c;
 		if (r) {
-			let t = Y(i, "output"), n = Y(i, "div", "mi-field"), a = Y(i, "div", "mi-label", "<span>Speed</span>");
-			a.append(t), c = X(i, {
+			let t = J(i, "output"), n = J(i, "div", "mi-field"), a = J(i, "div", "mi-label", "<span>Speed</span>");
+			a.append(t), c = Y(i, {
 				orient: "h",
 				label: "Speed",
 				min: 0,
@@ -1679,15 +1766,15 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		};
 	}
 	function w(e, t) {
-		let n = v(e, (e) => e.kind === "buttons"), r = Y(i, "div", "mi-center");
+		let n = v(e, (e) => e.kind === "buttons"), r = J(i, "div", "mi-center");
 		for (let t of n.buttons) {
-			let a = Y(i, "button", "mi-pill", t.label);
+			let a = J(i, "button", "mi-pill", t.label);
 			a.type = "button", a.onclick = () => _(e, n, t.service), r.append(a);
 		}
 		return t.append(r), () => {};
 	}
 	function T(e, t, n) {
-		let r = Y(i, "div", "mi-center"), a = Y(i, "div", "mi-state");
+		let r = J(i, "div", "mi-center"), a = J(i, "div", "mi-state");
 		return r.append(a), t.append(r), (e, t) => {
 			let n = t?.attributes?.unit_of_measurement;
 			a.textContent = `${q(e.state) ?? ""}${n ? ` ${n}` : ""}`;
@@ -1709,15 +1796,15 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 	}, D = () => {};
 	function O(e) {
 		f.replaceChildren(), h = void 0;
-		let t = Y(i, "div");
-		if (f.append(t), D = (e.unavailable ? T : E[e.domain] || T)(e, t), e.attributes.length) {
-			let t = Y(i, "details", "mi-attrs", `<summary><span>Attributes</span>${G("chevron")}</summary>`), n = Y(i, "dl");
-			for (let [t, r] of e.attributes) n.append(Y(i, "dt"), Y(i, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
+		let t = J(i, "div");
+		if (f.append(t), d.hidden = !1, D = (e.unavailable ? T : E[e.domain] || T)(e, t), e.attributes.length) {
+			let t = J(i, "details", "mi-attrs", `<summary><span>Attributes</span>${G("chevron")}</summary>`), n = J(i, "dl");
+			for (let [t, r] of e.attributes) n.append(J(i, "dt"), J(i, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
 			t.append(n), f.append(t);
 		}
 	}
 	function k() {
-		let e = t().states?.[n], r = Te(e);
+		let e = t().states?.[n], r = De(e);
 		u.textContent = r.name, d.textContent = r.unavailable ? "Unavailable" : [q(r.state), r.changed && `changed ${r.changed}`].filter(Boolean).join(" · ");
 		let i = [
 			r.unavailable,
@@ -1738,16 +1825,16 @@ function ke({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 	};
 }
 // dashboard/standalone-fit.mjs
-function Ae({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
+function Z({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
 	if (!e || !(a > 0)) return n;
 	let o = n >= t ? Math.max(r, i) : Math.min(r, i);
 	return Math.abs(n + a - o) <= 2 ? n + a : n;
 }
-function je(e = window) {
+function Ne(e = window) {
 	let t = e.document, n = t.createElement("div");
 	n.style.cssText = "position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none", t.documentElement.append(n);
 	let r = () => {
-		let r = Ae({
+		let r = Z({
 			standalone: e.navigator.standalone === !0 || e.matchMedia?.("(display-mode: standalone)").matches === !0,
 			innerWidth: e.innerWidth,
 			innerHeight: e.innerHeight,
@@ -1760,11 +1847,11 @@ function je(e = window) {
 	return r(), e.addEventListener("resize", r), e.addEventListener("orientationchange", () => setTimeout(r, 250)), e.visualViewport?.addEventListener("resize", r), r;
 }
 // dashboard/standalone.js
-je();
+Ne();
 var Q = document.getElementById("status"), $ = (e) => {
 	Q.hidden = !1, Q.textContent = e;
 };
-async function Me() {
+async function Pe() {
 	let e = document.body.dataset.view;
 	await customElements.whenDefined("three-d-rooms-card");
 	let t = await j({
@@ -1793,9 +1880,9 @@ async function Me() {
 			new URL(e, location.origin).href
 )));
 	}, o = await r.sendMessagePromise({ type: "config/entity_registry/list_for_display" }).catch(() => null);
-	_e({
-		resolver: he({ loadModules: a }),
-		registryIcon: ge(o)
+	ve({
+		resolver: ge({ loadModules: a }),
+		registryIcon: _e(o)
 	});
 	let s = await ne(r).catch(() => ({})), c = document.createElement("three-d-rooms-card");
 	c.setConfig({
@@ -1814,7 +1901,7 @@ async function Me() {
 		}
 	}), u;
 	c.addEventListener("hass-more-info", (e) => {
-		u?.close(), u = ke({
+		u?.close(), u = Me({
 			host: document.body,
 			getHass: () => l.build(),
 			entityId: e.detail.entityId,
@@ -1824,6 +1911,6 @@ async function Me() {
 		l.setStates(t), e();
 	})), c.hass = l.build(), Q.hidden = !0, document.body.append(c);
 }
-Me().catch((e) => {
+Pe().catch((e) => {
 	console.error(e), $(e?.message || "Could not connect to Home Assistant. Reload to try again.");
 });

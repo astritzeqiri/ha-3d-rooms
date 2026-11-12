@@ -115,6 +115,7 @@ export async function connectNative() {
       );
     },
     entityIcon: (state) => bridge.entityIcon?.(state) ?? Promise.resolve(null),
+    states: () => bridge.states?.() || null,
     subscribe: bridge.subscribe,
     subscribeModels: bridge.subscribeModels,
   };

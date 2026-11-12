@@ -53,6 +53,35 @@ export function relativeTime(iso, now = Date.now()) {
   return "just now";
 }
 
+/** "23 seconds ago", "5 minutes ago", as Home Assistant's dialog says it. */
+export function sinceText(iso, now = Date.now()) {
+  const then = Date.parse(iso);
+  if (!Number.isFinite(then)) return "";
+  const seconds = Math.round((then - now) / 1000);
+  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+  for (const [unit, size] of [
+    ["day", 86400],
+    ["hour", 3600],
+    ["minute", 60],
+  ])
+    if (Math.abs(seconds) >= size)
+      return rtf.format(Math.round(seconds / size), unit);
+  return Math.abs(seconds) < 2 ? "just now" : rtf.format(seconds, "second");
+}
+
+/** The cover's picture, open or closed, by its device class. */
+export function coverIcon(deviceClass, open) {
+  const kind = ["garage", "gate"].includes(deviceClass)
+    ? "garage"
+    : deviceClass === "door"
+      ? "door"
+      : ["blind", "shade", "curtain"].includes(deviceClass)
+        ? "blinds"
+        : "shutter";
+  if (kind === "door") return open ? "doorOpen" : "doorClosed";
+  return open ? `${kind}Open` : kind === "blinds" ? "blindsClosed" : kind;
+}
+
 const HIDDEN_ATTRIBUTES = new Set([
   "friendly_name",
   "icon",
@@ -111,6 +140,8 @@ export function describeEntity(entity) {
     state: entity?.state,
     unavailable: !entity || UNAVAILABLE.has(entity.state),
     changed: relativeTime(entity?.last_changed),
+    since: sinceText(entity?.last_changed),
+    deviceClass: a.device_class,
     attributes: attributeRows(a),
     controls: [],
   };
@@ -175,6 +206,9 @@ export function describeEntity(entity) {
         kind: "buttons",
         buttons: buttons.map(([, service, label]) => ({ service, label })),
       });
+    // Open and close only: one tall two-way switch, as in Home Assistant.
+    if (!(features & 4) && features & 1 && features & 2)
+      out.controls.push({ kind: "cover-toggle" });
     if (features & 4)
       out.controls.push({
         kind: "slider",

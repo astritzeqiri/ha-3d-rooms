@@ -1,5 +1,6 @@
 import { initMarkerEditor } from "./marker-editor.js";
 import { initRoomButtonsEditor } from "./room-buttons-editor.js";
+import { initEntityMarkersEditor } from "./entity-markers-editor.js";
 import { initBackgroundEditor } from "./background-editor.js";
 import {
   componentYaml,
@@ -21,6 +22,7 @@ export function initDashboardEditor({
   beforeOpen = () => {},
   entityFor,
   resolveIcon,
+  entities = () => [],
   standalone = false,
 }) {
   const $ = (id) => document.getElementById(id);
@@ -54,11 +56,27 @@ export function initDashboardEditor({
     model,
     onChange: () => update(),
   });
-  // Device marker settings plus the view's room buttons (`_rooms`).
+  const extraEntities = initEntityMarkersEditor({
+    viewport: $("viewport"),
+    host: $("dashboard-entity-settings"),
+    scene,
+    model,
+    entities,
+    resolveIcon,
+    onChange: () => update(),
+  });
+  // Device marker settings plus the view's room buttons (`_rooms`) and extra
+  // entities (`_entities`).
   const readMarkers = () => {
-    const { _rooms, ...markers } = markerEditor.read();
-    const rooms = roomButtons.read();
-    return rooms ? { ...markers, _rooms: rooms } : markers;
+    // eslint-disable-next-line no-unused-vars
+    const { _rooms, _entities, ...markers } = markerEditor.read();
+    const rooms = roomButtons.read(),
+      extra = extraEntities.read();
+    return {
+      ...markers,
+      ...(rooms ? { _rooms: rooms } : {}),
+      ...(extra ? { _entities: extra } : {}),
+    };
   };
   let current,
     draftId,
@@ -203,6 +221,7 @@ export function initDashboardEditor({
     backgroundEditor.close();
     fullscreen.hidden = true;
     roomButtons.close();
+    extraEntities.close();
     chromeWatch?.disconnect();
     panel.hidden = true;
     document.body.classList.remove("dashboard-editing");
@@ -284,6 +303,7 @@ export function initDashboardEditor({
     backgroundEditor.open(component);
     markerEditor.open(component?.markers);
     roomButtons.open(component?.markers);
+    extraEntities.open(component?.markers);
     applying = false;
     sync();
     baseline = baselineSnapshot || JSON.stringify(read());

@@ -195,3 +195,29 @@ test("last-changed text and the attributes list", () => {
     ["Xy color", "0.5, 0.4"],
   ]);
 });
+
+test("covers that only open and close get a two-way switch and a garage picture", async () => {
+  const { describeEntity, coverIcon, sinceText } =
+    await import("../dashboard/more-info-model.mjs");
+  const garage = describeEntity({
+    entity_id: "cover.garage_door",
+    state: "closed",
+    attributes: { supported_features: 3, device_class: "garage" },
+  });
+  assert.ok(garage.controls.some((c) => c.kind === "cover-toggle"));
+  assert.equal(garage.deviceClass, "garage");
+  const blind = describeEntity({
+    entity_id: "cover.blind",
+    state: "open",
+    attributes: { supported_features: 15, current_position: 40 },
+  });
+  assert.ok(!blind.controls.some((c) => c.kind === "cover-toggle"));
+  assert.equal(coverIcon("garage", false), "garage");
+  assert.equal(coverIcon("garage", true), "garageOpen");
+  assert.equal(coverIcon("door", true), "doorOpen");
+  assert.equal(coverIcon("shade", false), "blindsClosed");
+  assert.equal(coverIcon(undefined, true), "shutterOpen");
+  const now = Date.parse("2026-11-12T12:00:00Z");
+  assert.match(sinceText("2026-11-12T11:59:37Z", now), /23 seconds ago/);
+  assert.match(sinceText("2026-11-12T11:55:00Z", now), /5 minutes ago/);
+});

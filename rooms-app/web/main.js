@@ -2054,6 +2054,8 @@ function syncRoomIcons() {
 }
 const dashboardEditor = initDashboardEditor({
   ...markerIconSource,
+  // Extra entities may be any entity, not only those devices connect to.
+  entities: () => native?.states?.() || status.entities || [],
   standalone: !!native,
   beforeOpen: () => roomIcons.close(),
   api,

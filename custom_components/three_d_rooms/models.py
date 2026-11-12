@@ -444,9 +444,62 @@ def validate_room_buttons(value):
     return clean
 
 
+CUSTOM_ENTITY_LIMIT = 48
+ENTITY_ID = re.compile(r"^[a-z_][a-z0-9_]*\.[a-z0-9_]+$")
+
+
+def validate_custom_entities(value):
+    """Extra entities of a view: any HA entity shown at a chosen spot (view metres)."""
+    if not isinstance(value, dict) or len(value) > CUSTOM_ENTITY_LIMIT:
+        raise ValueError(f"Use at most {CUSTOM_ENTITY_LIMIT} extra entities in one view.")
+    clean = {}
+    for key, options in value.items():
+        if not valid_id(key) or not isinstance(options, dict) or set(options) - {
+                "entity", "position", "room", "name", "icon", "icon_off", "size", "show_state", "visible"}:
+            raise ValueError("Invalid extra entity settings.")
+        entity = options.get("entity")
+        if not isinstance(entity, str) or len(entity) > 255 or not ENTITY_ID.match(entity):
+            raise ValueError("Choose a Home Assistant entity such as sensor.hallway.")
+        position = options.get("position")
+        if (not isinstance(position, list) or len(position) != 3 or
+                any(not number(v) or abs(v) > 1000 for v in position)):
+            raise ValueError("An extra entity position must be three numbers.")
+        if "room" in options and not valid_id(options["room"]):
+            raise ValueError("Invalid room for an extra entity.")
+        name = options.get("name")
+        if name is not None and (not isinstance(name, str) or len(name) > 80):
+            raise ValueError("An extra entity name must be at most 80 characters.")
+        for icon_key in ("icon", "icon_off"):
+            if icon_key in options and (not isinstance(options[icon_key], str) or not MARKER_ICON.match(options[icon_key])):
+                raise ValueError("Choose a Home Assistant icon such as mdi:thermometer or local:front-door.")
+        size = options.get("size", 32)
+        if not isinstance(size, int) or isinstance(size, bool) or not 24 <= size <= 64:
+            raise ValueError("An extra entity size must be 24–64 pixels.")
+        if "show_state" in options and not isinstance(options["show_state"], bool):
+            raise ValueError("Showing the state must be true or false.")
+        if "visible" in options and not isinstance(options["visible"], bool):
+            raise ValueError("Visibility must be true or false.")
+        entry = {"entity": entity, "position": [float(v) for v in position]}
+        if options.get("room"):
+            entry["room"] = options["room"]
+        if name and name.strip():
+            entry["name"] = name.strip()
+        for icon_key in ("icon", "icon_off"):
+            if options.get(icon_key):
+                entry[icon_key] = options[icon_key]
+        if size != 32:
+            entry["size"] = size
+        if options.get("show_state") is False:
+            entry["show_state"] = False
+        if options.get("visible") is False:
+            entry["visible"] = False
+        clean[key] = entry
+    return clean
+
+
 def validate_markers(value):
     """Bounded, view-local control presentation. Coordinates are offsets, not geometry."""
-    if not isinstance(value, dict) or len(set(value) - {"_defaults", "_rooms"}) > 128:
+    if not isinstance(value, dict) or len(set(value) - {"_defaults", "_rooms", "_entities"}) > 128:
         raise ValueError("Use a device-marker settings object with at most 128 controls.")
     clean = {}
     for control_id, options in value.items():
@@ -454,6 +507,11 @@ def validate_markers(value):
             rooms = validate_room_buttons(options)
             if rooms:
                 clean["_rooms"] = rooms
+            continue
+        if control_id == "_entities":
+            entities = validate_custom_entities(options)
+            if entities:
+                clean["_entities"] = entities
             continue
         if ((control_id != "_defaults" and not valid_id(control_id)) or not isinstance(options, dict) or
                 set(options) - {"visible", "show_label", "size", "placement", "offset", "icon", "icon_off"}):

@@ -53,6 +53,8 @@ class ThreeDRoomsPanel extends HTMLElement {
             url.searchParams.set(key, value);
           history.replaceState(history.state, "", url);
         },
+        // Every entity, for the extra entities a view can show.
+        states: () => Object.values(this._hass?.states || {}),
         request: (operation, data = {}) =>
           this._hass.callWS({ type: "three_d_rooms/request", operation, data }),
         asset: (path, options) => this._hass.fetchWithAuth(path, options),

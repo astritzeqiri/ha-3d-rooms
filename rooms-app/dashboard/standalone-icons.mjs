@@ -92,7 +92,9 @@ export function defineStateIcon({ resolver, registryIcon = () => undefined }) {
       const name =
         this._icon ||
         this._stateObj?.attributes?.icon ||
-        registryIcon(this._stateObj?.entity_id);
+        registryIcon(this._stateObj?.entity_id) ||
+        // Extra entities of a view name a plain icon for their kind.
+        this.dataset.defaultIcon;
       if (name === this._name) return;
       this._name = name;
       const token = ++this._token;

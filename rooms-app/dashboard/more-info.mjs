@@ -1,5 +1,11 @@
 import { ICONS } from "./more-info-icons.mjs";
-import { describeEntity, controlCall, hsToRgb } from "./more-info-model.mjs";
+import {
+  describeEntity,
+  controlCall,
+  coverIcon,
+  hsToRgb,
+  sinceText,
+} from "./more-info-model.mjs";
 import { kelvinToRgb } from "../shared/light.mjs";
 
 export { describeEntity, controlCall };
@@ -18,7 +24,7 @@ dialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f
 dialog.mi::backdrop{background:#000a}
 @media (prefers-color-scheme:light){dialog.mi::backdrop{background:#0006}}
 @keyframes mi-in{from{opacity:0;transform:translateY(20px) scale(.98)}}
-@media (prefers-reduced-motion:reduce){dialog.mi{animation:none}.mi *{transition:none!important}}
+@media (prefers-reduced-motion:reduce){dialog.mi{animation:none}.mi *{transition:none!important;animation:none!important}}
 @media (max-width:600px){dialog.mi{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;animation-name:mi-up}@keyframes mi-up{from{transform:translateY(100%)}}}
 .mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}
 @media (max-width:600px){.mi-frame{max-height:94vh}}
@@ -74,6 +80,23 @@ dialog.mi::backdrop{background:#000a}
 .mi-lock{display:grid;place-items:center;width:176px;height:176px;border:0;border-radius:50%;background:color-mix(in srgb,var(--mi-accent) 22%,transparent);color:var(--mi-accent);cursor:pointer;transition:background .2s,color .2s;box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--mi-accent) 55%,transparent)}
 .mi-lock svg{width:72px;height:72px}
 .mi-lock:disabled{opacity:.5;cursor:default}
+/* cover: big state, then a tall two-way switch or a position slider */
+.mi-statehead{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px 0 4px;text-align:center}
+.mi-statehead strong{font:400 40px/1.15 Roboto,system-ui,sans-serif;letter-spacing:-.5px}
+.mi-statehead span{color:var(--mi-muted);font-size:16px}
+.mi-cover-switch{position:relative;box-sizing:border-box;width:132px;height:min(330px,40vh);min-height:220px;padding:8px;border:0;border-radius:32px;background:var(--mi-surface-2);color:inherit;cursor:pointer;touch-action:none}
+.mi-cover-switch:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 10%)}
+.mi-cover-knob{position:absolute;left:8px;right:8px;bottom:calc(8px + (50% - 8px) * var(--mi-pos,0));height:calc(50% - 8px);display:grid;place-items:center;border-radius:24px;background:#9e9e9e;color:#fff;pointer-events:none;transition:bottom .25s cubic-bezier(.3,.7,.3,1),background .25s}
+.mi-cover-switch.mi-dragging .mi-cover-knob{transition:background .25s}
+.mi-cover-switch[aria-checked=true] .mi-cover-knob{background:var(--mi-accent)}
+.mi-cover-switch[data-moving=true]{background:color-mix(in srgb,var(--mi-accent) 28%,var(--mi-surface-2))}
+.mi-cover-switch[data-moving=true] .mi-cover-knob{background:var(--mi-accent);animation:mi-moving 1.2s ease-in-out infinite}
+@keyframes mi-moving{50%{opacity:.7}}
+.mi-cover-knob svg{width:30px;height:30px}
+.mi-cover-switch:disabled{opacity:.5;cursor:default}
+.mi-cover-buttons{display:flex;gap:0;padding:4px;border-radius:24px;background:var(--mi-surface)}
+.mi-cover-buttons .mi-iconbtn{width:64px;height:48px;border-radius:20px}
+.mi-cover-buttons .mi-iconbtn:hover{background:var(--mi-surface-2)}
 .mi-state{font:500 20px Roboto,system-ui,sans-serif}
 .mi-sub{color:var(--mi-muted);margin-top:-12px}
 /* climate */
@@ -321,9 +344,11 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
       showError("");
       const [domain, service, data] = controlCall(description, control, value);
       await getHass().callService(domain, service, data);
+      return true;
     } catch (error) {
       showError(error?.message || "The command failed.");
       onError(error);
+      return false;
     }
   };
   const find = (d, pred) => d.controls.find(pred);
@@ -544,8 +569,109 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
   function coverLayout(d, root) {
     const pos = find(d, (c) => c.key === "position");
     const btns = find(d, (c) => c.kind === "buttons");
+    const toggleOnly = !!find(d, (c) => c.kind === "cover-toggle");
     const center = h(doc, "div", "mi-center");
-    let slider;
+    // Big state and when it changed, as Home Assistant's dialog shows them.
+    const head = h(
+      doc,
+      "div",
+      "mi-statehead",
+      "<strong></strong><span></span>",
+    );
+    center.append(head);
+    subtitle.hidden = true;
+    let slider,
+      knob,
+      wanted = null,
+      wantedTimer;
+    let press = null;
+    const setPos = (pos) => knob?.style.setProperty("--mi-pos", String(pos));
+    if (toggleOnly) {
+      knob = h(
+        doc,
+        "button",
+        "mi-cover-switch",
+        `<span class="mi-cover-knob"></span>`,
+      );
+      knob.type = "button";
+      knob.setAttribute("role", "switch");
+      knob.setAttribute("aria-label", d.name);
+      // The upper half opens, the lower half closes; a tap elsewhere flips it.
+      // The switch moves at once and shows "moving" until the cover reports
+      // where it ended (or gives up after a minute).
+      // Tap anywhere flips it, or drag the knob up (open) or down (close).
+      // The knob moves at once and shows "moving" until the cover reports
+      // where it ended (or gives up after a minute).
+      const shownOpen = () => knob.getAttribute("aria-checked") === "true";
+      const send = async (open) => {
+        const entity = getHass().states?.[entityId];
+        const resting = ["open", "closed"].includes(entity?.state);
+        wanted = open;
+        clearTimeout(wantedTimer);
+        // Already there: just settle the knob back.
+        if (resting && (entity.state === "open") === open) wanted = null;
+        else
+          wantedTimer = setTimeout(() => {
+            wanted = null;
+            update();
+          }, 60000);
+        update();
+        if (wanted === null) return;
+        if (!(await call(d, btns, open ? "open_cover" : "close_cover"))) {
+          wanted = null;
+          update();
+        }
+      };
+      knob.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || knob.disabled) return;
+        press = {
+          id: event.pointerId,
+          y: event.clientY,
+          from: shownOpen() ? 1 : 0,
+          pos: shownOpen() ? 1 : 0,
+          dragging: false,
+        };
+        try {
+          knob.setPointerCapture(event.pointerId);
+        } catch {
+          // Not a live pointer (e.g. synthetic); dragging still works.
+        }
+      });
+      knob.addEventListener("pointermove", (event) => {
+        if (!press || event.pointerId !== press.id) return;
+        const dy = press.y - event.clientY;
+        if (!press.dragging && Math.abs(dy) < 6) return;
+        press.dragging = true;
+        knob.classList.add("mi-dragging");
+        const travel = Math.max(1, knob.clientHeight / 2 - 8);
+        press.pos = Math.min(1, Math.max(0, press.from + dy / travel));
+        setPos(press.pos);
+      });
+      const release = (event) => {
+        if (!press || event.pointerId !== press.id) return;
+        const { dragging, pos, from } = press;
+        press = null;
+        knob.classList.remove("mi-dragging");
+        if (event.type === "pointercancel") {
+          setPos(from);
+          return;
+        }
+        send(dragging ? pos >= 0.5 : !shownOpen());
+      };
+      knob.addEventListener("pointerup", release);
+      knob.addEventListener("pointercancel", release);
+      // Keyboard: Enter/Space flips it, arrows open and close.
+      knob.onclick = (event) => {
+        if (event.detail === 0) send(!shownOpen());
+      };
+      knob.onkeydown = (event) => {
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          event.preventDefault();
+          send(event.key === "ArrowUp");
+        }
+      };
+      center.append(knob);
+    }
     if (pos) {
       slider = makeSlider(doc, {
         orient: "v",
@@ -566,16 +692,52 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
       stop_cover: "Stop",
       close_cover: "Close",
     };
-    for (const b of btns?.buttons || [])
-      row.append(
-        round(doc, ICON[b.service], LABEL[b.service], () =>
-          call(d, btns, b.service),
-        ),
-      );
-    center.append(row);
+    // Beside a slider the commands sit in one compact group, as in HA.
+    if (!toggleOnly) {
+      row.className = "mi-cover-buttons";
+      for (const b of btns?.buttons || []) {
+        const button = h(doc, "button", "mi-iconbtn", svg(ICON[b.service]));
+        button.type = "button";
+        button.title = LABEL[b.service];
+        button.setAttribute("aria-label", LABEL[b.service]);
+        button.onclick = () => call(d, btns, b.service);
+        row.append(button);
+      }
+      center.append(row);
+    }
     root.append(center);
-    return (nd) => {
+    const since = setInterval(() => {
+      if (!dialog.isConnected) return clearInterval(since);
+      const entity = getHass().states?.[entityId];
+      head.lastChild.textContent = sinceText(entity?.last_changed);
+    }, 5000);
+    return (nd, entity) => {
       dialog.style.setProperty("--mi-accent", "#9c27b0");
+      head.firstChild.textContent = nd.unavailable
+        ? "Unavailable"
+        : cap(nd.state);
+      head.lastChild.textContent = nd.since;
+      if (knob) {
+        let open = ["open", "opening"].includes(nd.state),
+          moving = ["opening", "closing"].includes(nd.state);
+        if (wanted !== null) {
+          // Done once the cover rests where it was sent.
+          if (!moving && open === wanted) {
+            wanted = null;
+            clearTimeout(wantedTimer);
+          } else {
+            if (!moving)
+              head.firstChild.textContent = wanted ? "Opening" : "Closing";
+            open = wanted;
+            moving = true;
+          }
+        }
+        knob.setAttribute("aria-checked", String(open));
+        if (!press?.dragging) setPos(open ? 1 : 0);
+        knob.dataset.moving = String(moving);
+        knob.firstChild.innerHTML = svg(coverIcon(nd.deviceClass, open));
+      }
+      void entity;
       const c = find(nd, (x) => x.key === "position");
       if (slider && c) {
         slider.set(c.value);
@@ -947,6 +1109,7 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
     errorEl = undefined;
     const root = h(doc, "div");
     body.append(root);
+    subtitle.hidden = false;
     const layout = d.unavailable
       ? plainLayout
       : LAYOUTS[d.domain] || plainLayout;

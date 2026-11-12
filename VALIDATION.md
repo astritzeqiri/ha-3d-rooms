@@ -1,3 +1,12 @@
+# 0.42.0 — extra entities on dashboard views, cover pop-up on the full-screen page, 2026-11-12
+
+Released as 0.42.0, based on 0.41.4.
+
+- Frontend: 338 tests pass, including new tests for extra-entity validation (bounds, icons per state, visibility), tap actions, state text and timestamps, state words, default icons, and the cover pop-up's two-way switch, icons and "seconds ago" text; Prettier and the build pass. Python: the integration tests pass (including new `test_custom_entities.py`), with the native Home Assistant tests skipped on the host.
+- Checked in the local Home Assistant Core (singleton container, built-in browser) before the final changes: adding a sensor and a switch to a house view, dragging them, saving through the backend validator and reopening; the device-style tools (icon picker search, hide, two undos back to "Saved view"); the card on the full-screen page showing extra entities at their spots, a switch toggling and a cover opening Home Assistant's dialog; the garage door's two-way switch opening and closing the demo cover by tap anywhere and by dragging, with the knob moving before Home Assistant answered (service call delayed in the page).
+- During this work a backend bug stored every extra entity under the id `icon_off` when saving; it was caught by the Python tests before release and fixed. The local test view's ids were checked and are intact.
+- Not tested in a browser: separate On/Off icons for extra entities and the remove confirmation (covered by unit tests and code review only); extra entities inside a regular Lovelace dashboard card (only the manager and the full-screen page); a real phone.
+
 # 0.41.4 — full-screen page on iPhone, bigger phone controls, desk pop-up, 2026-11-12
 
 Released as 0.41.4, based on 0.41.3.

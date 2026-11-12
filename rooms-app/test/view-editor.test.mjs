@@ -111,6 +111,16 @@ function harness(preview, onClose, modelConfig = {}, requestScope) {
         read: () => rooms,
       };
     },
+    initEntityMarkersEditor: () => {
+      let extra;
+      return {
+        open(value) {
+          extra = value?._entities;
+        },
+        close() {},
+        read: () => extra,
+      };
+    },
     validateComponent,
     componentYaml,
   };
