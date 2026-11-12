@@ -1,11 +1,3 @@
-## Model caching — 0.27.0
-
-Dashboard cards reuse decoded room models across tab switches in the current Home Assistant connection. The bottom-right **Reload models** button clears the session caches and reloads the current view. New model revisions automatically get fresh geometry. Cached templates are private browser memory, bounded to eight entries / approximately 256 MiB and ten minutes of inactivity; downloaded files have a separate 96 MiB / ten-minute limit. A full page refresh starts a fresh memory cache. Oversized models still load normally without being retained. Each card keeps independent controls, materials and placement.
-
-## 0.25.1 rendering fix
-
-Rooms with many lights and windows now retain textured floors and furniture on graphics devices with limited texture capacity. Shadow casting adapts to the device; all light controls remain available. Update through HACS, restart Home Assistant itself, and refresh the browser. No room re-export or re-upload is needed.
-
 <p align="center">
   <img src="custom_components/three_d_rooms/brand/icon.png" alt="3D Rooms" width="112" />
 </p>
@@ -22,39 +14,30 @@ Rooms with many lights and windows now retain textured floors and furniture on g
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="MIT license" /></a>
 </p>
 
-Bring your rooms into Home Assistant with an interactive 3D view. Import a prepared room model, connect its devices to your entities, and save the views you want on your dashboard.
+Bring your home into Home Assistant as an interactive 3D model. Import prepared room models, connect their devices to your entities, and save the views you want on a dashboard, or open any view as its own full-screen page with no Home Assistant menus around it.
 
-**The room manager and dashboard card come together in one integration.**
-
-## Houses, floors and room appearance
-
-Export rooms independently from the web house builder with matching house placement metadata. Import the room ZIPs in 3D Rooms; rooms sharing a house ID assemble automatically. In each room’s settings, link its saved height ranges to Home Assistant floors and select every floor it occupies. Stairways and hallways can span floors.
-
-Open **Dashboard views → New view**, then choose the whole house, a floor, or a room. Floor views clip the model to the exported height range. House views configure camera, perspective, framing and presentation; entities stay configured in their source rooms. Live room appearance still reflects those mappings.
-
-Prepared models may expose **Room settings → Room appearance**. The updated hallway export offers **Show wall above entrance**, leaving its door, casing and lower wall intact. Existing hallway models need one replacement export to gain separate geometry; a normal integration update does not require re-uploading other rooms.
-
-Compatible room replacement preserves device mappings, floor links and appearance choices. Back up room exports before replacing models. Prepared AC controls use Home Assistant’s native climate dialog; prepared hinged doors follow cover open/closed state.
-
-See [portable placement and floors](docs/house-placement.md) for the package contract.
+**The room manager, the dashboard card and the full-screen page come together in one integration.** There is nothing else to install, and no Node or add-on to run.
 
 ## Features
 
-- **Interactive rooms** — orbit, pan and zoom, or use the navigation cube to find the right angle.
-- **Lights** — control supported on/off, brightness, color and white temperature settings, with state reflected in the room.
-- **Roller shades** — open, stop and close compatible covers, with the modeled shade following their position.
-- **Door locks** — map a modeled lock to a `lock.*` entity; the thumb-turn follows its locked state, and dashboards open Home Assistant’s lock dialog.
-- **Your own icons per view** — choose any icon for each device marker in a dashboard view: Material Design icons or your own Home Assistant icon sets such as `local:`.
-- **Adjustable desks** — group height, movement controls and four configurable macros in one device card.
-- **Daylight** — choose Day, Night or Auto for prepared models; window light follows shade openings and the selected sun entity.
-- **Linked dashboard views** — save camera framing once and reuse it across cards, with optional per-card overrides.
-- **Local model library** — keep rooms and mappings in your Home Assistant installation and export them for backup.
+- **Rooms, floors and whole houses** — import rooms one by one or a complete house ZIP. Open the whole house, a single floor or one room, with live state on every device.
+- **Dashboard views** — frame the camera once, choose a background and which device buttons show, save it as a named view, and reuse it on any number of cards.
+- **A full-screen page per view** — `/three_d_rooms_view/<view id>` shows one view and nothing else: ideal for a wall tablet or a phone home screen.
+- **Lights** — on/off, brightness, colour and white temperature, with state and light effects reflected in the room.
+- **Shades, windows and doors** — open, stop and close covers, or follow a door/window contact sensor. Hinged and sliding doors move in 3D.
+- **Door locks** — the modeled thumb-turn follows the lock; a tap opens the lock's dialog.
+- **Air conditioners** — state colours and mode effects on the model; the native climate dialog (or, on the full-screen page, an arc dial) controls them.
+- **Adjustable desks** — height, movement controls and four macros in one device card.
+- **Your own icons** — every marker shows Home Assistant's icon for its entity and state, or any icon you choose per room or per view: Material Design icons or your own icon sets such as `local:`.
+- **Day, night and auto** — window light follows shade openings and the sun, with a three-icon time-of-day switch on every card.
+- **Fast on phones** — lighter copies of each room are made automatically, and phones render with a lighter profile.
+- **Local and private** — rooms and mappings live in your Home Assistant, are included in its backups and can be exported.
 
 Available controls depend on your room model and the capabilities of the mapped entities.
 
 ## Installation
 
-You’ll need [HACS](https://www.hacs.xyz/docs/use/) and a Home Assistant administrator account. The repository declares Home Assistant **2025.1.0** as its minimum version; runtime checks have been performed on **Core 2026.10.2**.
+You’ll need [HACS](https://www.hacs.xyz/docs/use/) and a Home Assistant administrator account. The repository declares Home Assistant **2025.1.0** as its minimum version; runtime checks have been performed on **Core 2026.11.0**.
 
 ### 1. Download through HACS
 
@@ -122,67 +105,112 @@ To use it, copy the complete [`skills/room-to-home-assistant`](skills/room-to-ho
 ## Add your first room
 
 1. Open **3D Rooms** in the Home Assistant sidebar.
-2. Choose **Import room** and upload a prepared room ZIP.
-3. In **Room & devices**, use each device’s settings cog to connect a compatible Home Assistant entity.
+2. Choose **+ Import** and upload a prepared room ZIP, or a full-house ZIP.
+3. The **Getting started** panel on the Overview lists the next steps. In **Devices**, use each device’s settings cog to connect a compatible Home Assistant entity, or **Connect devices** to connect close name matches in one go.
 4. Turn off **Preview** when you’re ready to send commands to your devices.
 
 Room packages contain an embedded 3D model and definitions for its controllable devices. A standalone GLB, photo or raw scan needs to be prepared as a room package before importing. ZIP uploads can be up to **100 MB**, with an expanded limit of **300 MB**.
 
-Under **Settings**, you can rename a room, assign a Home Assistant area, configure supported daylight settings, or export the room and its mappings. Assigning an area does not change your devices’ area assignments.
+Under **Settings** you can rename a room, assign a Home Assistant area, configure supported daylight settings, replace the model or export the room and its mappings. Changes in Settings save as you make them. Assigning an area does not change your devices’ area assignments.
+
+## Houses, floors and room appearance
+
+Export rooms independently from the web house builder with matching house placement metadata. Import the room ZIPs (or one full-house ZIP); rooms sharing a house ID assemble automatically. In each room’s settings, link its saved height ranges to Home Assistant floors and select every floor it occupies. Stairways and hallways can span floors.
+
+Prepared models may expose **Room settings → Room appearance**, for example **Show wall above entrance**, which leaves the door, casing and lower wall intact.
+
+**Replace room model** (Settings) swaps a room’s geometry and keeps its identity, saved views, floors, icons, light groups and compatible device mappings; removed or incompatible controls are reported. **Replace house** previews a full-house ZIP before applying it: rooms are matched by exported ID, then by name, and you can review and change each match, and each device mapping, before confirming. **Delete house** lists every affected room and saved view first. Back up room exports before replacing models.
+
+See [portable placement and floors](docs/house-placement.md) for the package contract.
+
+## Devices
+
+Open a room’s **Devices** tab to connect and arrange its devices. The model shows each device’s icon, coloured by state: green locked, red unlocked, purple open, the light’s own colour when on, and a grey ring when not yet connected.
+
+- **Lights** — group several modeled lights into one control connected to a single Home Assistant light or switch entity (**Group devices → Group lights**). Each fixture keeps its geometry. Ungroup at any time.
+- **Shades, windows and doors** — connect a `cover` entity, or a door/window `binary_sensor` (read-only: it shows open/closed and moves the model, with no open/close buttons). Shades, windows and doors can be grouped like lights.
+- **Locks** — map a modeled lock to a `lock.*` entity. Locks that need a code are never unlocked from 3D Rooms.
+- **Air conditioners** — connect a `climate` entity; mode effects show on the model.
+- **Adjustable desks** — see the [desk model specification](docs/adjustable-desk.md).
+- **Hide a device everywhere** — **Hide device** (in a device’s ⋯ menu) removes its markers and controls from every view and card. Entity mappings and Home Assistant itself are untouched; **Show device** restores it.
+
+### Icons
+
+On the Devices tab, drag an icon onto a visible surface to move it, or click it to choose any Home Assistant icon, including your own icon sets. Give a device separate icons for its active (on, open, locked) and inactive state, or leave it unset to keep Home Assistant’s own state icon. **Position → Reset** returns an icon to where the model placed it. These are the starting point for every card and view; a view can override them for itself. **Undo** (or Ctrl/⌘+Z) takes back the last icon change.
+
+A room with many devices can crowd a house card. Turn on **Group this room’s icons in house views** to show them as one chip with the room name that expands on a tap.
+
+## Dashboard views
+
+Open **Dashboard views** (next to **My home**) to browse every saved view across all houses, floors and rooms. Search by name, filter by space type, **Import** a view or choose **New view**.
+
+1. Choose **Whole house**, **A floor** or **A room**, then frame it with the camera controls, the view cube or a preset (**Floor plan** switches to a true top-down camera).
+2. Choose a **Background** (below), set the card height (a fixed height or **Auto**, which fills the screen), and decide whether to show a title.
+3. Click a device icon to hide it, change its icon or label, move it or resize it for this view; **Defaults for this view** sets these for all devices at once. On house and floor views, **Room buttons** choose when each room’s button shows, where it sits and which angle the room opens at.
+4. **Preview in dashboard** at desktop or phone width, then **Save view**. Saving also stores a preview picture for the gallery.
+
+Cards linked to a saved view follow later changes automatically. In the card editor, edit a field to override it for that card; a small **Reset** restores the view’s value. Each gallery card offers **Edit view**, **Preview in dashboard**, **Add to dashboard** and, under **More actions**, **Duplicate**, **Export view** and **Delete view**.
+
+### Backgrounds
+
+Each view has its own background: **Spotlight** (default), **Classic** (flat dark), **Blueprint grid**, **Sky** (follows the day/night setting and the real sun, with stars at night), **Aurora**, **Custom image** (a `/local/…` or web address) or **Home Assistant theme**. An optional soft shadow anchors the house. The gallery preview is drawn over the view’s current background, so it follows the sky too.
 
 ## Add a dashboard card
 
-In your dashboard, choose **Edit dashboard → Add card → 3D Rooms**. Select a room or saved view, adjust the preview, and save. The card loads automatically with the integration.
+In your dashboard, choose **Edit dashboard → Add card → 3D Rooms**. Select a saved view (or a room), adjust the preview, and save. The card loads automatically with the integration.
 
-To create a reusable view:
+On the card:
 
-1. Open **Dashboard views → New view** and choose **Whole house**, **A floor**, or **A room**.
-2. Pick the space, frame it using the camera controls, and give the view a name. All spaces let you choose device-button presentation.
-3. Preview the desktop or phone card, choose **Save view**, then select it in the dashboard card editor.
-
-Cards linked to a saved view follow later changes automatically. Edit a field directly to customize it for this card. A small **Reset** appears only for changed values and restores the saved view value.
-
-On the dashboard, click a light marker to toggle it; hold it to open Home Assistant’s device controls. Clicking the modeled light fixture also opens the controls. Cover markers open the native cover dialog. Daylight-ready rooms include an **Auto / Day / Night** selector.
+- **Markers** — tap a light to toggle it; hold it for Home Assistant’s device controls. Covers, locks and climate open their native dialogs.
+- **Lights and Shades panels** (top left) list each room’s lights or shades with one switch per room and a confirmed **All** switch. Hidden devices are never switched.
+- **House and floor cards** have floor buttons (All, then each floor). A room hidden behind others gets a button that shows it on its own; double-tap a room to open it, use the arrows or Left/Right for the next room, and the House button or Escape to return. Hold a room button to switch that room’s lights.
+- **Toolbar** — Move camera, Reset view, Reload models, fullscreen, and (for administrators) an Edit button that opens the view in the editor in a new tab.
+- **Time of day** — an Auto / Day / Night switch for daylight-ready rooms.
+- A progress bar and the view’s own picture show while a large room downloads.
 
 <details>
 <summary>Manual YAML configuration</summary>
 
-Use your room’s actual model ID:
-
 ```yaml
 type: custom:three-d-rooms-card
-model: my-room
-height: 600
-view: front
-tilt: 28
-heading: 0
+saved_view: <view id>     # or: model: my-room
+height: auto              # 180–1600, or auto to fill the screen
 ```
 
-Use `view: floor` for an orthographic floor plan. Optional fields include `title`, `zoom` and `interactive`. Cards showing a house or one of its floors include bottom-right floor buttons (All, then each floor) that switch instantly without reloading; set `floor_selector: false` to hide them. House and floor cards also show a button in front of each room that is hidden behind other rooms; it displays that room on its own, with a House button (or Escape) to return. Hold a button to switch the room's lights, or double-tap a visible room to open it; while in a room, arrows (or Left/Right) move to the next room. When you build the view in the manager, **Room buttons** lets you choose Automatic, Always or Never for each room and drag its button anywhere, also beside the model (saved with the view; by hand it is `markers._rooms`). Set `room_focus: false` on a card to hide all room buttons. Every card also has Move camera (starts from `interactive`) and Reset view buttons; set `camera_controls: false` to hide them. The top-left Lights and Shades buttons list each room's lights or shades, with one switch per room and a confirmed All switch; hidden devices are never switched. Set `light_panel: false` or `shade_panel: false` to hide them. To follow a saved view, copy the configuration from **Use in dashboard → Advanced YAML** in the manager. Administrators see an Edit button in the toolbar that opens the card's saved view in the 3D Rooms editor in a new tab; set `edit_button: false` to hide it.
+| Option | Meaning |
+| --- | --- |
+| `saved_view` / `model` | Follow a saved view (copy it from **Use in dashboard → Advanced YAML**), or show a room directly |
+| `view`, `tilt`, `heading`, `zoom` | Camera for a card without a saved view. `view: floor` is an orthographic floor plan |
+| `interactive` | Start with camera movement on |
+| `title`, `show_title` | Card title |
+| `floor_selector` | `false` hides the floor buttons on house and floor cards |
+| `room_focus` | `false` hides the room buttons |
+| `camera_controls` | `false` hides Move camera and Reset view |
+| `light_panel`, `shade_panel` | `false` hides the Lights or Shades panel |
+| `edit_button` | `false` hides the administrator Edit button |
+| `quality` | `auto` (default), `high` or `low` rendering quality |
+| `background`, `background_image`, `background_shadow` | Override the view’s background |
 
 </details>
 
 ## Full-screen page for one view
 
-Sometimes a dashboard still shows too much: Home Assistant's sidebar and header around the card. In the manager open **Dashboard views → Add to dashboard** and copy the **Full-screen page** link (`/three_d_rooms_view/<view id>` on your Home Assistant address). That page shows only the saved view, with no Home Assistant menu at all.
+Sometimes a dashboard still shows too much: Home Assistant’s sidebar and header around the card. Every view has its own page at `/three_d_rooms_view/<view id>` on your Home Assistant address that shows only the view, filling the screen.
 
-- Bookmark it, add it to a phone home screen, or use it as the start page of a wall tablet.
-- It reuses the Home Assistant login of that browser (and sends you to the normal login if there is none), and is for administrators, like the rest of 3D Rooms. Nothing is public.
-- Taps work as on the card (lights, shades, doors, locks). Holding a device opens a compact pop-up for it (power, brightness, colour, shades, locks, climate). Your chosen marker icons, including custom icon sets, are drawn too. The card's Edit button is not part of that page.
+- **Where to find it:** the **Open full screen** button on each card in **Dashboard views**, the **Full screen** button beside **Background** in the view editor (once the view is saved), or **Add to dashboard → Full-screen page** to copy the link. All open it in a new tab.
+- Bookmark it, add it to a phone’s home screen, or use it as a wall tablet’s start page.
+- It reuses the Home Assistant login of that browser (and sends you through the normal login if there is none). It is for administrators, like the rest of 3D Rooms, and nothing is public.
+- Taps work as on the card. Holding a device opens a pop-up laid out like Home Assistant’s own: a large brightness or position control, round buttons for power, colour temperature, colour and effects, an arc dial for air conditioners with mode, fan, swing and preset tiles, a big lock button, and an Attributes list. Your chosen marker icons, including custom icon sets, are drawn too.
 
 ## Faster loading on phones
 
-3D Rooms keeps lighter copies of every room next to your upload. Home Assistant makes them automatically (shared, smaller WebP textures), and phones download a copy with smaller textures. For the biggest gain, open the room in the 3D Rooms sidebar → Room settings → **Faster loading** → **Optimize for phones and desktops**. This compresses geometry and uses GPU-compressed (KTX2) textures; it runs in your browser and also starts automatically after an upload. Your upload is never changed, and Export returns it.
+Home Assistant makes lighter copies of every room next to your upload (shared, smaller WebP textures), and phones download the one with smaller textures. For the biggest gain open the room → **Settings → Faster loading → Optimize for phones and desktops**: it compresses geometry and uses GPU-compressed (KTX2) textures, runs in your browser and also starts automatically after an upload. Your upload is never changed, and Export returns it.
 
-Cards render more lightly on phones. Add `quality: high` to a card to keep full quality on a phone, or `quality: low` to use the light profile everywhere.
+Cards render more lightly on phones. Add `quality: high` to keep full quality on a phone, or `quality: low` to use the light profile everywhere. Dashboard cards also reuse decoded models between tab switches within a Home Assistant session; **Reload models** clears that cache.
 
 ## Update
 
-Download the latest version in **HACS → 3D Rooms**, restart **Home Assistant**, then refresh your browser.
-
-Your uploaded rooms, entity mappings and saved views stay in place. You do not need to re-upload models for an integration update.
-
-To update a room’s geometry, use **Settings → Replace room model**. The room keeps its identity, saved views and compatible device mappings. Removed or incompatible controls are reported during replacement.
+Download the latest version in **HACS → 3D Rooms**, restart **Home Assistant** itself, then refresh your browser. Your uploaded rooms, entity mappings and saved views stay in place, so a normal update never needs a re-upload. The sidebar shows the installed version. See the [changelog](rooms-app/CHANGELOG.md) for what each release changed.
 
 ## Storage and backups
 
@@ -193,8 +221,8 @@ Model uploads, downloads and device commands use your authenticated Home Assista
 ## Help and development
 
 - [Report a bug or request a feature](https://github.com/astritzeqiri/ha-3d-rooms/issues)
-- [Releases and update notes](https://github.com/astritzeqiri/ha-3d-rooms/releases)
-- [Adjustable desk model specification](docs/adjustable-desk.md)
+- [Releases and update notes](https://github.com/astritzeqiri/ha-3d-rooms/releases) · [changelog](rooms-app/CHANGELOG.md)
+- [Preparing a room package](docs/room-packages.md) · [portable placement and floors](docs/house-placement.md) · [adjustable desk specification](docs/adjustable-desk.md)
 - [Development and contribution guide](AGENTS.md)
 - [Validation records](VALIDATION.md)
 
@@ -203,66 +231,3 @@ Model uploads, downloads and device commands use your authenticated Home Assista
 Thanks to [Wes Bos and 3D Model Anything](https://github.com/wesbos/3d-model-anything) for the capture app, reconstruction workflow and viewer foundation used to create our rooms. See the upstream repository for its code license and [demo asset terms](https://github.com/wesbos/3d-model-anything/blob/main/ASSETS-LICENSE.md).
 
 Licensed under the [MIT license](LICENSE). See [third-party notices](THIRD_PARTY_NOTICES.md) for upstream attribution and asset terms.
-
-### Preview a dashboard view
-
-Choose **Preview in dashboard** while editing a view or on its saved-view card. Preview unsaved settings at Desktop or Phone card widths, then close with × or Escape. Device controls are live. **Show title on card** hides the header while retaining the saved view name. New views start without a header; existing views retain their setting. Linked cards follow changes unless overridden in Home Assistant’s card editor.
-
-### Dashboard views gallery
-
-Open the top-level **Dashboard views** workspace to browse every saved view across all houses, floors and rooms. Search by view or space name, filter by space type, or choose **New view** or **Import**. One creator lets you choose Whole house, A floor, or A room, then frame the live preview. **Change space** retains the view ID, name, height and linked dashboard cards while resetting camera framing and device presentation. **Back to views** returns to the global gallery. **My home** contains imports, room setup, devices and house settings. Existing saved views appear automatically; no migration or re-upload is needed. Arbitrary combinations of rooms are not part of this first version. House, floor and room views all show device controls and support individual button presentation. Entity connections follow their source rooms; floor views include the controls in that floor.
-
-## Editing device icons
-
-### Room icons (Devices tab)
-
-Open a room's **Devices** tab. The model shows each device's icon, coloured by its state. Drag an icon onto a visible surface to move it, or click it and choose **Edit icon** to pick any Home Assistant icon, including your own icon sets. **Position → Reset** puts it back where the model placed it. Changes save at once and become the starting point for dashboard cards, house and floor views and every dashboard view. Pointing at a device in the list highlights its icon, and clicking an icon opens its row.
-
-### Busy rooms in house views
-
-A room with many devices can crowd a house or floor card. Turn on **Room settings → Group this room's icons in house views** to show them as one chip with the room name when they overlap. Tap the chip to see the icons in their real places. It is off by default.
-
-### Icons in one dashboard view
-
-Create or edit a view under **Dashboard views**. A view starts from the room icons and can move an icon or pick another one for itself. Click a device icon to open its compact fan-out actions:
-
-- **Eye** hides or shows that control in this view. Hidden controls stay faded and selectable in the editor with a **Hidden** pill; dashboard cards and previews omit them.
-- **Edit icon** changes the state label, size and whether the control appears on the room or below it. The Visible checkbox stays synchronized with the eye.
-- **Position** offers click-to-place, reset and precise X/Y/Z offsets in metres. You can also drag an icon directly onto a visible model surface. Escape cancels an unfinished placement.
-- **Undo** steps through up to 50 icon edits for the selected device during the current editing session. Opening another view resets this history.
-
-Click outside the icons/tools to close the fan and clear selection. The device picker under **Device controls** provides another way to select a control. Editing icons never sends device commands; **Preview in dashboard** uses live controls. Save the view to retain presentation and position changes. Linked cards inherit saved marker settings unless explicitly overridden.
-
-Camera framing is retained when reopening, resizing and saving views. Saved views now include a bounded JPEG thumbnail shared across gallery browsers; older views gain one on their next save. Phone/tablet layouts keep preview actions accessible while scrolling.
-
-## Updating to 0.24.0
-
-Update 3D Rooms in HACS, restart Home Assistant itself, then refresh your browser. Full-house ZIP imports, the compact house workspace and AC state/visual fixes are included. Existing rooms, mappings and saved views remain compatible; no re-upload is required.
-
-## House management (local preview)
-
-Under a house’s Settings, use **Replace house** to preview a full-house ZIP before applying it, or **Delete house** to review all affected rooms and saved views. Replacement matches rooms by exported room ID, then by name (rooms re-added in the house app get a new ID), and device mappings by control ID, then by name and type. The preview shows a review for each room: pick which existing room it replaces, see which mappings are kept or not matched, and change any device before confirming. Matched rooms keep their name, area, compatible mappings, light groups and hidden devices. Missing rooms and their saved views are removed; other houses and Home Assistant devices are unchanged. Dashboard cards referring to removed content need manual updates.
-
-**Dashboard views → New view** is the shared creator for houses, floors and rooms. The editor previews the chosen space and saves that scope. The top-right selector changes the main 3D view; the sidebar floor filter only filters the room list.
-
-Device controls include **Defaults for this view**: set visibility, state labels, size and display position once for the view. Individual device settings override only the fields you change. **Use view defaults** removes appearance overrides and retains the device’s position. Existing saved customizations remain intact.
-
-## Auto height and fullscreen (local preview)
-
-In the Home Assistant card editor, choose **Height → Auto · fill available screen**. Use a single-card **Panel** view to fill both width and the space below Home Assistant’s header. YAML accepts `height: auto`; numeric heights from 180 to 1600 remain supported. This is a per-card layout choice and does not change the saved view or camera.
-
-The fullscreen button appears in browsers that support the Fullscreen API. Exit using the same button or the browser’s Escape action. Opening a device dialog exits fullscreen so Home Assistant dialogs remain accessible. Auto height includes the title and device tray; long trays scroll within the card.
-
-## Hide a device everywhere in 3D Rooms
-
-Open its source room → **Devices → Hide device**. The device's controls and markers disappear from room, house and floor views, dashboard cards, device trays and the view editor. Per-view visibility and icon defaults cannot reveal it. A minimal Hidden row remains only in the room's Devices tab; choose **Show device** there to restore it.
-
-Grouped desk controls hide together. Entity mappings, saved views and the physical room model remain intact; Home Assistant entities and automations are unaffected. Visibility persists across restarts, room exports and compatible room/house replacements.
-
-## Group modeled lights
-
-In **My home → room → Devices**, choose **Group lights**. Name the group, select at least two modeled lights from that room, and choose the one existing Home Assistant light (or switch) entity that controls them. You can connect it later. This does not create a Home Assistant entity.
-
-The group appears as one control in the device list and saved room/floor/house views. Each original fixture keeps its geometry and light source, and follows the shared entity's state. The group marker sits at the center of its visible fixtures. Use the group's settings button to change its name, members or entity. **Ungroup** restores individual controls and their previous connections. A light can belong to one group at a time. Groups persist through restarts, room exports and compatible model replacement.
-
-On a room’s Devices tab, click a device bubble to open its settings. Grouped lights open the group editor.
