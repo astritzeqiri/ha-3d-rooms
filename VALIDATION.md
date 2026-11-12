@@ -1,3 +1,13 @@
+# 0.43.1 — fix "Load failed" when reopening the home-screen app, 2026-11-13
+
+Released as 0.43.1, based on 0.43.0. Reported on an iPhone home-screen app: the first open worked, a reopened app showed "Load failed" and Retry failed the same way until Reload model was used. Cause: 0.43.0 stored rooms as Blobs in IndexedDB, and Safari can return a stored Blob whose data is gone after the app restarts.
+
+- Rooms are now stored as raw bytes (`data`, `size`, `type`) and read back into a fresh in-memory Blob; Blob entries from 0.43.0, wrong-sized entries and unreadable ones are dropped and downloaded once more. A storage read that does not answer within 2 s downloads instead; connections close on `versionchange`. If a room still fails to open from a stored copy, the card downloads all rooms again once by itself before showing an error.
+- Frontend: 347 tests pass (new: Blob/damaged entries dropped, stuck store times out, the card's one fresh retry); Prettier and the build pass. Python: the integration tests pass, with the native Home Assistant tests skipped on the host.
+- Checked with the extracted 0.43.1 integration ZIP's frontend, served on a side port and mounted on the local Home Assistant origin (`localhost:18123`, which has its own browser storage; the shared instance had another session's preview staged and was not restaged). Five-room house view on the full-screen page: (1) over five Blob entries written by 0.43.0, all were dropped, 5 rooms downloaded and stored as data, and the house opened; (2) the revisit opened with 0 downloads; (3) with one stored room overwritten by same-sized garbage, the parse failed, the card downloaded the rooms again by itself (no Retry), the house opened and all 5 stored copies were valid GLBs again.
+- During checks, a first version of the retry never ran (a `return` inside `catch` skipped it); fixed and covered by a test before release.
+- Not tested: a real iPhone home-screen app, where the original bug happens.
+
 # 0.43.0 — rooms kept on the device, reload menu, extra entities follow view defaults, 2026-11-13
 
 Released as 0.43.0, based on 0.42.0. Includes the extra-entity defaults change from the "Custom entities on HACS dashboard" session.

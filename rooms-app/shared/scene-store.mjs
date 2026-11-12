@@ -11,6 +11,21 @@
 const DB_NAME = "three-d-rooms";
 const STORE = "scenes";
 export const MAX_STORED_BYTES = 512 * 1024 * 1024;
+/** A read slower than this downloads the room instead of waiting. */
+export const STORE_READ_TIMEOUT = 2000;
+
+function withTimeout(promise, ms) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error("Model storage timed out.")),
+        ms,
+      );
+    }),
+  ]).finally(() => clearTimeout(timer));
+}
 
 export function storedSceneKey(user, model, variant) {
   return `${user || "user"}:${model.id}:${variant}`;
@@ -31,7 +46,16 @@ export function indexedSceneStore(idb = globalThis.indexedDB) {
     (opening ??= new Promise((resolve, reject) => {
       const req = idb.open(DB_NAME, 1);
       req.onupgradeneeded = () => req.result.createObjectStore(STORE);
-      req.onsuccess = () => resolve(req.result);
+      req.onsuccess = () => {
+        const db = req.result;
+        // Let another page upgrade or delete the database instead of
+        // leaving it waiting on this connection.
+        db.onversionchange = db.onclose = () => {
+          db.close();
+          opening = null;
+        };
+        resolve(db);
+      };
       req.onerror = () => reject(req.error);
       req.onblocked = () => reject(new Error("Model storage is blocked."));
     }).catch((error) => {
@@ -80,19 +104,49 @@ function sceneStore() {
   return current;
 }
 
-/** The stored model when it is still the given revision, else `null`. */
-export async function readStoredScene(key, revision) {
+/**
+ * The stored model when it is still the given revision, else `null`.
+ * Entries hold the raw bytes, not a Blob: Safari can hand back a stored
+ * Blob whose file is gone once the app restarts, which then fails to load
+ * ("Load failed"). Anything unreadable or the wrong size is dropped, so the
+ * room downloads again instead.
+ */
+export async function readStoredScene(
+  key,
+  revision,
+  timeout = STORE_READ_TIMEOUT,
+) {
   const store = sceneStore();
   if (!store) return null;
+  let entry;
   try {
-    const entry = await store.get(key);
-    if (!entry || entry.revision !== revision || !(entry.blob instanceof Blob))
-      return null;
-    // Remember the use for eviction; failing to does not matter.
-    store.put(key, { ...entry, usedAt: Date.now() }).catch(() => {});
-    return entry.blob;
+    // Safari can leave IndexedDB hanging; never let that hold up a room.
+    entry = await withTimeout(store.get(key), timeout);
   } catch {
     return null;
+  }
+  if (!entry || entry.revision !== revision) return null;
+  const data = entry.data;
+  if (
+    !(data instanceof ArrayBuffer) ||
+    !data.byteLength ||
+    data.byteLength !== entry.size
+  ) {
+    // An older (Blob) or damaged copy: forget it.
+    store.delete(key).catch?.(() => {});
+    return null;
+  }
+  // Remember the use for eviction; failing to does not matter.
+  store.put(key, { ...entry, usedAt: Date.now() }).catch?.(() => {});
+  return new Blob([data], { type: entry.type || "model/gltf-binary" });
+}
+
+/** Forget a stored model, e.g. when it could not be shown. */
+export async function forgetStoredScene(key) {
+  try {
+    await sceneStore()?.delete(key);
+  } catch {
+    /* Nothing stored, or storage unavailable. */
   }
 }
 
@@ -108,19 +162,21 @@ export async function storeScene(
   try {
     // Ask once that the browser keeps it (home-screen apps usually may).
     globalThis.navigator?.storage?.persist?.().catch?.(() => {});
+    const data = await blob.arrayBuffer();
     const entries = (await store.entries()).filter(([id]) => id !== key);
     let total = entries.reduce((sum, [, e]) => sum + (e?.size || 0), 0);
     entries.sort(([, a], [, b]) => (a?.usedAt || 0) - (b?.usedAt || 0));
     for (const [id, entry] of entries) {
-      if (total + blob.size <= limit) break;
+      if (total + data.byteLength <= limit) break;
       await store.delete(id);
       total -= entry?.size || 0;
     }
     const now = Date.now();
     await store.put(key, {
       revision,
-      blob,
-      size: blob.size,
+      data,
+      type: blob.type || "model/gltf-binary",
+      size: data.byteLength,
       savedAt: now,
       usedAt: now,
     });

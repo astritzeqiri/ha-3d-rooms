@@ -1036,3 +1036,26 @@ test("the Edit button opens the saved view in the manager, for administrators on
   card._config.model = "Bad Id!";
   assert.equal(card._editorURL(), null);
 });
+
+test("a room that fails to open from the device copy is downloaded once more", async () => {
+  const source = await readFile(
+    new URL("../dashboard/card.js", import.meta.url),
+    "utf8",
+  );
+  const load = source.slice(
+    source.indexOf("  async _load({ fresh = false } = {}) {"),
+    source.indexOf("  _thumbnailKey() {"),
+  );
+  assert.match(load, /gotScenes = true;/);
+  assert.match(
+    load,
+    /if \(gotScenes && !fresh && !this\._config\.preview_url\)/,
+  );
+  assert.match(load, /if \(retryFresh\) await this\._refreshModels\(\);/);
+  // The retry must not be skipped by a return in the catch block.
+  const handler = load.slice(
+    load.indexOf("retryFresh = true;"),
+    load.indexOf("} finally {"),
+  );
+  assert.doesNotMatch(handler, /return;/);
+});

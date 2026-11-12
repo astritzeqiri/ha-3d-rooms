@@ -1,3 +1,8 @@
+## 0.43.1
+
+- **Fixed "Load failed" when reopening the iPhone home-screen app.** In 0.43.0 the stored rooms were saved as files that Safari can lose when the app restarts, so a reopened app could show "Load failed", and Retry failed the same way until **Reload model** was used. Rooms are now stored as plain data and checked when read; copies saved by 0.43.0 are dropped and downloaded once more. If a room still cannot be opened from its stored copy, the card downloads it again by itself instead of showing an error.
+- **A busy or stuck device store never holds up a room.** If the browser's storage does not answer within two seconds, the room downloads instead of waiting.
+
 ## 0.43.0
 
 - **Rooms open instantly after the first visit.** Downloaded room models are now kept on the device (in the browser's storage, so it also works for the full-screen page saved to the iPhone home screen and over plain-HTTP Home Assistant). Opening a card or the full-screen page again — even after closing the app, or on a slow mobile connection — uses the stored copy instead of downloading the room again. A room that was replaced or re-exported downloads once and replaces its stored copy; up to 512 MB is kept, dropping the least recently opened rooms first.

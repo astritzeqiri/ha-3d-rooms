@@ -128,3 +128,42 @@ test("a failing or missing store never breaks loading", async (t) => {
   await sceneBlob(hass(), { id: "x", sceneRevision: "1" });
   assert.equal(calls.length, 2);
 });
+
+test("Blob entries from 0.43.0 and damaged copies are dropped and downloaded again", async (t) => {
+  // Safari can return a stored Blob whose file is gone after a restart.
+  const store = memoryStore();
+  setSceneStore(store);
+  t.after(() => setSceneStore(null));
+  const key = storedSceneKey("u1", { id: "hall" }, "phone");
+  store.map.set(key, { revision: "r1", blob: new Blob(["gone"]), size: 4 });
+  assert.equal(await readStoredScene(key, "r1"), null);
+  assert.equal(store.map.has(key), false);
+  store.map.set(key, { revision: "r1", data: new ArrayBuffer(3), size: 9 });
+  assert.equal(await readStoredScene(key, "r1"), null);
+  const { calls, hass } = counting();
+  await sceneBlob(hass(), { id: "hall", sceneRevision: "r1" }, "phone");
+  await settle();
+  assert.equal(calls.length, 1);
+  const entry = store.map.get(key);
+  assert.ok(entry.data instanceof ArrayBuffer);
+  assert.equal(entry.size, 11);
+  // Each read hands out a fresh in-memory Blob of the stored bytes.
+  const blob = await sceneBlob(
+    hass(),
+    { id: "hall", sceneRevision: "r1" },
+    "phone",
+  );
+  assert.equal(await blob.text(), "model bytes");
+  assert.equal(calls.length, 1);
+});
+
+test("a stuck store is given up on and the room downloads", async (t) => {
+  setSceneStore({
+    get: () => new Promise(() => {}),
+    put: () => new Promise(() => {}),
+    delete: async () => {},
+    entries: () => new Promise(() => {}),
+  });
+  t.after(() => setSceneStore(null));
+  assert.equal(await readStoredScene("k", "1", 20), null);
+});

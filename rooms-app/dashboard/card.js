@@ -607,6 +607,10 @@ export class ThreeDRoomsCard extends HTMLElement {
     bar.hidden = true;
     // A saved view's thumbnail stands in for the room while it downloads.
     if (!this._view) this._showLoadingPreview(this._cachedThumbnail());
+    // A room that cannot be shown from a copy kept on the device is
+    // downloaded once more before an error is shown.
+    let gotScenes = false,
+      retryFresh = false;
     try {
       if (this._sourceConfig?.saved_view) {
         const components = await this._hass.callWS({
@@ -666,6 +670,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         release?.();
         return;
       }
+      gotScenes = true;
       bar.hidden = true;
       this._message.querySelector("span").textContent =
         "Preparing the 3D view…";
@@ -783,11 +788,16 @@ export class ThreeDRoomsCard extends HTMLElement {
         }, 60000);
     } catch (error) {
       if (generation !== this._generation) return;
-      bar.hidden = true;
-      this._message.querySelector("span").textContent =
-        error.message || "Could not display this model.";
-      this._message.querySelector("button").hidden = false;
-      this._message.hidden = false;
+      if (gotScenes && !fresh && !this._config.preview_url) {
+        console.warn("3D Rooms: reloading the room after an error", error);
+        retryFresh = true;
+      } else {
+        bar.hidden = true;
+        this._message.querySelector("span").textContent =
+          error.message || "Could not display this model.";
+        this._message.querySelector("button").hidden = false;
+        this._message.hidden = false;
+      }
     } finally {
       if (generation === this._generation) {
         this._loading = false;
@@ -796,6 +806,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         this._recheckAfterLoad();
       }
     }
+    if (retryFresh) await this._refreshModels();
   }
   _thumbnailKey() {
     return `three-d-rooms:thumbnail:${this._sourceConfig?.saved_view}`;
