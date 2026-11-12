@@ -1,6 +1,7 @@
 /** Keep private room bytes within the current HA connection, shared by cards/panel.
  * Bound retained data; failed loads never become a cached result.
  */
+import { readStoredScene, storedSceneKey, storeScene } from "./scene-store.mjs";
 const sessions = new WeakMap();
 const MAX_BYTES = 96 * 1024 * 1024;
 const MAX_AGE = 10 * 60 * 1000;
@@ -42,8 +43,16 @@ async function readBlob(response, report) {
  * `variant` is "original", "full" or "phone"; the server falls back to the upload.
  * `onProgress({ loaded, total })` follows the download, also when another
  * card already started it.
+ * A copy kept on the device (scene-store) is used when it is still the
+ * current revision; `{ fresh: true }` skips it, downloads and stores anew.
  */
-export async function sceneBlob(hass, model, variant = "original", onProgress) {
+export async function sceneBlob(
+  hass,
+  model,
+  variant = "original",
+  onProgress,
+  { fresh = false } = {},
+) {
   if (hass.user?.is_admin === false)
     throw new Error("Administrator access is required.");
   const owner = sceneOwner(hass);
@@ -65,17 +74,27 @@ export async function sceneBlob(hass, model, variant = "original", onProgress) {
   }
   entry = { bytes: 0, expires: now + MAX_AGE, listeners: new Set() };
   if (onProgress) entry.listeners.add(onProgress);
+  const report = (progress) => {
+    entry.progress = progress;
+    for (const listener of entry.listeners || []) listener(progress);
+  };
+  const stored = storedSceneKey(hass.user?.id, model, variant);
   entry.promise = (async () => {
-    const path = `/api/three_d_rooms/models/${encodeURIComponent(model.id)}/scene.glb?v=${encodeURIComponent(revision)}&variant=${encodeURIComponent(variant)}`;
-    const response = await hass.fetchWithAuth(path);
-    if (!response.ok)
-      throw new Error(
-        "Could not download your room. Check your login and the 3D Rooms integration.",
-      );
-    const blob = await readBlob(response, (progress) => {
-      entry.progress = progress;
-      for (const listener of entry.listeners) listener(progress);
-    });
+    let blob = fresh ? null : await readStoredScene(stored, revision);
+    if (blob) report({ loaded: blob.size, total: blob.size });
+    else {
+      const path = `/api/three_d_rooms/models/${encodeURIComponent(model.id)}/scene.glb?v=${encodeURIComponent(revision)}&variant=${encodeURIComponent(variant)}`;
+      // A reload asks the browser not to answer from its HTTP cache either.
+      const response = await (fresh
+        ? hass.fetchWithAuth(path, { cache: "reload" })
+        : hass.fetchWithAuth(path));
+      if (!response.ok)
+        throw new Error(
+          "Could not download your room. Check your login and the 3D Rooms integration.",
+        );
+      blob = await readBlob(response, report);
+      storeScene(stored, revision, blob);
+    }
     entry.listeners = null;
     entry.bytes = blob.size;
     let size = [...cache.values()].reduce((sum, item) => sum + item.bytes, 0);

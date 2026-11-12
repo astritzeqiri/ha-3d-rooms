@@ -511,7 +511,7 @@ test("loads keep the update subscription instead of dropping it", async () => {
     "utf8",
   );
   const load = source.slice(
-    source.indexOf("  async _load() {"),
+    source.indexOf("  async _load({ fresh = false } = {}) {"),
     source.indexOf("  /** Rooms changed: check now"),
   );
   // Only previews/add-on configurations drop it; normal loads reuse it.

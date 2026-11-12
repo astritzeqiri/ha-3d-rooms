@@ -118,6 +118,7 @@ function harness(preview, onClose, modelConfig = {}, requestScope) {
           extra = value?._entities;
         },
         close() {},
+        paint() {},
         read: () => extra,
       };
     },

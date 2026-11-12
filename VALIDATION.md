@@ -1,3 +1,11 @@
+# 0.43.0 — rooms kept on the device, reload menu, extra entities follow view defaults, 2026-11-13
+
+Released as 0.43.0, based on 0.42.0. Includes the extra-entity defaults change from the "Custom entities on HACS dashboard" session.
+
+- Frontend: 344 tests pass, including new tests for the on-device model store (stored copy used across HA connections, a new revision replacing it, Reload model skipping it with `cache: "reload"`, the size limit and least-recently-opened eviction, a failing or missing store never breaking a load) and for extra entities following the view's device defaults; Prettier and the build pass. Python: the integration tests pass, with the native Home Assistant tests skipped on the host.
+- Checked with the extracted 0.43.0 integration ZIP in the local Home Assistant Core (singleton container, built-in browser), on the full-screen page for the five-room house view: with the store empty, the first visit downloaded and stored 5 rooms; on revisit there were 0 `scene.glb` requests. Before packaging, the same build showed the Reload page / Reload model menu next to the button, and Reload model downloaded all 5 rooms again and redrew the house. On the "Extra entities test" view (device defaults: no state label) both extra entities showed no state label.
+- Not tested: an iPhone home-screen app (the main target of the stored copies), Reload page (a plain `location.reload()`), the extra-entity "Use view defaults" button in a browser (unit tests only).
+
 # 0.42.0 — extra entities on dashboard views, cover pop-up on the full-screen page, 2026-11-12
 
 Released as 0.42.0, based on 0.41.4.

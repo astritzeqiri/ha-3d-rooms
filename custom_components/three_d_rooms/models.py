@@ -479,6 +479,8 @@ def validate_custom_entities(value):
             raise ValueError("Showing the state must be true or false.")
         if "visible" in options and not isinstance(options["visible"], bool):
             raise ValueError("Visibility must be true or false.")
+        # Size, visibility and state label override the view's device defaults,
+        # so they are kept whenever the entity sets them.
         entry = {"entity": entity, "position": [float(v) for v in position]}
         if options.get("room"):
             entry["room"] = options["room"]
@@ -487,12 +489,11 @@ def validate_custom_entities(value):
         for icon_key in ("icon", "icon_off"):
             if options.get(icon_key):
                 entry[icon_key] = options[icon_key]
-        if size != 32:
+        if "size" in options:
             entry["size"] = size
-        if options.get("show_state") is False:
-            entry["show_state"] = False
-        if options.get("visible") is False:
-            entry["visible"] = False
+        for flag in ("show_state", "visible"):
+            if flag in options:
+                entry[flag] = options[flag]
         clean[key] = entry
     return clean
 

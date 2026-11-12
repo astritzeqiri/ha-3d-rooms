@@ -64,6 +64,7 @@ export function initDashboardEditor({
     entities,
     resolveIcon,
     onChange: () => update(),
+    defaults: () => markerEditor.read()._defaults,
   });
   // Device marker settings plus the view's room buttons (`_rooms`) and extra
   // entities (`_entities`).
@@ -112,6 +113,8 @@ export function initDashboardEditor({
     );
   function update() {
     if (panel.hidden || !current) return;
+    // Extra entities follow the view's device defaults.
+    extraEntities.paint();
     $("dashboard-error").textContent = "";
     try {
       $("dashboard-yaml").value = componentYaml(read());

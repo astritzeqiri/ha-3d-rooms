@@ -13,7 +13,8 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
     return {
       preview: false,
       // `onProgress({ index, count, loaded, total })` follows the room downloads.
-      async load({ onProgress } = {}) {
+      // `fresh` skips the rooms kept on this device and downloads them again.
+      async load({ onProgress, fresh = false } = {}) {
         const models = await hass.callWS({
           type: "three_d_rooms/request",
           operation: "models",
@@ -52,7 +53,7 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
                   key: sceneAssetKey(source, variant),
                 },
                 url: URL.createObjectURL(
-                  await sceneBlob(hass, source, variant, report),
+                  await sceneBlob(hass, source, variant, report, { fresh }),
                 ),
               });
             }
@@ -76,6 +77,7 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
             variant,
             onProgress &&
               ((progress) => onProgress({ ...progress, index: 0, count: 1 })),
+            { fresh },
           ),
         );
         return {

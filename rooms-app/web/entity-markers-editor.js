@@ -4,6 +4,7 @@
 // for the ring of round actions (undo, edit icon, position, hide, remove).
 // Positions are in the view's own metres, as the card uses them.
 import {
+  CUSTOM_ENTITY_LOOK_KEYS,
   customEntityStateWords,
   CUSTOM_ENTITY_LIMIT,
   CUSTOM_ENTITY_SIZES,
@@ -99,6 +100,9 @@ export function initEntityMarkersEditor({
   entities = () => [],
   resolveIcon,
   onChange,
+  // The view's device defaults (`markers._defaults`), which extra entities
+  // follow unless they set their own size, visibility or state label.
+  defaults = () => ({}),
 }) {
   let items = {},
     owner,
@@ -215,6 +219,15 @@ export function initEntityMarkersEditor({
     tools?.sync?.();
     onChange();
   }
+  // Size, visibility and state label: a value equal to the view's default is
+  // not stored, so the entity keeps following the defaults.
+  function setLook(id, key, value) {
+    const inherited = customEntitySettings({}, defaults())[key];
+    change(id, (item) => {
+      if (value === inherited) delete item[key];
+      else item[key] = value;
+    });
+  }
   function setOption(id, key, value) {
     change(id, (item) => {
       if (value === undefined || value === "") delete item[key];
@@ -270,7 +283,7 @@ export function initEntityMarkersEditor({
       }
     for (const [id, item] of Object.entries(items)) {
       const button = buttonFor(id),
-        settings = customEntitySettings(item),
+        settings = customEntitySettings(item, defaults()),
         point = owner.screenPoint(item.position),
         look = customEntityState(stateOf(item.entity));
       button.hidden =
@@ -301,7 +314,7 @@ export function initEntityMarkersEditor({
     if (inspector.hidden) return;
     const width = viewport.clientWidth,
       height = viewport.clientHeight,
-      size = customEntitySettings(items[selected]).size,
+      size = customEntitySettings(items[selected], defaults()).size,
       x = parseFloat(button.style.left) + size / 2,
       y = parseFloat(button.style.top) + size / 2;
     inspector.style.left = x + "px";
@@ -341,7 +354,7 @@ export function initEntityMarkersEditor({
     const id = selected;
     const item = id && items[id];
     if (!item) return;
-    const settings = customEntitySettings(item);
+    const settings = customEntitySettings(item, defaults());
     tools = document.createElement("details");
     tools.className = "marker-device-settings";
     tools.open = true;
@@ -357,7 +370,7 @@ export function initEntityMarkersEditor({
         <label class="entity-marker-name-field">Name<input type="text" maxlength="80" data-field="name" autocomplete="off"></label>
         <div class="marker-icon-field" data-icon-slot="icon"><span class="marker-field-label" data-slot-label></span><button type="button" class="marker-icon-current" data-icon-open="icon" aria-expanded="false"><span class="marker-icon-swatch" aria-hidden="true"><svg viewBox="0 0 24 24"></svg></span><span class="marker-icon-name"></span><span class="marker-icon-change">Change</span></button></div>
         <div class="marker-icon-field" data-icon-slot="icon_off"><span class="marker-field-label" data-slot-label></span><button type="button" class="marker-icon-current" data-icon-open="icon_off" aria-expanded="false"><span class="marker-icon-swatch" aria-hidden="true"><svg viewBox="0 0 24 24"></svg></span><span class="marker-icon-name"></span><span class="marker-icon-change">Change</span></button></div>
-        <div class="marker-tool-checks"><label class="marker-check"><input type="checkbox" data-field="visible">Visible</label><label class="marker-check"><input type="checkbox" data-field="show_state">State label</label></div>
+        <p class="muted small" data-inheritance></p><button type="button" data-inherit>Use view defaults</button><div class="marker-tool-checks"><label class="marker-check"><input type="checkbox" data-field="visible">Visible</label><label class="marker-check"><input type="checkbox" data-field="show_state">State label</label></div>
         <label>Size<select data-field="size">${SIZE_OPTIONS.map(([v, t]) => `<option value="${v}">${t}</option>`).join("")}</select></label>
         ${ICON_PICKER_HTML}
       </div>
@@ -394,7 +407,12 @@ export function initEntityMarkersEditor({
     const sync = () => {
       const now = items[id];
       if (!now) return;
-      const look = customEntitySettings(now);
+      const look = customEntitySettings(now, defaults());
+      const own = CUSTOM_ENTITY_LOOK_KEYS.some((key) => now[key] !== undefined);
+      $("[data-inheritance]").textContent = own
+        ? "Custom settings for this entity"
+        : "Using view defaults";
+      $("[data-inherit]").disabled = !own;
       $('[data-action="undo"]').disabled = !history.get(id)?.length;
       const eye = $('[data-action="eye"]');
       eye.title = look.visible ? "Hide icon" : "Show icon";
@@ -436,10 +454,10 @@ export function initEntityMarkersEditor({
     place.onclick = () => toggle(position, place);
     $('[data-action="undo"]').onclick = () => undo(id);
     $('[data-action="eye"]').onclick = () =>
-      setOption(
+      setLook(
         id,
         "visible",
-        customEntitySettings(items[id]).visible ? false : undefined,
+        !customEntitySettings(items[id], defaults()).visible,
       );
     $('[data-action="remove"]').onclick = () => remove(id);
     // Typing a name is one undo step per pause, not per letter.
@@ -460,18 +478,13 @@ export function initEntityMarkersEditor({
     name.onkeydown = (event) => {
       if (event.key === "Enter") event.preventDefault();
     };
-    visible.onchange = () =>
-      setOption(id, "visible", visible.checked ? undefined : false);
-    state.onchange = () =>
-      setOption(id, "show_state", state.checked ? undefined : false);
-    size.onchange = () => {
-      const value = Number(size.value);
-      setOption(
-        id,
-        "size",
-        value === CUSTOM_ENTITY_SIZES.standard ? undefined : value,
-      );
-    };
+    visible.onchange = () => setLook(id, "visible", visible.checked);
+    state.onchange = () => setLook(id, "show_state", state.checked);
+    size.onchange = () => setLook(id, "size", Number(size.value));
+    $("[data-inherit]").onclick = () =>
+      change(id, (it) => {
+        for (const key of CUSTOM_ENTITY_LOOK_KEYS) delete it[key];
+      });
     $("[data-move]").onclick = () => {
       vertical = !vertical;
       sync();
@@ -663,7 +676,7 @@ export function initEntityMarkersEditor({
     const list = host.querySelector(".entity-cards");
     if (!list) return;
     const rows = Object.entries(items).map(([id, item]) => {
-      const settings = customEntitySettings(item),
+      const settings = customEntitySettings(item, defaults()),
         look = customEntityState(stateOf(item.entity));
       const row = document.createElement("li");
       row.className = "entity-card";
@@ -886,7 +899,12 @@ export function initEntityMarkersEditor({
       refresh();
     },
     close,
-    paint: refresh,
+    /** Redraw, e.g. after the view's device defaults changed. */
+    paint() {
+      refresh();
+      renderList();
+      tools?.sync?.();
+    },
     /** The view's `_entities` value, or undefined when there are none. */
     read() {
       const clean = validateCustomEntities(items);

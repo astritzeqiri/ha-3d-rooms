@@ -207,7 +207,7 @@ Sometimes a dashboard still shows too much: Home Assistant’s sidebar and heade
 
 Home Assistant makes lighter copies of every room next to your upload (shared, smaller WebP textures), and phones download the one with smaller textures. For the biggest gain open the room → **Settings → Faster loading → Optimize for phones and desktops**: it compresses geometry and uses GPU-compressed (KTX2) textures, runs in your browser and also starts automatically after an upload. Your upload is never changed, and Export returns it.
 
-Cards render more lightly on phones. Add `quality: high` to keep full quality on a phone, or `quality: low` to use the light profile everywhere. Dashboard cards also reuse decoded models between tab switches within a Home Assistant session; **Reload models** clears that cache.
+Cards render more lightly on phones. Add `quality: high` to keep full quality on a phone, or `quality: low` to use the light profile everywhere. Downloaded rooms are kept on the device, so cards and the full-screen page open them again without downloading (a replaced room downloads once). Cards also reuse decoded models between tab switches within a Home Assistant session. **Reload models** downloads the rooms again and replaces the stored copies; on the full-screen page the reload button offers **Reload page** and **Reload model**.
 
 ## Update
 

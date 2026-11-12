@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  customEntitySettings,
   customEntityDefaultIcon,
   customEntityShown,
   customEntityState,
@@ -45,7 +46,13 @@ test("extra entities keep their entity, spot and non-default options", () => {
         size: 44,
         show_state: false,
       },
-      e3: { entity: "light.x", position: [0, 0, 0] },
+      // Set on the entity, so kept: they override the view's defaults.
+      e3: {
+        entity: "light.x",
+        position: [0, 0, 0],
+        size: 32,
+        show_state: true,
+      },
     },
   );
 });
@@ -196,7 +203,7 @@ test("an extra entity can be hidden without removing it", () => {
     }),
     {
       e1: { entity: "sensor.a", position: [0, 0, 0], visible: false },
-      e2: { entity: "sensor.b", position: [0, 0, 0] },
+      e2: { entity: "sensor.b", position: [0, 0, 0], visible: true },
     },
   );
   assert.throws(() =>
@@ -258,4 +265,28 @@ test("an extra entity may have its own icon for each look", async () => {
     }).active,
     false,
   );
+});
+
+test("extra entities follow the view's device defaults unless set themselves", () => {
+  const defaults = { size: 44, show_label: false, visible: true };
+  assert.deepEqual(customEntitySettings({ entity: "sensor.a" }, defaults), {
+    entity: "sensor.a",
+    size: 44,
+    show_state: false,
+    visible: true,
+  });
+  assert.deepEqual(
+    customEntitySettings(
+      { entity: "sensor.a", show_state: true, size: 24 },
+      defaults,
+    ),
+    { entity: "sensor.a", size: 24, show_state: true, visible: true },
+  );
+  assert.deepEqual(customEntitySettings({ entity: "sensor.a" }), {
+    entity: "sensor.a",
+    size: 32,
+    show_state: true,
+    visible: true,
+  });
+  assert.equal(customEntitySettings({}, { visible: false }).visible, false);
 });

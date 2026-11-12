@@ -12,8 +12,9 @@ const ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,79}$/;
 /**
  * `{ [id]: { entity, position, room?, name?, icon?, size?, show_state? } }`.
  * `position` is a point in the view's own metres; `room` is the house-view
- * room it belongs to, so it hides with that room; `show_state: false` hides
- * the state under the icon. Defaults are not stored.
+ * room it belongs to, so it hides with that room; `size`, `visible` and
+ * `show_state` override the view's device defaults (`_defaults`: size,
+ * visible, show_label) and are stored only when set on the entity itself.
  */
 export function validateCustomEntities(value) {
   if (
@@ -100,26 +101,31 @@ export function validateCustomEntities(value) {
       ...(name ? { name } : {}),
       ...(options.icon ? { icon: options.icon } : {}),
       ...(options.icon_off ? { icon_off: options.icon_off } : {}),
-      ...(options.size !== undefined &&
-      options.size !== CUSTOM_ENTITY_SIZES.standard
-        ? { size: options.size }
+      ...(options.size !== undefined ? { size: options.size } : {}),
+      ...(options.show_state !== undefined
+        ? { show_state: options.show_state }
         : {}),
-      ...(options.show_state === false ? { show_state: false } : {}),
-      ...(options.visible === false ? { visible: false } : {}),
+      ...(options.visible !== undefined ? { visible: options.visible } : {}),
     };
   }
   return clean;
 }
 
-/** Settings of one extra entity with the defaults filled in. */
-export function customEntitySettings(options = {}) {
+/**
+ * Settings of one extra entity: its own choices, else the view's device
+ * defaults (`markers._defaults`), else the standard look.
+ */
+export function customEntitySettings(options = {}, defaults = {}) {
   return {
-    size: CUSTOM_ENTITY_SIZES.standard,
-    show_state: true,
-    visible: true,
     ...options,
+    size: options.size ?? defaults?.size ?? CUSTOM_ENTITY_SIZES.standard,
+    show_state: options.show_state ?? defaults?.show_label ?? true,
+    visible: options.visible ?? defaults?.visible ?? true,
   };
 }
+
+/** Which of an entity's look settings are its own (not the view's defaults). */
+export const CUSTOM_ENTITY_LOOK_KEYS = ["visible", "show_state", "size"];
 
 /** A short new id that is not used yet. */
 export function newCustomEntityId(existing = {}) {
@@ -225,6 +231,7 @@ export function customEntityState(stateObj, format) {
  */
 export function customEntityShown(options, shownRooms) {
   if (options.visible === false) return false;
+  // `options` are the settings with the view's defaults applied.
   if (!options.room || !shownRooms) return true;
   return shownRooms.has(options.room);
 }

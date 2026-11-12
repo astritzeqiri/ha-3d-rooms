@@ -19,7 +19,7 @@ class CustomEntityTests(unittest.TestCase):
             "e1": {"entity": "sensor.hall_temp", "position": [1.0, 1.2, -2.0]},
             "e2": {"entity": "switch.fan", "position": [0.0, 0.0, 0.0], "room": "office", "name": "Fan",
                    "icon": "mdi:fan", "size": 44, "show_state": False},
-            "e3": {"entity": "light.x", "position": [0.0, 0.0, 0.0]},
+            "e3": {"entity": "light.x", "position": [0.0, 0.0, 0.0], "size": 32, "show_state": True},
         })
         self.assertEqual(clean["lamp"], {"size": 44})
         self.assertNotIn("_entities", models.validate_markers({"_entities": {}}))
@@ -48,7 +48,7 @@ class CustomEntityTests(unittest.TestCase):
             "e1": {"entity": "sensor.a", "position": [0, 0, 0], "visible": False},
             "e2": {"entity": "sensor.b", "position": [0, 0, 0], "visible": True}}})
         self.assertEqual(clean["_entities"]["e1"]["visible"], False)
-        self.assertNotIn("visible", clean["_entities"]["e2"])
+        self.assertEqual(clean["_entities"]["e2"]["visible"], True)
         with self.assertRaises(ValueError):
             models.validate_markers({"_entities": {"e1": {"entity": "sensor.a", "position": [0, 0, 0], "visible": "no"}}})
 
