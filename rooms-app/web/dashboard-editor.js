@@ -87,7 +87,10 @@ export function initDashboardEditor({
     applying = false,
     saved = false,
     savedSnapshot,
-    baseline;
+    baseline,
+    // What Reset changes returns to, and whether its confirmation shows.
+    resetTarget,
+    confirmingReset = false;
   const fields = ["heading", "tilt", "zoom"];
   const read = () =>
     validateComponent(
@@ -127,15 +130,42 @@ export function initDashboardEditor({
       $("dashboard-yaml").value &&
       JSON.stringify(read()) === savedSnapshot
     );
-    $("dashboard-save-state").textContent = unchanged
-      ? "Saved view"
-      : saved
-        ? "Unsaved changes"
-        : "Not saved yet";
+    // Nothing left to reset: leave the confirmation.
+    if (unchanged) confirmingReset = false;
+    const state = confirmingReset
+      ? "confirm"
+      : unchanged
+        ? "saved"
+        : saved
+          ? "changed"
+          : "new";
+    $("dashboard-save-state").textContent =
+      state === "confirm"
+        ? saved
+          ? "Reset to the last saved version?"
+          : "Reset to how this view started?"
+        : unchanged
+          ? "Saved view"
+          : saved
+            ? "Unsaved changes"
+            : "Not saved yet";
     // The sticky save bar shows at a glance whether there is work to save.
     const saveState = $("dashboard-save-state");
-    if (saveState.dataset)
-      saveState.dataset.state = unchanged ? "saved" : saved ? "changed" : "new";
+    if (saveState.dataset) {
+      saveState.dataset.state = state;
+      saveState.dataset.detail =
+        state === "confirm"
+          ? saved
+            ? "The view goes back to how it was last saved."
+            : "The view goes back to how it was when you opened it."
+          : "";
+    }
+    // Preview shows the saved view, so only once there is nothing unsaved.
+    $("preview-dashboard").hidden = !preview || state !== "saved";
+    $("reset-dashboard").hidden = state !== "changed" && state !== "new";
+    $("reset-cancel").hidden = state !== "confirm";
+    $("reset-confirm").hidden = state !== "confirm";
+    $("save-dashboard-component").hidden = state === "confirm";
     $("use-saved-view").hidden = !unchanged;
     $("save-dashboard-component").classList.toggle("primary", !unchanged);
   }
@@ -246,10 +276,21 @@ export function initDashboardEditor({
       reframe = false,
       baselineSnapshot,
       savedSnapshot: priorSavedSnapshot,
+      force = false,
+      // Reset: reload this view's settings without closing the editor, so
+      // the room keeps its canvas size and the saved camera applies exactly.
+      inPlace = false,
     } = {},
   ) {
-    if (!panel.hidden && !close()) return false;
-    beforeOpen();
+    inPlace &&= !panel.hidden;
+    if (!inPlace && !panel.hidden && !close({ force })) return false;
+    confirmingReset = false;
+    if (inPlace) {
+      markerEditor.close();
+      backgroundEditor.close();
+      roomButtons.close();
+      extraEntities.close();
+    } else beforeOpen();
     if (!scene()?.model) {
       toast("Wait for the room to finish loading.");
       return;
@@ -260,7 +301,8 @@ export function initDashboardEditor({
     panel.hidden = false;
     document.body.classList.add("dashboard-editing");
     // A library opened directly has never laid out its hidden room canvas.
-    if ((!component || reframe) && fromLibrary) scene().fitFloor?.();
+    if ((!component || reframe) && fromLibrary && !inPlace)
+      scene().fitFloor?.();
     current =
       component && !reframe
         ? structuredClone(component.layers[0])
@@ -294,7 +336,7 @@ export function initDashboardEditor({
           Math.round($("viewport").getBoundingClientRect().height),
         ),
       );
-    $("dashboard-advanced").open = false;
+    if (!inPlace) $("dashboard-advanced").open = false;
     scene().options.allowRotate = true;
     applying = true;
     Object.assign(scene().options, current);
@@ -311,6 +353,11 @@ export function initDashboardEditor({
     sync();
     baseline = baselineSnapshot || JSON.stringify(read());
     if (saved) savedSnapshot = priorSavedSnapshot || baseline;
+    // Reset returns to the last saved version, or to this starting point.
+    resetTarget = {
+      component: JSON.parse(saved ? savedSnapshot : baseline),
+      draft: !saved,
+    };
     update();
     $("dashboard-panel-title").textContent = saved
       ? "Edit saved view"
@@ -322,11 +369,11 @@ export function initDashboardEditor({
     history.replaceState(null, "", url);
     window.dispatchEvent(new CustomEvent("rooms-route-change"));
     if (saved) cachePreview();
-    $("dashboard-title").focus({ preventScroll: true });
+    if (!inPlace) $("dashboard-title").focus({ preventScroll: true });
     return true;
   }
 
-  $("preview-dashboard").hidden = !preview;
+  $("preview-dashboard").hidden = true;
   $("preview-dashboard").onclick = async () => {
     try {
       if (!$("dashboard-form").reportValidity()) return;
@@ -337,6 +384,26 @@ export function initDashboardEditor({
     } finally {
       $("preview-dashboard").focus({ preventScroll: true });
     }
+  };
+  // Reset changes asks first; Yes, reset reopens the last saved version
+  // (or, for a new view or draft, how it was when it was opened).
+  $("reset-dashboard").onclick = () => {
+    confirmingReset = true;
+    update();
+    $("reset-cancel").focus({ preventScroll: true });
+  };
+  $("reset-cancel").onclick = () => {
+    confirmingReset = false;
+    update();
+    $("reset-dashboard").focus({ preventScroll: true });
+  };
+  $("reset-confirm").onclick = () => {
+    if (busy || !resetTarget) return;
+    const { component, draft } = resetTarget;
+    confirmingReset = false;
+    const opened = open(structuredClone(component), { draft, inPlace: true });
+    if (opened) toast("Changes reset.");
+    else update();
   };
   $("dashboard-preset").onchange = () => {
     if (!$("dashboard-preset").value) return;
@@ -434,6 +501,8 @@ export function initDashboardEditor({
       syncFullscreen();
       savedSnapshot = JSON.stringify(snapshot);
       baseline = savedSnapshot;
+      resetTarget = { component: structuredClone(snapshot), draft: false };
+      confirmingReset = false;
       cachePreview();
       update();
       window.dispatchEvent(

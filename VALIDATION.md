@@ -1,3 +1,11 @@
+# 0.47.1 — reset changes and an in-place save bar, 2026-11-13
+
+Released as 0.47.1, based on 0.47.0. Frontend only: `web/dashboard-editor.js` (reset with confirmation, in-place reload, preview only when saved), `web/index.html` (reset buttons), `web/views-workspace.css` (save bar states; the page-wide banner and its page padding removed).
+
+- All frontend tests (two new reset tests), the format check and the build pass; host Python tests pass with native-only skips.
+- Shared local Home Assistant (Core 2026.11.0) with this package staged: on a saved view, edits showed Reset changes and hid Preview; Reset asked first; Cancel kept the edits; Yes, reset restored name, title switch and the exact camera (screenshots before and after match, canvas 1544×1452 throughout) without saving. In saved, unsaved and confirm states the save bar kept the same position and 94 px height and the 3D view did not move; at 375×812 the bar keeps 94 px with no horizontal scroll.
+- Not checked: the light theme and Safari.
+
 # 0.47.0 — camera pop-up, view card actions and editor skeleton, 2026-11-13
 
 Released as 0.47.0, based on 0.46.0. Frontend only: `dashboard/more-info*.mjs` (camera layout, stream cleanup), `web/components.js` and `web/views-workspace.css` (card actions, menu, skeleton), `web/index.html` (skeleton markup and an early opening flag).

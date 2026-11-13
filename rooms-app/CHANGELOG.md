@@ -1,3 +1,9 @@
+## 0.47.1
+
+- **Reset changes in the view editor.** With unsaved changes, the save bar offers **Reset changes** next to **Save view**. It asks first ("Reset to the last saved version?" with **Cancel** and **Yes, reset**), then puts the view back to its last save (or, for a new view or draft, to how it started) without closing the editor, so the room keeps its exact saved framing.
+- **A calmer save bar.** Unsaved changes no longer turn into an orange banner across the whole page that pushed the content around. The save bar stays at the bottom of the editor sidebar and is tinted instead, with the same height in every state.
+- **Preview only for saved views.** Preview in the save bar shows once the view is saved.
+
 ## 0.47.0
 
 - **Cameras on the full-screen page.** Tapping a camera (added as an extra entity) opens a wide pop-up with its live picture: HLS video where the browser plays it natively and the camera streams (Safari, iPad, iPhone), otherwise Home Assistant's MJPEG stream, which works for every camera. A live badge, Reconnect, Full screen and (for video) sound buttons sit on the picture; it reconnects by itself with the latest access token, and closing the pop-up ends the stream. Camera access tokens are never listed among the attributes.

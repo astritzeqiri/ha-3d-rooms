@@ -900,138 +900,86 @@ button:focus-visible {
   #save-dashboard-component {
   display: none;
 }
-/* Unsaved changes or a new view: the save bar leaves the sidebar and
-   becomes a solid banner across the bottom of the whole page. */
+/* Unsaved changes, a new view or the reset question: the same bar in the
+   same place, tinted with the accent, with the same two-button row as a
+   saved view, so nothing on the page moves when it changes. */
 .dashboard-panel
   .panel-save:has(
-    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+    #dashboard-save-state:is(
+      [data-state="changed"],
+      [data-state="new"],
+      [data-state="confirm"]
+    )
   ) {
-  position: fixed;
-  inset: auto 0 0 0;
-  z-index: 40;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 12px;
-  margin: 0;
-  padding: 14px max(24px, env(safe-area-inset-right))
-    max(14px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
-  border: 0;
-  border-radius: 0;
-  background: var(--accent);
-  color: var(--on-accent);
-  backdrop-filter: none;
-  box-shadow: 0 -10px 30px -8px rgb(0 0 0 / 0.55);
-  animation: save-bar-attention 320ms var(--ease);
-}
-/* Keep the end of the page reachable above the banner. */
-body:has(
-  #dashboard-panel:not([hidden])
-    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
-) {
-  padding-bottom: 96px;
-}
-#dashboard-save-state:is([data-state="changed"], [data-state="new"]) {
-  display: grid !important;
   grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 12px;
-  color: var(--on-accent);
-  font-size: 15px;
-  font-weight: 700;
+  gap: 8px 10px;
+  border-top-color: color-mix(in srgb, var(--accent) 60%, var(--line));
+  background: color-mix(in srgb, var(--accent) 13%, var(--surface));
 }
-#dashboard-save-state:is([data-state="changed"], [data-state="new"])::before {
-  grid-row: span 2;
-  width: 10px;
-  height: 10px;
-  background: var(--on-accent);
-  box-shadow: 0 0 0 5px rgb(255 255 255 / 0.25);
+#dashboard-save-state:is(
+  [data-state="changed"],
+  [data-state="new"],
+  [data-state="confirm"]
+) {
+  grid-column: 1 / -1;
+  color: var(--text);
+  font-weight: 600;
+}
+#dashboard-save-state:is(
+    [data-state="changed"],
+    [data-state="new"],
+    [data-state="confirm"]
+  )::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--glow);
   animation: save-dot-pulse 1.6s ease-in-out infinite;
 }
-#dashboard-save-state:is([data-state="changed"], [data-state="new"])::after {
-  font-size: 13px;
-  font-weight: 500;
-  opacity: 0.85;
+#dashboard-save-state[data-state="confirm"]::before {
+  background: var(--bad);
+  box-shadow: none;
+  animation: none;
 }
-#dashboard-save-state[data-state="changed"]::after {
-  content: "Save to update this view and every card that uses it.";
-}
-#dashboard-save-state[data-state="new"]::after {
-  content: "Save it to add this view to your dashboards.";
-}
-.panel-save:has(
-    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+.dashboard-panel
+  .panel-save:has(
+    #dashboard-save-state:is(
+      [data-state="changed"],
+      [data-state="new"],
+      [data-state="confirm"]
+    )
   )
   button {
   min-height: 44px;
-  padding: 10px 20px;
-  font-size: 14px;
+  border-radius: 999px;
+  padding-inline: 16px;
+  white-space: nowrap;
 }
-.panel-save:has(
-    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
-  )
-  #preview-dashboard {
-  grid-column: 2;
-  border-color: color-mix(in srgb, var(--on-accent) 55%, transparent);
+.dashboard-panel .panel-save :is(#reset-dashboard, #reset-cancel) {
+  grid-column: 1;
   background: transparent;
-  color: var(--on-accent);
-}
-.panel-save:has(
-    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
-  )
-  #preview-dashboard:hover {
-  background: rgb(255 255 255 / 0.14);
 }
 .dashboard-panel
   .panel-save:has(
-    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
-  )
-  #save-dashboard-component {
-  grid-column: 3;
-  min-width: 150px;
-  border-color: var(--surface);
-  background: var(--surface);
-  color: var(--accent-ink);
-  font-weight: 700;
-  box-shadow: 0 4px 14px -6px rgb(0 0 0 / 0.5);
-}
-.dashboard-panel
-  .panel-save:has(
-    #dashboard-save-state:is([data-state="changed"], [data-state="new"])
-  )
-  #save-dashboard-component:hover:not(:disabled) {
-  background: var(--raised);
-}
-@media (max-width: 600px) {
-  .dashboard-panel
-    .panel-save:has(
-      #dashboard-save-state:is([data-state="changed"], [data-state="new"])
-    ) {
-    grid-template-columns: minmax(0, 1fr) auto;
-    padding-inline: 16px;
-  }
-  .dashboard-panel
-    .panel-save:has(
-      #dashboard-save-state:is([data-state="changed"], [data-state="new"])
+    #dashboard-save-state:is(
+      [data-state="changed"],
+      [data-state="new"],
+      [data-state="confirm"]
     )
-    #save-dashboard-component {
-    grid-column: 1 / -1;
-  }
-  body:has(
-    #dashboard-panel:not([hidden])
-      #dashboard-save-state:is([data-state="changed"], [data-state="new"])
-  ) {
-    padding-bottom: 150px;
-  }
+  )
+  :is(#save-dashboard-component, #reset-confirm) {
+  grid-column: 2;
+  font-weight: 700;
 }
-@keyframes save-bar-attention {
-  0% {
-    transform: translateY(100%);
-  }
-  100% {
-    transform: none;
-  }
+.dashboard-panel .panel-save #reset-confirm {
+  border-color: var(--bad);
+  background: var(--bad);
+  color: var(--bg);
+}
+.dashboard-panel .panel-save #reset-confirm:hover:not(:disabled) {
+  filter: brightness(1.08);
 }
 @keyframes save-dot-pulse {
   50% {
-    box-shadow: 0 0 0 8px rgb(255 255 255 / 0);
+    box-shadow: 0 0 0 7px transparent;
   }
 }
 @media (prefers-reduced-motion: reduce) {

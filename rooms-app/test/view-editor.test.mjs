@@ -22,6 +22,7 @@ function harness(preview, onClose, modelConfig = {}, requestScope) {
       fields.set(id, {
         value: "",
         hidden: id === "dashboard-panel",
+        dataset: {},
         style: {},
         classList: { toggle() {} },
         validity: { valid: true },
@@ -455,4 +456,60 @@ test("a saved automatic height opens as auto", () => {
     500,
     "a pixel height is kept for Fixed",
   );
+});
+
+test("reset changes asks first, then returns to the last saved version; preview waits for a save", async () => {
+  const h = harness(async () => {});
+  h.editor.open(saved());
+  assert.equal(h.field("preview-dashboard").hidden, false, "saved: preview");
+  assert.equal(h.field("reset-dashboard").hidden, true);
+  h.field("dashboard-title").value = "Unsaved rename";
+  h.field("dashboard-title").oninput?.();
+  h.scene.options.onCameraChange({ source: "orbit" });
+  assert.equal(h.field("dashboard-save-state").dataset.state, "changed");
+  assert.equal(
+    h.field("preview-dashboard").hidden,
+    true,
+    "unsaved: no preview",
+  );
+  assert.equal(h.field("reset-dashboard").hidden, false);
+  // First click only asks.
+  h.field("reset-dashboard").onclick();
+  assert.equal(h.field("dashboard-save-state").dataset.state, "confirm");
+  assert.equal(h.field("reset-confirm").hidden, false);
+  assert.equal(h.field("save-dashboard-component").hidden, true);
+  assert.equal(h.field("dashboard-title").value, "Unsaved rename");
+  h.field("reset-cancel").onclick();
+  assert.equal(h.field("dashboard-save-state").dataset.state, "changed");
+  assert.equal(h.field("dashboard-title").value, "Unsaved rename");
+  // Confirmed: back to the saved version, without a discard prompt.
+  h.allow(false);
+  h.field("reset-dashboard").onclick();
+  h.field("reset-confirm").onclick();
+  assert.equal(h.field("dashboard-title").value, saved().title);
+  assert.equal(h.editor.dirty(), false);
+  assert.equal(h.field("dashboard-save-state").dataset.state, "saved");
+  assert.equal(h.calls.length, 0, "nothing was saved");
+  h.allow(true);
+});
+
+test("reset after a save returns to that save; a new view resets to its start", async () => {
+  const h = harness();
+  h.editor.open(saved());
+  h.field("dashboard-title").value = "Saved rename";
+  await h.field("dashboard-form").onsubmit({ preventDefault() {} });
+  h.field("dashboard-title").value = "Later edit";
+  h.scene.options.onCameraChange({ source: "orbit" });
+  h.field("reset-dashboard").onclick();
+  h.field("reset-confirm").onclick();
+  assert.equal(h.field("dashboard-title").value, "Saved rename");
+  h.editor.open(undefined, { force: true });
+  const start = h.field("dashboard-title").value;
+  h.field("dashboard-title").value = "Something else";
+  h.scene.options.onCameraChange({ source: "orbit" });
+  assert.equal(h.field("dashboard-save-state").dataset.state, "new");
+  h.field("reset-dashboard").onclick();
+  h.field("reset-confirm").onclick();
+  assert.equal(h.field("dashboard-title").value, start);
+  assert.equal(h.field("dashboard-save-state").dataset.state, "new");
 });
