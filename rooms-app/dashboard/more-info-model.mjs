@@ -98,6 +98,9 @@ const HIDDEN_ATTRIBUTES = new Set([
   "attribution",
   "editable",
   "restored",
+  // Camera credentials and plumbing: never shown.
+  "access_token",
+  "frontend_stream_type",
 ]);
 /** Attributes worth listing, as `[label, text]` pairs. */
 export function attributeRows(attributes = {}) {
@@ -307,6 +310,13 @@ export function describeEntity(entity) {
       codeArmRequired: a.code_arm_required !== false,
       mode: alarmMode(entity),
     });
+  } else if (domain === "camera") {
+    out.controls.push({
+      kind: "camera",
+      // CameraEntityFeature.STREAM: HLS through Home Assistant's stream integration.
+      stream: !!((a.supported_features || 0) & 2),
+      token: typeof a.access_token === "string" ? a.access_token : "",
+    });
   } else if (domain === "climate") {
     if (num(a.temperature) !== undefined)
       out.controls.push({
@@ -420,4 +430,16 @@ export function controlCall(description, control, value) {
   if (control.kind === "color")
     return ["light", "turn_on", { entity_id: id, hs_color: value }];
   throw new Error("Unknown control");
+}
+
+/** Home Assistant's camera URLs for an entity and its current access token. */
+export function cameraUrls(entityId, token) {
+  const id = encodeURIComponent(entityId);
+  const query = token ? `?token=${encodeURIComponent(token)}` : "";
+  return {
+    /** One still picture. */
+    still: `/api/camera_proxy/${id}${query}`,
+    /** MJPEG: a native stream, or HA's stills every few seconds; any camera. */
+    mjpeg: `/api/camera_proxy_stream/${id}${query}`,
+  };
 }

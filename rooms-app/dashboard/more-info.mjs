@@ -3,6 +3,7 @@ import {
   describeEntity,
   controlCall,
   alarmNeedsCode,
+  cameraUrls,
   coverIcon,
   hsToRgb,
   sinceText,
@@ -158,6 +159,26 @@ dialog.mi.mi-code{width:min(360px,calc(100vw - 32px))}
 @media (prefers-color-scheme:light){.mi-key.mi-key-ok{color:#1b5e20}}
 .mi-key:disabled{opacity:.5;cursor:default}
 .mi-code .mi-pill{width:100%}
+/* camera: a wide dialog with the live picture */
+dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
+@media (max-width:600px){dialog.mi.mi-wide{width:100vw}}
+.mi-wide .mi-body{padding:0 0 16px}
+.mi-camera{position:relative;width:100%;aspect-ratio:16/9;max-height:calc(min(92vh,880px) - 140px);background:#000;overflow:hidden}
+.mi-camera>img,.mi-camera>video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.mi-camera>img[hidden],.mi-camera>video[hidden]{display:none}
+.mi-camera-note{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;color:#fff;text-align:center;background:#0006}
+.mi-camera-note[hidden]{display:none}
+.mi-camera-note svg{width:40px;height:40px;opacity:.85}
+.mi-camera-bar{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:4px;padding:8px 10px;background:linear-gradient(transparent,#000a);color:#fff}
+.mi-camera-bar .mi-iconbtn{width:44px;height:44px;color:#fff}
+.mi-camera-bar .mi-iconbtn:hover{background:#ffffff26}
+.mi-camera-bar [hidden]{display:none}
+.mi-live{display:inline-flex;align-items:center;gap:6px;margin-right:auto;padding:3px 10px;border-radius:999px;background:#0008;font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.mi-live::before{content:"";width:8px;height:8px;border-radius:50%;background:#f44336;animation:mi-moving 1.6s ease-in-out infinite}
+.mi-live[data-still=true]::before{background:#9e9e9e;animation:none}
+.mi-camera:fullscreen{max-height:none;aspect-ratio:auto}
+.mi-wide .mi-attrs{margin:16px 24px 0}
+.mi-wide .mi-error{margin:12px 24px 0}
 /* attributes */
 .mi-attrs{margin-top:24px;border-top:1px solid var(--mi-line);padding-top:4px}
 .mi-attrs summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-weight:500;cursor:pointer;list-style:none}
@@ -369,6 +390,11 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
   let signature = "",
     syncs = [],
     errorEl;
+  // Layouts register teardown here (camera streams); run on rebuild and close.
+  let cleanups = [];
+  const runCleanups = () => {
+    for (const cleanup of cleanups.splice(0)) cleanup();
+  };
   const showError = (message) => {
     errorEl ||= body.appendChild(h(doc, "p", "mi-error"));
     errorEl.textContent = message || "";
@@ -1311,6 +1337,160 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
     };
   }
 
+  // Live picture: HLS video where the browser plays it natively (Safari,
+  // iPad, iPhone) and the camera streams; otherwise Home Assistant's MJPEG
+  // proxy, which works for every camera. Stopped when the pop-up closes.
+  function cameraLayout(d, root) {
+    dialog.classList.add("mi-wide");
+    const control = find(d, (c) => c.kind === "camera");
+    const box = h(doc, "div", "mi-camera");
+    const img = h(doc, "img");
+    img.alt = d.name;
+    img.decoding = "async";
+    const video = h(doc, "video");
+    video.muted = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.setAttribute("playsinline", "");
+    video.hidden = true;
+    const note = h(
+      doc,
+      "div",
+      "mi-camera-note",
+      `${svg("cctv")}<span>Connecting to the camera…</span>`,
+    );
+    const bar = h(doc, "div", "mi-camera-bar");
+    const live = h(doc, "span", "mi-live", "Live");
+    const sound = h(doc, "button", "mi-iconbtn", svg("volumeOff"));
+    sound.type = "button";
+    sound.hidden = true;
+    sound.setAttribute("aria-label", "Turn sound on");
+    sound.onclick = () => {
+      video.muted = !video.muted;
+      sound.innerHTML = svg(video.muted ? "volumeOff" : "volumeHigh");
+      sound.setAttribute(
+        "aria-label",
+        video.muted ? "Turn sound on" : "Turn sound off",
+      );
+    };
+    const retry = h(doc, "button", "mi-iconbtn", svg("refresh"));
+    retry.type = "button";
+    retry.setAttribute("aria-label", "Reconnect");
+    retry.onclick = () => start(true);
+    const full = h(doc, "button", "mi-iconbtn", svg("fullscreen"));
+    full.type = "button";
+    full.setAttribute("aria-label", "Full screen");
+    full.hidden = !box.requestFullscreen;
+    full.onclick = () =>
+      doc.fullscreenElement === box
+        ? doc.exitFullscreen?.()
+        : box.requestFullscreen?.().catch(() => {});
+    const onFullscreen = () => {
+      full.innerHTML = svg(
+        doc.fullscreenElement === box ? "fullscreenExit" : "fullscreen",
+      );
+    };
+    doc.addEventListener("fullscreenchange", onFullscreen);
+    bar.append(live, sound, retry, full);
+    box.append(img, video, note, bar);
+    root.append(box);
+
+    let token = control.token,
+      stopped = false,
+      attempt = 0,
+      retryTimer;
+    const say = (text) => {
+      note.hidden = !text;
+      if (text) note.querySelector("span").textContent = text;
+    };
+    const stop = () => {
+      clearTimeout(retryTimer);
+      // Clearing the sources closes the HTTP stream to Home Assistant.
+      img.removeAttribute("src");
+      video.pause();
+      video.removeAttribute("src");
+      video.load?.();
+    };
+    const mjpeg = () => {
+      video.hidden = true;
+      sound.hidden = true;
+      img.hidden = false;
+      live.dataset.still = "false";
+      img.onload = () => {
+        attempt = 0;
+        say("");
+      };
+      img.onerror = () => {
+        if (stopped) return;
+        // A rotated access token or a busy camera: try again with the latest.
+        attempt++;
+        say(
+          attempt > 3
+            ? "The camera is not answering. Try Reconnect."
+            : "Reconnecting to the camera…",
+        );
+        if (attempt <= 3)
+          retryTimer = setTimeout(() => {
+            img.src = cameraUrls(d.id, token).mjpeg;
+          }, 1500 * attempt);
+      };
+      img.src = cameraUrls(d.id, token).mjpeg;
+    };
+    const hls =
+      control.stream && !!video.canPlayType?.("application/vnd.apple.mpegurl");
+    async function start(manual = false) {
+      stop();
+      stopped = false;
+      if (manual) attempt = 0;
+      say("Connecting to the camera…");
+      if (hls) {
+        try {
+          const { url } = await getHass().callWS({
+            type: "camera/stream",
+            entity_id: d.id,
+            format: "hls",
+          });
+          if (stopped) return;
+          img.hidden = true;
+          // A still picture until the first video frame arrives.
+          video.poster = cameraUrls(d.id, token).still;
+          video.hidden = false;
+          sound.hidden = false;
+          live.dataset.still = "false";
+          video.onplaying = () => {
+            clearTimeout(retryTimer);
+            say("");
+          };
+          video.onerror = () => !stopped && mjpeg();
+          video.src = url;
+          video.play?.().catch(() => {});
+          // A browser that only "maybe" plays HLS can stall without an error.
+          retryTimer = setTimeout(() => {
+            if (!stopped && video.readyState < 2) {
+              video.removeAttribute("src");
+              mjpeg();
+            }
+          }, 10000);
+          return;
+        } catch {
+          // No stream integration or no stream source: use the proxy.
+        }
+      }
+      mjpeg();
+    }
+    start();
+    cleanups.push(() => {
+      stopped = true;
+      stop();
+      doc.removeEventListener("fullscreenchange", onFullscreen);
+      if (doc.fullscreenElement === box) doc.exitFullscreen?.();
+    });
+    return (nd) => {
+      // Keep the running stream; only remember the newest token for retries.
+      token = find(nd, (c) => c.kind === "camera")?.token || token;
+    };
+  }
+
   function actionLayout(d, root) {
     const btns = find(d, (c) => c.kind === "buttons");
     const center = h(doc, "div", "mi-center");
@@ -1341,6 +1521,7 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
     lock: lockLayout,
     climate: climateLayout,
     alarm_control_panel: alarmLayout,
+    camera: cameraLayout,
     switch: switchLayout,
     input_boolean: switchLayout,
     fan: switchLayout,
@@ -1353,6 +1534,8 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
 
   let sync = () => {};
   function build(d) {
+    runCleanups();
+    dialog.classList.remove("mi-wide");
     body.replaceChildren();
     errorEl = undefined;
     const root = h(doc, "div");
@@ -1411,7 +1594,10 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) closeDialog();
   });
-  dialog.addEventListener("close", () => dialog.remove());
+  dialog.addEventListener("close", () => {
+    runCleanups();
+    dialog.remove();
+  });
   update();
   dialog.showModal();
   return { update, close: closeDialog, dialog };

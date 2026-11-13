@@ -1059,3 +1059,314 @@ body:has(
     height: 44px;
   }
 }
+
+/* Dashboard view cards: the picture opens the editor; Edit, Add to
+   dashboard and a menu sit in one row. */
+.saved-view-card {
+  display: flex;
+  flex-direction: column;
+}
+.saved-view-cover {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 0;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  overflow: hidden;
+  cursor: pointer;
+}
+.saved-view-cover:hover:not(:disabled) {
+  background: transparent;
+}
+.saved-view-cover > :first-child {
+  margin-bottom: 0;
+  transition:
+    transform 260ms var(--ease, ease),
+    filter 260ms ease;
+}
+.saved-view-cover:hover > :first-child,
+.saved-view-cover:focus-visible > :first-child {
+  transform: scale(1.02);
+  filter: brightness(0.75);
+}
+.saved-view-cover-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translate(-50%, -40%);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+  pointer-events: none;
+}
+.saved-view-cover-hint svg {
+  width: 16px;
+  height: 16px;
+}
+.saved-view-cover:hover .saved-view-cover-hint,
+.saved-view-cover:focus-visible .saved-view-cover-hint {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+.saved-view-card > .muted {
+  margin-bottom: 14px;
+}
+.saved-view-card .saved-view-actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: auto;
+}
+.saved-view-card .saved-view-actions > button,
+.saved-view-menu > summary {
+  min-height: 44px;
+  white-space: nowrap;
+}
+.saved-view-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-inline: 16px;
+}
+.saved-view-edit svg {
+  width: 17px;
+  height: 17px;
+}
+.saved-view-menu {
+  position: relative;
+}
+.saved-view-menu > summary {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  list-style: none;
+  cursor: pointer;
+  transition:
+    background-color var(--ease),
+    border-color var(--ease);
+}
+.saved-view-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.saved-view-menu > summary:hover,
+.saved-view-menu[open] > summary {
+  border-color: var(--accent);
+  background: var(--raised);
+}
+.saved-view-menu > summary svg {
+  width: 20px;
+  height: 20px;
+}
+.saved-view-menu-list {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  bottom: calc(100% + 6px);
+  display: grid;
+  min-width: 220px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 16px 36px -12px rgb(0 0 0 / 0.55);
+}
+.saved-view-menu-list button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+}
+.saved-view-menu-list button:hover:not(:disabled),
+.saved-view-menu-list button:focus-visible {
+  background: var(--raised);
+}
+.saved-view-menu-list button svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+}
+.saved-view-menu-list button.danger,
+.saved-view-menu-list button.danger svg {
+  color: var(--bad);
+}
+.saved-view-menu-list hr {
+  width: 100%;
+  margin: 4px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 600px) {
+  /* One card per row on phones, so the action row keeps its labels. */
+  body[data-room-tab="views"] #component-list.saved-view-grid,
+  body[data-room-tab="views"] .saved-view-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Reloading a view's editor: a skeleton of the editor, not the view list. */
+.view-opening {
+  display: none;
+}
+body[data-opening-view] .view-opening {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+  padding-top: 8px;
+}
+body[data-opening-view] #saved-views-section {
+  display: none !important;
+}
+.sk {
+  display: block;
+  border-radius: 8px;
+  background:
+    linear-gradient(
+        100deg,
+        transparent 30%,
+        color-mix(in srgb, var(--text) 7%, transparent) 50%,
+        transparent 70%
+      )
+      0 0 / 200% 100%,
+    color-mix(in srgb, var(--text) 7%, var(--surface));
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes sk-shimmer {
+  from {
+    background-position:
+      150% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      -50% 0,
+      0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk {
+    animation: none;
+  }
+}
+.sk-stage {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 14px;
+  min-width: 0;
+}
+.sk-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sk-toolbar .sk-text {
+  width: 120px;
+  margin-right: auto;
+}
+.sk-pill {
+  width: 112px;
+  height: 40px;
+}
+.sk-canvas {
+  min-height: min(70vh, 640px);
+  border-radius: var(--r-lg);
+}
+.sk-text {
+  width: 70%;
+  height: 12px;
+  border-radius: 6px;
+}
+.sk-short {
+  width: 38%;
+}
+.sk-field {
+  height: 40px;
+  border-radius: var(--r-md);
+}
+.sk-tall {
+  height: 56px;
+}
+.sk-round {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.sk-panel {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 0 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+.sk-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 4px 6px;
+}
+.sk-lines {
+  display: grid;
+  flex: 1;
+  gap: 8px;
+}
+.sk-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 82%, var(--text) 4%);
+}
+.sk-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 900px) {
+  body[data-opening-view] .view-opening {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 8px 16px 16px;
+  }
+  .sk-pill {
+    width: 88px;
+  }
+  .sk-pill:nth-child(n + 4) {
+    display: none;
+  }
+  .sk-canvas {
+    min-height: min(36dvh, 300px);
+  }
+}

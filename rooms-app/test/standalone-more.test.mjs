@@ -288,3 +288,42 @@ test("an alarm panel offers its supported modes and asks for the code when neede
     ],
   );
 });
+
+test("cameras get a live view; their access token is never listed", async () => {
+  const { cameraUrls } = await import("../dashboard/more-info-model.mjs");
+  const camera = describeEntity({
+    entity_id: "camera.garage",
+    state: "idle",
+    attributes: {
+      friendly_name: "Garagecamera",
+      supported_features: 2,
+      access_token: "secret-token",
+      entity_picture: "/api/camera_proxy/camera.garage?token=secret-token",
+      frontend_stream_type: "hls",
+      brand: "Reolink",
+    },
+  });
+  assert.deepEqual(camera.controls, [
+    { kind: "camera", stream: true, token: "secret-token" },
+  ]);
+  assert.deepEqual(camera.attributes, [["Brand", "Reolink"]]);
+  assert.ok(!JSON.stringify(camera.attributes).includes("secret"));
+  assert.deepEqual(cameraUrls("camera.garage", "a b"), {
+    still: "/api/camera_proxy/camera.garage?token=a%20b",
+    mjpeg: "/api/camera_proxy_stream/camera.garage?token=a%20b",
+  });
+  const still = describeEntity({
+    entity_id: "camera.snapshot",
+    state: "idle",
+    attributes: { supported_features: 0, access_token: "t" },
+  });
+  assert.equal(still.controls[0].stream, false);
+  assert.deepEqual(
+    describeEntity({
+      entity_id: "camera.x",
+      state: "unavailable",
+      attributes: {},
+    }).controls,
+    [],
+  );
+});

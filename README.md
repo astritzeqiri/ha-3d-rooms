@@ -150,7 +150,7 @@ Open **Dashboard views** (next to **My home**) to browse every saved view across
    **Extra entities** adds any Home Assistant entity (a sensor, switch, scene, media player…) to the view as an icon you drag anywhere on the model. Click it for the same tools as a device icon: its icon for each state, visibility, state label, size and position. On the card a tap switches what can be switched (or runs a scene or script) and opens Home Assistant's dialog for the rest; holding always opens the dialog.
 4. **Preview** at desktop or phone width, then **Save view**. Saving also stores a preview picture for the gallery.
 
-Cards linked to a saved view follow later changes automatically. In the card editor, edit a field to override it for that card; a small **Reset** restores the view’s value. Each gallery card offers **Edit view**, **Preview in dashboard**, **Add to dashboard** and, under **More actions**, **Duplicate**, **Export view** and **Delete view**.
+Cards linked to a saved view follow later changes automatically. In the card editor, edit a field to override it for that card; a small **Reset** restores the view’s value. Each gallery card offers **Edit** (or click its picture) and **Add to dashboard**; its **⋯** menu holds **Preview in dashboard**, **Open full screen**, **Duplicate**, **Export view** and **Delete view**.
 
 ### Backgrounds
 
@@ -201,7 +201,7 @@ Sometimes a dashboard still shows too much: Home Assistant’s sidebar and heade
 - **Where to find it:** the **Open full screen** button on each card in **Dashboard views**, the **Full screen** button beside **Background** in the view editor (once the view is saved), or **Add to dashboard → Full-screen page** to copy the link. All open it in a new tab.
 - Bookmark it, add it to a phone’s home screen, or use it as a wall tablet’s start page.
 - It reuses the Home Assistant login of that browser (and sends you through the normal login if there is none). Any Home Assistant user can open it, administrator or not, so a family member's phone or a wall tablet signed in as a regular user works; nothing is public.
-- Taps work as on the card. Holding a device opens a pop-up laid out like Home Assistant’s own: a large brightness or position control, round buttons for power, colour temperature, colour and effects, an arc dial for air conditioners with mode, fan, swing and preset tiles, a big lock button, an alarm mode picker (Home, Away, Night… as the alarm supports) with Home Assistant's code keypad when a code is needed, and an Attributes list. Your chosen marker icons, including custom icon sets, are drawn too.
+- Taps work as on the card. Holding a device opens a pop-up laid out like Home Assistant’s own: a large brightness or position control, round buttons for power, colour temperature, colour and effects, an arc dial for air conditioners with mode, fan, swing and preset tiles, a big lock button, an alarm mode picker (Home, Away, Night… as the alarm supports) with Home Assistant's code keypad when a code is needed, a live camera picture (HLS video on Safari, iPad and iPhone; Home Assistant's MJPEG stream elsewhere) with full screen and reconnect, and an Attributes list. Your chosen marker icons, including custom icon sets, are drawn too.
 
 ## Faster loading on phones
 

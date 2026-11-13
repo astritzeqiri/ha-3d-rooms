@@ -1,3 +1,10 @@
+## 0.47.0
+
+- **Cameras on the full-screen page.** Tapping a camera (added as an extra entity) opens a wide pop-up with its live picture: HLS video where the browser plays it natively and the camera streams (Safari, iPad, iPhone), otherwise Home Assistant's MJPEG stream, which works for every camera. A live badge, Reconnect, Full screen and (for video) sound buttons sit on the picture; it reconnects by itself with the latest access token, and closing the pop-up ends the stream. Camera access tokens are never listed among the attributes.
+- **Clearer view cards.** Each card in Dashboard views has one row: **Edit**, **Add to dashboard** and a **⋯** menu with Preview in dashboard, Open full screen, Duplicate, Export view and Delete view (set apart). Clicking the picture opens the editor too. On phones the cards are one per row.
+- **No list flash when reloading the editor.** Reloading while editing a view shows a skeleton of the editor until it opens, instead of the empty view list.
+- Rooms, connections and saved views are unchanged.
+
 ## 0.46.0
 
 - **Family members and wall tablets can see the 3D dashboard.** Any signed-in Home Assistant user, not only administrators, can now open dashboard cards and full-screen pages: room models, saved views, live updates, the day/night switch and preset buttons (presets follow the user's Home Assistant entity permissions). Uploading, replacing or deleting rooms, connecting entities, editing views, exports and the 3D Rooms sidebar stay administrator-only. Cards get library updates through a new `three_d_rooms/subscribe` command, because Home Assistant lets only administrators subscribe to custom events.

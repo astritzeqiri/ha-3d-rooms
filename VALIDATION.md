@@ -1,3 +1,14 @@
+# 0.47.0 — camera pop-up, view card actions and editor skeleton, 2026-11-13
+
+Released as 0.47.0, based on 0.46.0. Frontend only: `dashboard/more-info*.mjs` (camera layout, stream cleanup), `web/components.js` and `web/views-workspace.css` (card actions, menu, skeleton), `web/index.html` (skeleton markup and an early opening flag).
+
+- All frontend tests (including a new camera test), the format check and the build pass; host Python tests pass with native-only skips.
+- Shared local Home Assistant (Core 2026.11.0) with this package staged:
+  - Camera pop-up on the full-screen page with the demo cameras: the MJPEG picture streams in the wide dialog (desktop) and bottom sheet (375×812, no horizontal scroll); a stream-capable camera without a stream source falls back to MJPEG; only Reconnect and Full screen show for MJPEG; closing clears the stream.
+  - View cards: menu opens above the row and closes on choice, outside click and Escape; clicking a picture opened that view's editor; one card per row at 375 px.
+  - Reloading an editor link showed the skeleton from the start and the editor at about 1.3 s, never the view list; an unknown view link shows the list with "This saved view could not be found."; the plain list shows without the skeleton.
+- Not checked: the HLS path with a real streaming camera (needs Safari/iPad/iPhone), real cameras, the light theme and Safari layout.
+
 # 0.46.0 — non-admin viewing, diagnostics, Repairs, actions and a smaller download, 2026-11-13
 
 Released as 0.46.0, based on 0.45.1. Backend: `api.py` (operation split, `three_d_rooms/subscribe`), new `health.py`, `diagnostics.py`, `repairs.py`, `services.py`, `services.yaml`, store helpers in `models.py`, translations. Frontend: `shared/ha-mdi.mjs`, `web/icon-catalog.js`, `dashboard/standalone-icons.mjs`, `dashboard/updates.mjs`, admin gates removed in `dashboard/transport.mjs`, `dashboard/standalone.js` and `shared/scene-download.mjs`, compressed Basis encoder (`tools/basis-encoder.mjs`, Vite plugin in `tools/ktx2-transcoder-plugin.mjs`).

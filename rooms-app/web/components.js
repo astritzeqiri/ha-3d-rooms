@@ -7,6 +7,29 @@ import {
   standaloneViewURL,
 } from "../shared/component.mjs";
 
+const stroke = (d) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+/** Small line icons for the view cards and their menu. */
+const ICONS = {
+  edit: stroke('<path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/>'),
+  more: stroke(
+    '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
+  ),
+  preview: stroke(
+    '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  ),
+  open: stroke(
+    '<path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  ),
+  duplicate: stroke(
+    '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+  ),
+  export: stroke('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'),
+  delete: stroke(
+    '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  ),
+};
+
 /** One library across all houses, floors and rooms. Saved IDs remain unchanged. */
 export function initComponents({
   api,
@@ -55,6 +78,20 @@ export function initComponents({
     }
     $("use-view-dialog").showModal();
   }
+  // A view card's menu closes on a click elsewhere or Escape.
+  document.addEventListener?.("click", (event) => {
+    for (const menu of document.querySelectorAll?.(".saved-view-menu[open]") ||
+      [])
+      if (!menu.contains(event.target)) menu.open = false;
+  });
+  document.addEventListener?.("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    for (const menu of document.querySelectorAll?.(".saved-view-menu[open]") ||
+      []) {
+      menu.open = false;
+      menu.querySelector("summary")?.focus();
+    }
+  });
   function draw() {
     const host = $("component-list");
     host.replaceChildren();
@@ -121,6 +158,8 @@ export function initComponents({
         models.find((m) => m.id === c.layers[0].model),
         models,
       )} · ${c.layers[0].view === "floor" ? "Floor plan" : "Perspective"} · ${c.height === "auto" ? "auto height" : `${c.height}px card`}`;
+      // One clear row: Edit, Add to dashboard (the main step) and a menu
+      // for everything else. The preview picture also opens the editor.
       const actions = document.createElement("div");
       actions.className = "saved-view-actions";
       const button = (text, action, primary = false) => {
@@ -131,80 +170,97 @@ export function initComponents({
         b.onclick = action;
         return b;
       };
-      actions.append(
-        button("Edit view", () => openEditor(c)),
-        button("Add to dashboard", () => use(c), true),
-      );
-      if (standalone) {
-        const open = button("Open full screen", () =>
-          window.open(
-            standaloneViewURL(c.id, location.origin),
-            "_blank",
-            "noopener",
-          ),
-        );
-        open.className = "saved-view-open";
-        open.title = "Open this view as a full-screen page in a new tab";
-        actions.insertBefore(open, actions.firstChild);
-      }
-      if (preview) {
-        const previewButton = button("Preview in dashboard", async () => {
+      const edit = button("Edit", () => openEditor(c));
+      edit.className = "saved-view-edit";
+      edit.innerHTML = `${ICONS.edit}<span>Edit</span>`;
+      edit.setAttribute("aria-label", `Edit ${c.title}`);
+      const add = button("Add to dashboard", () => use(c), true);
+      const more = document.createElement("details");
+      more.className = "saved-view-menu";
+      const summary = document.createElement("summary");
+      summary.innerHTML = ICONS.more;
+      summary.title = "More actions";
+      summary.setAttribute("aria-label", `More actions for ${c.title}`);
+      const list = document.createElement("div");
+      list.className = "saved-view-menu-list";
+      list.setAttribute("role", "menu");
+      more.append(summary, list);
+      const item = (icon, text, action, className = "") => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.setAttribute("role", "menuitem");
+        b.className = className;
+        b.innerHTML = `${ICONS[icon]}<span></span>`;
+        b.querySelector("span").textContent = text;
+        b.onclick = async () => {
+          more.open = false;
+          await action(b);
+        };
+        list.append(b);
+        return b;
+      };
+      if (preview)
+        item("preview", "Preview in dashboard", async () => {
           try {
             await preview(structuredClone(c));
           } catch (error) {
             toast(error.message);
           } finally {
-            previewButton.focus({ preventScroll: true });
+            summary.focus({ preventScroll: true });
           }
         });
-        previewButton.className = "saved-view-preview";
-        actions.insertBefore(previewButton, actions.firstChild);
-      }
-      const more = document.createElement("details");
-      more.className = "saved-view-more";
-      const summary = document.createElement("summary");
-      summary.textContent = "More actions";
-      more.append(summary);
-      more.append(
-        button("Duplicate", () =>
-          openEditor(
-            {
-              ...structuredClone(c),
-              id: crypto.randomUUID(),
-              title: `${c.title.slice(0, 150)} copy`,
-            },
-            { draft: true },
+      if (standalone)
+        item("open", "Open full screen", () =>
+          window.open(
+            standaloneViewURL(c.id, location.origin),
+            "_blank",
+            "noopener",
           ),
+        ).title = "Open this view as a full-screen page in a new tab";
+      if (list.children.length) list.append(document.createElement("hr"));
+      item("duplicate", "Duplicate", () =>
+        openEditor(
+          {
+            ...structuredClone(c),
+            id: crypto.randomUUID(),
+            title: `${c.title.slice(0, 150)} copy`,
+          },
+          { draft: true },
         ),
-        button("Export view", () => {
-          const url = URL.createObjectURL(
-            new Blob([JSON.stringify(c, null, 2)], {
-              type: "application/json",
-            }),
-          );
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${c.id}.component.json`;
-          a.click();
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
-        }),
       );
-      const remove = button("Delete view", async () => {
-        if (!confirm(`Delete the saved view “${c.title}”?`)) return;
-        if (!editor.close()) return;
-        remove.disabled = true;
-        try {
-          await api(`components/${c.id}`, { method: "DELETE" });
-          components = components.filter((v) => v.id !== c.id);
-          draw();
-          toast("Saved view deleted.");
-        } catch (e) {
-          fail(e.message);
-          remove.disabled = false;
-        }
+      item("export", "Export view", () => {
+        const url = URL.createObjectURL(
+          new Blob([JSON.stringify(c, null, 2)], {
+            type: "application/json",
+          }),
+        );
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${c.id}.component.json`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       });
-      remove.className = "danger";
-      more.append(remove);
+      list.append(document.createElement("hr"));
+      const remove = item(
+        "delete",
+        "Delete view",
+        async () => {
+          if (!confirm(`Delete the saved view “${c.title}”?`)) return;
+          if (!editor.close()) return;
+          remove.disabled = true;
+          try {
+            await api(`components/${c.id}`, { method: "DELETE" });
+            components = components.filter((v) => v.id !== c.id);
+            draw();
+            toast("Saved view deleted.");
+          } catch (e) {
+            fail(e.message);
+            remove.disabled = false;
+          }
+        },
+        "danger",
+      );
+      actions.append(edit, add, more);
       if (c.thumbnailArt) {
         // The room is stored on its own; the view's current background (and
         // time of day) is painted behind it, so the preview never goes stale.
@@ -280,7 +336,20 @@ export function initComponents({
         placeholder.append(hint);
         card.append(placeholder);
       }
-      card.append(title, detail, actions, more);
+      // The picture opens the editor too, with a hint on hover and focus.
+      const picture = card.firstElementChild;
+      const cover = document.createElement("button");
+      cover.type = "button";
+      cover.className = "saved-view-cover";
+      cover.setAttribute("aria-label", `Edit ${c.title}`);
+      cover.onclick = () => openEditor(c);
+      const hint = document.createElement("span");
+      hint.className = "saved-view-cover-hint";
+      hint.setAttribute("aria-hidden", "true");
+      hint.innerHTML = `${ICONS.edit}<span>Edit view</span>`;
+      cover.append(picture, hint);
+      card.prepend(cover);
+      card.append(title, detail, actions);
       host.append(card);
     }
   }
@@ -302,6 +371,10 @@ export function initComponents({
       }
     } catch (e) {
       if (current === generation) fail(e.message);
+    } finally {
+      // The editor is open (or could not open): the page shows itself again.
+      if (openLink && document.body?.dataset)
+        delete document.body.dataset.openingView;
     }
   }
   // The Day / Night switch changes what a sky or spotlight looks like.

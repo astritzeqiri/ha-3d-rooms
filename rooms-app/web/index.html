@@ -7,6 +7,12 @@
     <title>3D Rooms</title>
   </head>
   <body>
+    <script>
+      // Reloading a view's editor: show a loader, not the view list, until
+      // the editor opens (web/components.js clears this).
+      if (new URLSearchParams(location.search).get("saved_view"))
+        document.body.dataset.openingView = "";
+    </script>
     <header>
       <a class="brand" href="./"
         ><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
@@ -60,6 +66,50 @@
       </div>
     </nav>
     <main>
+      <div
+        id="view-opening"
+        class="view-opening"
+        role="status"
+        aria-label="Opening view"
+      >
+        <div class="sk-stage" aria-hidden="true">
+          <div class="sk-toolbar">
+            <span class="sk sk-text"></span>
+            <span class="sk sk-pill"></span>
+            <span class="sk sk-pill"></span>
+            <span class="sk sk-pill"></span>
+            <span class="sk sk-pill"></span>
+          </div>
+          <div class="sk sk-canvas"></div>
+        </div>
+        <div class="sk-panel" aria-hidden="true">
+          <div class="sk-heading">
+            <span class="sk sk-round"></span>
+            <span class="sk-lines">
+              <span class="sk sk-text sk-short"></span>
+              <span class="sk sk-text"></span>
+            </span>
+          </div>
+          <div class="sk-card">
+            <span class="sk sk-text sk-short"></span>
+            <span class="sk sk-field"></span>
+            <span class="sk sk-text"></span>
+          </div>
+          <div class="sk-card">
+            <span class="sk sk-text sk-short"></span>
+            <span class="sk sk-field sk-tall"></span>
+          </div>
+          <div class="sk-card">
+            <span class="sk sk-text sk-short"></span>
+            <span class="sk-row">
+              <span class="sk sk-field"></span>
+              <span class="sk sk-field"></span>
+            </span>
+            <span class="sk sk-field"></span>
+          </div>
+        </div>
+        <span class="sr-only">Opening view…</span>
+      </div>
       <button
         id="library-scrim"
         type="button"
