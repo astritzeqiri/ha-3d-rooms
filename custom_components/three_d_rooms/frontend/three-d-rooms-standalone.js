@@ -472,7 +472,7 @@ var ee = (e) => {
 			};
 		}
 	};
-}, M = 5e3, N = (t, n, r, i, a = { unsubGrace: !0 }) => {
+}, te = 5e3, M = (t, n, r, i, a = { unsubGrace: !0 }) => {
 	if (t[n]) return t[n];
 	let o = 0, s, c, l = ee(), u = () => {
 		if (!r) throw Error("Collection does not support refresh");
@@ -488,7 +488,7 @@ var ee = (e) => {
 			e();
 		}, () => void 0), l.clearState(), t.removeEventListener("ready", d), t.removeEventListener("disconnected", h);
 	}, m = () => {
-		c = setTimeout(p, M);
+		c = setTimeout(p, te);
 	}, h = () => {
 		c && (clearTimeout(c), p());
 	};
@@ -505,9 +505,9 @@ var ee = (e) => {
 			};
 		}
 	}, t[n];
-}, te = (e) => e.sendMessagePromise(r()), ne = (e) => e.sendMessagePromise(i()), re = (e, t, n, r, i, o) => e.sendMessagePromise(a(t, n, r, i, o));
+}, ne = (e) => e.sendMessagePromise(r()), re = (e) => e.sendMessagePromise(i()), ie = (e, t, n, r, i, o) => e.sendMessagePromise(a(t, n, r, i, o));
 // node_modules/home-assistant-js-websocket/dist/entities.js
-function ie(e, t, n) {
+function ae(e, t, n) {
 	let r = n ? {} : Object.assign({}, e.state);
 	if (t.a) for (let e in t.a) {
 		let n = t.a[e], i = (/* @__PURE__ */ new Date(n.lc * 1e3)).toISOString();
@@ -538,14 +538,14 @@ function ie(e, t, n) {
 	}
 	e.setState(r, !0);
 }
-var ae = async (e, t) => {
+var oe = async (e, t) => {
 	let n = !0, r = () => {
 		n = !0;
 	};
 	e.addEventListener("ready", r);
 	try {
 		let i = await e.subscribeMessage((e) => {
-			ie(t, e, n), n = !1;
+			ae(t, e, n), n = !1;
 		}, { type: "subscribe_entities" });
 		return () => {
 			e.removeEventListener("ready", r), i();
@@ -554,7 +554,7 @@ var ae = async (e, t) => {
 		throw e.removeEventListener("ready", r), t;
 	}
 };
-function oe(e, t) {
+function se(e, t) {
 	let n = e.state;
 	if (n === void 0) return;
 	let { entity_id: r, new_state: i } = t.data;
@@ -564,17 +564,17 @@ function oe(e, t) {
 		delete t[r], e.setState(t, !0);
 	}
 }
-async function se(e) {
-	let t = await te(e), n = {};
+async function ce(e) {
+	let t = await ne(e), n = {};
 	for (let e = 0; e < t.length; e++) {
 		let r = t[e];
 		n[r.entity_id] = r;
 	}
 	return n;
 }
-var ce = (e, t) => e.subscribeEvents((e) => oe(t, e), "state_changed"), le = (e) => d(e.haVersion, 2022, 4, 0) ? N(e, "_ent", void 0, ae) : N(e, "_ent", se, ce), ue = (e, t) => le(e).subscribe(t);
+var le = (e, t) => e.subscribeEvents((e) => se(t, e), "state_changed"), ue = (e) => d(e.haVersion, 2022, 4, 0) ? M(e, "_ent", void 0, oe) : M(e, "_ent", ce, le), de = (e, t) => ue(e).subscribe(t);
 // node_modules/home-assistant-js-websocket/dist/index.js
-async function de(e) {
+async function fe(e) {
 	let t = Object.assign({
 		setupRetry: 0,
 		createSocket: h
@@ -582,7 +582,7 @@ async function de(e) {
 	return new _(await t.createSocket(t), t);
 }
 // dashboard/standalone-hass.mjs
-function fe({ auth: e, connection: t, user: n, config: r, origin: i, onChange: a, fetcher: o = (...e) => fetch(...e) }) {
+function pe({ auth: e, connection: t, user: n, config: r, origin: i, onChange: a, fetcher: o = (...e) => fetch(...e) }) {
 	let s = {}, c = !0, l = () => ({
 		states: s,
 		user: n,
@@ -591,7 +591,7 @@ function fe({ auth: e, connection: t, user: n, config: r, origin: i, onChange: a
 		connection: t,
 		connected: c,
 		callWS: (e) => t.sendMessagePromise(e),
-		callService: (e, n, r, i) => re(t, e, n, r, i),
+		callService: (e, n, r, i) => ie(t, e, n, r, i),
 		hassUrl: (e = "") => new URL(e, i).toString(),
 		fetchWithAuth: async (t, n = {}) => {
 			e.expired && await e.refreshAccessToken();
@@ -612,7 +612,7 @@ function fe({ auth: e, connection: t, user: n, config: r, origin: i, onChange: a
 		}
 	};
 }
-var pe = (e) => ({
+var me = (e) => ({
 	loadTokens() {
 		try {
 			return JSON.parse(e.getItem("hassTokens"));
@@ -625,7 +625,7 @@ var pe = (e) => ({
 			t ? e.setItem("hassTokens", JSON.stringify(t)) : e.removeItem("hassTokens");
 		} catch {}
 	}
-}), P = {
+}), N = {
 	"mdi:lightbulb": "M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z",
 	"mdi:lightbulb-outline": "M12,2A7,7 0 0,1 19,9C19,11.38 17.81,13.47 16,14.74V17A1,1 0 0,1 15,18H9A1,1 0 0,1 8,17V14.74C6.19,13.47 5,11.38 5,9A7,7 0 0,1 12,2M9,21V20H15V21A1,1 0 0,1 14,22H10A1,1 0 0,1 9,21M12,4A5,5 0 0,0 7,9C7,11.05 8.23,12.81 10,13.58V16H14V13.58C15.77,12.81 17,11.05 17,9A5,5 0 0,0 12,4Z",
 	"mdi:ceiling-light": "M8,9H11V4H13V9H16L20,17H4L8,9M14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18H14Z",
@@ -662,235 +662,235 @@ var pe = (e) => ({
 	"mdi:sofa": "M12.5 7C12.5 5.89 13.39 5 14.5 5H18C19.1 5 20 5.9 20 7V9.16C18.84 9.57 18 10.67 18 11.97V14H12.5V7M6 11.96V14H11.5V7C11.5 5.89 10.61 5 9.5 5H6C4.9 5 4 5.9 4 7V9.15C5.16 9.56 6 10.67 6 11.96M20.66 10.03C19.68 10.19 19 11.12 19 12.12V15H5V12C5 10.9 4.11 10 3 10S1 10.9 1 12V17C1 18.1 1.9 19 3 19V21H5V19H19V21H21V19C22.1 19 23 18.1 23 17V12C23 10.79 21.91 9.82 20.66 10.03Z",
 	"mdi:home": "M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z",
 	"mdi:star": "M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"
-}, me = [
+}, he = [
 	["Lights", [
 		[
 			"mdi:lightbulb",
 			"Bulb",
-			P["mdi:lightbulb"]
+			N["mdi:lightbulb"]
 		],
 		[
 			"mdi:lightbulb-outline",
 			"Bulb outline",
-			P["mdi:lightbulb-outline"]
+			N["mdi:lightbulb-outline"]
 		],
 		[
 			"mdi:ceiling-light",
 			"Ceiling light",
-			P["mdi:ceiling-light"]
+			N["mdi:ceiling-light"]
 		],
 		[
 			"mdi:lamp",
 			"Table lamp",
-			P["mdi:lamp"]
+			N["mdi:lamp"]
 		],
 		[
 			"mdi:floor-lamp",
 			"Floor lamp",
-			P["mdi:floor-lamp"]
+			N["mdi:floor-lamp"]
 		],
 		[
 			"mdi:desk-lamp",
 			"Desk lamp",
-			P["mdi:desk-lamp"]
+			N["mdi:desk-lamp"]
 		],
 		[
 			"mdi:wall-sconce",
 			"Wall light",
-			P["mdi:wall-sconce"]
+			N["mdi:wall-sconce"]
 		],
 		[
 			"mdi:outdoor-lamp",
 			"Outdoor light",
-			P["mdi:outdoor-lamp"]
+			N["mdi:outdoor-lamp"]
 		],
 		[
 			"mdi:led-strip",
 			"LED strip",
-			P["mdi:led-strip"]
+			N["mdi:led-strip"]
 		],
 		[
 			"mdi:string-lights",
 			"String lights",
-			P["mdi:string-lights"]
+			N["mdi:string-lights"]
 		]
 	]],
 	["Doors & windows", [
 		[
 			"mdi:door",
 			"Door",
-			P["mdi:door"]
+			N["mdi:door"]
 		],
 		[
 			"mdi:door-open",
 			"Open door",
-			P["mdi:door-open"]
+			N["mdi:door-open"]
 		],
 		[
 			"mdi:door-sliding",
 			"Sliding door",
-			P["mdi:door-sliding"]
+			N["mdi:door-sliding"]
 		],
 		[
 			"mdi:garage",
 			"Garage",
-			P["mdi:garage"]
+			N["mdi:garage"]
 		],
 		[
 			"mdi:window-closed-variant",
 			"Window",
-			P["mdi:window-closed-variant"]
+			N["mdi:window-closed-variant"]
 		],
 		[
 			"mdi:window-open-variant",
 			"Open window",
-			P["mdi:window-open-variant"]
+			N["mdi:window-open-variant"]
 		],
 		[
 			"mdi:blinds-horizontal",
 			"Blinds",
-			P["mdi:blinds-horizontal"]
+			N["mdi:blinds-horizontal"]
 		],
 		[
 			"mdi:roller-shade",
 			"Roller shade",
-			P["mdi:roller-shade"]
+			N["mdi:roller-shade"]
 		],
 		[
 			"mdi:curtains",
 			"Curtains",
-			P["mdi:curtains"]
+			N["mdi:curtains"]
 		],
 		[
 			"mdi:lock",
 			"Lock",
-			P["mdi:lock"]
+			N["mdi:lock"]
 		],
 		[
 			"mdi:lock-open-variant",
 			"Unlocked",
-			P["mdi:lock-open-variant"]
+			N["mdi:lock-open-variant"]
 		]
 	]],
 	["Other", [
 		[
 			"mdi:air-conditioner",
 			"Air conditioner",
-			P["mdi:air-conditioner"]
+			N["mdi:air-conditioner"]
 		],
 		[
 			"mdi:fan",
 			"Fan",
-			P["mdi:fan"]
+			N["mdi:fan"]
 		],
 		[
 			"mdi:thermometer",
 			"Thermometer",
-			P["mdi:thermometer"]
+			N["mdi:thermometer"]
 		],
 		[
 			"mdi:radiator",
 			"Radiator",
-			P["mdi:radiator"]
+			N["mdi:radiator"]
 		],
 		[
 			"mdi:television",
 			"TV",
-			P["mdi:television"]
+			N["mdi:television"]
 		],
 		[
 			"mdi:speaker",
 			"Speaker",
-			P["mdi:speaker"]
+			N["mdi:speaker"]
 		],
 		[
 			"mdi:power-plug",
 			"Plug",
-			P["mdi:power-plug"]
+			N["mdi:power-plug"]
 		],
 		[
 			"mdi:power",
 			"Power",
-			P["mdi:power"]
+			N["mdi:power"]
 		],
 		[
 			"mdi:flash",
 			"Flash",
-			P["mdi:flash"]
+			N["mdi:flash"]
 		],
 		[
 			"mdi:play",
 			"Play",
-			P["mdi:play"]
+			N["mdi:play"]
 		],
 		[
 			"mdi:desk",
 			"Desk",
-			P["mdi:desk"]
+			N["mdi:desk"]
 		],
 		[
 			"mdi:bed",
 			"Bed",
-			P["mdi:bed"]
+			N["mdi:bed"]
 		],
 		[
 			"mdi:sofa",
 			"Sofa",
-			P["mdi:sofa"]
+			N["mdi:sofa"]
 		],
 		[
 			"mdi:home",
 			"Home",
-			P["mdi:home"]
+			N["mdi:home"]
 		],
 		[
 			"mdi:star",
 			"Star",
-			P["mdi:star"]
+			N["mdi:star"]
 		]
 	]]
-], he = new Map(me.flatMap(([, e]) => e.map(([e, t, n]) => [e, {
+], ge = new Map(he.flatMap(([, e]) => e.map(([e, t, n]) => [e, {
 	label: t,
 	path: n
 }])));
-function F(e) {
+function _e(e) {
 	return "mdi" + e.replace(/^mdi:/, "").split("-").map((e) => e.charAt(0).toUpperCase() + e.slice(1)).join("");
 }
 // shared/icon-art.mjs
-var I = /^[MmLlHhVvCcSsQqTtAaZz0-9eE.,\s+-]+$/, L = /^-?[\d.]+(?:[\s,]+-?[\d.]+){3}$/, R = "0 0 24 24";
-function z({ path: e, secondaryPath: t, viewBox: n } = {}) {
-	if (typeof e == "string" && I.test(e)) return {
-		viewBox: typeof n == "string" && L.test(n.trim()) ? n.trim() : R,
-		html: `${typeof t == "string" && I.test(t) ? `<path d="${t}" opacity="0.5"/>` : ""}<path d="${e}"/>`
+var P = /^[MmLlHhVvCcSsQqTtAaZz0-9eE.,\s+-]+$/, ve = /^-?[\d.]+(?:[\s,]+-?[\d.]+){3}$/, F = "0 0 24 24";
+function I({ path: e, secondaryPath: t, viewBox: n } = {}) {
+	if (typeof e == "string" && P.test(e)) return {
+		viewBox: typeof n == "string" && ve.test(n.trim()) ? n.trim() : F,
+		html: `${typeof t == "string" && P.test(t) ? `<path d="${t}" opacity="0.5"/>` : ""}<path d="${e}"/>`
 	};
 }
 // dashboard/standalone-icons.mjs
-function ge({ customIcons: e = () => globalThis.window?.customIcons || {}, loadModules: t = async () => {}, loadMdi: n = () => import("./mdi-CGHzqUII.js") } = {}) {
+function ye({ customIcons: e = () => globalThis.window?.customIcons || {}, loadModules: t = async () => {}, loadMdi: n = () => import("./mdi-CGHzqUII.js") } = {}) {
 	let r = /* @__PURE__ */ new Map(), i, a = async (r) => {
 		let a = r.indexOf(":"), o = r.slice(0, a);
 		if (o === "mdi") {
-			let e = he.get(r);
+			let e = ge.get(r);
 			if (e) return {
-				viewBox: R,
+				viewBox: F,
 				html: `<path d="${e.path}"/>`
 			};
-			let t = (await n())[F(r)];
-			return z({ path: t });
+			let t = (await n())[_e(r)];
+			return I({ path: t });
 		}
 		e()[o] || (i ||= Promise.resolve(t()).catch(() => {}), await i);
 		let s = e()[o];
-		if (typeof s?.getIcon == "function") return z(await s.getIcon(r.slice(a + 1)));
+		if (typeof s?.getIcon == "function") return I(await s.getIcon(r.slice(a + 1)));
 	};
 	return { resolve(e) {
 		return typeof e != "string" || !e.includes(":") ? Promise.resolve(void 0) : (r.has(e) || r.set(e, a(e).catch(() => void 0)), r.get(e));
 	} };
 }
-function _e(e) {
+function be(e) {
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e?.entities || []) n.ei && typeof n.ic == "string" && t.set(n.ei, n.ic);
 	return (e) => t.get(e);
 }
-function ve({ resolver: e, registryIcon: t = () => void 0 }) {
+function xe({ resolver: e, registryIcon: t = () => void 0 }) {
 	if (customElements.get("ha-state-icon")) return;
 	class n extends HTMLElement {
 		constructor() {
@@ -928,7 +928,7 @@ function ve({ resolver: e, registryIcon: t = () => void 0 }) {
 	customElements.define("ha-state-icon", n);
 }
 // dashboard/more-info-icons.mjs
-var B = {
+var L = {
 	close: "M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z",
 	power: "M16.56,5.44L15.11,6.89C16.84,7.94 18,9.83 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12C6,9.83 7.16,7.94 8.88,6.88L7.44,5.44C5.36,6.88 4,9.28 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,9.28 18.64,6.88 16.56,5.44M13,3H11V13H13",
 	palette: "M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8A1.5,1.5 0 0,1 13,6.5A1.5,1.5 0 0,1 14.5,5A1.5,1.5 0 0,1 16,6.5A1.5,1.5 0 0,1 14.5,8M9.5,8A1.5,1.5 0 0,1 8,6.5A1.5,1.5 0 0,1 9.5,5A1.5,1.5 0 0,1 11,6.5A1.5,1.5 0 0,1 9.5,8M6.5,12A1.5,1.5 0 0,1 5,10.5A1.5,1.5 0 0,1 6.5,9A1.5,1.5 0 0,1 8,10.5A1.5,1.5 0 0,1 6.5,12M12,3A9,9 0 0,0 3,12A9,9 0 0,0 12,21A1.5,1.5 0 0,0 13.5,19.5C13.5,19.11 13.35,18.76 13.11,18.5C12.88,18.23 12.73,17.88 12.73,17.5A1.5,1.5 0 0,1 14.23,16H16A5,5 0 0,0 21,11C21,6.58 16.97,3 12,3Z",
@@ -967,24 +967,33 @@ var B = {
 	doorClosed: "M16,11H18V13H16V11M12,3H19C20.11,3 21,3.89 21,5V19H22V21H2V19H10V5C10,3.89 10.89,3 12,3M12,5V19H19V5H12Z",
 	doorOpen: "M12,3C10.89,3 10,3.89 10,5H3V19H2V21H22V19H21V5C21,3.89 20.11,3 19,3H12M12,5H19V19H12V5M5,11H7V13H5V11Z",
 	blindsClosed: "M20 19V3H4V19H2V21H13.25C13.25 21.97 14.03 22.75 15 22.75S16.75 21.97 16.75 21H22V19H20M18 11H16V9H18V11M14 11H6V9H14V11M14 13V15H6V13H14M16 13H18V15H16V13M18 7H16V5H18V7M14 5V7H6V5H14M6 19V17H14V19H6M16 19V17H18V19H16Z",
-	blindsOpen: "M20 19V3H4V19H2V21H22V19H20M16 9H18V11H16V9M14 11H6V9H14V11M18 7H16V5H18V7M14 5V7H6V5H14M6 19V13H14V14.82C13.55 15.14 13.25 15.66 13.25 16.25C13.25 17.22 14.03 18 15 18S16.75 17.22 16.75 16.25C16.75 15.66 16.45 15.13 16 14.82V13H18V19H6Z"
-}, V = [
+	blindsOpen: "M20 19V3H4V19H2V21H22V19H20M16 9H18V11H16V9M14 11H6V9H14V11M18 7H16V5H18V7M14 5V7H6V5H14M6 19V13H14V14.82C13.55 15.14 13.25 15.66 13.25 16.25C13.25 17.22 14.03 18 15 18S16.75 17.22 16.75 16.25C16.75 15.66 16.45 15.13 16 14.82V13H18V19H6Z",
+	home: "M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z",
+	night: "M2 12A10 10 0 0 0 15 21.54A10 10 0 0 1 15 2.46A10 10 0 0 0 2 12Z",
+	airplane: "M20.56 3.91C21.15 4.5 21.15 5.45 20.56 6.03L16.67 9.92L18.79 19.11L17.38 20.53L13.5 13.1L9.6 17L9.96 19.47L8.89 20.53L7.13 17.35L3.94 15.58L5 14.5L7.5 14.87L11.37 11L3.94 7.09L5.36 5.68L14.55 7.8L18.44 3.91C19 3.33 20 3.33 20.56 3.91Z",
+	security: "M12,12H19C18.47,16.11 15.72,19.78 12,20.92V12H5V6.3L12,3.19M12,1L3,5V11C3,16.55 6.84,21.73 12,23C17.16,21.73 21,16.55 21,11V5L12,1Z",
+	shieldOff: "M1,4.27L2.28,3L20.5,21.22L19.23,22.5L17,20.25C15.57,21.57 13.87,22.54 12,23C6.84,21.74 3,16.55 3,11V6.27L1,4.27M12,1L21,5V11C21,13.28 20.35,15.5 19.23,17.41L5.65,3.82L12,1Z",
+	bellRing: "M21,19V20H3V19L5,17V11C5,7.9 7.03,5.17 10,4.29C10,4.19 10,4.1 10,4A2,2 0 0,1 12,2A2,2 0 0,1 14,4C14,4.1 14,4.19 14,4.29C16.97,5.17 19,7.9 19,11V17L21,19M14,21A2,2 0 0,1 12,23A2,2 0 0,1 10,21M19.75,3.19L18.33,4.61C20.04,6.3 21,8.6 21,11H23C23,8.07 21.84,5.25 19.75,3.19M1,11H3C3,8.6 3.96,6.3 5.67,4.61L4.25,3.19C2.16,5.25 1,8.07 1,11Z",
+	check: "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z",
+	eye: "M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z",
+	eyeOff: "M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.74,7.13 11.35,7 12,7Z"
+}, R = [
 	"hs",
 	"xy",
 	"rgb",
 	"rgbw",
 	"rgbww"
 ];
-function ye(e) {
+function Se(e) {
 	let t = e?.attributes || {}, n = t.supported_color_modes || [], r = e?.entity_id?.startsWith("light."), i = Number.isFinite(t.min_color_temp_kelvin) ? t.min_color_temp_kelvin : 2e3, a = Number.isFinite(t.max_color_temp_kelvin) ? t.max_color_temp_kelvin : 6535;
 	return {
 		brightness: !!r && n.some((e) => [
 			"brightness",
 			"color_temp",
 			"white",
-			...V
+			...R
 		].includes(e)),
-		color: !!r && n.some((e) => V.includes(e)),
+		color: !!r && n.some((e) => R.includes(e)),
 		temperature: !!r && n.includes("color_temp") && i > 0 && a >= i,
 		minKelvin: i,
 		maxKelvin: a,
@@ -992,7 +1001,7 @@ function ye(e) {
 		transition: !!r && !!(t.supported_features & 32)
 	};
 }
-function H(e) {
+function z(e) {
 	let t = Math.max(1e3, Math.min(4e4, e)) / 100;
 	return [
 		t <= 66 ? 255 : 329.698727446 * (t - 60) ** -.1332047592,
@@ -1001,11 +1010,11 @@ function H(e) {
 	].map((e) => Math.round(Math.max(0, Math.min(255, e))));
 }
 // dashboard/more-info-model.mjs
-function be([e, t, n]) {
+function Ce([e, t, n]) {
 	let r = Math.max(e, t, n), i = r - Math.min(e, t, n), a = 0;
 	return i && (a = r === e ? (t - n) / i % 6 : r === t ? (n - e) / i + 2 : (e - t) / i + 4, a *= 60, a < 0 && (a += 360)), [Math.round(a), Math.round(r ? i / r * 100 : 0)];
 }
-function xe([e, t], n = 1) {
+function we([e, t], n = 1) {
 	let r = t / 100 * n, i = r * (1 - Math.abs(e / 60 % 2 - 1)), a = n - r, [o, s, c] = e < 60 ? [
 		r,
 		i,
@@ -1037,7 +1046,7 @@ function xe([e, t], n = 1) {
 		c
 	].map((e) => Math.round((e + a) * 255));
 }
-function Se(e, t = Date.now()) {
+function Te(e, t = Date.now()) {
 	let n = Date.parse(e);
 	if (!Number.isFinite(n)) return "";
 	let r = Math.round((n - t) / 1e3);
@@ -1050,7 +1059,7 @@ function Se(e, t = Date.now()) {
 	]) if (Math.abs(r) >= t) return i.format(Math.round(r / t), e);
 	return "just now";
 }
-function U(e, t = Date.now()) {
+function B(e, t = Date.now()) {
 	let n = Date.parse(e);
 	if (!Number.isFinite(n)) return "";
 	let r = Math.round((n - t) / 1e3), i = new Intl.RelativeTimeFormat(void 0, { numeric: "auto" });
@@ -1061,7 +1070,7 @@ function U(e, t = Date.now()) {
 	]) if (Math.abs(r) >= t) return i.format(Math.round(r / t), e);
 	return Math.abs(r) < 2 ? "just now" : i.format(r, "second");
 }
-function Ce(e, t) {
+function Ee(e, t) {
 	let n = ["garage", "gate"].includes(e) ? "garage" : e === "door" ? "door" : [
 		"blind",
 		"shade",
@@ -1069,7 +1078,7 @@ function Ce(e, t) {
 	].includes(e) ? "blinds" : "shutter";
 	return n === "door" ? t ? "doorOpen" : "doorClosed" : t ? `${n}Open` : n === "blinds" ? "blindsClosed" : n;
 }
-var we = /* @__PURE__ */ new Set([
+var De = /* @__PURE__ */ new Set([
 	"friendly_name",
 	"icon",
 	"entity_picture",
@@ -1086,29 +1095,82 @@ var we = /* @__PURE__ */ new Set([
 	"editable",
 	"restored"
 ]);
-function Te(e = {}) {
-	return Object.entries(e).filter(([e, t]) => !we.has(e) && t !== null && t !== "").slice(0, 14).map(([e, t]) => {
+function Oe(e = {}) {
+	return Object.entries(e).filter(([e, t]) => !De.has(e) && t !== null && t !== "").slice(0, 14).map(([e, t]) => {
 		let n = e.replace(/_/g, " ").replace(/^./, (e) => e.toUpperCase()), r = Array.isArray(t) && t.every((e) => typeof e != "object") ? t.join(", ") : typeof t == "object" ? JSON.stringify(t) : String(t);
 		return [n, r.length > 120 ? r.slice(0, 117) + "…" : r];
 	});
 }
-var W = (e) => Number.isFinite(e) ? e : void 0, Ee = /* @__PURE__ */ new Set(["unavailable", "unknown"]);
-function De(e) {
+var V = [
+	{
+		state: "armed_home",
+		service: "alarm_arm_home",
+		label: "Home",
+		icon: "home",
+		feature: 1
+	},
+	{
+		state: "armed_away",
+		service: "alarm_arm_away",
+		label: "Away",
+		icon: "lock",
+		feature: 2
+	},
+	{
+		state: "armed_night",
+		service: "alarm_arm_night",
+		label: "Night",
+		icon: "night",
+		feature: 4
+	},
+	{
+		state: "armed_vacation",
+		service: "alarm_arm_vacation",
+		label: "Vacation",
+		icon: "airplane",
+		feature: 32
+	},
+	{
+		state: "armed_custom_bypass",
+		service: "alarm_arm_custom_bypass",
+		label: "Custom bypass",
+		icon: "security",
+		feature: 16
+	},
+	{
+		state: "disarmed",
+		service: "alarm_disarm",
+		label: "Disarmed",
+		icon: "shieldOff",
+		feature: 0
+	}
+];
+function ke(e, t) {
+	return e?.codeFormat ? t === "alarm_disarm" || e.codeArmRequired : !1;
+}
+function Ae(e) {
+	let t = e?.state, n = e?.attributes || {};
+	if (V.some((e) => e.state === t)) return t;
+	let r = n.next_state || n.arm_mode;
+	return V.some((e) => e.state === r) ? r : void 0;
+}
+var H = (e) => Number.isFinite(e) ? e : void 0, je = /* @__PURE__ */ new Set(["unavailable", "unknown"]);
+function Me(e) {
 	let t = e?.entity_id || "", n = t.split(".")[0], r = e?.attributes || {}, i = {
 		id: t,
 		domain: n,
 		name: r.friendly_name || t,
 		state: e?.state,
-		unavailable: !e || Ee.has(e.state),
-		changed: Se(e?.last_changed),
-		since: U(e?.last_changed),
+		unavailable: !e || je.has(e.state),
+		changed: Te(e?.last_changed),
+		since: B(e?.last_changed),
 		deviceClass: r.device_class,
-		attributes: Te(r),
+		attributes: Oe(r),
 		controls: []
 	};
 	if (i.unavailable) return i;
 	if (n === "light") {
-		let t = ye(e);
+		let t = Se(e);
 		i.controls.push({
 			kind: "toggle",
 			on: e.state === "on"
@@ -1119,7 +1181,7 @@ function De(e) {
 			min: 0,
 			max: 255,
 			step: 1,
-			value: e.state === "on" ? W(r.brightness) ?? 0 : 0,
+			value: e.state === "on" ? H(r.brightness) ?? 0 : 0,
 			format: (e) => e > 0 ? `${Math.max(1, Math.round(e / 255 * 100))}%` : "Off"
 		}), t.temperature && i.controls.push({
 			kind: "slider",
@@ -1128,13 +1190,13 @@ function De(e) {
 			min: t.minKelvin,
 			max: t.maxKelvin,
 			step: 50,
-			value: W(r.color_temp_kelvin) ?? t.minKelvin,
+			value: H(r.color_temp_kelvin) ?? t.minKelvin,
 			format: (e) => `${Math.round(e)} K`
 		}), t.color && i.controls.push({
 			kind: "color",
 			key: "hs_color",
 			label: "Colour",
-			value: Array.isArray(r.hs_color) ? [r.hs_color[0], r.hs_color[1]] : be(Array.isArray(r.rgb_color) ? r.rgb_color : H(W(r.color_temp_kelvin) ?? 3e3))
+			value: Array.isArray(r.hs_color) ? [r.hs_color[0], r.hs_color[1]] : Ce(Array.isArray(r.rgb_color) ? r.rgb_color : z(H(r.color_temp_kelvin) ?? 3e3))
 		}), t.effects.length && i.controls.push({
 			kind: "select",
 			key: "effect",
@@ -1174,7 +1236,7 @@ function De(e) {
 			min: 0,
 			max: 100,
 			step: 1,
-			value: W(r.current_position) ?? 0,
+			value: H(r.current_position) ?? 0,
 			format: (e) => `${Math.round(e)}%`
 		});
 	} else if (n === "lock") i.controls.push({
@@ -1187,15 +1249,24 @@ function De(e) {
 			label: "Unlock"
 		}]
 	});
-	else if (n === "climate") {
-		W(r.temperature) !== void 0 && i.controls.push({
+	else if (n === "alarm_control_panel") {
+		let t = Number.isFinite(r.supported_features) ? r.supported_features : 3;
+		i.controls.push({
+			kind: "alarm",
+			modes: V.filter((e) => !e.feature || t & e.feature),
+			codeFormat: r.code_format === "number" || r.code_format === "text" ? r.code_format : null,
+			codeArmRequired: r.code_arm_required !== !1,
+			mode: Ae(e)
+		});
+	} else if (n === "climate") {
+		H(r.temperature) !== void 0 && i.controls.push({
 			kind: "stepper",
 			key: "temperature",
 			service: "set_temperature",
 			label: "Target temperature",
-			min: W(r.min_temp) ?? 7,
-			max: W(r.max_temp) ?? 35,
-			step: W(r.target_temp_step) ?? .5,
+			min: H(r.min_temp) ?? 7,
+			max: H(r.max_temp) ?? 35,
+			step: H(r.target_temp_step) ?? .5,
 			value: r.temperature,
 			unit: "°"
 		}), Array.isArray(r.hvac_modes) && r.hvac_modes.length && i.controls.push({
@@ -1256,8 +1327,8 @@ function De(e) {
 		label: "Speed",
 		min: 0,
 		max: 100,
-		step: W(r.percentage_step) ?? 1,
-		value: W(r.percentage) ?? 0,
+		step: H(r.percentage_step) ?? 1,
+		value: H(r.percentage) ?? 0,
 		format: (e) => `${Math.round(e)}%`
 	})) : ["button", "input_button"].includes(n) ? i.controls.push({
 		kind: "buttons",
@@ -1274,13 +1345,25 @@ function De(e) {
 	});
 	return i;
 }
-function Oe(e, t, n) {
+function U(e, t, n) {
 	let { domain: r, id: i } = e;
 	if (t.kind === "toggle") return [
 		r === "light" || r === "switch" ? r : "homeassistant",
 		n ? "turn_on" : "turn_off",
 		{ entity_id: i }
 	];
+	if (t.kind === "alarm") {
+		let { service: e, code: r } = n || {};
+		if (!t.modes.some((t) => t.service === e)) throw Error("Unknown alarm mode");
+		return [
+			"alarm_control_panel",
+			e,
+			r ? {
+				entity_id: i,
+				code: r
+			} : { entity_id: i }
+		];
+	}
 	if (t.kind === "buttons") return [
 		r,
 		n,
@@ -1323,7 +1406,14 @@ function Oe(e, t, n) {
 	throw Error("Unknown control");
 }
 // dashboard/more-info.mjs
-var ke = "\ndialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f;--mi-surface:#ffffff14;--mi-surface-2:#ffffff24;--mi-primary:#03a9f4;--mi-ink:#fff;--mi-accent:var(--mi-primary);--mi-accent-ink:#fff;\n box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--mi-bg);color:var(--mi-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:mi-in .22s cubic-bezier(.2,.8,.2,1)}\n@media (prefers-color-scheme:light){dialog.mi{--mi-bg:#fff;--mi-fg:#212121;--mi-muted:#727272;--mi-line:#0000001f;--mi-surface:#0000000d;--mi-surface-2:#0000001a;--mi-ink:#212121;box-shadow:0 24px 64px #0004}}\ndialog.mi::backdrop{background:#000a}\n@media (prefers-color-scheme:light){dialog.mi::backdrop{background:#0006}}\n@keyframes mi-in{from{opacity:0;transform:translateY(20px) scale(.98)}}\n@media (prefers-reduced-motion:reduce){dialog.mi{animation:none}.mi *{transition:none!important;animation:none!important}}\n@media (max-width:600px){dialog.mi{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;animation-name:mi-up}@keyframes mi-up{from{transform:translateY(100%)}}}\n.mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}\n@media (max-width:600px){.mi-frame{max-height:94vh}}\n.mi-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}\n.mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}\n.mi-head h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-head p{margin:0;color:var(--mi-muted);font-size:13px}\n.mi-iconbtn{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;transition:background .15s}\n.mi-iconbtn:hover{background:var(--mi-surface)}\n.mi svg{width:24px;height:24px;fill:currentColor;display:block}\n.mi-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:8px 24px 24px}\n.mi-center{display:flex;flex-direction:column;align-items:center;gap:20px}\n.mi button:focus-visible,.mi [role=slider]:focus-visible{outline:2px solid var(--mi-primary);outline-offset:3px}\n/* sliders */\n.mi-slider{position:relative;overflow:hidden;background:var(--mi-surface);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}\n.mi-slider:hover{background:var(--mi-surface-2)}\n.mi-slider .mi-fill{position:absolute;background:var(--mi-accent);opacity:.92;transition:background .3s}\n.mi-slider.mi-dragging .mi-fill{transition:none}\n.mi-slider.mi-v{width:132px;height:min(300px,38vh);min-height:200px;border-radius:28px}\n.mi-v .mi-fill{left:0;right:0;bottom:0}\n.mi-v .mi-readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;color:var(--mi-accent-ink);text-shadow:0 1px 2px #0004}\n.mi-v .mi-big{font:500 34px/1.1 Roboto,system-ui,sans-serif}\n.mi-v .mi-small{font-size:14px;opacity:.85}\n.mi-slider.mi-h{width:100%;height:48px;border-radius:14px}\n.mi-h .mi-fill{left:0;top:0;bottom:0}\n.mi-h.mi-track{background-image:var(--mi-gradient);background-color:transparent}\n.mi-h.mi-track .mi-fill{display:none}\n.mi-h .mi-thumb{position:absolute;top:8px;bottom:8px;width:6px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 0 1.5px #0004;pointer-events:none}\n.mi-field{width:100%;display:grid;gap:8px}\n.mi-field>.mi-label{display:flex;justify-content:space-between;font-weight:500}\n.mi-field output{color:var(--mi-muted);font-weight:400}\n/* round buttons */\n.mi-row{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;width:100%}\n.mi-round{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;padding:0;color:inherit;font:inherit;font-size:12px;cursor:pointer;min-width:64px}\n.mi-round .mi-disc{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--mi-surface-2);transition:background .15s,color .15s}\n.mi-round:hover .mi-disc{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-round[aria-pressed=true] .mi-disc{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-round:disabled{opacity:.4;cursor:default}\n.mi-round>span:last-child{color:var(--mi-muted)}\n.mi-round[aria-pressed=true]>span:last-child{color:var(--mi-fg)}\n/* panels & lists */\n.mi-panel{width:100%;display:grid;gap:18px;padding:16px;border-radius:20px;background:var(--mi-surface)}\n.mi-panel[hidden]{display:none}\n.mi-list{display:grid;gap:2px;margin:0;padding:0;list-style:none;max-height:220px;overflow:auto}\n.mi-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}\n.mi-list button:hover{background:var(--mi-surface-2)}\n.mi-list button[aria-checked=true]{color:var(--mi-primary);font-weight:500}\n.mi-list button[aria-checked=true]::after{content:\"✓\"}\n/* big tall switch and lock */\n.mi-tall{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:132px;height:min(240px,32vh);min-height:170px;border:0;border-radius:28px;background:var(--mi-surface-2);color:var(--mi-muted);font:500 16px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}\n.mi-tall svg{width:44px;height:44px}\n.mi-tall[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-lock{display:grid;place-items:center;width:176px;height:176px;border:0;border-radius:50%;background:color-mix(in srgb,var(--mi-accent) 22%,transparent);color:var(--mi-accent);cursor:pointer;transition:background .2s,color .2s;box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--mi-accent) 55%,transparent)}\n.mi-lock svg{width:72px;height:72px}\n.mi-lock:disabled{opacity:.5;cursor:default}\n/* cover: big state, then a tall two-way switch or a position slider */\n.mi-statehead{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px 0 4px;text-align:center}\n.mi-statehead strong{font:400 40px/1.15 Roboto,system-ui,sans-serif;letter-spacing:-.5px}\n.mi-statehead span{color:var(--mi-muted);font-size:16px}\n.mi-cover-switch{position:relative;box-sizing:border-box;width:132px;height:min(330px,40vh);min-height:220px;padding:8px;border:0;border-radius:32px;background:var(--mi-surface-2);color:inherit;cursor:pointer;touch-action:none}\n.mi-cover-switch:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 10%)}\n.mi-cover-knob{position:absolute;left:8px;right:8px;bottom:calc(8px + (50% - 8px) * var(--mi-pos,0));height:calc(50% - 8px);display:grid;place-items:center;border-radius:24px;background:#9e9e9e;color:#fff;pointer-events:none;transition:bottom .25s cubic-bezier(.3,.7,.3,1),background .25s}\n.mi-cover-switch.mi-dragging .mi-cover-knob{transition:background .25s}\n.mi-cover-switch[aria-checked=true] .mi-cover-knob{background:var(--mi-accent)}\n.mi-cover-switch[data-moving=true]{background:color-mix(in srgb,var(--mi-accent) 28%,var(--mi-surface-2))}\n.mi-cover-switch[data-moving=true] .mi-cover-knob{background:var(--mi-accent);animation:mi-moving 1.2s ease-in-out infinite}\n@keyframes mi-moving{50%{opacity:.7}}\n.mi-cover-knob svg{width:30px;height:30px}\n.mi-cover-switch:disabled{opacity:.5;cursor:default}\n.mi-cover-buttons{display:flex;gap:0;padding:4px;border-radius:24px;background:var(--mi-surface)}\n.mi-cover-buttons .mi-iconbtn{width:64px;height:48px;border-radius:20px}\n.mi-cover-buttons .mi-iconbtn:hover{background:var(--mi-surface-2)}\n.mi-state{font:500 20px Roboto,system-ui,sans-serif}\n.mi-sub{color:var(--mi-muted);margin-top:-12px}\n/* climate */\n.mi-temp{display:flex;align-items:center;justify-content:center;gap:20px;width:100%}\n.mi-temp output{display:flex;flex-direction:column;align-items:center;min-width:140px;font:500 56px/1 Roboto,system-ui,sans-serif}\n.mi-temp output small{margin-top:8px;font:400 14px Roboto,system-ui,sans-serif;color:var(--mi-muted)}\n.mi-temp .mi-iconbtn{width:56px;height:56px;background:var(--mi-surface-2)}\n.mi-temp .mi-iconbtn:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-pill{min-height:48px;padding:0 28px;border:0;border-radius:24px;background:var(--mi-primary);color:#fff;font:500 15px Roboto,system-ui,sans-serif;cursor:pointer}\n.mi-pill:hover{filter:brightness(1.08)}\n/* climate dial */\n.mi-climate{gap:12px}\n.mi-current{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mi-muted)}\n.mi-current strong{color:var(--mi-fg);font:500 20px Roboto,system-ui,sans-serif}\n.mi-dial{position:relative;width:min(300px,100%);aspect-ratio:1;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;border-radius:50%}\n.mi-dial svg{width:100%;height:100%;overflow:visible}\n.mi-dial svg path{fill:none;stroke-width:20;stroke-linecap:round}\n.mi-arc-track{stroke:var(--mi-surface-2)}\n.mi-arc-fill{stroke:var(--mi-accent);transition:stroke .3s}\n.mi-cur{fill:var(--mi-muted)}\n.mi-handle{fill:#fff;stroke:var(--mi-bg);stroke-width:0;filter:drop-shadow(0 1px 3px #0006)}\n.mi-dial.mi-dragging .mi-handle{r:13}\n.mi-dial-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none}\n.mi-dial-state{font:400 18px Roboto,system-ui,sans-serif}\n.mi-dial-value{display:flex;align-items:flex-start;font:400 72px/1 Roboto,system-ui,sans-serif;letter-spacing:-1px}\n.mi-sup{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:6px 0 0 4px;font:400 22px/1 Roboto,system-ui,sans-serif;letter-spacing:0}\n.mi-dec{font-size:22px;color:var(--mi-fg)}\n.mi-dialbtns{display:flex;gap:36px;margin-top:-58px;position:relative}\n.mi-outline{display:grid;place-items:center;width:56px;height:56px;padding:0;border:1px solid var(--mi-muted);border-radius:50%;background:var(--mi-bg);color:var(--mi-fg);cursor:pointer}\n.mi-outline:hover{background:var(--mi-surface-2)}\n.mi-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px}\n.mi-tile{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 14px;border:0;border-radius:16px;background:var(--mi-surface);color:inherit;font:inherit;text-align:left;cursor:pointer;min-width:0}\n.mi-tile:hover{background:var(--mi-surface-2)}\n.mi-tile-icon svg{width:24px;height:24px}\n.mi-tile-text{display:flex;flex-direction:column;min-width:0}\n.mi-tile-label{color:var(--mi-muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-tile-value{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n/* attributes */\n.mi-attrs{margin-top:24px;border-top:1px solid var(--mi-line);padding-top:4px}\n.mi-attrs summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-weight:500;cursor:pointer;list-style:none}\n.mi-attrs summary::-webkit-details-marker{display:none}\n.mi-attrs summary svg{transition:transform .2s}\n.mi-attrs[open] summary svg{transform:rotate(180deg)}\n.mi-attrs dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px 16px;margin:0 0 4px}\n.mi-attrs dt{color:var(--mi-muted)}\n.mi-attrs dd{margin:0;text-align:right;overflow-wrap:anywhere}\n.mi-error{margin:12px 0 0;color:#db4437;text-align:center}\n", G = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${B[e]}"/></svg>`, K = (e) => `rgb(${e.join(",")})`, Ae = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", q = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), je = {
+var Ne = "\ndialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f;--mi-surface:#ffffff14;--mi-surface-2:#ffffff24;--mi-primary:#03a9f4;--mi-ink:#fff;--mi-accent:var(--mi-primary);--mi-accent-ink:#fff;\n box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--mi-bg);color:var(--mi-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:mi-in .22s cubic-bezier(.2,.8,.2,1)}\n@media (prefers-color-scheme:light){dialog.mi{--mi-bg:#fff;--mi-fg:#212121;--mi-muted:#727272;--mi-line:#0000001f;--mi-surface:#0000000d;--mi-surface-2:#0000001a;--mi-ink:#212121;box-shadow:0 24px 64px #0004}}\ndialog.mi::backdrop{background:#000a}\n@media (prefers-color-scheme:light){dialog.mi::backdrop{background:#0006}}\n@keyframes mi-in{from{opacity:0;transform:translateY(20px) scale(.98)}}\n@media (prefers-reduced-motion:reduce){dialog.mi{animation:none}.mi *{transition:none!important;animation:none!important}}\n@media (max-width:600px){dialog.mi{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;animation-name:mi-up}@keyframes mi-up{from{transform:translateY(100%)}}}\n.mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}\n@media (max-width:600px){.mi-frame{max-height:94vh}}\n.mi-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}\n.mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}\n.mi-head h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-head p{margin:0;color:var(--mi-muted);font-size:13px}\n.mi-iconbtn{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;transition:background .15s}\n.mi-iconbtn:hover{background:var(--mi-surface)}\n.mi svg{width:24px;height:24px;fill:currentColor;display:block}\n.mi-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:8px 24px 24px}\n.mi-center{display:flex;flex-direction:column;align-items:center;gap:20px}\n.mi button:focus-visible,.mi [role=slider]:focus-visible{outline:2px solid var(--mi-primary);outline-offset:3px}\n/* sliders */\n.mi-slider{position:relative;overflow:hidden;background:var(--mi-surface);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}\n.mi-slider:hover{background:var(--mi-surface-2)}\n.mi-slider .mi-fill{position:absolute;background:var(--mi-accent);opacity:.92;transition:background .3s}\n.mi-slider.mi-dragging .mi-fill{transition:none}\n.mi-slider.mi-v{width:132px;height:min(300px,38vh);min-height:200px;border-radius:28px}\n.mi-v .mi-fill{left:0;right:0;bottom:0}\n.mi-v .mi-readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;color:var(--mi-accent-ink);text-shadow:0 1px 2px #0004}\n.mi-v .mi-big{font:500 34px/1.1 Roboto,system-ui,sans-serif}\n.mi-v .mi-small{font-size:14px;opacity:.85}\n.mi-slider.mi-h{width:100%;height:48px;border-radius:14px}\n.mi-h .mi-fill{left:0;top:0;bottom:0}\n.mi-h.mi-track{background-image:var(--mi-gradient);background-color:transparent}\n.mi-h.mi-track .mi-fill{display:none}\n.mi-h .mi-thumb{position:absolute;top:8px;bottom:8px;width:6px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 0 1.5px #0004;pointer-events:none}\n.mi-field{width:100%;display:grid;gap:8px}\n.mi-field>.mi-label{display:flex;justify-content:space-between;font-weight:500}\n.mi-field output{color:var(--mi-muted);font-weight:400}\n/* round buttons */\n.mi-row{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;width:100%}\n.mi-round{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;padding:0;color:inherit;font:inherit;font-size:12px;cursor:pointer;min-width:64px}\n.mi-round .mi-disc{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--mi-surface-2);transition:background .15s,color .15s}\n.mi-round:hover .mi-disc{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-round[aria-pressed=true] .mi-disc{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-round:disabled{opacity:.4;cursor:default}\n.mi-round>span:last-child{color:var(--mi-muted)}\n.mi-round[aria-pressed=true]>span:last-child{color:var(--mi-fg)}\n/* panels & lists */\n.mi-panel{width:100%;display:grid;gap:18px;padding:16px;border-radius:20px;background:var(--mi-surface)}\n.mi-panel[hidden]{display:none}\n.mi-list{display:grid;gap:2px;margin:0;padding:0;list-style:none;max-height:220px;overflow:auto}\n.mi-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}\n.mi-list button:hover{background:var(--mi-surface-2)}\n.mi-list button[aria-checked=true]{color:var(--mi-primary);font-weight:500}\n.mi-list button[aria-checked=true]::after{content:\"✓\"}\n/* big tall switch and lock */\n.mi-tall{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:132px;height:min(240px,32vh);min-height:170px;border:0;border-radius:28px;background:var(--mi-surface-2);color:var(--mi-muted);font:500 16px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}\n.mi-tall svg{width:44px;height:44px}\n.mi-tall[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-lock{display:grid;place-items:center;width:176px;height:176px;border:0;border-radius:50%;background:color-mix(in srgb,var(--mi-accent) 22%,transparent);color:var(--mi-accent);cursor:pointer;transition:background .2s,color .2s;box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--mi-accent) 55%,transparent)}\n.mi-lock svg{width:72px;height:72px}\n.mi-lock:disabled{opacity:.5;cursor:default}\n/* cover: big state, then a tall two-way switch or a position slider */\n.mi-statehead{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px 0 4px;text-align:center}\n.mi-statehead strong{font:400 40px/1.15 Roboto,system-ui,sans-serif;letter-spacing:-.5px}\n.mi-statehead span{color:var(--mi-muted);font-size:16px}\n.mi-cover-switch{position:relative;box-sizing:border-box;width:132px;height:min(330px,40vh);min-height:220px;padding:8px;border:0;border-radius:32px;background:var(--mi-surface-2);color:inherit;cursor:pointer;touch-action:none}\n.mi-cover-switch:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 10%)}\n.mi-cover-knob{position:absolute;left:8px;right:8px;bottom:calc(8px + (50% - 8px) * var(--mi-pos,0));height:calc(50% - 8px);display:grid;place-items:center;border-radius:24px;background:#9e9e9e;color:#fff;pointer-events:none;transition:bottom .25s cubic-bezier(.3,.7,.3,1),background .25s}\n.mi-cover-switch.mi-dragging .mi-cover-knob{transition:background .25s}\n.mi-cover-switch[aria-checked=true] .mi-cover-knob{background:var(--mi-accent)}\n.mi-cover-switch[data-moving=true]{background:color-mix(in srgb,var(--mi-accent) 28%,var(--mi-surface-2))}\n.mi-cover-switch[data-moving=true] .mi-cover-knob{background:var(--mi-accent);animation:mi-moving 1.2s ease-in-out infinite}\n@keyframes mi-moving{50%{opacity:.7}}\n.mi-cover-knob svg{width:30px;height:30px}\n.mi-cover-switch:disabled{opacity:.5;cursor:default}\n.mi-cover-buttons{display:flex;gap:0;padding:4px;border-radius:24px;background:var(--mi-surface)}\n.mi-cover-buttons .mi-iconbtn{width:64px;height:48px;border-radius:20px}\n.mi-cover-buttons .mi-iconbtn:hover{background:var(--mi-surface-2)}\n.mi-state{font:500 20px Roboto,system-ui,sans-serif}\n.mi-sub{color:var(--mi-muted);margin-top:-12px}\n/* climate */\n.mi-temp{display:flex;align-items:center;justify-content:center;gap:20px;width:100%}\n.mi-temp output{display:flex;flex-direction:column;align-items:center;min-width:140px;font:500 56px/1 Roboto,system-ui,sans-serif}\n.mi-temp output small{margin-top:8px;font:400 14px Roboto,system-ui,sans-serif;color:var(--mi-muted)}\n.mi-temp .mi-iconbtn{width:56px;height:56px;background:var(--mi-surface-2)}\n.mi-temp .mi-iconbtn:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-pill{min-height:48px;padding:0 28px;border:0;border-radius:24px;background:var(--mi-primary);color:#fff;font:500 15px Roboto,system-ui,sans-serif;cursor:pointer}\n.mi-pill:hover{filter:brightness(1.08)}\n/* climate dial */\n.mi-climate{gap:12px}\n.mi-current{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mi-muted)}\n.mi-current strong{color:var(--mi-fg);font:500 20px Roboto,system-ui,sans-serif}\n.mi-dial{position:relative;width:min(300px,100%);aspect-ratio:1;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;border-radius:50%}\n.mi-dial svg{width:100%;height:100%;overflow:visible}\n.mi-dial svg path{fill:none;stroke-width:20;stroke-linecap:round}\n.mi-arc-track{stroke:var(--mi-surface-2)}\n.mi-arc-fill{stroke:var(--mi-accent);transition:stroke .3s}\n.mi-cur{fill:var(--mi-muted)}\n.mi-handle{fill:#fff;stroke:var(--mi-bg);stroke-width:0;filter:drop-shadow(0 1px 3px #0006)}\n.mi-dial.mi-dragging .mi-handle{r:13}\n.mi-dial-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none}\n.mi-dial-state{font:400 18px Roboto,system-ui,sans-serif}\n.mi-dial-value{display:flex;align-items:flex-start;font:400 72px/1 Roboto,system-ui,sans-serif;letter-spacing:-1px}\n.mi-sup{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:6px 0 0 4px;font:400 22px/1 Roboto,system-ui,sans-serif;letter-spacing:0}\n.mi-dec{font-size:22px;color:var(--mi-fg)}\n.mi-dialbtns{display:flex;gap:36px;margin-top:-58px;position:relative}\n.mi-outline{display:grid;place-items:center;width:56px;height:56px;padding:0;border:1px solid var(--mi-muted);border-radius:50%;background:var(--mi-bg);color:var(--mi-fg);cursor:pointer}\n.mi-outline:hover{background:var(--mi-surface-2)}\n.mi-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px}\n.mi-tile{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 14px;border:0;border-radius:16px;background:var(--mi-surface);color:inherit;font:inherit;text-align:left;cursor:pointer;min-width:0}\n.mi-tile:hover{background:var(--mi-surface-2)}\n.mi-tile-icon svg{width:24px;height:24px}\n.mi-tile-text{display:flex;flex-direction:column;min-width:0}\n.mi-tile-label{color:var(--mi-muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-tile-value{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n/* alarm panel: big state, a vertical mode picker and a code keypad */\n.mi-modes{display:flex;flex-direction:column;gap:6px;box-sizing:border-box;width:184px;padding:6px;border-radius:32px;background:var(--mi-surface)}\n.mi-mode{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:min(92px,13vh);flex:1;padding:8px;border:0;border-radius:26px;background:transparent;color:var(--mi-fg);font:500 15px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}\n.mi-mode:hover{background:var(--mi-surface-2)}\n.mi-mode[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-mode[data-busy=true]{animation:mi-moving 1.2s ease-in-out infinite}\n.mi-mode:disabled{cursor:default}\ndialog.mi.mi-code{width:min(360px,calc(100vw - 32px))}\n@media (max-width:600px){dialog.mi.mi-code{width:100vw}}\n.mi-code .mi-body{display:grid;justify-items:center;gap:16px;padding:8px 24px 28px}\n.mi-code-field{display:flex;align-items:center;box-sizing:border-box;width:100%;min-height:56px;border-radius:6px 6px 0 0;background:var(--mi-surface-2);border-bottom:1px solid var(--mi-muted)}\n.mi-code-field:focus-within{border-bottom:2px solid var(--mi-primary)}\n.mi-code-field input{flex:1;min-width:0;height:56px;padding:0 16px;border:0;background:transparent;color:inherit;font:400 18px Roboto,system-ui,sans-serif;letter-spacing:2px;outline:none}\n.mi-code-field input::placeholder{color:var(--mi-muted);letter-spacing:0;font-size:16px}\n.mi-keypad{display:grid;grid-template-columns:repeat(3,64px);gap:16px 28px;margin-top:8px}\n.mi-key{display:grid;place-items:center;width:64px;height:64px;padding:0;border:0;border-radius:50%;background:var(--mi-surface-2);color:var(--mi-fg);font:400 26px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .15s}\n.mi-key:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-key.mi-key-clear{color:var(--mi-muted)}\n.mi-key.mi-key-ok{background:color-mix(in srgb,#43a047 45%,var(--mi-surface-2));color:#8bd88f}\n.mi-key.mi-key-ok:hover{background:color-mix(in srgb,#43a047 60%,var(--mi-surface-2))}\n@media (prefers-color-scheme:light){.mi-key.mi-key-ok{color:#1b5e20}}\n.mi-key:disabled{opacity:.5;cursor:default}\n.mi-code .mi-pill{width:100%}\n/* attributes */\n.mi-attrs{margin-top:24px;border-top:1px solid var(--mi-line);padding-top:4px}\n.mi-attrs summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-weight:500;cursor:pointer;list-style:none}\n.mi-attrs summary::-webkit-details-marker{display:none}\n.mi-attrs summary svg{transition:transform .2s}\n.mi-attrs[open] summary svg{transform:rotate(180deg)}\n.mi-attrs dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px 16px;margin:0 0 4px}\n.mi-attrs dt{color:var(--mi-muted)}\n.mi-attrs dd{margin:0;text-align:right;overflow-wrap:anywhere}\n.mi-error{margin:12px 0 0;color:#db4437;text-align:center}\n", W = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${L[e]}"/></svg>`, G = (e) => `rgb(${e.join(",")})`, Pe = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", K = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), q = {
+	disarmed: "#9e9e9e",
+	armed: "#43a047",
+	arming: "#ff9800",
+	pending: "#ff9800",
+	disarming: "#ff9800",
+	triggered: "#e5533d"
+}, Fe = (e) => q[e] || (e?.startsWith("armed") ? q.armed : q.disarmed), J = {
 	heat: "#ff8100",
 	cool: "#2b9af9",
 	heat_cool: "#ffab00",
@@ -1331,15 +1421,15 @@ var ke = "\ndialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-li
 	dry: "#efbd07",
 	fan_only: "#8a8a8a"
 };
-function J(e, t, n, r) {
+function Y(e, t, n, r) {
 	let i = e.createElement(t);
 	return n && (i.className = n), r !== void 0 && (i.innerHTML = r), i;
 }
-function Y(e, t) {
-	let n = t.orient === "v", r = J(e, "div", `mi-slider ${n ? "mi-v" : "mi-h"}`), i = J(e, "div", "mi-fill");
+function X(e, t) {
+	let n = t.orient === "v", r = Y(e, "div", `mi-slider ${n ? "mi-v" : "mi-h"}`), i = Y(e, "div", "mi-fill");
 	r.append(i);
 	let a, o;
-	n && (a = J(e, "div", "mi-readout", "<span class=\"mi-big\"></span><span class=\"mi-small\"></span>"), r.append(a)), t.gradient && (r.classList.add("mi-track"), r.style.setProperty("--mi-gradient", t.gradient)), n || (o = J(e, "div", "mi-thumb"), r.append(o)), r.setAttribute("role", "slider"), r.tabIndex = 0, r.setAttribute("aria-label", t.label), r.setAttribute("aria-orientation", n ? "vertical" : "horizontal"), r.setAttribute("aria-valuemin", t.min), r.setAttribute("aria-valuemax", t.max);
+	n && (a = Y(e, "div", "mi-readout", "<span class=\"mi-big\"></span><span class=\"mi-small\"></span>"), r.append(a)), t.gradient && (r.classList.add("mi-track"), r.style.setProperty("--mi-gradient", t.gradient)), n || (o = Y(e, "div", "mi-thumb"), r.append(o)), r.setAttribute("role", "slider"), r.tabIndex = 0, r.setAttribute("aria-label", t.label), r.setAttribute("aria-orientation", n ? "vertical" : "horizontal"), r.setAttribute("aria-valuemin", t.min), r.setAttribute("aria-valuemax", t.max);
 	let s = t.value ?? t.min, c = !1, l = t.max - t.min, u = () => {
 		let e = Math.min(1, Math.max(0, (s - t.min) / l)) * 100;
 		n ? i.style.height = `${e}%` : (i.style.width = `${e}%`, o.style.left = `${e}%`), r.setAttribute("aria-valuenow", s), r.setAttribute("aria-valuetext", t.format ? t.format(s) : s), a && (a.querySelector(".mi-big").textContent = t.format ? t.format(s) : s);
@@ -1390,35 +1480,35 @@ function Y(e, t) {
 		}
 	};
 }
-function X(e, t, n, r, i) {
-	let a = J(e, "button", "mi-round", `<span class="mi-disc">${G(t)}</span><span>${n}</span>`);
+function Z(e, t, n, r, i) {
+	let a = Y(e, "button", "mi-round", `<span class="mi-disc">${W(t)}</span><span>${n}</span>`);
 	return a.type = "button", i !== void 0 && a.setAttribute("aria-pressed", String(i)), a.onclick = r, a;
 }
-function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
-	let i = e.ownerDocument, a = J(i, "dialog", "mi");
+function Ie({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
+	let i = e.ownerDocument, a = Y(i, "dialog", "mi");
 	a.setAttribute("aria-labelledby", "mi-title");
-	let o = J(i, "div", "mi-frame"), s = J(i, "div", "mi-head"), c = J(i, "button", "mi-iconbtn", G("close"));
+	let o = Y(i, "div", "mi-frame"), s = Y(i, "div", "mi-head"), c = Y(i, "button", "mi-iconbtn", W("close"));
 	c.type = "button", c.setAttribute("aria-label", "Close");
-	let l = J(i, "div", "mi-titles"), u = J(i, "h2");
+	let l = Y(i, "div", "mi-titles"), u = Y(i, "h2");
 	u.id = "mi-title";
-	let d = J(i, "p");
+	let d = Y(i, "p");
 	l.append(u, d), s.append(c, l);
-	let f = J(i, "div", "mi-body"), p = J(i, "style");
-	p.textContent = ke, o.append(s, f), a.append(p, o), e.append(a);
+	let f = Y(i, "div", "mi-body"), p = Y(i, "style");
+	p.textContent = Ne, o.append(s, f), a.append(p, o), e.append(a);
 	let m = "", h, g = (e) => {
-		h ||= f.appendChild(J(i, "p", "mi-error")), h.textContent = e || "", h.hidden = !e;
+		h ||= f.appendChild(Y(i, "p", "mi-error")), h.textContent = e || "", h.hidden = !e;
 	}, _ = async (e, n, i) => {
 		try {
 			g("");
-			let [r, a, o] = Oe(e, n, i);
+			let [r, a, o] = U(e, n, i);
 			return await t().callService(r, a, o), !0;
 		} catch (e) {
 			return g(e?.message || "The command failed."), r(e), !1;
 		}
 	}, v = (e, t) => e.controls.find(t);
 	function y(e, t) {
-		let n = v(e, (e) => e.kind === "toggle"), r = v(e, (e) => e.key === "brightness"), o = v(e, (e) => e.key === "color_temp_kelvin"), s = v(e, (e) => e.kind === "color"), c = v(e, (e) => e.key === "effect"), l = J(i, "div", "mi-center"), u;
-		r ? (u = Y(i, {
+		let n = v(e, (e) => e.kind === "toggle"), r = v(e, (e) => e.key === "brightness"), o = v(e, (e) => e.key === "color_temp_kelvin"), s = v(e, (e) => e.kind === "color"), c = v(e, (e) => e.key === "effect"), l = Y(i, "div", "mi-center"), u;
+		r ? (u = X(i, {
 			orient: "v",
 			label: "Brightness",
 			min: r.min,
@@ -1427,8 +1517,8 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			value: r.value,
 			format: r.format,
 			onCommit: (t) => _(e, r, t)
-		}), l.append(u.el)) : (u = J(i, "button", "mi-tall", `${G("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => _(e, n, u.getAttribute("aria-checked") !== "true"), l.append(u));
-		let d = J(i, "div", "mi-row"), f = X(i, "power", "Power", () => {
+		}), l.append(u.el)) : (u = Y(i, "button", "mi-tall", `${W("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => _(e, n, u.getAttribute("aria-checked") !== "true"), l.append(u));
+		let d = Y(i, "div", "mi-row"), f = Z(i, "power", "Power", () => {
 			let t = f.getAttribute("aria-pressed") === "true";
 			_(e, n, !t);
 		}, !1);
@@ -1439,12 +1529,12 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				p[t].hidden = !n, m[t].setAttribute("aria-pressed", String(n));
 			}
 		}, g = (e, t, n, r) => {
-			m[e] = X(i, t, n, () => h(e), !1), p[e] = r, r.hidden = !0, d.append(m[e]);
+			m[e] = Z(i, t, n, () => h(e), !1), p[e] = r, r.hidden = !0, d.append(m[e]);
 		}, y = [];
 		if (o) {
-			let t = J(i, "output"), n = J(i, "div", "mi-field"), r = J(i, "div", "mi-label", "<span>Colour temperature</span>");
+			let t = Y(i, "output"), n = Y(i, "div", "mi-field"), r = Y(i, "div", "mi-label", "<span>Colour temperature</span>");
 			r.append(t);
-			let a = Y(i, {
+			let a = X(i, {
 				orient: "h",
 				label: "Colour temperature",
 				min: o.min,
@@ -1457,14 +1547,14 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				onCommit: (t) => _(e, o, t)
 			});
 			n.append(r, a.el);
-			let s = J(i, "div", "mi-panel");
+			let s = Y(i, "div", "mi-panel");
 			s.append(n), g("temp", "thermo", "Temperature", s), y.push((e) => {
 				let n = v(e, (e) => e.key === "color_temp_kelvin");
 				n && (a.set(n.value), t.textContent = `${Math.round(n.value)} K`);
 			});
 		}
 		if (s) {
-			let t = J(i, "output"), n = J(i, "output"), r = s.value[0], a = s.value[1], o = () => `linear-gradient(90deg,#fff,${K(xe([r, 100]))})`, c = Y(i, {
+			let t = Y(i, "output"), n = Y(i, "output"), r = s.value[0], a = s.value[1], o = () => `linear-gradient(90deg,#fff,${G(we([r, 100]))})`, c = X(i, {
 				orient: "h",
 				label: "Hue",
 				min: 0,
@@ -1476,7 +1566,7 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 					r = e, t.textContent = `${e}°`, l.el.style.setProperty("--mi-gradient", o());
 				},
 				onCommit: () => _(e, s, [r, a])
-			}), l = Y(i, {
+			}), l = X(i, {
 				orient: "h",
 				label: "Saturation",
 				min: 0,
@@ -1488,9 +1578,9 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 					a = e, n.textContent = `${e}%`;
 				},
 				onCommit: () => _(e, s, [r, a])
-			}), u = J(i, "div", "mi-field"), d = J(i, "div", "mi-field"), f = J(i, "div", "mi-label", "<span>Hue</span>"), p = J(i, "div", "mi-label", "<span>Saturation</span>");
+			}), u = Y(i, "div", "mi-field"), d = Y(i, "div", "mi-field"), f = Y(i, "div", "mi-label", "<span>Hue</span>"), p = Y(i, "div", "mi-label", "<span>Saturation</span>");
 			f.append(t), p.append(n), u.append(f, c.el), d.append(p, l.el), t.textContent = `${r}°`, n.textContent = `${a}%`;
-			let m = J(i, "div", "mi-panel");
+			let m = Y(i, "div", "mi-panel");
 			m.append(u, d), g("color", "palette", "Colour", m), y.push((e) => {
 				let i = v(e, (e) => e.kind === "color");
 				!i || c.dragging || l.dragging || ([r, a] = i.value, c.set(r), l.set(a), t.textContent = `${r}°`, n.textContent = `${a}%`, l.el.style.setProperty("--mi-gradient", o()));
@@ -1498,25 +1588,25 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		}
 		let b = [];
 		if (c) {
-			let t = J(i, "ul", "mi-list");
+			let t = Y(i, "ul", "mi-list");
 			t.setAttribute("role", "radiogroup");
 			for (let n of ["", ...c.options]) {
-				let r = J(i, "li"), a = J(i, "button");
+				let r = Y(i, "li"), a = Y(i, "button");
 				a.type = "button", a.setAttribute("role", "radio"), a.textContent = n || "None", a.dataset.value = n, a.onclick = () => _(e, c, n), r.append(a), t.append(r), b.push(a);
 			}
-			let n = J(i, "div", "mi-panel");
+			let n = Y(i, "div", "mi-panel");
 			n.append(t), g("effect", "effects", "Effect", n), y.push((e) => {
 				let t = v(e, (e) => e.key === "effect");
 				for (let e of b) e.setAttribute("aria-checked", String(e.dataset.value === (t?.value || "")));
 			});
 		}
 		return l.append(d, ...Object.values(p)), t.append(l), (e, t) => {
-			let n = e.state === "on", i = t?.attributes || {}, o = Array.isArray(i.rgb_color) ? i.rgb_color : i.color_temp_kelvin ? H(i.color_temp_kelvin) : [
+			let n = e.state === "on", i = t?.attributes || {}, o = Array.isArray(i.rgb_color) ? i.rgb_color : i.color_temp_kelvin ? z(i.color_temp_kelvin) : [
 				255,
 				193,
 				7
 			];
-			if (a.style.setProperty("--mi-accent", K(o)), a.style.setProperty("--mi-accent-ink", n ? Ae(o) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), v(e, (e) => e.kind === "toggle"), r) {
+			if (a.style.setProperty("--mi-accent", G(o)), a.style.setProperty("--mi-accent-ink", n ? Pe(o) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), v(e, (e) => e.kind === "toggle"), r) {
 				let t = v(e, (e) => e.key === "brightness");
 				u.set(n ? t?.value ?? 0 : 0), u.el.querySelector(".mi-big").textContent = n ? r.format(t?.value ?? 0) : "Off", u.caption(n ? "On" : "");
 			} else u.setAttribute("aria-checked", String(n)), u.querySelector("span").textContent = n ? "On" : "Off";
@@ -1524,16 +1614,16 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		};
 	}
 	function b(e, r) {
-		let o = v(e, (e) => e.key === "position"), s = v(e, (e) => e.kind === "buttons"), c = !!v(e, (e) => e.kind === "cover-toggle"), l = J(i, "div", "mi-center"), u = J(i, "div", "mi-statehead", "<strong></strong><span></span>");
+		let o = v(e, (e) => e.key === "position"), s = v(e, (e) => e.kind === "buttons"), c = !!v(e, (e) => e.kind === "cover-toggle"), l = Y(i, "div", "mi-center"), u = Y(i, "div", "mi-statehead", "<strong></strong><span></span>");
 		l.append(u), d.hidden = !0;
 		let f, p, m = null, h, g = null, y = (e) => p?.style.setProperty("--mi-pos", String(e));
 		if (c) {
-			p = J(i, "button", "mi-cover-switch", "<span class=\"mi-cover-knob\"></span>"), p.type = "button", p.setAttribute("role", "switch"), p.setAttribute("aria-label", e.name);
+			p = Y(i, "button", "mi-cover-switch", "<span class=\"mi-cover-knob\"></span>"), p.type = "button", p.setAttribute("role", "switch"), p.setAttribute("aria-label", e.name);
 			let r = () => p.getAttribute("aria-checked") === "true", a = async (r) => {
 				let i = t().states?.[n], a = ["open", "closed"].includes(i?.state);
 				m = r, clearTimeout(h), a && i.state === "open" === r ? m = null : h = setTimeout(() => {
-					m = null, k();
-				}, 6e4), k(), m !== null && (await _(e, s, r ? "open_cover" : "close_cover") || (m = null, k()));
+					m = null, A();
+				}, 6e4), A(), m !== null && (await _(e, s, r ? "open_cover" : "close_cover") || (m = null, A()));
 			};
 			p.addEventListener("pointerdown", (e) => {
 				if (!(e.button !== 0 || p.disabled)) {
@@ -1567,7 +1657,7 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				(e.key === "ArrowUp" || e.key === "ArrowDown") && (e.preventDefault(), a(e.key === "ArrowUp"));
 			}, l.append(p);
 		}
-		o && (f = Y(i, {
+		o && (f = X(i, {
 			orient: "v",
 			label: "Position",
 			min: 0,
@@ -1577,7 +1667,7 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			format: (e) => `${Math.round(e)}%`,
 			onCommit: (t) => _(e, o, t)
 		}), l.append(f.el));
-		let b = J(i, "div", "mi-row"), x = {
+		let b = Y(i, "div", "mi-row"), x = {
 			open_cover: "up",
 			stop_cover: "stop",
 			close_cover: "down"
@@ -1589,7 +1679,7 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		if (!c) {
 			b.className = "mi-cover-buttons";
 			for (let t of s?.buttons || []) {
-				let n = J(i, "button", "mi-iconbtn", G(x[t.service]));
+				let n = Y(i, "button", "mi-iconbtn", W(x[t.service]));
 				n.type = "button", n.title = S[t.service], n.setAttribute("aria-label", S[t.service]), n.onclick = () => _(e, s, t.service), b.append(n);
 			}
 			l.append(b);
@@ -1598,32 +1688,32 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		let C = setInterval(() => {
 			if (!a.isConnected) return clearInterval(C);
 			let e = t().states?.[n];
-			u.lastChild.textContent = U(e?.last_changed);
+			u.lastChild.textContent = B(e?.last_changed);
 		}, 5e3);
 		return (e, t) => {
-			if (a.style.setProperty("--mi-accent", "#9c27b0"), u.firstChild.textContent = e.unavailable ? "Unavailable" : q(e.state), u.lastChild.textContent = e.since, p) {
+			if (a.style.setProperty("--mi-accent", "#9c27b0"), u.firstChild.textContent = e.unavailable ? "Unavailable" : K(e.state), u.lastChild.textContent = e.since, p) {
 				let t = ["open", "opening"].includes(e.state), n = ["opening", "closing"].includes(e.state);
-				m !== null && (!n && t === m ? (m = null, clearTimeout(h)) : (n || (u.firstChild.textContent = m ? "Opening" : "Closing"), t = m, n = !0)), p.setAttribute("aria-checked", String(t)), g?.dragging || y(+!!t), p.dataset.moving = String(n), p.firstChild.innerHTML = G(Ce(e.deviceClass, t));
+				m !== null && (!n && t === m ? (m = null, clearTimeout(h)) : (n || (u.firstChild.textContent = m ? "Opening" : "Closing"), t = m, n = !0)), p.setAttribute("aria-checked", String(t)), g?.dragging || y(+!!t), p.dataset.moving = String(n), p.firstChild.innerHTML = W(Ee(e.deviceClass, t));
 			}
 			let n = v(e, (e) => e.key === "position");
-			f && n && (f.set(n.value), f.caption(q(e.state)));
+			f && n && (f.set(n.value), f.caption(K(e.state)));
 		};
 	}
 	function x(e, t) {
-		let n = v(e, (e) => e.kind === "buttons"), r = J(i, "div", "mi-center"), o = J(i, "button", "mi-lock");
+		let n = v(e, (e) => e.kind === "buttons"), r = Y(i, "div", "mi-center"), o = Y(i, "button", "mi-lock");
 		o.type = "button";
-		let s = J(i, "div", "mi-state");
+		let s = Y(i, "div", "mi-state");
 		return o.onclick = () => _(e, n, o.dataset.locked === "true" ? "unlock" : "lock"), r.append(o, s), t.append(r), (e) => {
 			let t = e.state === "locked", n = [
 				"locking",
 				"unlocking",
 				"opening"
 			].includes(e.state), r = e.state === "jammed" || e.state === "unlocked" ? "#e5533d" : n ? "#ff9800" : "#43a047";
-			a.style.setProperty("--mi-accent", r), o.dataset.locked = String(t), o.disabled = n, o.innerHTML = G(t ? "lock" : "unlock"), o.setAttribute("aria-label", t ? "Locked. Press to unlock" : "Unlocked. Press to lock"), s.textContent = q(e.state);
+			a.style.setProperty("--mi-accent", r), o.dataset.locked = String(t), o.disabled = n, o.innerHTML = W(t ? "lock" : "unlock"), o.setAttribute("aria-label", t ? "Locked. Press to unlock" : "Unlocked. Press to lock"), s.textContent = K(e.state);
 		};
 	}
 	function S(e, n) {
-		let r = v(e, (e) => e.kind === "stepper"), o = e.controls.filter((e) => e.kind === "select"), s = J(i, "div", "mi-center mi-climate"), c = () => t().config?.unit_system?.temperature || "°C", l = J(i, "div", "mi-current");
+		let r = v(e, (e) => e.kind === "stepper"), o = e.controls.filter((e) => e.kind === "select"), s = Y(i, "div", "mi-center mi-climate"), c = () => t().config?.unit_system?.temperature || "°C", l = Y(i, "div", "mi-current");
 		s.append(l);
 		let u, d;
 		if (r) {
@@ -1635,7 +1725,7 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				let [r, i] = t(e), [a, o] = t(n);
 				return `M${r.toFixed(2)} ${i.toFixed(2)}A92 92 0 ${+(n - e > 180)} 1 ${a.toFixed(2)} ${o.toFixed(2)}`;
 			};
-			u = J(i, "div", "mi-dial", `<svg viewBox="0 0 220 220" aria-hidden="true"><path class="mi-arc-track" d="${n(135, 405)}"/><path class="mi-arc-fill"/><circle class="mi-cur" r="3.5"/><circle class="mi-handle" r="11"/></svg><div class="mi-dial-text"><span class="mi-dial-state"></span><span class="mi-dial-value"><span class="mi-int"></span><span class="mi-sup"><span class="mi-unit"></span><span class="mi-dec"></span></span></span></div>`), u.setAttribute("role", "slider"), u.tabIndex = 0, u.setAttribute("aria-label", "Target temperature"), u.setAttribute("aria-valuemin", r.min), u.setAttribute("aria-valuemax", r.max);
+			u = Y(i, "div", "mi-dial", `<svg viewBox="0 0 220 220" aria-hidden="true"><path class="mi-arc-track" d="${n(135, 405)}"/><path class="mi-arc-fill"/><circle class="mi-cur" r="3.5"/><circle class="mi-handle" r="11"/></svg><div class="mi-dial-text"><span class="mi-dial-state"></span><span class="mi-dial-value"><span class="mi-int"></span><span class="mi-sup"><span class="mi-unit"></span><span class="mi-dec"></span></span></span></div>`), u.setAttribute("role", "slider"), u.tabIndex = 0, u.setAttribute("aria-label", "Target temperature"), u.setAttribute("aria-valuemin", r.min), u.setAttribute("aria-valuemax", r.max);
 			let a = u.querySelector(".mi-arc-fill"), o = u.querySelector(".mi-handle"), l = u.querySelector(".mi-cur"), f = r.max - r.min, p = (e) => 135 + Math.min(1, Math.max(0, (e - r.min) / f)) * 270, m = r.value, h = !1, g = e.state, y, b = (e) => {
 				let t = Math.round((e - r.min) / r.step) * r.step;
 				return Math.min(r.max, Math.max(r.min, Math.round((r.min + t) * 100) / 100));
@@ -1674,7 +1764,7 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				}[e.key];
 				t !== void 0 && (e.preventDefault(), C(b(m + t * r.step)), T());
 			});
-			let D = J(i, "div", "mi-dialbtns");
+			let D = Y(i, "div", "mi-dialbtns");
 			for (let [e, t, n] of [[
 				-1,
 				"minus",
@@ -1684,7 +1774,7 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				"plus",
 				"Raise target temperature"
 			]]) {
-				let a = J(i, "button", "mi-outline", G(t));
+				let a = Y(i, "button", "mi-outline", W(t));
 				a.type = "button", a.setAttribute("aria-label", n), a.onclick = () => {
 					C(b(m + e * r.step)), T();
 				}, D.append(a);
@@ -1693,7 +1783,7 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				let n = v(e, (e) => e.kind === "stepper");
 				g = e.state, y = t?.attributes?.current_temperature, n && !h && (m = n.value);
 				let r = t?.attributes?.hvac_action;
-				u.querySelector(".mi-dial-state").textContent = e.state === "off" ? "Off" : q(r || e.state), x();
+				u.querySelector(".mi-dial-state").textContent = e.state === "off" ? "Off" : K(r || e.state), x();
 			};
 		}
 		let f = {
@@ -1702,17 +1792,17 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			swing_mode: "swing",
 			swing_horizontal_mode: "swingh",
 			preset_mode: "preset"
-		}, p = J(i, "div", "mi-tiles"), m = J(i, "div", "mi-panel");
+		}, p = Y(i, "div", "mi-tiles"), m = Y(i, "div", "mi-panel");
 		m.hidden = !0;
-		let h = J(i, "ul", "mi-list");
+		let h = Y(i, "ul", "mi-list");
 		h.setAttribute("role", "radiogroup"), m.append(h);
 		let g, y = /* @__PURE__ */ new Map(), b = (t) => {
 			if (g === t.key) g = void 0, m.hidden = !0;
 			else {
 				g = t.key, h.replaceChildren();
 				for (let n of t.options) {
-					let r = J(i, "li"), a = J(i, "button");
-					a.type = "button", a.setAttribute("role", "radio"), a.dataset.value = n, a.textContent = q(n), a.onclick = () => {
+					let r = Y(i, "li"), a = Y(i, "button");
+					a.type = "button", a.setAttribute("role", "radio"), a.dataset.value = n, a.textContent = K(n), a.onclick = () => {
 						_(e, t, n), g = void 0, m.hidden = !0;
 					}, r.append(a), h.append(r);
 				}
@@ -1723,30 +1813,30 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			for (let e of h.querySelectorAll("button")) e.setAttribute("aria-checked", String(e.dataset.value === t?.value));
 		};
 		for (let e of o) {
-			let t = J(i, "button", "mi-tile", "<span class=\"mi-tile-icon\"></span><span class=\"mi-tile-text\"><span class=\"mi-tile-label\"></span><span class=\"mi-tile-value\"></span></span>");
+			let t = Y(i, "button", "mi-tile", "<span class=\"mi-tile-icon\"></span><span class=\"mi-tile-text\"><span class=\"mi-tile-label\"></span><span class=\"mi-tile-value\"></span></span>");
 			t.type = "button", t.querySelector(".mi-tile-label").textContent = e.label, t.onclick = () => b(e), p.append(t), y.set(e.key, t);
 		}
 		return o.length && s.append(p, m), n.append(s), (e, t) => {
 			x = e;
 			let n = t?.attributes || {};
-			a.style.setProperty("--mi-accent", je[e.state] || "var(--mi-muted)"), l.hidden = !Number.isFinite(n.current_temperature), l.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${c()}</strong>`, d?.(e, t);
+			a.style.setProperty("--mi-accent", J[e.state] || "var(--mi-muted)"), l.hidden = !Number.isFinite(n.current_temperature), l.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${c()}</strong>`, d?.(e, t);
 			for (let t of e.controls.filter((e) => e.kind === "select")) {
 				let e = y.get(t.key);
 				if (!e) continue;
-				e.querySelector(".mi-tile-value").textContent = q(t.value) || "—";
-				let n = t.key === "hvac_mode" ? B[t.value] ? t.value : "power" : f[t.key];
-				e.querySelector(".mi-tile-icon").innerHTML = G(n);
+				e.querySelector(".mi-tile-value").textContent = K(t.value) || "—";
+				let n = t.key === "hvac_mode" ? L[t.value] ? t.value : "power" : f[t.key];
+				e.querySelector(".mi-tile-icon").innerHTML = W(n);
 			}
 			S(e);
 		};
 	}
 	function C(e, t) {
-		let n = v(e, (e) => e.kind === "toggle"), r = v(e, (e) => e.key === "percentage"), o = J(i, "div", "mi-center"), s = J(i, "button", "mi-tall", `${G("power")}<span></span>`);
+		let n = v(e, (e) => e.kind === "toggle"), r = v(e, (e) => e.key === "percentage"), o = Y(i, "div", "mi-center"), s = Y(i, "button", "mi-tall", `${W("power")}<span></span>`);
 		s.type = "button", s.setAttribute("role", "switch"), s.onclick = () => _(e, n, s.getAttribute("aria-checked") !== "true"), o.append(s);
 		let c;
 		if (r) {
-			let t = J(i, "output"), n = J(i, "div", "mi-field"), a = J(i, "div", "mi-label", "<span>Speed</span>");
-			a.append(t), c = Y(i, {
+			let t = Y(i, "output"), n = Y(i, "div", "mi-field"), a = Y(i, "div", "mi-label", "<span>Speed</span>");
+			a.append(t), c = X(i, {
 				orient: "h",
 				label: "Speed",
 				min: 0,
@@ -1765,76 +1855,184 @@ function Me({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			c && n && c.set(n.value);
 		};
 	}
-	function w(e, t) {
-		let n = v(e, (e) => e.kind === "buttons"), r = J(i, "div", "mi-center");
+	function w(e, n) {
+		let o = v(e, (e) => e.kind === "alarm"), s = Y(i, "div", "mi-center"), c = Y(i, "div", "mi-statehead", "<strong></strong><span></span>"), l = Y(i, "div", "mi-modes");
+		l.setAttribute("role", "radiogroup"), l.setAttribute("aria-label", "Mode"), s.append(c, l), n.append(s), d.hidden = !0;
+		let u = null, f, p = async (n, r) => {
+			let [i, a, s] = U(e, o, {
+				service: n,
+				code: r
+			});
+			await t().callService(i, a, s);
+		}, m = async (e) => {
+			if (e.state !== o.mode || u) {
+				if (ke(o, e.service)) b(e);
+				else {
+					u = e.state, y();
+					try {
+						g(""), await p(e.service);
+					} catch (e) {
+						u = null, y(), g(e?.message || "The command failed."), r(e);
+					}
+					clearTimeout(f), f = setTimeout(() => {
+						u = null, y();
+					}, 4e3);
+				}
+			}
+		}, h = /* @__PURE__ */ new Map();
+		for (let e of o.modes) {
+			let t = Y(i, "button", "mi-mode", `${W(e.icon)}<span>${e.label}</span>`);
+			t.type = "button", t.setAttribute("role", "radio"), t.onclick = () => m(e), h.set(e.state, t), l.append(t);
+		}
+		let _ = e.state, y = () => {
+			let e = u || o.mode;
+			for (let [t, n] of h) n.setAttribute("aria-checked", String(t === e)), n.dataset.busy = String(t === e && (t === u || [
+				"arming",
+				"pending",
+				"disarming"
+			].includes(_)));
+			a.style.setProperty("--mi-accent", Fe(u && u !== _ ? "arming" : _));
+		};
+		function b(e) {
+			let t = Y(i, "dialog", "mi mi-code");
+			t.setAttribute("aria-labelledby", "mi-code-title");
+			let n = Y(i, "div", "mi-frame"), s = Y(i, "div", "mi-head"), c = Y(i, "button", "mi-iconbtn", W("close"));
+			c.type = "button", c.setAttribute("aria-label", "Close");
+			let l = Y(i, "div", "mi-titles", `<h2 id="mi-code-title">${e.service === "alarm_disarm" ? "Disarm" : "Arm"}</h2>`);
+			s.append(c, l);
+			let d = Y(i, "div", "mi-body"), m = Y(i, "label", "mi-code-field"), h = Y(i, "input");
+			h.type = "password", h.placeholder = "Code", h.autocomplete = "off", h.setAttribute("aria-label", "Code"), o.codeFormat === "number" && (h.inputMode = "numeric");
+			let g = Y(i, "button", "mi-iconbtn", W("eye"));
+			g.type = "button", g.setAttribute("aria-label", "Show code"), g.onclick = () => {
+				let e = h.type === "text";
+				h.type = e ? "password" : "text", g.innerHTML = W(e ? "eye" : "eyeOff"), g.setAttribute("aria-label", e ? "Show code" : "Hide code");
+			}, m.append(h, g);
+			let _ = Y(i, "p", "mi-error");
+			_.hidden = !0, d.append(m);
+			let v, b = async () => {
+				if (h.value && !v?.disabled) {
+					v && (v.disabled = !0), _.hidden = !0;
+					try {
+						await p(e.service, h.value), u = e.state, y(), clearTimeout(f), f = setTimeout(() => {
+							u = null, y();
+						}, 4e3), t.close();
+					} catch (e) {
+						h.value = "", _.textContent = e?.message || "The code was not accepted.", _.hidden = !1, r(e), h.focus();
+					} finally {
+						v && (v.disabled = !1);
+					}
+				}
+			};
+			if (o.codeFormat === "number") {
+				let t = Y(i, "div", "mi-keypad");
+				for (let e of [
+					"1",
+					"2",
+					"3",
+					"4",
+					"5",
+					"6",
+					"7",
+					"8",
+					"9"
+				]) {
+					let n = Y(i, "button", "mi-key", e);
+					n.type = "button", n.onclick = () => {
+						h.value += e;
+					}, t.append(n);
+				}
+				let n = Y(i, "button", "mi-key mi-key-clear", W("close"));
+				n.type = "button", n.setAttribute("aria-label", "Clear"), n.onclick = () => {
+					h.value = "";
+				};
+				let r = Y(i, "button", "mi-key", "0");
+				r.type = "button", r.onclick = () => {
+					h.value += "0";
+				}, v = Y(i, "button", "mi-key mi-key-ok", W("check")), v.type = "button", v.setAttribute("aria-label", e.label), v.onclick = b, t.append(n, r, v), d.append(t);
+			} else v = Y(i, "button", "mi-pill", e.service === "alarm_disarm" ? "Disarm" : `Arm ${e.label}`), v.type = "button", v.onclick = b, d.append(v);
+			d.append(_), h.addEventListener("keydown", (e) => {
+				e.key === "Enter" && (e.preventDefault(), b());
+			}), c.onclick = () => t.close(), t.addEventListener("click", (e) => {
+				e.stopPropagation(), e.target === t && t.close();
+			}), t.addEventListener("close", (e) => {
+				e.stopPropagation(), t.remove();
+			}), n.append(s, d), t.append(n), a.append(t), t.showModal(), h.focus();
+		}
+		return (e) => {
+			o = v(e, (e) => e.kind === "alarm") || o, _ = e.state, u && o.mode === u && (u = null, clearTimeout(f)), c.firstChild.textContent = K(e.state), c.lastChild.textContent = e.since || "", y();
+		};
+	}
+	function T(e, t) {
+		let n = v(e, (e) => e.kind === "buttons"), r = Y(i, "div", "mi-center");
 		for (let t of n.buttons) {
-			let a = J(i, "button", "mi-pill", t.label);
+			let a = Y(i, "button", "mi-pill", t.label);
 			a.type = "button", a.onclick = () => _(e, n, t.service), r.append(a);
 		}
 		return t.append(r), () => {};
 	}
-	function T(e, t, n) {
-		let r = J(i, "div", "mi-center"), a = J(i, "div", "mi-state");
+	function E(e, t, n) {
+		let r = Y(i, "div", "mi-center"), a = Y(i, "div", "mi-state");
 		return r.append(a), t.append(r), (e, t) => {
 			let n = t?.attributes?.unit_of_measurement;
-			a.textContent = `${q(e.state) ?? ""}${n ? ` ${n}` : ""}`;
+			a.textContent = `${K(e.state) ?? ""}${n ? ` ${n}` : ""}`;
 		};
 	}
-	let E = {
+	let D = {
 		light: y,
 		cover: b,
 		lock: x,
 		climate: S,
+		alarm_control_panel: w,
 		switch: C,
 		input_boolean: C,
 		fan: C,
 		automation: C,
-		button: w,
-		input_button: w,
-		scene: w,
-		script: w
-	}, D = () => {};
-	function O(e) {
+		button: T,
+		input_button: T,
+		scene: T,
+		script: T
+	}, O = () => {};
+	function k(e) {
 		f.replaceChildren(), h = void 0;
-		let t = J(i, "div");
-		if (f.append(t), d.hidden = !1, D = (e.unavailable ? T : E[e.domain] || T)(e, t), e.attributes.length) {
-			let t = J(i, "details", "mi-attrs", `<summary><span>Attributes</span>${G("chevron")}</summary>`), n = J(i, "dl");
-			for (let [t, r] of e.attributes) n.append(J(i, "dt"), J(i, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
+		let t = Y(i, "div");
+		if (f.append(t), d.hidden = !1, O = (e.unavailable ? E : D[e.domain] || E)(e, t), e.attributes.length) {
+			let t = Y(i, "details", "mi-attrs", `<summary><span>Attributes</span>${W("chevron")}</summary>`), n = Y(i, "dl");
+			for (let [t, r] of e.attributes) n.append(Y(i, "dt"), Y(i, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
 			t.append(n), f.append(t);
 		}
 	}
-	function k() {
-		let e = t().states?.[n], r = De(e);
-		u.textContent = r.name, d.textContent = r.unavailable ? "Unavailable" : [q(r.state), r.changed && `changed ${r.changed}`].filter(Boolean).join(" · ");
+	function A() {
+		let e = t().states?.[n], r = Me(e);
+		u.textContent = r.name, d.textContent = r.unavailable ? "Unavailable" : [K(r.state), r.changed && `changed ${r.changed}`].filter(Boolean).join(" · ");
 		let i = [
 			r.unavailable,
 			r.domain,
-			...r.controls.map((e) => `${e.kind}:${e.key || ""}:${(e.options || []).join(",")}:${(e.buttons || []).length}`)
+			...r.controls.map((e) => `${e.kind}:${e.key || ""}:${(e.options || []).join(",")}:${(e.buttons || e.modes || []).length}`)
 		].join("|");
-		i !== m && (m = i, O(r)), D(r, e);
+		i !== m && (m = i, k(r)), O(r, e);
 	}
-	let A = () => {
+	let j = () => {
 		a.open && a.close();
 	};
-	return c.onclick = A, a.addEventListener("click", (e) => {
-		e.target === a && A();
-	}), a.addEventListener("close", () => a.remove()), k(), a.showModal(), {
-		update: k,
-		close: A,
+	return c.onclick = j, a.addEventListener("click", (e) => {
+		e.target === a && j();
+	}), a.addEventListener("close", () => a.remove()), A(), a.showModal(), {
+		update: A,
+		close: j,
 		dialog: a
 	};
 }
 // dashboard/standalone-fit.mjs
-function Z({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
+function Le({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
 	if (!e || !(a > 0)) return n;
 	let o = n >= t ? Math.max(r, i) : Math.min(r, i);
 	return Math.abs(n + a - o) <= 2 ? n + a : n;
 }
-function Ne(e = window) {
+function Re(e = window) {
 	let t = e.document, n = t.createElement("div");
 	n.style.cssText = "position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none", t.documentElement.append(n);
 	let r = () => {
-		let r = Z({
+		let r = Le({
 			standalone: e.navigator.standalone === !0 || e.matchMedia?.("(display-mode: standalone)").matches === !0,
 			innerWidth: e.innerWidth,
 			innerHeight: e.innerHeight,
@@ -1847,16 +2045,16 @@ function Ne(e = window) {
 	return r(), e.addEventListener("resize", r), e.addEventListener("orientationchange", () => setTimeout(r, 250)), e.visualViewport?.addEventListener("resize", r), r;
 }
 // dashboard/standalone.js
-Ne();
+Re();
 var Q = document.getElementById("status"), $ = (e) => {
 	Q.hidden = !1, Q.textContent = e;
 };
-async function Pe() {
+async function ze() {
 	let e = document.body.dataset.view;
 	await customElements.whenDefined("three-d-rooms-card");
 	let t = await j({
 		hassUrl: location.origin,
-		...pe(localStorage)
+		...me(localStorage)
 	}), n = new URL(location.href);
 	for (let e of [
 		"auth_callback",
@@ -1864,7 +2062,7 @@ async function Pe() {
 		"state"
 	]) n.searchParams.delete(e);
 	history.replaceState(null, "", n);
-	let r = await de({ auth: t }), i = await r.sendMessagePromise({ type: "auth/current_user" });
+	let r = await fe({ auth: t }), i = await r.sendMessagePromise({ type: "auth/current_user" });
 	if (!i.is_admin) {
 		$("3D Rooms views are only available to Home Assistant administrators.");
 		return;
@@ -1880,17 +2078,17 @@ async function Pe() {
 			new URL(e, location.origin).href
 )));
 	}, o = await r.sendMessagePromise({ type: "config/entity_registry/list_for_display" }).catch(() => null);
-	ve({
-		resolver: ge({ loadModules: a }),
-		registryIcon: _e(o)
+	xe({
+		resolver: ye({ loadModules: a }),
+		registryIcon: be(o)
 	});
-	let s = await ne(r).catch(() => ({})), c = document.createElement("three-d-rooms-card");
+	let s = await re(r).catch(() => ({})), c = document.createElement("three-d-rooms-card");
 	c.setConfig({
 		saved_view: e,
 		height: "auto",
 		edit_button: !1
 	}), c.setAttribute("fill-page", "");
-	let l = fe({
+	let l = pe({
 		auth: t,
 		connection: r,
 		user: i,
@@ -1901,16 +2099,16 @@ async function Pe() {
 		}
 	}), u;
 	c.addEventListener("hass-more-info", (e) => {
-		u?.close(), u = Me({
+		u?.close(), u = Ie({
 			host: document.body,
 			getHass: () => l.build(),
 			entityId: e.detail.entityId,
 			onError: (e) => console.error(e)
 		});
-	}), r.addEventListener("ready", () => l.setConnected(!0)), r.addEventListener("disconnected", () => l.setConnected(!1)), await new Promise((e) => ue(r, (t) => {
+	}), r.addEventListener("ready", () => l.setConnected(!0)), r.addEventListener("disconnected", () => l.setConnected(!1)), await new Promise((e) => de(r, (t) => {
 		l.setStates(t), e();
 	})), c.hass = l.build(), Q.hidden = !0, document.body.append(c);
 }
-Pe().catch((e) => {
+ze().catch((e) => {
 	console.error(e), $(e?.message || "Could not connect to Home Assistant. Reload to try again.");
 });

@@ -221,3 +221,69 @@ test("covers that only open and close get a two-way switch and a garage picture"
   assert.match(sinceText("2026-11-12T11:59:37Z", now), /23 seconds ago/);
   assert.match(sinceText("2026-11-12T11:55:00Z", now), /5 minutes ago/);
 });
+
+test("an alarm panel offers its supported modes and asks for the code when needed", async () => {
+  const { alarmNeedsCode } = await import("../dashboard/more-info-model.mjs");
+  // Alarmo: Home + Away supported, numeric code, arming needs the code too.
+  const alarm = describeEntity({
+    entity_id: "alarm_control_panel.alarmo",
+    state: "disarmed",
+    attributes: {
+      friendly_name: "Alarmo",
+      supported_features: 3,
+      code_format: "number",
+      code_arm_required: true,
+    },
+  });
+  const control = alarm.controls[0];
+  assert.equal(control.kind, "alarm");
+  assert.deepEqual(
+    control.modes.map((m) => m.label),
+    ["Home", "Away", "Disarmed"],
+  );
+  assert.equal(control.mode, "disarmed");
+  assert.equal(alarmNeedsCode(control, "alarm_arm_away"), true);
+  assert.deepEqual(
+    controlCall(alarm, control, { service: "alarm_arm_away", code: "1234" }),
+    [
+      "alarm_control_panel",
+      "alarm_arm_away",
+      { entity_id: "alarm_control_panel.alarmo", code: "1234" },
+    ],
+  );
+  assert.throws(() =>
+    controlCall(alarm, control, { service: "alarm_arm_night" }),
+  );
+
+  // No arming code: arm straight away, but disarming still asks.
+  const quick = describeEntity({
+    entity_id: "alarm_control_panel.house",
+    state: "arming",
+    attributes: {
+      supported_features: 63,
+      code_format: "number",
+      code_arm_required: false,
+      next_state: "armed_night",
+    },
+  }).controls[0];
+  assert.equal(quick.modes.length, 6);
+  assert.equal(quick.mode, "armed_night");
+  assert.equal(alarmNeedsCode(quick, "alarm_arm_home"), false);
+  assert.equal(alarmNeedsCode(quick, "alarm_disarm"), true);
+
+  // No code at all.
+  const open = describeEntity({
+    entity_id: "alarm_control_panel.open",
+    state: "armed_home",
+    attributes: { supported_features: 1, code_format: null },
+  });
+  assert.equal(alarmNeedsCode(open.controls[0], "alarm_disarm"), false);
+  assert.deepEqual(
+    controlCall(open, open.controls[0], { service: "alarm_disarm" }),
+    [
+      "alarm_control_panel",
+      "alarm_disarm",
+      { entity_id: "alarm_control_panel.open" },
+    ],
+  );
+});

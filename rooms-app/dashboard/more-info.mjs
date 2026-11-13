@@ -2,6 +2,7 @@ import { ICONS } from "./more-info-icons.mjs";
 import {
   describeEntity,
   controlCall,
+  alarmNeedsCode,
   coverIcon,
   hsToRgb,
   sinceText,
@@ -134,6 +135,29 @@ dialog.mi::backdrop{background:#000a}
 .mi-tile-text{display:flex;flex-direction:column;min-width:0}
 .mi-tile-label{color:var(--mi-muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mi-tile-value{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* alarm panel: big state, a vertical mode picker and a code keypad */
+.mi-modes{display:flex;flex-direction:column;gap:6px;box-sizing:border-box;width:184px;padding:6px;border-radius:32px;background:var(--mi-surface)}
+.mi-mode{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:min(92px,13vh);flex:1;padding:8px;border:0;border-radius:26px;background:transparent;color:var(--mi-fg);font:500 15px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}
+.mi-mode:hover{background:var(--mi-surface-2)}
+.mi-mode[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}
+.mi-mode[data-busy=true]{animation:mi-moving 1.2s ease-in-out infinite}
+.mi-mode:disabled{cursor:default}
+dialog.mi.mi-code{width:min(360px,calc(100vw - 32px))}
+@media (max-width:600px){dialog.mi.mi-code{width:100vw}}
+.mi-code .mi-body{display:grid;justify-items:center;gap:16px;padding:8px 24px 28px}
+.mi-code-field{display:flex;align-items:center;box-sizing:border-box;width:100%;min-height:56px;border-radius:6px 6px 0 0;background:var(--mi-surface-2);border-bottom:1px solid var(--mi-muted)}
+.mi-code-field:focus-within{border-bottom:2px solid var(--mi-primary)}
+.mi-code-field input{flex:1;min-width:0;height:56px;padding:0 16px;border:0;background:transparent;color:inherit;font:400 18px Roboto,system-ui,sans-serif;letter-spacing:2px;outline:none}
+.mi-code-field input::placeholder{color:var(--mi-muted);letter-spacing:0;font-size:16px}
+.mi-keypad{display:grid;grid-template-columns:repeat(3,64px);gap:16px 28px;margin-top:8px}
+.mi-key{display:grid;place-items:center;width:64px;height:64px;padding:0;border:0;border-radius:50%;background:var(--mi-surface-2);color:var(--mi-fg);font:400 26px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .15s}
+.mi-key:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}
+.mi-key.mi-key-clear{color:var(--mi-muted)}
+.mi-key.mi-key-ok{background:color-mix(in srgb,#43a047 45%,var(--mi-surface-2));color:#8bd88f}
+.mi-key.mi-key-ok:hover{background:color-mix(in srgb,#43a047 60%,var(--mi-surface-2))}
+@media (prefers-color-scheme:light){.mi-key.mi-key-ok{color:#1b5e20}}
+.mi-key:disabled{opacity:.5;cursor:default}
+.mi-code .mi-pill{width:100%}
 /* attributes */
 .mi-attrs{margin-top:24px;border-top:1px solid var(--mi-line);padding-top:4px}
 .mi-attrs summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-weight:500;cursor:pointer;list-style:none}
@@ -152,6 +176,17 @@ const rgbCss = (rgb) => `rgb(${rgb.join(",")})`;
 const inkFor = ([r, g, b]) =>
   (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? "#1c1c1c" : "#fff";
 const cap = (s) => (s ? s[0].toUpperCase() + s.slice(1).replace(/_/g, " ") : s);
+const ALARM_COLOR = {
+  disarmed: "#9e9e9e",
+  armed: "#43a047",
+  arming: "#ff9800",
+  pending: "#ff9800",
+  disarming: "#ff9800",
+  triggered: "#e5533d",
+};
+const alarmColor = (state) =>
+  ALARM_COLOR[state] ||
+  (state?.startsWith("armed") ? ALARM_COLOR.armed : ALARM_COLOR.disarmed);
 const HVAC_COLOR = {
   heat: "#ff8100",
   cool: "#2b9af9",
@@ -1064,6 +1099,218 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
     };
   }
 
+  function alarmLayout(d, root) {
+    let control = find(d, (c) => c.kind === "alarm");
+    const center = h(doc, "div", "mi-center");
+    const head = h(
+      doc,
+      "div",
+      "mi-statehead",
+      "<strong></strong><span></span>",
+    );
+    const modes = h(doc, "div", "mi-modes");
+    modes.setAttribute("role", "radiogroup");
+    modes.setAttribute("aria-label", "Mode");
+    center.append(head, modes);
+    root.append(center);
+    subtitle.hidden = true;
+    let busy = null,
+      busyTimer;
+    const send = async (service, code) => {
+      const [domain, name, data] = controlCall(d, control, { service, code });
+      await getHass().callService(domain, name, data);
+    };
+    const choose = async (mode) => {
+      if (mode.state === control.mode && !busy) return;
+      if (alarmNeedsCode(control, mode.service)) {
+        askCode(mode);
+        return;
+      }
+      busy = mode.state;
+      paint();
+      try {
+        showError("");
+        await send(mode.service);
+      } catch (error) {
+        busy = null;
+        paint();
+        showError(error?.message || "The command failed.");
+        onError(error);
+      }
+      clearTimeout(busyTimer);
+      busyTimer = setTimeout(() => {
+        busy = null;
+        paint();
+      }, 4000);
+    };
+    const buttons = new Map();
+    for (const mode of control.modes) {
+      const b = h(
+        doc,
+        "button",
+        "mi-mode",
+        `${svg(mode.icon)}<span>${mode.label}</span>`,
+      );
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.onclick = () => choose(mode);
+      buttons.set(mode.state, b);
+      modes.append(b);
+    }
+    let state = d.state;
+    const paint = () => {
+      const selected = busy || control.mode;
+      for (const [modeState, b] of buttons) {
+        b.setAttribute("aria-checked", String(modeState === selected));
+        b.dataset.busy = String(
+          modeState === selected &&
+            (modeState === busy ||
+              ["arming", "pending", "disarming"].includes(state)),
+        );
+      }
+      dialog.style.setProperty(
+        "--mi-accent",
+        alarmColor(busy && busy !== state ? "arming" : state),
+      );
+    };
+
+    // Code entry, laid out like Home Assistant's: a masked field with a
+    // show/hide eye and, for numeric codes, a keypad with clear and confirm.
+    function askCode(mode) {
+      const sheet = h(doc, "dialog", "mi mi-code");
+      sheet.setAttribute("aria-labelledby", "mi-code-title");
+      const frame = h(doc, "div", "mi-frame");
+      const top = h(doc, "div", "mi-head");
+      const close = h(doc, "button", "mi-iconbtn", svg("close"));
+      close.type = "button";
+      close.setAttribute("aria-label", "Close");
+      const heading = h(
+        doc,
+        "div",
+        "mi-titles",
+        `<h2 id="mi-code-title">${mode.service === "alarm_disarm" ? "Disarm" : "Arm"}</h2>`,
+      );
+      top.append(close, heading);
+      const inner = h(doc, "div", "mi-body");
+      const field = h(doc, "label", "mi-code-field");
+      const input = h(doc, "input");
+      input.type = "password";
+      input.placeholder = "Code";
+      input.autocomplete = "off";
+      input.setAttribute("aria-label", "Code");
+      if (control.codeFormat === "number") input.inputMode = "numeric";
+      const eye = h(doc, "button", "mi-iconbtn", svg("eye"));
+      eye.type = "button";
+      eye.setAttribute("aria-label", "Show code");
+      eye.onclick = () => {
+        const shown = input.type === "text";
+        input.type = shown ? "password" : "text";
+        eye.innerHTML = svg(shown ? "eye" : "eyeOff");
+        eye.setAttribute("aria-label", shown ? "Show code" : "Hide code");
+      };
+      field.append(input, eye);
+      const error = h(doc, "p", "mi-error");
+      error.hidden = true;
+      inner.append(field);
+      let ok;
+      const submit = async () => {
+        if (!input.value || ok?.disabled) return;
+        if (ok) ok.disabled = true;
+        error.hidden = true;
+        try {
+          await send(mode.service, input.value);
+          busy = mode.state;
+          paint();
+          clearTimeout(busyTimer);
+          busyTimer = setTimeout(() => {
+            busy = null;
+            paint();
+          }, 4000);
+          sheet.close();
+        } catch (failure) {
+          input.value = "";
+          error.textContent = failure?.message || "The code was not accepted.";
+          error.hidden = false;
+          onError(failure);
+          input.focus();
+        } finally {
+          if (ok) ok.disabled = false;
+        }
+      };
+      if (control.codeFormat === "number") {
+        const pad = h(doc, "div", "mi-keypad");
+        for (const key of ["1", "2", "3", "4", "5", "6", "7", "8", "9"]) {
+          const k = h(doc, "button", "mi-key", key);
+          k.type = "button";
+          k.onclick = () => {
+            input.value += key;
+          };
+          pad.append(k);
+        }
+        const clear = h(doc, "button", "mi-key mi-key-clear", svg("close"));
+        clear.type = "button";
+        clear.setAttribute("aria-label", "Clear");
+        clear.onclick = () => {
+          input.value = "";
+        };
+        const zero = h(doc, "button", "mi-key", "0");
+        zero.type = "button";
+        zero.onclick = () => {
+          input.value += "0";
+        };
+        ok = h(doc, "button", "mi-key mi-key-ok", svg("check"));
+        ok.type = "button";
+        ok.setAttribute("aria-label", mode.label);
+        ok.onclick = submit;
+        pad.append(clear, zero, ok);
+        inner.append(pad);
+      } else {
+        ok = h(
+          doc,
+          "button",
+          "mi-pill",
+          mode.service === "alarm_disarm" ? "Disarm" : `Arm ${mode.label}`,
+        );
+        ok.type = "button";
+        ok.onclick = submit;
+        inner.append(ok);
+      }
+      inner.append(error);
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          submit();
+        }
+      });
+      close.onclick = () => sheet.close();
+      sheet.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (event.target === sheet) sheet.close();
+      });
+      sheet.addEventListener("close", (event) => {
+        event.stopPropagation();
+        sheet.remove();
+      });
+      frame.append(top, inner);
+      sheet.append(frame);
+      dialog.append(sheet);
+      sheet.showModal();
+      input.focus();
+    }
+
+    return (nd) => {
+      control = find(nd, (c) => c.kind === "alarm") || control;
+      state = nd.state;
+      if (busy && control.mode === busy) {
+        busy = null;
+        clearTimeout(busyTimer);
+      }
+      head.firstChild.textContent = cap(nd.state);
+      head.lastChild.textContent = nd.since || "";
+      paint();
+    };
+  }
+
   function actionLayout(d, root) {
     const btns = find(d, (c) => c.kind === "buttons");
     const center = h(doc, "div", "mi-center");
@@ -1093,6 +1340,7 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
     cover: coverLayout,
     lock: lockLayout,
     climate: climateLayout,
+    alarm_control_panel: alarmLayout,
     switch: switchLayout,
     input_boolean: switchLayout,
     fan: switchLayout,
@@ -1146,7 +1394,7 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
       d.domain,
       ...d.controls.map(
         (c) =>
-          `${c.kind}:${c.key || ""}:${(c.options || []).join(",")}:${(c.buttons || []).length}`,
+          `${c.kind}:${c.key || ""}:${(c.options || []).join(",")}:${(c.buttons || c.modes || []).length}`,
       ),
     ].join("|");
     if (next !== signature) {

@@ -1,3 +1,9 @@
+## 0.45.0
+
+- **Alarm panels on the full-screen page.** Opening an alarm (for example from Alarmo) now shows a pop-up like Home Assistant's own instead of a plain state: the state in large type with when it changed, and a tall mode picker listing only the modes the alarm supports (Home, Away, Night, Vacation, Custom bypass) plus Disarmed. The selected mode is grey when disarmed, green when armed, orange and pulsing while arming or pending, and red when triggered.
+- **Code keypad.** When the alarm needs a code (always for disarming, and for arming unless the alarm says otherwise), choosing a mode opens an **Arm** or **Disarm** sheet with a hidden code field, a show/hide eye and a 1–9 / clear / 0 / confirm keypad (a text field for text codes). A wrong code shows Home Assistant's error and clears the field; the right one sends the command and closes the sheet.
+- Dashboard cards are unchanged: they already open Home Assistant's own dialog. Nothing about saved views, cards or rooms changes.
+
 ## 0.44.0
 
 - **A tidier view editor sidebar.** The dashboard view editor is now grouped into clear sections: **Details** (the name and a switch to show it on the card), **What to show** (the space, with a compact **Change** button), **Camera** (Perspective or Floor plan and the preset side by side, with **Fine-tune camera and height** folded underneath) and **On the card** (Device icons, Extra entities and the YAML configuration as matching fold-out rows). The back arrow now sits beside the title.

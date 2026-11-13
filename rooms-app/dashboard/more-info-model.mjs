@@ -121,6 +121,70 @@ export function attributeRows(attributes = {}) {
     });
 }
 
+/**
+ * Alarm panel modes in Home Assistant's order, with the supported-features
+ * bit each needs (`AlarmControlPanelEntityFeature`). Disarm is always offered.
+ */
+export const ALARM_MODES = [
+  {
+    state: "armed_home",
+    service: "alarm_arm_home",
+    label: "Home",
+    icon: "home",
+    feature: 1,
+  },
+  {
+    state: "armed_away",
+    service: "alarm_arm_away",
+    label: "Away",
+    icon: "lock",
+    feature: 2,
+  },
+  {
+    state: "armed_night",
+    service: "alarm_arm_night",
+    label: "Night",
+    icon: "night",
+    feature: 4,
+  },
+  {
+    state: "armed_vacation",
+    service: "alarm_arm_vacation",
+    label: "Vacation",
+    icon: "airplane",
+    feature: 32,
+  },
+  {
+    state: "armed_custom_bypass",
+    service: "alarm_arm_custom_bypass",
+    label: "Custom bypass",
+    icon: "security",
+    feature: 16,
+  },
+  {
+    state: "disarmed",
+    service: "alarm_disarm",
+    label: "Disarmed",
+    icon: "shieldOff",
+    feature: 0,
+  },
+];
+
+/** Whether pressing `service` on an alarm control must first ask for the code. */
+export function alarmNeedsCode(control, service) {
+  if (!control?.codeFormat) return false;
+  return service === "alarm_disarm" || control.codeArmRequired;
+}
+
+/** The mode an alarm is in, or heading to while arming/pending. */
+export function alarmMode(entity) {
+  const state = entity?.state;
+  const a = entity?.attributes || {};
+  if (ALARM_MODES.some((m) => m.state === state)) return state;
+  const next = a.next_state || a.arm_mode;
+  return ALARM_MODES.some((m) => m.state === next) ? next : undefined;
+}
+
 const num = (v) => (Number.isFinite(v) ? v : undefined);
 const UNAVAILABLE = new Set(["unavailable", "unknown"]);
 
@@ -229,6 +293,20 @@ export function describeEntity(entity) {
         { service: "unlock", label: "Unlock" },
       ],
     });
+  } else if (domain === "alarm_control_panel") {
+    const features = Number.isFinite(a.supported_features)
+      ? a.supported_features
+      : 1 | 2;
+    out.controls.push({
+      kind: "alarm",
+      modes: ALARM_MODES.filter((m) => !m.feature || features & m.feature),
+      codeFormat:
+        a.code_format === "number" || a.code_format === "text"
+          ? a.code_format
+          : null,
+      codeArmRequired: a.code_arm_required !== false,
+      mode: alarmMode(entity),
+    });
   } else if (domain === "climate") {
     if (num(a.temperature) !== undefined)
       out.controls.push({
@@ -314,6 +392,16 @@ export function controlCall(description, control, value) {
       value ? "turn_on" : "turn_off",
       { entity_id: id },
     ];
+  if (control.kind === "alarm") {
+    const { service, code } = value || {};
+    if (!control.modes.some((m) => m.service === service))
+      throw new Error("Unknown alarm mode");
+    return [
+      "alarm_control_panel",
+      service,
+      code ? { entity_id: id, code } : { entity_id: id },
+    ];
+  }
   if (control.kind === "buttons") return [domain, value, { entity_id: id }];
   if (
     control.kind === "slider" ||

@@ -201,7 +201,7 @@ Sometimes a dashboard still shows too much: Home Assistant’s sidebar and heade
 - **Where to find it:** the **Open full screen** button on each card in **Dashboard views**, the **Full screen** button beside **Background** in the view editor (once the view is saved), or **Add to dashboard → Full-screen page** to copy the link. All open it in a new tab.
 - Bookmark it, add it to a phone’s home screen, or use it as a wall tablet’s start page.
 - It reuses the Home Assistant login of that browser (and sends you through the normal login if there is none). It is for administrators, like the rest of 3D Rooms, and nothing is public.
-- Taps work as on the card. Holding a device opens a pop-up laid out like Home Assistant’s own: a large brightness or position control, round buttons for power, colour temperature, colour and effects, an arc dial for air conditioners with mode, fan, swing and preset tiles, a big lock button, and an Attributes list. Your chosen marker icons, including custom icon sets, are drawn too.
+- Taps work as on the card. Holding a device opens a pop-up laid out like Home Assistant’s own: a large brightness or position control, round buttons for power, colour temperature, colour and effects, an arc dial for air conditioners with mode, fan, swing and preset tiles, a big lock button, an alarm mode picker (Home, Away, Night… as the alarm supports) with Home Assistant's code keypad when a code is needed, and an Attributes list. Your chosen marker icons, including custom icon sets, are drawn too.
 
 ## Faster loading on phones
 

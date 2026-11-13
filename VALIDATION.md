@@ -1,3 +1,11 @@
+# 0.45.0 — alarm panels on the full-screen page, 2026-11-13
+
+Released as 0.45.0, based on 0.44.0. Changes only the full-screen page's pop-up (`rooms-app/dashboard/more-info.mjs`, `more-info-model.mjs`, `more-info-icons.mjs`) and its bundle `three-d-rooms-standalone.js`.
+
+- New unit test for alarm modes by `supported_features`, code rules (`code_format`, `code_arm_required`), the arming target (`next_state`/`arm_mode`) and the service calls; all frontend tests, the format check and the build pass; host Python tests pass with native-only skips.
+- The pop-up was checked in a local page against a simulated Alarmo entity (Home + Away, numeric code required for arming): dark and light themes, desktop and 375×812 (both sheets as bottom sheets); a wrong code shows the error and clears the field, the right one calls `alarm_control_panel.alarm_arm_away` with the code, closes the keypad and shows Arming with Away highlighted.
+- The package was staged in the shared local Home Assistant (Core 2026.11.0); the full-screen page serves the new bundle. Not checked: a real Alarmo install, and tapping the alarm on the native page (the local demo only has `alarm_control_panel.security`, which no saved view shows).
+
 # 0.44.0 — view editor sidebar and unsaved-changes banner, 2026-11-13
 
 Released as 0.44.0, based on 0.43.1. Markup and CSS only (`rooms-app/web/index.html`, `web/views-workspace.css`, removed overrides in `web/style.css`, one note string in `web/main.js`); all element IDs kept, so the editor logic and stored views are unchanged.
