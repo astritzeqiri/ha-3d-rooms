@@ -72,7 +72,7 @@ test("dashboard uses an authenticated Ingress session and model-specific scene U
   );
   assert.equal(calls.at(-1).endpoint, "/ingress/session");
 });
-test("dashboard refuses cross-origin preview URLs, non-admin access and missing models", async () => {
+test("dashboard refuses cross-origin preview URLs and missing models; any user may view", async () => {
   await assert.rejects(
     connectModel(
       {},
@@ -81,14 +81,21 @@ test("dashboard refuses cross-origin preview URLs, non-admin access and missing 
     ),
     /Preview/,
   );
-  await assert.rejects(
-    connectModel(
-      { user: { is_admin: false } },
-      { model: "kitchen" },
-      "https://home.example",
-    ),
-    /administrator/,
+  // A non-admin (family member, wall tablet) reads rooms like an admin does.
+  const asked = [];
+  const family = await connectModel(
+    {
+      user: { is_admin: false },
+      callWS: async (message) => {
+        asked.push(message.operation);
+        return [];
+      },
+    },
+    { model: "kitchen" },
+    "https://home.example",
   );
+  await assert.rejects(family.load(), /Model not found/);
+  assert.deepEqual(asked, ["models"]);
   const c = await connectModel(
     {},
     { model: "missing", preview_url: "http://127.0.0.1:5190/" },

@@ -379,26 +379,90 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(web.HTTPServiceUnavailable):
             await view.get(SimpleNamespace(), "my-house_1")
 
-    async def test_native_view_and_websocket_deny_non_admin(self):
+    async def test_signed_in_users_read_and_use_cards_but_only_admins_edit(self):
         from aiohttp import web
         from homeassistant.exceptions import Unauthorized
 
-        with self.assertRaises(web.HTTPForbidden):
-            self.api.runtime_for(
-                {"hass_user": SimpleNamespace(is_admin=False)}, self.hass
-            )
-        with self.assertRaises(Unauthorized):
-            self.api.websocket_request(
-                self.hass,
-                SimpleNamespace(user=SimpleNamespace(is_admin=False)),
-                {"id": 1, "type": "three_d_rooms/request", "operation": "models"},
-            )
-        self.assertIs(
-            self.api.runtime_for(
-                {"hass_user": SimpleNamespace(is_admin=True)}, self.hass
-            ),
-            self.runtime,
+        allowed = {"light.kitchen", "button.desk_preset"}
+        user = SimpleNamespace(
+            id="family",
+            is_admin=False,
+            permissions=SimpleNamespace(check_entity=lambda entity, _policy: entity in allowed),
         )
+        admin = SimpleNamespace(id="admin", is_admin=True)
+
+        # HTTP: room models for every signed-in user; uploads/exports for admins.
+        with self.assertRaises(web.HTTPForbidden):
+            self.api.runtime_for({"hass_user": None}, self.hass, admin=False)
+        self.assertIs(self.api.runtime_for({"hass_user": user}, self.hass, admin=False), self.runtime)
+        with self.assertRaises(web.HTTPForbidden):
+            self.api.runtime_for({"hass_user": user}, self.hass)
+        self.assertIs(self.api.runtime_for({"hass_user": admin}, self.hass), self.runtime)
+
+        # Websocket: read operations work, every edit is refused.
+        from unittest.mock import patch
+        with patch("homeassistant.helpers.floor_registry.async_get", return_value=SimpleNamespace(async_list_floors=lambda: [])), \
+                patch.object(self.store, "catalog", lambda _floors=None: [{"id": "kitchen"}]):
+            self.assertEqual(await self.runtime.request("models", {}, user.id, user), [{"id": "kitchen"}])
+        self.store.components = [{"id": "v", "thumbnail": "x", "thumbnailArt": "y"}]
+        listed = await self.runtime.request(
+            "components", {"include_thumbnails": True, "include_art": True}, user.id, user
+        )
+        self.assertNotIn("thumbnail", listed[0])
+        self.assertNotIn("thumbnailArt", listed[0])
+        for operation, data in [
+            ("bindings", {"model": "kitchen", "controlId": "ceiling", "entityId": ""}),
+            ("delete", {"model": "kitchen"}),
+            ("save_component", {}),
+            ("delete_component", {"id": "v"}),
+            ("device-visibility", {"model": "kitchen", "controlId": "ceiling", "hidden": True}),
+            ("room", {"model": "kitchen", "title": "Hacked"}),
+            ("light-groups", {"model": "kitchen", "groups": []}),
+            ("optimization", {"model": "kitchen"}),
+            ("status", {}),
+            ("house_summary", {"house": "h"}),
+        ]:
+            with self.assertRaises(Unauthorized, msg=operation):
+                await self.runtime.request(operation, data, user.id, user)
+        self.assertEqual(self.store.find("kitchen")["bindings"], {"ceiling": "light.kitchen"})
+
+        # Day/night switch: the mode only, never the sun entity.
+        self.store.models[0]["daylight"] = {"mode": "night", "entity": "sun.sun", "windows": [
+            {"id": "window", "nodeId": "glass", "position": [0, 2, 1], "inward": [0, 0, -1], "width": 1, "height": 1}
+        ]}
+        self.hass.states.async_set("sun.sun", "above_horizon", {"elevation": 22})
+        result = await self.runtime.request("daylight", {"model": "kitchen", "mode": "day", "entity": "sun.sun"}, user.id, user)
+        self.assertEqual(result["daylight"]["mode"], "day")
+        self.hass.states.async_set("sun.other", "above_horizon", {"elevation": 5})
+        with self.assertRaises(Unauthorized):
+            await self.runtime.request("daylight", {"model": "kitchen", "mode": "auto", "entity": "sun.other"}, user.id, user)
+        self.assertEqual(self.store.find("kitchen")["daylight"]["entity"], "sun.sun")
+
+        # Presets follow Home Assistant's entity permissions for the user.
+        calls = []
+        async def handle(call):
+            calls.append(call)
+        self.hass.services.async_register("button", "press", handle)
+        for control_id, entity_id in (("preset-ok", "button.desk_preset"), ("preset-no", "button.garage")):
+            self.store.models[0]["controls"].append({"id": control_id, "type": "button", "capabilities": ["press"]})
+            self.store.models[0]["bindings"][control_id] = entity_id
+            self.hass.states.async_set(entity_id, "unknown")
+        await self.runtime.request("command", {"model": "kitchen", "controlId": "preset-ok", "action": "press"}, user.id, user)
+        self.assertEqual(calls[-1].context.user_id, "family")
+        with self.assertRaises(Unauthorized):
+            await self.runtime.request("command", {"model": "kitchen", "controlId": "preset-no", "action": "press"}, user.id, user)
+        self.assertEqual(len(calls), 1)
+
+        # The websocket handler turns refusals into an "unauthorized" error.
+        sent = []
+        connection = SimpleNamespace(
+            user=user,
+            send_error=lambda *args: sent.append(("error", *args)),
+            send_result=lambda *args: sent.append(("result", *args)),
+        )
+        handler = getattr(self.api.websocket_request, "__wrapped__", self.api.websocket_request)
+        await handler(self.hass, connection, {"id": 7, "operation": "delete", "data": {"model": "kitchen"}})
+        self.assertEqual(sent[-1][:3], ("error", 7, "unauthorized"))
 
     async def test_light_group_uses_one_entity_and_one_service_call(self):
         from copy import deepcopy

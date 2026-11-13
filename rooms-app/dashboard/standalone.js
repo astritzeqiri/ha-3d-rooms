@@ -36,13 +36,11 @@ async function start() {
     clean.searchParams.delete(key);
   history.replaceState(null, "", clean);
   const connection = await createConnection({ auth });
+  // Any signed-in user may open a view (a family member, a wall tablet);
+  // device control follows their Home Assistant permissions.
   const user = await connection.sendMessagePromise({
     type: "auth/current_user",
   });
-  if (!user.is_admin) {
-    say("3D Rooms views are only available to Home Assistant administrators.");
-    return;
-  }
   // Home Assistant draws marker icons with its own elements, which this page
   // lacks. Custom icon sets live in the user's frontend modules: loaded on need.
   const loadModules = async () => {

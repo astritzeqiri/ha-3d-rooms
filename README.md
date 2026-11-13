@@ -200,7 +200,7 @@ Sometimes a dashboard still shows too much: Home Assistant’s sidebar and heade
 
 - **Where to find it:** the **Open full screen** button on each card in **Dashboard views**, the **Full screen** button beside **Background** in the view editor (once the view is saved), or **Add to dashboard → Full-screen page** to copy the link. All open it in a new tab.
 - Bookmark it, add it to a phone’s home screen, or use it as a wall tablet’s start page.
-- It reuses the Home Assistant login of that browser (and sends you through the normal login if there is none). It is for administrators, like the rest of 3D Rooms, and nothing is public.
+- It reuses the Home Assistant login of that browser (and sends you through the normal login if there is none). Any Home Assistant user can open it, administrator or not, so a family member's phone or a wall tablet signed in as a regular user works; nothing is public.
 - Taps work as on the card. Holding a device opens a pop-up laid out like Home Assistant’s own: a large brightness or position control, round buttons for power, colour temperature, colour and effects, an arc dial for air conditioners with mode, fan, swing and preset tiles, a big lock button, an alarm mode picker (Home, Away, Night… as the alarm supports) with Home Assistant's code keypad when a code is needed, and an Attributes list. Your chosen marker icons, including custom icon sets, are drawn too.
 
 ## Faster loading on phones
@@ -215,9 +215,40 @@ Download the latest version in **HACS → 3D Rooms**, restart **Home Assistant**
 
 ## Storage and backups
 
-Rooms and mappings are stored locally in `config/.storage/three_d_rooms/`, separately from the integration files. Include this directory in your Home Assistant backups, or use the room export action for a portable copy.
+Rooms, device connections and saved views live in `config/.storage/three_d_rooms/`, separately from the integration files. Every room keeps its uploaded GLB plus lighter phone and desktop copies, so the folder can reach hundreds of megabytes; the diagnostics download (below) shows its size.
 
-Model uploads, downloads and device commands use your authenticated Home Assistant administrator session. Removing the integration retains the model library; removing a room in the manager deletes that room.
+- **Home Assistant backups include it.** Full backups and partial backups that include Home Assistant's configuration contain the whole library. Large rooms make backups larger and slower; keep that in mind for backup locations with little space.
+- **Portable copy of one room:** **Export room & mappings** in the room's settings in the 3D Rooms sidebar, or the `three_d_rooms.export_room` action (below). The ZIP holds the room and its connections and imports on any Home Assistant with 3D Rooms.
+- Removing the integration keeps the library, so adding it again brings everything back. Removing a room in the sidebar deletes that room.
+
+### Who can see and change what
+
+- **Every signed-in Home Assistant user** (including non-administrators, such as family members or a wall tablet) can view dashboard cards and full-screen pages: the room models, saved views and the day/night switch. Turning devices on and off goes through Home Assistant itself, so it follows the same permissions as the rest of Home Assistant.
+- **Administrators only:** the 3D Rooms sidebar and everything that changes the library — uploading, replacing or deleting rooms, connecting devices to entities, editing saved views, room exports, and the actions and repairs above. The card's Edit button only shows for administrators.
+
+Nothing is public: every request needs a Home Assistant login.
+
+## Diagnostics, repairs and actions
+
+- **Diagnostics:** **Settings → Devices & services → 3D Rooms → ⋮ → Download diagnostics** saves the integration and Home Assistant versions, the number of rooms, houses and saved views, storage size, device types, how many devices are connected and the optimization state of each room. Room and view names and entity IDs are left out. Attach it to bug reports.
+- **Repairs:** **Settings → Repairs** lists a room or saved view that still uses an entity Home Assistant no longer has (for example after removing a device or renaming an entity), and a room whose lighter copies could not be made. Each issue has a fix: disconnect the removed entities (the devices stay in the room so you can connect new ones), remove them from the saved view, or try the optimization again. Issues clear by themselves once the cause is gone.
+- **Actions** for automations and scripts:
+
+  ```yaml
+  # Read the library again and refresh open cards and the sidebar.
+  action: three_d_rooms.reload
+  data:
+    retry_optimizations: true # optional: try failed optimizations again
+  ```
+
+  ```yaml
+  # Save a room as a ZIP in config/3d_rooms_exports/.
+  action: three_d_rooms.export_room
+  data:
+    room: Kitchen # the room's name in 3D Rooms, or its room id
+    filename: kitchen-weekly # optional; default: the room name and time
+  response_variable: export # optional: path, size and room id
+  ```
 
 ## Help and development
 

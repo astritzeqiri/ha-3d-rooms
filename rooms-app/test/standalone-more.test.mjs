@@ -132,7 +132,8 @@ test("icon resolver: curated and custom icons, modules loaded once and only when
         }),
       };
     },
-    loadMdi: async () => ({ mdiBedKing: "M1 1h2v2H1z" }),
+    mdiPath: async (name) =>
+      name === "mdi:bed-king" ? "M1 1h2v2H1z" : undefined,
   });
   assert.match((await resolver.resolve("mdi:lightbulb")).html, /<path d="M/);
   assert.equal(loads, 0);

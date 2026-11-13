@@ -12,9 +12,12 @@ from .api import (
     ModelUploadView,
     RoomsRuntime,
     websocket_request,
+    websocket_subscribe,
 )
 from .const import DOMAIN, STATIC_URL, VERSION
 from .models import ModelStore
+from .repairs import HealthMonitor, clear_issues
+from .services import async_register_services
 from .standalone import StandalonePageView
 
 
@@ -30,7 +33,9 @@ async def async_setup(hass, config):
     hass.http.register_view(ModelOptimizedView(hass))
     hass.http.register_view(StandalonePageView(hass))
     websocket_api.async_register_command(hass, websocket_request)
+    websocket_api.async_register_command(hass, websocket_subscribe)
     hass.data.setdefault(DOMAIN, {})
+    async_register_services(hass)
     return True
 
 
@@ -42,6 +47,10 @@ async def async_setup_entry(hass, entry):
     hass.data[DOMAIN]["runtime"] = runtime
     # Existing rooms get lighter copies once, without re-uploading.
     runtime.schedule_optimize()
+    # Repairs: rooms or views using removed entities, failed optimizations.
+    monitor = HealthMonitor(hass, runtime)
+    hass.data[DOMAIN]["health"] = monitor
+    monitor.async_start()
     # The version plus the bundle's build time: browsers keep a cached card
     # otherwise, also between builds that share a version.
     card = Path(__file__).parent / "frontend" / "three-d-rooms-card.js"
@@ -65,6 +74,10 @@ async def async_setup_entry(hass, entry):
 
 async def async_unload_entry(hass, entry):
     """Hide the panel, while retaining models for a later setup or recovery."""
+    monitor = hass.data[DOMAIN].pop("health", None)
+    if monitor is not None:
+        monitor.async_stop()
+        clear_issues(hass)
     runtime = hass.data[DOMAIN].get("runtime")
     if runtime is not None:
         if runtime.optimizer is not None:

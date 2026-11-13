@@ -8,8 +8,7 @@ import { sceneVariant } from "../shared/render-profile.mjs";
  */
 export async function connectModel(hass, config, origin, fetcher = fetch) {
   if (!config.preview_url && !config.addon) {
-    if (hass.user?.is_admin === false)
-      throw new Error("This release requires a Home Assistant administrator.");
+    // Any signed-in user may view rooms; editing stays in the admin-only sidebar.
     return {
       preview: false,
       // `onProgress({ index, count, loaded, total })` follows the room downloads.

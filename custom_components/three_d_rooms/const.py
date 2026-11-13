@@ -1,5 +1,5 @@
 """Constants for 3D Rooms."""
 
 DOMAIN = "three_d_rooms"
-VERSION = "0.45.1"
+VERSION = "0.46.0"
 STATIC_URL = "/three_d_rooms_static"

@@ -1,4 +1,5 @@
-import { MARKER_ICONS, mdiExportName } from "../shared/marker-icons.mjs";
+import { MARKER_ICONS } from "../shared/marker-icons.mjs";
+import { haMdi } from "../shared/ha-mdi.mjs";
 import { iconArt, MDI_VIEWBOX } from "../shared/icon-art.mjs";
 
 /**
@@ -10,7 +11,7 @@ import { iconArt, MDI_VIEWBOX } from "../shared/icon-art.mjs";
 export function createIconResolver({
   customIcons = () => globalThis.window?.customIcons || {},
   loadModules = async () => {},
-  loadMdi = () => import("@mdi/js"),
+  mdiPath = (name) => haMdi.path(name),
 } = {}) {
   const cache = new Map();
   let modules;
@@ -21,8 +22,9 @@ export function createIconResolver({
       const curated = MARKER_ICONS.get(name);
       if (curated)
         return { viewBox: MDI_VIEWBOX, html: `<path d="${curated.path}"/>` };
-      const path = (await loadMdi())[mdiExportName(name)];
-      return iconArt({ path });
+      // Home Assistant's own copy of the set (see shared/ha-mdi.mjs).
+      const path = await mdiPath(name);
+      return path ? iconArt({ path }) : undefined;
     }
     if (!customIcons()[prefix]) {
       modules ||= Promise.resolve(loadModules()).catch(() => {});

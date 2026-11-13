@@ -1,3 +1,13 @@
+## 0.46.0
+
+- **Family members and wall tablets can see the 3D dashboard.** Any signed-in Home Assistant user, not only administrators, can now open dashboard cards and full-screen pages: room models, saved views, live updates, the day/night switch and preset buttons (presets follow the user's Home Assistant entity permissions). Uploading, replacing or deleting rooms, connecting entities, editing views, exports and the 3D Rooms sidebar stay administrator-only. Cards get library updates through a new `three_d_rooms/subscribe` command, because Home Assistant lets only administrators subscribe to custom events.
+- **Diagnostics.** **Download diagnostics** on the 3D Rooms integration saves versions, room, house and view counts, storage size, device types, connected and missing entities and each room's optimization state, without names or entity IDs.
+- **Repairs.** A room or saved view using an entity that no longer exists, and a room whose lighter copies could not be made, now show in **Settings → Repairs** with a fix: disconnect the removed entities (the devices stay), remove them from the view, or retry the optimization.
+- **Actions for automations:** `three_d_rooms.reload` (read the library again, optionally retry failed optimizations) and `three_d_rooms.export_room` (save a room with its connections as a ZIP in `config/3d_rooms_exports/`, with an optional response giving the path).
+- **A much smaller download: 12.7 MB → 4.6 MB.** The manager's icon picker and the full-screen page now use Home Assistant's own copy of the Material Design icons (`/static/mdi/`) instead of bundling two 2.8 MB copies, and the in-browser optimizer's texture encoder ships gzip-compressed (3.3 MB → 1.2 MB) and is unpacked only when a room is optimized.
+- The README explains that Home Assistant backups include the 3D Rooms library (`.storage/three_d_rooms/`) and that it can be large.
+- Rooms, connections and saved views are unchanged; no re-upload is needed.
+
 ## 0.45.1
 
 - **A cleaner view editor sidebar.** Details, What to show, Camera and On the card are now soft cards with their titles inside, instead of sections split by lines. Text fields and dropdowns share one height and look, with small muted labels. What to show gets a tinted icon and a compact **Change** button; Fine-tune camera and height sits at the foot of the Camera card; Device icons, Extra entities and YAML configuration have leading icons and an accent count badge. A saved view shows **Preview** and **Use in dashboard** side by side.

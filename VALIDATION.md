@@ -1,3 +1,17 @@
+# 0.46.0 — non-admin viewing, diagnostics, Repairs, actions and a smaller download, 2026-11-13
+
+Released as 0.46.0, based on 0.45.1. Backend: `api.py` (operation split, `three_d_rooms/subscribe`), new `health.py`, `diagnostics.py`, `repairs.py`, `services.py`, `services.yaml`, store helpers in `models.py`, translations. Frontend: `shared/ha-mdi.mjs`, `web/icon-catalog.js`, `dashboard/standalone-icons.mjs`, `dashboard/updates.mjs`, admin gates removed in `dashboard/transport.mjs`, `dashboard/standalone.js` and `shared/scene-download.mjs`, compressed Basis encoder (`tools/basis-encoder.mjs`, Vite plugin in `tools/ktx2-transcoder-plugin.mjs`).
+
+- All frontend tests, the format check and the build pass; host Python tests pass (including new `test_health.py`) with native-only skips; all native tests pass inside Home Assistant Core 2026.11.0, including a new permission-split test.
+- Shared local Home Assistant with this package staged:
+  - Diagnostics download: 5 rooms, 1 house, 2 views, storage size and per-room optimization state; no names or entity IDs.
+  - Repairs: a temporary switch bound to an unbound room device and a temporary helper added to a saved view were removed; both issues appeared with the right room and view names, both fix flows succeeded and the issues cleared. The view was restored byte-for-byte and HA restarted to bring the demo switch back.
+  - `export_room` wrote a valid ZIP (manifest, bindings, house placement, scene) and returned its path; unknown rooms and unsafe file names were refused; `reload` succeeded. The test export was deleted.
+  - A temporary non-administrator user: room list and views readable, every edit refused, update subscription delivered events (the custom event subscription is refused by HA, as expected), scene download 200, export and upload 403, no login 401. The full-screen page loaded all five rooms with markers, floor buttons and the day/night switch. The user was deleted afterwards.
+  - Icons: the manager's picker found and drew all "printer 3d" results from HA's `/static/mdi/` (list, metadata and two chunks); the full-screen page drew its chosen icons from HA's files.
+  - Optimizer: ran in the manager page on the smallest room with a stand-in upload (nothing saved); the 1.2 MB compressed encoder was fetched once and both copies came out with all textures in KTX2.
+- Not checked: Ruff (not installed), a regular dashboard card drawing rooms as a non-administrator (the only visible test card points at a replaced room id), real phones or wall tablets, Safari, and the HACS download itself.
+
 # 0.45.1 — view editor sidebar polish, 2026-11-13
 
 Released as 0.45.1, based on 0.45.0. Styling of the manager's view editor sidebar only (`rooms-app/web/views-workspace.css`, row icons in `web/index.html`, the Extra entities intro text in `web/entity-markers-editor.js`); element IDs and editor behaviour are unchanged.

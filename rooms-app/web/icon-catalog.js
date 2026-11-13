@@ -1,7 +1,9 @@
-import { mdiExportName } from "../shared/marker-icons.mjs";
+import { MARKER_ICONS } from "../shared/marker-icons.mjs";
+import { haMdi } from "../shared/ha-mdi.mjs";
 /**
  * Every icon Home Assistant's own icon picker offers: the Material Design set
- * (loaded on demand, see tools/mdi-catalog.mjs) plus each icon set registered
+ * (HA's own copy, see shared/ha-mdi.mjs; paths load per chunk as tiles are
+ * drawn) plus each icon set registered
  * in HA's `window.customIcons` (`local:`, `phu:` …) with `getIconList()` and
  * `getIcon(name)`. The manager runs in a same-origin frame inside HA, so the
  * sets are read from the HA page.
@@ -52,22 +54,32 @@ async function customEntries(sets) {
 }
 
 let loading;
-/** Loads once per page; pass `sets` only in tests. */
-export function loadIconCatalog(sets = hostIconSets()) {
+/** Loads once per page; pass `sets` and `mdiSource` only in tests. */
+export function loadIconCatalog(sets = hostIconSets(), mdiSource = haMdi) {
   loading ||= Promise.all([
-    import("@mdi/js"),
-    import("./mdi-catalog.json", { with: { type: "json" } }),
+    mdiSource.list().catch(() => {
+      console.warn("Unable to load Home Assistant's icon list");
+      return [];
+    }),
     customEntries(sets),
-  ]).then(([paths, { default: rows }, custom]) => {
-    const art = new Map();
-    const mdi = [];
-    for (const [name, words] of rows) {
-      const icon = "mdi:" + name;
-      const path = paths[mdiExportName(icon)];
-      if (!path) continue;
-      art.set(icon, { viewBox: MDI_VIEWBOX, html: `<path d="${path}"/>` });
-      mdi.push({ icon, set: "mdi", name, words });
-    }
+  ]).then(([rows, custom]) => {
+    // The suggested icons draw at once; the rest load from HA when shown.
+    const art = new Map(
+      [...MARKER_ICONS].map(([icon, { path }]) => [
+        icon,
+        { viewBox: MDI_VIEWBOX, html: `<path d="${path}"/>` },
+      ]),
+    );
+    const mdi = rows
+      .filter((row) => typeof row?.name === "string")
+      .map((row) => ({
+        icon: "mdi:" + row.name,
+        set: "mdi",
+        name: row.name.toLowerCase(),
+        words: (Array.isArray(row.keywords) ? row.keywords : [])
+          .join(" ")
+          .toLowerCase(),
+      }));
     const icons = [...mdi, ...custom];
     const pending = new Map();
     const setCounts = new Map();
@@ -78,20 +90,23 @@ export function loadIconCatalog(sets = hostIconSets()) {
       mdiCount: mdi.length,
       /** Custom sets that listed icons, e.g. `[{ prefix: "local", count: 12 }]`. */
       sets: [...setCounts].map(([prefix, count]) => ({ prefix, count })),
-      /** Synchronous art if known (all MDI; custom icons after `resolve`). */
+      /** Synchronous art if known (suggestions; others after `resolve`). */
       art: (icon) => art.get(icon),
-      /** Fetch a custom icon's art from its set (cached); undefined if unavailable. */
+      /** Fetch an icon's art from HA or its set (cached); undefined if unavailable. */
       resolve(icon) {
         if (art.has(icon)) return Promise.resolve(art.get(icon));
         if (!pending.has(icon)) {
           const split = icon.indexOf(":");
-          const set = sets[icon.slice(0, split)];
+          const prefix = icon.slice(0, split);
+          const set = sets[prefix];
           pending.set(
             icon,
             Promise.resolve(
-              typeof set?.getIcon === "function"
-                ? set.getIcon(icon.slice(split + 1))
-                : undefined,
+              prefix === "mdi"
+                ? mdiSource.path(icon).then((path) => path && { path })
+                : typeof set?.getIcon === "function"
+                  ? set.getIcon(icon.slice(split + 1))
+                  : undefined,
             )
               .then((data) => iconArt(data))
               .catch(() => undefined)

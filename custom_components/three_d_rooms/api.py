@@ -19,13 +19,22 @@ except ImportError:  # Home Assistant versions before the schema migration.
 
 from homeassistant.components import websocket_api
 from homeassistant.components.http import HomeAssistantView
-from homeassistant.core import Context
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.auth.permissions.const import POLICY_CONTROL
+from homeassistant.core import Context, callback
+from homeassistant.exceptions import HomeAssistantError, Unauthorized
 from .const import DOMAIN
 from .models import ENTITY, MAX_UPLOAD, number, compatible_entity
 from .house_matching import MAX_CHOICES
 
 LOGGER = logging.getLogger(__name__)
+
+# What a dashboard card needs, for any signed-in user (a family member, a wall
+# tablet). Everything else edits the library and stays administrator-only.
+READ_OPERATIONS = frozenset({"models", "components"})
+# Card controls: the day/night switch (mode only) and preset buttons (checked
+# against Home Assistant's own entity permissions for the user).
+CARD_OPERATIONS = frozenset({"daylight", "command"})
+USER_OPERATIONS = READ_OPERATIONS | CARD_OPERATIONS
 
 
 
@@ -80,7 +89,18 @@ class RoomsRuntime:
             ],
         }
 
-    async def request(self, operation, data, user_id):
+    async def request(self, operation, data, user_id, user=None):
+        """`user` is the Home Assistant user; None means an internal caller."""
+        if user is not None and not user.is_admin:
+            if operation not in USER_OPERATIONS:
+                raise Unauthorized()
+            if operation == "components":
+                # Gallery artwork is for the manager; cards ask for their own view.
+                data = {k: v for k, v in data.items() if k == "id"}
+            if operation == "daylight":
+                current = self.store.find(data.get("model")).get("daylight") or {}
+                if data.get("entity") != current.get("entity"):
+                    raise Unauthorized()
         if operation == "floors":
             from homeassistant.helpers import floor_registry
             registry = floor_registry.async_get(self.hass)
@@ -209,6 +229,8 @@ class RoomsRuntime:
             entity_id = model["bindings"].get(data.get("controlId"))
             if not control or not entity_id or not ENTITY.fullmatch(entity_id):
                 raise ValueError("Connect this control to an entity first.")
+            if user is not None and not user.is_admin and not user.permissions.check_entity(entity_id, POLICY_CONTROL):
+                raise Unauthorized(entity_id=entity_id, permission=POLICY_CONTROL)
             entity = self.hass.states.get(entity_id)
             if not entity or entity.state == "unavailable" or (entity.state == "unknown" and control.get("type") != "button"):
                 raise ValueError("This entity is unavailable.")
@@ -403,10 +425,13 @@ def light_command(data, control, entity):
         vol.Optional("data", default={}): dict,
     }
 )
-@websocket_api.require_admin
 @websocket_api.async_response
 async def websocket_request(hass, connection, msg):
-    """Handle model metadata without Supervisor or another access token."""
+    """Handle model metadata without Supervisor or another access token.
+
+    Any signed-in user may read rooms and views and use the card's controls;
+    every other operation needs an administrator (see USER_OPERATIONS).
+    """
     runtime = hass.data.get(DOMAIN, {}).get("runtime")
     if runtime is None:
         connection.send_error(
@@ -415,7 +440,11 @@ async def websocket_request(hass, connection, msg):
         return
     try:
         result = await runtime.request(
-            msg["operation"], msg["data"], connection.user.id
+            msg["operation"], msg["data"], connection.user.id, connection.user
+        )
+    except Unauthorized:
+        connection.send_error(
+            msg["id"], websocket_api.ERR_UNAUTHORIZED, "Administrator access is required."
         )
     except (ValueError, TypeError, HomeAssistantError) as error:
         connection.send_error(msg["id"], "invalid_request", str(error))
@@ -423,10 +452,27 @@ async def websocket_request(hass, connection, msg):
         connection.send_result(msg["id"], result)
 
 
-def runtime_for(request, hass):
-    """HA authenticates the HTTP request; we also require administrator access."""
+@websocket_api.websocket_command({"type": "three_d_rooms/subscribe"})
+@callback
+def websocket_subscribe(hass, connection, msg):
+    """Tell any signed-in user's cards when the library changes.
+
+    Home Assistant lets non-administrators subscribe only to a short list of
+    built-in events, so cards listen here instead of to the custom event.
+    """
+
+    @callback
+    def forward(_event):
+        connection.send_message(websocket_api.event_message(msg["id"], {"type": "updated"}))
+
+    connection.subscriptions[msg["id"]] = hass.bus.async_listen("three_d_rooms_updated", forward)
+    connection.send_result(msg["id"])
+
+
+def runtime_for(request, hass, admin=True):
+    """HA authenticates the HTTP request; edits also need an administrator."""
     user = request.get("hass_user")
-    if user is None or not user.is_admin:
+    if user is None or (admin and not user.is_admin):
         raise web.HTTPForbidden(text="Administrator access is required.")
     runtime = hass.data.get(DOMAIN, {}).get("runtime")
     if runtime is None:
@@ -545,14 +591,16 @@ class ModelAssetView(HomeAssistantView):
         self.hass = hass
 
     async def get(self, request, model_id, asset):
-        runtime = runtime_for(request, self.hass)
+        # Room models are what every card draws; exports include mappings and
+        # stay with administrators.
+        runtime = runtime_for(request, self.hass, admin=asset != "scene.glb")
         try:
             if asset == "scene.glb":
                 variant = request.query.get("variant", "original")
                 if variant not in ("original", "full", "phone"):
                     raise ValueError("Unknown scene variant.")
                 revision = runtime.store.revision(model_id)
-                # Authentication/admin checks precede all cache revalidation.
+                # Authentication checks precede all cache revalidation.
                 headers = {
                     "Cache-Control": "private, no-cache",
                     "Vary": "Authorization, Accept-Encoding",

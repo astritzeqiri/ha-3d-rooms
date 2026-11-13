@@ -1,12 +1,12 @@
 {
   "name": "ha-3d-rooms",
-  "version": "0.45.1",
+  "version": "0.46.0",
   "private": true,
   "type": "module",
   "scripts": {
     "icons": "node tools/mdi-catalog.mjs",
     "dev": "node server/index.mjs",
-    "build": "vite build && vite build --config vite.card.config.mjs && vite build --config vite.standalone.config.mjs && node tools/build-card.mjs",
+    "build": "node tools/basis-encoder.mjs && vite build && vite build --config vite.card.config.mjs && vite build --config vite.standalone.config.mjs && node tools/build-card.mjs",
     "start": "NODE_ENV=production node server/index.mjs",
     "test": "node --test test/*.test.mjs",
     "example": "node tools/create-example.mjs",

@@ -10,3 +10,4 @@ model-exports/
 
 __pycache__/
 *.pyc
+rooms-app/web/vendor/

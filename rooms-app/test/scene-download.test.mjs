@@ -34,10 +34,13 @@ test("cards and sidebar share one download per model revision and HA connection"
     3,
     "another authenticated session gets its own cache",
   );
-  await assert.rejects(
-    sceneBlob({ ...hass, user: { is_admin: false } }, model),
-    /Administrator/,
+  // Non-admin users (family, wall tablets) download rooms too; the server
+  // checks the login.
+  await sceneBlob(
+    { ...hass, connection: {}, user: { id: "family", is_admin: false } },
+    model,
   );
+  assert.equal(calls.length, 4);
 });
 
 test("failed scene requests can retry instead of poisoning the cache", async () => {

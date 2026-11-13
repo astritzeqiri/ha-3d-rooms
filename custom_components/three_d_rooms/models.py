@@ -1518,6 +1518,77 @@ class ModelStore:
         self.refresh_variants(model["folder"])
         return {"variant": variant, "bytes": len(data), "sceneRevision": self.revision(model_id)}
 
+    def optimization_failed(self, model_id):
+        """True when the server could not make this room's lighter copies."""
+        model = next((m for m in self.models if m["id"] == model_id), None)
+        if model is None:
+            return False
+        return (self.directory / "models" / model["folder"] / f"scene.s{SERVER_VERSION}.failed").exists()
+
+    def retry_optimizations(self, model_ids=None):
+        """Forget failed optimizations so the next run tries those rooms again."""
+        cleared = []
+        for model in self.models:
+            if model_ids is not None and model["id"] not in model_ids:
+                continue
+            marker = self.directory / "models" / model["folder"] / f"scene.s{SERVER_VERSION}.failed"
+            if marker.exists():
+                marker.unlink(missing_ok=True)
+                cleared.append(model["id"])
+        return cleared
+
+    def unbind_entities(self, model_id, entity_ids):
+        """Disconnect a room's devices (and light groups) from these entities."""
+        entity_ids = set(entity_ids)
+        models = deepcopy(self.models)
+        model = next((m for m in models if m["id"] == model_id), None)
+        if model is None:
+            raise ValueError("Model not found.")
+        removed = [c for c, e in model["bindings"].items() if e in entity_ids]
+        for control in removed:
+            del model["bindings"][control]
+        for group in model.get("lightGroups", []):
+            if group.get("entityId") in entity_ids:
+                group["entityId"] = ""
+                removed.extend(group["controls"])
+        if removed:
+            validate_light_groups(model.get("lightGroups", []), model["controls"])
+            self.save(models)
+        return sorted(set(removed))
+
+    def drop_view_entities(self, view_id, entity_ids):
+        """Remove extra entities pointing at these entity ids from a saved view."""
+        entity_ids = set(entity_ids)
+        view = next((c for c in self.components if c["id"] == view_id), None)
+        if view is None:
+            raise ValueError("Saved view not found.")
+        items = (view.get("markers") or {}).get("_entities") or {}
+        keep = {k: v for k, v in items.items() if v.get("entity") not in entity_ids}
+        if len(keep) == len(items):
+            return []
+        changed = deepcopy(view)
+        if keep:
+            changed["markers"]["_entities"] = keep
+        else:
+            del changed["markers"]["_entities"]
+        self.put_component(changed)
+        return sorted(set(items) - set(keep))
+
+    def find_room(self, reference):
+        """A real room by id, or by its title when exactly one room has it."""
+        if not isinstance(reference, str) or not reference.strip():
+            raise ValueError("Name the room to export.")
+        reference = reference.strip()
+        for model in self.models:
+            if model["id"] == reference:
+                return model
+        matches = [m for m in self.models if m["title"].strip().casefold() == reference.casefold()]
+        if len(matches) == 1:
+            return matches[0]
+        if matches:
+            raise ValueError(f"More than one room is called {reference}; use its room id.")
+        raise ValueError(f"No room called {reference}.")
+
     def optimization_status(self, model_id):
         model = next((m for m in self.models if m["id"] == model_id), None)
         if model is None:

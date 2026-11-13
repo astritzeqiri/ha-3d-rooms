@@ -1,0 +1,17 @@
+reload:
+  fields:
+    retry_optimizations:
+      default: false
+      selector:
+        boolean:
+export_room:
+  fields:
+    room:
+      required: true
+      example: Kitchen
+      selector:
+        text:
+    filename:
+      example: kitchen-backup
+      selector:
+        text:

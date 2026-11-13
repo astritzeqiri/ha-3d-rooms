@@ -212,17 +212,30 @@ test("icon catalog combines MDI with HA's registered custom icon sets", async ()
     },
     legacy: { getIcon: async () => ({ path: "M1 1h2" }) },
   };
-  const catalog = await loadIconCatalog(sets);
+  // Stands in for Home Assistant's /static/mdi/ files.
+  const { MDI_PATHS } = await import("./helpers/fake-ha-mdi.mjs");
+  const pathCalls = [];
+  const mdiSource = {
+    list: async () =>
+      Object.keys(MDI_PATHS).map((name) => ({ name, keywords: [] })),
+    path: async (icon) => {
+      pathCalls.push(icon);
+      return MDI_PATHS[icon.replace(/^mdi:/, "")];
+    },
+  };
+  const catalog = await loadIconCatalog(sets, mdiSource);
   assert.ok(catalog.mdiCount > 7000);
   assert.equal(catalog.count, catalog.mdiCount + 2);
   assert.deepEqual(catalog.sets, [{ prefix: "local", count: 2 }]);
+  // Suggestions draw at once; any other icon loads from HA on demand.
   for (const icon of MARKER_ICONS.keys()) assert.ok(catalog.art(icon), icon);
-  for (const icon of [
-    "mdi:dice-d20",
-    "mdi:alpha-a-box",
-    "mdi:printer-3d-nozzle",
-  ])
-    assert.ok(catalog.art(icon), icon);
+  assert.equal(pathCalls.length, 0);
+  for (const icon of ["mdi:dice-d20", "mdi:alpha-a-box", "mdi:door-open"])
+    assert.match((await catalog.resolve(icon)).html, /^<path d="M/, icon);
+  assert.ok(catalog.art("mdi:dice-d20"));
+  await catalog.resolve("mdi:dice-d20");
+  assert.equal(pathCalls.filter((i) => i === "mdi:dice-d20").length, 1);
+  assert.equal(await catalog.resolve("mdi:not-a-real-icon"), undefined);
   const doors = catalog.search("door");
   assert.ok(doors.total > 10);
   assert.equal(doors.results[0].icon, "mdi:door");
@@ -250,17 +263,14 @@ test("icon catalog combines MDI with HA's registered custom icon sets", async ()
   assert.equal(iconLabel("local:front_door"), "Front door · local");
   assert.equal(iconLabel("mdi:garage-open-variant"), "Garage open variant");
 });
-test("only the picker's lazy catalog imports @mdi/js; suggestion paths match it", async () => {
+test("no runtime code bundles @mdi/js; suggestion paths match it", async () => {
   const { readdir, readFile: read } = await import("node:fs/promises");
+  // Icons come from Home Assistant's /static/mdi/ (shared/ha-mdi.mjs).
   for (const dir of ["shared", "web", "dashboard"])
     for (const file of await readdir(dir)) {
       if (!/\.(m?js)$/.test(file)) continue;
       const source = await read(`${dir}/${file}`, "utf8");
-      // The standalone page's icon resolver loads the set lazily, like the picker.
-      if (file === "icon-catalog.js" || file === "standalone-icons.mjs") {
-        assert.match(source, /import\("@mdi\/js"\)/);
-        assert.doesNotMatch(source, /from "@mdi\/js"/);
-      } else assert.doesNotMatch(source, /@mdi\/js"/, `${dir}/${file}`);
+      assert.doesNotMatch(source, /@mdi\/js"/, `${dir}/${file}`);
     }
   const all = await import("@mdi/js");
   const { SUGGESTED_ICON_PATHS } =

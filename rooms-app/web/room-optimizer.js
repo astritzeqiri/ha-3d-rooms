@@ -6,6 +6,34 @@
 import { encodeToKTX2 } from "ktx2-encoder";
 import { optimizeScene, VARIANT_EDGES } from "../shared/optimize-scene.mjs";
 
+/** The Basis encoder, shipped gzip-compressed (see tools/basis-encoder.mjs). */
+const PACKED_ENCODER = new URL("./vendor/basis_encoder.wasmz", import.meta.url)
+  .href;
+let encoderUrl;
+/** Fetch and unpack the encoder once; a blob URL feeds ktx2-encoder's `wasmUrl`. */
+export function basisEncoderUrl(source = PACKED_ENCODER) {
+  encoderUrl ||= (async () => {
+    const response = await fetch(source);
+    if (!response.ok)
+      throw new Error(`Texture encoder unavailable (${response.status})`);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    // A server may already have decoded it; gzip data starts with 1f 8b.
+    const wasm =
+      bytes[0] === 0x1f && bytes[1] === 0x8b
+        ? await new Response(
+            new Blob([bytes])
+              .stream()
+              .pipeThrough(new DecompressionStream("gzip")),
+          ).arrayBuffer()
+        : bytes;
+    return URL.createObjectURL(new Blob([wasm], { type: "application/wasm" }));
+  })().catch((error) => {
+    encoderUrl = undefined;
+    throw error;
+  });
+  return encoderUrl;
+}
+
 /** Fit within maxEdge; compressed GPU formats need sides in multiples of four. */
 export function textureSize(width, height, maxEdge) {
   const scale = Math.min(1, maxEdge / Math.max(width, height));
@@ -41,6 +69,7 @@ export async function encodeTexture(
 ) {
   const raster = await pixels(image, mimeType, maxEdge);
   const encoded = await encodeToKTX2(image, {
+    wasmUrl: await basisEncoderUrl(),
     imageDecoder: async () => raster,
     isUASTC: normal,
     isNormalMap: normal,

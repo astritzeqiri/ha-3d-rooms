@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { initMarkerEditor } from "../web/marker-editor.js";
+import { installFakeHaMdi } from "./helpers/fake-ha-mdi.mjs";
+
+installFakeHaMdi();
 
 function harness(extraControls = [], extraOptions = {}) {
   class Element {

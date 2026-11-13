@@ -53,8 +53,7 @@ export async function sceneBlob(
   onProgress,
   { fresh = false } = {},
 ) {
-  if (hass.user?.is_admin === false)
-    throw new Error("Administrator access is required.");
+  // Any signed-in user may download rooms; the server checks the login.
   const owner = sceneOwner(hass);
   let cache = sessions.get(owner);
   if (!cache) sessions.set(owner, (cache = new Map()));

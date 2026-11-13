@@ -31,6 +31,7 @@ import {
   LOCK_ICON_PATH,
 } from "../shared/marker.mjs";
 import { lockState } from "../shared/lock.mjs";
+import { subscribeUpdates } from "./updates.mjs";
 import {
   customEntityDefaultIcon,
   customEntitySettings,
@@ -761,9 +762,8 @@ export class ThreeDRoomsCard extends HTMLElement {
         !this._unsubModels &&
         this._hass.connection?.subscribeEvents
       ) {
-        const unsubscribe = await this._hass.connection.subscribeEvents(
-          () => this._modelsEvent(),
-          "three_d_rooms_updated",
+        const unsubscribe = await subscribeUpdates(this._hass.connection, () =>
+          this._modelsEvent(),
         );
         // Keep one subscription: drop this one if the card left the page or
         // another load subscribed meanwhile.
