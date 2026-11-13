@@ -769,7 +769,7 @@ export function initEntityMarkersEditor({
   }
   function buildPanel() {
     if (!host) return;
-    host.innerHTML = `<p class="entity-intro">Show any Home Assistant entity on this view — sensors, switches, scenes, media players… Then drag its icon on the model to place it.</p>
+    host.innerHTML = `<p class="entity-intro">Add any Home Assistant entity, then drag its icon on the model to place it.</p>
       <div class="entity-search">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input type="search" role="combobox" placeholder="Search entities to add" aria-label="Search entities to add" aria-expanded="false" aria-controls="entity-results" aria-autocomplete="list" autocomplete="off" spellcheck="false">

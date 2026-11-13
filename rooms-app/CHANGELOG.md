@@ -1,3 +1,9 @@
+## 0.45.1
+
+- **A cleaner view editor sidebar.** Details, What to show, Camera and On the card are now soft cards with their titles inside, instead of sections split by lines. Text fields and dropdowns share one height and look, with small muted labels. What to show gets a tinted icon and a compact **Change** button; Fine-tune camera and height sits at the foot of the Camera card; Device icons, Extra entities and YAML configuration have leading icons and an accent count badge. A saved view shows **Preview** and **Use in dashboard** side by side.
+- **Fixed the Extra entities search.** The magnifier now sits inside the search field, centred with the text. The entity list matches the rest of the sidebar, with a shorter intro and a quieter remove button.
+- Styling only: saved views, cards and rooms are unchanged.
+
 ## 0.45.0
 
 - **Alarm panels on the full-screen page.** Opening an alarm (for example from Alarmo) now shows a pop-up like Home Assistant's own instead of a plain state: the state in large type with when it changed, and a tall mode picker listing only the modes the alarm supports (Home, Away, Night, Vacation, Custom bypass) plus Disarmed. The selected mode is grey when disarmed, green when armed, orange and pulsing while arming or pending, and red when triggered.

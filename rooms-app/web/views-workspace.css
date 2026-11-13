@@ -439,10 +439,14 @@ button:focus-visible {
   flex-wrap: wrap;
 }
 
-/* View editor sidebar: a compact header, titled sections and a save bar. */
+/* View editor sidebar: a compact header, then each section as a soft card
+   (title inside), uniform 40px controls and icon-led rows. */
 .dashboard-panel {
+  --ve-card: color-mix(in srgb, var(--surface) 82%, var(--text) 4%);
+  --ve-field: var(--bg);
+  --ve-divider: color-mix(in srgb, var(--line) 70%, transparent);
   gap: 0;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 .dashboard-panel .panel-heading {
   display: flex;
@@ -450,8 +454,7 @@ button:focus-visible {
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
-  padding: 18px 0 16px;
-  border-bottom: 1px solid var(--line);
+  padding: 16px 4px 14px;
 }
 .dashboard-panel .panel-heading-text {
   min-width: 0;
@@ -487,14 +490,18 @@ button:focus-visible {
   background: var(--raised);
 }
 #dashboard-form {
-  display: block;
+  display: grid;
+  gap: 10px;
+  padding-bottom: 12px;
 }
 .editor-section {
   display: grid;
   gap: 12px;
-  padding: 18px 0;
-  border-bottom: 1px solid var(--line);
   min-width: 0;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--ve-divider);
+  border-radius: 14px;
+  background: var(--ve-card);
 }
 .editor-section-title {
   color: var(--muted);
@@ -505,14 +512,53 @@ button:focus-visible {
 }
 .editor-section > p.muted {
   margin-top: -6px;
+  line-height: 1.45;
 }
 .dashboard-panel .panel-field,
 .dashboard-panel .view-height-field {
   display: grid;
   gap: 6px;
   min-width: 0;
-  font-size: 13px;
+  color: var(--muted);
+  font-size: 12px;
   font-weight: 600;
+}
+.dashboard-panel .panel-field > :is(input, select),
+.dashboard-panel .view-height-field > :is(input, select) {
+  margin-top: 0;
+}
+/* One height and look for every text field and dropdown. */
+.dashboard-panel
+  input:is(:not([type]), [type="text"], [type="number"], [type="search"]),
+.dashboard-panel select {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-color: var(--ve-divider);
+  border-radius: var(--r-md);
+  background-color: var(--ve-field);
+  color: var(--text);
+  font-size: 14px;
+}
+.dashboard-panel select {
+  padding-right: 34px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23998f82' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.dashboard-panel select:hover,
+.dashboard-panel
+  input:is(
+    :not([type]),
+    [type="text"],
+    [type="number"],
+    [type="search"]
+  ):hover {
+  border-color: var(--line);
 }
 .dashboard-panel .panel-field-row {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -524,7 +570,9 @@ button:focus-visible {
   justify-content: space-between;
   gap: 12px;
   min-height: 40px;
+  margin-top: -2px;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
 }
 .dashboard-panel .card-title-toggle input[role="switch"] {
@@ -532,80 +580,124 @@ button:focus-visible {
   min-height: 0;
   margin: 0;
   padding: 0;
+  border-radius: 999px;
 }
 
 /* What to show */
 .view-content-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 10px 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--bg);
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 8px 8px 10px;
+  border: 1px solid var(--ve-divider);
+  border-radius: 12px;
+  background: var(--ve-field);
 }
 .view-content-icon {
   flex: none;
-  width: 20px;
-  height: 20px;
+  box-sizing: border-box;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--glow);
   color: var(--accent-ink);
 }
 .view-content-row p {
   flex: 1;
   min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.35;
-  overflow-wrap: anywhere;
 }
 .view-content-row button {
   flex: none;
   min-height: 34px;
   padding: 6px 12px;
+  border-color: var(--ve-divider);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent-ink);
   font-size: 13px;
+}
+.view-content-row button:hover:not(:disabled) {
+  background: var(--glow);
+  border-color: var(--accent);
+}
+#view-content-note {
+  margin-top: -4px;
 }
 #view-content-note:empty {
   display: none;
 }
 
-/* Collapsible groups */
+/* Collapsible rows: an icon, the label, an optional count and a chevron. */
 .editor-section-list {
   gap: 0;
-  padding-bottom: 6px;
+  padding: 14px 8px 6px;
 }
 .editor-section-list .editor-section-title {
-  margin-bottom: 4px;
+  margin: 0 8px 6px;
 }
 .editor-collapsible {
   min-width: 0;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--ve-divider);
+}
+.editor-section-list .editor-collapsible {
+  margin: 0 8px;
 }
 .editor-section-list .editor-collapsible:first-of-type {
   border-top: 0;
 }
 .view-advanced.editor-collapsible {
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  padding: 0 12px;
+  margin: 0 -16px -16px;
+  padding: 0 16px;
+  border-top: 1px solid var(--ve-divider);
 }
 .editor-collapsible > summary {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 10px 0;
+  gap: 12px;
+  min-height: 48px;
+  padding: 6px 0;
   font-size: 14px;
   font-weight: 600;
   list-style: none;
   cursor: pointer;
+  border-radius: var(--r-md);
 }
 .editor-collapsible > summary::-webkit-details-marker {
   display: none;
 }
+.editor-collapsible .row-icon {
+  flex: none;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  color: var(--muted);
+  transition:
+    background-color var(--ease),
+    color var(--ease);
+}
+.editor-collapsible > summary:hover .row-icon,
+.editor-collapsible[open] > summary .row-icon {
+  background: var(--glow);
+  color: var(--accent-ink);
+}
 .editor-collapsible > summary::after {
   content: "";
+  flex: none;
   width: 7px;
   height: 7px;
-  margin: 0 4px 3px auto;
+  margin: 0 6px 3px auto;
   border-right: 1.8px solid var(--muted);
   border-bottom: 1.8px solid var(--muted);
   transform: rotate(45deg);
@@ -619,28 +711,114 @@ button:focus-visible {
   color: var(--accent-ink);
 }
 .editor-collapsible .entity-count:not(:empty) {
-  padding: 1px 8px;
+  min-width: 22px;
+  padding: 1px 7px;
   border-radius: 999px;
-  background: var(--raised);
-  color: var(--muted);
+  background: var(--glow);
+  color: var(--accent-ink);
   font-size: 12px;
+  font-weight: 700;
+  text-align: center;
 }
 .editor-collapsible-body {
   display: grid;
   gap: 14px;
   min-width: 0;
-  padding: 2px 0 16px;
+  padding: 4px 0 16px;
 }
 .editor-collapsible-body > p.muted:empty {
   display: none;
 }
 .dashboard-config textarea {
   width: 100%;
+  margin-top: 0;
+  border-color: var(--ve-divider);
+  border-radius: var(--r-md);
+  background: var(--ve-field);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
 }
 .dashboard-config .editor-collapsible-body > button {
   justify-self: start;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+/* Extra entities: a search field with its icon inside, then a light list. */
+#dashboard-entity-settings {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 0;
+}
+.dashboard-panel .entity-intro {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.dashboard-panel .entity-search > svg {
+  top: 50%;
+  left: 12px;
+  width: 17px;
+  height: 17px;
+  transform: translateY(-50%);
+}
+.dashboard-panel .entity-search input {
+  margin: 0;
+  padding-left: 38px;
+}
+.dashboard-panel .entity-search input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+.dashboard-panel .entity-cards {
+  gap: 6px;
+}
+.dashboard-panel .entity-card {
+  padding: 2px 4px 2px 2px;
+  border-color: var(--ve-divider);
+  border-radius: 12px;
+  background: var(--ve-field);
+}
+.dashboard-panel .entity-card-main {
+  min-height: 52px;
+  padding: 6px 8px;
+}
+.dashboard-panel :is(.entity-cards, .entity-results) .entity-card-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--glow);
+}
+.dashboard-panel .entity-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.dashboard-panel .entity-card-text {
+  gap: 2px;
+}
+.dashboard-panel .entity-card-remove {
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 8px;
+  opacity: 0.7;
+}
+.dashboard-panel .entity-card:hover .entity-card-remove,
+.dashboard-panel .entity-card-remove:focus-visible {
+  opacity: 1;
+}
+.dashboard-panel .entity-empty {
+  border-color: var(--ve-divider);
+  background: var(--ve-field);
+  font-size: 13px;
+}
+#dashboard-entities .editor-collapsible-body {
+  padding-bottom: 12px;
+}
+@media (max-width: 600px) {
+  .dashboard-panel .entity-search input {
+    padding-left: 40px;
+  }
 }
 
 /* Save bar: stays in reach while the settings scroll. Saved: status,
@@ -654,8 +832,8 @@ button:focus-visible {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px 12px;
-  margin: 0 -20px;
-  padding: 12px 20px max(14px, env(safe-area-inset-bottom));
+  margin: 0 -16px;
+  padding: 12px 16px max(14px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
   border-radius: 0 0 var(--r-lg) var(--r-lg);
   background: color-mix(in srgb, var(--surface) 94%, transparent);
@@ -691,6 +869,28 @@ button:focus-visible {
 #save-dashboard-component,
 #use-saved-view {
   grid-column: 1 / -1;
+}
+/* Saved: a small status line, then Preview and Use in dashboard side by side. */
+.dashboard-panel .panel-save:has(#dashboard-save-state[data-state="saved"]) {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 10px;
+}
+.panel-save:has(#dashboard-save-state[data-state="saved"])
+  #dashboard-save-state {
+  grid-column: 1 / -1;
+}
+.panel-save:has(#dashboard-save-state[data-state="saved"]) #preview-dashboard {
+  grid-column: 1;
+}
+.panel-save:has(#dashboard-save-state[data-state="saved"]) #use-saved-view {
+  grid-column: 2;
+}
+.dashboard-panel
+  .panel-save:has(#dashboard-save-state[data-state="saved"])
+  button {
+  min-height: 44px;
+  border-radius: 999px;
+  padding-inline: 18px;
 }
 #dashboard-save-state[data-state="saved"]::before {
   background: var(--good, #4caf50);

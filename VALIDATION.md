@@ -1,3 +1,11 @@
+# 0.45.1 — view editor sidebar polish, 2026-11-13
+
+Released as 0.45.1, based on 0.45.0. Styling of the manager's view editor sidebar only (`rooms-app/web/views-workspace.css`, row icons in `web/index.html`, the Extra entities intro text in `web/entity-markers-editor.js`); element IDs and editor behaviour are unchanged.
+
+- All frontend tests, the format check and the build pass; host Python tests pass with native-only skips.
+- Checked in the shared local Home Assistant (Core 2026.11.0) in the real manager page, dark theme, at 1440×900 and 375×812: section cards, uniform 40px fields and dropdowns, icon rows, the saved-state Preview / Use in dashboard row, no horizontal scroll at phone width. The unsaved-changes banner still appears on a change and clears when undone. The Extra entities search icon is centred on the field; three entities were added temporarily to check the list and the results dropdown, then discarded without saving.
+- Not checked: the light theme and Safari.
+
 # 0.45.0 — alarm panels on the full-screen page, 2026-11-13
 
 Released as 0.45.0, based on 0.44.0. Changes only the full-screen page's pop-up (`rooms-app/dashboard/more-info.mjs`, `more-info-model.mjs`, `more-info-icons.mjs`) and its bundle `three-d-rooms-standalone.js`.
