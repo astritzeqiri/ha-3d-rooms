@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-B_-NuEh1.js"></script>
+    <script type="module" crossorigin src="./assets/index-BJwKrpp_.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/camera-view-Dzk4R3Ew.js">
-    <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-Bj4pBqMI.js">
+    <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-BHmLgbtw.js">
     <link rel="modulepreload" crossorigin href="./assets/room-focus-WYsZzcBL.js">
     <link rel="modulepreload" crossorigin href="./assets/preload-helper-CRzLMJPS.js">
     <link rel="stylesheet" crossorigin href="./assets/index-CzjaRT9S.css">
@@ -364,6 +364,17 @@
                     type="checkbox"
                     role="switch"
                 /></label>
+                <label class="panel-field" for="dashboard-quality"
+                  >Room detail<select id="dashboard-quality">
+                    <option value="auto">Lighter on phones</option>
+                    <option value="high">Full detail everywhere</option>
+                    <option value="low">Lighter everywhere</option>
+                  </select>
+                  <span class="muted small"
+                    >Phones keep a downloaded room, so full detail costs data
+                    only the first time.</span
+                  ></label
+                >
               </section>
               <section
                 class="editor-section view-content-summary"
@@ -878,8 +889,7 @@
                 ><strong>Group this room's icons</strong
                 ><small class="muted"
                   >When its icons overlap on a house or floor card, they show as
-                  one chip with the room name. Tap the chip to see them. Phones
-                  and touch screens always do this.</small
+                  one chip with the room name. Tap the chip to see them.</small
                 ></span
               ></label
             >

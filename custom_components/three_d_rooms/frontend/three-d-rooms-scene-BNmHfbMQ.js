@@ -16023,13 +16023,9 @@ var zp = class {
 	}
 	async prepareAsset(e, t, n) {
 		let r = this.generation;
-		this.shadowsCurrent = !1, this.preparedViews = /* @__PURE__ */ new Map(), this.clearClimateVisuals(), this.disposeScene(this.scene), this.scene.clear(), this.groundShadow = null, this.groundBox = null, this.roomHighlight = null, this.model = e, this.asset = t, this.scene.add(this.asset), this.materials = [], this.nodes = /* @__PURE__ */ new Map();
-		let i = /* @__PURE__ */ new Set();
-		this.asset.traverse((e) => {
-			e.userData.wallNormal && e.traverse((e) => e.isMesh && i.add(e));
-		}), this.asset.traverse((e) => {
+		this.shadowsCurrent = !1, this.preparedViews = /* @__PURE__ */ new Map(), this.clearClimateVisuals(), this.disposeScene(this.scene), this.scene.clear(), this.groundShadow = null, this.groundBox = null, this.roomHighlight = null, this.model = e, this.asset = t, this.scene.add(this.asset), this.materials = [], this.nodes = /* @__PURE__ */ new Map(), this.asset.traverse((e) => {
 			if (e.userData.controlId && this.nodes.set(e.userData.controlId, e), e.isMesh) {
-				if (e.castShadow = !e.userData.daylightWindowId, e.receiveShadow = !0, e.material = Array.isArray(e.material) ? e.material.map((e) => e.clone()) : e.material.clone(), i.has(e)) for (let t of Array.isArray(e.material) ? e.material : [e.material]) t.side = 2;
+				e.castShadow = !e.userData.daylightWindowId, e.receiveShadow = !0, e.material = Array.isArray(e.material) ? e.material.map((e) => e.clone()) : e.material.clone();
 				for (let t of Array.isArray(e.material) ? e.material : [e.material]) t.isMeshBasicMaterial && this.materials.push([t, t.color.clone()]);
 			}
 		}), this.ambient = new Yo("#e5e8ee", "#8c8378", e.ambient ?? .22), this.scene.add(this.ambient), this.fill = new hs(16777215, .25), this.scene.add(this.fill), this.fixtures = /* @__PURE__ */ new Map();
@@ -16072,28 +16068,28 @@ var zp = class {
 				base: t.intensity ?? 12
 			});
 		}
-		let a = (e) => {
+		let i = (e) => {
 			let t = 0;
 			for (let n = e.parent; n; n = n.parent) t++;
 			return t;
 		};
-		e.controls.flatMap((e) => (e.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((t) => [e.id, t])).sort((e, t) => a(e[1]) - a(t[1])).forEach(([e, t]) => t.traverse((t) => {
+		e.controls.flatMap((e) => (e.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((t) => [e.id, t])).sort((e, t) => i(e[1]) - i(t[1])).forEach(([e, t]) => t.traverse((t) => {
 			t.userData.pickControl = e;
 		})), this.daylight = e.daylight ? fd(e.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = e.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
-		let { center: o, size: s } = this.applyHouseScope();
-		this.defaultTarget = e.camera?.target || o.toArray(), this.defaultPosition = e.camera?.position || o.clone().add(new K(s * .7, s * .65, s * .7)).toArray();
-		let c = performance.now();
-		this.renderer.domElement.dataset.prepareMs = Math.round(c - n);
-		let l = this.compiling = {};
+		let { center: a, size: o } = this.applyHouseScope();
+		this.defaultTarget = e.camera?.target || a.toArray(), this.defaultPosition = e.camera?.position || a.clone().add(new K(o * .7, o * .65, o * .7)).toArray();
+		let s = performance.now();
+		this.renderer.domElement.dataset.prepareMs = Math.round(s - n);
+		let c = this.compiling = {};
 		this.renderSuspended = !0;
 		try {
 			await this.compileShown();
 		} finally {
-			this.compiling === l && (this.compiling = null, this.renderSuspended = !1);
+			this.compiling === c && (this.compiling = null, this.renderSuspended = !1);
 		}
 		if (r !== this.generation) return !1;
-		let u = performance.now();
-		return this.renderer.domElement.dataset.compileMs = Math.round(u - c), this.deferShadows = !0, this.setView(this.options.mode), this.renderer.domElement.dataset.firstRenderMs = Math.round(performance.now() - u), !0;
+		let l = performance.now();
+		return this.renderer.domElement.dataset.compileMs = Math.round(l - s), this.deferShadows = !0, this.setView(this.options.mode), this.renderer.domElement.dataset.firstRenderMs = Math.round(performance.now() - l), !0;
 	}
 	async compileShown() {
 		if (!this.contextLost) try {
@@ -16389,29 +16385,14 @@ var zp = class {
 		return this.skyPairs;
 	}
 	cutaway() {
-		let e = this.camera?.position;
-		this.asset?.traverse((t) => {
-			t.userData.ceiling && (t.visible = !!t.userData.controlId), t.userData.wallNormal && (t.visible = !e || this.wallFacesCamera(t, e)), t.userData.appearanceId && (t.visible = this.model.houseView ? t.userData.appearanceVisible !== !1 : (this.model.appearance || []).find((e) => e.id === t.userData.appearanceId)?.visible !== !1);
+		this.asset?.traverse((e) => {
+			e.userData.ceiling && (e.visible = !!e.userData.controlId), e.userData.wallNormal && (e.visible = !0), e.userData.appearanceId && (e.visible = this.model.houseView ? e.userData.appearanceVisible !== !1 : (this.model.appearance || []).find((t) => t.id === e.userData.appearanceId)?.visible !== !1);
 		});
 		for (let [e, t] of this.skyWindows?.() || []) {
 			let n = e.userData.inScope !== !1;
 			for (let e = t; n && e && e !== this.asset; e = e.parent) n = e.visible;
 			e.visible = n && this.insideShownFloor(e.position);
 		}
-	}
-	wallFacesCamera(e, t) {
-		this.wallFrames ||= /* @__PURE__ */ new WeakMap();
-		let n = this.wallFrames.get(e);
-		if (!n) {
-			e.updateWorldMatrix(!0, !1);
-			let t = new lr().setFromObject(e);
-			if (t.isEmpty()) return !0;
-			n = {
-				middle: t.getCenter(new K()),
-				normal: new K().fromArray(e.userData.wallNormal).transformDirection((e.parent || e).matrixWorld)
-			}, this.wallFrames.set(e, n);
-		}
-		return t.x * n.normal.x + t.y * n.normal.y + t.z * n.normal.z - n.middle.dot(n.normal) > 0;
 	}
 	setStates(e) {
 		if (this.model) {

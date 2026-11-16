@@ -1,3 +1,11 @@
+# 0.48.1 — room fronts back, grouping only when asked, room detail per view, 2026-11-16
+
+Released as 0.48.1, based on 0.48.0. Reverts the 0.48.0 wall cutaway and two-sided walls (`web/scene.js`) and the automatic phone grouping (`dashboard/card.js`). Adds an optional saved-view `quality` (`high`/`low`; validated in `shared/component.mjs` and `models.py`, resolved in `shared/saved-view.mjs`, Room detail in the view editor) and a `?quality=` override on the full-screen page (`dashboard/standalone.js`) for the iOS app.
+
+- All frontend tests (new: view quality) and host Python tests (new: quality validation) pass with native-only skips; format check and build pass.
+- Shared local Home Assistant (Core 2026.11.0): room fronts and windows draw again; the Living room no longer groups at phone width; the full-screen page at 375×812 renders at pixel ratio 2 with `?quality=high` and 1.5 without.
+- Not checked: the Room detail field in the view editor by hand (saving is covered by tests), Safari, a real phone.
+
 # 0.48.0 — audit fixes, calmer dashboard controls and one-step Add to dashboard, 2026-11-16
 
 Released as 0.48.0, based on 0.47.1 (plus the README link on main). Frontend only. Card: `dashboard/card.js` (theme-coloured pop-ups, phone grouping, panels during download, undo, labelled controls, More menu, panel changes), `dashboard/panel.js` (Home Assistant light/dark mode, dashboard bridge), `dashboard/transport.mjs`; the card is split so the 3D engine (`three-d-rooms-scene-*.js`) loads only when a card shows a room (`vite.card.config.mjs`, `tools/build-card.mjs`; `dist/ha-3d-rooms.js` stays one file). Shared: `room-lights.mjs` (undo), `dashboard-cards.mjs` (new), `scene-sessions.mjs` (new), `view-cube.mjs`, `house-presentation.mjs`, `daylight.mjs`. Scene: wall cutaway by inner normal, two-sided walls, daylight sky panels follow their windows, floor framing with a toolbar inset, icons limited to the shown floor. Manager: header, Room settings groups, wording, rooms list, library, phone editor, room filter, wheel behaviour, editor tidy-ups.

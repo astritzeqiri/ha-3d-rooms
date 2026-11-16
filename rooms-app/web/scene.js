@@ -288,15 +288,6 @@ export class SceneView {
     this.scene.add(this.asset);
     this.materials = [];
     this.nodes = new Map();
-    // Wall surfaces are exported one-sided (outside only, in some rooms). A
-    // wall the camera looks at from inside then drew only its windows, which
-    // floated above the room; draw both sides. Walls facing the camera are
-    // hidden whole by cutaway().
-    const wallMeshes = new Set();
-    this.asset.traverse((o) => {
-      if (o.userData.wallNormal)
-        o.traverse((m) => m.isMesh && wallMeshes.add(m));
-    });
     this.asset.traverse((o) => {
       if (o.userData.controlId) this.nodes.set(o.userData.controlId, o);
       if (o.isMesh) {
@@ -305,9 +296,6 @@ export class SceneView {
         o.material = Array.isArray(o.material)
           ? o.material.map((m) => m.clone())
           : o.material.clone();
-        if (wallMeshes.has(o))
-          for (const m of Array.isArray(o.material) ? o.material : [o.material])
-            m.side = THREE.DoubleSide;
         for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
           if (m.isMeshBasicMaterial) this.materials.push([m, m.color.clone()]);
         }
@@ -1145,15 +1133,9 @@ export class SceneView {
     return this.skyPairs;
   }
   cutaway() {
-    const eye = this.camera?.position;
     this.asset?.traverse((o) => {
       if (o.userData.ceiling) o.visible = !!o.userData.controlId;
-      // Dollhouse cut, as in the room viewer the models come from: a wall
-      // whose inside faces away from the camera is hidden with everything
-      // in it. Walls are single-sided, so drawing it anyway left its windows,
-      // doors and shutter boxes floating in front of the room.
-      if (o.userData.wallNormal)
-        o.visible = !eye || this.wallFacesCamera(o, eye);
+      if (o.userData.wallNormal) o.visible = true;
       if (o.userData.appearanceId)
         o.visible = this.model.houseView
           ? o.userData.appearanceVisible !== false
@@ -1167,32 +1149,6 @@ export class SceneView {
         shown = o.visible;
       sky.visible = shown && this.insideShownFloor(sky.position);
     }
-  }
-  /** True when the camera is on the inner side of a wall (`wallNormal` points inside). */
-  wallFacesCamera(wall, eye) {
-    this.wallFrames ||= new WeakMap();
-    let frame = this.wallFrames.get(wall);
-    if (!frame) {
-      wall.updateWorldMatrix(true, false);
-      const box = new THREE.Box3().setFromObject(wall);
-      if (box.isEmpty()) return true;
-      frame = {
-        middle: box.getCenter(new THREE.Vector3()),
-        // The exported normal is in the room's frame (the wall's parent), as
-        // in the room viewer; the wall group itself is rotated into place.
-        normal: new THREE.Vector3()
-          .fromArray(wall.userData.wallNormal)
-          .transformDirection((wall.parent || wall).matrixWorld),
-      };
-      this.wallFrames.set(wall, frame);
-    }
-    return (
-      eye.x * frame.normal.x +
-        eye.y * frame.normal.y +
-        eye.z * frame.normal.z -
-        frame.middle.dot(frame.normal) >
-      0
-    );
   }
   setStates(states) {
     if (!this.model) return;

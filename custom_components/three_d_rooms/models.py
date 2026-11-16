@@ -590,6 +590,8 @@ def validate_component(value, model_ids):
         raise ValueError("Height must be auto or 180–1600 pixels.")
     if "show_title" in value and not isinstance(value["show_title"], bool):
         raise ValueError("Show title must be true or false.")
+    if "quality" in value and value["quality"] not in ("high", "low"):
+        raise ValueError("Quality must be high or low.")
     clean_layer = {key: layer[key] for key in ("model", "view", "heading", "tilt", "zoom")}
     if "camera" in layer:
         clean_layer["camera"] = validate_camera_snapshot(layer["camera"], layer["view"])
@@ -597,6 +599,7 @@ def validate_component(value, model_ids):
             **({"thumbnail": validate_thumbnail(value["thumbnail"])} if "thumbnail" in value else {}),
             **({"thumbnailArt": validate_thumbnail_art(value["thumbnailArt"])} if "thumbnailArt" in value else {}),
             **({"show_title": value["show_title"]} if "show_title" in value else {}),
+            **({"quality": value["quality"]} if "quality" in value else {}),
             **validate_background(value),
             **({"markers": validate_markers(value["markers"])} if "markers" in value else {}),
             "layers": [clean_layer]}

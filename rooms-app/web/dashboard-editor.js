@@ -99,6 +99,9 @@ export function initDashboardEditor({
         id: draftId,
         title: $("dashboard-title").value,
         ...(!$("dashboard-show-title").checked ? { show_title: false } : {}),
+        ...($("dashboard-quality").value !== "auto"
+          ? { quality: $("dashboard-quality").value }
+          : {}),
         height:
           $("dashboard-height-mode").value === "auto"
             ? "auto"
@@ -326,6 +329,7 @@ export function initDashboardEditor({
     $("dashboard-show-title").checked = component
       ? component.show_title !== false
       : false;
+    $("dashboard-quality").value = component?.quality || "auto";
     // Auto keeps a pixel height too, for switching back to Fixed.
     $("dashboard-height-mode").value =
       component?.height === "auto" ? "auto" : "fixed";
@@ -434,6 +438,7 @@ export function initDashboardEditor({
   $("dashboard-view").onchange = apply;
   $("dashboard-title").oninput = update;
   $("dashboard-show-title").onchange = update;
+  $("dashboard-quality").onchange = update;
   // Fixed shows the editor at the card's pixel height; Auto leaves the editor
   // its normal size, as the card will fill whatever space it is given.
   function showHeight() {

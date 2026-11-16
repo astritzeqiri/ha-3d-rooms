@@ -320,6 +320,7 @@ function I(e, t) {
 		title: n.title,
 		show_title: n.show_title ?? !0,
 		height: n.height,
+		...n.quality ? { quality: n.quality } : {},
 		...n.markers === void 0 ? {} : { markers: structuredClone(n.markers) },
 		...Object.fromEntries(A.filter((e) => n[e] !== void 0).map((e) => [e, n[e]])),
 		interactive: !1,
@@ -1428,7 +1429,7 @@ var ct = /* @__PURE__ */ new Set([
 	"curtain",
 	"shutter",
 	"awning"
-]), lt, ut = () => lt ||= import("./three-d-rooms-scene-CPPXVGnK.js").catch((e) => {
+]), lt, ut = () => lt ||= import("./three-d-rooms-scene-BNmHfbMQ.js").catch((e) => {
 	throw lt = void 0, e;
 }), $ = {
 	auto: {
@@ -2531,16 +2532,16 @@ var ct = /* @__PURE__ */ new Set([
 	}
 	_groupIcons(e, t, r) {
 		this._groupChips ||= /* @__PURE__ */ new Map();
-		let i = t < 600 || !!globalThis.matchMedia?.("(pointer: coarse)").matches, a = i ? 1 : .9, o = new Set(this._model?.houseView && !this._model.focusRoom ? (this._model.members || []).filter((e) => e.groupIcons || i).map((e) => e.model) : []), s = o.size > 0;
-		e = e.filter((e) => o.has(e.room));
-		let c = this._openGroup, l = s ? R(e, {
-			open: new Set(c ? [c] : []),
-			overlap: a
+		let i = .9, a = new Set(this._model?.houseView && !this._model.focusRoom ? (this._model.members || []).filter((e) => e.groupIcons).map((e) => e.model) : []), o = a.size > 0;
+		e = e.filter((e) => a.has(e.room));
+		let s = this._openGroup, c = o ? R(e, {
+			open: new Set(s ? [s] : []),
+			overlap: i
 		}) : [];
-		c && !(s && je(e, c, a)) && (this._openGroup = null), this._groupOf = /* @__PURE__ */ new Map();
-		let u = /* @__PURE__ */ new Set();
-		for (let t of l) {
-			u.add(t.room);
+		s && !(o && je(e, s, i)) && (this._openGroup = null), this._groupOf = /* @__PURE__ */ new Map();
+		let l = /* @__PURE__ */ new Set();
+		for (let t of c) {
+			l.add(t.room);
 			for (let n of t.ids) {
 				this._groupOf.set(n, t.room);
 				let r = e.find((e) => e.id === n);
@@ -2553,7 +2554,7 @@ var ct = /* @__PURE__ */ new Set([
 			let i = this._model.controls.filter((e) => t.ids.includes(e.id)).filter((e) => this.shadowRoot.querySelector(`.fixture-access [data-control="${CSS.escape(e.id)}"]`)?.dataset.active === "true").length, a = n(this._model.controls.find((e) => e.sourceModel === t.room)?.roomTitle || "Room");
 			r.hidden = !1, r.style.left = t.x + "px", r.style.top = t.y + "px", r.dataset.active = String(i > 0), r.innerHTML = "<span class=\"group-name\"></span><span class=\"group-count\"></span>", r.querySelector(".group-name").textContent = a, r.querySelector(".group-count").textContent = t.ids.length, r.setAttribute("aria-label", `${a}: ${t.ids.length} devices${i ? `, ${i} on` : ""}. ${this._roomFocusable(t.room) ? "Open the room" : "Show them"}`), r.title = `${a} — ${t.ids.length} devices${i ? `, ${i} on` : ""}`;
 		}
-		for (let [e, t] of this._groupChips) u.has(e) || (t.hidden = !0);
+		for (let [e, t] of this._groupChips) l.has(e) || (t.hidden = !0);
 	}
 	async _toggle(e) {
 		let t = this._panelModel, n = t?.controls.find((t) => t.id === e);

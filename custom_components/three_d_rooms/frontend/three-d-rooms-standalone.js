@@ -2186,32 +2186,33 @@ async function We() {
 		resolver: xe({ loadModules: a }),
 		registryIcon: Se(o)
 	});
-	let s = await te(r).catch(() => ({})), c = document.createElement("three-d-rooms-card");
+	let s = await te(r).catch(() => ({})), c = document.createElement("three-d-rooms-card"), l = new URL(location.href).searchParams.get("quality");
 	c.setConfig({
 		saved_view: e,
 		height: "auto",
-		edit_button: !1
+		edit_button: !1,
+		...["high", "low"].includes(l) ? { quality: l } : {}
 	}), c.setAttribute("fill-page", "");
-	let l = de({
+	let u = de({
 		auth: t,
 		connection: r,
 		user: i,
 		config: s,
 		origin: location.origin,
 		onChange: (e) => {
-			c.hass = e, u?.update();
+			c.hass = e, d?.update();
 		}
-	}), u;
+	}), d;
 	c.addEventListener("hass-more-info", (e) => {
-		u?.close(), u = Be({
+		d?.close(), d = Be({
 			host: document.body,
-			getHass: () => l.build(),
+			getHass: () => u.build(),
 			entityId: e.detail.entityId,
 			onError: (e) => console.error(e)
 		});
-	}), r.addEventListener("ready", () => l.setConnected(!0)), r.addEventListener("disconnected", () => l.setConnected(!1)), await new Promise((e) => le(r, (t) => {
-		l.setStates(t), e();
-	})), c.hass = l.build(), $.hidden = !0, document.body.append(c);
+	}), r.addEventListener("ready", () => u.setConnected(!0)), r.addEventListener("disconnected", () => u.setConnected(!1)), await new Promise((e) => le(r, (t) => {
+		u.setStates(t), e();
+	})), c.hass = u.build(), $.hidden = !0, document.body.append(c);
 }
 We().catch((e) => {
 	console.error(e), Ue(e?.message || "Could not connect to Home Assistant. Reload to try again.");

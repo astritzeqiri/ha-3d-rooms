@@ -22,6 +22,10 @@ export function validateComponent(value, modelIds) {
     throw new Error("This release supports one room per component.");
   if (value.show_title !== undefined && typeof value.show_title !== "boolean")
     throw new Error("Show title must be true or false.");
+  // Model detail: "high" full textures everywhere, "low" the lighter copy
+  // everywhere; left out ("auto") phones get the lighter copy.
+  if (value.quality !== undefined && !["high", "low"].includes(value.quality))
+    throw new Error("Quality must be high or low.");
   validateBackground(value);
   const layer = value.layers[0];
   if (!layer || !modelIds.includes(layer.model))
@@ -67,6 +71,7 @@ export function validateComponent(value, modelIds) {
       ? { markers: validateMarkers(value.markers) }
       : {}),
     ...(value.show_title !== undefined ? { show_title: value.show_title } : {}),
+    ...(value.quality !== undefined ? { quality: value.quality } : {}),
     ...Object.fromEntries(
       BACKGROUND_FIELDS.filter((key) => value[key] !== undefined).map((key) => [
         key,

@@ -1,3 +1,9 @@
+## 0.48.1
+
+- **Room fronts and windows are back.** 0.48.0 hid every wall whose inside faced away from the camera, which removed the fronts of the rooms and their windows; walls are drawn as before again.
+- **Room detail per view.** The view editor's Details has **Room detail**: Lighter on phones (as before), Full detail everywhere, or Lighter everywhere. Phones keep a downloaded room, so full detail costs data only the first time. The full-screen page also takes `?quality=high` or `?quality=low`, which the iOS app's Room detail setting uses.
+- **Icons group only in rooms set to group.** On phones 0.48.0 also grouped every crowded room; now only rooms with "Group this room's icons" turned on group, as before.
+
 ## 0.48.0
 
 - **Pop-ups follow your Home Assistant theme.** The card's confirm, light, air-conditioner and desk-height pop-ups used fixed dark colours; they now use the theme's card, text and divider colours, so they are light on a light theme.

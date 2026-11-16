@@ -73,7 +73,14 @@ async function start() {
   const card = document.createElement("three-d-rooms-card");
   // `height: auto` fills the screen. Home Assistant's more-info dialog is part
   // of its own frontend, so the Edit shortcut to the manager is left out.
-  card.setConfig({ saved_view: view, height: "auto", edit_button: false });
+  // `?quality=high|low` (the iOS app's Room detail setting) overrides the view.
+  const quality = new URL(location.href).searchParams.get("quality");
+  card.setConfig({
+    saved_view: view,
+    height: "auto",
+    edit_button: false,
+    ...(["high", "low"].includes(quality) ? { quality } : {}),
+  });
   // Sized by the page and kept clear of the iPhone status bar and notch.
   card.setAttribute("fill-page", "");
   const standalone = createStandaloneHass({

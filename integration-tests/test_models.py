@@ -543,6 +543,17 @@ class ComponentTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 models.validate_component({**value, "show_title": "false"}, ["kitchen"])
 
+    def test_view_quality_persists_and_rejects_other_values(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package())
+            store.put_component({**self.component(), "quality": "high"})
+            self.assertEqual(models.ModelStore(directory).open().components[0]["quality"], "high")
+            self.assertNotIn("quality", models.validate_component(self.component(), ["kitchen"]))
+            for bad in ("auto", "ultra", 1):
+                with self.assertRaises(ValueError):
+                    models.validate_component({**self.component(), "quality": bad}, ["kitchen"])
+
     def test_view_background_persists_and_rejects_unsafe_values(self):
         with tempfile.TemporaryDirectory() as directory:
             store = models.ModelStore(directory).open()

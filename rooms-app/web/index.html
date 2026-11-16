@@ -358,6 +358,17 @@
                     type="checkbox"
                     role="switch"
                 /></label>
+                <label class="panel-field" for="dashboard-quality"
+                  >Room detail<select id="dashboard-quality">
+                    <option value="auto">Lighter on phones</option>
+                    <option value="high">Full detail everywhere</option>
+                    <option value="low">Lighter everywhere</option>
+                  </select>
+                  <span class="muted small"
+                    >Phones keep a downloaded room, so full detail costs data
+                    only the first time.</span
+                  ></label
+                >
               </section>
               <section
                 class="editor-section view-content-summary"
@@ -872,8 +883,7 @@
                 ><strong>Group this room's icons</strong
                 ><small class="muted"
                   >When its icons overlap on a house or floor card, they show as
-                  one chip with the room name. Tap the chip to see them. Phones
-                  and touch screens always do this.</small
+                  one chip with the room name. Tap the chip to see them.</small
                 ></span
               ></label
             >

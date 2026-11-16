@@ -2511,16 +2511,12 @@ export class ThreeDRoomsCard extends HTMLElement {
    */
   _groupIcons(items, width, height) {
     this._groupChips ||= new Map();
-    // Rooms set to "Group this room's icons" always group. On a phone-sized
-    // or touch card every room groups once its icons touch, so no two tap
-    // targets sit on top of each other (WCAG 2.5.8).
-    const compact =
-        width < 600 || !!globalThis.matchMedia?.("(pointer: coarse)").matches,
-      overlap = compact ? 1 : 0.9;
+    // Only rooms set to "Group this room's icons" in their settings group.
+    const overlap = 0.9;
     const grouping = new Set(
       this._model?.houseView && !this._model.focusRoom
         ? (this._model.members || [])
-            .filter((m) => m.groupIcons || compact)
+            .filter((m) => m.groupIcons)
             .map((m) => m.model)
         : [],
     );

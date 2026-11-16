@@ -197,3 +197,19 @@ test("contentBounds finds the drawn part of a transparent picture", () => {
     height: 2,
   });
 });
+
+test("a saved view can ask for full or lighter room detail", () => {
+  assert.equal("quality" in validateComponent(view(), ["house"]), false);
+  const high = validateComponent(view({ quality: "high" }), ["house"]);
+  assert.equal(high.quality, "high");
+  assert.throws(() => validateComponent(view({ quality: "auto" }), ["house"]));
+  // The view's choice reaches the card; a card's own setting still wins.
+  assert.equal(
+    resolveSavedView({ saved_view: "house" }, [high]).quality,
+    "high",
+  );
+  assert.equal(
+    resolveSavedView({ saved_view: "house", quality: "low" }, [high]).quality,
+    "low",
+  );
+});

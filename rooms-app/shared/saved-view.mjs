@@ -24,6 +24,7 @@ export function resolveSavedView(config, components) {
     title: saved.title,
     show_title: saved.show_title ?? true,
     height: saved.height,
+    ...(saved.quality ? { quality: saved.quality } : {}),
     ...(saved.markers !== undefined
       ? { markers: structuredClone(saved.markers) }
       : {}),
