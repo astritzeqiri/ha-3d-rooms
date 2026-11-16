@@ -18,6 +18,10 @@ Bring your home into Home Assistant as an interactive 3D model. Import prepared 
 
 **The room manager, the dashboard card and the full-screen page come together in one integration.** There is nothing else to install, and no Node or add-on to run.
 
+## iPhone and iPad app
+
+**3D Rooms for Home** opens a saved room, floor or house view full screen on your iPhone or iPad. Sign in with your Home Assistant account and choose the view you want at launch. On iOS 18 or later, you can also open it from a Home Screen widget, the Lock Screen or Control Center. [Get the iOS viewer source and build instructions](https://github.com/astritzeqiri/ha-3d-rooms-ios-viewer#build-and-run-from-source).
+
 ## Features
 
 - **Rooms, floors and whole houses** — import rooms one by one or a complete house ZIP. Open the whole house, a single floor or one room, with live state on every device.
