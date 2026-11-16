@@ -58,8 +58,11 @@ export function createDaylight(config) {
   const shown = (w) => !scope || !w.sourceModel || scope.has(w.sourceModel);
   function setScope(rooms) {
     scope = rooms ? new Set(rooms) : null;
-    for (const { w, light, sky } of windows)
+    for (const { w, light, sky } of windows) {
       light.visible = light.target.visible = sky.visible = shown(w);
+      // The scene also hides a sky panel whose window is hidden (cutaway).
+      sky.userData.inScope = shown(w);
+    }
   }
   function update(mode, entity, positions = new Map()) {
     factor = daylightFactor(mode, entity, factor);

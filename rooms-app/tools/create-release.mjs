@@ -50,7 +50,7 @@ await writeFile(
 );
 await writeFile(
   `../releases/three-d-rooms-card-${version}.js`,
-  await readFile("dist/card/three-d-rooms-card.js"),
+  await readFile("dist/card-single/three-d-rooms-card.js"),
 );
 console.log(
   `Prepared 3d-rooms-${version}-source.zip and three-d-rooms-card-${version}.js in releases/.`,

@@ -206,15 +206,26 @@ export function initRoomButtonsEditor({ viewport, scene, model, onChange }) {
       ghost.dataset.world = JSON.stringify(point.world);
       ghost.dataset.manual = String(point.manual);
       // Dimmed: the card would not show this button for the room.
-      ghost.dataset.dim = String(
-        !roomButtonShows(modeOf(point.room), point.exposure),
-      );
+      const dim = !roomButtonShows(modeOf(point.room), point.exposure);
+      ghost.dataset.dim = String(dim);
+      // Say what the faded, dashed look means instead of leaving it a puzzle.
+      ghost.title = dim
+        ? `${ghost.dataset.baseTitle || "Room button"}. Faded: not shown on the card at this angle (set it to Always to keep it).`
+        : ghost.dataset.baseTitle || "";
       // As on the card: placed buttons are centred on their spot, others hang
       // below the room's edge, and buttons that would overlap move apart.
       const size = sizeOf(point.room),
         offset = point.manual ? -size / 2 : 6;
       ghost.style.setProperty("--room-tag-size", size + "px");
-      ghost.style.left = point.x + "px";
+      // As on the card: keep the whole label inside the view ("ing room"
+      // was cut off at the edge).
+      const width = owner.container?.clientWidth || 0,
+        half = (ghost.offsetWidth || 80) / 2 + 8,
+        x =
+          width > 2 * half
+            ? Math.max(half, Math.min(width - half, point.x))
+            : point.x;
+      ghost.style.left = x + "px";
       ghost.style.top = point.y + "px";
       if (
         !ghost.hidden &&
@@ -224,7 +235,7 @@ export function initRoomButtonsEditor({ viewport, scene, model, onChange }) {
         items.push({
           ghost,
           offset,
-          x: point.x,
+          x,
           y: point.y + offset,
           w: ghost.offsetWidth || 80,
           h: size,
@@ -438,7 +449,8 @@ export function initRoomButtonsEditor({ viewport, scene, model, onChange }) {
       ghost.className = "room-button-ghost has-tip";
       ghost.hidden = true;
       ghost.dataset.room = room;
-      ghost.title = `${title}: drag to move, click for options`;
+      ghost.title =
+        ghost.dataset.baseTitle = `${title}: drag to move, click for options`;
       ghost.innerHTML =
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span></span>';
       ghost.querySelector("span").textContent = title;

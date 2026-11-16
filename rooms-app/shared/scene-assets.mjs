@@ -5,13 +5,8 @@ import { clone } from "three/addons/utils/SkeletonUtils.js";
 
 // CPU-only templates, scoped to the authenticated HA connection. Never render or
 // mutate a template: each viewer owns and disposes its own geometry/materials.
-const sessions = new WeakMap();
-export function clearSceneAssets(owner) {
-  sessions.delete(owner);
-}
-export function sceneAssetKey(model, variant = "original") {
-  return `${model.id}:${model.sceneRevision || model.importedAt || "legacy"}:${variant}`;
-}
+import { sceneSessions as sessions } from "./scene-sessions.mjs";
+export { clearSceneAssets, sceneAssetKey } from "./scene-sessions.mjs";
 /* The bundled Basis transcoder ships beside the card (frontend/basis/). Each build
  * defines where that folder is relative to its own module. */
 const BASIS_PATH =

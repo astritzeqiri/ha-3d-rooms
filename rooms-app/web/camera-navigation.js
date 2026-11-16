@@ -23,27 +23,20 @@ export function mountCameraNavigation(
     role: "group",
     "aria-label": "View cube: choose a face, edge or corner",
   });
-  const controls = document.createElement("div");
-  controls.className = "cube-controls";
-  const reset = document.createElement("button");
-  reset.type = "button";
-  reset.className = "camera-home";
-  reset.innerHTML =
-    '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v11h5v-6h4v6h5V10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  reset.setAttribute("aria-label", "Reset camera view");
-  reset.title = "Reset and fit room";
   function select(name) {
     const scene = getScene();
     if (!scene?.model) return;
     scene.setCameraPreset(name);
     onSelect();
   }
-  reset.onclick = () => select("reset");
+  // One tab stop: arrow keys rotate, letters snap to a face. The faces,
+  // edges and corners stay clickable but out of the tab order.
   cube.setAttribute("tabindex", "0");
   cube.setAttribute(
     "aria-label",
-    "View cube: drag or use arrow keys to rotate; click a face, edge or corner to snap",
+    "View cube: arrow keys rotate; T, F, B, L, R or K snap to top, front, bottom, left, right or back; Home resets",
   );
+  cube.setAttribute("aria-keyshortcuts", "T F B L R K Home");
   let drag,
     suppressClick = false;
   cube.addEventListener("pointerdown", (event) => {
@@ -96,7 +89,23 @@ export function mountCameraNavigation(
     },
     true,
   );
+  const faceKeys = {
+    t: "top",
+    f: "front",
+    b: "bottom",
+    l: "left",
+    r: "right",
+    k: "back",
+  };
   cube.addEventListener("keydown", (event) => {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const face =
+      event.key === "Home" ? "reset" : faceKeys[event.key.toLowerCase()];
+    if (face) {
+      event.preventDefault();
+      select(face);
+      return;
+    }
     const delta = {
       ArrowLeft: [-1, 0],
       ArrowRight: [1, 0],
@@ -130,7 +139,7 @@ export function mountCameraNavigation(
           const direction = CUBE_DIRECTIONS.find((d) => d.name === zone.name);
           group = svgElement("g", {
             role: "button",
-            tabindex: "0",
+            tabindex: "-1",
             "aria-label": `View from ${label(zone.name)}${direction.kind === "face" ? "" : " " + direction.kind}`,
             "data-view": zone.name,
             class: `cube-region cube-region-${direction.kind}`,
@@ -168,33 +177,6 @@ export function mountCameraNavigation(
         cube.append(text);
       }
     }
-    const axes = svgElement("g", { "aria-hidden": "true", class: "cube-axes" });
-    [
-      ["X", [1, 0, 0]],
-      ["Y", [0, 1, 0]],
-      ["Z", [0, 0, 1]],
-    ].forEach(([name, axis]) => {
-      const dot = (v) => axis.reduce((s, n, i) => s + n * v[i], 0),
-        x = 15 + dot(basis.right) * 16,
-        y = 91 - dot(basis.up) * 16;
-      axes.append(
-        svgElement("line", {
-          x1: 15,
-          y1: 91,
-          x2: x,
-          y2: y,
-          class: `axis-${name}`,
-        }),
-      );
-      const text = svgElement("text", {
-        x: x + 2,
-        y: y - 2,
-        class: `axis-${name}`,
-      });
-      text.textContent = name;
-      axes.append(text);
-    });
-    cube.append(axes);
     if (focused)
       (
         Array.from(cube.querySelectorAll("[data-view]")).find(
@@ -210,8 +192,9 @@ export function mountCameraNavigation(
     right: [0.7071, 0, -0.7071],
     up: [-0.40825, 0.8165, -0.40825],
   });
-  controls.append(reset);
-  nav.append(cube, controls);
+  // Reset lives in the view's own toolbar ("Reset camera"); a second home
+  // button on the cube did the same thing.
+  nav.append(cube);
   container.append(nav);
   return nav;
 }

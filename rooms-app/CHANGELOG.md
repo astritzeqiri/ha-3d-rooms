@@ -1,3 +1,22 @@
+## 0.48.0
+
+- **Pop-ups follow your Home Assistant theme.** The card's confirm, light, air-conditioner and desk-height pop-ups used fixed dark colours; they now use the theme's card, text and divider colours, so they are light on a light theme.
+- **The 3D Rooms sidebar follows Home Assistant's light or dark mode**, not only the computer's setting, and switches when you change it.
+- **No more stacked icons on phones.** On phone-sized or touch cards, a room's device icons group into one room chip as soon as they touch (rooms set to group always do), and room buttons move off icons and chips, so a tap hits what you meant.
+- **View cube: one keyboard stop.** Tab reaches the cube once; arrow keys rotate it, T/F/B/L/R/K snap to top, front, bottom, left, right or back, and Home resets. The faces stay clickable.
+- **Lighter dashboards.** The card is now about 170 KB (44 KB compressed); the 3D engine loads only when a card shows a room, so dashboards without the card no longer download it. The manual card file (`dist/ha-3d-rooms.js`) is still one self-contained file.
+- Fewer blurred overlays on the card (room buttons and phone controls use solid fills), and device icons announce their Shift+Enter / F2 shortcut for more info.
+- **Lights and Shades work while the room downloads.** The top-left Lights and Shades buttons show as soon as the card knows the rooms, before the 3D model has arrived, and switch lights and shades straight away. The first time, shades are the covers Home Assistant calls shades, blinds, curtains, shutters or awnings; after that the card remembers what the 3D model showed.
+- **Undo.** After a light or shade switch on the card (one device, a room or All), a message such as "Living room 3 lights turned off" offers **Undo** for six seconds, which puts every device back as it was.
+- **The sidebar's Devices tab starts in Simulation**, so setting up a room never switches a real light by accident. Choose **Real devices** to control them; the choice is remembered in that browser.
+- **Room settings in named groups:** About this room, On house and floor cards, and Day and night. The area's help text sits under the area, and when the house model puts a room on floors that are not linked to Home Assistant floors yet, the links open right away.
+- **Plainer words:** "Not connected" and "Connect to Home Assistant" instead of "Needs entity" and "Connect an entity"; **Add to dashboard** everywhere (the editor said "Use in dashboard"). The small all-caps labels above headings are gone; the kind of space (Whole house, House floor or the room's area) now sits quietly under its name. The getting-started list is part of the room panel instead of a card inside it, and the view cube no longer draws X/Y/Z axes.
+- **Add to a dashboard in one step.** In the sidebar, Add to dashboard lists your dashboards and their views; pick one and press Add card. The manual steps and the YAML stay under "Add it yourself". Auto-generated and YAML dashboards are not offered.
+- **The view editor:** the mouse wheel scrolls the page (Ctrl + scroll or pinch zooms the preview), "Show icons from" narrows the icons to one room, room labels stay inside the preview, picking a room no longer outlines it, the Name field is not focused on open, the view cube and the repeated title above the preview are gone, and the device defaults' checkboxes sit beside their words.
+- **Dashboard card and house overview:** walls whose inside faces away from the camera hide with their windows and doors (as in the room viewer), and daylight sky panels hide with their windows, so nothing floats over the house. Floors frame their own rooms; a room's chip opens it; icons from other floors and unconnected devices are hidden; Lights and Shades are labelled; shades show their position and use the cover colour; lights get a brightness slider; Edit moved into a More menu.
+- **Library and dialogs:** each view names its background, thumbnails fill their frame, the new view dialog drops its one-item list and all-caps label, and Custom image says what kind of picture to use.
+- Rooms, connections and saved views are unchanged.
+
 ## 0.47.1
 
 - **Reset changes in the view editor.** With unsaved changes, the save bar offers **Reset changes** next to **Save view**. It asks first ("Reset to the last saved version?" with **Cancel** and **Yes, reset**), then puts the view back to its last save (or, for a new view or draft, to how it started) without closing the editor, so the room keeps its exact saved framing.

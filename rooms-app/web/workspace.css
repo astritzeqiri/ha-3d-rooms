@@ -101,6 +101,10 @@ main {
   color: var(--muted);
   min-height: 24px;
 }
+/* The house itself needs no trail back to itself. */
+#space-breadcrumb:empty {
+  display: none;
+}
 #space-breadcrumb button {
   width: auto;
   min-width: 0;
@@ -183,28 +187,31 @@ body:not([data-room-tab="overview"]) #space-inspector {
   margin-top: 6px;
   font-size: 19px;
 }
+/* Rooms read as a list of rows, not a stack of cards inside the panel. */
 .space-room-list {
   display: grid;
-  gap: 12px;
+  border-top: 1px solid var(--line);
 }
 .space-room {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  border-bottom: 1px solid var(--line);
 }
 .space-room.is-selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
 }
 .room-select {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  width: 100%;
+  gap: 2px;
+  min-width: 0;
   border: 0;
   border-radius: 0;
-  padding: 14px;
+  padding: 12px 4px;
   text-align: left;
   background: transparent;
 }
@@ -214,19 +221,25 @@ body:not([data-room-tab="overview"]) #space-inspector {
 .room-select small {
   font-size: 12px;
   color: var(--muted);
-  line-height: 1.5;
+  line-height: 1.4;
 }
 .room-quick-actions {
   display: flex;
-  gap: 8px;
-  padding: 0 12px 12px;
-  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: 4px;
+  padding-right: 4px;
 }
 .room-quick-actions button {
-  flex: 1;
-  min-height: 44px;
-  padding: 8px;
-  font-size: 12px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--accent-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.room-quick-actions button:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 .model-identity {
   font-size: 13px;
@@ -624,9 +637,6 @@ summary:focus-visible {
   #space-inspector {
     max-height: none;
   }
-  .space-room-list {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
-  }
   body[data-room-tab="overview"] #viewport {
     height: 55dvh;
   }
@@ -699,16 +709,23 @@ summary:focus-visible {
   .workspace {
     padding: 16px 20px;
   }
+  /* Title and the floor switch share a line when they fit, so the model
+     starts higher on a phone. */
   .toolbar {
     display: flex;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     flex-wrap: wrap;
     gap: 12px;
+  }
+  .toolbar > div:first-child {
+    flex: 1 1 auto;
   }
   .toolbar-actions {
     display: flex;
     flex-direction: row;
-    width: 100%;
+    width: auto;
+    margin-left: auto;
     align-items: center;
   }
   #dashboard {
@@ -1388,14 +1405,16 @@ summary:focus-visible {
 }
 
 /* Getting started checklist (Overview panel). */
+/* Part of the room panel, not a card inside it: set apart by a rule. */
 .setup-checklist {
   display: grid;
   gap: 12px;
-  padding: 16px;
+  padding: 0 0 20px;
   margin-bottom: 4px;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--glow) 60%, var(--surface));
+  border-bottom: 1px solid var(--line);
+}
+.setup-count {
+  margin: 2px 0 0;
 }
 .setup-head {
   display: flex;

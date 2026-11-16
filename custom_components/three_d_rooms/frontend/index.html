@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>3D Rooms</title>
-    <script type="module" crossorigin src="./assets/index-CpIiiiT1.js"></script>
+    <script type="module" crossorigin src="./assets/index-B_-NuEh1.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/camera-view-Dzk4R3Ew.js">
     <link rel="modulepreload" crossorigin href="./assets/view-thumbnail-Bj4pBqMI.js">
-    <link rel="modulepreload" crossorigin href="./assets/room-focus-DvO3dS1t.js">
+    <link rel="modulepreload" crossorigin href="./assets/room-focus-WYsZzcBL.js">
     <link rel="modulepreload" crossorigin href="./assets/preload-helper-CRzLMJPS.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-CvnbSoe5.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-CzjaRT9S.css">
   </head>
   <body>
     <script>
@@ -158,8 +158,8 @@
         <div class="toolbar">
           <div>
             <nav id="space-breadcrumb" aria-label="Location"></nav>
-            <span class="eyebrow" id="model-type">YOUR SPACE</span>
             <h1 id="title">Bring your home into view</h1>
+            <p class="space-kind muted" id="model-type"></p>
           </div>
           <div class="toolbar-actions">
             <select
@@ -343,8 +343,7 @@
                 </svg>
               </button>
               <div class="panel-heading-text">
-                <span class="eyebrow">Dashboard view</span>
-                <h2 id="dashboard-panel-title">Save this view</h2>
+                <h2 id="dashboard-panel-title" tabindex="-1">Save this view</h2>
               </div>
             </div>
             <form id="dashboard-form">
@@ -668,7 +667,7 @@
                   type="button"
                   hidden
                 >
-                  Use in dashboard
+                  Add to dashboard
                 </button>
               </div>
             </form>
@@ -701,7 +700,7 @@
             <div>
               <h2>Room devices</h2>
               <p id="device-list-hint" class="muted small">
-                Select a device below to control it or connect an entity.
+                Select a device to connect it to Home Assistant or try it out.
               </p>
             </div>
             <div class="room-device-actions">
@@ -710,7 +709,7 @@
                 <span id="control-mode-label">Control mode</span
                 ><select id="control-mode" aria-label="Control mode">
                   <option value="simulation">Simulation</option>
-                  <option value="live">Live controls</option>
+                  <option value="live">Real devices</option>
                 </select>
                 <span id="preview-mode-note" class="muted"
                   >No device commands</span
@@ -761,7 +760,7 @@
                 data-chip="setup"
                 aria-pressed="false"
               >
-                Needs entity
+                Not connected
               </button>
             </div>
             <label class="sr-only" for="device-search">Search devices</label>
@@ -781,7 +780,6 @@
         >
           <div class="views-library-heading">
             <div class="views-library-intro">
-              <span class="eyebrow">DASHBOARD LIBRARY</span>
               <h1 id="saved-views-heading">
                 Dashboard views
                 <span id="saved-view-count" class="views-count">0</span>
@@ -829,6 +827,7 @@
         >
           <h2 id="room-settings-heading">Room settings</h2>
           <form id="room-settings-form" class="room-settings-card">
+            <h3 class="settings-group-heading">About this room</h3>
             <label for="room-name"
               >Room name<input
                 id="room-name"
@@ -844,12 +843,16 @@
                 <option value="">Not assigned</option>
               </select>
             </label>
+            <p id="room-area-note" class="muted small field-note">
+              The room's area in Home Assistant. Devices are still connected one
+              by one.
+            </p>
             <fieldset id="house-floor-settings" hidden>
-              <legend>Floors occupied by this room</legend>
+              <legend>Floors this room is on</legend>
               <div id="room-floor-choices"></div>
-              <p id="room-floor-note" class="muted"></p>
-              <details>
-                <summary>Advanced: house floor links</summary>
+              <p id="room-floor-note" class="muted small"></p>
+              <details id="room-floor-link-details">
+                <summary>Link house floors to Home Assistant floors</summary>
                 <p class="muted small">
                   These links apply to the whole house. You can also manage them
                   from House → Settings.
@@ -857,12 +860,11 @@
                 <div id="room-floor-links"></div>
               </details>
             </fieldset>
-            <p id="room-area-note" class="muted small">
-              Link this 3D room to its area in Home Assistant. Device mappings
-              stay explicit.
-            </p>
+            <h3 class="settings-group-heading" id="room-card-heading" hidden>
+              On house and floor cards
+            </h3>
             <fieldset id="room-appearance-settings" hidden>
-              <legend>Room appearance</legend>
+              <legend>What to show</legend>
               <div id="room-appearance-choices"></div>
               <p class="muted small">
                 Applies to this room and its house and floor views.
@@ -873,10 +875,11 @@
               id="room-group-setting"
               hidden
               ><input type="checkbox" id="room-group-icons" /><span
-                ><strong>Group this room's icons in house views</strong
+                ><strong>Group this room's icons</strong
                 ><small class="muted"
                   >When its icons overlap on a house or floor card, they show as
-                  one chip with the room name. Tap the chip to see them.</small
+                  one chip with the room name. Tap the chip to see them. Phones
+                  and touch screens always do this.</small
                 ></span
               ></label
             >
@@ -899,7 +902,7 @@
             hidden
             aria-label="Day and night"
           >
-            <div class="light-label">Daylight</div>
+            <h3 class="settings-group-heading">Day and night</h3>
             <label class="light-option"
               >Time of day<select id="daylight-mode">
                 <option value="night">Night</option>
@@ -1113,8 +1116,10 @@
           placeholder="/local/backgrounds/garden.jpg"
         />
         <span class="muted small"
-          >A file in Home Assistant’s <code>www</code> folder is
-          <code>/local/…</code>, or use a web address.</span
+          >A wide photo works best (about 1600 × 1000, JPG or WebP); it is
+          dimmed behind the house. Put it in Home Assistant’s
+          <code>www</code> folder and enter <code>/local/</code> plus its name,
+          or paste a web address.</span
         ></label
       >
       <label class="card-title-toggle"
@@ -1130,24 +1135,43 @@
     </dialog>
     <dialog id="use-view-dialog" aria-labelledby="use-view-title">
       <div class="dialog-top">
-        <h2 id="use-view-title">Use this view on a dashboard</h2>
-        <button class="close" aria-label="Close dashboard instructions">
-          ×
-        </button>
+        <h2 id="use-view-title">Add to a dashboard</h2>
+        <button class="close" aria-label="Close">×</button>
       </div>
       <p id="use-view-name"></p>
-      <p class="muted small">
-        Dashboard cards copy this view’s settings. After editing a saved view,
-        select it again in the card editor to update an existing card.
-      </p>
-      <ol class="dashboard-steps">
-        <li>
-          Open your Home Assistant dashboard and choose
-          <strong>Edit dashboard</strong>.
-        </li>
-        <li>Choose <strong>Add card → 3D Rooms</strong>.</li>
-        <li>Select this <strong>Saved view</strong>, then save the card.</li>
-      </ol>
+      <section id="use-view-direct" hidden>
+        <label>Dashboard and view<select id="use-view-target"></select></label>
+        <div class="dialog-actions">
+          <button id="use-view-add" class="primary" type="button">
+            Add card
+          </button>
+        </div>
+        <p id="use-view-added" class="muted small" role="status"></p>
+      </section>
+      <details id="use-view-manual">
+        <summary>Add it yourself</summary>
+        <ol class="dashboard-steps">
+          <li>
+            Open your Home Assistant dashboard and choose
+            <strong>Edit dashboard</strong>.
+          </li>
+          <li>Choose <strong>Add card → 3D Rooms</strong>.</li>
+          <li>Select this <strong>Saved view</strong>, then save the card.</li>
+        </ol>
+        <p class="muted small">
+          Or add a Manual card with this configuration. Cards copy the view’s
+          settings; after editing the view, select it again in the card editor
+          to update an existing card.
+        </p>
+        <textarea
+          id="use-view-yaml"
+          rows="3"
+          readonly
+          spellcheck="false"
+          aria-label="Dashboard card configuration"
+        ></textarea
+        ><button id="copy-view-yaml">Copy configuration</button>
+      </details>
       <section id="use-view-page" hidden>
         <h3>Full-screen page</h3>
         <p class="muted small">
@@ -1168,19 +1192,8 @@
           >
         </div>
       </section>
-      <details>
-        <summary>Advanced: YAML configuration</summary>
-        <textarea
-          id="use-view-yaml"
-          rows="8"
-          readonly
-          spellcheck="false"
-          aria-label="Dashboard card configuration"
-        ></textarea
-        ><button id="copy-view-yaml">Copy configuration</button>
-      </details>
       <div class="dialog-actions">
-        <button class="close primary">Done</button>
+        <button class="close">Done</button>
       </div>
     </dialog>
     <dialog id="house-action-dialog" aria-labelledby="house-action-title">
@@ -1212,7 +1225,6 @@
     </dialog>
     <dialog id="view-scope-dialog" aria-labelledby="view-scope-title">
       <form id="view-scope-form">
-        <span class="eyebrow">DASHBOARD VIEW</span>
         <h2 id="view-scope-title">What would you like to show?</h2>
         <p class="muted">Choose a space. Next, frame it in the live preview.</p>
         <fieldset class="view-scope-kinds">
@@ -1235,7 +1247,7 @@
             ></label
           >
         </fieldset>
-        <div class="panel-field">
+        <div class="panel-field" id="view-scope-field">
           <label id="view-scope-label" for="view-scope-model">Space</label>
           <select id="view-scope-model" required></select>
         </div>

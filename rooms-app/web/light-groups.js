@@ -160,7 +160,7 @@ export function initLightGroups({
       $("light-group-search").value = $("light-group-error").textContent = "";
       $("ungroup-lights").hidden = !group;
       const select = $("light-group-entity");
-      select.replaceChildren(new Option("Connect an entity later", ""));
+      select.replaceChildren(new Option("Connect to Home Assistant later", ""));
       for (const entity of entities().filter((e) =>
         kind.entity.test(e.entity_id),
       ))

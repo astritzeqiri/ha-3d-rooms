@@ -33,6 +33,15 @@ const faces = [
   ["top", [0, 1, 0], [1, 0, 0], [0, 0, -1]],
   ["bottom", [0, -1, 0], [1, 0, 0], [0, 0, 1]],
 ];
+/**
+ * A face label seen from behind its "up" would read upside down ("dOT" for
+ * TOP): turn it half a turn so it always reads left to right.
+ */
+function readable([a, b, c, d]) {
+  return a < -0.01 || (Math.abs(a) <= 0.01 && b > 0)
+    ? [-a, -b, -c, -d]
+    : [a, b, c, d];
+}
 /** Project the cube with the same camera basis as the room; no extra WebGL renderer. */
 export function projectViewCube({ normal, right, up }) {
   const project = (p) => [52 + dot(p, right) * 25, 49 - dot(p, up) * 25];
@@ -65,7 +74,12 @@ export function projectViewCube({ normal, right, up }) {
           [-1, 1],
         ].map(([a, b]) => project(add(n, u, v, a, b))),
         center: project(n),
-        textMatrix: [dot(u, right), -dot(u, up), -dot(v, right), dot(v, up)],
+        textMatrix: readable([
+          dot(u, right),
+          -dot(u, up),
+          -dot(v, right),
+          dot(v, up),
+        ]),
       };
     });
 }

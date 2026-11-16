@@ -98,27 +98,14 @@ export class SceneView {
       this.render();
       this.options.onContextRestored?.();
     });
-    // On a page that scrolls, the wheel scrolls the page until the model has
-    // been clicked or dragged; Ctrl/⌘ + wheel (and trackpad pinch) always zoom.
+    // The wheel always scrolls the page (it zoomed the view by accident and
+    // left "unsaved changes"); Ctrl/⌘ + wheel and trackpad pinch zoom.
     this.wheelGate = (event) => {
-      if (
-        !this.options.scrollSafeZoom ||
-        event.ctrlKey ||
-        event.metaKey ||
-        this.wheelEngaged
-      )
+      if (!this.options.scrollSafeZoom || event.ctrlKey || event.metaKey)
         return;
-      const page = document.scrollingElement;
-      if (page && page.scrollHeight > page.clientHeight + 1)
-        event.stopPropagation();
+      event.stopPropagation();
     };
     container.addEventListener("wheel", this.wheelGate, { capture: true });
-    this.renderer.domElement.addEventListener("pointerdown", () => {
-      this.wheelEngaged = true;
-    });
-    this.renderer.domElement.addEventListener("pointerleave", () => {
-      this.wheelEngaged = false;
-    });
     this.scene = new THREE.Scene();
     this.scene.background = this.options.transparent
       ? null
@@ -301,6 +288,15 @@ export class SceneView {
     this.scene.add(this.asset);
     this.materials = [];
     this.nodes = new Map();
+    // Wall surfaces are exported one-sided (outside only, in some rooms). A
+    // wall the camera looks at from inside then drew only its windows, which
+    // floated above the room; draw both sides. Walls facing the camera are
+    // hidden whole by cutaway().
+    const wallMeshes = new Set();
+    this.asset.traverse((o) => {
+      if (o.userData.wallNormal)
+        o.traverse((m) => m.isMesh && wallMeshes.add(m));
+    });
     this.asset.traverse((o) => {
       if (o.userData.controlId) this.nodes.set(o.userData.controlId, o);
       if (o.isMesh) {
@@ -309,6 +305,9 @@ export class SceneView {
         o.material = Array.isArray(o.material)
           ? o.material.map((m) => m.clone())
           : o.material.clone();
+        if (wallMeshes.has(o))
+          for (const m of Array.isArray(o.material) ? o.material : [o.material])
+            m.side = THREE.DoubleSide;
         for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
           if (m.isMeshBasicMaterial) this.materials.push([m, m.color.clone()]);
         }
@@ -632,12 +631,18 @@ export class SceneView {
     this.groundShadow.visible = true;
   }
   screenPoint(point) {
-    const v = new THREE.Vector3(...point).project(this.camera);
+    const world = new THREE.Vector3(...point),
+      inside = this.insideShownFloor(world);
+    const v = world.project(this.camera);
     return {
       x: ((v.x + 1) * this.container.clientWidth) / 2,
       y: ((1 - v.y) * this.container.clientHeight) / 2,
       visible:
-        v.z >= -1 && v.z <= 1 && Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1,
+        inside &&
+        v.z >= -1 &&
+        v.z <= 1 &&
+        Math.abs(v.x) <= 1 &&
+        Math.abs(v.y) <= 1,
     };
   }
   /**
@@ -1004,14 +1009,25 @@ export class SceneView {
   }
   fitFloor() {
     if (!this.bounds) return;
-    const { width, height } = this.container.getBoundingClientRect();
-    if (!width || !height) return;
-    // A focused room is framed on its own; the card's saved camera frames the house.
-    const focused = !!this.model?.focusRoom;
+    const { width, height: full } = this.container.getBoundingClientRect();
+    if (!width || !full) return;
+    // Controls drawn over the bottom of the view (a card's toolbar): frame
+    // the model in the space above them.
+    const inset = Math.max(
+        0,
+        Math.min(full * 0.3, this.options.frameInset?.() || 0),
+      ),
+      height = full - inset;
+    // A focused room is framed on its own; the card's saved camera frames the
+    // view it was saved for. Another floor of the house frames its own rooms.
+    const focused = !!this.model?.focusRoom,
+      savedFor =
+        !this.options.cameraModel ||
+        this.model?.id === this.options.cameraModel;
     // A room may ask for its own angle when opened on its own.
     const frame = focused ? this.model.focusFrame : undefined;
     const f =
-      this.options.camera && !focused
+      this.options.camera && !focused && savedFor
         ? restoreCameraView(this.options.camera, {
             aspect: width / height,
             min: this.bounds.min.toArray(),
@@ -1044,7 +1060,21 @@ export class SceneView {
     this.camera.up.fromArray(f.up);
     this.orbit.target.fromArray(f.target);
     this.camera.lookAt(this.orbit.target);
+    if (inset) this.camera.setViewOffset(width, height, 0, 0, width, full);
+    else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
+  }
+  /**
+   * False for a point outside the floor shown, such as a door lock one floor
+   * down whose icon sits just above the door, right at the floor line. Icons
+   * must be clearly above the floor (10 cm) and may reach a little past the
+   * ceiling (25 cm).
+   */
+  insideShownFloor(point) {
+    return (this.clipPlanes || []).every(
+      (plane) =>
+        plane.distanceToPoint(point) > (plane.normal.y > 0 ? 0.1 : -0.25),
+    );
   }
   captureView() {
     if (!this.model || !this.bounds) return null;
@@ -1080,10 +1110,50 @@ export class SceneView {
     this.cutaway();
     this.render();
   }
+  /**
+   * Each daylight sky panel (drawn just outside its window) paired with the
+   * window it belongs to, so it hides with that window. Without this a
+   * stairwell's upper windows left two sky squares floating over the house.
+   */
+  skyWindows() {
+    if (this.skyPairsFor === this.asset) return this.skyPairs;
+    this.skyPairsFor = this.asset;
+    this.skyPairs = [];
+    const skies = [],
+      panes = [];
+    this.daylight?.group.traverse(
+      (o) => o.name?.startsWith("daylight-sky-") && skies.push(o),
+    );
+    if (!skies.length || !this.asset) return this.skyPairs;
+    this.asset.updateWorldMatrix(true, true);
+    this.asset.traverse((o) => {
+      if (o.userData.daylightWindowId)
+        panes.push([
+          o,
+          new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()),
+        ]);
+    });
+    for (const sky of skies) {
+      let best = null,
+        distance = 0.6;
+      for (const [pane, centre] of panes) {
+        const d = centre.distanceTo(sky.position);
+        if (d < distance) [best, distance] = [pane, d];
+      }
+      if (best) this.skyPairs.push([sky, best]);
+    }
+    return this.skyPairs;
+  }
   cutaway() {
+    const eye = this.camera?.position;
     this.asset?.traverse((o) => {
       if (o.userData.ceiling) o.visible = !!o.userData.controlId;
-      if (o.userData.wallNormal) o.visible = true;
+      // Dollhouse cut, as in the room viewer the models come from: a wall
+      // whose inside faces away from the camera is hidden with everything
+      // in it. Walls are single-sided, so drawing it anyway left its windows,
+      // doors and shutter boxes floating in front of the room.
+      if (o.userData.wallNormal)
+        o.visible = !eye || this.wallFacesCamera(o, eye);
       if (o.userData.appearanceId)
         o.visible = this.model.houseView
           ? o.userData.appearanceVisible !== false
@@ -1091,6 +1161,38 @@ export class SceneView {
               (p) => p.id === o.userData.appearanceId,
             )?.visible !== false;
     });
+    for (const [sky, pane] of this.skyWindows?.() || []) {
+      let shown = sky.userData.inScope !== false;
+      for (let o = pane; shown && o && o !== this.asset; o = o.parent)
+        shown = o.visible;
+      sky.visible = shown && this.insideShownFloor(sky.position);
+    }
+  }
+  /** True when the camera is on the inner side of a wall (`wallNormal` points inside). */
+  wallFacesCamera(wall, eye) {
+    this.wallFrames ||= new WeakMap();
+    let frame = this.wallFrames.get(wall);
+    if (!frame) {
+      wall.updateWorldMatrix(true, false);
+      const box = new THREE.Box3().setFromObject(wall);
+      if (box.isEmpty()) return true;
+      frame = {
+        middle: box.getCenter(new THREE.Vector3()),
+        // The exported normal is in the room's frame (the wall's parent), as
+        // in the room viewer; the wall group itself is rotated into place.
+        normal: new THREE.Vector3()
+          .fromArray(wall.userData.wallNormal)
+          .transformDirection((wall.parent || wall).matrixWorld),
+      };
+      this.wallFrames.set(wall, frame);
+    }
+    return (
+      eye.x * frame.normal.x +
+        eye.y * frame.normal.y +
+        eye.z * frame.normal.z -
+        frame.middle.dot(frame.normal) >
+      0
+    );
   }
   setStates(states) {
     if (!this.model) return;
@@ -1436,6 +1538,7 @@ export class SceneView {
   fixtureScreenPosition(id, offset) {
     const fixture = this.fixtures.get(id);
     if (!fixture) return null;
+    const inside = this.insideShownFloor(fixture.marker.position);
     const point = new THREE.Vector3()
       .fromArray(offsetPoint(fixture.marker.position.toArray(), offset))
       .project(this.camera);
@@ -1443,6 +1546,7 @@ export class SceneView {
       x: ((point.x + 1) * this.container.clientWidth) / 2,
       y: ((1 - point.y) * this.container.clientHeight) / 2,
       visible:
+        inside &&
         point.z >= -1 &&
         point.z <= 1 &&
         Math.abs(point.x) <= 1 &&

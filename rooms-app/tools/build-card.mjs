@@ -1,6 +1,10 @@
 import { mkdir, copyFile, cp, rm, readdir } from "node:fs/promises";
 await mkdir("../dist", { recursive: true });
-await copyFile("dist/card/three-d-rooms-card.js", "../dist/ha-3d-rooms.js");
+// The manual/compatibility resource is one self-contained file.
+await copyFile(
+  "dist/card-single/three-d-rooms-card.js",
+  "../dist/ha-3d-rooms.js",
+);
 console.log(
   "Prepared HACS Dashboard bundle: dist/ha-3d-rooms.js at the repository root.",
 );
@@ -22,10 +26,9 @@ for (const file of ["basis_transcoder.js", "basis_transcoder.wasm"])
     `node_modules/three/examples/jsm/libs/basis/${file}`,
     `${destination}/basis/${file}`,
   );
-await copyFile(
-  "dist/card/three-d-rooms-card.js",
-  `${destination}/three-d-rooms-card.js`,
-);
+// The card module and its lazily loaded 3D engine chunk(s).
+for (const file of await readdir("dist/card"))
+  await copyFile(`dist/card/${file}`, `${destination}/${file}`);
 // The page script plus the lazily loaded icon chunk beside it.
 for (const file of await readdir("dist/standalone"))
   await copyFile(`dist/standalone/${file}`, `${destination}/${file}`);

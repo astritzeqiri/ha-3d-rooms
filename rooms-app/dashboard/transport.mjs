@@ -1,4 +1,4 @@
-import { sceneAssetKey } from "../shared/scene-assets.mjs";
+import { sceneAssetKey } from "../shared/scene-sessions.mjs";
 import { sceneBlob, sceneOwner } from "../shared/scene-download.mjs";
 import { houseLoadPlan } from "../shared/house-floors.mjs";
 import { sceneVariant } from "../shared/render-profile.mjs";
@@ -13,7 +13,9 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
       preview: false,
       // `onProgress({ index, count, loaded, total })` follows the room downloads.
       // `fresh` skips the rooms kept on this device and downloads them again.
-      async load({ onProgress, fresh = false } = {}) {
+      // `onModel({ model, configured, views })` reports the rooms and devices
+      // before any 3D download, so the card can offer its panels meanwhile.
+      async load({ onProgress, onModel, fresh = false } = {}) {
         const models = await hass.callWS({
           type: "three_d_rooms/request",
           operation: "models",
@@ -30,6 +32,7 @@ export async function connectModel(hass, config, origin, fetcher = fetch) {
           configured,
           config.floor_selector !== false,
         );
+        onModel?.({ model, configured, views });
         if (model.members) {
           const layers = [];
           try {

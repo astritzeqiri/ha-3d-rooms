@@ -31,3 +31,14 @@ test("separate icons, single icons, open rooms and room-less icons stay as they 
   assert.equal(roomCrowded(items, "living"), true);
   assert.equal(roomCrowded(items, "hall"), false);
 });
+
+test("touch cards group icons as soon as their tap targets touch", () => {
+  // 24px icons 22px apart: they overlap, but not by the desktop margin.
+  const items = [
+    { id: "a", room: "hall", x: 0, y: 0, size: 24 },
+    { id: "b", room: "hall", x: 22, y: 0, size: 24 },
+  ];
+  assert.deepEqual(groupMarkers(items), []);
+  assert.equal(groupMarkers(items, { overlap: 1 }).length, 1);
+  assert.equal(roomCrowded(items, "hall", 1), true);
+});

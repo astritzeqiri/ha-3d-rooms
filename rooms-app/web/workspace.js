@@ -183,7 +183,9 @@ export function initWorkspace({
     $("space-breadcrumb").innerHTML =
       house && house.id !== model.id
         ? `<button data-model="${esc(house.id)}">${esc(house.title)}</button><span aria-hidden="true">/</span><span>${esc(roomName(model))}</span>`
-        : `<span>${model.houseView ? "Your home" : "Other rooms"}</span>`;
+        : model.houseView
+          ? ""
+          : `<span>Other rooms</span>`;
     const options = house
       ? getModels().filter((m) => m.houseView && m.houseId === house.houseId)
       : [];
@@ -203,11 +205,9 @@ export function initWorkspace({
           .map((member) => getModels().find((m) => m.id === member.model))
           .filter(Boolean)
       : [model];
-    const heading = model.houseView
-      ? "Rooms in this space"
-      : "Room at a glance";
+    const heading = model.houseView ? "Rooms" : "Room at a glance";
     $("space-inspector").innerHTML =
-      `${checklistHTML(model, rooms)}<div class="inspector-heading"><span class="eyebrow">${model.houseView ? "EXPLORE" : "OVERVIEW"}</span><h2>${heading}</h2></div><p class="muted small">${model.houseView ? "Select a room here or in the 3D model." : "Connect devices and adjust room settings."}</p><div class="space-room-list">${rooms
+      `${checklistHTML(model, rooms)}<div class="inspector-heading"><h2>${heading}</h2></div><p class="muted small">${model.houseView ? "Select a room to point it out in the 3D model." : "Connect devices and adjust room settings."}</p><div class="space-room-list">${rooms
         .map(
           (room) =>
             `<article class="space-room ${focusedRoom === room.id ? "is-selected" : ""}"><button class="room-select" data-focus-room="${esc(room.id)}" ${model.houseView ? `aria-pressed="${focusedRoom === room.id}"` : ""}><span>${esc(roomName(room))}</span><small>${deviceEntries(room).length} devices · ${esc(
@@ -218,7 +218,7 @@ export function initWorkspace({
                 )
                 .filter(Boolean)
                 .join(" / ") || "Floor not assigned",
-            )}</small></button><div class="room-quick-actions">${model.houseView ? `<button data-open-room="${esc(room.id)}">Open room</button>` : ""}<button data-room-devices="${esc(room.id)}">Devices</button></div></article>`,
+            )}</small></button><div class="room-quick-actions">${model.houseView ? `<button data-open-room="${esc(room.id)}" aria-label="Open ${esc(roomName(room))}">Open</button>` : ""}<button data-room-devices="${esc(room.id)}" aria-label="${esc(roomName(room))} devices">Devices</button></div></article>`,
         )
         .join(
           "",
@@ -260,7 +260,7 @@ export function initWorkspace({
       icons: "Place icons",
       view: "Create view",
     };
-    return `<section class="setup-checklist" aria-labelledby="setup-title"><div class="setup-head"><div><span class="eyebrow">GET STARTED</span><h2 id="setup-title">${done} of ${steps.length} done</h2></div><button type="button" class="setup-hide" data-setup-hide aria-label="Hide getting started">Hide</button></div><div class="setup-meter" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="${steps.length}" aria-valuenow="${done}"><span style="width:${(done / steps.length) * 100}%"></span></div><ol>${steps
+    return `<section class="setup-checklist" aria-labelledby="setup-title"><div class="setup-head"><div><h2 id="setup-title">Get started</h2><p class="setup-count muted small">${done} of ${steps.length} done</p></div><button type="button" class="setup-hide" data-setup-hide aria-label="Hide getting started">Hide</button></div><div class="setup-meter" role="progressbar" aria-label="Setup progress" aria-valuemin="0" aria-valuemax="${steps.length}" aria-valuenow="${done}"><span style="width:${(done / steps.length) * 100}%"></span></div><ol>${steps
       .map(
         (step, index) =>
           `<li data-done="${step.done}">${step.done ? `<div class="setup-step"><span class="setup-mark" aria-hidden="true">${check}</span><span class="setup-text"><strong>${esc(step.title)}</strong><small>${esc(step.detail)}</small></span><span class="sr-only">Done</span></div>` : `<button type="button" class="setup-step" data-setup="${step.id}" ${step.room ? `data-setup-room="${esc(step.room)}"` : ""} aria-label="${esc(step.title)}: ${esc(step.detail)}. ${action[step.id]}"><span class="setup-mark" aria-hidden="true">${index + 1}</span><span class="setup-text"><strong>${esc(step.title)}</strong><small>${esc(step.detail)}</small></span><svg class="setup-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>`}</li>`,

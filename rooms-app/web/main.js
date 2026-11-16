@@ -287,7 +287,7 @@ function deviceRowQuick(c, s, connection) {
   if (c.hidden)
     return `<button type="button" class="quick-text" data-device-visibility="${c.id}" data-hidden="false" aria-label="Show ${label}">Show</button>`;
   if (connection.kind === "unmapped" && !c.device)
-    return `<button type="button" class="quick-text quick-connect" data-device-settings="${c.id}" aria-label="Connect an entity to ${label}">Connect</button>`;
+    return `<button type="button" class="quick-text quick-connect" data-device-settings="${c.id}" aria-label="Connect ${label} to Home Assistant">Connect</button>`;
   const off = !preview && s.unavailable ? "disabled" : "";
   if (c.type === "light") {
     const waiting = pending.has(`${selected.id}/${c.id}`);
@@ -463,7 +463,7 @@ const entityNote = (c) =>
     ? '<span class="muted small device-entity">Simulation only</span>'
     : selected.bindings[c.id]
       ? `<span class="muted small device-entity">${esc(selected.bindings[c.id])}</span>`
-      : `<button type="button" class="connect-entity" data-device-settings="${c.id}">Connect an entity</button>`;
+      : `<button type="button" class="connect-entity" data-device-settings="${c.id}">Connect to Home Assistant</button>`;
 function deskCard(device, states) {
   const height = selected.controls.find((c) => c.id === device.height),
     motion = selected.controls.find((c) => c.id === device.motion);
@@ -743,7 +743,7 @@ function drawControls() {
       );
     else
       parts.push(`${live.length} ${live.length === 1 ? "device" : "devices"}`);
-    if (unmapped && !preview) parts.push(`${unmapped} need an entity`);
+    if (unmapped && !preview) parts.push(`${unmapped} not connected`);
     return parts.join(" · ");
   };
   $("controls").innerHTML = categories
@@ -1351,11 +1351,16 @@ function drawRoomSettings() {
   $("room-floor-note").textContent = !haFloors.length
     ? "No Home Assistant floors found. Create them under Settings → Areas, labels & zones, then refresh areas and floors."
     : unlinked.length
-      ? `The house model puts this room on ${unlinked.map((f) => f.name).join(" and ")}, which ${unlinked.length === 1 ? "is" : "are"} not linked to a Home Assistant floor yet. Link ${unlinked.length === 1 ? "it" : "them"} under Advanced below, or tick the floors this room occupies.`
-      : "Tick every Home Assistant floor this room occupies. The 3D model is not changed.";
+      ? `The house model puts this room on ${unlinked.map((f) => f.name).join(" and ")}, which ${unlinked.length === 1 ? "is" : "are"} not linked to a Home Assistant floor yet. Link ${unlinked.length === 1 ? "it" : "them"} below, or tick the floors this room is on.`
+      : "Tick every Home Assistant floor this room is on. The 3D model is not changed.";
+  // Floors the model places the room on but that are not linked yet: show
+  // the links right away instead of behind a fold.
+  $("room-floor-link-details").open = unlinked.length > 0;
   $("room-name").value = selected.title;
   showNameSuggestion();
   $("room-group-setting").hidden = !selected.housePlacement;
+  $("room-card-heading").hidden =
+    !selected.housePlacement && !selected.appearance?.length;
   $("room-group-icons").checked = !!selected.groupIcons;
   $("room-area").replaceChildren();
   const add = (value, label) => {
@@ -1380,7 +1385,7 @@ function drawRoomSettings() {
       ? "Open 3D Rooms inside Home Assistant to assign an area."
       : !areas.length
         ? "No areas found. Create an area in Home Assistant, then refresh this list."
-        : "Link this 3D room to its Home Assistant area. Assign device entities separately.");
+        : "The room's area in Home Assistant. Devices are still connected one by one.");
   $("room-settings-error").textContent = "";
   $("room-save-status").textContent = "";
   updateRoomSummary();
@@ -1546,7 +1551,7 @@ async function saveRoomSettings(part) {
     if (selected?.id === model.id) {
       $("title").textContent = roomName(model);
       $("model-type").textContent =
-        areas.find((a) => a.area_id === model.areaId)?.name || "3D ROOM";
+        areas.find((a) => a.area_id === model.areaId)?.name || "Room";
       // Keep what is being typed in another field.
       if (!$("room-settings-form").contains(document.activeElement))
         drawRoomSettings();
@@ -1669,13 +1674,12 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
   setRoomTab(tab, { keepEditor: true });
   savedViews?.refresh();
   $("title").textContent = roomName(selected);
+  // Houses and floors: the floor switch beside the title says which.
   $("model-type").textContent = selected.houseView
-    ? selected.houseFloor
-      ? "HOUSE FLOOR"
-      : "HOUSE"
+    ? ""
     : areas.find((a) => a.area_id === selected.areaId)?.name ||
       selected.floor ||
-      "3D ROOM";
+      "Room";
   $("settings").hidden = !!selected.houseView;
   $("home-view").hidden = activeRoomTab === "settings";
   $("floor-view").hidden = activeRoomTab === "settings";
@@ -1717,7 +1721,12 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
         transparent: true,
         onDaylight: () =>
           window.dispatchEvent(new CustomEvent("rooms-daylight")),
-        onRoomPick: (id) => workspace.focusRoom(id),
+        // While editing a view, clicks on the model frame it, they do not
+        // pick (and outline) a room.
+        onRoomPick: (id) => {
+          if (!document.body.classList.contains("dashboard-editing"))
+            workspace.focusRoom(id);
+        },
         scrollSafeZoom: true,
         workLight: true,
         floorMarkers: true,
@@ -1803,7 +1812,7 @@ $("models").addEventListener("click", (e) => {
 // Floor plans pan instead of rotating; say what dragging does.
 function showViewHint() {
   $("view-hint").textContent =
-    `${viewMode === "floor" ? "Drag to move" : "Drag to rotate"} · Click the model, then scroll to zoom${activeRoomTab === "devices" ? " · Select a device to find it in the list" : ""}`;
+    `${viewMode === "floor" ? "Drag to move" : "Drag to rotate"} · Ctrl + scroll or pinch to zoom${activeRoomTab === "devices" ? " · Select a device to find it in the list" : ""}`;
 }
 window.addEventListener("rooms-view-camera", (event) => {
   viewMode = event.detail.view;
@@ -1845,6 +1854,8 @@ function drawScopeOptions(preferred) {
     $("view-scope-model").value = preferred;
   $("view-scope-label").textContent =
     { house: "House", floor: "Floor", room: "Room" }[kind] || "Space";
+  // One house only: the choice above already says it; no list of one.
+  $("view-scope-field").hidden = options.length < 2;
   scopePicker.refresh();
   drawScopeSummary();
 }
@@ -2078,9 +2089,24 @@ const dashboardEditor = initDashboardEditor({
     $("floor-view").setAttribute("aria-pressed", String(viewMode === "floor"));
   },
 });
+function storedControlMode() {
+  try {
+    return localStorage.getItem("three-d-rooms:control-mode");
+  } catch {
+    return null;
+  }
+}
 $("control-mode").onchange = () => {
   $("preview").checked = $("control-mode").value === "simulation";
   preview = $("preview").checked;
+  try {
+    localStorage.setItem(
+      "three-d-rooms:control-mode",
+      preview ? "simulation" : "live",
+    );
+  } catch {
+    // Without storage the choice lasts until the page reloads.
+  }
   drawControls();
 };
 for (const id of ["add-model", "empty-add"])
@@ -2542,7 +2568,9 @@ try {
   models = await api("models");
   await refreshAreas({ quiet: true });
   updateStatus(await api("status"));
-  preview = status.mode === "preview";
+  // Setting up rooms should not switch real lights by accident: the Devices
+  // tab starts in Simulation unless this browser chose Real devices before.
+  preview = status.mode === "preview" || storedControlMode() !== "live";
   $("preview").checked = preview;
   drawModels();
   if (models.length)
@@ -2594,6 +2622,8 @@ const { initComponents } = await import("./components.js");
 savedViews = initComponents({
   api,
   preview: native?.preview,
+  dashboards: native?.dashboards,
+  addCard: native?.addCard,
   selectModel: async (id) => {
     const loaded = await choose(id, "views");
     return !!loaded && selected?.id === id && view?.model?.id === id;

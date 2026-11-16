@@ -33,8 +33,10 @@
   background: var(--bg);
   color: var(--text);
 }
+/* Inside Home Assistant the panel sets data-theme from HA's own dark mode;
+   on its own the manager follows the system. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #1b1a18;
     --surface: #24221f;
     --raised: #302d28;
@@ -48,6 +50,24 @@
     --bad: #ff7b72;
     --shadow: none;
   }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1b1a18;
+  --surface: #24221f;
+  --raised: #302d28;
+  --line: #484239;
+  --text: #f4efe6;
+  --muted: #c1b7a8;
+  --accent: #edac8c;
+  --accent-ink: #edac8c;
+  --on-accent: #302018;
+  --glow: rgb(237 172 140 / 0.12);
+  --bad: #ff7b72;
+  --shadow: none;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 * {
   box-sizing: border-box;
@@ -99,6 +119,14 @@ h3 {
 }
 .small {
   font-size: 12px;
+}
+/* What the open space is (Whole house, a floor, a room's area), quietly under its name. */
+.space-kind {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+.space-kind:empty {
+  display: none;
 }
 .eyebrow {
   display: block;
@@ -1421,8 +1449,9 @@ dialog h2 {
   display: block;
   width: 100%;
   aspect-ratio: 8 / 5;
-  max-height: 180px;
-  object-fit: contain;
+  max-height: 220px;
+  /* Fill the frame: the captured picture leaves a wide dark margin. */
+  object-fit: cover;
   border-radius: var(--r-sm);
   margin-bottom: 16px;
   background: var(--canvas);
@@ -1441,6 +1470,40 @@ dialog h2 {
 .room-settings-card label {
   display: grid;
   gap: 8px;
+}
+/* Room settings read as a few named groups instead of one long form. */
+.settings-group-heading {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--text);
+}
+.room-settings-card .settings-group-heading:not(:first-child) {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+/* Grouped choices read like the other fields: a label above, no frame. */
+.room-settings-card fieldset {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.room-settings-card legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.room-settings-card fieldset p {
+  margin: 0;
+}
+/* Help text sits right under the field it explains. */
+.room-settings-card .field-note {
+  margin: -8px 0 0;
 }
 .room-settings-card label input,
 .room-settings-card label select {
@@ -1747,32 +1810,9 @@ body.dashboard-editing #dashboard {
 }
 .cube-label {
   fill: #1c2a35;
-  font: 700 11px system-ui;
+  font: 800 13px system-ui;
   letter-spacing: 0.3px;
   pointer-events: none;
-}
-.cube-axes {
-  pointer-events: none;
-}
-.cube-axes line {
-  stroke-width: 1.5;
-  stroke-linecap: round;
-}
-.cube-axes text {
-  font: 600 8px system-ui;
-  stroke: none;
-}
-.cube-axes .axis-X {
-  stroke: #db857e;
-  fill: #db857e;
-}
-.cube-axes .axis-Y {
-  stroke: #a7c887;
-  fill: #a7c887;
-}
-.cube-axes .axis-Z {
-  stroke: #8caedf;
-  fill: #8caedf;
 }
 .camera-navigation .cube-controls {
   display: grid;

@@ -1,4 +1,4 @@
-import { clearSceneAssets } from "../shared/scene-assets.mjs";
+import { clearSceneAssets } from "../shared/scene-sessions.mjs";
 import { clearSceneDownloads, sceneOwner } from "../shared/scene-download.mjs";
 import { CardLayout } from "./layout.js";
 import { climateState } from "../shared/climate.mjs";
@@ -44,7 +44,23 @@ import { coverState } from "../shared/cover.mjs";
 import { validateCameraSnapshot } from "../shared/camera-view.mjs";
 import "./panel.js";
 import "./editor.js";
-import { SceneView } from "../web/scene.js";
+// The 3D engine (Three.js) is a separate chunk, fetched the first time a card
+// loads a room, so dashboards without this card do not download it.
+// Covers Home Assistant itself calls shades: the Shades panel's first guess
+// before a room's 3D model has loaded once.
+const SHADE_CLASSES = new Set([
+  "shade",
+  "blind",
+  "curtain",
+  "shutter",
+  "awning",
+]);
+let sceneModule;
+const loadSceneView = () =>
+  (sceneModule ||= import("../web/scene.js").catch((error) => {
+    sceneModule = undefined;
+    throw error;
+  }));
 import { entityAppearance, hexToRgb, kelvinToRgb } from "../shared/light.mjs";
 import { connectModel } from "./transport.mjs";
 import { selectHouseView } from "../shared/house-floors.mjs";
@@ -73,13 +89,17 @@ import {
   roomDevices,
   allLights,
   PANEL_KINDS,
+  snapshotEntities,
+  restoreCommands,
 } from "../shared/room-lights.mjs";
 // Time of day, in the order the card shows the options.
 const DAYLIGHT_MODES = {
   auto: {
     label: "Auto",
     hint: "follow the sun",
-    icon: '<path d="M12 3a9 9 0 1 0 0 18Z" fill="currentColor"/><circle cx="12" cy="12" r="9"/>',
+    // A sun on the horizon: follows the real sun (a half-filled circle read
+    // as a light/dark theme switch).
+    icon: '<path d="M12 3v3M5.6 7.6 7 9M18.4 7.6 17 9M3 16h18M7 16a5 5 0 0 1 10 0M8 20h8"/>',
   },
   day: {
     label: "Day",
@@ -106,7 +126,7 @@ export class ThreeDRoomsCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this.shadowRoot.innerHTML = `<style>:host{display:block;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}.switching{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;cursor:progress;background:color-mix(in srgb,var(--card-background-color,#101715) 40%,transparent);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px)}.switching-pill{display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:10px 18px 10px 14px;border-radius:999px;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#101715) 90%,transparent);box-shadow:0 2px 8px #0006;font:500 14px/1.3 system-ui}.switching-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spinner{flex-shrink:0;width:18px;height:18px;box-sizing:border-box;border:2px solid color-mix(in srgb,var(--primary-text-color,#edf2eb) 25%,transparent);border-top-color:var(--primary-color,#aacaab);border-radius:50%;will-change:transform;animation:switch-spin .8s linear infinite}@keyframes switch-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}ha-card{container:card-root/inline-size;display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;isolation:isolate;width:100%;height:500px;container:card-scene/inline-size}.scene canvas{display:block;width:100%;height:100%}${BACKDROP_CSS}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid #536258;border-radius:16px;padding:24px;background:#202923;color:#edf2eb;font:14px system-ui}dialog::backdrop{background:#0008}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:#aebbb2;line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{width:22px;height:22px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}.room-tags{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}.room-tags .room-tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--room-tag-size,30px)*.2);box-sizing:border-box;height:var(--room-tag-size,30px);min-height:var(--room-tag-size,30px);padding:0 calc(var(--room-tag-size,30px)*.37) 0 calc(var(--room-tag-size,30px)*.27);border-radius:calc(var(--room-tag-size,30px)/2);transform:translate(-50%,6px);white-space:nowrap;pointer-events:auto;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#202923) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006;font:500 calc(var(--room-tag-size,30px)*.4)/1 system-ui}.room-tags .room-tag::before{content:"";position:absolute;inset:-8px -4px}.room-tags .room-tag svg{width:calc(var(--room-tag-size,30px)*.47);height:calc(var(--room-tag-size,30px)*.47);flex-shrink:0;opacity:.8}.room-tags .room-tag[data-manual="true"]{transform:translate(-50%,-50%)}.room-tags .room-tag .room-tag-count{display:grid;place-items:center;min-width:calc(var(--room-tag-size,30px)*.6);height:calc(var(--room-tag-size,30px)*.6);padding:0 calc(var(--room-tag-size,30px)*.17);box-sizing:border-box;border-radius:calc(var(--room-tag-size,30px)*.3);background:var(--state-light-active-color,#ffc107);color:#1c1c1c;font-size:calc(var(--room-tag-size,30px)*.37);font-weight:600}.room-tags .room-tag[data-pressing="true"]{animation:room-tag-hold .55s linear forwards}@keyframes room-tag-hold{from{box-shadow:0 2px 8px #0006,inset 0 0 0 0 var(--state-light-active-color,#ffc107)}to{box-shadow:0 2px 8px #0006,inset 0 0 0 20px var(--state-light-active-color,#ffc107)}}@media(prefers-reduced-motion:reduce){.room-tags .room-tag[data-pressing="true"]{animation:none;border-color:var(--state-light-active-color,#ffc107)}}.room-tags .room-tag:hover{background:var(--card-background-color,#202923);border-color:var(--primary-color,#aacaab)}.room-nav{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px}.room-nav .room-step{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:0;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.room-nav .room-step svg{width:22px;height:22px}.room-back{display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;height:44px;min-height:44px;flex:0 0 auto;width:clamp(150px,calc(100cqw - 404px),260px);justify-content:center;padding:0 16px 0 10px;white-space:nowrap;color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab);box-shadow:0 2px 8px #0006;font:600 14px/1 system-ui}.room-back svg{width:20px;height:20px;flex-shrink:0}.room-back>span:not(.room-back-name){flex-shrink:0}.room-back .room-back-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.85;padding-left:8px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent)}.room-back .room-back-name:empty{display:none}@container card-root (max-width:520px){.card-controls{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px}.card-controls>button,.light-panel-toggle{width:44px;height:44px;min-height:44px;padding:10px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.card-controls>button::before,.light-panel-toggle::before{content:"";position:absolute;inset:-5px}.card-controls>button svg,.light-panel-toggle svg{width:22px;height:22px;opacity:.85}.panel-toggles{top:8px;left:8px;gap:6px}.floor-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.floor-switch button{height:36px;min-width:44px;padding:0 12px;font:500 14px system-ui}.card-top.card-top:has(header[hidden]){top:8px;right:8px}.daylight-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.daylight-switch button{width:40px;height:36px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{top:3px;left:3px;width:40px;height:36px}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}.light-panel{top:60px;left:8px;bottom:62px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 122px)}.room-nav{top:60px;gap:6px}.room-nav .room-step{width:44px;height:44px;min-height:44px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 70%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.room-nav .room-step::before{content:"";position:absolute;inset:-5px}.room-nav .room-step svg{width:22px;height:22px}.room-back{height:44px;min-height:44px;width:clamp(130px,calc(100cqw - 132px),200px);padding:0 12px 0 8px;font:600 12px/1 system-ui;box-shadow:0 1px 4px #0004}.room-back svg{width:16px;height:16px}}.reload-menu{position:absolute;bottom:calc(100% + 8px);z-index:4;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;width:min(250px,calc(100vw - 32px));padding:6px;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;pointer-events:auto}.reload-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;border:0;border-radius:8px;text-align:left;color:inherit;font:500 15px/1.25 system-ui}.reload-menu button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.reload-menu button:disabled{opacity:.5;cursor:wait}.reload-menu svg{flex-shrink:0;width:22px;height:22px}.reload-menu small{display:block;margin-top:2px;color:var(--secondary-text-color,#aebbb2);font:400 12px/1.3 system-ui}.model-refresh[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="backdrop" aria-hidden="true"></div><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`;
+    this.shadowRoot.innerHTML = `<style>:host{display:block;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}.switching{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;cursor:progress;background:color-mix(in srgb,var(--card-background-color,#101715) 40%,transparent);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px)}.switching-pill{display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:10px 18px 10px 14px;border-radius:999px;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#101715) 90%,transparent);box-shadow:0 2px 8px #0006;font:500 14px/1.3 system-ui}.switching-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spinner{flex-shrink:0;width:18px;height:18px;box-sizing:border-box;border:2px solid color-mix(in srgb,var(--primary-text-color,#edf2eb) 25%,transparent);border-top-color:var(--primary-color,#aacaab);border-radius:50%;will-change:transform;animation:switch-spin .8s linear infinite}@keyframes switch-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}ha-card{container:card-root/inline-size;display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;isolation:isolate;width:100%;height:500px;container:card-scene/inline-size}.scene canvas{display:block;width:100%;height:100%}${BACKDROP_CSS}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border-color:color-mix(in srgb,var(--primary-text-color,#edf2eb) 45%,transparent);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid var(--divider-color,#536258);border-radius:var(--ha-dialog-border-radius,16px);padding:24px;background:var(--ha-card-background,var(--card-background-color,#202923));color:var(--primary-text-color,#edf2eb);font:14px system-ui;box-shadow:0 12px 40px #0005}dialog::backdrop{background:var(--mdc-dialog-scrim-color,#0008)}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:var(--secondary-text-color,#aebbb2);line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:auto;height:44px;min-height:44px;padding:0 14px 0 11px;font:500 14px system-ui;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{flex-shrink:0;width:20px;height:20px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel[data-kind="shade"] button[role="switch"][aria-checked="true"]{background:var(--state-cover-active-color,#9c27b0)}.light-panel[data-kind="shade"] .light-row[data-on="true"] ha-state-icon{color:var(--state-cover-active-color,#9c27b0)}.light-row{flex-wrap:wrap}.light-position{flex-shrink:0;margin-left:auto;padding-left:8px;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-dim{flex-basis:100%;box-sizing:border-box;width:auto;height:28px;margin:-4px 0 6px 34px;accent-color:var(--state-active-color,#ffd66b);cursor:pointer}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}.room-tags{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}.room-tags .room-tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--room-tag-size,30px)*.2);box-sizing:border-box;height:var(--room-tag-size,30px);min-height:var(--room-tag-size,30px);padding:0 calc(var(--room-tag-size,30px)*.37) 0 calc(var(--room-tag-size,30px)*.27);border-radius:calc(var(--room-tag-size,30px)/2);transform:translate(-50%,6px);white-space:nowrap;pointer-events:auto;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#202923) 92%,transparent);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006;font:500 calc(var(--room-tag-size,30px)*.4)/1 system-ui}.room-tags .room-tag::before{content:"";position:absolute;inset:-8px -4px}.room-tags .room-tag svg{width:calc(var(--room-tag-size,30px)*.47);height:calc(var(--room-tag-size,30px)*.47);flex-shrink:0;opacity:.8}.room-tags .room-tag[data-manual="true"]{transform:translate(-50%,-50%)}.room-tags .room-tag .room-tag-count{display:grid;place-items:center;min-width:calc(var(--room-tag-size,30px)*.6);height:calc(var(--room-tag-size,30px)*.6);padding:0 calc(var(--room-tag-size,30px)*.17);box-sizing:border-box;border-radius:calc(var(--room-tag-size,30px)*.3);background:var(--state-light-active-color,#ffc107);color:#1c1c1c;font-size:calc(var(--room-tag-size,30px)*.37);font-weight:600}.room-tags .room-tag[data-pressing="true"]{animation:room-tag-hold .55s linear forwards}@keyframes room-tag-hold{from{box-shadow:0 2px 8px #0006,inset 0 0 0 0 var(--state-light-active-color,#ffc107)}to{box-shadow:0 2px 8px #0006,inset 0 0 0 20px var(--state-light-active-color,#ffc107)}}@media(prefers-reduced-motion:reduce){.room-tags .room-tag[data-pressing="true"]{animation:none;border-color:var(--state-light-active-color,#ffc107)}}.room-tags .room-tag:hover{background:var(--card-background-color,#202923);border-color:var(--primary-color,#aacaab)}.room-nav{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px}.room-nav .room-step{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:0;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.room-nav .room-step svg{width:22px;height:22px}.room-back{display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;height:44px;min-height:44px;flex:0 0 auto;width:clamp(150px,calc(100cqw - 404px),260px);justify-content:center;padding:0 16px 0 10px;white-space:nowrap;color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab);box-shadow:0 2px 8px #0006;font:600 14px/1 system-ui}.room-back svg{width:20px;height:20px;flex-shrink:0}.room-back>span:not(.room-back-name){flex-shrink:0}.room-back .room-back-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.85;padding-left:8px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent)}.room-back .room-back-name:empty{display:none}@container card-root (max-width:520px){.card-controls{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px}.card-controls>button{width:44px;height:44px;min-height:44px;padding:10px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.card-controls>button::before,.light-panel-toggle::before{content:"";position:absolute;inset:-5px}.card-controls>button svg,.light-panel-toggle svg{width:20px;height:20px;opacity:.85}.panel-toggles{top:8px;left:8px;gap:6px}.floor-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.floor-switch button{height:36px;min-width:44px;padding:0 12px;font:500 14px system-ui}.card-top.card-top:has(header[hidden]){top:8px;right:8px}.daylight-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.daylight-switch button{width:40px;height:36px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{top:3px;left:3px;width:40px;height:36px}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}.light-panel{top:60px;left:8px;bottom:62px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 122px)}.room-nav{top:60px;gap:6px}.room-nav .room-step{width:44px;height:44px;min-height:44px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.room-nav .room-step::before{content:"";position:absolute;inset:-5px}.room-nav .room-step svg{width:22px;height:22px}.room-back{height:44px;min-height:44px;width:clamp(130px,calc(100cqw - 132px),200px);padding:0 12px 0 8px;font:600 12px/1 system-ui;box-shadow:0 1px 4px #0004}.room-back svg{width:16px;height:16px}}.reload-menu{position:absolute;bottom:calc(100% + 8px);z-index:4;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;width:min(250px,calc(100vw - 32px));padding:6px;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;pointer-events:auto}.reload-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;border:0;border-radius:8px;text-align:left;color:inherit;font:500 15px/1.25 system-ui}.reload-menu button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.reload-menu button:disabled{opacity:.5;cursor:wait}.reload-menu svg{flex-shrink:0;width:22px;height:22px}.reload-menu small{display:block;margin-top:2px;color:var(--secondary-text-color,#aebbb2);font:400 12px/1.3 system-ui}.model-refresh[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.undo-toast{position:absolute;left:50%;bottom:72px;z-index:6;transform:translateX(-50%);display:flex;align-items:center;gap:4px;box-sizing:border-box;max-width:calc(100% - 24px);padding:4px 4px 4px 16px;border-radius:10px;color:var(--card-background-color,#fff);background:var(--primary-text-color,#212121);box-shadow:0 4px 16px #0006;font:500 14px/1.3 system-ui;animation:undo-in .2s cubic-bezier(.2,.7,.2,1)}.undo-toast span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.undo-toast button{flex-shrink:0;min-height:40px;padding:0 14px;border:0;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}.undo-toast button:hover{background:color-mix(in srgb,currentColor 12%,transparent)}@keyframes undo-in{from{opacity:0;transform:translate(-50%,8px)}}@media(prefers-reduced-motion:reduce){.undo-toast{animation:none}}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="backdrop" aria-hidden="true"></div><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`;
     this._container = this.shadowRoot.querySelector(".scene");
     this._message = this.shadowRoot.querySelector(".message");
     this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
@@ -149,16 +169,15 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._refresh = document.createElement("button");
     this._refresh.type = "button";
     this._refresh.className = "model-refresh";
-    this._refresh.setAttribute("aria-label", "Reload models");
-    this._refresh.title = "Reload models — clear cached models and load again";
+    this._refresh.setAttribute("aria-label", "More");
+    this._refresh.setAttribute("aria-haspopup", "menu");
+    this._refresh.setAttribute("aria-expanded", "false");
+    this._refresh.title = "More: reload, edit";
     this._refresh.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 17.9 17"/></svg>';
-    // On the full-screen page (a home-screen app has no browser reload) the
-    // button offers Reload page and Reload model; elsewhere it reloads models.
-    this._refresh.onclick = () =>
-      this.hasAttribute("fill-page")
-        ? this._setReloadMenu(!this._reloadMenu)
-        : this._refreshModels();
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
+    // Less-used actions share one menu: Reload model, Edit in 3D Rooms (for
+    // administrators) and, on the full-screen page, Reload page.
+    this._refresh.onclick = () => this._setReloadMenu(!this._reloadMenu);
     this._resetCamera = document.createElement("button");
     this._resetCamera.type = "button";
     this._resetCamera.className = "camera-reset";
@@ -187,16 +206,13 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._editButton.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
     this._editButton.onclick = () => this._openEditor();
-    this._controls.append(
-      this._refresh,
-      this._editButton,
-      this._resetCamera,
-      this._moveCamera,
-    );
+    // Editing lives in the More menu; the button only records whether it can.
+    this._controls.append(this._refresh, this._resetCamera, this._moveCamera);
     // Top-left Lights and Shades buttons; the panel opens just below them.
     this._panelToggles = document.createElement("div");
     this._panelToggles.className = "panel-toggles";
     this._panelButtons = {};
+    this._panelIcons = {};
     for (const [kind, label, title, icon] of [
       [
         "light",
@@ -218,7 +234,9 @@ export class ThreeDRoomsCard extends HTMLElement {
       button.setAttribute("aria-label", label);
       button.setAttribute("aria-expanded", "false");
       button.title = title;
-      button.innerHTML = icon;
+      // Icon and word: a bulb and some lines alone did not say what they open.
+      button.innerHTML = `${icon}<span class="toggle-label">${kind === "shade" ? "Shades" : "Lights"}</span>`;
+      this._panelIcons[kind] = icon;
       button.hidden = true;
       button.onclick = () =>
         this._setLightPanel(this._panelKind === kind ? null : kind);
@@ -430,6 +448,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     if (!this._config || !this.isConnected) return;
     if (this._reload || !this._view) {
       if (!this._loading) this._load();
+      else this._earlyStates();
     } else this._states();
   }
   getCardSize() {
@@ -530,15 +549,19 @@ export class ThreeDRoomsCard extends HTMLElement {
     const menu = document.createElement("div");
     menu.className = "reload-menu";
     menu.setAttribute("role", "menu");
-    menu.setAttribute("aria-label", "Reload");
+    menu.setAttribute("aria-label", "More");
     const items = [
-      [
-        "reload-page",
-        "Reload page",
-        "Start the page again",
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></svg>',
-        () => location.reload(),
-      ],
+      ...(this.hasAttribute("fill-page")
+        ? [
+            [
+              "reload-page",
+              "Reload page",
+              "Start the page again",
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></svg>',
+              () => location.reload(),
+            ],
+          ]
+        : []),
       [
         "reload-model",
         "Reload model",
@@ -546,6 +569,17 @@ export class ThreeDRoomsCard extends HTMLElement {
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="M12 12v9M12 12l8-4.5M12 12 4 7.5"/></svg>',
         () => this._refreshModels(),
       ],
+      ...(this._editButton.hidden
+        ? []
+        : [
+            [
+              "edit-view",
+              "Edit in 3D Rooms",
+              "Change this view in the sidebar",
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+              () => this._openEditor(),
+            ],
+          ]),
     ];
     for (const [name, label, hint, icon, action] of items) {
       const item = document.createElement("button");
@@ -586,6 +620,8 @@ export class ThreeDRoomsCard extends HTMLElement {
   async _load({ fresh = false } = {}) {
     if (!this._config || !this._hass) return;
     const generation = ++this._generation;
+    // Fetch the 3D engine alongside the room download; errors surface below.
+    loadSceneView().catch(() => {});
     this._loading = true;
     this._contextLost = false;
     // The full-screen page keeps its button: Reload page works while loading.
@@ -659,6 +695,9 @@ export class ThreeDRoomsCard extends HTMLElement {
         assetCache,
       } = await connection.load({
         fresh,
+        onModel: (plan) => {
+          if (generation === this._generation) this._showEarlyPanels(plan);
+        },
         onProgress: (progress) => {
           if (generation !== this._generation) return;
           const { value, text } = loadProgress(progress);
@@ -680,6 +719,11 @@ export class ThreeDRoomsCard extends HTMLElement {
         release?.();
         return;
       }
+      const { SceneView } = await loadSceneView();
+      if (generation !== this._generation) {
+        release?.();
+        return;
+      }
       this._view?.dispose();
       this._view = new SceneView(this._container, (id) => this._pick(id), {
         mode: this._config.view,
@@ -689,6 +733,10 @@ export class ThreeDRoomsCard extends HTMLElement {
         heading: this._config.heading,
         zoom: this._config.zoom ?? 1,
         camera: this._config.camera,
+        // The saved camera frames the configured view; other floors frame their own rooms.
+        cameraModel: this._config.model,
+        // Keep the model clear of the toolbar drawn over the bottom of the card.
+        frameInset: () => this._toolbarInset(),
         quality: this._config.quality,
         transparent: needsTransparentCanvas(this._background()),
         groundShadow: groundShadowEnabled(this._config),
@@ -741,6 +789,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       if (shown !== model && !view.setHouseView(shown)) shown = model;
       if (this._floor && shown.id !== this._floor) this._floor = null;
       this._model = shown;
+      this._earlyModel = null;
       this._focus = null;
       this._cameraMoved = false;
       this._syncFloorSwitch();
@@ -905,10 +954,24 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._changedDuringLoad = false;
     this._modelsChanged();
   }
+  /** True when the room has a button that opens it on its own. */
+  _roomFocusable(room) {
+    return !![...(this._roomTags?.children || [])].some(
+      (tag) => tag.dataset.room === room,
+    );
+  }
+  /** Height of the card's bottom toolbar over the scene, plus a little air. */
+  _toolbarInset() {
+    const controls = this._controls,
+      height = this._container?.clientHeight || 0;
+    if (!controls || !height || !controls.offsetHeight) return 0;
+    return Math.max(0, height - controls.offsetTop + 8);
+  }
   _syncFloorSwitch() {
     const group = this._floorSwitch;
+    if (!group) return;
     group.hidden =
-      this._floors.length < 2 || this._config?.floor_selector === false;
+      (this._floors?.length || 0) < 2 || this._config?.floor_selector === false;
     if (group.hidden) return;
     const key = JSON.stringify(this._floors);
     if (group.dataset.options !== key) {
@@ -931,7 +994,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     for (const button of group.children)
       button.setAttribute(
         "aria-pressed",
-        String(button.dataset.floor === this._model?.id),
+        String(!this._focus && button.dataset.floor === this._model?.id),
       );
   }
   /**
@@ -944,17 +1007,12 @@ export class ThreeDRoomsCard extends HTMLElement {
     if (!target || !this._floors.some((floor) => floor.id === id)) return;
     this._showView(target, target.title, () => {
       this._floor = id === this._config?.model ? null : id;
-      const keepCamera = !!this._cameraFree;
-      if (
-        !this._view?.setHouseView(target, {
-          keepCamera,
-          render: false,
-        })
-      ) {
+      // A new floor is a new scope: frame its rooms, even after orbiting.
+      if (!this._view?.setHouseView(target, { render: false })) {
         this._load();
         return;
       }
-      if (!keepCamera) this._cameraMoved = false;
+      this._cameraMoved = false;
       this._model = target;
       this._focus = null;
       this._buildAccess();
@@ -1100,6 +1158,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     this._states();
     this._syncRoomTags();
     this._syncCameraButtons();
+    this._syncFloorSwitch();
   }
   _syncRoomTags() {
     const rooms =
@@ -1261,7 +1320,9 @@ export class ThreeDRoomsCard extends HTMLElement {
         );
       tag.dataset.shown = String(show);
       tag.dataset.manual = String(!!point?.manual);
-      tag.hidden = !show;
+      // A room shown as one chip of icons opens from that chip instead.
+      const chip = this._groupChips?.get(tag.dataset.room);
+      tag.hidden = !show || (!!chip && !chip.hidden);
       if (!show) continue;
       const size = buttons[tag.dataset.room]?.size ?? 30;
       tag.style.setProperty("--room-tag-size", size + "px");
@@ -1284,6 +1345,51 @@ export class ThreeDRoomsCard extends HTMLElement {
       });
     }
     const ys = spreadButtons(items);
+    // A room button must not sit on a device icon or room chip: tapping one
+    // would hit the other. Move it down past them.
+    const box = this._container?.getBoundingClientRect?.(),
+      obstacles = [
+        ...(box
+          ? this.shadowRoot.querySelectorAll(".fixture-access button")
+          : []),
+      ]
+        .filter((b) => !b.hidden && b.offsetWidth)
+        .map((b) => {
+          const r = b.getBoundingClientRect();
+          return {
+            left: r.left - box.left - 4,
+            right: r.right - box.left + 4,
+            top: r.top - box.top - 4,
+            bottom: r.bottom - box.top + 4,
+          };
+        });
+    // A placed button keeps its spot on wide cards; on phone-sized or touch
+    // cards it gives way too, since its spot was chosen at another size.
+    const compact =
+      width < 600 || !!globalThis.matchMedia?.("(pointer: coarse)").matches;
+    items.forEach((item, i) => {
+      if (item.fixed && !compact) return;
+      const left = item.x - item.w / 2,
+        right = item.x + item.w / 2;
+      for (let step = 0; step < 6; step++) {
+        const y = ys[i],
+          hit = obstacles.find(
+            (o) =>
+              left < o.right &&
+              o.left < right &&
+              y < o.bottom &&
+              o.top < y + item.h,
+          );
+        if (!hit || hit.bottom + item.h > lowest) break;
+        ys[i] = hit.bottom;
+      }
+      obstacles.push({
+        left,
+        right,
+        top: ys[i],
+        bottom: ys[i] + item.h,
+      });
+    });
     items.forEach((item, i) => {
       item.tag.style.left = item.x + "px";
       item.tag.style.top = Math.min(lowest, ys[i] - item.offset) + "px";
@@ -1475,6 +1581,9 @@ export class ThreeDRoomsCard extends HTMLElement {
         (device && device.height !== control.id)
       )
         continue;
+      // A device not connected to Home Assistant does nothing on a dashboard;
+      // previews (the view editor) still show it so it can be placed.
+      if (!this._preview && !this._model.bindings?.[control.id]) continue;
       const button = document.createElement("button");
       const label = device?.label || deviceLabel(control, "light");
       button.dataset.control = control.id;
@@ -1484,7 +1593,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         "aria-label",
         control.type !== "light"
           ? `Control ${label}`
-          : `Toggle ${label}. Hold for more info.`,
+          : `Toggle ${label}. Hold, or press Shift+Enter, for more info.`,
       );
       button.title =
         control.type !== "light"
@@ -1568,6 +1677,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         if (!held) this._toggle(control.id);
         held = false;
       };
+      button.setAttribute("aria-keyshortcuts", "Shift+Enter F2");
       button.onkeydown = (event) => {
         if (event.key === "F2" || (event.shiftKey && event.key === "Enter")) {
           event.preventDefault();
@@ -1654,6 +1764,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         if (!held) this._tapCustom(id);
         held = false;
       };
+      button.setAttribute("aria-keyshortcuts", "Shift+Enter F2");
       button.onkeydown = (event) => {
         if (event.key === "F2" || (event.shiftKey && event.key === "Enter")) {
           event.preventDefault();
@@ -1782,9 +1893,72 @@ export class ThreeDRoomsCard extends HTMLElement {
   }
   /** Room shades: covers the loaded scene animates as roller shades. */
   _isShade(control) {
-    return !!this._view?.fixtures
-      ?.get(control.id)
-      ?.coverNodes?.some((node) => node?.userData?.rollerShade);
+    if (this._view?.fixtures)
+      return !!this._view.fixtures
+        .get(control.id)
+        ?.coverNodes?.some((node) => node?.userData?.rollerShade);
+    // Before the 3D model is in: the shades seen on the last visit, or, the
+    // first time, covers Home Assistant itself calls shades or blinds.
+    const known = this._knownShades();
+    if (known) return known.includes(control.id);
+    const entity =
+      this._hass?.states?.[this._panelModel?.bindings?.[control.id]];
+    return SHADE_CLASSES.has(entity?.attributes?.device_class);
+  }
+  _shadeKey(model = this._panelModel) {
+    return model?.id && `three-d-rooms:shades:${model.id}`;
+  }
+  _knownShades() {
+    try {
+      const value = JSON.parse(localStorage.getItem(this._shadeKey()));
+      return Array.isArray(value) ? value : null;
+    } catch {
+      return null;
+    }
+  }
+  _rememberShades(ids) {
+    try {
+      const key = this._shadeKey();
+      if (key) localStorage.setItem(key, JSON.stringify(ids));
+    } catch {
+      // Private mode or full storage: shades simply show once the room loads.
+    }
+  }
+  /** The model the panels act on: the loaded one, or the one still downloading. */
+  get _panelModel() {
+    return this._model || this._earlyModel;
+  }
+  /**
+   * The room list is known before the 3D download finishes: show the Lights
+   * and Shades buttons right away so they work while the room loads.
+   */
+  _showEarlyPanels({ model, configured, views }) {
+    if (this._view || this._preview || !model?.controls) return;
+    this._earlyModel = selectHouseView(
+      views || [],
+      configured || model,
+      this._floor,
+    );
+    this._earlyStates();
+    this._buildLightPanel();
+  }
+  /** Live light and shade states for the panels while the room downloads. */
+  _earlyStates() {
+    const model = this._earlyModel;
+    if (!model || this._view || !this._hass) return;
+    const states = new Map();
+    for (const control of model.controls) {
+      const entity = this._hass.states?.[model.bindings?.[control.id]];
+      if (control.type === "cover") states.set(control.id, coverState(entity));
+      else if (control.type === "light")
+        states.set(control.id, {
+          on: entity?.state === "on",
+          unavailable:
+            !entity || ["unavailable", "unknown"].includes(entity.state),
+        });
+    }
+    this._lightStates = states;
+    this._syncLightPanel(states);
   }
   /** Wording for the open panel's kind. */
   _panelWords(kind = this._panelKind || "light") {
@@ -1809,12 +1983,28 @@ export class ThreeDRoomsCard extends HTMLElement {
   /** Rebuild the Lights/Shades panel for the shown room, house or floor. */
   _buildLightPanel() {
     this._panelRooms = {
-      light: this._config?.light_panel === false ? [] : roomLights(this._model),
+      light:
+        this._config?.light_panel === false ? [] : roomLights(this._panelModel),
       shade:
         this._config?.shade_panel === false
           ? []
-          : roomDevices(this._model, "shade", (c) => this._isShade(c)),
+          : roomDevices(this._panelModel, "shade", (c) => this._isShade(c)),
     };
+    // Remember which covers are shades, for the panels of the next visit.
+    if (this._view?.fixtures && this._model && !this._model.focusRoom)
+      this._rememberShades(
+        this._panelRooms.shade.flatMap((room) => room.lights.map((l) => l.id)),
+      );
+    // Rooms and devices not connected to Home Assistant have nothing to
+    // switch: leave them out (previews keep them).
+    if (!this._preview)
+      for (const kind of Object.keys(this._panelRooms))
+        this._panelRooms[kind] = this._panelRooms[kind]
+          .map((room) => ({
+            ...room,
+            lights: room.lights.filter((light) => light.entityId),
+          }))
+          .filter((room) => room.lights.length);
     for (const [kind, button] of Object.entries(this._panelButtons))
       button.hidden = !this._panelRooms[kind].length;
     if (this._panelKind && !this._panelRooms[this._panelKind].length)
@@ -1864,7 +2054,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       const expand = document.createElement("button");
       expand.type = "button";
       expand.innerHTML =
-        '<svg class="light-chevron" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m9 6 6 6-6 6z"/></svg><span class="light-room-title"></span><span class="light-room-count"></span>';
+        '<svg class="light-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg><span class="light-room-title"></span><span class="light-room-count"></span>';
       expand.querySelector(".light-room-title").textContent = room.title;
       const key = kind + room.id,
         expanded = this._expandedRooms.has(key);
@@ -1895,7 +2085,7 @@ export class ThreeDRoomsCard extends HTMLElement {
         name.title = `${device.label}: details`;
         const icon = document.createElement("ha-state-icon");
         icon.setAttribute("aria-hidden", "true");
-        icon.innerHTML = this._panelButtons[kind].innerHTML;
+        icon.innerHTML = this._panelIcons[kind];
         const label = document.createElement("span");
         label.className = "light-name";
         label.textContent = device.label;
@@ -1910,6 +2100,21 @@ export class ThreeDRoomsCard extends HTMLElement {
             ? this._toggleShade(device.id)
             : this._toggle(device.id);
         row.append(name, toggle);
+        // Shades say how far open they are; dimmable lights get a slider.
+        if (kind === "shade") {
+          const position = document.createElement("span");
+          position.className = "light-position";
+          label.after(position);
+        } else if (device.entityId?.startsWith("light.")) {
+          const dim = document.createElement("input");
+          dim.type = "range";
+          dim.className = "light-dim";
+          dim.min = "1";
+          dim.max = "100";
+          dim.setAttribute("aria-label", `${device.label} brightness`);
+          dim.onchange = () => this._setBrightness(device, Number(dim.value));
+          row.append(dim);
+        }
         // Point at the device's marker in the room while hovering its row.
         const highlight = (on) => {
           for (const marker of this.shadowRoot.querySelectorAll(
@@ -2014,6 +2219,32 @@ export class ThreeDRoomsCard extends HTMLElement {
         const toggle = row.querySelector('[role="switch"]');
         toggle.setAttribute("aria-checked", String(on));
         toggle.disabled = unavailable && !this._preview;
+        const dim = row.querySelector(".light-dim");
+        if (dim) {
+          const modes = entity?.attributes?.supported_color_modes || [];
+          dim.hidden =
+            !on ||
+            (!!entity && modes.length > 0 && modes.every((m) => m === "onoff"));
+          if (
+            document.activeElement !== dim &&
+            this.shadowRoot.activeElement !== dim
+          )
+            dim.value = String(
+              Math.max(1, Math.round(((state.brightness ?? 255) / 255) * 100)),
+            );
+        }
+        const position = row.querySelector(".light-position");
+        if (position) {
+          const value = state.position ?? state.motionPosition;
+          position.textContent =
+            unavailable || typeof value !== "number"
+              ? ""
+              : value <= 0
+                ? "Closed"
+                : value >= 100
+                  ? "Open"
+                  : `${Math.round(value)}% open`;
+        }
         const icon = row.querySelector("ha-state-icon");
         if (icon && entity) {
           icon.hass = this._hass;
@@ -2026,12 +2257,13 @@ export class ThreeDRoomsCard extends HTMLElement {
   async _toggleShade(id) {
     const states = this._lightStates || new Map(),
       open = PANEL_KINDS.shade.isOn(states.get(id) || {});
+    const model = this._panelModel;
     if (this._preview) {
       this._previewStates.set(id, { position: open ? 0 : 100 });
       this._states();
       return;
     }
-    const entityId = this._model.bindings[id];
+    const entityId = model.bindings[id];
     const entity = this._hass.states?.[entityId];
     if (
       !entityId?.startsWith("cover.") ||
@@ -2039,14 +2271,83 @@ export class ThreeDRoomsCard extends HTMLElement {
       ["unavailable", "unknown"].includes(entity.state)
     )
       return;
+    const before = snapshotEntities([entityId], this._hass.states);
     try {
       await this._hass.callService(
         "cover",
         open ? "close_cover" : "open_cover",
         { entity_id: entityId },
       );
+      this._offerUndo(
+        () =>
+          `${deviceLabel(model.controls.find((c) => c.id === id) || {}, "Shade")} ${open ? "closed" : "opened"}`,
+        before,
+      );
     } catch {
       this._panelFeedback("Could not move the shade. Try again.");
+    }
+  }
+  /** Dim one light from the Lights panel (preview cards only show it). */
+  async _setBrightness(device, percent) {
+    if (this._preview) {
+      const state = this._previewStates.get(device.id) || { on: true };
+      this._previewStates.set(device.id, {
+        ...state,
+        on: true,
+        brightness: Math.round((percent / 100) * 255),
+      });
+      this._states();
+      return;
+    }
+    try {
+      await this._hass.callService("light", "turn_on", {
+        entity_id: device.entityId,
+        brightness_pct: percent,
+      });
+    } catch {
+      this._panelFeedback(`Could not dim ${device.label}. Try again.`);
+    }
+  }
+  /**
+   * After a switch: "Living room 3 lights turned off · Undo" for a few
+   * seconds. Undo puts every device back as it was just before.
+   */
+  _offerUndo(text, before) {
+    if (!before?.length || !this._container) return;
+    // The switch has already happened: a message that cannot show must never
+    // be reported as a failed switch.
+    try {
+      if (typeof text === "function") text = text();
+      clearTimeout(this._undoTimer);
+      this._undoToast?.remove();
+      if (!before?.length) return;
+      const toast = document.createElement("div");
+      toast.className = "undo-toast";
+      toast.setAttribute("role", "status");
+      toast.innerHTML = '<span></span><button type="button">Undo</button>';
+      toast.querySelector("span").textContent = text;
+      const close = () => {
+        clearTimeout(this._undoTimer);
+        toast.remove();
+        if (this._undoToast === toast) this._undoToast = null;
+      };
+      toast.querySelector("button").onclick = async () => {
+        close();
+        try {
+          await Promise.all(
+            restoreCommands(before).map((call) =>
+              this._hass.callService(...call),
+            ),
+          );
+        } catch {
+          this._panelFeedback("Could not undo. Try again.");
+        }
+      };
+      this._undoToast = toast;
+      this._container.append(toast);
+      this._undoTimer = setTimeout(close, 6000);
+    } catch {
+      this._undoToast = null;
     }
   }
   _panelFeedback(text) {
@@ -2086,8 +2387,16 @@ export class ThreeDRoomsCard extends HTMLElement {
       this._states();
       return;
     }
-    const { calls } = roomLightCommands(room, states, this._hass.states);
+    const { calls, turnOn } = roomLightCommands(
+      room,
+      states,
+      this._hass.states,
+    );
     if (!calls.length) return;
+    const before = snapshotEntities(
+      calls.flatMap(([, , data]) => data.entity_id),
+      this._hass.states,
+    );
     this._pendingRooms.add(roomId);
     const all = [
       ...(this._lightPanel?.querySelectorAll("[data-room-switch]") || []),
@@ -2096,6 +2405,17 @@ export class ThreeDRoomsCard extends HTMLElement {
     this.shadowRoot.querySelector(".fixture-feedback")?.remove();
     try {
       await Promise.all(calls.map((call) => this._hass.callService(...call)));
+      this._offerUndo(() => {
+        const count = before.length,
+          what =
+            count === 1
+              ? room.lights.find(
+                  (l) =>
+                    this._panelModel?.bindings?.[l.id] === before[0].entityId,
+                )?.label || `1 ${words.one}`
+              : `${roomId ? `${room.title} ` : ""}${count} ${words.noun}`;
+        return `${what} ${turnOn ? (room.kind === "shade" ? "opened" : "turned on") : room.kind === "shade" ? "closed" : "turned off"}`;
+      }, before);
     } catch {
       this._panelFeedback(
         roomId
@@ -2191,11 +2511,16 @@ export class ThreeDRoomsCard extends HTMLElement {
    */
   _groupIcons(items, width, height) {
     this._groupChips ||= new Map();
-    // Only rooms set to "Group this room's icons" in their settings group.
+    // Rooms set to "Group this room's icons" always group. On a phone-sized
+    // or touch card every room groups once its icons touch, so no two tap
+    // targets sit on top of each other (WCAG 2.5.8).
+    const compact =
+        width < 600 || !!globalThis.matchMedia?.("(pointer: coarse)").matches,
+      overlap = compact ? 1 : 0.9;
     const grouping = new Set(
-      this._model?.houseView
+      this._model?.houseView && !this._model.focusRoom
         ? (this._model.members || [])
-            .filter((m) => m.groupIcons)
+            .filter((m) => m.groupIcons || compact)
             .map((m) => m.model)
         : [],
     );
@@ -2203,12 +2528,13 @@ export class ThreeDRoomsCard extends HTMLElement {
     items = items.filter((item) => grouping.has(item.room));
     const open = this._openGroup;
     const groups = enabled
-      ? groupMarkers(items, { open: new Set(open ? [open] : []) })
+      ? groupMarkers(items, { open: new Set(open ? [open] : []), overlap })
       : [];
     // The open room shows its icons where they really are; tapping elsewhere
     // (or Escape) groups it again. Once its icons no longer overlap it stays
     // ungrouped on its own.
-    if (open && !(enabled && roomCrowded(items, open))) this._openGroup = null;
+    if (open && !(enabled && roomCrowded(items, open, overlap)))
+      this._openGroup = null;
     this._groupOf = new Map();
     const shown = new Set();
     for (const group of groups) {
@@ -2225,6 +2551,12 @@ export class ThreeDRoomsCard extends HTMLElement {
         chip.className = "room-group";
         chip.dataset.groupRoom = group.room;
         chip.onclick = () => {
+          // One chip per room: where rooms can be opened on their own, the
+          // chip opens the room, which shows its icons with room to tap them.
+          if (this._roomFocusable(group.room)) {
+            this._focusRoom(group.room);
+            return;
+          }
           this._openGroup = this._openGroup === group.room ? null : group.room;
           this._positionButtons();
           if (this._openGroup)
@@ -2267,7 +2599,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       chip.querySelector(".group-count").textContent = group.ids.length;
       chip.setAttribute(
         "aria-label",
-        `${title}: ${group.ids.length} devices${active ? `, ${active} on` : ""}. Show them`,
+        `${title}: ${group.ids.length} devices${active ? `, ${active} on` : ""}. ${this._roomFocusable(group.room) ? "Open the room" : "Show them"}`,
       );
       chip.title = `${title} — ${group.ids.length} devices${active ? `, ${active} on` : ""}`;
     }
@@ -2275,7 +2607,8 @@ export class ThreeDRoomsCard extends HTMLElement {
       if (!shown.has(room)) chip.hidden = true;
   }
   async _toggle(id) {
-    const control = this._model.controls.find((c) => c.id === id);
+    const model = this._panelModel;
+    const control = model?.controls.find((c) => c.id === id);
     if (!control || control.hidden) return;
     if (control.type === "button") {
       await this._pressPreset(control);
@@ -2300,7 +2633,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       this._states();
       return;
     }
-    const entityId = this._model.bindings[id];
+    const entityId = model.bindings[id];
     const entity = this._hass.states?.[entityId];
     if (!entity || ["unavailable", "unknown"].includes(entity.state)) return;
     this._pendingToggles ||= new Set();
@@ -2311,6 +2644,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     );
     button?.setAttribute("aria-busy", "true");
     this.shadowRoot.querySelector(".fixture-feedback")?.remove();
+    const before = snapshotEntities([entityId], this._hass.states);
     try {
       const domain = entityId.split(".")[0];
       await this._hass.callService(
@@ -2319,6 +2653,11 @@ export class ThreeDRoomsCard extends HTMLElement {
           : "homeassistant",
         "toggle",
         { entity_id: entityId },
+      );
+      this._offerUndo(
+        () =>
+          `${deviceLabel(control, "Light")} turned ${entity.state === "on" ? "off" : "on"}`,
+        before,
       );
     } catch {
       const message = document.createElement("div");
@@ -2365,14 +2704,14 @@ export class ThreeDRoomsCard extends HTMLElement {
         .catch(() => {});
       return;
     }
-    const control = this._model.controls.find((c) => c.id === id);
+    const control = this._panelModel.controls.find((c) => c.id === id);
     if (!control || control.hidden) return;
-    const desk = deviceForControl(this._model, id);
+    const desk = deviceForControl(this._panelModel, id);
     if (desk) {
       this._deskDialog(desk);
       return;
     }
-    const entityId = this._model.bindings[id];
+    const entityId = this._panelModel.bindings[id];
     if (!this._preview && entityId) {
       this.dispatchEvent(
         new CustomEvent("hass-more-info", {
@@ -2865,7 +3204,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       button.title = `${label}: ${appearance.description}`;
       button.setAttribute(
         "aria-label",
-        `${control.type !== "light" ? "Control" : "Toggle"} ${label}, ${appearance.description}${control.type !== "light" ? "" : ". Hold for more info."}`,
+        `${control.type !== "light" ? "Control" : "Toggle"} ${label}, ${appearance.description}${control.type !== "light" ? "" : ". Hold, or press Shift+Enter, for more info."}`,
       );
       button.setAttribute("aria-disabled", String(appearance.unavailable));
       if (control.type !== "light") button.removeAttribute("aria-pressed");

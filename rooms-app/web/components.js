@@ -1,6 +1,11 @@
 import { filterViews, viewScopeLabel } from "../shared/view-library.mjs";
 import { viewThumbnail } from "./view-thumbnail.js";
-import { BACKDROP_CSS, paintBackdrop } from "../shared/backdrop.mjs";
+import {
+  BACKDROP_CSS,
+  BACKGROUND_NAMES,
+  DEFAULT_BACKGROUND,
+  paintBackdrop,
+} from "../shared/backdrop.mjs";
 import {
   validateComponent,
   componentYaml,
@@ -42,6 +47,8 @@ export function initComponents({
   createView,
   initialViewId,
   standalone = false,
+  dashboards,
+  addCard,
   liveTime = () => "night",
   onList = () => {},
 }) {
@@ -66,9 +73,76 @@ export function initComponents({
       return false;
     }
   }
+  /**
+   * Inside Home Assistant the card is added in one step: pick a dashboard
+   * and view, press Add card. The manual steps stay under "Add it yourself".
+   */
+  async function offerDirectAdd(component) {
+    const section = $("use-view-direct"),
+      select = $("use-view-target"),
+      add = $("use-view-add"),
+      status = $("use-view-added");
+    section.hidden = true;
+    $("use-view-manual").open = false;
+    status.replaceChildren();
+    if (!dashboards || !addCard) {
+      $("use-view-manual").open = true;
+      return;
+    }
+    let list = [];
+    try {
+      list = await dashboards();
+    } catch {
+      list = [];
+    }
+    if (!list.length) {
+      $("use-view-manual").open = true;
+      return;
+    }
+    select.replaceChildren(
+      ...list.flatMap((dashboard) =>
+        dashboard.views.map((view) => {
+          // Two views with one name ("Kitchen", "Kitchen") get their place.
+          const twin =
+            dashboard.views.filter((v) => v.title === view.title).length > 1;
+          const option = new Option(
+            `${dashboard.title} › ${view.title}${twin ? ` (view ${view.index + 1})` : ""}`,
+            JSON.stringify([dashboard.url_path, view.index]),
+          );
+          option.dataset.href = `/${dashboard.url_path || "lovelace"}/${view.path}`;
+          return option;
+        }),
+      ),
+    );
+    section.hidden = false;
+    add.disabled = false;
+    add.onclick = async () => {
+      const [urlPath, index] = JSON.parse(select.value);
+      const href = select.selectedOptions[0]?.dataset.href;
+      add.disabled = true;
+      status.textContent = "Adding…";
+      try {
+        await addCard(urlPath, index, {
+          type: "custom:three-d-rooms-card",
+          saved_view: component.id,
+        });
+        status.textContent = `Added to ${select.selectedOptions[0].textContent}. `;
+        const open = document.createElement("a");
+        open.href = href;
+        open.target = "_top";
+        open.textContent = "Open the dashboard";
+        status.append(open);
+      } catch (error) {
+        status.textContent = `Could not add the card: ${error.message}`;
+      } finally {
+        add.disabled = false;
+      }
+    };
+  }
   function use(component) {
     $("use-view-name").textContent = `Saved view: ${component.title}`;
     $("use-view-yaml").value = componentYaml(component);
+    offerDirectAdd(component);
     // Only inside Home Assistant, which serves the page.
     $("use-view-page").hidden = !standalone;
     if (standalone) {
@@ -100,9 +174,16 @@ export function initComponents({
       query: $("view-search").value,
       kind: $("view-kind-filter").value,
     });
+    // Search and filter earn their place once there are a few views; the
+    // count beside the heading already says how many there are.
+    const filtering =
+      !!$("view-search").value || $("view-kind-filter").value !== "all";
+    document
+      .querySelector(".view-library-filters")
+      ?.toggleAttribute("hidden", components.length < 6 && !filtering);
     $("view-results").textContent =
       views.length === components.length
-        ? `${views.length} ${views.length === 1 ? "view" : "views"}`
+        ? ""
         : `${views.length} of ${components.length} views`;
     $("create-library-view").disabled = !models.length;
     $("saved-view-count").textContent = components.length;
@@ -157,7 +238,7 @@ export function initComponents({
       detail.textContent = `${viewScopeLabel(
         models.find((m) => m.id === c.layers[0].model),
         models,
-      )} · ${c.layers[0].view === "floor" ? "Floor plan" : "Perspective"} · ${c.height === "auto" ? "auto height" : `${c.height}px card`}`;
+      )}${c.layers[0].view === "floor" ? " · Floor plan" : ""} · ${BACKGROUND_NAMES[c.background || DEFAULT_BACKGROUND] || "Spotlight"}`;
       // One clear row: Edit, Add to dashboard (the main step) and a menu
       // for everything else. The preview picture also opens the editor.
       const actions = document.createElement("div");
@@ -174,7 +255,9 @@ export function initComponents({
       edit.className = "saved-view-edit";
       edit.innerHTML = `${ICONS.edit}<span>Edit</span>`;
       edit.setAttribute("aria-label", `Edit ${c.title}`);
-      const add = button("Add to dashboard", () => use(c), true);
+      // Secondary on each card: New view stays the one main action here.
+      const add = button("Add to dashboard", () => use(c));
+      add.className = "saved-view-add";
       const more = document.createElement("details");
       more.className = "saved-view-menu";
       const summary = document.createElement("summary");

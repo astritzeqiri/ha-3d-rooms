@@ -5,7 +5,7 @@ import {
   LOCK_ICON_PATH,
 } from "../shared/marker.mjs";
 import { deviceForControl } from "../shared/device.mjs";
-import { deviceLabel } from "../shared/workspace.mjs";
+import { deviceLabel, shortRoomTitle } from "../shared/workspace.mjs";
 import {
   markerSettings,
   markerLayout,
@@ -109,6 +109,8 @@ export function initMarkerEditor({
     tray,
     inspector,
     picker,
+    // House views: show the icons of one room only ("" = every room).
+    roomFilter = "",
     defaultsBox,
     previousRender,
     previousMarkers,
@@ -453,7 +455,11 @@ export function initMarkerEditor({
         if (entry.button.parentElement !== layer) layer.append(entry.button);
         entry.name.hidden = true;
         const point = owner.fixtureScreenPosition(control.id, option.offset);
-        entry.button.hidden = !point?.visible;
+        entry.button.hidden =
+          !point?.visible ||
+          (!!roomFilter &&
+            control.sourceModel !== roomFilter &&
+            selected !== control.id);
         if (point) {
           const layout = markerLayout(
             point,
@@ -598,6 +604,27 @@ export function initMarkerEditor({
       };
     }
     host?.append(defaultsBox);
+    // A whole house shows dozens of icons on top of each other: let the
+    // editor narrow them to one room.
+    roomFilter = "";
+    const rooms = new Map();
+    for (const c of controls())
+      if (c.sourceModel && !rooms.has(c.sourceModel))
+        rooms.set(c.sourceModel, shortRoomTitle(c.roomTitle || "Room"));
+    if (rooms.size > 1) {
+      const filter = document.createElement("label");
+      filter.className = "marker-room-filter";
+      filter.textContent = "Show icons from";
+      const select = document.createElement("select");
+      select.append(new Option("Every room", ""));
+      for (const [id, title] of rooms) select.append(new Option(title, id));
+      select.onchange = () => {
+        roomFilter = select.value;
+        refresh();
+      };
+      filter.append(select);
+      host?.append(filter);
+    }
     picker = document.createElement("select");
     picker.setAttribute("aria-label", "Choose device icon to edit");
     const placeholder = document.createElement("option");

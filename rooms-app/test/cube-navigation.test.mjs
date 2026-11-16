@@ -19,7 +19,10 @@ function navigation() {
     dataset = {};
     captured = false;
     classList = { add() {}, remove() {} };
-    setAttribute() {}
+    attributes = {};
+    setAttribute(name, value) {
+      this.attributes[name] = value;
+    }
     append(...nodes) {
       this.children.push(...nodes);
     }
@@ -100,6 +103,21 @@ test("cancelled cube gestures do not snap; arrow keys rotate", () => {
   assert.equal(h.presets.length, 0);
   h.cube.listeners.keydown({ key: "ArrowRight", preventDefault() {} });
   assert.deepEqual(h.moves, [[0.12, 0]]);
+});
+test("the cube is one tab stop; letters snap to faces and Home resets", () => {
+  const h = navigation();
+  const key = (k, extra = {}) =>
+    h.cube.listeners.keydown({ key: k, preventDefault() {}, ...extra });
+  key("t");
+  key("K");
+  key("Home");
+  key("f", { ctrlKey: true });
+  assert.deepEqual(h.presets, ["top", "back", "reset"]);
+  const regions = h.cube.children.filter(
+    (c) => c.attributes?.role === "button",
+  );
+  assert.ok(regions.length > 0);
+  assert.ok(regions.every((r) => r.attributes.tabindex === "-1"));
 });
 const sceneSource = (
   await readFile(new URL("../web/scene.js", import.meta.url), "utf8")

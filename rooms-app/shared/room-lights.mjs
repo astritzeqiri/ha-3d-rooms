@@ -132,3 +132,59 @@ export function allLights(rooms) {
     entities: [...new Set(rooms.flatMap((r) => r.entities))],
   };
 }
+
+/**
+ * What an Undo needs: each entity's state before a switch. Lights and other
+ * on/off entities keep on/off (Home Assistant restores the last brightness
+ * on turn_on); covers keep their position when they report one.
+ */
+export function snapshotEntities(entityIds, entityStates = {}) {
+  return entityIds
+    .map((entityId) => {
+      const entity = entityStates[entityId];
+      if (!entity || ["unavailable", "unknown"].includes(entity.state))
+        return null;
+      const position = entity.attributes?.current_position;
+      return {
+        entityId,
+        state: entity.state,
+        ...(typeof position === "number" ? { position } : {}),
+      };
+    })
+    .filter(Boolean);
+}
+
+/** Service calls that put every entity of a snapshot back as it was. */
+export function restoreCommands(snapshot) {
+  const grouped = new Map(),
+    calls = [];
+  for (const { entityId, state, position } of snapshot) {
+    const domain = entityId.split(".")[0];
+    if (domain === "cover") {
+      if (typeof position === "number")
+        calls.push([
+          "cover",
+          "set_cover_position",
+          { entity_id: entityId, position },
+        ]);
+      else if (state === "open" || state === "closed")
+        calls.push([
+          "cover",
+          state === "open" ? "open_cover" : "close_cover",
+          { entity_id: entityId },
+        ]);
+      continue;
+    }
+    if (state !== "on" && state !== "off") continue;
+    const key = `${domain}.${state}`;
+    if (!grouped.has(key)) grouped.set(key, [domain, state, []]);
+    grouped.get(key)[2].push(entityId);
+  }
+  for (const [domain, state, entity_id] of grouped.values())
+    calls.push([
+      domain,
+      state === "on" ? "turn_on" : "turn_off",
+      { entity_id },
+    ]);
+  return calls;
+}

@@ -13,7 +13,11 @@ const source = (
 function panelHarness() {
   let Panel;
   const events = [],
-    frame = { contentWindow: { dispatchEvent() {} } };
+    frame = {
+      contentWindow: { dispatchEvent() {} },
+      contentDocument: { documentElement: { dataset: {} } },
+      addEventListener() {},
+    };
   const context = vm.createContext({
     HTMLElement: class {
       attachShadow() {
@@ -57,7 +61,12 @@ function panelHarness() {
     origin: "http://localhost",
     data: { type: "three-d-rooms-ready" },
   });
-  return { panel, bridge: frame.contentWindow.threeDRoomsBridge, events };
+  return {
+    panel,
+    frame,
+    bridge: frame.contentWindow.threeDRoomsBridge,
+    events,
+  };
 }
 
 test("native manager receives climate state on initial publish and live updates", () => {
@@ -126,4 +135,14 @@ test("manager native adapter opens the real HA AC dialog through its panel", asy
     if (previousLocation === undefined) delete globalThis.location;
     else globalThis.location = previousLocation;
   }
+});
+
+test("the manager frame follows Home Assistant's own light or dark mode", () => {
+  const { panel, frame } = panelHarness();
+  const root = frame.contentDocument.documentElement;
+  assert.equal(root.dataset.theme, undefined);
+  panel.hass = { ...panel._hass, themes: { darkMode: true } };
+  assert.equal(root.dataset.theme, "dark");
+  panel.hass = { ...panel._hass, themes: { darkMode: false } };
+  assert.equal(root.dataset.theme, "light");
 });

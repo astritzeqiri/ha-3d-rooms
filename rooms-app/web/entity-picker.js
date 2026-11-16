@@ -24,7 +24,7 @@ export function pickerHTML({ control, entities, selectedId, enabled }) {
   const id = esc(control.id);
   const value = selectedId
     ? `<span class="picker-value"><strong>${esc(name)}</strong><small>${esc(selectedId)}${entity ? "" : " · not found in Home Assistant"}</small></span>`
-    : `<span class="picker-value empty">${enabled ? "Choose an entity" : "Home Assistant not connected"}</span>`;
+    : `<span class="picker-value empty">${enabled ? "Choose a Home Assistant device" : "Home Assistant not connected"}</span>`;
   return `<div class="entity-picker" data-picker="${id}">
     <button type="button" class="picker-field" id="map-${id}" aria-haspopup="listbox" aria-expanded="false" aria-controls="picker-list-${id}" ${enabled ? "" : "disabled"}>
       <span class="picker-label">Entity</span>${value}<span class="picker-chevron">${chevron}</span>

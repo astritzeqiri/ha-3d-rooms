@@ -300,6 +300,8 @@ export function initDashboardEditor({
     const fromLibrary = document.body.dataset?.roomTab === "views";
     panel.hidden = false;
     document.body.classList.add("dashboard-editing");
+    // A room picked in My home outlines it; that outline is not part of a view.
+    scene()?.highlightRoom?.(null);
     // A library opened directly has never laid out its hidden room canvas.
     if ((!component || reframe) && fromLibrary && !inPlace)
       scene().fitFloor?.();
@@ -369,7 +371,8 @@ export function initDashboardEditor({
     history.replaceState(null, "", url);
     window.dispatchEvent(new CustomEvent("rooms-route-change"));
     if (saved) cachePreview();
-    if (!inPlace) $("dashboard-title").focus({ preventScroll: true });
+    // Focus the panel, not the Name field: typing must not rename the view.
+    if (!inPlace) $("dashboard-panel-title")?.focus?.({ preventScroll: true });
     return true;
   }
 

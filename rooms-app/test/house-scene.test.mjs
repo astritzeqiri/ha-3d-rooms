@@ -380,3 +380,26 @@ test("a new scene compiles its shaders first and draws its first frame without s
     globalThis.requestAnimationFrame = raf;
   }
 });
+
+test("a wall whose inside faces away from the camera hides with its windows", () => {
+  const root = new THREE.Group(),
+    wall = new THREE.Group(),
+    windowPane = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 0.05));
+  // An inward normal pointing -z: the room's inside is towards -z.
+  wall.userData.wallNormal = [0, 0, -1];
+  wall.position.set(0, 1, 2);
+  // Walls are rotated into place; their normal stays in the room's frame.
+  wall.rotation.y = Math.PI / 2;
+  wall.add(windowPane);
+  root.add(wall);
+  const view = Object.create(SceneView.prototype);
+  view.asset = root;
+  view.model = {};
+  view.camera = new THREE.PerspectiveCamera();
+  view.camera.position.set(0, 3, 0); // inside the room
+  view.cutaway();
+  assert.equal(wall.visible, true);
+  view.camera.position.set(0, 3, 9); // outside, looking in through that wall
+  view.cutaway();
+  assert.equal(wall.visible, false);
+});

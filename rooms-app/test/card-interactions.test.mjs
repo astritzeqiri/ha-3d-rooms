@@ -11,6 +11,8 @@ import {
   roomLightCommands,
   roomLights,
   roomLightSummary,
+  snapshotEntities,
+  restoreCommands,
 } from "../shared/room-lights.mjs";
 import { roomRoute } from "../shared/room-route.mjs";
 import { shortRoomTitle } from "../shared/workspace.mjs";
@@ -89,6 +91,8 @@ function cardHarness() {
     roomLightCommands,
     roomLights,
     roomLightSummary,
+    snapshotEntities,
+    restoreCommands,
     focusableRooms,
     roomButtonShows,
     spreadButtons,
@@ -385,7 +389,8 @@ test("floor buttons switch the loaded house in place and hide when disabled", ()
     },
   };
   card._selectFloor("h-home--f2");
-  assert.deepEqual(shown, [["h-home--f2", true]]);
+  // A new floor always frames its own rooms, even with the camera free.
+  assert.deepEqual(shown, [["h-home--f2", undefined]]);
   assert.equal(card._model, upper);
   assert.equal(card._floor, "h-home--f2");
   assert.equal(loads, 0);
@@ -395,7 +400,7 @@ test("floor buttons switch the loaded house in place and hide when disabled", ()
   assert.equal(shown.length, 1);
   card._cameraFree = false;
   card._selectFloor("h-home");
-  assert.deepEqual(shown[1], ["h-home", false]);
+  assert.deepEqual(shown[1], ["h-home", undefined]);
   assert.equal(card._floor, null);
   // Missing rooms in the loaded scene fall back to a full load.
   card._view.setHouseView = () => false;

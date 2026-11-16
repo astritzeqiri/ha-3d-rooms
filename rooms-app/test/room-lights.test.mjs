@@ -9,6 +9,8 @@ import {
   allLights,
   roomDevices,
   PANEL_KINDS,
+  snapshotEntities,
+  restoreCommands,
 } from "../shared/room-lights.mjs";
 import { houseModels } from "../shared/house.mjs";
 
@@ -199,6 +201,8 @@ function card() {
     allLights,
     roomDevices,
     PANEL_KINDS,
+    snapshotEntities,
+    restoreCommands,
   });
   vm.runInContext(source, context);
   const c = Object.create(Card.prototype);
@@ -454,5 +458,27 @@ test("card shade row opens a closed shade through the cover domain", async () =>
   assert.deepEqual(JSON.parse(JSON.stringify(calls)), [
     ["cover", "open_cover", { entity_id: "cover.side" }],
     ["cover", "close_cover", { entity_id: "cover.side" }],
+  ]);
+});
+
+test("undo restores each light and shade to how it was", () => {
+  const snapshot = snapshotEntities(
+    ["light.a", "light.b", "switch.c", "cover.d", "cover.e", "light.gone"],
+    {
+      "light.a": { state: "on" },
+      "light.b": { state: "off" },
+      "switch.c": { state: "on" },
+      "cover.d": { state: "open", attributes: { current_position: 40 } },
+      "cover.e": { state: "closed", attributes: {} },
+      "light.gone": { state: "unavailable" },
+    },
+  );
+  assert.equal(snapshot.length, 5);
+  assert.deepEqual(restoreCommands(snapshot), [
+    ["cover", "set_cover_position", { entity_id: "cover.d", position: 40 }],
+    ["cover", "close_cover", { entity_id: "cover.e" }],
+    ["light", "turn_on", { entity_id: ["light.a"] }],
+    ["light", "turn_off", { entity_id: ["light.b"] }],
+    ["switch", "turn_on", { entity_id: ["switch.c"] }],
   ]);
 });

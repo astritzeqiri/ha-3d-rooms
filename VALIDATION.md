@@ -1,3 +1,11 @@
+# 0.48.0 — audit fixes, calmer dashboard controls and one-step Add to dashboard, 2026-11-16
+
+Released as 0.48.0, based on 0.47.1 (plus the README link on main). Frontend only. Card: `dashboard/card.js` (theme-coloured pop-ups, phone grouping, panels during download, undo, labelled controls, More menu, panel changes), `dashboard/panel.js` (Home Assistant light/dark mode, dashboard bridge), `dashboard/transport.mjs`; the card is split so the 3D engine (`three-d-rooms-scene-*.js`) loads only when a card shows a room (`vite.card.config.mjs`, `tools/build-card.mjs`; `dist/ha-3d-rooms.js` stays one file). Shared: `room-lights.mjs` (undo), `dashboard-cards.mjs` (new), `scene-sessions.mjs` (new), `view-cube.mjs`, `house-presentation.mjs`, `daylight.mjs`. Scene: wall cutaway by inner normal, two-sided walls, daylight sky panels follow their windows, floor framing with a toolbar inset, icons limited to the shown floor. Manager: header, Room settings groups, wording, rooms list, library, phone editor, room filter, wheel behaviour, editor tidy-ups.
+
+- All frontend tests (new: undo, dashboard cards, cube keyboard, wall cutaway, marker grouping, theme bridge) and the format check and build pass; host Python tests pass with native-only skips. No backend change.
+- Shared local Home Assistant (Core 2026.11.0) with this package staged, checked in the browser pane at 375, 480 and 1440 px, light and dark: card pop-ups follow a light theme; the sidebar follows HA's dark mode; Lights panel opens and switches during a fresh download; Undo restored the Office and Hallway lights; floors fill the card; unconnected devices are hidden; the house overview has no floating window panels; the editor room filter (36 → 3 icons), focus, hidden cube and wheel hint; Add to dashboard lists the dashboards and views.
+- Not checked: pressing Add card (it saves a dashboard), Safari, a real phone, and the phone-width editor and library after the last round.
+
 # 0.47.1 — reset changes and an in-place save bar, 2026-11-13
 
 Released as 0.47.1, based on 0.47.0. Frontend only: `web/dashboard-editor.js` (reset with confirmation, in-place reload, preview only when saved), `web/index.html` (reset buttons), `web/views-workspace.css` (save bar states; the page-wide banner and its page padding removed).

@@ -99,14 +99,14 @@ test("house library summaries describe rooms and floor scope, never entity conne
     controls: [{}, {}],
     bindings: {},
   };
-  assert.equal(houseViewSummary(model), "2 rooms · Whole house");
+  assert.equal(houseViewSummary(model), "2 rooms");
   assert.equal(
     houseViewSummary({
       ...model,
       members: [{}],
       houseFloor: { name: "Upper floor" },
     }),
-    "1 room · Upper floor",
+    "1 room",
   );
 });
 

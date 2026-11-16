@@ -3,6 +3,10 @@ import { resolveEntityIcon } from "../shared/entity-icon.mjs";
 import { roomRoute, managerURL } from "../shared/room-route.mjs";
 import { sceneBlob } from "../shared/scene-download.mjs";
 import { openDashboardPreview } from "./preview.js";
+import {
+  listDashboards,
+  addDashboardCard,
+} from "../shared/dashboard-cards.mjs";
 /** Native HA sidebar wrapper for the existing room manager. No token copying. */
 class ThreeDRoomsPanel extends HTMLElement {
   constructor() {
@@ -10,6 +14,7 @@ class ThreeDRoomsPanel extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = `<style>:host{display:block;height:100%;min-height:100vh}iframe{display:block;width:100%;height:100vh;border:0}</style><iframe title="3D Rooms model library"></iframe>`;
     this._frame = this.shadowRoot.querySelector("iframe");
+    this._frame.addEventListener("load", () => this._applyTheme());
     this._iconCache = new Map();
     this._ready = (event) => {
       if (
@@ -53,6 +58,10 @@ class ThreeDRoomsPanel extends HTMLElement {
             url.searchParams.set(key, value);
           history.replaceState(history.state, "", url);
         },
+        // Add a view's card to a stored dashboard in one step.
+        dashboards: () => listDashboards(this._hass),
+        addCard: (urlPath, viewIndex, card) =>
+          addDashboardCard(this._hass, urlPath, viewIndex, card),
         // Every entity, for the extra entities a view can show.
         states: () => Object.values(this._hass?.states || {}),
         request: (operation, data = {}) =>
@@ -91,6 +100,7 @@ class ThreeDRoomsPanel extends HTMLElement {
           };
         },
       };
+      this._applyTheme();
       this._frame.contentWindow.threeDRoomsBridge = bridge;
       this._frame.contentWindow.dispatchEvent(
         new Event("three-d-rooms-connected"),
@@ -100,7 +110,16 @@ class ThreeDRoomsPanel extends HTMLElement {
   set hass(value) {
     this._hass = value;
     if (this._preview) this._preview.card.hass = value;
+    this._applyTheme();
     this._publish();
+  }
+  /** Follow Home Assistant's own light/dark choice, not just the system's. */
+  _applyTheme() {
+    const dark = this._hass?.themes?.darkMode;
+    const root = this._frame.contentDocument?.documentElement;
+    if (typeof dark !== "boolean" || !root) return;
+    const theme = dark ? "dark" : "light";
+    if (root.dataset.theme !== theme) root.dataset.theme = theme;
   }
   _publish() {
     if (!this._hass) return;

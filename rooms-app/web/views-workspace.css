@@ -385,6 +385,31 @@ button:focus-visible {
   width: auto;
   min-width: 140px;
 }
+/* Checkboxes sit right beside their words, not at the far side of the row. */
+.marker-view-defaults > label.marker-check {
+  justify-content: flex-start;
+  gap: 10px;
+}
+/* The room filter for icons, above the device picker. */
+.marker-room-filter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.marker-room-filter select {
+  width: auto;
+  min-width: 140px;
+}
+/* While editing a view: the name above the preview repeats "What to show",
+   and the view cube named the saved camera's side ("BACK"), which only
+   confused; the camera presets and Reset camera do its job here. */
+.dashboard-editing .view-tools-title,
+.dashboard-editing .camera-navigation {
+  display: none;
+}
 .marker-appearance [data-inherit] {
   width: 100%;
   margin-bottom: 8px;
@@ -503,12 +528,11 @@ button:focus-visible {
   border-radius: 14px;
   background: var(--ve-card);
 }
+/* Section headings in the editor: plain words, not all-caps labels. */
 .editor-section-title {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 650;
 }
 .editor-section > p.muted {
   margin-top: -6px;
@@ -822,7 +846,7 @@ button:focus-visible {
 }
 
 /* Save bar: stays in reach while the settings scroll. Saved: status,
-   Preview and Use in dashboard. Unsaved: it turns into an accent banner
+   Preview and Add to dashboard. Unsaved: it turns into an accent banner
    with a full-width Save view. */
 .dashboard-panel .panel-save {
   position: sticky;
@@ -870,7 +894,7 @@ button:focus-visible {
 #use-saved-view {
   grid-column: 1 / -1;
 }
-/* Saved: a small status line, then Preview and Use in dashboard side by side. */
+/* Saved: a small status line, then Preview and Add to dashboard side by side. */
 .dashboard-panel .panel-save:has(#dashboard-save-state[data-state="saved"]) {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 8px 10px;
@@ -1316,5 +1340,47 @@ body[data-opening-view] #saved-views-section {
   }
   .sk-canvas {
     min-height: min(36dvh, 300px);
+  }
+}
+
+/* View editor on a phone. The preview stays pinned so changes show as they
+   are made, but shorter, and the saved-state bar is one row, leaving room
+   to work in between. The toolbar is a two-by-two grid of labelled buttons
+   instead of a strip that wrapped labels and cut off its first button. */
+@media (max-width: 600px) {
+  .dashboard-editing .camera-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 6px;
+  }
+  .dashboard-editing .camera-actions button {
+    justify-content: flex-start;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .dashboard-editing .view-tools {
+    width: 100%;
+  }
+  .dashboard-editing #viewport {
+    height: min(30dvh, 240px) !important;
+  }
+  .dashboard-panel .panel-save:has(#dashboard-save-state[data-state="saved"]) {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    padding-top: 10px;
+  }
+  .panel-save:has(#dashboard-save-state[data-state="saved"])
+    #dashboard-save-state {
+    grid-column: 1;
+    /* The green dot says saved; the words stay for screen readers. */
+    font-size: 0;
+    gap: 0;
+  }
+  .panel-save:has(#dashboard-save-state[data-state="saved"])
+    #preview-dashboard {
+    grid-column: 2;
+  }
+  .panel-save:has(#dashboard-save-state[data-state="saved"]) #use-saved-view {
+    grid-column: 3;
   }
 }
