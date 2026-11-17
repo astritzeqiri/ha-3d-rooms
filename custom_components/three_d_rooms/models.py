@@ -287,6 +287,26 @@ def validate_device_entities(value, controls):
     return clean
 
 
+IMAGE_ENTITY = re.compile(r"image\.[a-z0-9_]+\Z")
+
+
+def validate_device_maps(value, controls):
+    """`{controlId: "image.…"}`: the map picture shown in a robot vacuum's dialog."""
+    types = {c["id"]: c["type"] for c in controls}
+    if not isinstance(value, dict):
+        raise ValueError("Device maps must be an object.")
+    clean = {}
+    for control_id, entity in value.items():
+        if types.get(control_id) not in DEVICE_ENTITY_TYPES:
+            raise ValueError("Only robot vacuums have a map.")
+        if entity in (None, ""):
+            continue
+        if not isinstance(entity, str) or len(entity) > 255 or not IMAGE_ENTITY.fullmatch(entity):
+            raise ValueError("Choose an image entity for the map.")
+        clean[control_id] = entity
+    return clean
+
+
 def stored_room_settings(stored, manifest):
     """Room settings kept beside the model in the catalog, re-read on start.
 
@@ -313,6 +333,14 @@ def stored_room_settings(stored, manifest):
             pass
     if entities:
         out["deviceEntities"] = entities
+    maps = {}
+    for control_id, value in (stored.get("deviceMaps") or {}).items():
+        try:
+            maps.update(validate_device_maps({control_id: value}, manifest["controls"]))
+        except ValueError:
+            pass
+    if maps:
+        out["deviceMaps"] = maps
     return out
 
 
@@ -324,12 +352,15 @@ def apply_marker_defaults(model):
     """
     defaults = model.get("markerDefaults") or {}
     entities = model.get("deviceEntities") or {}
-    if not defaults and not entities:
+    maps = model.get("deviceMaps") or {}
+    if not defaults and not entities and not maps:
         return model
     model = deepcopy(model)
     for control in model["controls"]:
         if entities.get(control["id"]):
             control["entities"] = list(entities[control["id"]])
+        if maps.get(control["id"]):
+            control["map"] = maps[control["id"]]
     for control in model["controls"]:
         value = defaults.get(control["id"])
         if not value:
@@ -363,6 +394,11 @@ def preserve_marker_defaults(previous, incoming):
         incoming["deviceEntities"] = entities
     else:
         incoming.pop("deviceEntities", None)
+    maps = {k: v for k, v in previous.get("deviceMaps", {}).items() if k in vacuums}
+    if maps:
+        incoming["deviceMaps"] = maps
+    else:
+        incoming.pop("deviceMaps", None)
 
 
 def preserve_device_visibility(previous, incoming):
@@ -1123,6 +1159,21 @@ class ModelStore:
             model.pop("deviceEntities", None)
         self.save(models)
         return {"entities": list(clean.get(control_id, []))}
+
+    def set_device_map(self, model_id, control_id, entity_id):
+        """The map picture (an image entity) of a robot vacuum; "" removes it."""
+        models = deepcopy(self.models)
+        model = next((m for m in models if m["id"] == model_id), None)
+        if model is None:
+            raise ValueError("Choose a device in its source room.")
+        stored = {**model.get("deviceMaps", {}), control_id: entity_id}
+        clean = validate_device_maps(stored, model["controls"])
+        if clean:
+            model["deviceMaps"] = clean
+        else:
+            model.pop("deviceMaps", None)
+        self.save(models)
+        return {"map": clean.get(control_id, "")}
 
     def set_device_settings(self, model_id, device_id, names):
         models = deepcopy(self.models)

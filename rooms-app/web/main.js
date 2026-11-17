@@ -1002,7 +1002,22 @@ function vacuumEntitiesHTML(c) {
         `<option value="${esc(e.entity_id)}">${esc(name(e, e.entity_id))}</option>`,
     )
     .join("");
-  return `<section class="ve" aria-labelledby="ve-title-${c.id}"><h4 id="ve-title-${c.id}">Entities in the robot's dialog <span class="ve-count">${list.length}</span></h4><p class="muted">Tapping the robot on a card opens its own dialog with these entities: mop mode, dock, maintenance, anything you add.</p>${rows ? `<ol class="ve-list">${rows}</ol>` : ""}<div class="ve-add"><input type="search" list="ve-options-${c.id}" data-ve-input="${c.id}" placeholder="Search entities to add" aria-label="Entity to add"><datalist id="ve-options-${c.id}">${options}</datalist><button type="button" data-ve-add="${c.id}">Add</button></div>${selected.bindings[c.id] ? `<button type="button" class="ve-suggest" data-ve-suggest="${c.id}">Add all from this vacuum and its dock</button>` : ""}</section>`;
+  // The robot's map picture: one image entity, shown from a Map button.
+  const images = all.filter((e) => e.entity_id.startsWith("image."));
+  const mapEntity = c.map && find(c.map);
+  const mapHTML = `<section class="ve ve-map" aria-labelledby="ve-map-${c.id}"><h4 id="ve-map-${c.id}">Map</h4><p class="muted">The robot's map picture (an image entity, such as a Roborock's "Map 0"). Its dialog gets a Map button.</p>${
+    c.map
+      ? `<div class="ve-row"><span class="ve-text"><span class="ve-name">${esc(name(mapEntity, c.map))}</span><span class="ve-id">${esc(c.map)}${mapEntity ? "" : " · not found"}</span></span><span class="ve-tools">${iconButton(`data-ve-map="${c.id}" data-entity=""`, "Remove the map", '<path d="M6 6l12 12M18 6 6 18"/>')}</span></div>`
+      : `<div class="ve-add"><select data-ve-map-input="${c.id}" aria-label="Map image entity"><option value="">${images.length ? "Choose an image entity" : "No image entities found"}</option>${images
+          .map(
+            (e) =>
+              `<option value="${esc(e.entity_id)}">${esc(name(e, e.entity_id))} · ${esc(e.entity_id)}</option>`,
+          )
+          .join(
+            "",
+          )}</select><button type="button" data-ve-map-set="${c.id}" ${images.length ? "" : "disabled"}>Connect</button></div>`
+  }</section>`;
+  return `${mapHTML}<section class="ve" aria-labelledby="ve-title-${c.id}"><h4 id="ve-title-${c.id}">Entities in the robot's dialog <span class="ve-count">${list.length}</span></h4><p class="muted">Tapping the robot on a card opens its own dialog with these entities: mop mode, dock, maintenance, anything you add.</p>${rows ? `<ol class="ve-list">${rows}</ol>` : ""}<div class="ve-add"><input type="search" list="ve-options-${c.id}" data-ve-input="${c.id}" placeholder="Search entities to add" aria-label="Entity to add"><datalist id="ve-options-${c.id}">${options}</datalist><button type="button" data-ve-add="${c.id}">Add</button></div>${selected.bindings[c.id] ? `<button type="button" class="ve-suggest" data-ve-suggest="${c.id}">Add all from this vacuum and its dock</button>` : ""}</section>`;
 }
 async function saveVacuumEntities(controlId, entities, message) {
   const control = selected.controls.find((x) => x.id === controlId);
@@ -1018,7 +1033,32 @@ async function saveVacuumEntities(controlId, entities, message) {
     toast(error.message);
   }
 }
+async function setVacuumMap(controlId, entityId) {
+  const control = selected.controls.find((x) => x.id === controlId);
+  const result = await api(`models/${selected.id}/device-map`, {
+    method: "POST",
+    body: JSON.stringify({ controlId, entityId }),
+  });
+  if (result.map) control.map = result.map;
+  else delete control.map;
+}
 async function vacuumEntityAction(e) {
+  const mapButton = e.target.closest("[data-ve-map], [data-ve-map-set]");
+  if (mapButton) {
+    const controlId = mapButton.dataset.veMap || mapButton.dataset.veMapSet;
+    const value = mapButton.dataset.veMapSet
+      ? mapButton.parentElement.querySelector("[data-ve-map-input]")?.value
+      : "";
+    if (mapButton.dataset.veMapSet && !value) return true;
+    try {
+      await setVacuumMap(controlId, value);
+      drawControls();
+      toast(value ? "Map connected" : "Map removed");
+    } catch (error) {
+      toast(error.message);
+    }
+    return true;
+  }
   const add = e.target.closest("[data-ve-add]"),
     move = e.target.closest("[data-ve-move]"),
     remove = e.target.closest("[data-ve-remove]"),
@@ -1064,17 +1104,31 @@ async function vacuumEntityAction(e) {
       });
       // Controls first, then settings, then diagnostics, as on the device page.
       const order = { null: 0, config: 1, diagnostic: 2 };
+      // A map picture goes to the Map section, not the list.
+      const image = found.entities.find((x) =>
+        x.entity_id.startsWith("image."),
+      );
+      let mapped = false;
+      if (image && !control.map) {
+        await setVacuumMap(controlId, image.entity_id);
+        mapped = true;
+      }
       const fresh = found.entities
+        .filter((x) => !x.entity_id.startsWith("image."))
         .filter((x) => !list.includes(x.entity_id))
         .sort((a, b) => order[a.category] - order[b.category])
         .map((x) => x.entity_id)
         .slice(0, 48 - list.length);
-      if (!fresh.length) toast("Nothing new to add from this vacuum.");
-      else
+      if (!fresh.length) {
+        if (mapped) drawControls();
+        toast(
+          mapped ? "Map connected" : "Nothing new to add from this vacuum.",
+        );
+      } else
         await saveVacuumEntities(
           controlId,
           [...list, ...fresh],
-          `Added ${fresh.length} ${fresh.length === 1 ? "entity" : "entities"} from ${found.devices.join(" and ")}`,
+          `Added ${fresh.length} ${fresh.length === 1 ? "entity" : "entities"}${mapped ? " and the map" : ""} from ${found.devices.join(" and ")}`,
         );
     } catch (error) {
       toast(error.message);
@@ -2782,6 +2836,7 @@ async function refreshDeviceVisibility() {
         "icon",
         "iconOff",
         "entities",
+        "map",
       ])
         if (key in updated) control[key] = updated[key];
         else delete control[key];

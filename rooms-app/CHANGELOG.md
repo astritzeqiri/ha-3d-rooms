@@ -1,3 +1,7 @@
+## 0.51.0
+
+- **The robot's map.** A robot vacuum can have its map picture (an `image` entity, such as a Roborock's "Map 0") connected in its own **Map** section on the device card, apart from the entity list; **Add all from this vacuum and its dock** connects it there. The vacuum dialog then has a **Map** button next to Fan speed and Cleaning: it opens the picture in the dialog, which reloads whenever the entity reports a new map, with when it last changed. An image entity in the entity list shows when its picture last changed instead of a raw timestamp.
+
 ## 0.50.0
 
 - **A robot vacuum's own dialog, with any entities you add.** Tapping the robot on a card or the full-screen page now always opens 3D Rooms' vacuum dialog (Home Assistant's vacuum controls, as before on the full-screen page), followed by the extra entities chosen for it, grouped like Home Assistant's device page into Controls, Configuration and Diagnostic: switches, selects (cleaning mode, mop mode), sliders (volume), times (do not disturb), buttons (Press) and readable values (battery, durations such as "149h 49m", "8 minutes ago", Connected/OK). The device name is dropped from row names. In the manager, a vacuum's device card has **Entities in the robot's dialog**: search and add any entity, reorder, remove, or **Add all from this vacuum and its dock** (its own device plus devices linked to it or named after it, such as "Saros 10R Dock"). Up to 48 per vacuum; kept when the room is replaced.

@@ -2248,6 +2248,14 @@ button.setup-step:hover {
   display: flex;
   gap: 8px;
 }
+.ve-add select {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+}
+.ve-map + .ve {
+  margin-top: 4px;
+}
 .ve-add input {
   flex: 1;
   min-width: 0;

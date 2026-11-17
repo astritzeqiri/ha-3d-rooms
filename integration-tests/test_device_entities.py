@@ -65,6 +65,23 @@ class DeviceEntitiesTests(unittest.TestCase):
         self.store.replace(self.model, package())  # vacuum removed: list dropped
         self.assertNotIn("deviceEntities", self.store.models[0])
 
+    def test_vacuum_map_is_one_image_entity_kept_on_restart_and_replace(self):
+        self.assertEqual(self.store.set_device_map(self.model, "robot", "image.saros_10r_map_0"), {"map": "image.saros_10r_map_0"})
+        self.assertEqual(self.served()["robot"]["map"], "image.saros_10r_map_0")
+        for bad in ("sensor.saros_10r_map_0", "camera.map", ["image.a"], "Image.Map"):
+            with self.assertRaises(ValueError):
+                self.store.set_device_map(self.model, "robot", bad)
+        light = next(c["id"] for c in self.store.models[0]["controls"] if c["type"] == "light")
+        with self.assertRaises(ValueError):
+            self.store.set_device_map(self.model, light, "image.saros_10r_map_0")
+        reopened = models.ModelStore(self.dir.name).open()
+        self.assertEqual(self.served(reopened)["robot"]["map"], "image.saros_10r_map_0")
+        self.store.replace(self.model, with_vacuum())
+        self.assertEqual(self.served()["robot"]["map"], "image.saros_10r_map_0")
+        self.store.set_device_map(self.model, "robot", "")
+        self.assertNotIn("map", self.served()["robot"])
+        self.assertNotIn("deviceMaps", self.store.models[0])
+
 
 if __name__ == "__main__":
     unittest.main()

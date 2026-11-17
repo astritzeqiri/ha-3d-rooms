@@ -251,6 +251,8 @@ dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
 .mi-vac-menu .mi-list{max-height:240px}
 .mi-vac-areas{display:flex;flex-direction:column;gap:16px}
 .mi-vac-areas[hidden]{display:none}
+.mi-vac-map-img{display:block;width:100%;max-height:min(70vh,640px);object-fit:contain;border-radius:16px;background:var(--mi-surface)}
+.mi-vac-map-img[hidden]{display:none}
 .mi-vac-areas-head{display:flex;align-items:center;gap:4px;margin-left:-12px}
 .mi-vac-areas-head h3{margin:0;font:500 18px Roboto,system-ui,sans-serif}
 .mi-vac-areas-body{display:flex;flex-direction:column;gap:16px}
@@ -481,6 +483,8 @@ export function openMoreInfo({
   // A device's extra entities (a robot vacuum's mop mode, dock, …), listed
   // under its controls in the order given.
   extras = [],
+  // The device's map picture (an image entity), opened from a Map button.
+  map = "",
 }) {
   const doc = host.ownerDocument;
   const dialog = h(doc, "dialog", "mi");
@@ -1706,6 +1710,17 @@ export function openMoreInfo({
       fan.append(fanChip, panel);
       chips.append(fan);
     }
+    if (map) {
+      const mapChip = h(
+        doc,
+        "button",
+        "mi-vac-chip",
+        `<span class="mi-vac-chip-icon">${svg("map")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Map</span><span class="mi-vac-chip-value">Show map</span></span><span class="mi-vac-chip-icon">${svg("next")}</span>`,
+      );
+      mapChip.type = "button";
+      mapChip.onclick = () => openMap();
+      chips.append(mapChip);
+    }
     if (vacuum.cleanArea) {
       const areaChip = h(
         doc,
@@ -1879,6 +1894,52 @@ export function openMoreInfo({
     }
     if (extras.length) main.append(extrasEl);
     buildExtras();
+
+    // ---- the robot's map picture ----
+    const mapView = h(doc, "div", "mi-vac-areas mi-vac-map");
+    mapView.hidden = true;
+    root.append(mapView);
+    let mapShown = "";
+    const mapSrc = () => {
+      const entity = getHass().states?.[map],
+        picture = entity?.attributes?.entity_picture;
+      if (!picture) return "";
+      // The state changes with each new picture; it keeps the URL fresh.
+      return `${picture}${picture.includes("?") ? "&" : "?"}t=${encodeURIComponent(entity.state)}`;
+    };
+    function syncMap() {
+      if (mapView.hidden) return;
+      const src = mapSrc(),
+        img = mapView.querySelector("img"),
+        note = mapView.querySelector(".mi-vac-hint");
+      const entity = getHass().states?.[map];
+      note.textContent = !entity
+        ? "The map entity was not found."
+        : src
+          ? `Updated ${sinceText(entity.state) || sinceText(entity.last_changed) || ""}`
+          : "No map picture yet.";
+      img.hidden = !src;
+      if (src && src !== mapShown) {
+        mapShown = src;
+        img.src = src;
+      }
+    }
+    function openMap() {
+      main.hidden = true;
+      areasView.hidden = true;
+      mapView.hidden = false;
+      dialog.classList.add("mi-vac-in-areas");
+      mapView.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${svg("back")}</button><h3>Map</h3></div><img class="mi-vac-map-img" alt="" hidden><p class="mi-vac-hint"></p>`;
+      mapView.querySelector("img").alt = `${prefix() || "Vacuum"} map`;
+      mapView.querySelector("button").onclick = () => {
+        mapView.hidden = true;
+        main.hidden = false;
+        mapShown = "";
+        dialog.classList.remove("mi-vac-in-areas");
+      };
+      mapShown = "";
+      syncMap();
+    }
 
     // ---- clean by area (Home Assistant's clean-areas view) ----
     const areasView = h(doc, "div", "mi-vac-areas");
@@ -2084,6 +2145,7 @@ export function openMoreInfo({
         fanChip.querySelector(".mi-vac-chip-value").textContent =
           cap(control.fanSpeed) || "—";
       syncExtras();
+      syncMap();
     };
     return sync;
   }

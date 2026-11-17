@@ -66,7 +66,8 @@ var r = {
 	next: "M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z",
 	back: "M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z",
 	battery: "M16.67,4H15V2H9V4H7.33A1.33,1.33 0 0,0 6,5.33V20.67C6,21.4 6.6,22 7.33,22H16.67A1.33,1.33 0 0,0 18,20.67V5.33C18,4.6 17.4,4 16.67,4Z",
-	batterycharging: "M16.67,4H15V2H9V4H7.33A1.33,1.33 0 0,0 6,5.33V20.66C6,21.4 6.6,22 7.33,22H16.66C17.4,22 18,21.4 18,20.67V5.33C18,4.6 17.4,4 16.67,4M11,20V14.5H9L13,7V12.5H15"
+	batterycharging: "M16.67,4H15V2H9V4H7.33A1.33,1.33 0 0,0 6,5.33V20.66C6,21.4 6.6,22 7.33,22H16.66C17.4,22 18,21.4 18,20.67V5.33C18,4.6 17.4,4 16.67,4M11,20V14.5H9L13,7V12.5H15",
+	map: "M20.5,3L20.34,3.03L15,5.1L9,3L3.36,4.9C3.15,4.97 3,5.15 3,5.38V20.5A0.5,0.5 0 0,0 3.5,21L3.66,20.97L9,18.9L15,21L20.64,19.1C20.85,19.03 21,18.85 21,18.62V3.5A0.5,0.5 0 0,0 20.5,3M10,5.47L14,6.87V18.53L10,17.13V5.47M5,6.46L8,5.45V17.15L5,18.31V6.46M19,17.54L16,18.55V6.86L19,5.7V17.54Z"
 };
 // dashboard/more-info-model.mjs
 function i([e, t, n]) {
@@ -653,13 +654,13 @@ function E(e, { prefix: t = "", now: n = Date.now() } = {}) {
 	if (i === "binary_sensor") {
 		let e = w[a.device_class];
 		d = e ? e[o === "on" ? 0 : 1] : o === "on" ? "On" : "Off";
-	} else d = a.device_class === "timestamp" && Date.parse(o) ? s(o, n) || d : a.device_class === "duration" ? C(o, a.unit_of_measurement) ?? d : a.unit_of_measurement ? `${T(o)}${a.unit_of_measurement === "%" ? "" : " "}${a.unit_of_measurement}` : x(T(o));
+	} else d = (a.device_class === "timestamp" || i === "image") && Date.parse(o) ? s(o, n) || d : a.device_class === "duration" ? C(o, a.unit_of_measurement) ?? d : a.unit_of_measurement ? `${T(o)}${a.unit_of_measurement === "%" ? "" : " "}${a.unit_of_measurement}` : x(T(o));
 	return {
 		...u,
 		value: d
 	};
 }
-function D(e, t) {
+function ee(e, t) {
 	let n = { entity_id: e.id };
 	if (e.kind === "toggle") return [
 		e.domain,
@@ -715,13 +716,13 @@ function D(e, t) {
 	throw Error("This entity has no control here");
 }
 // dashboard/vacuum-art.mjs
-var O = "<svg viewBox=\"0 0 240 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"vacuum-svg\" ><circle cx=\"120\" cy=\"120\" r=\"110\" class=\"glow\" fill=\"var(--vacuum-color)\" opacity=\"0.06\" /><g class=\"vacuum-body-rotate\"><g class=\"vacuum-body\"><g class=\"brush brush-right\"><g class=\"brush-spokes\"><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"64\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"88\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"162\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"186\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /></g><circle cx=\"174\" cy=\"76\" r=\"2\" fill=\"var(--vacuum-color)\" opacity=\"0.5\" /></g><circle cx=\"120\" cy=\"120\" r=\"72\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /><circle cx=\"120\" cy=\"120\" r=\"66\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.2\" /><path d=\"M 60 94 A 68 68 0 0 1 180 94\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"3\" stroke-linecap=\"round\" class=\"bumper\" /><g class=\"nav-lines\" opacity=\"0.15\"><line x1=\"120\" y1=\"56\" x2=\"120\" y2=\"74\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"88\" y1=\"63\" x2=\"96\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"152\" y1=\"63\" x2=\"144\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /></g><circle cx=\"120\" cy=\"108\" r=\"14\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" class=\"lidar-housing\" /><circle cx=\"120\" cy=\"108\" r=\"9\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.25\" /><circle cx=\"120\" cy=\"140\" r=\"8\" fill=\"var(--vacuum-color)\" opacity=\"0.08\" class=\"power-ring\" /><circle cx=\"120\" cy=\"140\" r=\"4\" fill=\"var(--vacuum-color)\" opacity=\"0.25\" class=\"power-dot\" /></g></g><g class=\"particles\"><circle class=\"particle p1\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p2\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p3\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p4\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p5\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p6\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p7\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p8\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /></g><g class=\"dock-indicator\"><rect x=\"76\" y=\"188\" width=\"88\" height=\"28\" rx=\"8\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /></g><g class=\"return-path\"><polygon points=\"120,220 110,206 130,206\" fill=\"var(--vacuum-color)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" stroke-linejoin=\"round\" opacity=\"0.55\" /></g></svg>", k = ".mi-vac-status{display: flex; align-items: center; justify-content: center;}.mi-vac-status .container{width: 200px; height: 200px; position: relative;}.mi-vac-status .vacuum-svg{width: 100%; height: 100%;}.mi-vac-status .particles,.mi-vac-status .dock-indicator,.mi-vac-status .return-path{opacity: 0; transition: opacity 400ms ease;}.mi-vac-status .cleaning .vacuum-body{animation: mi-vac-vacuum-wander 12s ease-in-out infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .brush-right .brush-spokes{animation: mi-vac-brush-spin 0.6s linear infinite; transform-origin: 174px 76px;}.mi-vac-status .cleaning .particles{opacity: 1;}.mi-vac-status .cleaning .particle{animation: mi-vac-particle-suck 2.4s ease-in infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .p1{animation-delay: 0s;}.mi-vac-status .cleaning .p2{animation-delay: -0.3s;}.mi-vac-status .cleaning .p3{animation-delay: -0.6s;}.mi-vac-status .cleaning .p4{animation-delay: -0.9s;}.mi-vac-status .cleaning .p5{animation-delay: -1.2s;}.mi-vac-status .cleaning .p6{animation-delay: -1.5s;}.mi-vac-status .cleaning .p7{animation-delay: -1.8s;}.mi-vac-status .cleaning .p8{animation-delay: -2.1s;}.mi-vac-status .cleaning .p1{--particle-x: -90px; --particle-y: -25px;}.mi-vac-status .cleaning .p2{--particle-x: 90px; --particle-y: 20px;}.mi-vac-status .cleaning .p3{--particle-x: -85px; --particle-y: 40px;}.mi-vac-status .cleaning .p4{--particle-x: 85px; --particle-y: -35px;}.mi-vac-status .cleaning .p5{--particle-x: -65px; --particle-y: 70px;}.mi-vac-status .cleaning .p6{--particle-x: 70px; --particle-y: -65px;}.mi-vac-status .cleaning .p7{--particle-x: -75px; --particle-y: -55px;}.mi-vac-status .cleaning .p8{--particle-x: 80px; --particle-y: 55px;}.mi-vac-status .cleaning .nav-lines{animation: mi-vac-nav-pulse 2s ease-in-out infinite;}.mi-vac-status .vacuum-body-rotate{transform-origin: 120px 120px; transform: rotate(0deg); transition: transform 600ms ease-in-out;}.mi-vac-status .returning .vacuum-body-rotate{transform: rotate(180deg);}.mi-vac-status .returning .vacuum-body{animation: mi-vac-returning-drift 3s ease-in-out infinite;}.mi-vac-status .returning .return-path{opacity: 1; animation: mi-vac-return-arrow 1.6s ease-in-out infinite; transform-origin: 120px 210px;}.mi-vac-status .returning .brush-right{opacity: 0.4;}.mi-vac-status .docked .dock-indicator{opacity: 1;}.mi-vac-status .docked .vacuum-body{opacity: 0.75;}.mi-vac-status .docked .glow{animation: mi-vac-docked-glow 4s ease-in-out infinite;}.mi-vac-status .docked .power-ring{animation: mi-vac-charge-pulse 2.5s ease-in-out infinite;}.mi-vac-status .docked .brush-right{opacity: 0.5;}.mi-vac-status .error .glow{animation: mi-vac-error-glow 1.8s ease-in-out infinite;}.mi-vac-status .idle .vacuum-body{opacity: 0.65;}.mi-vac-status .idle .brush-right{opacity: 0.4;}@keyframes mi-vac-vacuum-wander { 0% { transform: rotate(0deg) translate(0, 0); } 15% { transform: rotate(0deg) translate(0, -30px); } 25% { transform: rotate(0deg) translate(0, 0); } 32% { transform: rotate(-18deg) translate(0, 0); } 47% { transform: rotate(-18deg) translate(0, -28px); } 57% { transform: rotate(-18deg) translate(0, 0); } 63% { transform: rotate(12deg) translate(0, 0); } 78% { transform: rotate(12deg) translate(0, -25px); } 88% { transform: rotate(12deg) translate(0, 0); } 95% { transform: rotate(0deg) translate(0, 0); } 100% { transform: rotate(0deg) translate(0, 0); } }@keyframes mi-vac-brush-spin { to { transform: rotate(360deg); } }@keyframes mi-vac-particle-suck { 0% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1.2); } 25% { opacity: 0.8; } 80% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } 100% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } }@keyframes mi-vac-nav-pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.35; } }@keyframes mi-vac-returning-drift { 0%, 100% { transform: translateY(-6px); } 50% { transform: translateY(4px); } }@keyframes mi-vac-return-arrow { 0%, 100% { transform: translateY(-6px); opacity: 0.3; } 50% { transform: translateY(4px); opacity: 0.85; } }@keyframes mi-vac-docked-glow { 0%, 100% { opacity: 0.06; } 50% { opacity: 0.14; } }@keyframes mi-vac-charge-pulse { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.25; } }@keyframes mi-vac-error-glow { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.35; } }";
-function ee(e) {
+var te = "<svg viewBox=\"0 0 240 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"vacuum-svg\" ><circle cx=\"120\" cy=\"120\" r=\"110\" class=\"glow\" fill=\"var(--vacuum-color)\" opacity=\"0.06\" /><g class=\"vacuum-body-rotate\"><g class=\"vacuum-body\"><g class=\"brush brush-right\"><g class=\"brush-spokes\"><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"64\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"88\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"162\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"186\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /></g><circle cx=\"174\" cy=\"76\" r=\"2\" fill=\"var(--vacuum-color)\" opacity=\"0.5\" /></g><circle cx=\"120\" cy=\"120\" r=\"72\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /><circle cx=\"120\" cy=\"120\" r=\"66\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.2\" /><path d=\"M 60 94 A 68 68 0 0 1 180 94\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"3\" stroke-linecap=\"round\" class=\"bumper\" /><g class=\"nav-lines\" opacity=\"0.15\"><line x1=\"120\" y1=\"56\" x2=\"120\" y2=\"74\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"88\" y1=\"63\" x2=\"96\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"152\" y1=\"63\" x2=\"144\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /></g><circle cx=\"120\" cy=\"108\" r=\"14\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" class=\"lidar-housing\" /><circle cx=\"120\" cy=\"108\" r=\"9\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.25\" /><circle cx=\"120\" cy=\"140\" r=\"8\" fill=\"var(--vacuum-color)\" opacity=\"0.08\" class=\"power-ring\" /><circle cx=\"120\" cy=\"140\" r=\"4\" fill=\"var(--vacuum-color)\" opacity=\"0.25\" class=\"power-dot\" /></g></g><g class=\"particles\"><circle class=\"particle p1\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p2\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p3\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p4\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p5\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p6\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p7\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p8\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /></g><g class=\"dock-indicator\"><rect x=\"76\" y=\"188\" width=\"88\" height=\"28\" rx=\"8\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /></g><g class=\"return-path\"><polygon points=\"120,220 110,206 130,206\" fill=\"var(--vacuum-color)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" stroke-linejoin=\"round\" opacity=\"0.55\" /></g></svg>", D = ".mi-vac-status{display: flex; align-items: center; justify-content: center;}.mi-vac-status .container{width: 200px; height: 200px; position: relative;}.mi-vac-status .vacuum-svg{width: 100%; height: 100%;}.mi-vac-status .particles,.mi-vac-status .dock-indicator,.mi-vac-status .return-path{opacity: 0; transition: opacity 400ms ease;}.mi-vac-status .cleaning .vacuum-body{animation: mi-vac-vacuum-wander 12s ease-in-out infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .brush-right .brush-spokes{animation: mi-vac-brush-spin 0.6s linear infinite; transform-origin: 174px 76px;}.mi-vac-status .cleaning .particles{opacity: 1;}.mi-vac-status .cleaning .particle{animation: mi-vac-particle-suck 2.4s ease-in infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .p1{animation-delay: 0s;}.mi-vac-status .cleaning .p2{animation-delay: -0.3s;}.mi-vac-status .cleaning .p3{animation-delay: -0.6s;}.mi-vac-status .cleaning .p4{animation-delay: -0.9s;}.mi-vac-status .cleaning .p5{animation-delay: -1.2s;}.mi-vac-status .cleaning .p6{animation-delay: -1.5s;}.mi-vac-status .cleaning .p7{animation-delay: -1.8s;}.mi-vac-status .cleaning .p8{animation-delay: -2.1s;}.mi-vac-status .cleaning .p1{--particle-x: -90px; --particle-y: -25px;}.mi-vac-status .cleaning .p2{--particle-x: 90px; --particle-y: 20px;}.mi-vac-status .cleaning .p3{--particle-x: -85px; --particle-y: 40px;}.mi-vac-status .cleaning .p4{--particle-x: 85px; --particle-y: -35px;}.mi-vac-status .cleaning .p5{--particle-x: -65px; --particle-y: 70px;}.mi-vac-status .cleaning .p6{--particle-x: 70px; --particle-y: -65px;}.mi-vac-status .cleaning .p7{--particle-x: -75px; --particle-y: -55px;}.mi-vac-status .cleaning .p8{--particle-x: 80px; --particle-y: 55px;}.mi-vac-status .cleaning .nav-lines{animation: mi-vac-nav-pulse 2s ease-in-out infinite;}.mi-vac-status .vacuum-body-rotate{transform-origin: 120px 120px; transform: rotate(0deg); transition: transform 600ms ease-in-out;}.mi-vac-status .returning .vacuum-body-rotate{transform: rotate(180deg);}.mi-vac-status .returning .vacuum-body{animation: mi-vac-returning-drift 3s ease-in-out infinite;}.mi-vac-status .returning .return-path{opacity: 1; animation: mi-vac-return-arrow 1.6s ease-in-out infinite; transform-origin: 120px 210px;}.mi-vac-status .returning .brush-right{opacity: 0.4;}.mi-vac-status .docked .dock-indicator{opacity: 1;}.mi-vac-status .docked .vacuum-body{opacity: 0.75;}.mi-vac-status .docked .glow{animation: mi-vac-docked-glow 4s ease-in-out infinite;}.mi-vac-status .docked .power-ring{animation: mi-vac-charge-pulse 2.5s ease-in-out infinite;}.mi-vac-status .docked .brush-right{opacity: 0.5;}.mi-vac-status .error .glow{animation: mi-vac-error-glow 1.8s ease-in-out infinite;}.mi-vac-status .idle .vacuum-body{opacity: 0.65;}.mi-vac-status .idle .brush-right{opacity: 0.4;}@keyframes mi-vac-vacuum-wander { 0% { transform: rotate(0deg) translate(0, 0); } 15% { transform: rotate(0deg) translate(0, -30px); } 25% { transform: rotate(0deg) translate(0, 0); } 32% { transform: rotate(-18deg) translate(0, 0); } 47% { transform: rotate(-18deg) translate(0, -28px); } 57% { transform: rotate(-18deg) translate(0, 0); } 63% { transform: rotate(12deg) translate(0, 0); } 78% { transform: rotate(12deg) translate(0, -25px); } 88% { transform: rotate(12deg) translate(0, 0); } 95% { transform: rotate(0deg) translate(0, 0); } 100% { transform: rotate(0deg) translate(0, 0); } }@keyframes mi-vac-brush-spin { to { transform: rotate(360deg); } }@keyframes mi-vac-particle-suck { 0% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1.2); } 25% { opacity: 0.8; } 80% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } 100% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } }@keyframes mi-vac-nav-pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.35; } }@keyframes mi-vac-returning-drift { 0%, 100% { transform: translateY(-6px); } 50% { transform: translateY(4px); } }@keyframes mi-vac-return-arrow { 0%, 100% { transform: translateY(-6px); opacity: 0.3; } 50% { transform: translateY(4px); opacity: 0.85; } }@keyframes mi-vac-docked-glow { 0%, 100% { opacity: 0.06; } 50% { opacity: 0.14; } }@keyframes mi-vac-charge-pulse { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.25; } }@keyframes mi-vac-error-glow { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.35; } }";
+function ne(e) {
 	let t = e?.state;
 	return t === "unavailable" ? "idle" : t === "error" ? "error" : t === "cleaning" || t === "on" ? "cleaning" : t === "returning" || t === "paused" || t === "docked" ? t : "idle";
 }
 // dashboard/more-info.mjs
-var A = `
+var O = `
 dialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f;--mi-surface:#ffffff14;--mi-surface-2:#ffffff24;--mi-primary:#03a9f4;--mi-ink:#fff;--mi-accent:var(--mi-primary);--mi-accent-ink:#fff;
  box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--mi-bg);color:var(--mi-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:mi-in .22s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-color-scheme:light){dialog.mi{--mi-bg:#fff;--mi-fg:#212121;--mi-muted:#727272;--mi-line:#0000001f;--mi-surface:#0000000d;--mi-surface-2:#0000001a;--mi-ink:#212121;box-shadow:0 24px 64px #0004}}
@@ -945,6 +946,8 @@ dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
 .mi-vac-menu .mi-list{max-height:240px}
 .mi-vac-areas{display:flex;flex-direction:column;gap:16px}
 .mi-vac-areas[hidden]{display:none}
+.mi-vac-map-img{display:block;width:100%;max-height:min(70vh,640px);object-fit:contain;border-radius:16px;background:var(--mi-surface)}
+.mi-vac-map-img[hidden]{display:none}
 .mi-vac-areas-head{display:flex;align-items:center;gap:4px;margin-left:-12px}
 .mi-vac-areas-head h3{margin:0;font:500 18px Roboto,system-ui,sans-serif}
 .mi-vac-areas-body{display:flex;flex-direction:column;gap:16px}
@@ -967,15 +970,15 @@ dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
 .mi-vac-empty svg{width:48px;height:48px}
 .mi-vac-empty-title{margin:12px 0 4px;color:var(--mi-fg);font-size:18px;font-weight:500}
 .mi-vac-empty p{margin:0}
-${k}
-`, j = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${r[e]}"/></svg>`, M = (e) => `rgb(${e.join(",")})`, N = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", P = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), F = {
+${D}
+`, k = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${r[e]}"/></svg>`, A = (e) => `rgb(${e.join(",")})`, j = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", M = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), N = {
 	disarmed: "#9e9e9e",
 	armed: "#43a047",
 	arming: "#ff9800",
 	pending: "#ff9800",
 	disarming: "#ff9800",
 	triggered: "#e5533d"
-}, I = (e) => F[e] || (e?.startsWith("armed") ? F.armed : F.disarmed), L = {
+}, P = (e) => N[e] || (e?.startsWith("armed") ? N.armed : N.disarmed), F = {
 	heat: "#ff8100",
 	cool: "#2b9af9",
 	heat_cool: "#ffab00",
@@ -983,15 +986,15 @@ ${k}
 	dry: "#efbd07",
 	fan_only: "#8a8a8a"
 };
-function R(e, t, n, r) {
+function I(e, t, n, r) {
 	let i = e.createElement(t);
 	return n && (i.className = n), r !== void 0 && (i.innerHTML = r), i;
 }
-function z(e, t) {
-	let n = t.orient === "v", r = R(e, "div", `mi-slider ${n ? "mi-v" : "mi-h"}`), i = R(e, "div", "mi-fill");
+function L(e, t) {
+	let n = t.orient === "v", r = I(e, "div", `mi-slider ${n ? "mi-v" : "mi-h"}`), i = I(e, "div", "mi-fill");
 	r.append(i);
 	let a, o;
-	n && (a = R(e, "div", "mi-readout", "<span class=\"mi-big\"></span><span class=\"mi-small\"></span>"), r.append(a)), t.gradient && (r.classList.add("mi-track"), r.style.setProperty("--mi-gradient", t.gradient)), n || (o = R(e, "div", "mi-thumb"), r.append(o)), r.setAttribute("role", "slider"), r.tabIndex = 0, r.setAttribute("aria-label", t.label), r.setAttribute("aria-orientation", n ? "vertical" : "horizontal"), r.setAttribute("aria-valuemin", t.min), r.setAttribute("aria-valuemax", t.max);
+	n && (a = I(e, "div", "mi-readout", "<span class=\"mi-big\"></span><span class=\"mi-small\"></span>"), r.append(a)), t.gradient && (r.classList.add("mi-track"), r.style.setProperty("--mi-gradient", t.gradient)), n || (o = I(e, "div", "mi-thumb"), r.append(o)), r.setAttribute("role", "slider"), r.tabIndex = 0, r.setAttribute("aria-label", t.label), r.setAttribute("aria-orientation", n ? "vertical" : "horizontal"), r.setAttribute("aria-valuemin", t.min), r.setAttribute("aria-valuemax", t.max);
 	let s = t.value ?? t.min, c = !1, l = t.max - t.min, u = () => {
 		let e = Math.min(1, Math.max(0, (s - t.min) / l)) * 100;
 		n ? i.style.height = `${e}%` : (i.style.width = `${e}%`, o.style.left = `${e}%`), r.setAttribute("aria-valuenow", s), r.setAttribute("aria-valuetext", t.format ? t.format(s) : s), a && (a.querySelector(".mi-big").textContent = t.format ? t.format(s) : s);
@@ -1042,11 +1045,11 @@ function z(e, t) {
 		}
 	};
 }
-function B(e, t, n, r, i) {
-	let a = R(e, "button", "mi-round", `<span class="mi-disc">${j(t)}</span><span>${n}</span>`);
+function R(e, t, n, r, i) {
+	let a = I(e, "button", "mi-round", `<span class="mi-disc">${k(t)}</span><span>${n}</span>`);
 	return a.type = "button", i !== void 0 && a.setAttribute("aria-pressed", String(i)), a.onclick = r, a;
 }
-function te(t, n) {
+function re(t, n) {
 	return {
 		battery_charging: "mdi:battery-charging",
 		duration: "mdi:timer-outline",
@@ -1059,33 +1062,33 @@ function te(t, n) {
 		input_datetime: "mdi:clock-outline"
 	}[n?.domain] || e(n?.id, t);
 }
-function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l = [] }) {
-	let u = e.ownerDocument, d = R(u, "dialog", "mi");
-	d.setAttribute("aria-labelledby", "mi-title");
-	let p = R(u, "div", "mi-frame"), m = R(u, "div", "mi-head"), h = R(u, "button", "mi-iconbtn", j("close"));
-	h.type = "button", h.setAttribute("aria-label", "Close");
-	let _ = R(u, "div", "mi-titles"), v = R(u, "h2");
-	v.id = "mi-title";
-	let x = R(u, "p");
-	_.append(v, x), m.append(h, _);
-	let S = R(u, "div", "mi-body"), C = R(u, "style");
-	C.textContent = A, p.append(m, S), d.append(C, p), e.append(d);
-	let w = "", T, k = [], F = () => {
-		for (let e of k.splice(0)) e();
-	}, V = (e) => {
-		T ||= S.appendChild(R(u, "p", "mi-error")), T.textContent = e || "", T.hidden = !e;
-	}, H = async (e, n, r) => {
+function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l = [], map: u = "" }) {
+	let d = e.ownerDocument, p = I(d, "dialog", "mi");
+	p.setAttribute("aria-labelledby", "mi-title");
+	let m = I(d, "div", "mi-frame"), h = I(d, "div", "mi-head"), _ = I(d, "button", "mi-iconbtn", k("close"));
+	_.type = "button", _.setAttribute("aria-label", "Close");
+	let v = I(d, "div", "mi-titles"), x = I(d, "h2");
+	x.id = "mi-title";
+	let S = I(d, "p");
+	v.append(x, S), h.append(_, v);
+	let C = I(d, "div", "mi-body"), w = I(d, "style");
+	w.textContent = O, m.append(h, C), p.append(w, m), e.append(p);
+	let T = "", D, N = [], z = () => {
+		for (let e of N.splice(0)) e();
+	}, B = (e) => {
+		D ||= C.appendChild(I(d, "p", "mi-error")), D.textContent = e || "", D.hidden = !e;
+	}, V = async (e, n, r) => {
 		try {
-			V("");
+			B("");
 			let [i, a, o] = y(e, n, r);
 			return await t().callService(i, a, o), !0;
 		} catch (e) {
-			return V(e?.message || "The command failed."), o(e), !1;
+			return B(e?.message || "The command failed."), o(e), !1;
 		}
-	}, U = (e, t) => e.controls.find(t);
-	function W(e, t) {
-		let r = U(e, (e) => e.kind === "toggle"), i = U(e, (e) => e.key === "brightness"), o = U(e, (e) => e.key === "color_temp_kelvin"), s = U(e, (e) => e.kind === "color"), c = U(e, (e) => e.key === "effect"), l = R(u, "div", "mi-center"), f;
-		i ? (f = z(u, {
+	}, H = (e, t) => e.controls.find(t);
+	function U(e, t) {
+		let r = H(e, (e) => e.kind === "toggle"), i = H(e, (e) => e.key === "brightness"), o = H(e, (e) => e.key === "color_temp_kelvin"), s = H(e, (e) => e.kind === "color"), c = H(e, (e) => e.key === "effect"), l = I(d, "div", "mi-center"), u;
+		i ? (u = L(d, {
 			orient: "v",
 			label: "Brightness",
 			min: i.min,
@@ -1093,25 +1096,25 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			step: i.step,
 			value: i.value,
 			format: i.format,
-			onCommit: (t) => H(e, i, t)
-		}), l.append(f.el)) : (f = R(u, "button", "mi-tall", `${j("bulb")}<span></span>`), f.type = "button", f.setAttribute("role", "switch"), f.onclick = () => H(e, r, f.getAttribute("aria-checked") !== "true"), l.append(f));
-		let p = R(u, "div", "mi-row"), m = B(u, "power", "Power", () => {
+			onCommit: (t) => V(e, i, t)
+		}), l.append(u.el)) : (u = I(d, "button", "mi-tall", `${k("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => V(e, r, u.getAttribute("aria-checked") !== "true"), l.append(u));
+		let f = I(d, "div", "mi-row"), m = R(d, "power", "Power", () => {
 			let t = m.getAttribute("aria-pressed") === "true";
-			H(e, r, !t);
+			V(e, r, !t);
 		}, !1);
-		p.append(m);
+		f.append(m);
 		let h = {}, g = {}, _ = (e) => {
 			for (let t of Object.keys(h)) {
 				let n = t === e && h[t].hidden;
 				h[t].hidden = !n, g[t].setAttribute("aria-pressed", String(n));
 			}
 		}, v = (e, t, n, r) => {
-			g[e] = B(u, t, n, () => _(e), !1), h[e] = r, r.hidden = !0, p.append(g[e]);
+			g[e] = R(d, t, n, () => _(e), !1), h[e] = r, r.hidden = !0, f.append(g[e]);
 		}, y = [];
 		if (o) {
-			let t = R(u, "output"), n = R(u, "div", "mi-field"), r = R(u, "div", "mi-label", "<span>Colour temperature</span>");
+			let t = I(d, "output"), n = I(d, "div", "mi-field"), r = I(d, "div", "mi-label", "<span>Colour temperature</span>");
 			r.append(t);
-			let i = z(u, {
+			let i = L(d, {
 				orient: "h",
 				label: "Colour temperature",
 				min: o.min,
@@ -1121,17 +1124,17 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				gradient: "linear-gradient(90deg,#ffa93d,#ffe3b8 40%,#f4f6ff 65%,#a8c8ff)",
 				format: (e) => `${Math.round(e)} K`,
 				onInput: (e) => t.textContent = `${Math.round(e)} K`,
-				onCommit: (t) => H(e, o, t)
+				onCommit: (t) => V(e, o, t)
 			});
 			n.append(r, i.el);
-			let a = R(u, "div", "mi-panel");
+			let a = I(d, "div", "mi-panel");
 			a.append(n), v("temp", "thermo", "Temperature", a), y.push((e) => {
-				let n = U(e, (e) => e.key === "color_temp_kelvin");
+				let n = H(e, (e) => e.key === "color_temp_kelvin");
 				n && (i.set(n.value), t.textContent = `${Math.round(n.value)} K`);
 			});
 		}
 		if (s) {
-			let t = R(u, "output"), n = R(u, "output"), r = s.value[0], i = s.value[1], o = () => `linear-gradient(90deg,#fff,${M(a([r, 100]))})`, c = z(u, {
+			let t = I(d, "output"), n = I(d, "output"), r = s.value[0], i = s.value[1], o = () => `linear-gradient(90deg,#fff,${A(a([r, 100]))})`, c = L(d, {
 				orient: "h",
 				label: "Hue",
 				min: 0,
@@ -1142,8 +1145,8 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				onInput: (e) => {
 					r = e, t.textContent = `${e}°`, l.el.style.setProperty("--mi-gradient", o());
 				},
-				onCommit: () => H(e, s, [r, i])
-			}), l = z(u, {
+				onCommit: () => V(e, s, [r, i])
+			}), l = L(d, {
 				orient: "h",
 				label: "Saturation",
 				min: 0,
@@ -1154,53 +1157,53 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				onInput: (e) => {
 					i = e, n.textContent = `${e}%`;
 				},
-				onCommit: () => H(e, s, [r, i])
-			}), d = R(u, "div", "mi-field"), f = R(u, "div", "mi-field"), p = R(u, "div", "mi-label", "<span>Hue</span>"), m = R(u, "div", "mi-label", "<span>Saturation</span>");
-			p.append(t), m.append(n), d.append(p, c.el), f.append(m, l.el), t.textContent = `${r}°`, n.textContent = `${i}%`;
-			let h = R(u, "div", "mi-panel");
-			h.append(d, f), v("color", "palette", "Colour", h), y.push((e) => {
-				let a = U(e, (e) => e.kind === "color");
+				onCommit: () => V(e, s, [r, i])
+			}), u = I(d, "div", "mi-field"), f = I(d, "div", "mi-field"), p = I(d, "div", "mi-label", "<span>Hue</span>"), m = I(d, "div", "mi-label", "<span>Saturation</span>");
+			p.append(t), m.append(n), u.append(p, c.el), f.append(m, l.el), t.textContent = `${r}°`, n.textContent = `${i}%`;
+			let h = I(d, "div", "mi-panel");
+			h.append(u, f), v("color", "palette", "Colour", h), y.push((e) => {
+				let a = H(e, (e) => e.kind === "color");
 				!a || c.dragging || l.dragging || ([r, i] = a.value, c.set(r), l.set(i), t.textContent = `${r}°`, n.textContent = `${i}%`, l.el.style.setProperty("--mi-gradient", o()));
 			});
 		}
 		let b = [];
 		if (c) {
-			let t = R(u, "ul", "mi-list");
+			let t = I(d, "ul", "mi-list");
 			t.setAttribute("role", "radiogroup");
 			for (let n of ["", ...c.options]) {
-				let r = R(u, "li"), i = R(u, "button");
-				i.type = "button", i.setAttribute("role", "radio"), i.textContent = n || "None", i.dataset.value = n, i.onclick = () => H(e, c, n), r.append(i), t.append(r), b.push(i);
+				let r = I(d, "li"), i = I(d, "button");
+				i.type = "button", i.setAttribute("role", "radio"), i.textContent = n || "None", i.dataset.value = n, i.onclick = () => V(e, c, n), r.append(i), t.append(r), b.push(i);
 			}
-			let n = R(u, "div", "mi-panel");
+			let n = I(d, "div", "mi-panel");
 			n.append(t), v("effect", "effects", "Effect", n), y.push((e) => {
-				let t = U(e, (e) => e.key === "effect");
+				let t = H(e, (e) => e.key === "effect");
 				for (let e of b) e.setAttribute("aria-checked", String(e.dataset.value === (t?.value || "")));
 			});
 		}
-		return l.append(p, ...Object.values(h)), t.append(l), (e, t) => {
+		return l.append(f, ...Object.values(h)), t.append(l), (e, t) => {
 			let r = e.state === "on", a = t?.attributes || {}, o = Array.isArray(a.rgb_color) ? a.rgb_color : a.color_temp_kelvin ? n(a.color_temp_kelvin) : [
 				255,
 				193,
 				7
 			];
-			if (d.style.setProperty("--mi-accent", M(o)), d.style.setProperty("--mi-accent-ink", r ? N(o) : "var(--mi-fg)"), m.setAttribute("aria-pressed", String(r)), U(e, (e) => e.kind === "toggle"), i) {
-				let t = U(e, (e) => e.key === "brightness");
-				f.set(r ? t?.value ?? 0 : 0), f.el.querySelector(".mi-big").textContent = r ? i.format(t?.value ?? 0) : "Off", f.caption(r ? "On" : "");
-			} else f.setAttribute("aria-checked", String(r)), f.querySelector("span").textContent = r ? "On" : "Off";
+			if (p.style.setProperty("--mi-accent", A(o)), p.style.setProperty("--mi-accent-ink", r ? j(o) : "var(--mi-fg)"), m.setAttribute("aria-pressed", String(r)), H(e, (e) => e.kind === "toggle"), i) {
+				let t = H(e, (e) => e.key === "brightness");
+				u.set(r ? t?.value ?? 0 : 0), u.el.querySelector(".mi-big").textContent = r ? i.format(t?.value ?? 0) : "Off", u.caption(r ? "On" : "");
+			} else u.setAttribute("aria-checked", String(r)), u.querySelector("span").textContent = r ? "On" : "Off";
 			for (let t of y) t(e);
 		};
 	}
-	function G(e, n) {
-		let r = U(e, (e) => e.key === "position"), a = U(e, (e) => e.kind === "buttons"), o = !!U(e, (e) => e.kind === "cover-toggle"), l = R(u, "div", "mi-center"), f = R(u, "div", "mi-statehead", "<strong></strong><span></span>");
-		l.append(f), x.hidden = !0;
-		let p, m, h = null, g, _ = null, v = (e) => m?.style.setProperty("--mi-pos", String(e));
+	function W(e, n) {
+		let r = H(e, (e) => e.key === "position"), a = H(e, (e) => e.kind === "buttons"), o = !!H(e, (e) => e.kind === "cover-toggle"), l = I(d, "div", "mi-center"), u = I(d, "div", "mi-statehead", "<strong></strong><span></span>");
+		l.append(u), S.hidden = !0;
+		let f, m, h = null, g, _ = null, v = (e) => m?.style.setProperty("--mi-pos", String(e));
 		if (o) {
-			m = R(u, "button", "mi-cover-switch", "<span class=\"mi-cover-knob\"></span>"), m.type = "button", m.setAttribute("role", "switch"), m.setAttribute("aria-label", e.name);
+			m = I(d, "button", "mi-cover-switch", "<span class=\"mi-cover-knob\"></span>"), m.type = "button", m.setAttribute("role", "switch"), m.setAttribute("aria-label", e.name);
 			let n = () => m.getAttribute("aria-checked") === "true", r = async (n) => {
 				let r = t().states?.[i], o = ["open", "closed"].includes(r?.state);
 				h = n, clearTimeout(g), o && r.state === "open" === n ? h = null : g = setTimeout(() => {
 					h = null, Q();
-				}, 6e4), Q(), h !== null && (await H(e, a, n ? "open_cover" : "close_cover") || (h = null, Q()));
+				}, 6e4), Q(), h !== null && (await V(e, a, n ? "open_cover" : "close_cover") || (h = null, Q()));
 			};
 			m.addEventListener("pointerdown", (e) => {
 				if (!(e.button !== 0 || m.disabled)) {
@@ -1234,7 +1237,7 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				(e.key === "ArrowUp" || e.key === "ArrowDown") && (e.preventDefault(), r(e.key === "ArrowUp"));
 			}, l.append(m);
 		}
-		r && (p = z(u, {
+		r && (f = L(d, {
 			orient: "v",
 			label: "Position",
 			min: 0,
@@ -1242,13 +1245,13 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			step: 1,
 			value: r.value,
 			format: (e) => `${Math.round(e)}%`,
-			onCommit: (t) => H(e, r, t)
-		}), l.append(p.el));
-		let y = R(u, "div", "mi-row"), b = {
+			onCommit: (t) => V(e, r, t)
+		}), l.append(f.el));
+		let y = I(d, "div", "mi-row"), b = {
 			open_cover: "up",
 			stop_cover: "stop",
 			close_cover: "down"
-		}, S = {
+		}, x = {
 			open_cover: "Open",
 			stop_cover: "Stop",
 			close_cover: "Close"
@@ -1256,43 +1259,43 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 		if (!o) {
 			y.className = "mi-cover-buttons";
 			for (let t of a?.buttons || []) {
-				let n = R(u, "button", "mi-iconbtn", j(b[t.service]));
-				n.type = "button", n.title = S[t.service], n.setAttribute("aria-label", S[t.service]), n.onclick = () => H(e, a, t.service), y.append(n);
+				let n = I(d, "button", "mi-iconbtn", k(b[t.service]));
+				n.type = "button", n.title = x[t.service], n.setAttribute("aria-label", x[t.service]), n.onclick = () => V(e, a, t.service), y.append(n);
 			}
 			l.append(y);
 		}
 		n.append(l);
 		let C = setInterval(() => {
-			if (!d.isConnected) return clearInterval(C);
+			if (!p.isConnected) return clearInterval(C);
 			let e = t().states?.[i];
-			f.lastChild.textContent = s(e?.last_changed);
+			u.lastChild.textContent = s(e?.last_changed);
 		}, 5e3);
 		return (e, t) => {
-			if (d.style.setProperty("--mi-accent", "#9c27b0"), f.firstChild.textContent = e.unavailable ? "Unavailable" : P(e.state), f.lastChild.textContent = e.since, m) {
+			if (p.style.setProperty("--mi-accent", "#9c27b0"), u.firstChild.textContent = e.unavailable ? "Unavailable" : M(e.state), u.lastChild.textContent = e.since, m) {
 				let t = ["open", "opening"].includes(e.state), n = ["opening", "closing"].includes(e.state);
-				h !== null && (!n && t === h ? (h = null, clearTimeout(g)) : (n || (f.firstChild.textContent = h ? "Opening" : "Closing"), t = h, n = !0)), m.setAttribute("aria-checked", String(t)), _?.dragging || v(+!!t), m.dataset.moving = String(n), m.firstChild.innerHTML = j(c(e.deviceClass, t));
+				h !== null && (!n && t === h ? (h = null, clearTimeout(g)) : (n || (u.firstChild.textContent = h ? "Opening" : "Closing"), t = h, n = !0)), m.setAttribute("aria-checked", String(t)), _?.dragging || v(+!!t), m.dataset.moving = String(n), m.firstChild.innerHTML = k(c(e.deviceClass, t));
 			}
-			let n = U(e, (e) => e.key === "position");
-			p && n && (p.set(n.value), p.caption(P(e.state)));
+			let n = H(e, (e) => e.key === "position");
+			f && n && (f.set(n.value), f.caption(M(e.state)));
 		};
 	}
-	function K(e, t) {
-		let n = U(e, (e) => e.kind === "buttons"), r = R(u, "div", "mi-center"), i = R(u, "button", "mi-lock");
+	function G(e, t) {
+		let n = H(e, (e) => e.kind === "buttons"), r = I(d, "div", "mi-center"), i = I(d, "button", "mi-lock");
 		i.type = "button";
-		let a = R(u, "div", "mi-state");
-		return i.onclick = () => H(e, n, i.dataset.locked === "true" ? "unlock" : "lock"), r.append(i, a), t.append(r), (e) => {
+		let a = I(d, "div", "mi-state");
+		return i.onclick = () => V(e, n, i.dataset.locked === "true" ? "unlock" : "lock"), r.append(i, a), t.append(r), (e) => {
 			let t = e.state === "locked", n = [
 				"locking",
 				"unlocking",
 				"opening"
 			].includes(e.state), r = e.state === "jammed" || e.state === "unlocked" ? "#e5533d" : n ? "#ff9800" : "#43a047";
-			d.style.setProperty("--mi-accent", r), i.dataset.locked = String(t), i.disabled = n, i.innerHTML = j(t ? "lock" : "unlock"), i.setAttribute("aria-label", t ? "Locked. Press to unlock" : "Unlocked. Press to lock"), a.textContent = P(e.state);
+			p.style.setProperty("--mi-accent", r), i.dataset.locked = String(t), i.disabled = n, i.innerHTML = k(t ? "lock" : "unlock"), i.setAttribute("aria-label", t ? "Locked. Press to unlock" : "Unlocked. Press to lock"), a.textContent = M(e.state);
 		};
 	}
-	function q(e, n) {
-		let i = U(e, (e) => e.kind === "stepper"), a = e.controls.filter((e) => e.kind === "select"), o = R(u, "div", "mi-center mi-climate"), s = () => t().config?.unit_system?.temperature || "°C", c = R(u, "div", "mi-current");
+	function K(e, n) {
+		let i = H(e, (e) => e.kind === "stepper"), a = e.controls.filter((e) => e.kind === "select"), o = I(d, "div", "mi-center mi-climate"), s = () => t().config?.unit_system?.temperature || "°C", c = I(d, "div", "mi-current");
 		o.append(c);
-		let l, f;
+		let l, u;
 		if (i) {
 			let t = (e) => {
 				let t = e * Math.PI / 180;
@@ -1302,8 +1305,8 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				let [r, i] = t(e), [a, o] = t(n);
 				return `M${r.toFixed(2)} ${i.toFixed(2)}A92 92 0 ${+(n - e > 180)} 1 ${a.toFixed(2)} ${o.toFixed(2)}`;
 			};
-			l = R(u, "div", "mi-dial", `<svg viewBox="0 0 220 220" aria-hidden="true"><path class="mi-arc-track" d="${n(135, 405)}"/><path class="mi-arc-fill"/><circle class="mi-cur" r="3.5"/><circle class="mi-handle" r="11"/></svg><div class="mi-dial-text"><span class="mi-dial-state"></span><span class="mi-dial-value"><span class="mi-int"></span><span class="mi-sup"><span class="mi-unit"></span><span class="mi-dec"></span></span></span></div>`), l.setAttribute("role", "slider"), l.tabIndex = 0, l.setAttribute("aria-label", "Target temperature"), l.setAttribute("aria-valuemin", i.min), l.setAttribute("aria-valuemax", i.max);
-			let r = l.querySelector(".mi-arc-fill"), a = l.querySelector(".mi-handle"), c = l.querySelector(".mi-cur"), d = i.max - i.min, p = (e) => 135 + Math.min(1, Math.max(0, (e - i.min) / d)) * 270, m = i.value, h = !1, g = e.state, _, v = (e) => {
+			l = I(d, "div", "mi-dial", `<svg viewBox="0 0 220 220" aria-hidden="true"><path class="mi-arc-track" d="${n(135, 405)}"/><path class="mi-arc-fill"/><circle class="mi-cur" r="3.5"/><circle class="mi-handle" r="11"/></svg><div class="mi-dial-text"><span class="mi-dial-state"></span><span class="mi-dial-value"><span class="mi-int"></span><span class="mi-sup"><span class="mi-unit"></span><span class="mi-dec"></span></span></span></div>`), l.setAttribute("role", "slider"), l.tabIndex = 0, l.setAttribute("aria-label", "Target temperature"), l.setAttribute("aria-valuemin", i.min), l.setAttribute("aria-valuemax", i.max);
+			let r = l.querySelector(".mi-arc-fill"), a = l.querySelector(".mi-handle"), c = l.querySelector(".mi-cur"), f = i.max - i.min, p = (e) => 135 + Math.min(1, Math.max(0, (e - i.min) / f)) * 270, m = i.value, h = !1, g = e.state, _, v = (e) => {
 				let t = Math.round((e - i.min) / i.step) * i.step;
 				return Math.min(i.max, Math.max(i.min, Math.round((i.min + t) * 100) / 100));
 			}, y = () => {
@@ -1318,7 +1321,7 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				l.querySelector(".mi-int").textContent = Math.trunc(m), l.querySelector(".mi-unit").textContent = s(), l.querySelector(".mi-dec").textContent = d ? (m % 1).toFixed(1).slice(1) : "", l.setAttribute("aria-valuenow", m), l.setAttribute("aria-valuetext", `${m} ${s()}`);
 			}, b = (e) => {
 				let t = l.querySelector("svg").getBoundingClientRect(), n = e.clientX - (t.left + t.width / 2), r = e.clientY - (t.top + t.height / 2), a = (Math.atan2(r, n) * 180 / Math.PI - 135 + 720) % 360;
-				return a > 270 && (a = a > 315 ? 0 : 270), v(i.min + a / 270 * d);
+				return a > 270 && (a = a > 315 ? 0 : 270), v(i.min + a / 270 * f);
 			}, x = (e) => {
 				m = e, y();
 			};
@@ -1328,9 +1331,9 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				h && x(b(e));
 			});
 			let S, C = () => {
-				clearTimeout(S), S = setTimeout(() => H(e, i, m), 500);
+				clearTimeout(S), S = setTimeout(() => V(e, i, m), 500);
 			}, w = () => {
-				h && (h = !1, l.classList.remove("mi-dragging"), H(e, i, m));
+				h && (h = !1, l.classList.remove("mi-dragging"), V(e, i, m));
 			};
 			l.addEventListener("pointerup", w), l.addEventListener("pointercancel", w), l.addEventListener("keydown", (e) => {
 				let t = {
@@ -1341,7 +1344,7 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				}[e.key];
 				t !== void 0 && (e.preventDefault(), x(v(m + t * i.step)), C());
 			});
-			let T = R(u, "div", "mi-dialbtns");
+			let T = I(d, "div", "mi-dialbtns");
 			for (let [e, t, n] of [[
 				-1,
 				"minus",
@@ -1351,69 +1354,69 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				"plus",
 				"Raise target temperature"
 			]]) {
-				let r = R(u, "button", "mi-outline", j(t));
+				let r = I(d, "button", "mi-outline", k(t));
 				r.type = "button", r.setAttribute("aria-label", n), r.onclick = () => {
 					x(v(m + e * i.step)), C();
 				}, T.append(r);
 			}
-			o.append(l, T), f = (e, t) => {
-				let n = U(e, (e) => e.kind === "stepper");
+			o.append(l, T), u = (e, t) => {
+				let n = H(e, (e) => e.kind === "stepper");
 				g = e.state, _ = t?.attributes?.current_temperature, n && !h && (m = n.value);
 				let r = t?.attributes?.hvac_action;
-				l.querySelector(".mi-dial-state").textContent = e.state === "off" ? "Off" : P(r || e.state), y();
+				l.querySelector(".mi-dial-state").textContent = e.state === "off" ? "Off" : M(r || e.state), y();
 			};
 		}
-		let p = {
+		let f = {
 			hvac_mode: null,
 			fan_mode: "fan_only",
 			swing_mode: "swing",
 			swing_horizontal_mode: "swingh",
 			preset_mode: "preset"
-		}, m = R(u, "div", "mi-tiles"), h = R(u, "div", "mi-panel");
+		}, m = I(d, "div", "mi-tiles"), h = I(d, "div", "mi-panel");
 		h.hidden = !0;
-		let g = R(u, "ul", "mi-list");
+		let g = I(d, "ul", "mi-list");
 		g.setAttribute("role", "radiogroup"), h.append(g);
 		let _, v = /* @__PURE__ */ new Map(), y = (t) => {
 			if (_ === t.key) _ = void 0, h.hidden = !0;
 			else {
 				_ = t.key, g.replaceChildren();
 				for (let n of t.options) {
-					let r = R(u, "li"), i = R(u, "button");
-					i.type = "button", i.setAttribute("role", "radio"), i.dataset.value = n, i.textContent = P(n), i.onclick = () => {
-						H(e, t, n), _ = void 0, h.hidden = !0;
+					let r = I(d, "li"), i = I(d, "button");
+					i.type = "button", i.setAttribute("role", "radio"), i.dataset.value = n, i.textContent = M(n), i.onclick = () => {
+						V(e, t, n), _ = void 0, h.hidden = !0;
 					}, r.append(i), g.append(r);
 				}
 				h.hidden = !1, x(b);
 			}
 		}, b, x = (e) => {
-			let t = e && U(e, (e) => e.key === _);
+			let t = e && H(e, (e) => e.key === _);
 			for (let e of g.querySelectorAll("button")) e.setAttribute("aria-checked", String(e.dataset.value === t?.value));
 		};
 		for (let e of a) {
-			let t = R(u, "button", "mi-tile", "<span class=\"mi-tile-icon\"></span><span class=\"mi-tile-text\"><span class=\"mi-tile-label\"></span><span class=\"mi-tile-value\"></span></span>");
+			let t = I(d, "button", "mi-tile", "<span class=\"mi-tile-icon\"></span><span class=\"mi-tile-text\"><span class=\"mi-tile-label\"></span><span class=\"mi-tile-value\"></span></span>");
 			t.type = "button", t.querySelector(".mi-tile-label").textContent = e.label, t.onclick = () => y(e), m.append(t), v.set(e.key, t);
 		}
 		return a.length && o.append(m, h), n.append(o), (e, t) => {
 			b = e;
 			let n = t?.attributes || {};
-			d.style.setProperty("--mi-accent", L[e.state] || "var(--mi-muted)"), c.hidden = !Number.isFinite(n.current_temperature), c.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${s()}</strong>`, f?.(e, t);
+			p.style.setProperty("--mi-accent", F[e.state] || "var(--mi-muted)"), c.hidden = !Number.isFinite(n.current_temperature), c.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${s()}</strong>`, u?.(e, t);
 			for (let t of e.controls.filter((e) => e.kind === "select")) {
 				let e = v.get(t.key);
 				if (!e) continue;
-				e.querySelector(".mi-tile-value").textContent = P(t.value) || "—";
-				let n = t.key === "hvac_mode" ? r[t.value] ? t.value : "power" : p[t.key];
-				e.querySelector(".mi-tile-icon").innerHTML = j(n);
+				e.querySelector(".mi-tile-value").textContent = M(t.value) || "—";
+				let n = t.key === "hvac_mode" ? r[t.value] ? t.value : "power" : f[t.key];
+				e.querySelector(".mi-tile-icon").innerHTML = k(n);
 			}
 			x(e);
 		};
 	}
-	function J(e, t) {
-		let n = U(e, (e) => e.kind === "toggle"), r = U(e, (e) => e.key === "percentage"), i = R(u, "div", "mi-center"), a = R(u, "button", "mi-tall", `${j("power")}<span></span>`);
-		a.type = "button", a.setAttribute("role", "switch"), a.onclick = () => H(e, n, a.getAttribute("aria-checked") !== "true"), i.append(a);
+	function q(e, t) {
+		let n = H(e, (e) => e.kind === "toggle"), r = H(e, (e) => e.key === "percentage"), i = I(d, "div", "mi-center"), a = I(d, "button", "mi-tall", `${k("power")}<span></span>`);
+		a.type = "button", a.setAttribute("role", "switch"), a.onclick = () => V(e, n, a.getAttribute("aria-checked") !== "true"), i.append(a);
 		let o;
 		if (r) {
-			let t = R(u, "output"), n = R(u, "div", "mi-field"), a = R(u, "div", "mi-label", "<span>Speed</span>");
-			a.append(t), o = z(u, {
+			let t = I(d, "output"), n = I(d, "div", "mi-field"), a = I(d, "div", "mi-label", "<span>Speed</span>");
+			a.append(t), o = L(d, {
 				orient: "h",
 				label: "Speed",
 				min: 0,
@@ -1422,20 +1425,20 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				value: r.value,
 				format: (e) => `${Math.round(e)}%`,
 				onInput: (e) => t.textContent = `${Math.round(e)}%`,
-				onCommit: (t) => H(e, r, t)
+				onCommit: (t) => V(e, r, t)
 			}), n.append(a, o.el), i.append(n);
 		}
 		return t.append(i), (e) => {
 			let t = e.state === "on";
-			d.style.setProperty("--mi-accent", "var(--mi-primary)"), a.setAttribute("aria-checked", String(t)), a.querySelector("span").textContent = t ? "On" : "Off";
-			let n = U(e, (e) => e.key === "percentage");
+			p.style.setProperty("--mi-accent", "var(--mi-primary)"), a.setAttribute("aria-checked", String(t)), a.querySelector("span").textContent = t ? "On" : "Off";
+			let n = H(e, (e) => e.key === "percentage");
 			o && n && o.set(n.value);
 		};
 	}
-	function ne(e, n) {
-		let r = U(e, (e) => e.kind === "alarm"), i = R(u, "div", "mi-center"), a = R(u, "div", "mi-statehead", "<strong></strong><span></span>"), s = R(u, "div", "mi-modes");
-		s.setAttribute("role", "radiogroup"), s.setAttribute("aria-label", "Mode"), i.append(a, s), n.append(i), x.hidden = !0;
-		let c = null, l, p = async (n, i) => {
+	function J(e, n) {
+		let r = H(e, (e) => e.kind === "alarm"), i = I(d, "div", "mi-center"), a = I(d, "div", "mi-statehead", "<strong></strong><span></span>"), s = I(d, "div", "mi-modes");
+		s.setAttribute("role", "radiogroup"), s.setAttribute("aria-label", "Mode"), i.append(a, s), n.append(i), S.hidden = !0;
+		let c = null, l, u = async (n, i) => {
 			let [a, o, s] = y(e, r, {
 				service: n,
 				code: i
@@ -1447,9 +1450,9 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				else {
 					c = e.state, _();
 					try {
-						V(""), await p(e.service);
+						B(""), await u(e.service);
 					} catch (e) {
-						c = null, _(), V(e?.message || "The command failed."), o(e);
+						c = null, _(), B(e?.message || "The command failed."), o(e);
 					}
 					clearTimeout(l), l = setTimeout(() => {
 						c = null, _();
@@ -1458,7 +1461,7 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			}
 		}, h = /* @__PURE__ */ new Map();
 		for (let e of r.modes) {
-			let t = R(u, "button", "mi-mode", `${j(e.icon)}<span>${e.label}</span>`);
+			let t = I(d, "button", "mi-mode", `${k(e.icon)}<span>${e.label}</span>`);
 			t.type = "button", t.setAttribute("role", "radio"), t.onclick = () => m(e), h.set(e.state, t), s.append(t);
 		}
 		let g = e.state, _ = () => {
@@ -1468,29 +1471,29 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				"pending",
 				"disarming"
 			].includes(g)));
-			d.style.setProperty("--mi-accent", I(c && c !== g ? "arming" : g));
+			p.style.setProperty("--mi-accent", P(c && c !== g ? "arming" : g));
 		};
 		function v(e) {
-			let t = R(u, "dialog", "mi mi-code");
+			let t = I(d, "dialog", "mi mi-code");
 			t.setAttribute("aria-labelledby", "mi-code-title");
-			let n = R(u, "div", "mi-frame"), i = R(u, "div", "mi-head"), a = R(u, "button", "mi-iconbtn", j("close"));
+			let n = I(d, "div", "mi-frame"), i = I(d, "div", "mi-head"), a = I(d, "button", "mi-iconbtn", k("close"));
 			a.type = "button", a.setAttribute("aria-label", "Close");
-			let s = R(u, "div", "mi-titles", `<h2 id="mi-code-title">${e.service === "alarm_disarm" ? "Disarm" : "Arm"}</h2>`);
+			let s = I(d, "div", "mi-titles", `<h2 id="mi-code-title">${e.service === "alarm_disarm" ? "Disarm" : "Arm"}</h2>`);
 			i.append(a, s);
-			let f = R(u, "div", "mi-body"), m = R(u, "label", "mi-code-field"), h = R(u, "input");
+			let f = I(d, "div", "mi-body"), m = I(d, "label", "mi-code-field"), h = I(d, "input");
 			h.type = "password", h.placeholder = "Code", h.autocomplete = "off", h.setAttribute("aria-label", "Code"), r.codeFormat === "number" && (h.inputMode = "numeric");
-			let g = R(u, "button", "mi-iconbtn", j("eye"));
+			let g = I(d, "button", "mi-iconbtn", k("eye"));
 			g.type = "button", g.setAttribute("aria-label", "Show code"), g.onclick = () => {
 				let e = h.type === "text";
-				h.type = e ? "password" : "text", g.innerHTML = j(e ? "eye" : "eyeOff"), g.setAttribute("aria-label", e ? "Show code" : "Hide code");
+				h.type = e ? "password" : "text", g.innerHTML = k(e ? "eye" : "eyeOff"), g.setAttribute("aria-label", e ? "Show code" : "Hide code");
 			}, m.append(h, g);
-			let v = R(u, "p", "mi-error");
+			let v = I(d, "p", "mi-error");
 			v.hidden = !0, f.append(m);
 			let y, b = async () => {
 				if (h.value && !y?.disabled) {
 					y && (y.disabled = !0), v.hidden = !0;
 					try {
-						await p(e.service, h.value), c = e.state, _(), clearTimeout(l), l = setTimeout(() => {
+						await u(e.service, h.value), c = e.state, _(), clearTimeout(l), l = setTimeout(() => {
 							c = null, _();
 						}, 4e3), t.close();
 					} catch (e) {
@@ -1501,7 +1504,7 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				}
 			};
 			if (r.codeFormat === "number") {
-				let t = R(u, "div", "mi-keypad");
+				let t = I(d, "div", "mi-keypad");
 				for (let e of [
 					"1",
 					"2",
@@ -1513,56 +1516,56 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 					"8",
 					"9"
 				]) {
-					let n = R(u, "button", "mi-key", e);
+					let n = I(d, "button", "mi-key", e);
 					n.type = "button", n.onclick = () => {
 						h.value += e;
 					}, t.append(n);
 				}
-				let n = R(u, "button", "mi-key mi-key-clear", j("close"));
+				let n = I(d, "button", "mi-key mi-key-clear", k("close"));
 				n.type = "button", n.setAttribute("aria-label", "Clear"), n.onclick = () => {
 					h.value = "";
 				};
-				let r = R(u, "button", "mi-key", "0");
+				let r = I(d, "button", "mi-key", "0");
 				r.type = "button", r.onclick = () => {
 					h.value += "0";
-				}, y = R(u, "button", "mi-key mi-key-ok", j("check")), y.type = "button", y.setAttribute("aria-label", e.label), y.onclick = b, t.append(n, r, y), f.append(t);
-			} else y = R(u, "button", "mi-pill", e.service === "alarm_disarm" ? "Disarm" : `Arm ${e.label}`), y.type = "button", y.onclick = b, f.append(y);
+				}, y = I(d, "button", "mi-key mi-key-ok", k("check")), y.type = "button", y.setAttribute("aria-label", e.label), y.onclick = b, t.append(n, r, y), f.append(t);
+			} else y = I(d, "button", "mi-pill", e.service === "alarm_disarm" ? "Disarm" : `Arm ${e.label}`), y.type = "button", y.onclick = b, f.append(y);
 			f.append(v), h.addEventListener("keydown", (e) => {
 				e.key === "Enter" && (e.preventDefault(), b());
 			}), a.onclick = () => t.close(), t.addEventListener("click", (e) => {
 				e.stopPropagation(), e.target === t && t.close();
 			}), t.addEventListener("close", (e) => {
 				e.stopPropagation(), t.remove();
-			}), n.append(i, f), t.append(n), d.append(t), t.showModal(), h.focus();
+			}), n.append(i, f), t.append(n), p.append(t), t.showModal(), h.focus();
 		}
 		return (e) => {
-			r = U(e, (e) => e.kind === "alarm") || r, g = e.state, c && r.mode === c && (c = null, clearTimeout(l)), a.firstChild.textContent = P(e.state), a.lastChild.textContent = e.since || "", _();
+			r = H(e, (e) => e.kind === "alarm") || r, g = e.state, c && r.mode === c && (c = null, clearTimeout(l)), a.firstChild.textContent = M(e.state), a.lastChild.textContent = e.since || "", _();
 		};
 	}
-	function re(e, n) {
-		d.classList.add("mi-wide");
-		let r = U(e, (e) => e.kind === "camera"), i = R(u, "div", "mi-camera"), a = R(u, "img");
+	function Y(e, n) {
+		p.classList.add("mi-wide");
+		let r = H(e, (e) => e.kind === "camera"), i = I(d, "div", "mi-camera"), a = I(d, "img");
 		a.alt = e.name, a.decoding = "async";
-		let o = R(u, "video");
+		let o = I(d, "video");
 		o.muted = !0, o.autoplay = !0, o.playsInline = !0, o.setAttribute("playsinline", ""), o.hidden = !0;
-		let s = R(u, "div", "mi-camera-note", `${j("cctv")}<span>Connecting to the camera…</span>`), c = R(u, "div", "mi-camera-bar"), l = R(u, "span", "mi-live", "Live"), f = R(u, "button", "mi-iconbtn", j("volumeOff"));
-		f.type = "button", f.hidden = !0, f.setAttribute("aria-label", "Turn sound on"), f.onclick = () => {
-			o.muted = !o.muted, f.innerHTML = j(o.muted ? "volumeOff" : "volumeHigh"), f.setAttribute("aria-label", o.muted ? "Turn sound on" : "Turn sound off");
+		let s = I(d, "div", "mi-camera-note", `${k("cctv")}<span>Connecting to the camera…</span>`), c = I(d, "div", "mi-camera-bar"), l = I(d, "span", "mi-live", "Live"), u = I(d, "button", "mi-iconbtn", k("volumeOff"));
+		u.type = "button", u.hidden = !0, u.setAttribute("aria-label", "Turn sound on"), u.onclick = () => {
+			o.muted = !o.muted, u.innerHTML = k(o.muted ? "volumeOff" : "volumeHigh"), u.setAttribute("aria-label", o.muted ? "Turn sound on" : "Turn sound off");
 		};
-		let p = R(u, "button", "mi-iconbtn", j("refresh"));
-		p.type = "button", p.setAttribute("aria-label", "Reconnect"), p.onclick = () => T(!0);
-		let m = R(u, "button", "mi-iconbtn", j("fullscreen"));
-		m.type = "button", m.setAttribute("aria-label", "Full screen"), m.hidden = !i.requestFullscreen, m.onclick = () => u.fullscreenElement === i ? u.exitFullscreen?.() : i.requestFullscreen?.().catch(() => {});
+		let f = I(d, "button", "mi-iconbtn", k("refresh"));
+		f.type = "button", f.setAttribute("aria-label", "Reconnect"), f.onclick = () => T(!0);
+		let m = I(d, "button", "mi-iconbtn", k("fullscreen"));
+		m.type = "button", m.setAttribute("aria-label", "Full screen"), m.hidden = !i.requestFullscreen, m.onclick = () => d.fullscreenElement === i ? d.exitFullscreen?.() : i.requestFullscreen?.().catch(() => {});
 		let h = () => {
-			m.innerHTML = j(u.fullscreenElement === i ? "fullscreenExit" : "fullscreen");
+			m.innerHTML = k(d.fullscreenElement === i ? "fullscreenExit" : "fullscreen");
 		};
-		u.addEventListener("fullscreenchange", h), c.append(l, f, p, m), i.append(a, o, s, c), n.append(i);
+		d.addEventListener("fullscreenchange", h), c.append(l, u, f, m), i.append(a, o, s, c), n.append(i);
 		let g = r.token, _ = !1, v = 0, y, x = (e) => {
 			s.hidden = !e, e && (s.querySelector("span").textContent = e);
 		}, S = () => {
 			clearTimeout(y), a.removeAttribute("src"), o.pause(), o.removeAttribute("src"), o.load?.();
 		}, C = () => {
-			o.hidden = !0, f.hidden = !0, a.hidden = !1, l.dataset.still = "false", a.onload = () => {
+			o.hidden = !0, u.hidden = !0, a.hidden = !1, l.dataset.still = "false", a.onload = () => {
 				v = 0, x("");
 			}, a.onerror = () => {
 				_ || (v++, x(v > 3 ? "The camera is not answering. Try Reconnect." : "Reconnecting to the camera…"), v <= 3 && (y = setTimeout(() => {
@@ -1578,7 +1581,7 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 					format: "hls"
 				});
 				if (_) return;
-				a.hidden = !0, o.poster = b(e.id, g).still, o.hidden = !1, f.hidden = !1, l.dataset.still = "false", o.onplaying = () => {
+				a.hidden = !0, o.poster = b(e.id, g).still, o.hidden = !1, u.hidden = !1, l.dataset.still = "false", o.onplaying = () => {
 					clearTimeout(y), x("");
 				}, o.onerror = () => !_ && C(), o.src = n, o.play?.().catch(() => {}), y = setTimeout(() => {
 					!_ && o.readyState < 2 && (o.removeAttribute("src"), C());
@@ -1587,161 +1590,181 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			} catch {}
 			C();
 		}
-		return T(), k.push(() => {
-			_ = !0, S(), u.removeEventListener("fullscreenchange", h), u.fullscreenElement === i && u.exitFullscreen?.();
+		return T(), N.push(() => {
+			_ = !0, S(), d.removeEventListener("fullscreenchange", h), d.fullscreenElement === i && d.exitFullscreen?.();
 		}), (e) => {
-			g = U(e, (e) => e.kind === "camera")?.token || g;
+			g = H(e, (e) => e.kind === "camera")?.token || g;
 		};
 	}
-	function Y(e, t) {
-		let n = U(e, (e) => e.kind === "buttons"), r = R(u, "div", "mi-center");
+	function X(e, t) {
+		let n = H(e, (e) => e.kind === "buttons"), r = I(d, "div", "mi-center");
 		for (let t of n.buttons) {
-			let i = R(u, "button", "mi-pill", t.label);
-			i.type = "button", i.onclick = () => H(e, n, t.service), r.append(i);
+			let i = I(d, "button", "mi-pill", t.label);
+			i.type = "button", i.onclick = () => V(e, n, t.service), r.append(i);
 		}
 		return t.append(r), () => {};
 	}
-	function ie(e, n) {
-		d.classList.add("mi-vacuum"), x.hidden = !0;
-		let r = R(u, "div", "mi-center"), a = R(u, "div", "mi-statehead mi-vac-head", "<strong></strong><span class=\"mi-vac-since\"></span><span class=\"mi-vac-battery\" hidden></span>"), c = R(u, "div", "mi-vac-status", `<div class="container idle">${O}</div>`), f = R(u, "div", "mi-vac-buttons"), p = /* @__PURE__ */ new Map();
-		for (let t of U(e, (e) => e.kind === "vacuum").buttons) {
-			let e = R(u, "button", "mi-vac-btn", j(t.icon));
+	function Z(e, n) {
+		p.classList.add("mi-vacuum"), S.hidden = !0;
+		let r = I(d, "div", "mi-center"), a = I(d, "div", "mi-statehead mi-vac-head", "<strong></strong><span class=\"mi-vac-since\"></span><span class=\"mi-vac-battery\" hidden></span>"), c = I(d, "div", "mi-vac-status", `<div class="container idle">${te}</div>`), f = I(d, "div", "mi-vac-buttons"), m = /* @__PURE__ */ new Map();
+		for (let t of H(e, (e) => e.kind === "vacuum").buttons) {
+			let e = I(d, "button", "mi-vac-btn", k(t.icon));
 			e.type = "button", e.onclick = () => {
-				let e = U(G, (e) => e.kind === "vacuum"), n = e.buttons.find((e) => e.key === t.key);
-				n && !n.disabled && H(G, e, n.service);
-			}, p.set(t.key, e), f.append(e);
+				let e = H(Y, (e) => e.kind === "vacuum"), n = e.buttons.find((e) => e.key === t.key);
+				n && !n.disabled && V(Y, e, n.service);
+			}, m.set(t.key, e), f.append(e);
 		}
-		let m = R(u, "div", "mi-vac-chips"), h = U(e, (e) => e.kind === "vacuum"), g = R(u, "div", "mi-vac-menu");
-		g.hidden = !0, g.setAttribute("role", "listbox");
-		let _ = R(u, "ul", "mi-list");
-		g.append(_);
-		let v = () => {
-			g.hidden = !0, y?.setAttribute("aria-expanded", "false");
+		let h = I(d, "div", "mi-vac-chips"), g = H(e, (e) => e.kind === "vacuum"), _ = I(d, "div", "mi-vac-menu");
+		_.hidden = !0, _.setAttribute("role", "listbox");
+		let v = I(d, "ul", "mi-list");
+		_.append(v);
+		let y = () => {
+			_.hidden = !0, b?.setAttribute("aria-expanded", "false");
 		};
-		d.addEventListener("click", (e) => {
-			!g.hidden && !e.target.closest?.(".mi-vac-fan") && v();
+		p.addEventListener("click", (e) => {
+			!_.hidden && !e.target.closest?.(".mi-vac-fan") && y();
 		});
-		let y;
-		if (h.fanSpeeds.length) {
-			y = R(u, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${j("fan")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Fan speed</span><span class="mi-vac-chip-value"></span></span>`), y.type = "button", y.setAttribute("aria-haspopup", "listbox"), y.onclick = () => {
-				if (!g.hidden) return v();
-				if (g.hidden = !1, y.setAttribute("aria-expanded", String(!g.hidden)), g.hidden) return;
-				let e = U(G, (e) => e.kind === "vacuum");
-				_.replaceChildren();
+		let b;
+		if (g.fanSpeeds.length) {
+			b = I(d, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("fan")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Fan speed</span><span class="mi-vac-chip-value"></span></span>`), b.type = "button", b.setAttribute("aria-haspopup", "listbox"), b.onclick = () => {
+				if (!_.hidden) return y();
+				if (_.hidden = !1, b.setAttribute("aria-expanded", String(!_.hidden)), _.hidden) return;
+				let e = H(Y, (e) => e.kind === "vacuum");
+				v.replaceChildren();
 				for (let t of e.fanSpeeds) {
-					let n = R(u, "li"), r = R(u, "button");
-					r.type = "button", r.setAttribute("role", "radio"), r.setAttribute("aria-checked", String(t === e.fanSpeed)), r.textContent = P(t), r.onclick = () => {
-						v(), H(G, e, { fan_speed: t });
-					}, n.append(r), _.append(n);
+					let n = I(d, "li"), r = I(d, "button");
+					r.type = "button", r.setAttribute("role", "radio"), r.setAttribute("aria-checked", String(t === e.fanSpeed)), r.textContent = M(t), r.onclick = () => {
+						y(), V(Y, e, { fan_speed: t });
+					}, n.append(r), v.append(n);
 				}
 			};
-			let e = R(u, "div", "mi-vac-fan");
-			e.append(y, g), m.append(e);
+			let e = I(d, "div", "mi-vac-fan");
+			e.append(b, _), h.append(e);
 		}
-		if (h.cleanArea) {
-			let e = R(u, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${j("area")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Cleaning</span><span class="mi-vac-chip-value">By area</span></span><span class="mi-vac-chip-icon">${j("next")}</span>`);
-			e.type = "button", e.onclick = () => z(), m.append(e);
+		if (u) {
+			let e = I(d, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("map")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Map</span><span class="mi-vac-chip-value">Show map</span></span><span class="mi-vac-chip-icon">${k("next")}</span>`);
+			e.type = "button", e.onclick = () => z(), h.append(e);
 		}
-		r.append(a, c, f), m.childElementCount && r.append(m), n.append(r);
-		let b = R(u, "div", "mi-extras"), S = {}, C = /* @__PURE__ */ new Set(), w = /* @__PURE__ */ new Map(), T = (e) => t().entities?.[e]?.entity_category ?? S[e] ?? null, k = () => t().states?.[i]?.attributes?.friendly_name || "", A = async (e, n) => {
+		if (g.cleanArea) {
+			let e = I(d, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("area")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Cleaning</span><span class="mi-vac-chip-value">By area</span></span><span class="mi-vac-chip-icon">${k("next")}</span>`);
+			e.type = "button", e.onclick = () => K(), h.append(e);
+		}
+		r.append(a, c, f), h.childElementCount && r.append(h), n.append(r);
+		let x = I(d, "div", "mi-extras"), C = {}, w = /* @__PURE__ */ new Set(), T = /* @__PURE__ */ new Map(), D = (e) => t().entities?.[e]?.entity_category ?? C[e] ?? null, O = () => t().states?.[i]?.attributes?.friendly_name || "", A = async (e, n) => {
 			try {
-				V("");
-				let [r, i, a] = D(e, n);
+				B("");
+				let [r, i, a] = ee(e, n);
 				await t().callService(r, i, a);
 			} catch (e) {
-				V(e?.message || "The command failed."), o(e);
+				B(e?.message || "The command failed."), o(e);
 			}
 		};
-		function M() {
-			if (b.replaceChildren(), w.clear(), l.length) {
+		function j() {
+			if (x.replaceChildren(), T.clear(), l.length) {
 				for (let [e, t] of [
 					[null, "Controls"],
 					["config", "Configuration"],
 					["diagnostic", "Diagnostic"]
 				]) {
-					let n = l.filter((t) => (T(t) || null) === e);
+					let n = l.filter((t) => (D(t) || null) === e);
 					if (!n.length) continue;
-					let r = R(u, "details", "mi-extra-section", `<summary><span></span><span class="mi-extra-count">${n.length}</span>${j("chevron")}</summary>`);
-					r.querySelector("summary span").textContent = t, r.open = C.has(t), r.addEventListener("toggle", () => {
-						r.open ? C.add(t) : C.delete(t);
+					let r = I(d, "details", "mi-extra-section", `<summary><span></span><span class="mi-extra-count">${n.length}</span>${k("chevron")}</summary>`);
+					r.querySelector("summary span").textContent = t, r.open = w.has(t), r.addEventListener("toggle", () => {
+						r.open ? w.add(t) : w.delete(t);
 					});
 					for (let e of n) {
-						let t = R(u, "div", "mi-row", "<ha-state-icon class=\"mi-row-icon\"></ha-state-icon><span class=\"mi-row-name\"></span><span class=\"mi-row-ctl\"></span>");
-						r.append(t), w.set(e, {
+						let t = I(d, "div", "mi-row", "<ha-state-icon class=\"mi-row-icon\"></ha-state-icon><span class=\"mi-row-name\"></span><span class=\"mi-row-ctl\"></span>");
+						r.append(t), T.set(e, {
 							el: t,
 							kind: null
 						});
 					}
-					b.append(r);
+					x.append(r);
 				}
 				N();
 			}
 		}
 		function N() {
 			let e = t();
-			for (let [n, r] of w) {
-				let i = e.states?.[n], a = E(i, { prefix: k() }), { el: o } = r, s = o.querySelector("ha-state-icon"), c = o.querySelector(".mi-row-ctl");
-				s.hass = e, s.dataset.defaultIcon = te(i, a), i && (s.stateObj = i), o.querySelector(".mi-row-name").textContent = a.name, o.dataset.unavailable = String(a.unavailable);
+			for (let [n, r] of T) {
+				let i = e.states?.[n], a = E(i, { prefix: O() }), { el: o } = r, s = o.querySelector("ha-state-icon"), c = o.querySelector(".mi-row-ctl");
+				s.hass = e, s.dataset.defaultIcon = re(i, a), i && (s.stateObj = i), o.querySelector(".mi-row-name").textContent = a.name, o.dataset.unavailable = String(a.unavailable);
 				let l = a.unavailable ? "value" : a.kind;
 				if (r.kind !== l || l === "select" && r.options !== a.options.join("|")) {
 					if (r.kind = l, r.options = a.options?.join("|"), c.replaceChildren(), l === "toggle") {
-						let e = R(u, "button", "mi-row-switch");
+						let e = I(d, "button", "mi-row-switch");
 						e.type = "button", e.setAttribute("role", "switch"), e.onclick = () => {
 							let e = E(t().states?.[n]);
 							A(e, !e.on);
 						}, c.append(e);
 					} else if (l === "select") {
-						let e = R(u, "select", "mi-row-select");
+						let e = I(d, "select", "mi-row-select");
 						for (let t of a.options) {
-							let n = R(u, "option");
-							n.value = t, n.textContent = P(t), e.append(n);
+							let n = I(d, "option");
+							n.value = t, n.textContent = M(t), e.append(n);
 						}
 						e.onchange = () => A(E(t().states?.[n]), e.value), c.append(e);
 					} else if (l === "number") {
-						let e = R(u, "input", "mi-row-range");
+						let e = I(d, "input", "mi-row-range");
 						e.type = "range";
-						let r = R(u, "output", "mi-row-value");
+						let r = I(d, "output", "mi-row-value");
 						e.oninput = () => {
 							r.textContent = `${e.value}${a.unit === "%" ? "%" : a.unit ? ` ${a.unit}` : ""}`;
 						}, e.onchange = () => A(E(t().states?.[n]), e.value), c.append(e, r);
 					} else if (l === "button") {
-						let e = R(u, "button", "mi-row-press", "Press");
+						let e = I(d, "button", "mi-row-press", "Press");
 						e.type = "button", e.onclick = () => A(E(t().states?.[n])), c.append(e);
 					} else if (l === "time") {
-						let e = R(u, "input", "mi-row-time");
+						let e = I(d, "input", "mi-row-time");
 						e.type = "time", e.onchange = () => A(E(t().states?.[n]), e.value), c.append(e);
-					} else c.append(R(u, "span", "mi-row-value"));
+					} else c.append(I(d, "span", "mi-row-value"));
 				}
-				let d = `${a.name}`;
+				let u = `${a.name}`;
 				if (l === "toggle") {
 					let e = c.firstChild;
-					e.setAttribute("aria-checked", String(a.on)), e.setAttribute("aria-label", d);
+					e.setAttribute("aria-checked", String(a.on)), e.setAttribute("aria-label", u);
 				} else if (l === "select") {
 					let e = c.firstChild;
-					e.setAttribute("aria-label", d), u.activeElement !== e && (e.value = a.options.includes(a.value) ? a.value : "", a.options.includes(a.value) || (e.selectedIndex = -1));
+					e.setAttribute("aria-label", u), d.activeElement !== e && (e.value = a.options.includes(a.value) ? a.value : "", a.options.includes(a.value) || (e.selectedIndex = -1));
 				} else if (l === "number") {
 					let [e, t] = c.children;
 					Object.assign(e, {
 						min: a.min,
 						max: a.max,
 						step: a.step
-					}), e.setAttribute("aria-label", d), u.activeElement !== e && a.value !== void 0 && (e.value = a.value), t.textContent = `${a.value ?? "—"}${a.unit === "%" ? "%" : a.unit ? ` ${a.unit}` : ""}`;
-				} else if (l === "button") c.firstChild.setAttribute("aria-label", `Press ${d}`);
+					}), e.setAttribute("aria-label", u), d.activeElement !== e && a.value !== void 0 && (e.value = a.value), t.textContent = `${a.value ?? "—"}${a.unit === "%" ? "%" : a.unit ? ` ${a.unit}` : ""}`;
+				} else if (l === "button") c.firstChild.setAttribute("aria-label", `Press ${u}`);
 				else if (l === "time") {
 					let e = c.firstChild;
-					e.setAttribute("aria-label", d), u.activeElement !== e && (e.value = a.value);
+					e.setAttribute("aria-label", u), d.activeElement !== e && (e.value = a.value);
 				} else c.firstChild.textContent = a.value;
 			}
 		}
-		l.length && r.append(b), M();
-		let F = R(u, "div", "mi-vac-areas");
-		F.hidden = !0, n.append(F);
-		let I = [], L = () => {
-			F.hidden = !0, r.hidden = !1, d.classList.remove("mi-vac-in-areas");
+		l.length && r.append(x), j();
+		let P = I(d, "div", "mi-vac-areas mi-vac-map");
+		P.hidden = !0, n.append(P);
+		let F = "", L = () => {
+			let e = t().states?.[u], n = e?.attributes?.entity_picture;
+			return n ? `${n}${n.includes("?") ? "&" : "?"}t=${encodeURIComponent(e.state)}` : "";
 		};
-		async function z() {
-			r.hidden = !0, F.hidden = !1, d.classList.add("mi-vac-in-areas"), I = [], F.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${j("back")}</button><h3>Clean areas</h3></div><div class="mi-vac-areas-body"><p class="mi-vac-hint">Loading areas…</p></div>`, F.querySelector("button").onclick = L;
-			let e = F.querySelector(".mi-vac-areas-body"), n, a, o;
+		function R() {
+			if (P.hidden) return;
+			let e = L(), n = P.querySelector("img"), r = P.querySelector(".mi-vac-hint"), i = t().states?.[u];
+			r.textContent = i ? e ? `Updated ${s(i.state) || s(i.last_changed) || ""}` : "No map picture yet." : "The map entity was not found.", n.hidden = !e, e && e !== F && (F = e, n.src = e);
+		}
+		function z() {
+			r.hidden = !0, U.hidden = !0, P.hidden = !1, p.classList.add("mi-vac-in-areas"), P.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${k("back")}</button><h3>Map</h3></div><img class="mi-vac-map-img" alt="" hidden><p class="mi-vac-hint"></p>`, P.querySelector("img").alt = `${O() || "Vacuum"} map`, P.querySelector("button").onclick = () => {
+				P.hidden = !0, r.hidden = !1, F = "", p.classList.remove("mi-vac-in-areas");
+			}, F = "", R();
+		}
+		let U = I(d, "div", "mi-vac-areas");
+		U.hidden = !0, n.append(U);
+		let W = [], G = () => {
+			U.hidden = !0, r.hidden = !1, p.classList.remove("mi-vac-in-areas");
+		};
+		async function K() {
+			r.hidden = !0, U.hidden = !1, p.classList.add("mi-vac-in-areas"), W = [], U.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${k("back")}</button><h3>Clean areas</h3></div><div class="mi-vac-areas-body"><p class="mi-vac-hint">Loading areas…</p></div>`, U.querySelector("button").onclick = G;
+			let e = U.querySelector(".mi-vac-areas-body"), n, a, o;
 			try {
 				let e = t(), [r, s, c] = await Promise.all([
 					e.callWS({
@@ -1757,7 +1780,7 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 				return;
 			}
 			if (!a.length) {
-				e.innerHTML = `<div class="mi-vac-empty">${j("area")}<p class="mi-vac-empty-title">No areas set up</p><p>Map this vacuum's rooms to Home Assistant areas in its entity settings, then clean them from here.</p></div>`;
+				e.innerHTML = `<div class="mi-vac-empty">${k("area")}<p class="mi-vac-empty-title">No areas set up</p><p>Map this vacuum's rooms to Home Assistant areas in its entity settings, then clean them from here.</p></div>`;
 				return;
 			}
 			let s = [];
@@ -1768,127 +1791,127 @@ function V({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			let c = a.filter((e) => !o.some((t) => t.floor_id === e.floor_id));
 			c.length && s.push(["Other areas", c]), e.replaceChildren();
 			for (let [t, n] of s) {
-				let r = R(u, "div", "mi-vac-section");
-				s.length > 1 && r.append(R(u, "div", "mi-vac-section-name")), s.length > 1 && (r.firstChild.textContent = t);
-				let i = R(u, "div", "mi-vac-grid");
+				let r = I(d, "div", "mi-vac-section");
+				s.length > 1 && r.append(I(d, "div", "mi-vac-section-name")), s.length > 1 && (r.firstChild.textContent = t);
+				let i = I(d, "div", "mi-vac-grid");
 				for (let e of n) {
-					let t = R(u, "button", "mi-vac-area", `<span class="mi-vac-badge" hidden></span><span class="mi-vac-area-icon">${j("area")}</span><span class="mi-vac-area-name"></span>`);
+					let t = I(d, "button", "mi-vac-area", `<span class="mi-vac-badge" hidden></span><span class="mi-vac-area-icon">${k("area")}</span><span class="mi-vac-area-name"></span>`);
 					t.type = "button", t.dataset.area = e.area_id, t.querySelector(".mi-vac-area-name").textContent = e.name, t.onclick = () => {
-						I = I.indexOf(e.area_id) >= 0 ? I.filter((t) => t !== e.area_id) : [...I, e.area_id], p();
+						W = W.indexOf(e.area_id) >= 0 ? W.filter((t) => t !== e.area_id) : [...W, e.area_id], f();
 					}, i.append(t);
 				}
 				r.append(i), e.append(r);
 			}
-			e.append(R(u, "p", "mi-vac-hint", "The order in which areas are cleaned may not be supported by your vacuum."));
-			let l = R(u, "div", "mi-vac-footer"), f = R(u, "button", "mi-pill");
-			f.type = "button", f.onclick = async () => {
-				f.disabled = !0;
-				let e = U(G, (e) => e.kind === "vacuum");
-				await H(G, e, { areas: I }) ? L() : p();
-			}, l.append(f), F.append(l);
-			let p = () => {
+			e.append(I(d, "p", "mi-vac-hint", "The order in which areas are cleaned may not be supported by your vacuum."));
+			let l = I(d, "div", "mi-vac-footer"), u = I(d, "button", "mi-pill");
+			u.type = "button", u.onclick = async () => {
+				u.disabled = !0;
+				let e = H(Y, (e) => e.kind === "vacuum");
+				await V(Y, e, { areas: W }) ? G() : f();
+			}, l.append(u), U.append(l);
+			let f = () => {
 				for (let t of e.querySelectorAll(".mi-vac-area")) {
-					let e = I.indexOf(t.dataset.area);
+					let e = W.indexOf(t.dataset.area);
 					t.setAttribute("aria-pressed", String(e >= 0));
 					let n = t.querySelector(".mi-vac-badge");
 					n.hidden = e < 0, n.textContent = String(e + 1);
 				}
-				f.disabled = !I.length, f.textContent = `Start cleaning${I.length ? ` (${I.length})` : ""}`;
+				u.disabled = !W.length, u.textContent = `Start cleaning${W.length ? ` (${W.length})` : ""}`;
 			};
-			p();
+			f();
 		}
-		let B = null;
+		let q = null;
 		t().callWS?.({ type: "config/entity_registry/list_for_display" }).then((e) => {
 			let n = e?.entities || [], r = e?.entity_categories || {};
-			S = Object.fromEntries(n.filter((e) => e.ec !== void 0 && r[e.ec]).map((e) => [e.ei, r[e.ec]])), l.length && M();
+			C = Object.fromEntries(n.filter((e) => e.ec !== void 0 && r[e.ec]).map((e) => [e.ei, r[e.ec]])), l.length && j();
 			let a = n.find((e) => e.ei === i)?.di;
 			if (!a) return;
 			let o = n.filter((e) => e.di === a).map((e) => e.ei), s = t().states || {};
-			B = {
+			q = {
 				battery: o.find((e) => /^sensor\./.test(e) && s[e]?.attributes?.device_class === "battery" && !isNaN(Number(s[e].state))),
 				charging: o.find((e) => /^binary_sensor\./.test(e) && s[e]?.attributes?.device_class === "battery_charging")
-			}, G && q(G);
+			}, Y && Z(Y);
 		}).catch(() => {});
-		let W = setInterval(() => {
-			if (!d.isConnected) return clearInterval(W);
+		let J = setInterval(() => {
+			if (!p.isConnected) return clearInterval(J);
 			let e = t().states?.[i];
 			a.querySelector(".mi-vac-since").textContent = s(e?.last_changed);
-		}, 5e3), G, K = {
+		}, 5e3), Y, X = {
 			cleaning: "var(--state-vacuum-active-color,#009688)",
 			returning: "var(--state-vacuum-active-color,#009688)",
 			error: "var(--error-color,#db4437)"
-		}, q = (e) => {
-			G = e;
-			let n = U(e, (e) => e.kind === "vacuum");
+		}, Z = (e) => {
+			Y = e;
+			let n = H(e, (e) => e.kind === "vacuum");
 			if (!n) return;
 			let r = t().states?.[i];
-			a.firstChild.textContent = n.status || P(e.state) || "", a.querySelector(".mi-vac-since").textContent = e.since || "";
-			let o = t().states || {}, s = B?.battery ? Number(o[B.battery]?.state) : n.battery, l = B?.charging ? o[B.charging]?.state === "on" : e.state === "docked" && s < 100, u = a.querySelector(".mi-vac-battery");
-			u.hidden = !Number.isFinite(s), Number.isFinite(s) && (u.innerHTML = `<span>${Math.round(s)}%</span>${j(l ? "batterycharging" : "battery")}`);
-			let d = ee(r), f = c.firstChild;
-			f.className = `container ${d}`, f.style.setProperty("--vacuum-color", K[d] || "var(--mi-muted)");
+			a.firstChild.textContent = n.status || M(e.state) || "", a.querySelector(".mi-vac-since").textContent = e.since || "";
+			let o = t().states || {}, s = q?.battery ? Number(o[q.battery]?.state) : n.battery, l = q?.charging ? o[q.charging]?.state === "on" : e.state === "docked" && s < 100, u = a.querySelector(".mi-vac-battery");
+			u.hidden = !Number.isFinite(s), Number.isFinite(s) && (u.innerHTML = `<span>${Math.round(s)}%</span>${k(l ? "batterycharging" : "battery")}`);
+			let d = ne(r), f = c.firstChild;
+			f.className = `container ${d}`, f.style.setProperty("--vacuum-color", X[d] || "var(--mi-muted)");
 			for (let e of n.buttons) {
-				let t = p.get(e.key);
-				t && (t.innerHTML = j(e.icon), t.disabled = e.disabled, t.title = e.label, t.setAttribute("aria-label", e.label));
+				let t = m.get(e.key);
+				t && (t.innerHTML = k(e.icon), t.disabled = e.disabled, t.title = e.label, t.setAttribute("aria-label", e.label));
 			}
-			y && (y.querySelector(".mi-vac-chip-value").textContent = P(n.fanSpeed) || "—"), N();
+			b && (b.querySelector(".mi-vac-chip-value").textContent = M(n.fanSpeed) || "—"), N(), R();
 		};
-		return q;
+		return Z;
 	}
-	function X(e, t, n) {
-		let r = R(u, "div", "mi-center"), i = R(u, "div", "mi-state");
+	function ie(e, t, n) {
+		let r = I(d, "div", "mi-center"), i = I(d, "div", "mi-state");
 		return r.append(i), t.append(r), (e, t) => {
 			let n = t?.attributes?.unit_of_measurement;
-			i.textContent = `${P(e.state) ?? ""}${n ? ` ${n}` : ""}`;
+			i.textContent = `${M(e.state) ?? ""}${n ? ` ${n}` : ""}`;
 		};
 	}
 	let ae = {
-		light: W,
-		cover: G,
-		lock: K,
-		vacuum: ie,
-		climate: q,
-		alarm_control_panel: ne,
-		camera: re,
-		switch: J,
-		input_boolean: J,
-		fan: J,
-		automation: J,
-		button: Y,
-		input_button: Y,
-		scene: Y,
-		script: Y
-	}, Z = () => {};
-	function oe(e) {
-		F(), d.classList.remove("mi-wide", "mi-vacuum", "mi-vac-in-areas"), S.replaceChildren(), T = void 0;
-		let t = R(u, "div");
-		if (S.append(t), x.hidden = !1, Z = (e.unavailable ? X : ae[e.domain] || X)(e, t), e.attributes.length) {
-			let t = R(u, "details", "mi-attrs", `<summary><span>Attributes</span>${j("chevron")}</summary>`), n = R(u, "dl");
-			for (let [t, r] of e.attributes) n.append(R(u, "dt"), R(u, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
-			t.append(n), S.append(t);
+		light: U,
+		cover: W,
+		lock: G,
+		vacuum: Z,
+		climate: K,
+		alarm_control_panel: J,
+		camera: Y,
+		switch: q,
+		input_boolean: q,
+		fan: q,
+		automation: q,
+		button: X,
+		input_button: X,
+		scene: X,
+		script: X
+	}, oe = () => {};
+	function se(e) {
+		z(), p.classList.remove("mi-wide", "mi-vacuum", "mi-vac-in-areas"), C.replaceChildren(), D = void 0;
+		let t = I(d, "div");
+		if (C.append(t), S.hidden = !1, oe = (e.unavailable ? ie : ae[e.domain] || ie)(e, t), e.attributes.length) {
+			let t = I(d, "details", "mi-attrs", `<summary><span>Attributes</span>${k("chevron")}</summary>`), n = I(d, "dl");
+			for (let [t, r] of e.attributes) n.append(I(d, "dt"), I(d, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
+			t.append(n), C.append(t);
 		}
 	}
 	function Q() {
 		let e = t().states?.[i], n = g(e);
-		v.textContent = n.name, x.textContent = n.unavailable ? "Unavailable" : [P(n.state), n.changed && `changed ${n.changed}`].filter(Boolean).join(" · ");
+		x.textContent = n.name, S.textContent = n.unavailable ? "Unavailable" : [M(n.state), n.changed && `changed ${n.changed}`].filter(Boolean).join(" · ");
 		let r = [
 			n.unavailable,
 			n.domain,
 			...n.controls.map((e) => `${e.kind}:${e.key || ""}:${(e.options || []).join(",")}:${(e.buttons || e.modes || []).length}`)
 		].join("|");
-		r !== w && (w = r, oe(n)), Z(n, e);
+		r !== T && (T = r, se(n)), oe(n, e);
 	}
 	let $ = () => {
-		d.open && d.close();
+		p.open && p.close();
 	};
-	return h.onclick = $, d.addEventListener("click", (e) => {
-		e.target === d && $();
-	}), d.addEventListener("close", () => {
-		F(), d.remove();
-	}), Q(), d.showModal(), {
+	return _.onclick = $, p.addEventListener("click", (e) => {
+		e.target === p && $();
+	}), p.addEventListener("close", () => {
+		z(), p.remove();
+	}), Q(), p.showModal(), {
 		update: Q,
 		close: $,
-		dialog: d
+		dialog: p
 	};
 }
-export { V as openMoreInfo };
+export { z as openMoreInfo };

@@ -1,3 +1,11 @@
+# 0.51.0 — the robot vacuum's map, 2026-11-17
+
+Released as 0.51.0, based on 0.50.0. A robot vacuum's map picture: per-room `deviceMaps` (`validate_device_maps`, `set_device_map`, websocket operation `device-map` in `api.py`), served as control `map`; a Map section on the manager's vacuum device card (`web/main.js`), where "Add all from this vacuum and its dock" now connects an `image` entity; a Map button and view in the vacuum dialog (`dashboard/more-info.mjs`), refreshed when the image entity's state changes.
+
+- All frontend tests (new: image entity rows) and host Python tests (new: map storage, restart and replacement) pass with native-only skips. Format check and build pass.
+- Shared local Home Assistant (Core 2026.11.0): the release ZIP loads; the dialog's Map button opens the picture and reloads it when the entity's state changes (checked with an in-page stand-in image, as the test instance has no `image` entity).
+- Not checked: connecting a real Roborock map in the manager, a real map in the dialog, Safari, a real phone, and HACS download of this version.
+
 # 0.50.0 — a robot vacuum's own dialog and entities, 2026-11-17
 
 Released as 0.50.0, based on 0.49.0. A robot vacuum lists extra entities (per-room `deviceEntities`, operations `device-entities` and `device-entity-suggestions` in `api.py`, served as control `entities`), edited on its device card in the manager (`web/main.js`), and a tap on the robot opens 3D Rooms' own vacuum dialog with those entities as grouped, folded rows (`dashboard/card.js` `_vacuumDialog`; `entityRow`/`entityRowCall` in `dashboard/more-info-model.mjs`, rows in `dashboard/more-info.mjs`). Also: `ModelStore.open()` now re-reads `markerDefaults` and `groupIcons` (they were dropped on every start), and full-screen-page device markers keep their glyph when a state's icon is Default (`markerGlyph` in `dashboard/card.js`).

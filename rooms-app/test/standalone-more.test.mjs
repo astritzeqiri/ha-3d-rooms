@@ -504,3 +504,20 @@ test("a vacuum's extra entities become device-page rows with their own controls"
   assert.equal(entityRow(undefined).value, "Not found");
   assert.equal(formatDuration("1.5", "h"), "1h 30m");
 });
+
+test("an image entity row tells when its picture last changed", async () => {
+  const { entityRow } = await import("../dashboard/more-info-model.mjs");
+  const row = entityRow(
+    {
+      entity_id: "image.saros_10r_map_0",
+      state: "2026-11-17T11:46:43.304619+00:00",
+      attributes: {
+        friendly_name: "Saros 10R Map 0",
+        entity_picture: "/api/image_proxy/image.saros_10r_map_0?token=x",
+      },
+    },
+    { prefix: "Saros 10R", now: Date.parse("2026-11-17T12:08:43Z") },
+  );
+  assert.equal(row.name, "Map 0");
+  assert.match(row.value, /22 minutes ago/);
+});

@@ -3318,7 +3318,10 @@ export class ThreeDRoomsCard extends HTMLElement {
       host: this.shadowRoot,
       getHass: () => this._hass,
       entityId,
-      extras: (control.entities || []).filter((id) => id !== entityId),
+      extras: (control.entities || []).filter(
+        (id) => id !== entityId && id !== control.map,
+      ),
+      map: control.map || "",
       onError: (error) => console.error(error),
     });
     this._robotDialog = dialog;

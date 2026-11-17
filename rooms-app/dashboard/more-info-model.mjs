@@ -660,7 +660,11 @@ export function entityRow(entity, { prefix = "", now = Date.now() } = {}) {
       : state === "on"
         ? "On"
         : "Off";
-  } else if (a.device_class === "timestamp" && Date.parse(state))
+    // An image entity's state is when its picture last changed.
+  } else if (
+    (a.device_class === "timestamp" || domain === "image") &&
+    Date.parse(state)
+  )
     value = sinceText(state, now) || value;
   else if (a.device_class === "duration")
     value = formatDuration(state, a.unit_of_measurement) ?? value;

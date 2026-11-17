@@ -2902,13 +2902,14 @@ var ft = /* @__PURE__ */ new Set([
 		n.oninput = r, r(), t.addEventListener("close", () => t.remove()), this.shadowRoot.append(t), t.showModal();
 	}
 	async _vacuumDialog(e, t) {
-		let { openMoreInfo: n } = await import("./three-d-rooms-more-info-CQ8DGWc3.js");
+		let { openMoreInfo: n } = await import("./three-d-rooms-more-info-Caaltia1.js");
 		this._robotDialog?.close();
 		let r = n({
 			host: this.shadowRoot,
 			getHass: () => this._hass,
 			entityId: t,
-			extras: (e.entities || []).filter((e) => e !== t),
+			extras: (e.entities || []).filter((n) => n !== t && n !== e.map),
+			map: e.map || "",
 			onError: (e) => console.error(e)
 		});
 		this._robotDialog = r, r.dialog.addEventListener("close", () => {
