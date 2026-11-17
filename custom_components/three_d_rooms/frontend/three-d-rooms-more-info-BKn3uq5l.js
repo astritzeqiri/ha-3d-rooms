@@ -733,6 +733,12 @@ dialog.mi::backdrop{background:#000a}
 @media (max-width:600px){dialog.mi{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;animation-name:mi-up}@keyframes mi-up{from{transform:translateY(100%)}}}
 .mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}
 @media (max-width:600px){.mi-frame{max-height:94vh}}
+/* phones: a grab handle; the sheet follows a downward drag and is dismissed */
+.mi-grab{display:none}
+@media (max-width:600px){.mi-grab{display:block;flex-shrink:0;width:36px;height:4px;margin:8px auto 0;border-radius:2px;background:var(--mi-muted);opacity:.5}.mi-head{padding-top:4px}}
+dialog.mi.mi-dragging{transition:none!important}
+dialog.mi.mi-settling{transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+dialog.mi:focus{outline:none}
 .mi-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}
 .mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}
 .mi-head h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1202,8 +1208,8 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			let n = () => m.getAttribute("aria-checked") === "true", r = async (n) => {
 				let r = t().states?.[i], o = ["open", "closed"].includes(r?.state);
 				h = n, clearTimeout(g), o && r.state === "open" === n ? h = null : g = setTimeout(() => {
-					h = null, Q();
-				}, 6e4), Q(), h !== null && (await V(e, a, n ? "open_cover" : "close_cover") || (h = null, Q()));
+					h = null, X();
+				}, 6e4), X(), h !== null && (await V(e, a, n ? "open_cover" : "close_cover") || (h = null, X()));
 			};
 			m.addEventListener("pointerdown", (e) => {
 				if (!(e.button !== 0 || m.disabled)) {
@@ -1292,7 +1298,7 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			p.style.setProperty("--mi-accent", r), i.dataset.locked = String(t), i.disabled = n, i.innerHTML = k(t ? "lock" : "unlock"), i.setAttribute("aria-label", t ? "Locked. Press to unlock" : "Unlocked. Press to lock"), a.textContent = M(e.state);
 		};
 	}
-	function K(e, n) {
+	function ie(e, n) {
 		let i = H(e, (e) => e.kind === "stepper"), a = e.controls.filter((e) => e.kind === "select"), o = I(d, "div", "mi-center mi-climate"), s = () => t().config?.unit_system?.temperature || "°C", c = I(d, "div", "mi-current");
 		o.append(c);
 		let l, u;
@@ -1410,7 +1416,7 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			x(e);
 		};
 	}
-	function q(e, t) {
+	function K(e, t) {
 		let n = H(e, (e) => e.kind === "toggle"), r = H(e, (e) => e.key === "percentage"), i = I(d, "div", "mi-center"), a = I(d, "button", "mi-tall", `${k("power")}<span></span>`);
 		a.type = "button", a.setAttribute("role", "switch"), a.onclick = () => V(e, n, a.getAttribute("aria-checked") !== "true"), i.append(a);
 		let o;
@@ -1435,7 +1441,7 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			o && n && o.set(n.value);
 		};
 	}
-	function J(e, n) {
+	function ae(e, n) {
 		let r = H(e, (e) => e.kind === "alarm"), i = I(d, "div", "mi-center"), a = I(d, "div", "mi-statehead", "<strong></strong><span></span>"), s = I(d, "div", "mi-modes");
 		s.setAttribute("role", "radiogroup"), s.setAttribute("aria-label", "Mode"), i.append(a, s), n.append(i), S.hidden = !0;
 		let c = null, l, u = async (n, i) => {
@@ -1542,7 +1548,7 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			r = H(e, (e) => e.kind === "alarm") || r, g = e.state, c && r.mode === c && (c = null, clearTimeout(l)), a.firstChild.textContent = M(e.state), a.lastChild.textContent = e.since || "", _();
 		};
 	}
-	function Y(e, n) {
+	function q(e, n) {
 		p.classList.add("mi-wide");
 		let r = H(e, (e) => e.kind === "camera"), i = I(d, "div", "mi-camera"), a = I(d, "img");
 		a.alt = e.name, a.decoding = "async";
@@ -1596,7 +1602,7 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			g = H(e, (e) => e.kind === "camera")?.token || g;
 		};
 	}
-	function X(e, t) {
+	function J(e, t) {
 		let n = H(e, (e) => e.kind === "buttons"), r = I(d, "div", "mi-center");
 		for (let t of n.buttons) {
 			let i = I(d, "button", "mi-pill", t.label);
@@ -1604,14 +1610,14 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 		}
 		return t.append(r), () => {};
 	}
-	function Z(e, n) {
+	function Y(e, n) {
 		p.classList.add("mi-vacuum"), S.hidden = !0;
 		let r = I(d, "div", "mi-center"), a = I(d, "div", "mi-statehead mi-vac-head", "<strong></strong><span class=\"mi-vac-since\"></span><span class=\"mi-vac-battery\" hidden></span>"), c = I(d, "div", "mi-vac-status", `<div class="container idle">${te}</div>`), f = I(d, "div", "mi-vac-buttons"), m = /* @__PURE__ */ new Map();
 		for (let t of H(e, (e) => e.kind === "vacuum").buttons) {
 			let e = I(d, "button", "mi-vac-btn", k(t.icon));
 			e.type = "button", e.onclick = () => {
-				let e = H(Y, (e) => e.kind === "vacuum"), n = e.buttons.find((e) => e.key === t.key);
-				n && !n.disabled && V(Y, e, n.service);
+				let e = H(q, (e) => e.kind === "vacuum"), n = e.buttons.find((e) => e.key === t.key);
+				n && !n.disabled && V(q, e, n.service);
 			}, m.set(t.key, e), f.append(e);
 		}
 		let h = I(d, "div", "mi-vac-chips"), g = H(e, (e) => e.kind === "vacuum"), _ = I(d, "div", "mi-vac-menu");
@@ -1629,12 +1635,12 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			b = I(d, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("fan")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Fan speed</span><span class="mi-vac-chip-value"></span></span>`), b.type = "button", b.setAttribute("aria-haspopup", "listbox"), b.onclick = () => {
 				if (!_.hidden) return y();
 				if (_.hidden = !1, b.setAttribute("aria-expanded", String(!_.hidden)), _.hidden) return;
-				let e = H(Y, (e) => e.kind === "vacuum");
+				let e = H(q, (e) => e.kind === "vacuum");
 				v.replaceChildren();
 				for (let t of e.fanSpeeds) {
 					let n = I(d, "li"), r = I(d, "button");
 					r.type = "button", r.setAttribute("role", "radio"), r.setAttribute("aria-checked", String(t === e.fanSpeed)), r.textContent = M(t), r.onclick = () => {
-						y(), V(Y, e, { fan_speed: t });
+						y(), V(q, e, { fan_speed: t });
 					}, n.append(r), v.append(n);
 				}
 			};
@@ -1647,7 +1653,7 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 		}
 		if (g.cleanArea) {
 			let e = I(d, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("area")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Cleaning</span><span class="mi-vac-chip-value">By area</span></span><span class="mi-vac-chip-icon">${k("next")}</span>`);
-			e.type = "button", e.onclick = () => K(), h.append(e);
+			e.type = "button", e.onclick = () => ie(), h.append(e);
 		}
 		r.append(a, c, f), h.childElementCount && r.append(h), n.append(r);
 		let x = I(d, "div", "mi-extras"), C = {}, w = /* @__PURE__ */ new Set(), T = /* @__PURE__ */ new Map(), D = (e) => t().entities?.[e]?.entity_category ?? C[e] ?? null, O = () => t().states?.[i]?.attributes?.friendly_name || "", A = async (e, n) => {
@@ -1762,7 +1768,7 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 		let W = [], G = () => {
 			U.hidden = !0, r.hidden = !1, p.classList.remove("mi-vac-in-areas");
 		};
-		async function K() {
+		async function ie() {
 			r.hidden = !0, U.hidden = !1, p.classList.add("mi-vac-in-areas"), W = [], U.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${k("back")}</button><h3>Clean areas</h3></div><div class="mi-vac-areas-body"><p class="mi-vac-hint">Loading areas…</p></div>`, U.querySelector("button").onclick = G;
 			let e = U.querySelector(".mi-vac-areas-body"), n, a, o;
 			try {
@@ -1806,8 +1812,8 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			let l = I(d, "div", "mi-vac-footer"), u = I(d, "button", "mi-pill");
 			u.type = "button", u.onclick = async () => {
 				u.disabled = !0;
-				let e = H(Y, (e) => e.kind === "vacuum");
-				await V(Y, e, { areas: W }) ? G() : f();
+				let e = H(q, (e) => e.kind === "vacuum");
+				await V(q, e, { areas: W }) ? G() : f();
 			}, l.append(u), U.append(l);
 			let f = () => {
 				for (let t of e.querySelectorAll(".mi-vac-area")) {
@@ -1820,78 +1826,78 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			};
 			f();
 		}
-		let q = null;
+		let K = null;
 		t().callWS?.({ type: "config/entity_registry/list_for_display" }).then((e) => {
 			let n = e?.entities || [], r = e?.entity_categories || {};
 			C = Object.fromEntries(n.filter((e) => e.ec !== void 0 && r[e.ec]).map((e) => [e.ei, r[e.ec]])), l.length && j();
 			let a = n.find((e) => e.ei === i)?.di;
 			if (!a) return;
 			let o = n.filter((e) => e.di === a).map((e) => e.ei), s = t().states || {};
-			q = {
+			K = {
 				battery: o.find((e) => /^sensor\./.test(e) && s[e]?.attributes?.device_class === "battery" && !isNaN(Number(s[e].state))),
 				charging: o.find((e) => /^binary_sensor\./.test(e) && s[e]?.attributes?.device_class === "battery_charging")
-			}, Y && Z(Y);
+			}, q && Y(q);
 		}).catch(() => {});
-		let J = setInterval(() => {
-			if (!p.isConnected) return clearInterval(J);
+		let ae = setInterval(() => {
+			if (!p.isConnected) return clearInterval(ae);
 			let e = t().states?.[i];
 			a.querySelector(".mi-vac-since").textContent = s(e?.last_changed);
-		}, 5e3), Y, X = {
+		}, 5e3), q, J = {
 			cleaning: "var(--state-vacuum-active-color,#009688)",
 			returning: "var(--state-vacuum-active-color,#009688)",
 			error: "var(--error-color,#db4437)"
-		}, Z = (e) => {
-			Y = e;
+		}, Y = (e) => {
+			q = e;
 			let n = H(e, (e) => e.kind === "vacuum");
 			if (!n) return;
 			let r = t().states?.[i];
 			a.firstChild.textContent = n.status || M(e.state) || "", a.querySelector(".mi-vac-since").textContent = e.since || "";
-			let o = t().states || {}, s = q?.battery ? Number(o[q.battery]?.state) : n.battery, l = q?.charging ? o[q.charging]?.state === "on" : e.state === "docked" && s < 100, u = a.querySelector(".mi-vac-battery");
+			let o = t().states || {}, s = K?.battery ? Number(o[K.battery]?.state) : n.battery, l = K?.charging ? o[K.charging]?.state === "on" : e.state === "docked" && s < 100, u = a.querySelector(".mi-vac-battery");
 			u.hidden = !Number.isFinite(s), Number.isFinite(s) && (u.innerHTML = `<span>${Math.round(s)}%</span>${k(l ? "batterycharging" : "battery")}`);
 			let d = ne(r), f = c.firstChild;
-			f.className = `container ${d}`, f.style.setProperty("--vacuum-color", X[d] || "var(--mi-muted)");
+			f.className = `container ${d}`, f.style.setProperty("--vacuum-color", J[d] || "var(--mi-muted)");
 			for (let e of n.buttons) {
 				let t = m.get(e.key);
 				t && (t.innerHTML = k(e.icon), t.disabled = e.disabled, t.title = e.label, t.setAttribute("aria-label", e.label));
 			}
 			b && (b.querySelector(".mi-vac-chip-value").textContent = M(n.fanSpeed) || "—"), N(), R();
 		};
-		return Z;
+		return Y;
 	}
-	function ie(e, t, n) {
+	function oe(e, t, n) {
 		let r = I(d, "div", "mi-center"), i = I(d, "div", "mi-state");
 		return r.append(i), t.append(r), (e, t) => {
 			let n = t?.attributes?.unit_of_measurement;
 			i.textContent = `${M(e.state) ?? ""}${n ? ` ${n}` : ""}`;
 		};
 	}
-	let ae = {
+	let se = {
 		light: U,
 		cover: W,
 		lock: G,
-		vacuum: Z,
-		climate: K,
-		alarm_control_panel: J,
-		camera: Y,
-		switch: q,
-		input_boolean: q,
-		fan: q,
-		automation: q,
-		button: X,
-		input_button: X,
-		scene: X,
-		script: X
-	}, oe = () => {};
-	function se(e) {
+		vacuum: Y,
+		climate: ie,
+		alarm_control_panel: ae,
+		camera: q,
+		switch: K,
+		input_boolean: K,
+		fan: K,
+		automation: K,
+		button: J,
+		input_button: J,
+		scene: J,
+		script: J
+	}, ce = () => {};
+	function le(e) {
 		z(), p.classList.remove("mi-wide", "mi-vacuum", "mi-vac-in-areas"), C.replaceChildren(), D = void 0;
 		let t = I(d, "div");
-		if (C.append(t), S.hidden = !1, oe = (e.unavailable ? ie : ae[e.domain] || ie)(e, t), e.attributes.length) {
+		if (C.append(t), S.hidden = !1, ce = (e.unavailable ? oe : se[e.domain] || oe)(e, t), e.attributes.length) {
 			let t = I(d, "details", "mi-attrs", `<summary><span>Attributes</span>${k("chevron")}</summary>`), n = I(d, "dl");
 			for (let [t, r] of e.attributes) n.append(I(d, "dt"), I(d, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
 			t.append(n), C.append(t);
 		}
 	}
-	function Q() {
+	function X() {
 		let e = t().states?.[i], n = g(e);
 		x.textContent = n.name, S.textContent = n.unavailable ? "Unavailable" : [M(n.state), n.changed && `changed ${n.changed}`].filter(Boolean).join(" · ");
 		let r = [
@@ -1899,18 +1905,51 @@ function z({ host: e, getHass: t, entityId: i, onError: o = () => {}, extras: l 
 			n.domain,
 			...n.controls.map((e) => `${e.kind}:${e.key || ""}:${(e.options || []).join(",")}:${(e.buttons || e.modes || []).length}`)
 		].join("|");
-		r !== T && (T = r, se(n)), oe(n, e);
+		r !== T && (T = r, le(n)), ce(n, e);
 	}
-	let $ = () => {
+	let Z = () => {
 		p.open && p.close();
 	};
-	return _.onclick = $, p.addEventListener("click", (e) => {
-		e.target === p && $();
+	_.onclick = Z, p.addEventListener("click", (e) => {
+		e.target === p && Z();
 	}), p.addEventListener("close", () => {
 		z(), p.remove();
-	}), Q(), p.showModal(), {
-		update: Q,
-		close: $,
+	});
+	let ue = I(d, "div", "mi-grab");
+	ue.setAttribute("aria-hidden", "true"), m.prepend(ue);
+	let de = d.defaultView, fe = () => de?.matchMedia?.("(max-width:600px)").matches, Q = null, $ = (e) => p.style.setProperty("transform", e ? `translateY(${e}px)` : "");
+	p.addEventListener("touchstart", (e) => {
+		if (!fe() || e.touches.length !== 1 || e.target.closest?.("input, select, textarea, .mi-slider, .mi-dial, .mi-cover-switch, .mi-mode, [role=slider]")) return Q = null;
+		Q = {
+			y: e.touches[0].clientY,
+			t: performance.now(),
+			dy: 0,
+			active: !1,
+			fromTop: !!e.target.closest?.(".mi-grab, .mi-head")
+		};
+	}, { passive: !0 }), p.addEventListener("touchmove", (e) => {
+		if (!Q) return;
+		let t = e.touches[0].clientY - Q.y;
+		if (Q.active) e.preventDefault(), Q.dy = Math.max(0, t), $(Q.dy);
+		else {
+			if (t < -6) return Q = null;
+			if (t < 8 || !(Q.fromTop || C.scrollTop <= 0)) return;
+			Q.active = !0, Q.y += t, Q.t = performance.now(), p.classList.add("mi-dragging");
+		}
+	}, { passive: !1 });
+	let pe = () => {
+		let e = Q;
+		if (Q = null, !e?.active) return;
+		p.classList.remove("mi-dragging");
+		let t = e.dy / Math.max(1, performance.now() - e.t), n = de?.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+		if (e.dy > Math.min(140, p.offsetHeight * .25) || t > .8) {
+			if (n) return Z();
+			p.classList.add("mi-settling"), $(p.offsetHeight), setTimeout(Z, 220);
+		} else p.classList.add("mi-settling"), $(0), setTimeout(() => p.classList.remove("mi-settling"), 240);
+	};
+	return p.addEventListener("touchend", pe), p.addEventListener("touchcancel", pe), X(), p.showModal(), p.tabIndex = -1, p.focus({ preventScroll: !0 }), {
+		update: X,
+		close: Z,
 		dialog: p
 	};
 }

@@ -1,3 +1,11 @@
+# 0.53.0 — old card resources, tap safety, swipe to close, 2026-11-17
+
+Released as 0.53.0, based on 0.52.0. Repairs reports dashboard resources that load an old 3D Rooms card (`stale_card_resources` in `health.py`; issue `old_card_resource` with a fix flow that removes them, or `old_card_resource_yaml`, in `repairs.py`). The card toggles only lights on a tap; every other device opens its dialog (`_toggle` in `dashboard/card.js`), and warns in the console when an older card registered first. The dialog follows a downward drag on phones and closes on a long or quick pull (`dashboard/more-info.mjs`).
+
+- All frontend tests (new: a tap on a non-light opens it) and host Python tests (new: `test_old_card.py`) pass with native-only skips. Format check and build pass.
+- Shared local Home Assistant (Core 2026.11.0): a test `/hacsfiles/ha-3d-rooms/ha-3d-rooms.js` resource raised the Repairs issue; Submit removed it and the issue cleared. At 375×812 the dialog sprang back after a 60 px pull and closed after a 320 px pull; it opens without a focus ring on the close button.
+- Not checked: the user's production dashboard resource, a resource kept in YAML, a real phone, Safari, and HACS download of this version.
+
 # 0.52.0 — Home Assistant's default icons on the full-screen page, 2026-11-17
 
 Released as 0.52.0, based on 0.51.0. The full-screen page's `ha-state-icon` (`dashboard/standalone-icons.mjs`) now resolves an unchosen icon with `shared/ha-icons.mjs`, a port of Home Assistant frontend 20261028.4's icon order using its `frontend/get_icons` tables and the entity registry's platform, translation key and icon (`dashboard/standalone.js`).

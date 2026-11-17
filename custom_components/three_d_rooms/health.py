@@ -8,6 +8,7 @@ knows an entity (a state or an entity registry entry).
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 
@@ -119,3 +120,19 @@ def library_summary(store, exists):
         "room_details": rooms,
         "view_details": views,
     }
+
+
+# An old 3D Rooms card added as a dashboard resource (from the former HACS
+# "Dashboard" install or a manual /local copy) registers the card element
+# before the integration's own bundle, so dashboards run that old version.
+OLD_CARD = re.compile(r"(ha-3d-rooms|three-d-rooms-card)[^/]*\.js", re.I)
+
+
+def stale_card_resources(items, static_url):
+    """Dashboard resources that load another 3D Rooms card than the integration's."""
+    return [
+        item for item in items or []
+        if isinstance(item.get("url"), str)
+        and OLD_CARD.search(item["url"])
+        and not item["url"].startswith(static_url)
+    ]

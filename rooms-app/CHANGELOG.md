@@ -1,3 +1,9 @@
+## 0.53.0
+
+- **Repairs finds an old 3D Rooms card on your dashboards.** A leftover dashboard resource (from the former HACS "Dashboard" install, `/hacsfiles/…/ha-3d-rooms.js`, or a `/local/` copy) loads an old card before the integration's own, so dashboards run that old version: no Floor plan or Edit buttons, and newer devices such as robot vacuums treated like lights. Home Assistant's **Repairs** now reports it and removes it on **Submit** (for resources kept in YAML it says what to remove). The browser console says so too.
+- **A tap only ever switches lights.** Every other device (climate, locks, covers, desks, robot vacuums, and types added later) opens its dialog on a tap, so a tap can never start a vacuum or switch something by accident.
+- **Swipe the dialog down to close it on a phone.** The pop-up on the full-screen page and the robot vacuum's dialog follow a downward drag from the grab handle or the header, or from the content when it is scrolled to the top; a long or quick pull closes it, a short one springs back. It also opens without a focus ring on the close button.
+
 ## 0.52.0
 
 - **Default icons on the full-screen page match Home Assistant's.** A device or entity without a chosen icon now shows exactly the icon Home Assistant's dashboards show for its state: the shade's open or closed shutter, a light's bulb or bulb-off, a fan's fan-off, an integration's own icons (a Roborock's mop mode, filter, …). The page asks Home Assistant for its icon tables (`frontend/get_icons`) and follows its frontend's order: the entity's own or registry icon, the integration's icon for the entity, the domain's icon by device class and state, then the domain's fallback. Before, it drew a generic glyph per device type, so shades and lights looked different from the dashboard and the view editor.

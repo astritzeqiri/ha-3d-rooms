@@ -38,6 +38,12 @@ dialog.mi::backdrop{background:#000a}
 @media (max-width:600px){dialog.mi{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;animation-name:mi-up}@keyframes mi-up{from{transform:translateY(100%)}}}
 .mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}
 @media (max-width:600px){.mi-frame{max-height:94vh}}
+/* phones: a grab handle; the sheet follows a downward drag and is dismissed */
+.mi-grab{display:none}
+@media (max-width:600px){.mi-grab{display:block;flex-shrink:0;width:36px;height:4px;margin:8px auto 0;border-radius:2px;background:var(--mi-muted);opacity:.5}.mi-head{padding-top:4px}}
+dialog.mi.mi-dragging{transition:none!important}
+dialog.mi.mi-settling{transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+dialog.mi:focus{outline:none}
 .mi-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}
 .mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}
 .mi-head h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2245,7 +2251,82 @@ export function openMoreInfo({
     runCleanups();
     dialog.remove();
   });
+  // ---- phones: drag the sheet down to dismiss it ----
+  const grab = h(doc, "div", "mi-grab");
+  grab.setAttribute("aria-hidden", "true");
+  frame.prepend(grab);
+  const win = doc.defaultView;
+  const isSheet = () => win?.matchMedia?.("(max-width:600px)").matches;
+  // Controls that use a vertical drag themselves keep it.
+  const OWN_DRAG =
+    "input, select, textarea, .mi-slider, .mi-dial, .mi-cover-switch, .mi-mode, [role=slider]";
+  let drag = null;
+  const place = (dy) =>
+    dialog.style.setProperty("transform", dy ? `translateY(${dy}px)` : "");
+  dialog.addEventListener(
+    "touchstart",
+    (event) => {
+      if (!isSheet() || event.touches.length !== 1) return (drag = null);
+      if (event.target.closest?.(OWN_DRAG)) return (drag = null);
+      const touch = event.touches[0];
+      drag = {
+        y: touch.clientY,
+        t: performance.now(),
+        dy: 0,
+        active: false,
+        // From the handle or the header, or the content scrolled to its top.
+        fromTop: !!event.target.closest?.(".mi-grab, .mi-head"),
+      };
+    },
+    { passive: true },
+  );
+  dialog.addEventListener(
+    "touchmove",
+    (event) => {
+      if (!drag) return;
+      const dy = event.touches[0].clientY - drag.y;
+      if (!drag.active) {
+        if (dy < -6) return (drag = null); // scrolling up the content
+        if (dy < 8 || !(drag.fromTop || body.scrollTop <= 0)) return;
+        drag.active = true;
+        drag.y += dy; // follow from here, no jump
+        drag.t = performance.now();
+        dialog.classList.add("mi-dragging");
+        return;
+      }
+      event.preventDefault();
+      drag.dy = Math.max(0, dy);
+      place(drag.dy);
+    },
+    { passive: false },
+  );
+  const release = () => {
+    const done = drag;
+    drag = null;
+    if (!done?.active) return;
+    dialog.classList.remove("mi-dragging");
+    const speed = done.dy / Math.max(1, performance.now() - done.t);
+    const reduced = win?.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (done.dy > Math.min(140, dialog.offsetHeight * 0.25) || speed > 0.8) {
+      if (reduced) return closeDialog();
+      dialog.classList.add("mi-settling");
+      place(dialog.offsetHeight);
+      setTimeout(closeDialog, 220);
+      return;
+    }
+    dialog.classList.add("mi-settling");
+    place(0);
+    setTimeout(() => dialog.classList.remove("mi-settling"), 240);
+  };
+  dialog.addEventListener("touchend", release);
+  dialog.addEventListener("touchcancel", release);
+
   update();
   dialog.showModal();
+  // Open without a focus ring on the close button (a touch is not a Tab).
+  dialog.tabIndex = -1;
+  dialog.focus({ preventScroll: true });
   return { update, close: closeDialog, dialog };
 }

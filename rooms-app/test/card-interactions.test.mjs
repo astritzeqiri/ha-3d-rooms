@@ -1297,3 +1297,31 @@ test("a room that fails to open from the device copy is downloaded once more", a
   );
   assert.doesNotMatch(handler, /return;/);
 });
+
+test("a tap on any device other than a light opens it instead of toggling", async () => {
+  const card = cardHarness(),
+    calls = [],
+    picked = [];
+  card._hass = {
+    states: {
+      "vacuum.robot": {
+        entity_id: "vacuum.robot",
+        state: "docked",
+        attributes: {},
+      },
+    },
+    callService: async (...call) => calls.push(call),
+  };
+  card._model = {
+    controls: [
+      { id: "robot", type: "vacuum" },
+      { id: "future", type: "something_new" },
+    ],
+    bindings: { robot: "vacuum.robot", future: "vacuum.robot" },
+  };
+  card._pick = (id) => picked.push(id);
+  await card._toggle("robot");
+  await card._toggle("future");
+  assert.deepEqual(picked, ["robot", "future"]);
+  assert.deepEqual(calls, []);
+});

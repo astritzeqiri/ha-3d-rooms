@@ -403,19 +403,19 @@ var Pe = "\ndialog.dm{--dm-bg:var(--ha-card-background,var(--card-background-col
 	stop: "<rect x=\"7\" y=\"7\" width=\"10\" height=\"10\" rx=\"1.5\" fill=\"currentColor\" stroke=\"none\"/>",
 	down: "<path d=\"M12 5v14M6 13l6 6 6-6\"/>"
 }, W = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true">${Fe[e]}</svg>`, G = (e, t, n) => `<button type="button" class="dm-round" data-action="${e}"><span class="dm-disc">${W(n)}</span><span>${t}</span></button>`, Ie = `<style>${Pe}</style><form method="dialog"><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${W("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${G("open", "Up", "up")}${G("stop", "Stop", "stop")}${G("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
-function K(e, { min: t, max: n, step: r }) {
+function Le(e, { min: t, max: n, step: r }) {
 	let i = t + Math.round((Math.min(n, Math.max(t, e)) - t) / (r || 1)) * (r || 1);
 	return Number(Math.min(n, i).toFixed(6));
 }
-function Le(e, t, n) {
+function Re(e, t, n) {
 	let r = t.height ? 1 - (e - t.top) / t.height : 0;
-	return K(n.min + r * (n.max - n.min), n);
+	return Le(n.min + r * (n.max - n.min), n);
 }
-function Re(e, { min: t, max: n }) {
+function ze(e, { min: t, max: n }) {
 	return !Number.isFinite(e) || n <= t ? 0 : Math.min(1, Math.max(0, (e - t) / (n - t)));
 }
 // shared/marker.mjs
-function ze(e, t, n, r = !1) {
+function Be(e, t, n, r = !1) {
 	if (e.type === "climate") {
 		let e = t ? i(t) : n?.mode ? n : i(void 0), r = l(e);
 		return {
@@ -515,21 +515,21 @@ function ze(e, t, n, r = !1) {
 		tone: f ? a ? "open" : "light" : void 0,
 		...v ? {
 			toneColor: `rgb(${_.map(Math.round).join(",")})`,
-			toneInk: Be(_)
+			toneInk: Ve(_)
 		} : {}
 	};
 }
-function Be([e, t, n]) {
+function Ve([e, t, n]) {
 	let r = (e) => e / 255 <= .03928 ? e / 255 / 12.92 : ((e / 255 + .055) / 1.055) ** 2.4;
 	return .2126 * r(e) + .7152 * r(t) + .0722 * r(n) > .4 ? "#1c1c1c" : "#fff";
 }
-function Ve(e, t) {
+function He(e, t) {
 	t?.tone ? e.dataset.tone = t.tone : delete e.dataset.tone;
 	for (let [n, r] of [["--tone", t?.tone && t.toneColor], ["--tone-ink", t?.tone && t.toneInk]]) r ? e.style?.setProperty?.(n, r) : e.style?.removeProperty?.(n);
 }
-var He = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", Ue = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
+var Ue = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", We = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
 // dashboard/updates.mjs
-async function We(e, t) {
+async function Ge(e, t) {
 	if (e.subscribeMessage) try {
 		return await e.subscribeMessage(() => t(), { type: "three_d_rooms/subscribe" });
 	} catch (e) {
@@ -538,7 +538,7 @@ async function We(e, t) {
 	return e.subscribeEvents(() => t(), "three_d_rooms_updated");
 }
 // shared/upload.mjs
-function Ge(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
+function Ke(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
 	return new Promise((s, c) => {
 		let l = o();
 		l.open(t, e);
@@ -555,13 +555,13 @@ function Ge(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = (
 		}, l.send(n);
 	});
 }
-async function Ke(e, t, n) {
+async function qe(e, t, n) {
 	if (!(t === "/api/three_d_rooms/models" && n.method === "POST" || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+$/.test(t) && n.method === "PUT" || /^\/api\/three_d_rooms\/houses\/[a-z0-9_-]+$/.test(t) && ["POST", "PUT"].includes(n.method) || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+\/optimized\/(full|phone)$/.test(t) && n.method === "PUT")) throw Error("Unknown model upload.");
 	let r = t.includes("/optimized/"), i = n.headers?.["X-Rooms-Source-Revision"];
 	if (r && !/^[a-f0-9]{24}$/.test(i || "")) throw Error("Optimized scenes must name the upload they came from.");
 	let a = n.headers?.["X-Rooms-Matches"];
 	if (a !== void 0 && !/^[A-Za-z0-9_-]{1,6000}$/.test(a)) throw Error("Too many room and device choices to send at once.");
-	return e.auth.expired && await e.auth.refreshAccessToken(), Ge(t, {
+	return e.auth.expired && await e.auth.refreshAccessToken(), Ke(t, {
 		...n,
 		headers: {
 			...n.headers?.["X-Rooms-Revision"] ? { "X-Rooms-Revision": n.headers["X-Rooms-Revision"] } : {},
@@ -573,23 +573,23 @@ async function Ke(e, t, n) {
 	});
 }
 // shared/entity-icon.mjs
-function qe(e) {
+function Je(e) {
 	let t = e.querySelector?.("svg");
 	if (t) return t;
 	for (let t of e.querySelectorAll?.("*") || []) if (t.shadowRoot) {
-		let e = qe(t.shadowRoot);
+		let e = Je(t.shadowRoot);
 		if (e) return e;
 	}
 	return null;
 }
-async function Je(e, t, n, { frames: r = 120 } = {}) {
+async function Ye(e, t, n, { frames: r = 120 } = {}) {
 	let i = e.ownerDocument;
 	if (!i.defaultView.customElements.get("ha-state-icon")) return null;
 	let a = i.createElement("ha-state-icon");
 	a.hass = t, a.stateObj = n, a.setAttribute("aria-hidden", "true"), a.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;width:24px;height:24px", e.append(a);
 	try {
 		for (let e = 0; e < r; e++) {
-			let e = a.shadowRoot && qe(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
+			let e = a.shadowRoot && Je(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
 			if (t?.length) return {
 				viewBox: e.getAttribute("viewBox") || "0 0 24 24",
 				paths: t.map((e) => ({
@@ -607,7 +607,7 @@ async function Je(e, t, n, { frames: r = 120 } = {}) {
 	}
 }
 // dashboard/preview.js
-function Ye(e, t, n) {
+function Xe(e, t, n) {
 	let r = document.createElement("dialog");
 	r.setAttribute("aria-labelledby", "dashboard-preview-title"), r.innerHTML = "<style>\n    dialog.dashboard-preview{box-sizing:border-box;width:min(960px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--divider-color,#777);border-radius:12px;background:var(--primary-background-color,#fafafa);color:var(--primary-text-color,#212121);font:14px/1.5 system-ui}\n    .dashboard-preview::backdrop{background:#0009}\n    .preview-toolbar{position:sticky;top:0;z-index:2;background:var(--primary-background-color,#fafafa);display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px;border-bottom:1px solid var(--divider-color,#777)}\n    .preview-toolbar h2{font-size:18px;margin:0;flex:1;min-width:160px}\n    .preview-actions{display:flex;align-items:center;gap:12px;margin-left:auto}\n    .preview-widths{display:flex;padding:3px;border:1px solid var(--divider-color,#ddd);border-radius:8px;background:var(--secondary-background-color,#eee)}\n    .preview-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:44px;padding:8px 12px;border:0;border-radius:5px;color:var(--secondary-text-color,#555);background:transparent;font:500 14px/20px system-ui;cursor:pointer;white-space:nowrap}\n    .preview-widths button[aria-pressed=\"true\"]{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff);box-shadow:0 1px 3px #0002}\n    .preview-toolbar button:hover{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff)}\n    .preview-toolbar .preview-close{width:44px;padding:10px;border-radius:50%}\n    .preview-toolbar svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}\n    @media(max-width:480px){.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{flex-basis:100%}.preview-actions{width:100%;justify-content:space-between}.preview-widths{flex:1}.preview-widths button{flex:1}}\n    .preview-toolbar :focus-visible{outline:2px solid var(--primary-color,#03a9f4);outline-offset:2px}\n    .preview-note{margin:0;padding:12px 16px;color:var(--secondary-text-color,#555)}\n    .preview-dashboard{padding:16px;background:var(--lovelace-background,var(--primary-background-color,#fafafa))}\n    .preview-card{width:100%;max-width:560px;margin:auto}\n    .preview-card[data-width=\"phone\"]{max-width:360px}\n    @media(max-width:600px){dialog.dashboard-preview{width:100vw;max-width:100vw;max-height:100dvh;margin:auto 0;border-radius:0;overflow:auto;overscroll-behavior:contain}.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{font-size:16px}.preview-note{font-size:13px;padding:12px}.preview-dashboard{padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}}\n  </style><div class=\"preview-toolbar\"><h2 id=\"dashboard-preview-title\">Dashboard preview</h2><div class=\"preview-actions\"><div class=\"preview-widths\" role=\"group\" aria-label=\"Preview card width\"><button type=\"button\" data-width=\"desktop\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 21h8M12 16v5\"/></svg>Desktop</button><button type=\"button\" data-width=\"phone\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></svg>Phone</button></div><button class=\"preview-close\" type=\"button\" aria-label=\"Close preview\" title=\"Close preview\" autofocus><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></div></div><p class=\"preview-note\">Your current changes, without saving. Device controls are live. The final card width depends on your dashboard layout.</p><div class=\"preview-dashboard\"><div class=\"preview-card\"></div></div>", r.className = "dashboard-preview";
 	let i = document.createElement("three-d-rooms-card");
@@ -638,7 +638,7 @@ function Ye(e, t, n) {
 	};
 }
 // shared/dashboard-cards.mjs
-function Xe(e, t, n) {
+function Ze(e, t, n) {
 	let r = structuredClone(e), i = r?.views?.[t];
 	if (!i) throw Error("That dashboard view no longer exists.");
 	if (i.strategy) throw Error("That view is generated automatically; choose another.");
@@ -647,7 +647,7 @@ function Xe(e, t, n) {
 		cards: [n]
 	})) : (i.cards ||= [], i.cards.push(n)), r;
 }
-function Ze(e) {
+function Qe(e) {
 	return !e || e.strategy || !Array.isArray(e.views) ? [] : e.views.map((e, t) => ({
 		index: t,
 		title: e.title || e.path || `View ${t + 1}`,
@@ -655,7 +655,7 @@ function Ze(e) {
 		editable: !e.strategy
 	})).filter((e) => e.editable);
 }
-async function Qe(e) {
+async function $e(e) {
 	let t = [{
 		url_path: null,
 		title: "Overview"
@@ -670,7 +670,7 @@ async function Qe(e) {
 		} catch {
 			continue;
 		}
-		let i = Ze(t);
+		let i = Qe(t);
 		i.length && n.push({
 			url_path: r.url_path,
 			title: r.title || r.url_path || "Dashboard",
@@ -679,7 +679,7 @@ async function Qe(e) {
 	}
 	return n;
 }
-async function $e(e, t, n, r) {
+async function et(e, t, n, r) {
 	let i = t ? { url_path: t } : {}, a = await e.callWS({
 		type: "lovelace/config",
 		...i
@@ -687,11 +687,11 @@ async function $e(e, t, n, r) {
 	await e.callWS({
 		type: "lovelace/config/save",
 		...i,
-		config: Xe(a, n, r)
+		config: Ze(a, n, r)
 	});
 }
 // dashboard/panel.js
-var et = class extends HTMLElement {
+var tt = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block;height:100%;min-height:100vh}iframe{display:block;width:100%;height:100vh;border:0}</style><iframe title=\"3D Rooms model library\"></iframe>", this._frame = this.shadowRoot.querySelector("iframe"), this._frame.addEventListener("load", () => this._applyTheme()), this._iconCache = /* @__PURE__ */ new Map(), this._ready = (e) => {
 			if (e.source !== this._frame.contentWindow || e.origin !== location.origin || e.data?.type !== "three-d-rooms-ready") return;
@@ -705,7 +705,7 @@ var et = class extends HTMLElement {
 				},
 				preview: async (e) => {
 					this._preview?.close();
-					let t = Ye(this.shadowRoot, e, this._hass);
+					let t = Xe(this.shadowRoot, e, this._hass);
 					this._preview = t, await t.closed, this._preview === t && (this._preview = null);
 				},
 				navigate: (e) => {
@@ -720,8 +720,8 @@ var et = class extends HTMLElement {
 					for (let [n, r] of B(e)) t.searchParams.set(n, r);
 					history.replaceState(history.state, "", t);
 				},
-				dashboards: () => Qe(this._hass),
-				addCard: (e, t, n) => $e(this._hass, e, t, n),
+				dashboards: () => $e(this._hass),
+				addCard: (e, t, n) => et(this._hass, e, t, n),
 				states: () => Object.values(this._hass?.states || {}),
 				request: (e, t = {}) => this._hass.callWS({
 					type: "three_d_rooms/request",
@@ -729,7 +729,7 @@ var et = class extends HTMLElement {
 					data: t
 				}),
 				asset: (e, t) => this._hass.fetchWithAuth(e, t),
-				upload: (e, t) => Ke(this._hass, e, t),
+				upload: (e, t) => qe(this._hass, e, t),
 				scene: (e, t = "full") => j(this._hass, e, t),
 				entityIcon: (e) => {
 					let t = JSON.stringify([
@@ -738,7 +738,7 @@ var et = class extends HTMLElement {
 						e.attributes?.icon,
 						e.attributes?.device_class
 					]);
-					return this._iconCache.has(t) || (this._iconCache.set(t, Je(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
+					return this._iconCache.has(t) || (this._iconCache.set(t, Ye(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
 				},
 				subscribeModels: (e) => this._hass.connection.subscribeEvents(e, "three_d_rooms_updated"),
 				subscribe: (e) => (this._listener = e, this._publish(), () => {
@@ -773,9 +773,9 @@ var et = class extends HTMLElement {
 		this._preview?.close(), window.removeEventListener("message", this._ready), this._listener = null;
 	}
 };
-customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", et);
+customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", tt);
 // shared/house-floors.mjs
-function q(e, t) {
+function K(e, t) {
 	if (!t?.houseView || !Array.isArray(e)) return [];
 	let n = e.filter((e) => e?.houseView && e.houseId === t.houseId);
 	return n.length < 2 ? [] : n.map((e) => ({
@@ -784,11 +784,11 @@ function q(e, t) {
 		label: e.houseFloor?.name || "Whole house"
 	})).sort((e, t) => e.floorId === null ? -1 : +(t.floorId === null));
 }
-function tt(e, t, n) {
-	return !n || n === t?.id ? t : q(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
+function nt(e, t, n) {
+	return !n || n === t?.id ? t : K(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
 }
-function nt(e, t, n = !0) {
-	let r = n ? q(e, t) : [];
+function rt(e, t, n = !0) {
+	let r = n ? K(e, t) : [];
 	if (!r.length) return {
 		model: t,
 		floors: [],
@@ -802,7 +802,7 @@ function nt(e, t, n = !0) {
 	};
 }
 // dashboard/editor.js
-var rt = {
+var it = {
 	model: "Room",
 	title: "Title",
 	show_title: "Show title",
@@ -812,14 +812,14 @@ var rt = {
 	zoom: "Zoom",
 	height: "Height",
 	interactive: "Camera movement"
-}, it = {
+}, at = {
 	show_title: !0,
 	height: 500,
 	view: "front",
 	heading: 0,
 	tilt: 28,
 	zoom: 1
-}, at = class extends HTMLElement {
+}, ot = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>
       :host{display:block;container-type:inline-size;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}
@@ -887,7 +887,7 @@ var rt = {
 			let i = document.createElement("div");
 			i.className = "override-controls", i.id = `override-controls-${e}`, i.hidden = !0;
 			let a = document.createElement("button");
-			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${rt[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
+			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${it[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
 		}
 		this._field("height-mode").onchange = () => {
 			this._field("height-mode").disabled || this._emit({
@@ -1001,19 +1001,19 @@ var rt = {
 			let t = !!this._config.saved_view, r = Object.hasOwn(this._config, e);
 			this._field(`reset-field-${e}`).hidden = !t || !r || !n || this._config[e] === n[e], this._field(`override-controls-${e}`).hidden = this._field(`reset-field-${e}`).hidden, this._field(e).disabled = !1;
 		}
-		for (let t of Object.keys(it).concat([
+		for (let t of Object.keys(at).concat([
 			"model",
 			"title",
 			"interactive"
 		])) {
-			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : it[t]) ?? "";
+			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : at[t]) ?? "";
 			t === "interactive" || t === "show_title" ? n.checked = !!a : n.value = a;
 		}
 		this._field("height-mode").value = e.height === "auto" ? "auto" : "fixed", this._field("height-mode").disabled = this._field("height").disabled, this._field("height").hidden = e.height === "auto";
 		let r = e.model, i = this._field("model");
 		r && ![...i.options].some((e) => e.value === r) && (i.add(new Option(`${r} (not in room library)`, r)), i.value = r);
 		let a = this._models?.find((e) => e.id === r);
-		this._field("floor-selector-setting").hidden = !q(this._models, a).length, this._field("room-focus-setting").hidden = !a?.houseView, this._field("room_focus").checked = this._config.room_focus !== !1, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("floor_plan_button").checked = this._config.floor_plan_button !== !1, this._field("floor-plan-button-setting").hidden = (e.view || "front") === "floor", this._field("light_panel").checked = this._config.light_panel !== !1, this._field("edit_button").checked = this._config.edit_button !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1;
+		this._field("floor-selector-setting").hidden = !K(this._models, a).length, this._field("room-focus-setting").hidden = !a?.houseView, this._field("room_focus").checked = this._config.room_focus !== !1, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("floor_plan_button").checked = this._config.floor_plan_button !== !1, this._field("floor-plan-button-setting").hidden = (e.view || "front") === "floor", this._field("light_panel").checked = this._config.light_panel !== !1, this._field("edit_button").checked = this._config.edit_button !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1;
 		let o = e.background || "spotlight";
 		this._field("background").value = o, this._field("background-image-setting").hidden = o !== "image", this._field("background_image").value = e.background_image || "", this._field("background_image").setCustomValidity(!e.background_image || P(e.background_image) ? "" : "Use an address starting with /, http:// or https://"), this._field("background_shadow").checked = F({
 			...e,
@@ -1141,9 +1141,9 @@ var rt = {
 		}));
 	}
 };
-customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", at);
+customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", ot);
 // dashboard/transport.mjs
-async function ot(e, t, n, r = fetch) {
+async function st(e, t, n, r = fetch) {
 	if (!t.preview_url && !t.addon) return {
 		preview: !1,
 		async load({ onProgress: n, onModel: r, fresh: i = !1 } = {}) {
@@ -1152,7 +1152,7 @@ async function ot(e, t, n, r = fetch) {
 				operation: "models"
 			}), s = a.find((e) => e.id === t.model);
 			if (!s) throw Error("Model not found. Upload it in the 3D Rooms sidebar first.");
-			let c = m(t.quality), { model: l, floors: u, views: d } = nt(a, s, t.floor_selector !== !1);
+			let c = m(t.quality), { model: l, floors: u, views: d } = rt(a, s, t.floor_selector !== !1);
 			if (r?.({
 				model: l,
 				configured: s,
@@ -1253,7 +1253,7 @@ async function ot(e, t, n, r = fetch) {
 			if (!e.ok) throw Error("Could not read models. Open the 3D Rooms add-on and try again.");
 			let n = await e.json(), a = n.find((e) => e.id === t.model);
 			if (!a) throw Error("Model not found. Upload it in the 3D Rooms add-on first.");
-			let { model: o, floors: s, views: c } = nt(n, a, t.floor_selector !== !1);
+			let { model: o, floors: s, views: c } = rt(n, a, t.floor_selector !== !1);
 			return o.members ? {
 				model: o,
 				configured: a,
@@ -1274,7 +1274,7 @@ async function ot(e, t, n, r = fetch) {
 	};
 }
 // shared/room-lights.mjs
-var J = {
+var q = {
 	light: {
 		entity: /^(light|switch)\.[a-z0-9_]+$/,
 		isOn: (e) => !!e.on,
@@ -1292,8 +1292,8 @@ var J = {
 		}
 	}
 };
-function st(e, t = "light", n = () => !1) {
-	let { entity: i } = J[t], a = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), o = /* @__PURE__ */ new Map(), s = new Set((e?.controls || []).filter((e) => e.hidden && a(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
+function ct(e, t = "light", n = () => !1) {
+	let { entity: i } = q[t], a = (e) => t === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && n(e), o = /* @__PURE__ */ new Map(), s = new Set((e?.controls || []).filter((e) => e.hidden && a(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
 	for (let n of e?.controls || []) {
 		if (!a(n) || n.hidden || n.lightGroupPrimary === !1) continue;
 		let c = n.sourceModel || e.id, l = r(n.roomTitle || e.title || "Room");
@@ -1316,9 +1316,9 @@ function st(e, t = "light", n = () => !1) {
 	}
 	return [...o.values()];
 }
-var Y = (e) => st(e, "light");
-function X(e, t) {
-	let { isOn: n } = J[e.kind || "light"], r = 0, i = 0;
+var J = (e) => ct(e, "light");
+function Y(e, t) {
+	let { isOn: n } = q[e.kind || "light"], r = 0, i = 0;
 	for (let a of e.lights) {
 		let e = t.get(a.id);
 		e && !e.unavailable && (i++, n(e) && r++);
@@ -1329,8 +1329,8 @@ function X(e, t) {
 		total: e.lights.length
 	};
 }
-function ct(e, t, n = {}) {
-	let { services: r } = J[e.kind || "light"], i = X(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
+function lt(e, t, n = {}) {
+	let { services: r } = q[e.kind || "light"], i = Y(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
 	for (let t of e.entities) {
 		let e = n[t];
 		if (!e || ["unavailable", "unknown"].includes(e.state)) continue;
@@ -1346,7 +1346,7 @@ function ct(e, t, n = {}) {
 		])
 	};
 }
-function Z(e) {
+function X(e) {
 	return {
 		id: "",
 		kind: e[0]?.kind || "light",
@@ -1355,7 +1355,7 @@ function Z(e) {
 		entities: [...new Set(e.flatMap((e) => e.entities))]
 	};
 }
-function Q(e, t = {}) {
+function Z(e, t = {}) {
 	return e.map((e) => {
 		let n = t[e];
 		if (!n || ["unavailable", "unknown"].includes(n.state)) return null;
@@ -1367,7 +1367,7 @@ function Q(e, t = {}) {
 		};
 	}).filter(Boolean);
 }
-function lt(e) {
+function ut(e) {
 	let t = /* @__PURE__ */ new Map(), n = [];
 	for (let { entityId: r, state: i, position: a } of e) {
 		let e = r.split(".")[0];
@@ -1402,19 +1402,19 @@ function lt(e) {
 	return n;
 }
 // dashboard/card.js
-var ut = "M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z";
-function dt(e, t) {
-	return `<svg viewBox="0 0 24 24">${t ? x(t) || "" : e.type === "climate" ? Ue : e.type === "lock" ? He : `<path d="${e.type === "vacuum" ? ut : e.type === "button" ? "m8 4 12 8-12 8Z" : e.type === "number" ? "M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z" : e.type === "light" ? "M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z" : "M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"}"/>`}</svg>`;
+var dt = "M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z";
+function ft(e, t) {
+	return `<svg viewBox="0 0 24 24">${t ? x(t) || "" : e.type === "climate" ? We : e.type === "lock" ? Ue : `<path d="${e.type === "vacuum" ? dt : e.type === "button" ? "m8 4 12 8-12 8Z" : e.type === "number" ? "M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z" : e.type === "light" ? "M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z" : "M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"}"/>`}</svg>`;
 }
-var ft = /* @__PURE__ */ new Set([
+var pt = /* @__PURE__ */ new Set([
 	"shade",
 	"blind",
 	"curtain",
 	"shutter",
 	"awning"
-]), pt, mt = () => pt ||= import("./three-d-rooms-scene-QyB4Sil0.js").catch((e) => {
-	throw pt = void 0, e;
-}), $ = {
+]), mt, ht = () => mt ||= import("./three-d-rooms-scene-QyB4Sil0.js").catch((e) => {
+	throw mt = void 0, e;
+}), Q = {
 	auto: {
 		label: "Auto",
 		hint: "follow the sun",
@@ -1430,10 +1430,10 @@ var ft = /* @__PURE__ */ new Set([
 		hint: "always night",
 		icon: "<path d=\"M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z\"/>"
 	}
-}, ht = (e, t = 1) => {
-	let n = Object.keys($);
+}, gt = (e, t = 1) => {
+	let n = Object.keys(Q);
 	return n[(n.indexOf(e) + t + n.length) % n.length];
-}, gt = class extends HTMLElement {
+}, $ = class extends HTMLElement {
 	static getConfigElement() {
 		return document.createElement("three-d-rooms-editor");
 	}
@@ -1448,7 +1448,7 @@ var ft = /* @__PURE__ */ new Set([
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>:host{display:block;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}.switching{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;cursor:progress;background:color-mix(in srgb,var(--card-background-color,#101715) 40%,transparent);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px)}.switching-pill{display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:10px 18px 10px 14px;border-radius:999px;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#101715) 90%,transparent);box-shadow:0 2px 8px #0006;font:500 14px/1.3 system-ui}.switching-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spinner{flex-shrink:0;width:18px;height:18px;box-sizing:border-box;border:2px solid color-mix(in srgb,var(--primary-text-color,#edf2eb) 25%,transparent);border-top-color:var(--primary-color,#aacaab);border-radius:50%;will-change:transform;animation:switch-spin .8s linear infinite}@keyframes switch-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}ha-card{container:card-root/inline-size;display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;isolation:isolate;width:100%;height:500px;container:card-scene/inline-size}.scene canvas{display:block;width:100%;height:100%}${Ae}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border-color:color-mix(in srgb,var(--primary-text-color,#edf2eb) 45%,transparent);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid var(--divider-color,#536258);border-radius:var(--ha-dialog-border-radius,16px);padding:24px;background:var(--ha-card-background,var(--card-background-color,#202923));color:var(--primary-text-color,#edf2eb);font:14px system-ui;box-shadow:0 12px 40px #0005}dialog::backdrop{background:var(--mdc-dialog-scrim-color,#0008)}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:var(--secondary-text-color,#aebbb2);line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"],.camera-floor-plan[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}[data-tone="cleaning"]{--tone:var(--state-vacuum-active-color,#009688)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:auto;height:44px;min-height:44px;padding:0 14px 0 11px;font:500 14px system-ui;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{flex-shrink:0;width:20px;height:20px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel[data-kind="shade"] button[role="switch"][aria-checked="true"]{background:var(--state-cover-active-color,#9c27b0)}.light-panel[data-kind="shade"] .light-row[data-on="true"] ha-state-icon{color:var(--state-cover-active-color,#9c27b0)}.light-row{flex-wrap:wrap}.light-position{flex-shrink:0;margin-left:auto;padding-left:8px;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-dim{flex-basis:100%;box-sizing:border-box;width:auto;height:28px;margin:-4px 0 6px 34px;accent-color:var(--state-active-color,#ffd66b);cursor:pointer}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}.room-tags{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}.room-tags .room-tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--room-tag-size,30px)*.2);box-sizing:border-box;height:var(--room-tag-size,30px);min-height:var(--room-tag-size,30px);padding:0 calc(var(--room-tag-size,30px)*.37) 0 calc(var(--room-tag-size,30px)*.27);border-radius:calc(var(--room-tag-size,30px)/2);transform:translate(-50%,6px);white-space:nowrap;pointer-events:auto;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#202923) 92%,transparent);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006;font:500 calc(var(--room-tag-size,30px)*.4)/1 system-ui}.room-tags .room-tag::before{content:"";position:absolute;inset:-8px -4px}.room-tags .room-tag svg{width:calc(var(--room-tag-size,30px)*.47);height:calc(var(--room-tag-size,30px)*.47);flex-shrink:0;opacity:.8}.room-tags .room-tag[data-manual="true"]{transform:translate(-50%,-50%)}.room-tags .room-tag .room-tag-count{display:grid;place-items:center;min-width:calc(var(--room-tag-size,30px)*.6);height:calc(var(--room-tag-size,30px)*.6);padding:0 calc(var(--room-tag-size,30px)*.17);box-sizing:border-box;border-radius:calc(var(--room-tag-size,30px)*.3);background:var(--state-light-active-color,#ffc107);color:#1c1c1c;font-size:calc(var(--room-tag-size,30px)*.37);font-weight:600}.room-tags .room-tag[data-pressing="true"]{animation:room-tag-hold .55s linear forwards}@keyframes room-tag-hold{from{box-shadow:0 2px 8px #0006,inset 0 0 0 0 var(--state-light-active-color,#ffc107)}to{box-shadow:0 2px 8px #0006,inset 0 0 0 20px var(--state-light-active-color,#ffc107)}}@media(prefers-reduced-motion:reduce){.room-tags .room-tag[data-pressing="true"]{animation:none;border-color:var(--state-light-active-color,#ffc107)}}.room-tags .room-tag:hover{background:var(--card-background-color,#202923);border-color:var(--primary-color,#aacaab)}.room-nav{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px}.room-nav .room-step{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:0;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.room-nav .room-step svg{width:22px;height:22px}.room-back{display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;height:44px;min-height:44px;flex:0 0 auto;width:clamp(150px,calc(100cqw - 404px),260px);justify-content:center;padding:0 16px 0 10px;white-space:nowrap;color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab);box-shadow:0 2px 8px #0006;font:600 14px/1 system-ui}.room-back svg{width:20px;height:20px;flex-shrink:0}.room-back>span:not(.room-back-name){flex-shrink:0}.room-back .room-back-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.85;padding-left:8px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent)}.room-back .room-back-name:empty{display:none}@container card-root (max-width:520px){.card-controls{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px}.card-controls>button{width:44px;height:44px;min-height:44px;padding:10px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.card-controls>button::before,.light-panel-toggle::before{content:"";position:absolute;inset:-5px}.card-controls>button svg,.light-panel-toggle svg{width:20px;height:20px;opacity:.85}.panel-toggles{top:8px;left:8px;gap:6px}.floor-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.floor-switch button{height:36px;min-width:44px;padding:0 12px;font:500 14px system-ui}.card-top.card-top:has(header[hidden]){top:8px;right:8px}.daylight-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.daylight-switch button{width:40px;height:36px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{top:3px;left:3px;width:40px;height:36px}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}.light-panel{top:60px;left:8px;bottom:62px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 122px)}.room-nav{top:60px;gap:6px}.room-nav .room-step{width:44px;height:44px;min-height:44px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.room-nav .room-step::before{content:"";position:absolute;inset:-5px}.room-nav .room-step svg{width:22px;height:22px}.room-back{height:44px;min-height:44px;width:clamp(130px,calc(100cqw - 132px),200px);padding:0 12px 0 8px;font:600 12px/1 system-ui;box-shadow:0 1px 4px #0004}.room-back svg{width:16px;height:16px}}.reload-menu{position:absolute;bottom:calc(100% + 8px);z-index:4;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;width:min(250px,calc(100vw - 32px));padding:6px;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;pointer-events:auto}.reload-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;border:0;border-radius:8px;text-align:left;color:inherit;font:500 15px/1.25 system-ui}.reload-menu button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.reload-menu button:disabled{opacity:.5;cursor:wait}.reload-menu svg{flex-shrink:0;width:22px;height:22px}.reload-menu small{display:block;margin-top:2px;color:var(--secondary-text-color,#aebbb2);font:400 12px/1.3 system-ui}.model-refresh[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.undo-toast{position:absolute;left:50%;bottom:72px;z-index:6;transform:translateX(-50%);display:flex;align-items:center;gap:4px;box-sizing:border-box;max-width:calc(100% - 24px);padding:4px 4px 4px 16px;border-radius:10px;color:var(--card-background-color,#fff);background:var(--primary-text-color,#212121);box-shadow:0 4px 16px #0006;font:500 14px/1.3 system-ui;animation:undo-in .2s cubic-bezier(.2,.7,.2,1)}.undo-toast span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.undo-toast button{flex-shrink:0;min-height:40px;padding:0 14px;border:0;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}.undo-toast button:hover{background:color-mix(in srgb,currentColor 12%,transparent)}@keyframes undo-in{from{opacity:0;transform:translate(-50%,8px)}}@media(prefers-reduced-motion:reduce){.undo-toast{animation:none}}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="backdrop" aria-hidden="true"></div><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`, this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
 		let e = document.createElement("span");
 		e.className = "daylight-thumb", this._daylightSwitch.append(e);
-		for (let [e, { label: t, hint: n, icon: r }] of Object.entries($)) {
+		for (let [e, { label: t, hint: n, icon: r }] of Object.entries(Q)) {
 			let i = document.createElement("button");
 			i.type = "button", i.dataset.mode = e, i.setAttribute("role", "radio"), i.setAttribute("aria-label", t), i.title = `${t} — ${n}`, i.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${r}</svg>`, i.onclick = () => this._chooseDaylight(e), this._daylightSwitch.append(i);
 		}
@@ -1461,7 +1461,7 @@ var ft = /* @__PURE__ */ new Set([
 			}[e.key];
 			if (!t) return;
 			e.preventDefault();
-			let n = ht(this._daylightSwitch.value, t);
+			let n = gt(this._daylightSwitch.value, t);
 			this._chooseDaylight(n), this._daylightSwitch.querySelector(`[data-mode="${n}"]`)?.focus();
 		}, this._showDaylightMode("auto"), this.shadowRoot.querySelector(".message button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "More"), this._refresh.setAttribute("aria-haspopup", "menu"), this._refresh.setAttribute("aria-expanded", "false"), this._refresh.title = "More: reload, edit", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><circle cx=\"5\" cy=\"12\" r=\"2\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/><circle cx=\"19\" cy=\"12\" r=\"2\"/></svg>", this._refresh.onclick = () => this._setReloadMenu(!this._reloadMenu), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._floorPlanButton = document.createElement("button"), this._floorPlanButton.type = "button", this._floorPlanButton.className = "camera-floor-plan", this._floorPlanButton.setAttribute("aria-label", "Floor plan"), this._floorPlanButton.setAttribute("aria-pressed", "false"), this._floorPlanButton.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 12h7M10 3v13M14 12h7M14 12v9\"/></svg>", this._floorPlanButton.hidden = !0, this._floorPlanButton.onclick = () => this._setFloorPlan(!this._floorPlan), this._editButton = document.createElement("button"), this._editButton.type = "button", this._editButton.className = "card-edit", this._editButton.hidden = !0, this._editButton.setAttribute("aria-label", "Edit in 3D Rooms"), this._editButton.title = "Edit in 3D Rooms — opens this view in the editor in a new tab", this._editButton.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z\"/></svg>", this._editButton.onclick = () => this._openEditor(), this._controls.append(this._refresh, this._resetCamera, this._moveCamera, this._floorPlanButton), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {}, this._panelIcons = {};
 		for (let [e, t, n, r] of [[
@@ -1606,7 +1606,7 @@ var ft = /* @__PURE__ */ new Set([
 	async _load({ fresh: e = !1 } = {}) {
 		if (!this._config || !this._hass) return;
 		let t = ++this._generation;
-		mt().catch(() => {}), this._loading = !0, this._contextLost = !1, this._refresh.disabled = !this.hasAttribute("fill-page"), this._container.setAttribute("aria-busy", "true"), this._reload = !1, clearInterval(this._keepalive), (this._config.preview_url || this._config.addon) && (this._unsubModels?.(), this._unsubModels = null), this._changedDuringLoad = !1, this._message.hidden = !1, this._message.querySelector("span").textContent = "Downloading your room…", this._message.querySelector("button").hidden = !0, this._message.querySelector("button").textContent = "Retry";
+		ht().catch(() => {}), this._loading = !0, this._contextLost = !1, this._refresh.disabled = !this.hasAttribute("fill-page"), this._container.setAttribute("aria-busy", "true"), this._reload = !1, clearInterval(this._keepalive), (this._config.preview_url || this._config.addon) && (this._unsubModels?.(), this._unsubModels = null), this._changedDuringLoad = !1, this._message.hidden = !1, this._message.querySelector("span").textContent = "Downloading your room…", this._message.querySelector("button").hidden = !0, this._message.querySelector("button").textContent = "Retry";
 		let n = this._message.querySelector("progress");
 		n.hidden = !0, this._view || this._showLoadingPreview(this._cachedThumbnail());
 		let r = !1, i = !1;
@@ -1630,7 +1630,7 @@ var ft = /* @__PURE__ */ new Set([
 				this._message.querySelector("span").textContent = "Choose a room in the visual editor.";
 				return;
 			}
-			let i = await ot(this._hass, this._config, location.origin);
+			let i = await st(this._hass, this._config, location.origin);
 			if (t !== this._generation) return;
 			i.session && (document.cookie = `ingress_session=${i.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`);
 			let { model: a, configured: o, floors: c, views: l, sceneURL: u, layers: d, release: f, assetCache: p } = await i.load({
@@ -1648,7 +1648,7 @@ var ft = /* @__PURE__ */ new Set([
 				f?.();
 				return;
 			}
-			let { SceneView: m } = await mt();
+			let { SceneView: m } = await ht();
 			if (t !== this._generation) {
 				f?.();
 				return;
@@ -1684,9 +1684,9 @@ var ft = /* @__PURE__ */ new Set([
 			}
 			if (t !== this._generation) return;
 			this._views = l || [], this._floors = c || [];
-			let g = tt(this._views, o || a, this._floor);
+			let g = nt(this._views, o || a, this._floor);
 			if (g !== a && !h.setHouseView(g) && (g = a), this._floor && g.id !== this._floor && (this._floor = null), this._model = g, this._earlyModel = null, this._focus = null, this._cameraMoved = !1, this._syncFloorSwitch(), this._syncCameraButtons(), this._previewStates = /* @__PURE__ */ new Map(), this._buildAccess(), this._syncRoomTags(), this._preview = i.preview, this._signature = null, this._states(), this._syncDaylightSwitch(), this._syncEditButton(), this._message.hidden = !0, this._hideLoadingPreview(), this._warmViews(), !this._preview && !this._config.addon && !this._unsubModels && this._hass.connection?.subscribeEvents) {
-				let e = await We(this._hass.connection, () => this._modelsEvent());
+				let e = await Ge(this._hass.connection, () => this._modelsEvent());
 				!this.isConnected || this._unsubModels ? e() : this._unsubModels = e;
 			}
 			if (t !== this._generation) return;
@@ -1878,7 +1878,7 @@ var ft = /* @__PURE__ */ new Set([
 		this._positionRoomTags();
 	}
 	_roomLightsOf(e) {
-		return Y(this._model).find((t) => t.id === e && t.lights.length);
+		return J(this._model).find((t) => t.id === e && t.lights.length);
 	}
 	_wireRoomTag(e, t) {
 		let n = null, r, i = !1, a = () => {
@@ -1907,9 +1907,9 @@ var ft = /* @__PURE__ */ new Set([
 	_syncRoomTagStates() {
 		let e = [...this._roomTags?.children || []];
 		if (!e.length) return;
-		let t = new Map(Y(this._model).map((e) => [e.id, e])), n = this._lightStates || /* @__PURE__ */ new Map();
+		let t = new Map(J(this._model).map((e) => [e.id, e])), n = this._lightStates || /* @__PURE__ */ new Map();
 		for (let r of e) {
-			let e = t.get(r.dataset.room), i = e ? X(e, n).on : 0, a = r.querySelector(".room-tag-count");
+			let e = t.get(r.dataset.room), i = e ? Y(e, n).on : 0, a = r.querySelector(".room-tag-count");
 			r.dataset.active = String(i > 0), a && (a.hidden = i === 0, a.textContent = i, a.title = `${i} on`);
 		}
 	}
@@ -2083,7 +2083,7 @@ var ft = /* @__PURE__ */ new Set([
 		this._daylightSwitch.hidden = !e || !!this._preview, e && this._showDaylightMode(e.mode);
 	}
 	_showDaylightMode(e) {
-		let t = this._daylightSwitch, n = $[e] ? e : "auto";
+		let t = this._daylightSwitch, n = Q[e] ? e : "auto";
 		t.value = n, t.dataset && (t.dataset.mode = n);
 		for (let e of t.querySelectorAll?.("button") || []) {
 			let t = e.dataset.mode === n;
@@ -2163,7 +2163,7 @@ var ft = /* @__PURE__ */ new Set([
 			let c = e(this._config.markers, i.id);
 			o.style.setProperty("--marker-size", c.size + "px"), o.setAttribute("aria-label", i.type === "light" ? `Toggle ${s}. Hold, or press Shift+Enter, for more info.` : `Control ${s}`), o.title = i.type === "light" ? `${s}: click to toggle, hold for more info` : `${s}: value controls`;
 			let l = S(c, i, !1), u = l || S(c, i, !0), f = document.createElement(i.type === "climate" && !u ? "span" : "ha-state-icon");
-			i.type === "climate" && !u && (f.className = "fixture-ac-icon"), l && (f.icon = l), f.setAttribute("aria-hidden", "true"), f.innerHTML = dt(i, l), f.dataset.glyph = l || "";
+			i.type === "climate" && !u && (f.className = "fixture-ac-icon"), l && (f.icon = l), f.setAttribute("aria-hidden", "true"), f.innerHTML = ft(i, l), f.dataset.glyph = l || "";
 			let p = document.createElement("span");
 			if (p.className = "fixture-state", p.setAttribute("aria-hidden", "true"), p.hidden = !c.show_label, o.append(f), c.placement === "tray") {
 				let e = document.createElement("span");
@@ -2288,7 +2288,7 @@ var ft = /* @__PURE__ */ new Set([
 		let t = this._knownShades();
 		if (t) return t.includes(e.id);
 		let n = this._hass?.states?.[this._panelModel?.bindings?.[e.id]];
-		return ft.has(n?.attributes?.device_class);
+		return pt.has(n?.attributes?.device_class);
 	}
 	_shadeKey(e = this._panelModel) {
 		return e?.id && `three-d-rooms:shades:${e.id}`;
@@ -2311,7 +2311,7 @@ var ft = /* @__PURE__ */ new Set([
 		return this._model || this._earlyModel;
 	}
 	_showEarlyPanels({ model: e, configured: t, views: n }) {
-		this._view || this._preview || !e?.controls || (this._earlyModel = tt(n || [], t || e, this._floor), this._earlyStates(), this._buildLightPanel());
+		this._view || this._preview || !e?.controls || (this._earlyModel = nt(n || [], t || e, this._floor), this._earlyStates(), this._buildLightPanel());
 	}
 	_earlyStates() {
 		let e = this._earlyModel;
@@ -2345,8 +2345,8 @@ var ft = /* @__PURE__ */ new Set([
 	}
 	_buildLightPanel() {
 		if (this._panelRooms = {
-			light: this._config?.light_panel === !1 ? [] : Y(this._panelModel),
-			shade: this._config?.shade_panel === !1 ? [] : st(this._panelModel, "shade", (e) => this._isShade(e))
+			light: this._config?.light_panel === !1 ? [] : J(this._panelModel),
+			shade: this._config?.shade_panel === !1 ? [] : ct(this._panelModel, "shade", (e) => this._isShade(e))
 		}, this._view?.fixtures && this._model && !this._model.focusRoom && this._rememberShades(this._panelRooms.shade.flatMap((e) => e.lights.map((e) => e.id))), !this._preview) for (let e of Object.keys(this._panelRooms)) this._panelRooms[e] = this._panelRooms[e].map((e) => ({
 			...e,
 			lights: e.lights.filter((e) => e.entityId)
@@ -2411,7 +2411,7 @@ var ft = /* @__PURE__ */ new Set([
 		this._lightPanel = n, this._container.append(n), this._syncLightPanel();
 	}
 	_confirmAllLights() {
-		let { on: e, available: t } = X(Z(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
+		let { on: e, available: t } = Y(X(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
 		this._dialog?.remove();
 		let a = document.createElement("dialog");
 		return this._dialog = a, a.className = "confirm-all-lights", a.innerHTML = "<form method=\"dialog\"><h2></h2><p></p><div style=\"display:flex;gap:8px;justify-content:flex-end;margin-top:16px\"><button value=\"cancel\" autofocus>Cancel</button><button value=\"ok\" class=\"confirm\"></button></div></form>", a.querySelector("h2").textContent = `${n ? r.turnOn : r.turnOff} all ${r.noun}?`, a.querySelector("p").textContent = n ? `This will ${r.turnOn.toLowerCase()} ${t} ${i(t)} in ${this._rooms.length === 1 ? this._rooms[0].title : "every room shown"}. Hidden devices are not changed.` : `This will ${r.turnOff.toLowerCase()} the ${e} ${i(e)} that ${e === 1 ? "is" : "are"} ${r.on}. Hidden devices are not changed.`, a.querySelector(".confirm").textContent = n ? `${r.turnOn} all` : `${r.turnOff} all`, this.shadowRoot.append(a), new Promise((e) => {
@@ -2426,12 +2426,12 @@ var ft = /* @__PURE__ */ new Set([
 	_syncLightPanel(e = this._lightStates) {
 		let t = this._lightPanel;
 		if (!t || !e) return;
-		let n = this._panelWords(), r = J[this._panelKind || "light"].isOn, i = Z(this._rooms), a = X(i, e), o = t.querySelector("h2 [role=\"switch\"]");
+		let n = this._panelWords(), r = q[this._panelKind || "light"].isOn, i = X(this._rooms), a = Y(i, e), o = t.querySelector("h2 [role=\"switch\"]");
 		t.querySelector("h2 .light-room-count").textContent = a.available ? `${a.on} ${n.on}` : "", o.setAttribute("aria-checked", String(a.on > 0)), o.disabled = !a.available || !this._preview && !i.entities.length, o.title = `${a.on ? n.turnOff : n.turnOn} all ${n.noun}`;
 		for (let i of this._rooms) {
 			let a = [...t.querySelectorAll("[data-room]")].find((e) => e.dataset.room === i.id);
 			if (!a) continue;
-			let o = X(i, e);
+			let o = Y(i, e);
 			a.querySelector(".light-room-count").textContent = o.available ? `${o.on} of ${o.available} ${n.on}` : i.entities.length || this._preview ? "Unavailable" : "Not connected";
 			let s = a.querySelector("[data-room-switch]");
 			s.setAttribute("aria-checked", String(o.on > 0)), s.disabled = !o.available || !this._preview && !i.entities.length, s.title = `${o.on ? n.turnOff : n.turnOn} all ${i.title} ${n.noun}`;
@@ -2456,14 +2456,14 @@ var ft = /* @__PURE__ */ new Set([
 		}
 	}
 	async _toggleShade(e) {
-		let t = this._lightStates || /* @__PURE__ */ new Map(), n = J.shade.isOn(t.get(e) || {}), r = this._panelModel;
+		let t = this._lightStates || /* @__PURE__ */ new Map(), n = q.shade.isOn(t.get(e) || {}), r = this._panelModel;
 		if (this._preview) {
 			this._previewStates.set(e, { position: n ? 0 : 100 }), this._states();
 			return;
 		}
 		let i = r.bindings[e], a = this._hass.states?.[i];
 		if (!i?.startsWith("cover.") || !a || ["unavailable", "unknown"].includes(a.state)) return;
-		let o = Q([i], this._hass.states);
+		let o = Z([i], this._hass.states);
 		try {
 			await this._hass.callService("cover", n ? "close_cover" : "open_cover", { entity_id: i }), this._offerUndo(() => `${d(r.controls.find((t) => t.id === e) || {}, "Shade")} ${n ? "closed" : "opened"}`, o);
 		} catch {
@@ -2498,7 +2498,7 @@ var ft = /* @__PURE__ */ new Set([
 			n.querySelector("button").onclick = async () => {
 				r();
 				try {
-					await Promise.all(lt(t).map((e) => this._hass.callService(...e)));
+					await Promise.all(ut(t).map((e) => this._hass.callService(...e)));
 				} catch {
 					this._panelFeedback("Could not undo. Try again.");
 				}
@@ -2513,11 +2513,11 @@ var ft = /* @__PURE__ */ new Set([
 		t.className = "fixture-feedback", t.setAttribute("role", "alert"), t.textContent = e, this._container.append(t), setTimeout(() => t.remove(), 5e3);
 	}
 	async _toggleRoomLights(e, t) {
-		let n = t || (e === "" ? this._rooms?.length && Z(this._rooms) : this._rooms?.find((t) => t.id === e));
+		let n = t || (e === "" ? this._rooms?.length && X(this._rooms) : this._rooms?.find((t) => t.id === e));
 		if (!n || this._pendingRooms.has(e)) return;
 		let r = this._lightStates || /* @__PURE__ */ new Map(), i = this._panelWords(n.kind);
 		if (this._preview) {
-			let e = X(n, r).on === 0;
+			let e = Y(n, r).on === 0;
 			for (let t of n.lights) {
 				if (n.kind === "shade") {
 					this._previewStates.set(t.id, { position: e ? 100 : 0 });
@@ -2536,9 +2536,9 @@ var ft = /* @__PURE__ */ new Set([
 			this._states();
 			return;
 		}
-		let { calls: a, turnOn: o } = ct(n, r, this._hass.states);
+		let { calls: a, turnOn: o } = lt(n, r, this._hass.states);
 		if (!a.length) return;
-		let s = Q(a.flatMap(([, , e]) => e.entity_id), this._hass.states);
+		let s = Z(a.flatMap(([, , e]) => e.entity_id), this._hass.states);
 		this._pendingRooms.add(e);
 		let c = [...this._lightPanel?.querySelectorAll("[data-room-switch]") || []].find((t) => t.dataset.roomSwitch === e);
 		c?.setAttribute("aria-busy", "true"), this.shadowRoot.querySelector(".fixture-feedback")?.remove();
@@ -2633,7 +2633,7 @@ var ft = /* @__PURE__ */ new Set([
 			await this._pressPreset(n);
 			return;
 		}
-		if (n.type === "climate" || n.type === "lock" || n.type === "vacuum" || n.type === "cover" || n.type === "number") {
+		if ((n.type ?? "light") !== "light") {
 			this._pick(e);
 			return;
 		}
@@ -2654,7 +2654,7 @@ var ft = /* @__PURE__ */ new Set([
 		this._pendingToggles.add(e);
 		let a = [...this.shadowRoot.querySelectorAll("[data-control]")].find((t) => t.dataset.control === e);
 		a?.setAttribute("aria-busy", "true"), this.shadowRoot.querySelector(".fixture-feedback")?.remove();
-		let o = Q([r], this._hass.states);
+		let o = Z([r], this._hass.states);
 		try {
 			let e = r.split(".")[0];
 			await this._hass.callService([
@@ -2786,7 +2786,7 @@ var ft = /* @__PURE__ */ new Set([
 		r.onpointerdown = (e) => {
 			if (r.getAttribute("aria-disabled") === "true" || !a()) return;
 			e.preventDefault(), r.setPointerCapture(e.pointerId), r.classList.add("dm-dragging"), t._deskDragging = !0;
-			let n = (e) => Le(e.clientY, r.getBoundingClientRect(), a());
+			let n = (e) => Re(e.clientY, r.getBoundingClientRect(), a());
 			t._deskValue = n(e), o(t._deskValue), r.onpointermove = (e) => {
 				t._deskValue = n(e), o(t._deskValue);
 			}, r.onpointerup = r.onpointercancel = (e) => {
@@ -2803,7 +2803,7 @@ var ft = /* @__PURE__ */ new Set([
 				PageUp: c,
 				PageDown: -c
 			}[e.key], u = e.key === "Home" ? n.min : e.key === "End" ? n.max : l === void 0 ? void 0 : (t._deskValue ?? n.min) + l;
-			u !== void 0 && (e.preventDefault(), t._deskDragging = !0, t._deskValue = K(u, n), o(t._deskValue), clearTimeout(i), i = setTimeout(() => {
+			u !== void 0 && (e.preventDefault(), t._deskDragging = !0, t._deskValue = Le(u, n), o(t._deskValue), clearTimeout(i), i = setTimeout(() => {
 				t._deskDragging = !1, s(t._deskValue);
 			}, 500));
 		}, t.addEventListener("click", (e) => {
@@ -2816,7 +2816,7 @@ var ft = /* @__PURE__ */ new Set([
 		let t = this._dialog, n = t?._deskRange;
 		if (!n) return;
 		let r = Number.isFinite(e);
-		t.querySelector(".dm-fill").style.height = Re(e, n) * 100 + "%", t.querySelector(".dm-big").textContent = r ? `${e} ${n.unit}` : "—";
+		t.querySelector(".dm-fill").style.height = ze(e, n) * 100 + "%", t.querySelector(".dm-big").textContent = r ? `${e} ${n.unit}` : "—";
 		let i = t.querySelector(".dm-slider");
 		i.setAttribute("aria-valuemin", n.min), i.setAttribute("aria-valuemax", n.max), r ? (i.setAttribute("aria-valuenow", e), i.setAttribute("aria-valuetext", `${e} ${n.unit}`)) : i.removeAttribute("aria-valuenow");
 	}
@@ -2902,7 +2902,7 @@ var ft = /* @__PURE__ */ new Set([
 		n.oninput = r, r(), t.addEventListener("close", () => t.remove()), this.shadowRoot.append(t), t.showModal();
 	}
 	async _vacuumDialog(e, t) {
-		let { openMoreInfo: n } = await import("./three-d-rooms-more-info-Caaltia1.js");
+		let { openMoreInfo: n } = await import("./three-d-rooms-more-info-BKn3uq5l.js");
 		this._robotDialog?.close();
 		let r = n({
 			host: this.shadowRoot,
@@ -2967,15 +2967,15 @@ var ft = /* @__PURE__ */ new Set([
 		}
 		this._updateDeskDialog(), this._lightStates = r, this._syncLightPanel(r), this._syncRoomTagStates(), this._customEntityStates();
 		for (let t of this.shadowRoot.querySelectorAll("[data-control]")) {
-			let i = t.dataset.control, a = this._model.controls.find((e) => e.id === i), o = this._hass.states?.[this._model.bindings[i]], s = ze(a, o, r.get(i), this._preview);
-			t.dataset.active = String(s.active), t.dataset.moving = String(s.moving), t.dataset.unavailable = String(s.unavailable), Ve(t, s);
+			let i = t.dataset.control, a = this._model.controls.find((e) => e.id === i), o = this._hass.states?.[this._model.bindings[i]], s = Be(a, o, r.get(i), this._preview);
+			t.dataset.active = String(s.active), t.dataset.moving = String(s.moving), t.dataset.unavailable = String(s.unavailable), He(t, s);
 			let c = n(this._model, i)?.label || d(a);
 			t.title = `${c}: ${s.description}`, t.setAttribute("aria-label", `${a.type === "light" ? "Toggle" : "Control"} ${c}, ${s.description}${a.type === "light" ? ". Hold, or press Shift+Enter, for more info." : ""}`), t.setAttribute("aria-disabled", String(s.unavailable)), a.type === "light" ? t.setAttribute("aria-pressed", String(s.active)) : t.removeAttribute("aria-pressed");
 			let l = t.querySelector("ha-state-icon");
 			if (l) {
 				l.hass = this._hass, l.stateObj = s.stateObj;
 				let t = S(e(this._config.markers, i), a, s.active);
-				l.icon !== t && (l.icon = t), (l.dataset.glyph ?? "") !== (t || "") && (l.innerHTML = dt(a, t), l.dataset.glyph = t || "");
+				l.icon !== t && (l.icon = t), (l.dataset.glyph ?? "") !== (t || "") && (l.innerHTML = ft(a, t), l.dataset.glyph = t || "");
 			}
 			t.querySelector(".fixture-state").textContent = s.badge;
 		}
@@ -2988,10 +2988,10 @@ var ft = /* @__PURE__ */ new Set([
 		o !== this._signature && (this._signature = o, this._applyBackdrop(a), this._view.setStates(r), this._view.setDaylight?.(this._model.daylight?.mode ?? "night", a));
 	}
 };
-customElements.get("three-d-rooms-card") || customElements.define("three-d-rooms-card", gt), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
+customElements.get("three-d-rooms-card") ? customElements.get("three-d-rooms-card") !== $ && console.warn("3D Rooms: an older 3D Rooms card was loaded before this one, so dashboards use it. Remove the 3D Rooms entry from Settings → Dashboards → Resources (Home Assistant Repairs offers to), then reload.") : customElements.define("three-d-rooms-card", $), window.customCards = window.customCards || [], window.customCards.some((e) => e.type === "three-d-rooms-card") || window.customCards.push({
 	type: "three-d-rooms-card",
 	name: "3D Rooms",
 	description: "Your room in perspective, with live lighting and controls on the modeled fixtures.",
 	preview: !0
 });
-export { gt as ThreeDRoomsCard };
+export { $ as ThreeDRoomsCard };

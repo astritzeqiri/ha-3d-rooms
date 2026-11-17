@@ -2825,13 +2825,11 @@ export class ThreeDRoomsCard extends HTMLElement {
       await this._pressPreset(control);
       return;
     }
-    if (
-      control.type === "climate" ||
-      control.type === "lock" ||
-      control.type === "vacuum" ||
-      control.type === "cover" ||
-      control.type === "number"
-    ) {
+    // Only lights switch on a tap. Every other device (climate, locks,
+    // covers, desks, robot vacuums, and any type added later) opens its
+    // dialog, so a tap can never start or toggle it by accident.
+    // (Controls without a type are lights, as everywhere else.)
+    if ((control.type ?? "light") !== "light") {
       this._pick(id);
       return;
     }
@@ -3531,6 +3529,12 @@ export class ThreeDRoomsCard extends HTMLElement {
 }
 if (!customElements.get("three-d-rooms-card"))
   customElements.define("three-d-rooms-card", ThreeDRoomsCard);
+else if (customElements.get("three-d-rooms-card") !== ThreeDRoomsCard)
+  // Another copy registered first, usually an old dashboard resource
+  // (/hacsfiles/… or /local/…): dashboards then run that older card.
+  console.warn(
+    "3D Rooms: an older 3D Rooms card was loaded before this one, so dashboards use it. Remove the 3D Rooms entry from Settings → Dashboards → Resources (Home Assistant Repairs offers to), then reload.",
+  );
 window.customCards = window.customCards || [];
 if (!window.customCards.some((c) => c.type === "three-d-rooms-card"))
   window.customCards.push({

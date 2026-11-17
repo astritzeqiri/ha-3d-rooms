@@ -17,13 +17,30 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.debounce import Debouncer
 
-from .const import DOMAIN
-from .health import failed_optimizations, missing_room_entities, missing_view_entities
+from .const import DOMAIN, STATIC_URL
+from .health import failed_optimizations, missing_room_entities, missing_view_entities, stale_card_resources
 
 LOGGER = logging.getLogger(__name__)
 ROOM_ISSUE = "missing_entities_"
 VIEW_ISSUE = "missing_view_entities_"
 OPTIMIZE_ISSUE = "optimization_failed_"
+CARD_ISSUE = "old_card_resource"
+
+
+async def dashboard_resources(hass):
+    """The dashboard resource collection and its items, or (None, [])."""
+    try:
+        from homeassistant.components.lovelace.const import LOVELACE_DATA
+    except ImportError:  # an older Home Assistant
+        return None, []
+    data = hass.data.get(LOVELACE_DATA)
+    resources = getattr(data, "resources", None)
+    if resources is None:
+        return None, []
+    ensure = getattr(resources, "_async_ensure_loaded", None)
+    if ensure is not None and not getattr(resources, "loaded", True):
+        await ensure()
+    return resources, list(resources.async_items() or [])
 SHOWN = 5
 
 
@@ -109,12 +126,22 @@ class HealthMonitor:
                 {"room": titles[model_id]},
                 {"model": model_id},
             )
+        resources, items = await dashboard_resources(self.hass)
+        stale = stale_card_resources(items, STATIC_URL)
+        if stale:
+            # Removable here only when resources are kept in storage (not YAML).
+            removable = hasattr(resources, "async_delete_item")
+            wanted[CARD_ISSUE] = (
+                "old_card_resource" if removable else "old_card_resource_yaml",
+                {"resources": listing([item["url"] for item in stale])},
+                {"ids": [item.get("id") for item in stale]},
+            )
         for issue_id, (key, placeholders, data) in wanted.items():
             ir.async_create_issue(
                 self.hass,
                 DOMAIN,
                 issue_id,
-                is_fixable=True,
+                is_fixable=key != "old_card_resource_yaml",
                 is_persistent=False,
                 severity=ir.IssueSeverity.WARNING,
                 translation_key=key,
@@ -182,7 +209,19 @@ class RetryOptimizeFlow(_ActionFlow):
         runtime.schedule_optimize()
 
 
+class RemoveOldCardFlow(_ActionFlow):
+    async def fix(self, runtime):
+        resources, items = await dashboard_resources(self.hass)
+        ids = {item.get("id") for item in stale_card_resources(items, STATIC_URL)}
+        if resources is None or not ids & set(self.data.get("ids", [])):
+            raise ValueError("gone")
+        for item_id in ids & set(self.data["ids"]):
+            await resources.async_delete_item(item_id)
+
+
 async def async_create_fix_flow(hass, issue_id, data) -> RepairsFlow:
+    if issue_id == CARD_ISSUE:
+        return RemoveOldCardFlow(data)
     if issue_id.startswith(ROOM_ISSUE):
         return UnbindRoomFlow(data)
     if issue_id.startswith(VIEW_ISSUE):
