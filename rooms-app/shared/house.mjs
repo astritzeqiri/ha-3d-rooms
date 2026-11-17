@@ -95,6 +95,10 @@ export function houseKey(text) {
     h = BigInt.asUintN(64, (h ^ BigInt(c)) * 1099511628211n);
   return h.toString(16).padStart(16, "0");
 }
+/** Rotate a direction by a placement transform, without moving it. */
+export function placedDirection(v, t) {
+  return [0, 1, 2].map((i) => t[i] * v[0] + t[4 + i] * v[1] + t[8 + i] * v[2]);
+}
 export function placedPoint(p, t) {
   return [0, 1, 2].map(
     (i) => t[i] * p[0] + t[4 + i] * p[1] + t[8 + i] * p[2] + t[12 + i],
@@ -148,6 +152,7 @@ export function houseModels(models) {
             ...(c.markerPosition
               ? { markerPosition: placedPoint(c.markerPosition, t) }
               : {}),
+            ...(c.facing ? { facing: placedDirection(c.facing, t) } : {}),
             ...(c.lightGroup
               ? {
                   lightGroup: key(c.lightGroup),
@@ -226,6 +231,8 @@ export function houseModels(models) {
         model.members.push({
           model: m.id,
           ...(m.groupIcons ? { groupIcons: true } : {}),
+          // The room's Home Assistant area: where a vacuum cleaning by area goes.
+          ...(m.areaId ? { areaId: m.areaId } : {}),
           appearance: structuredClone(m.appearance || []),
           transform: t,
           sceneRevision: m.sceneRevision,

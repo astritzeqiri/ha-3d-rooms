@@ -6,6 +6,7 @@ import {
   renderProfile,
 } from "../shared/render-profile.mjs";
 import { createClimateVisual } from "../shared/climate-visual.mjs";
+import { createVacuumVisual } from "../shared/vacuum-visual.mjs";
 import { climateAppearance } from "../shared/climate.mjs";
 import { offsetPoint } from "../shared/marker-settings.mjs";
 import { deviceForControl } from "../shared/device.mjs";
@@ -387,7 +388,10 @@ export class SceneView {
         c.type === "lock"
           ? (c.nodeIds || []).map((id) => this.nodes.get(id)).filter(Boolean)
           : [];
+      const vacuum =
+        c.type === "vacuum" ? this.createVacuum(c, marker) : undefined;
       this.fixtures.set(c.id, {
+        vacuum,
         lockNodes,
         climateVisuals,
         numberNodes,
@@ -1172,6 +1176,13 @@ export class SceneView {
         f.marker.material.color.set(s.unavailable ? "#858b86" : "#c3dbab");
         continue;
       }
+      if (f.type === "vacuum") {
+        f.vacuum?.setState(s);
+        f.marker.material.color.set(
+          s.unavailable ? "#858b86" : s.error ? "#d9654f" : "#c3dbab",
+        );
+        continue;
+      }
       if (f.type === "lock") {
         // Unknown state keeps the exported (unlocked) pose rather than guessing.
         for (const node of f.lockNodes) setLockTurn(node, s.locked === true);
@@ -1509,12 +1520,97 @@ export class SceneView {
         Math.abs(point.y) <= 1,
     };
   }
+  /**
+   * Robot vacuum and dock for a `vacuum` control. The robot feels its way
+   * with short rays against the room's own meshes (both faces: scanned walls
+   * are often single-sided), so it stays off walls and furniture.
+   */
+  createVacuum(control, marker) {
+    const ray = new THREE.Raycaster(),
+      down = new THREE.Vector3(0, -1, 0),
+      from = new THREE.Vector3(),
+      sides = new Map();
+    const cast = (origin, direction, far) => {
+      if (!this.asset) return [];
+      ray.set(origin, direction);
+      ray.far = far;
+      if (sides.asset !== this.asset) {
+        sides.clear();
+        sides.asset = this.asset;
+        this.asset.traverse((o) => {
+          for (const m of [o.material].flat()) if (m) sides.set(m, m.side);
+        });
+      }
+      // Count both faces only while casting; nothing renders in between.
+      for (const m of sides.keys()) m.side = THREE.DoubleSide;
+      try {
+        return ray.intersectObject(this.asset, true);
+      } finally {
+        for (const [m, side] of sides) m.side = side;
+      }
+    };
+    const visual = createVacuumVisual(control, {
+      reducedMotion:
+        typeof matchMedia === "function" &&
+        matchMedia("(prefers-reduced-motion: reduce)").matches,
+      sense: (origin, direction, far) =>
+        cast(origin, direction, far)[0]?.distance ?? Infinity,
+      floorAt: (x, y, z) =>
+        cast(from.set(x, y + 0.3, z), down, 0.4).some(
+          (hit) => Math.abs(hit.point.y - y) < 0.06,
+        ),
+      // Whose floor is this: the house room the floor mesh belongs to, or
+      // this room in a single-room view.
+      roomAt: (x, y, z) => {
+        const hit = cast(from.set(x, y + 0.3, z), down, 0.4).find(
+          (h) => Math.abs(h.point.y - y) < 0.06,
+        );
+        if (!hit) return null;
+        for (let o = hit.object; o; o = o.parent)
+          if (o.userData.pickRoom) return o.userData.pickRoom;
+        return this.model?.id ?? null;
+      },
+      roomCenter: (room) => {
+        const placement = this.asset?.children.find(
+          (child) => child.userData.pickRoom === room,
+        );
+        return placement
+          ? new THREE.Box3()
+              .setFromObject(placement)
+              .getCenter(new THREE.Vector3())
+              .toArray()
+          : null;
+      },
+    });
+    for (const object of visual.objects) {
+      object.traverse((o) => {
+        o.userData.pickControl = control.id;
+      });
+      this.scene.add(object);
+    }
+    // The marker floats above the dock unless the room set its own spot.
+    if (!control.markerPosition)
+      marker.position
+        .copy(visual.dock.position)
+        .setY(visual.dock.position.y + 0.7);
+    return visual;
+  }
+  /** Send a vacuum's robot to these rooms (clean by area); [] to roam. */
+  setVacuumRooms(id, rooms) {
+    const vacuum = this.fixtures?.get(id)?.vacuum;
+    if (!vacuum) return false;
+    vacuum.setRooms(rooms);
+    this.syncClimateAnimation();
+    return true;
+  }
   clearClimateVisuals() {
     if (this.climateFrame) cancelAnimationFrame(this.climateFrame);
     this.climateFrame = 0;
     for (const f of this.fixtures?.values() || []) {
       for (const effect of f.climateVisuals || []) effect.dispose();
       f.climateVisuals = [];
+      f.vacuum?.dispose();
+      f.vacuum = undefined;
     }
   }
   /** Start a light effect seen as a service call (one-shot effects repeat). */
@@ -1565,9 +1661,10 @@ export class SceneView {
     return false;
   }
   syncClimateAnimation() {
-    const effects = [...this.fixtures.values()].flatMap(
-      (f) => f.climateVisuals || [],
-    );
+    const effects = [...this.fixtures.values()].flatMap((f) => [
+      ...(f.climateVisuals || []),
+      ...(f.vacuum ? [f.vacuum] : []),
+    ]);
     const shouldRun =
       !document.hidden &&
       !this.contextLost &&
@@ -1608,9 +1705,11 @@ export class SceneView {
       return;
     }
     this.syncClimateAnimation();
-    for (const f of this.fixtures.values())
+    for (const f of this.fixtures.values()) {
       for (const effect of f.climateVisuals || [])
         effect.update(performance.now() / 1000);
+      f.vacuum?.update(performance.now() / 1000);
+    }
     this.applyLightEffects(performance.now() / 1000);
     if (this.deferShadows) {
       // First frame of a new scene: shadow maps are created but nothing casts

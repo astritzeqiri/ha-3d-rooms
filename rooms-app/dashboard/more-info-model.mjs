@@ -296,6 +296,8 @@ export function describeEntity(entity) {
         { service: "unlock", label: "Unlock" },
       ],
     });
+  } else if (domain === "vacuum") {
+    out.controls.push(vacuumControl(entity));
   } else if (domain === "alarm_control_panel") {
     const features = Number.isFinite(a.supported_features)
       ? a.supported_features
@@ -393,6 +395,105 @@ export function describeEntity(entity) {
   return out;
 }
 
+/** `VacuumEntityFeature` bits, as in Home Assistant's frontend. */
+export const VACUUM_FEATURE = {
+  PAUSE: 4,
+  STOP: 8,
+  RETURN_HOME: 16,
+  FAN_SPEED: 32,
+  STATUS: 128,
+  LOCATE: 512,
+  CLEAN_SPOT: 1024,
+  STATE: 4096,
+  START: 8192,
+  CLEAN_AREA: 16384,
+};
+/**
+ * The vacuum dialog's buttons and chips, with Home Assistant's own rules
+ * (more-info-vacuum): one start/pause button (play while not cleaning,
+ * pause while cleaning; the legacy start_pause service for old entities),
+ * stop only while away from the dock, return home unless already returning.
+ */
+export function vacuumControl(entity) {
+  const a = entity?.attributes || {},
+    state = entity?.state,
+    features = Number.isFinite(a.supported_features) ? a.supported_features : 0,
+    has = (bit) => (features & bit) !== 0,
+    unavailable = state === "unavailable",
+    cleaning = state === "cleaning" || state === "on",
+    legacy = !has(VACUUM_FEATURE.STATE) && !has(VACUUM_FEATURE.START);
+  const buttons = [];
+  if (has(VACUUM_FEATURE.START) || has(VACUUM_FEATURE.PAUSE)) {
+    const pause = !legacy && cleaning && has(VACUUM_FEATURE.PAUSE);
+    buttons.push(
+      legacy && has(VACUUM_FEATURE.PAUSE)
+        ? {
+            key: "start_pause",
+            service: "start_pause",
+            label: "Start/Pause",
+            icon: "playpause",
+            disabled: unavailable,
+          }
+        : {
+            key: "start_pause",
+            service: cleaning ? "pause" : "start",
+            label: pause ? "Pause" : "Start",
+            icon: pause ? "pause" : "play",
+            disabled: unavailable,
+          },
+    );
+  }
+  if (has(VACUUM_FEATURE.STOP))
+    buttons.push({
+      key: "stop",
+      service: "stop",
+      label: "Stop",
+      icon: "stop",
+      disabled: unavailable || ["docked", "off", "idle"].includes(state),
+    });
+  if (has(VACUUM_FEATURE.RETURN_HOME))
+    buttons.push({
+      key: "return_to_base",
+      service: "return_to_base",
+      label: "Return to dock",
+      icon: "dock",
+      disabled: unavailable || state === "returning",
+    });
+  if (has(VACUUM_FEATURE.LOCATE))
+    buttons.push({
+      key: "locate",
+      service: "locate",
+      label: "Locate",
+      icon: "locate",
+      disabled: unavailable,
+    });
+  if (has(VACUUM_FEATURE.CLEAN_SPOT))
+    buttons.push({
+      key: "clean_spot",
+      service: "clean_spot",
+      label: "Clean spot",
+      icon: "spot",
+      disabled: unavailable,
+    });
+  const fanSpeeds =
+    has(VACUUM_FEATURE.FAN_SPEED) && Array.isArray(a.fan_speed_list)
+      ? a.fan_speed_list.filter((v) => typeof v === "string")
+      : [];
+  return {
+    kind: "vacuum",
+    buttons,
+    fanSpeeds,
+    fanSpeed: typeof a.fan_speed === "string" ? a.fan_speed : undefined,
+    cleanArea: has(VACUUM_FEATURE.CLEAN_AREA),
+    // A vacuum's own status text replaces the state, as in Home Assistant.
+    status:
+      has(VACUUM_FEATURE.STATUS) && typeof a.status === "string"
+        ? a.status
+        : undefined,
+    battery: Number.isFinite(a.battery_level) ? a.battery_level : undefined,
+  };
+}
+
 /** The service call a control change means, for `callService(domain, service, data)`. */
 export function controlCall(description, control, value) {
   const { domain, id } = description;
@@ -413,6 +514,31 @@ export function controlCall(description, control, value) {
     ];
   }
   if (control.kind === "buttons") return [domain, value, { entity_id: id }];
+  if (control.kind === "vacuum") {
+    // value: a button's service, { fan_speed }, or { areas: [area ids] }.
+    if (value?.fan_speed !== undefined) {
+      if (!control.fanSpeeds.includes(value.fan_speed))
+        throw new Error("Unknown fan speed");
+      return [
+        "vacuum",
+        "set_fan_speed",
+        { entity_id: id, fan_speed: value.fan_speed },
+      ];
+    }
+    if (value?.areas) {
+      if (!control.cleanArea || !value.areas.length)
+        throw new Error("Choose at least one area");
+      return [
+        "vacuum",
+        "clean_area",
+        { entity_id: id, cleaning_area_id: [...value.areas] },
+      ];
+    }
+    const button = control.buttons.find((b) => b.service === value);
+    if (!button || button.disabled)
+      throw new Error("This vacuum cannot do that now");
+    return ["vacuum", value, { entity_id: id }];
+  }
   if (
     control.kind === "slider" ||
     control.kind === "stepper" ||

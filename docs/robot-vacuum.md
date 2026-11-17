@@ -1,0 +1,29 @@
+# Robot vacuum in a room model
+
+A robot vacuum is a control of type `vacuum` in the room's `manifest.json`. It needs no scene nodes: 3D Rooms draws a dock and a robot itself.
+
+```json
+{
+  "id": "corridor-vacuum",
+  "label": "Robot vacuum",
+  "type": "vacuum",
+  "position": [-0.97, 0, 2.46],
+  "facing": [1, 0, 0],
+  "capabilities": ["start", "pause", "stop", "return_home", "locate"]
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `position` | Centre of the dock's base, on the floor, in room metres. The dock is about 0.44 m wide and 0.47 m deep (tower and ramp); its back sits 0.25 m behind this point. |
+| `facing` | Optional horizontal unit vector (`y` must be 0) pointing out of the dock, where the robot drives out. Default `[0, 0, 1]`. House views rotate it with the room. |
+| `capabilities` | Must include `start`; may add `pause`, `stop`, `return_home`, `locate`. A button also needs the matching feature reported by the vacuum entity. |
+| `markerPosition` | Optional; otherwise the icon floats 0.7 m above the dock. |
+
+Connect the control to any `vacuum.*` entity. Commands go through `vacuum.start`, `vacuum.pause`, `vacuum.stop`, `vacuum.return_to_base` and `vacuum.locate`.
+
+Home Assistant reports the vacuum's activity (cleaning, returning, docked, paused, idle, error), not its position. While cleaning, the drawn robot drives out to 0.55 m in front of the dock and bumps around: short rays at 7 cm above the floor stop it before walls and furniture, and a floor check stops it at stairs and the edge of the scan. Open doorways let it into the next room in house views.
+
+**Cleaning by area.** When the vacuum is sent to clean Home Assistant areas (`vacuum.clean_area`), each 3D room linked to one of those areas (room **Settings → Area**) becomes a destination, in the order chosen. The robot plans a route on a 25 cm grid (a cell needs floor and room for the robot's body; a step needs a clear ray), drives there, cleans without leaving that room's floor (found by a downward ray, so L-shaped rooms work), and moves to the next room after about a minute; it stays in the last one until it returns. Unlinked or unreachable areas are skipped. The card reads the areas from Home Assistant's `call_service` event, which only administrators receive; otherwise, and when cleaning starts outside Home Assistant, the robot roams. Returning, it retraces its own path (loops removed), turns to face out and reverses onto the dock. A single-room view only has that room's floor, so the robot stays inside it.
+
+To add a vacuum to an existing room, add the control to the room's manifest and replace the room in place (the room's **Settings → Replace room model**) with a ZIP of that manifest and the room's `scene.glb`. Mappings, placement and icons are kept.

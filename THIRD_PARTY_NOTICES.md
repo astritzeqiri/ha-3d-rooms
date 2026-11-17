@@ -52,3 +52,7 @@ source projects, or anything really.
 Icons: Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
 Code: MIT (https://opensource.org/licenses/MIT)
 ```
+
+## Home Assistant frontend
+
+The full-screen page's robot vacuum picture and its animations (`rooms-app/dashboard/vacuum-art.mjs`) are adapted from Home Assistant's `ha-state-control-vacuum-status` ([home-assistant/frontend](https://github.com/home-assistant/frontend), Apache License 2.0, Copyright Home Assistant contributors). The vacuum dialog's layout follows that project's `more-info-vacuum`.

@@ -1,5 +1,6 @@
 import { climateState, climateAppearance } from "./climate.mjs";
 import { lockState } from "./lock.mjs";
+import { vacuumState } from "./vacuum.mjs";
 /** Presentation only: actual entity state remains the source of truth. */
 export function markerAppearance(control, entity, state, preview = false) {
   if (control.type === "climate") {
@@ -26,6 +27,40 @@ export function markerAppearance(control, entity, state, preview = false) {
         entity_id: "climate.three_d_rooms_preview",
         state: s.mode || "unavailable",
         attributes: { icon: "mdi:air-conditioner" },
+      },
+    };
+  }
+  if (control.type === "vacuum") {
+    const s = preview
+        ? state || {}
+        : entity
+          ? vacuumState(entity)
+          : state || {},
+      connected = preview || !!entity,
+      unavailable = !connected || !!s.unavailable;
+    return {
+      badge: !connected ? "—" : unavailable ? "!" : s.label,
+      description: !connected
+        ? "Not connected"
+        : unavailable
+          ? "Unavailable"
+          : `${s.label}${s.battery === undefined ? "" : ` · ${s.battery}%`}, Home Assistant vacuum controls`,
+      active: !unavailable && !!s.active,
+      moving: !unavailable && !!s.active,
+      unavailable,
+      tone: unavailable
+        ? undefined
+        : s.error
+          ? "jammed"
+          : s.cleaning
+            ? "cleaning"
+            : s.returning
+              ? "moving"
+              : undefined,
+      stateObj: entity || {
+        entity_id: "vacuum.three_d_rooms_preview",
+        state: s.state || "docked",
+        attributes: {},
       },
     };
   }

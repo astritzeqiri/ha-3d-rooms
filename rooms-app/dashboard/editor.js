@@ -57,6 +57,7 @@ export class ThreeDRoomsEditor extends HTMLElement {
     </div>
     <label class="check"><input id="interactive" type="checkbox">Allow camera movement by default</label>
     <label class="check"><input id="camera_controls" type="checkbox">Show camera buttons on the card (move camera and reset view)</label>
+    <label class="check" id="floor-plan-button-setting"><input id="floor_plan_button" type="checkbox">Show the Floor plan button (switch between the 3D view and a top-down floor plan)</label>
     <label class="check"><input id="edit_button" type="checkbox">Show the Edit button to administrators (opens this view in the 3D Rooms editor)</label>
     <label class="check"><input id="light_panel" type="checkbox">Show the Lights button (each room's lights, with one switch per room)</label>
     <label class="check"><input id="shade_panel" type="checkbox">Show the Shades button (each room's shades, with one switch per room)</label>
@@ -131,6 +132,13 @@ export class ThreeDRoomsEditor extends HTMLElement {
       const config = { ...this._config };
       if (this._field("camera_controls").checked) delete config.camera_controls;
       else config.camera_controls = false;
+      this._emit(config);
+    };
+    this._field("floor_plan_button").onchange = () => {
+      const config = { ...this._config };
+      if (this._field("floor_plan_button").checked)
+        delete config.floor_plan_button;
+      else config.floor_plan_button = false;
       this._emit(config);
     };
     this._field("shade_panel").onchange = () => {
@@ -362,6 +370,11 @@ export class ThreeDRoomsEditor extends HTMLElement {
       this._config.floor_selector !== false;
     this._field("camera_controls").checked =
       this._config.camera_controls !== false;
+    this._field("floor_plan_button").checked =
+      this._config.floor_plan_button !== false;
+    // A view saved as a floor plan has no 3D camera to switch to.
+    this._field("floor-plan-button-setting").hidden =
+      (resolved.view || "front") === "floor";
     this._field("light_panel").checked = this._config.light_panel !== false;
     this._field("edit_button").checked = this._config.edit_button !== false;
     this._field("shade_panel").checked = this._config.shade_panel !== false;

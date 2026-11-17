@@ -92,3 +92,17 @@ test("linked marker settings follow saved views, support explicit overrides and 
     undefined,
   );
 });
+test("a saved view's floor plan reaches linked cards and clears when off", () => {
+  const view = { ...saved(), floorPlan: { heading: 180 } };
+  const resolved = resolveSavedView({ saved_view: "office" }, [view]);
+  assert.deepEqual(resolved.floorPlan, { heading: 180 });
+  resolved.floorPlan.heading = 1;
+  assert.equal(view.floorPlan.heading, 180, "cards get their own copy");
+  assert.equal(
+    Object.hasOwn(
+      resolveSavedView({ saved_view: "office" }, [saved()]),
+      "floorPlan",
+    ),
+    false,
+  );
+});

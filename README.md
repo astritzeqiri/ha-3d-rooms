@@ -30,6 +30,7 @@ Bring your home into Home Assistant as an interactive 3D model. Import prepared 
 - **Lights** — on/off, brightness, colour and white temperature, with state and light effects reflected in the room.
 - **Shades, windows and doors** — open, stop and close covers, or follow a door/window contact sensor. Hinged and sliding doors move in 3D.
 - **Door locks** — the modeled thumb-turn follows the lock; a tap opens the lock's dialog.
+- **Robot vacuums** — a dock and robot drawn in the room: the robot drives out and cleans while the vacuum cleans, and drives back to its dock when it returns. A tap opens Home Assistant's vacuum dialog, including cleaning by area.
 - **Air conditioners** — state colours and mode effects on the model; the native climate dialog (or, on the full-screen page, an arc dial) controls them.
 - **Adjustable desks** — height, movement controls and four macros in one device card.
 - **Your own icons** — every marker shows Home Assistant's icon for its entity and state, or any icon you choose per room or per view: Material Design icons or your own icon sets such as `local:`.
@@ -134,6 +135,7 @@ Open a room’s **Devices** tab to connect and arrange its devices. The model sh
 - **Lights** — group several modeled lights into one control connected to a single Home Assistant light or switch entity (**Group devices → Group lights**). Each fixture keeps its geometry. Ungroup at any time.
 - **Shades, windows and doors** — connect a `cover` entity, or a door/window `binary_sensor` (read-only: it shows open/closed and moves the model, with no open/close buttons). Shades, windows and doors can be grouped like lights.
 - **Locks** — map a modeled lock to a `lock.*` entity. Locks that need a code are never unlocked from 3D Rooms.
+- **Robot vacuums** — connect a `vacuum.*` entity (any integration: Roborock, Matter, …). Start, Pause, Stop, Dock and Locate appear only when the vacuum supports them. Home Assistant does not report where the robot is, so its path in the room is illustrative: it bumps around the floor (and through open doors) while cleaning and retraces its path home. Cleaning by area sends it to the 3D rooms linked to those areas (room **Settings → Area**), and it stays inside them. See the [robot vacuum model specification](docs/robot-vacuum.md).
 - **Air conditioners** — connect a `climate` entity; mode effects show on the model.
 - **Adjustable desks** — see the [desk model specification](docs/adjustable-desk.md).
 - **Hide a device everywhere** — **Hide device** (in a device’s ⋯ menu) removes its markers and controls from every view and card. Entity mappings and Home Assistant itself are untouched; **Show device** restores it.
@@ -169,7 +171,7 @@ On the card:
 - **Markers** — tap a light to toggle it; hold it for Home Assistant’s device controls. Covers, locks and climate open their native dialogs.
 - **Lights and Shades panels** (top left) list each room’s lights or shades with one switch per room and a confirmed **All** switch. Hidden devices are never switched.
 - **House and floor cards** have floor buttons (All, then each floor). A room hidden behind others gets a button that shows it on its own; double-tap a room to open it, use the arrows or Left/Right for the next room, and the House button or Escape to return. Hold a room button to switch that room’s lights.
-- **Toolbar** — Move camera, Reset view, Reload models, fullscreen, and (for administrators) an Edit button that opens the view in the editor in a new tab.
+- **Toolbar** — Floor plan (switch between the saved 3D camera and a top-down floor plan in the same orientation; the choice is saved on the view for everyone, like the time of day), Move camera, Reset view, Reload models, fullscreen, and (for administrators) an Edit button that opens the view in the editor in a new tab.
 - **Time of day** — an Auto / Day / Night switch for daylight-ready rooms.
 - A progress bar and the view’s own picture show while a large room downloads.
 
@@ -191,6 +193,7 @@ height: auto              # 180–1600, or auto to fill the screen
 | `floor_selector` | `false` hides the floor buttons on house and floor cards |
 | `room_focus` | `false` hides the room buttons |
 | `camera_controls` | `false` hides Move camera and Reset view |
+| `floor_plan_button` | `false` hides the Floor plan button (it is never shown on views saved as a floor plan) |
 | `light_panel`, `shade_panel` | `false` hides the Lights or Shades panel |
 | `edit_button` | `false` hides the administrator Edit button |
 | `quality` | `auto` (default), `high` or `low` rendering quality |

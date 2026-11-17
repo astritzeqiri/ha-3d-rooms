@@ -78,6 +78,22 @@ function cardHarness() {
       }),
     },
     hexToRgb: () => [255, 240, 212],
+    validateBackground: () => {},
+    // A per-test store; __floorPlanBlocked makes every call throw.
+    localStorage: {
+      getItem: (k) => {
+        if (globalThis.__floorPlanBlocked) throw new Error("blocked");
+        return globalThis.__floorPlanStore?.get(k) ?? null;
+      },
+      setItem: (k, v) => {
+        if (globalThis.__floorPlanBlocked) throw new Error("blocked");
+        (globalThis.__floorPlanStore ||= new Map()).set(k, v);
+      },
+      removeItem: (k) => {
+        if (globalThis.__floorPlanBlocked) throw new Error("blocked");
+        globalThis.__floorPlanStore?.delete(k);
+      },
+    },
     actionState,
     resolveSavedView,
     markerSettings,
@@ -490,6 +506,223 @@ test("camera buttons toggle movement for this session and reset the framing", ()
     camera_controls: false,
   });
 });
+function floorPlanCard() {
+  const card = cardHarness();
+  const calls = [];
+  const button = () => ({
+    hidden: true,
+    attributes: {},
+    setAttribute(k, v) {
+      this.attributes[k] = v;
+    },
+  });
+  card._moveCamera = button();
+  card._resetCamera = button();
+  card._floorPlanButton = button();
+  const options = { mode: "front" };
+  card._view = {
+    model: { id: "room" },
+    options,
+    // Camera south of the target, looking north: heading 180.
+    camera: { position: { x: 0, y: 5, z: -10 } },
+    orbit: { target: { x: 0, y: 0, z: 0 } },
+    setView: (mode) => calls.push(["view", mode, options.heading]),
+  };
+  return { card, calls, options };
+}
+
+test("floor plan button keeps the 3D heading and saves the choice on the view", async () => {
+  const { card, calls, options } = floorPlanCard();
+  const sent = [];
+  card._hass = { callWS: async (message) => sent.push(message) };
+  const camera = { projection: "perspective", position: [1, 2, 3] };
+  card._sourceConfig = { saved_view: "v1" };
+  card._config = {
+    view: "front",
+    tilt: 40,
+    heading: 90,
+    zoom: 1.5,
+    camera,
+    interactive: false,
+  };
+  card._restoreFloorPlan();
+  card._syncCameraButtons();
+  assert.equal(card._floorPlanButton.hidden, false);
+  assert.equal(card._floorPlanButton.attributes["aria-pressed"], "false");
+  card._cameraMoved = true;
+  card._setFloorPlan(true);
+  await Promise.resolve();
+  assert.deepEqual(
+    calls,
+    [["view", "floor", 180]],
+    "plan keeps the 3D heading",
+  );
+  assert.equal(options.tilt, 0);
+  assert.equal(options.camera, undefined);
+  assert.equal(card._floorPlanButton.attributes["aria-pressed"], "true");
+  assert.equal(card._cameraMoved, false);
+  assert.deepEqual(JSON.parse(JSON.stringify(sent)), [
+    {
+      type: "three_d_rooms/request",
+      operation: "view-floor-plan",
+      data: { id: "v1", floorPlan: { heading: 180 } },
+    },
+  ]);
+  assert.equal(JSON.stringify(card._config.floorPlan), '{"heading":180}');
+  // A reload reads it back from the saved view and opens as the same plan.
+  card._floorPlan = false;
+  card._restoreFloorPlan();
+  assert.equal(card._floorPlan, true);
+  assert.deepEqual(JSON.parse(JSON.stringify(card._cameraOptions())), {
+    mode: "floor",
+    view: "floor",
+    tilt: 0,
+    heading: 180,
+    zoom: 1,
+  });
+  card._setFloorPlan(false);
+  await Promise.resolve();
+  assert.deepEqual(calls.at(-1), ["view", "front", 90]);
+  assert.equal(options.tilt, 40);
+  assert.equal(options.zoom, 1.5);
+  assert.equal(options.camera, camera, "the saved camera comes back");
+  assert.equal(sent.at(-1).data.floorPlan, null);
+  assert.equal(Object.hasOwn(card._config, "floorPlan"), false);
+  // Previews in the card editor never write to the view.
+  card._preview = true;
+  card._setFloorPlan(true);
+  assert.equal(sent.length, 2);
+});
+
+test("a failed save puts the floor plan back as it was", async () => {
+  const { card, calls } = floorPlanCard();
+  card._hass = {
+    callWS: async () => {
+      throw new Error("Saved view not found.");
+    },
+  };
+  card._container = { append() {} };
+  card._sourceConfig = { saved_view: "v1" };
+  card._config = { view: "front", heading: 90, tilt: 30 };
+  card._restoreFloorPlan();
+  card._setFloorPlan(true);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(card._floorPlan, false);
+  assert.equal(Object.hasOwn(card._config, "floorPlan"), false);
+  assert.deepEqual(calls.at(-1), ["view", "front", 90]);
+  assert.equal(card._floorPlanButton.attributes["aria-pressed"], "false");
+});
+
+test("a room card without a saved view remembers the floor plan in this browser", () => {
+  const { card } = floorPlanCard();
+  const store = new Map();
+  globalThis.__floorPlanStore = store;
+  card._sourceConfig = { model: "room-1" };
+  card._config = { view: "front", heading: 0 };
+  card._setFloorPlan(true);
+  assert.equal(
+    store.get("three-d-rooms:floor-plan:room-1"),
+    JSON.stringify({ heading: 180 }),
+  );
+  card._floorPlan = false;
+  card._restoreFloorPlan();
+  assert.equal(card._floorPlan, true);
+  assert.equal(card._floorPlanHeading, 180);
+  card._setFloorPlan(false);
+  assert.equal(store.has("three-d-rooms:floor-plan:room-1"), false);
+  // Blocked storage: the choice simply lasts until the page closes.
+  globalThis.__floorPlanBlocked = true;
+  try {
+    card._setFloorPlan(true);
+    card._restoreFloorPlan();
+    assert.equal(card._floorPlan, false);
+  } finally {
+    globalThis.__floorPlanBlocked = false;
+  }
+});
+
+test("floor plan button is hidden when turned off or for floor-plan views", () => {
+  const { card } = floorPlanCard();
+  card._sourceConfig = { saved_view: "v1" };
+  card._config = {
+    view: "front",
+    floor_plan_button: false,
+    floorPlan: { heading: 10 },
+  };
+  card._restoreFloorPlan();
+  assert.equal(
+    card._floorPlan,
+    false,
+    "a hidden button ignores the saved plan",
+  );
+  card._syncCameraButtons();
+  assert.equal(card._floorPlanButton.hidden, true);
+  card._config = { view: "floor", interactive: false };
+  card._syncCameraButtons();
+  assert.equal(card._floorPlanButton.hidden, true);
+  card._setFloorPlan(true);
+  assert.equal(card._floorPlan, false);
+  delete card._view;
+  card._config = { view: "front" };
+  card._syncCameraButtons();
+  assert.equal(
+    card._floorPlanButton.hidden,
+    true,
+    "hidden until a scene loads",
+  );
+});
+
+test("another viewer's floor plan change applies without reloading the card", async () => {
+  const { card, calls } = floorPlanCard();
+  card._sourceConfig = { saved_view: "v1" };
+  card._config = {
+    model: "room",
+    view: "front",
+    heading: 90,
+    interactive: false,
+  };
+  let loads = 0;
+  card._load = () => loads++;
+  card._generation = 1;
+  card._model = { id: "room", controls: [] };
+  card._states = () => {};
+  card._syncDaylightSwitch = () => {};
+  card._hass = {
+    callWS: async ({ operation }) =>
+      operation === "components"
+        ? [
+            {
+              id: "v1",
+              title: "View",
+              height: 500,
+              floorPlan: { heading: 45 },
+              layers: [{ model: "room", view: "front", heading: 90 }],
+            },
+          ]
+        : [{ id: "room", controls: [] }],
+  };
+  card._config = resolveSavedView(card._sourceConfig, [
+    {
+      id: "v1",
+      title: "View",
+      height: 500,
+      layers: [{ model: "room", view: "front", heading: 90 }],
+    },
+  ]);
+  await card._modelsChanged();
+  assert.equal(loads, 0);
+  assert.equal(card._floorPlan, true);
+  assert.deepEqual(calls.at(-1), ["view", "floor", 45]);
+});
+
+test("floor_plan_button must be true or false", () => {
+  const card = cardHarness();
+  assert.throws(
+    () => card.setConfig({ model: "room", floor_plan_button: "no" }),
+    /floor_plan_button must be true or false/,
+  );
+});
+
 test("room changes during a load are rechecked once the load finishes", () => {
   const card = cardHarness();
   let checks = 0;

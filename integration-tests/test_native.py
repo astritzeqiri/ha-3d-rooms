@@ -438,6 +438,16 @@ class NativeTests(unittest.IsolatedAsyncioTestCase):
             await self.runtime.request("daylight", {"model": "kitchen", "mode": "auto", "entity": "sun.other"}, user.id, user)
         self.assertEqual(self.store.find("kitchen")["daylight"]["entity"], "sun.sun")
 
+        # A saved view's Floor plan toggle, like the day/night switch.
+        self.store.components = []
+        self.store.put_component({"schemaVersion": 1, "id": "kitchen-view", "title": "Kitchen", "height": 500,
+                                  "layers": [{"model": "kitchen", "view": "front", "heading": 90, "tilt": 28, "zoom": 1}]})
+        result = await self.runtime.request("view-floor-plan", {"id": "kitchen-view", "floorPlan": {"heading": 90}}, user.id, user)
+        self.assertEqual(result["floorPlan"], {"heading": 90})
+        self.assertEqual(self.store.components[0]["floorPlan"], {"heading": 90})
+        await self.runtime.request("view-floor-plan", {"id": "kitchen-view", "floorPlan": None}, user.id, user)
+        self.assertNotIn("floorPlan", self.store.components[0])
+
         # Presets follow Home Assistant's entity permissions for the user.
         calls = []
         async def handle(call):

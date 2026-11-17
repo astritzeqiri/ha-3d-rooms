@@ -16,6 +16,12 @@ import {
 import { climateState } from "../shared/climate.mjs";
 import { effectiveElevation, tone } from "../shared/backdrop.mjs";
 import { lockState, lockCommand } from "../shared/lock.mjs";
+import {
+  vacuumActions,
+  vacuumCommand,
+  vacuumState,
+  VACUUM_ACTIONS,
+} from "../shared/vacuum.mjs";
 import { houseViewSummary } from "../shared/house-presentation.mjs";
 import { uploadJSON } from "../shared/upload.mjs";
 import { uploadProgress } from "./upload-progress.js";
@@ -236,6 +242,8 @@ const ICON_PATHS = {
   number: '<path d="M4 7h16M4 12h10M4 17h6"/><path d="m17 14 3 3-3 3"/>',
   button: '<circle cx="12" cy="12" r="8"/><path d="m10 9 5 3-5 3Z"/>',
   lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1"/>',
+  vacuum:
+    '<circle cx="12" cy="12" r="9"/><path d="M7 9.5h10"/><circle cx="12" cy="14.5" r="1.5"/>',
 };
 const deviceKind = (c) =>
   c.device
@@ -274,6 +282,8 @@ function deviceRowMeta(c, s, connection) {
             : `${Math.round(s.position)}% open`) + group
     );
   if (c.type === "lock") return s.label || "Unknown";
+  if (c.type === "vacuum")
+    return `${s.label || "Unknown"}${s.battery === undefined ? "" : ` · ${s.battery}%`}`;
   if (c.type === "climate")
     return `${s.mode ?? "Unknown"}${s.currentTemperature === undefined ? "" : ` · ${s.currentTemperature}°`}${s.temperature === undefined ? "" : ` → ${s.temperature}°`}`;
   if (c.type === "number")
@@ -325,7 +335,45 @@ function deviceRowQuick(c, s, connection) {
   if (c.type === "button")
     return `<button type="button" class="quick-text" data-press="${c.id}" aria-label="Run ${label}" ${off}>Run</button>`;
   if (c.type === "lock") return lockButtons(c, s, off);
+  if (c.type === "vacuum") return vacuumButtons(c, s, off, true);
   return "";
+}
+const VACUUM_BUTTONS = {
+  start: ["Start", '<path d="m8 5 11 7-11 7Z"/>'],
+  pause: ["Pause", '<path d="M8 5v14M16 5v14"/>'],
+  stop: ["Stop", '<rect x="7" y="7" width="10" height="10" rx="1"/>'],
+  return_to_base: ["Dock", '<path d="M4 11 12 4l8 7M6 10v10h12V10"/>'],
+  locate: [
+    "Locate",
+    '<path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  ],
+};
+/**
+ * Explicit vacuum actions the robot supports. The quick row shows the main
+ * one (Start, or Pause while cleaning) and Dock; the device card shows all.
+ */
+function vacuumButtons(c, s, off, quick = false) {
+  const label = esc(c.label);
+  let actions = preview
+    ? ["start", "pause", "return_to_base"]
+    : vacuumActions(s.entity, c);
+  if (quick)
+    actions = actions.filter(
+      (a) =>
+        a === "return_to_base" ||
+        a === (s.cleaning && actions.includes("pause") ? "pause" : "start"),
+    );
+  if (!actions.length) return "";
+  return `<div class="quick-segment">${actions
+    .map((a) => {
+      const [text, path] = VACUUM_BUTTONS[a];
+      return iconButton(
+        `data-vacuum="${c.id}" data-action="${a}" ${off}`,
+        `${text} ${label}`,
+        path,
+      );
+    })
+    .join("")}</div>`;
 }
 // Locks never toggle on a single tap: each button names its explicit action.
 function lockButtons(c, s, off) {
@@ -352,6 +400,22 @@ let deviceFilter = "all",
 const openMore = new Set();
 const DEVICE_TOOLS_MIN = 5;
 function state(c) {
+  if (c.type === "vacuum") {
+    if (preview)
+      return (
+        simulated.get(c.id) ||
+        vacuumState({ entity_id: "vacuum.preview", state: "docked" })
+      );
+    const entity = status.entities.find(
+      (e) => e.entity_id === selected.bindings[c.id],
+    );
+    const reported = vacuumState(entity);
+    return {
+      ...reported,
+      entity,
+      unavailable: !status.connected || reported.unavailable,
+    };
+  }
   if (c.type === "lock") {
     if (preview)
       return (
@@ -588,7 +652,12 @@ function drawControls() {
         .includes(query)
     )
       return false;
-    const isOn = c.type === "cover" ? s.position > 0 : !!s.on;
+    const isOn =
+      c.type === "cover"
+        ? s.position > 0
+        : c.type === "vacuum"
+          ? !!s.active
+          : !!s.on;
     if (!tools || deviceFilter === "all") return true;
     if (deviceFilter === "on") return isOn;
     if (deviceFilter === "off") return !isOn;
@@ -609,6 +678,10 @@ function drawControls() {
     if (c.type === "lock") {
       const s = states.get(c.id);
       return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${esc(c.label)}</span>${deviceSettingsButton(c)}</div><p>${esc(s.label || "Unknown")}${s.jammed ? " · check the door" : ""}</p>${lockButtons(c, s, !preview && s.unavailable ? "disabled" : "")}${entityNote(c)}</article>`;
+    }
+    if (c.type === "vacuum") {
+      const s = states.get(c.id);
+      return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${esc(c.label)}</span>${deviceSettingsButton(c)}</div><p>${esc(s.label || "Unknown")}${s.battery === undefined ? "" : ` · Battery ${s.battery}%`}</p>${vacuumButtons(c, s, !preview && s.unavailable ? "disabled" : "")}${!preview && native?.moreInfo ? `<button type="button" data-vacuum-info="${c.id}" ${s.unavailable ? "disabled" : ""}>Open Home Assistant vacuum controls</button>` : ""}${entityNote(c)}</article>`;
     }
     if (c.type === "button") {
       const s = states.get(c.id),
@@ -853,6 +926,38 @@ async function command(id, on, settings = {}) {
     drawControls();
   }
 }
+async function moveVacuum(id, action) {
+  const c = selected.controls.find((c) => c.id === id);
+  if (!c || !VACUUM_ACTIONS[action]) return;
+  view?.highlight(id);
+  if (preview) {
+    const next =
+      action === "start"
+        ? "cleaning"
+        : action === "pause"
+          ? "paused"
+          : action === "return_to_base"
+            ? "returning"
+            : state(c).state;
+    simulated.set(
+      id,
+      vacuumState({ entity_id: "vacuum.preview", state: next }),
+    );
+    drawControls();
+    return;
+  }
+  try {
+    vacuumCommand(state(c).entity, c, action);
+    await api(`models/${selected.id}/command`, {
+      method: "POST",
+      body: JSON.stringify({ controlId: id, action }),
+    });
+    status = await api("status");
+    drawControls();
+  } catch (error) {
+    toast(error.message);
+  }
+}
 const LOCK_PREVIEW = { unavailable: false, moving: false, needsCode: false };
 async function moveLock(id, action) {
   const c = selected.controls.find((c) => c.id === id);
@@ -1032,6 +1137,11 @@ $("controls").addEventListener("click", async (e) => {
   if (preset) pressPreset(preset.dataset.press);
   const lock = e.target.closest("[data-lock]");
   if (lock) moveLock(lock.dataset.lock, lock.dataset.action);
+  const vacuum = e.target.closest("[data-vacuum]");
+  if (vacuum) moveVacuum(vacuum.dataset.vacuum, vacuum.dataset.action);
+  const vacuumInfo = e.target.closest("[data-vacuum-info]");
+  if (vacuumInfo)
+    native?.moreInfo?.(selected.bindings[vacuumInfo.dataset.vacuumInfo]);
   const lockInfo = e.target.closest("[data-lock-info]");
   if (lockInfo)
     native?.moreInfo?.(selected.bindings[lockInfo.dataset.lockInfo]);
@@ -1711,7 +1821,7 @@ async function choose(id, tab = "overview", { forceEditorClose = false } = {}) {
         }
         document
           .querySelector(
-            `[data-climate="${id}"], [data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"], [data-number="${id}"], [data-press="${id}"], [data-lock="${id}"]`,
+            `[data-climate="${id}"], [data-toggle="${id}"], [data-cover="${id}"], [data-position="${id}"], [data-number="${id}"], [data-press="${id}"], [data-lock="${id}"], [data-vacuum="${id}"]`,
           )
           ?.focus();
       },
@@ -2183,33 +2293,37 @@ const lightDomains = /^(light|switch)\./,
   // Windows and doors are often only reported by open/closed contact sensors.
   openingDomains = /^(cover|binary_sensor)\./;
 const deviceIcon = (c) =>
-  c.type === "lock"
-    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${ICON_PATHS.lock}</svg>`
-    : c.type === "climate"
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3"/></svg>'
-      : c.type === "button"
-        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 10 7-10 7Z"/></svg>'
-        : c.type === "number"
-          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h18M5 8v12M19 8v12M9 3h6"/></svg>'
-          : c.type === "cover"
-            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h16M6 4v10M18 4v10M6 8h12M6 11h12"/><path d="M12 14v5"/><circle cx="12" cy="20" r="1"/></svg>'
-            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/></svg>';
+  c.type === "vacuum"
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${ICON_PATHS.vacuum}</svg>`
+    : c.type === "lock"
+      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${ICON_PATHS.lock}</svg>`
+      : c.type === "climate"
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3"/></svg>'
+        : c.type === "button"
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 5 10 7-10 7Z"/></svg>'
+          : c.type === "number"
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h18M5 8v12M19 8v12M9 3h6"/></svg>'
+            : c.type === "cover"
+              ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4h16M6 4v10M18 4v10M6 8h12M6 11h12"/><path d="M12 14v5"/><circle cx="12" cy="20" r="1"/></svg>'
+              : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/></svg>';
 const capabilityText = (c) =>
-  c.type === "lock"
-    ? "Door lock · lock, unlock"
-    : c.type === "climate"
-      ? "Air conditioner · Home Assistant controls"
-      : c.type === "button"
-        ? "Preset · press"
-        : c.type === "number"
-          ? `Height · ${c.min}–${c.max} ${c.unit}`
-          : c.type === "cover"
-            ? c.motion === "none"
-              ? "Desk direction · up, stop, down"
-              : "Shade · open, close, position"
-            : c.capabilities.includes("brightness")
-              ? "Light · dimming, color, white"
-              : "Light · on/off";
+  c.type === "vacuum"
+    ? "Robot vacuum · start, pause, dock"
+    : c.type === "lock"
+      ? "Door lock · lock, unlock"
+      : c.type === "climate"
+        ? "Air conditioner · Home Assistant controls"
+        : c.type === "button"
+          ? "Preset · press"
+          : c.type === "number"
+            ? `Height · ${c.min}–${c.max} ${c.unit}`
+            : c.type === "cover"
+              ? c.motion === "none"
+                ? "Desk direction · up, stop, down"
+                : "Shade · open, close, position"
+              : c.capabilities.includes("brightness")
+                ? "Light · dimming, color, white"
+                : "Light · on/off";
 const pickerContext = (controlId) => {
   const control = selected.controls.find((c) => c.id === controlId);
   return {
@@ -2217,19 +2331,21 @@ const pickerContext = (controlId) => {
     entities: status.entities,
     selectedId: selected.bindings[controlId] || "",
     pattern:
-      control.type === "lock"
-        ? /^lock\./
-        : control.type === "climate"
-          ? /^climate\./
-          : control.type === "button"
-            ? /^(button|input_button|script|scene)\./
-            : control.type === "number"
-              ? /^(number|input_number)\./
-              : control.type === "cover"
-                ? control.motion === "none"
-                  ? coverDomains
-                  : openingDomains
-                : lightDomains,
+      control.type === "vacuum"
+        ? /^vacuum\./
+        : control.type === "lock"
+          ? /^lock\./
+          : control.type === "climate"
+            ? /^climate\./
+            : control.type === "button"
+              ? /^(button|input_button|script|scene)\./
+              : control.type === "number"
+                ? /^(number|input_number)\./
+                : control.type === "cover"
+                  ? control.motion === "none"
+                    ? coverDomains
+                    : openingDomains
+                  : lightDomains,
   };
 };
 const pickerFor = (c) =>

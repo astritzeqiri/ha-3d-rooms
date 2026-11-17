@@ -6,6 +6,7 @@ import { actionCommand } from "../shared/action.mjs";
 import { numberCommand } from "../shared/number.mjs";
 import { coverCommand } from "../shared/cover.mjs";
 import { lockCommand } from "../shared/lock.mjs";
+import { vacuumCommand, VACUUM_CAPABILITIES } from "../shared/vacuum.mjs";
 import { lightFeatures } from "../shared/light.mjs";
 export const ID = /^[a-z0-9][a-z0-9_-]{0,79}$/;
 export function validateDaylight(value, controls) {
@@ -110,11 +111,27 @@ export function validateManifest(m) {
     )
       fail("Covers need nodes and a default position from 0 to 100.");
     if (
-      !["light", "cover", "number", "button", "climate", "lock"].includes(
-        c.type,
-      )
+      ![
+        "light",
+        "cover",
+        "number",
+        "button",
+        "climate",
+        "lock",
+        "vacuum",
+      ].includes(c.type)
     )
-      fail("Use light, cover, number, button, climate or lock controls.");
+      fail(
+        "Use light, cover, number, button, climate, lock or vacuum controls.",
+      );
+    if (
+      c.facing !== undefined &&
+      (c.type !== "vacuum" ||
+        !vector(c.facing) ||
+        c.facing[1] !== 0 ||
+        Math.abs(Math.hypot(...c.facing) - 1) > 1e-3)
+    )
+      fail("Vacuum dock facing must be a horizontal unit vector.");
     if (typeof c.label !== "string" || !c.label.trim() || c.label.length > 160)
       fail("Every light needs a label.");
     if (!vector(c.position)) fail("Each light needs a position in meters.");
@@ -158,13 +175,15 @@ export function validateManifest(m) {
           ? "more_info"
           : c.type === "lock"
             ? "lock_unlock"
-            : c.type === "button"
-              ? "press"
-              : c.type === "number"
-                ? "set_value"
-                : c.type === "cover"
-                  ? "open_close"
-                  : "on_off",
+            : c.type === "vacuum"
+              ? "start"
+              : c.type === "button"
+                ? "press"
+                : c.type === "number"
+                  ? "set_value"
+                  : c.type === "cover"
+                    ? "open_close"
+                    : "on_off",
       ) ||
       c.capabilities.some(
         (v) =>
@@ -173,13 +192,15 @@ export function validateManifest(m) {
               ? ["more_info"]
               : c.type === "lock"
                 ? ["lock_unlock"]
-                : c.type === "button"
-                  ? ["press"]
-                  : c.type === "number"
-                    ? ["set_value"]
-                    : c.type === "cover"
-                      ? ["open_close", "position", "stop"]
-                      : ["on_off", "brightness", "color", "color_temp"]
+                : c.type === "vacuum"
+                  ? VACUUM_CAPABILITIES
+                  : c.type === "button"
+                    ? ["press"]
+                    : c.type === "number"
+                      ? ["set_value"]
+                      : c.type === "cover"
+                        ? ["open_close", "position", "stop"]
+                        : ["on_off", "brightness", "color", "color_temp"]
           ).includes(v),
       )
     )
@@ -204,13 +225,15 @@ export function compatible(control, entity) {
       ? /^climate\./
       : control.type === "lock"
         ? /^lock\./
-        : control.type === "button"
-          ? /^(button|input_button|script|scene)\./
-          : control.type === "number"
-            ? /^(number|input_number)\./
-            : control.type === "cover"
-              ? /^cover\./
-              : /^(light|switch)\./
+        : control.type === "vacuum"
+          ? /^vacuum\./
+          : control.type === "button"
+            ? /^(button|input_button|script|scene)\./
+            : control.type === "number"
+              ? /^(number|input_number)\./
+              : control.type === "cover"
+                ? /^cover\./
+                : /^(light|switch)\./
     ).test(entity.entity_id)
   );
 }
@@ -233,6 +256,7 @@ export function commandFor(
     );
   if (control.type === "button") return actionCommand(entity, control, action);
   if (control.type === "lock") return lockCommand(entity, control, action);
+  if (control.type === "vacuum") return vacuumCommand(entity, control, action);
   if (control.type === "number")
     return numberCommand(entity, control, action, settings.value);
   if (control.type === "cover")

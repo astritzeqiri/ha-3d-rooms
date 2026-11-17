@@ -31,9 +31,10 @@ LOGGER = logging.getLogger(__name__)
 # What a dashboard card needs, for any signed-in user (a family member, a wall
 # tablet). Everything else edits the library and stays administrator-only.
 READ_OPERATIONS = frozenset({"models", "components"})
-# Card controls: the day/night switch (mode only) and preset buttons (checked
-# against Home Assistant's own entity permissions for the user).
-CARD_OPERATIONS = frozenset({"daylight", "command"})
+# Card controls: the day/night switch (mode only), a saved view's Floor plan
+# toggle, and preset buttons (checked against Home Assistant's own entity
+# permissions for the user).
+CARD_OPERATIONS = frozenset({"daylight", "view-floor-plan", "command"})
 USER_OPERATIONS = READ_OPERATIONS | CARD_OPERATIONS
 
 
@@ -85,7 +86,7 @@ class RoomsRuntime:
             "entities": [
                 s.as_dict()
                 for s in self.hass.states.async_all()
-                if s.domain in ("climate", "light", "switch", "cover", "lock", "sun", "binary_sensor", "number", "input_number", "button", "input_button", "script", "scene")
+                if s.domain in ("climate", "light", "switch", "cover", "lock", "vacuum", "sun", "binary_sensor", "number", "input_number", "button", "input_button", "script", "scene")
             ],
         }
 
@@ -177,6 +178,10 @@ class RoomsRuntime:
             result = await self.work(self.store.set_daylight, data.get("model"), data)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
+        if operation == "view-floor-plan":
+            result = await self.work(self.store.set_view_floor_plan, data.get("id"), data.get("floorPlan"))
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "device-visibility":
             result = await self.work(self.store.set_device_visibility, data.get("model"), data.get("controlId"), data.get("hidden"))
             self.hass.bus.async_fire("three_d_rooms_updated")
@@ -245,6 +250,8 @@ class RoomsRuntime:
                 service, settings = ("press" if entity.domain in ("button", "input_button") else "turn_on"), {}
             elif control.get("type") == "lock":
                 service, settings = lock_command(data, control, entity)
+            elif control.get("type") == "vacuum":
+                service, settings = vacuum_command(data, control, entity)
             elif control.get("type") == "number":
                 service, settings = number_command(data, control, entity)
             elif is_cover:
@@ -299,6 +306,27 @@ def lock_command(data, control, entity):
         raise ValueError("Choose lock or unlock.")
     if entity.attributes.get("code_format"):
         raise ValueError("This lock needs a code; use the Home Assistant lock dialog.")
+    return action, {}
+
+
+# VacuumEntityFeature bit and model capability each vacuum action needs.
+VACUUM_ACTIONS = {
+    "start": (8192, "start"),
+    "pause": (4, "pause"),
+    "stop": (8, "stop"),
+    "return_to_base": (16, "return_home"),
+    "locate": (512, "locate"),
+}
+
+
+def vacuum_command(data, control, entity):
+    """Start, pause, stop, send home or locate; only what the vacuum and the model both support."""
+    action = data.get("action")
+    if action not in VACUUM_ACTIONS or entity.domain != "vacuum":
+        raise ValueError("Choose a vacuum action.")
+    bit, capability = VACUUM_ACTIONS[action]
+    if capability not in control["capabilities"] or not entity.attributes.get("supported_features", 0) & bit:
+        raise ValueError("This vacuum does not support that action.")
     return action, {}
 
 

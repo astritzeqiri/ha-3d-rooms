@@ -109,14 +109,18 @@ export function entityInState(stateObj, active) {
         ? active
           ? "locked"
           : "unlocked"
-        : domain === "climate"
+        : domain === "vacuum"
           ? active
-            ? stateObj.state === "off"
-              ? "cool"
-              : stateObj.state
-            : "off"
-          : active
-            ? "on"
-            : "off";
+            ? "cleaning"
+            : "docked"
+          : domain === "climate"
+            ? active
+              ? stateObj.state === "off"
+                ? "cool"
+                : stateObj.state
+              : "off"
+            : active
+              ? "on"
+              : "off";
   return state === stateObj.state ? stateObj : { ...stateObj, state };
 }

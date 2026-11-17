@@ -319,6 +319,24 @@ test("camera buttons setting is on by default and saves only when turned off", (
   );
 });
 
+test("Floor plan button setting is on by default, saves only when off and hides for floor views", () => {
+  const { editor, field, events } = harness();
+  assert.equal(field("floor_plan_button").checked, true);
+  assert.equal(field("floor-plan-button-setting").hidden, false);
+  field("floor_plan_button").checked = false;
+  field("floor_plan_button").onchange();
+  assert.equal(events.at(-1).detail.config.floor_plan_button, false);
+  assert.equal(field("floor_plan_button").checked, false);
+  field("floor_plan_button").checked = true;
+  field("floor_plan_button").onchange();
+  assert.equal(
+    Object.hasOwn(events.at(-1).detail.config, "floor_plan_button"),
+    false,
+  );
+  editor.setConfig({ ...editor._config, view: "floor" });
+  assert.equal(field("floor-plan-button-setting").hidden, true);
+});
+
 test("Edit button setting is on by default and saves only when turned off", () => {
   const { field, events } = harness();
   assert.equal(field("edit_button").checked, true);

@@ -163,3 +163,32 @@ test("saved components preserve exact camera geometry and reject malformed snaps
       ),
     );
 });
+
+test("saved views carry a valid floor plan heading only", () => {
+  const view = {
+    schemaVersion: 1,
+    id: "office-view",
+    title: "Office",
+    height: 500,
+    layers: [{ model: "office", view: "front", heading: 0, tilt: 28, zoom: 1 }],
+  };
+  assert.deepEqual(
+    validateComponent({ ...view, floorPlan: { heading: 179.43 } }, ["office"])
+      .floorPlan,
+    { heading: 179.43 },
+  );
+  assert.equal(
+    Object.hasOwn(
+      validateComponent({ ...view, floorPlan: null }, ["office"]),
+      "floorPlan",
+    ),
+    false,
+  );
+  for (const floorPlan of [
+    { heading: 360 },
+    { heading: "9" },
+    { heading: 1, x: 2 },
+    true,
+  ])
+    assert.throws(() => validateComponent({ ...view, floorPlan }, ["office"]));
+});

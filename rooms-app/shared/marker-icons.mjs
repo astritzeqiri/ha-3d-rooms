@@ -114,5 +114,6 @@ export function markerStateWords(control) {
     return null;
   if (control.type === "cover") return ["Open", "Closed"];
   if (control.type === "lock") return ["Locked", "Unlocked"];
+  if (control.type === "vacuum") return ["Cleaning", "Docked"];
   return ["On", "Off"];
 }

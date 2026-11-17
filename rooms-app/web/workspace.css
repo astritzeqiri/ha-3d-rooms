@@ -1269,6 +1269,9 @@ summary:focus-visible {
 .device-row[data-tone="auto"] {
   --tone: #4caf50;
 }
+.device-row[data-tone="cleaning"] {
+  --tone: #009688;
+}
 /* Status dot: state colour when active, solid grey when idle, ring when not
    connected, red when unavailable. */
 .device-row[data-connection="ready"] .device-row-meta::before,

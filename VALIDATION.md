@@ -1,3 +1,12 @@
+# 0.49.0 — robot vacuums and a Floor plan button, 2026-11-17
+
+Released as 0.49.0, based on 0.48.1. Two features: the robot-vacuum work (new `vacuum` control type in `models.py`/`api.py`/`house.py`, `shared/vacuum.mjs`, `shared/vacuum-visual.mjs`, `dashboard/vacuum-art.mjs`, vacuum dialog in `dashboard/more-info*.mjs`, spec in `docs/robot-vacuum.md`) and the card's Floor plan button (`dashboard/card.js`, `dashboard/editor.js`, saved-view `floorPlan` in `shared/component.mjs`, `shared/saved-view.mjs`, `models.py`, new card operation `view-floor-plan` in `api.py`).
+
+- All frontend tests (new: vacuum, floor plan toggle, saved-view floor plan, editor option) and host Python tests (new: `test_vacuum.py`, floor plan storage) pass with native-only skips; all native tests pass inside Home Assistant Core 2026.11.0, including a non-admin user switching a saved view's floor plan. Format check and build pass.
+- Shared local Home Assistant (Core 2026.11.0), robot vacuum: the Corridor's vacuum (mapped to the demo vacuum) drove out, cleaned through the doorway, returned and docked; clean by area drove it to a linked room; the full-screen page's vacuum dialog follows Home Assistant's.
+- Shared local Home Assistant, Floor plan button: on a whole-house dashboard card and on the full-screen page (desktop and phone width) the plan keeps the 3D orientation, follows floor switching, and turning it off restores the saved camera exactly. The choice is saved on the view: it survives a reload, and a change made elsewhere is followed live, all without reloading the model.
+- Not checked: Safari, a real phone, a real robot vacuum, and HACS download of this version.
+
 # 0.48.1 — room fronts back, grouping only when asked, room detail per view, 2026-11-16
 
 Released as 0.48.1, based on 0.48.0. Reverts the 0.48.0 wall cutaway and two-sided walls (`web/scene.js`) and the automatic phone grouping (`dashboard/card.js`). Adds an optional saved-view `quality` (`high`/`low`; validated in `shared/component.mjs` and `models.py`, resolved in `shared/saved-view.mjs`, Room detail in the view editor) and a `?quality=` override on the full-screen page (`dashboard/standalone.js`) for the iOS app.

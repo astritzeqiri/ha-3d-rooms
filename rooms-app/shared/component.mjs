@@ -70,6 +70,9 @@ export function validateComponent(value, modelIds) {
     ...(value.markers !== undefined
       ? { markers: validateMarkers(value.markers) }
       : {}),
+    ...(value.floorPlan != null
+      ? { floorPlan: validateFloorPlan(value.floorPlan) }
+      : {}),
     ...(value.show_title !== undefined ? { show_title: value.show_title } : {}),
     ...(value.quality !== undefined ? { quality: value.quality } : {}),
     ...Object.fromEntries(
@@ -97,4 +100,18 @@ export function componentYaml(component) {
 /** The bare full-screen page for a saved view (no Home Assistant menus). */
 export function standaloneViewURL(id, origin) {
   return new URL(`/three_d_rooms_view/${encodeURIComponent(id)}`, origin).href;
+}
+
+/** A viewer's Floor plan toggle on a saved view: the heading it looks down from. */
+export function validateFloorPlan(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Object.keys(value).join() !== "heading" ||
+    !Number.isFinite(value.heading) ||
+    value.heading < 0 ||
+    value.heading >= 360
+  )
+    throw new Error("Floor plan heading must be between 0 and 360 degrees.");
+  return { heading: value.heading };
 }

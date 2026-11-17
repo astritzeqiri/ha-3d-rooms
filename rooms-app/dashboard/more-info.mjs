@@ -9,6 +9,11 @@ import {
   sinceText,
 } from "./more-info-model.mjs";
 import { kelvinToRgb } from "../shared/light.mjs";
+import {
+  VACUUM_STATUS_CSS,
+  VACUUM_STATUS_SVG,
+  vacuumVisualState,
+} from "./vacuum-art.mjs";
 
 export { describeEntity, controlCall };
 
@@ -189,6 +194,56 @@ dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
 .mi-attrs dt{color:var(--mi-muted)}
 .mi-attrs dd{margin:0;text-align:right;overflow-wrap:anywhere}
 .mi-error{margin:12px 0 0;color:#db4437;text-align:center}
+
+/* robot vacuum, as Home Assistant's more-info-vacuum */
+.mi-vac-head{position:relative;width:100%}
+.mi-vac-head .mi-vac-battery{position:absolute;right:0;bottom:2px;display:inline-flex;align-items:center;gap:4px;color:var(--mi-muted);font-size:14px}
+.mi-vac-head .mi-vac-battery svg{width:18px;height:18px}
+.mi-vac-status{margin:0 0 4px}
+.mi-vac-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.mi-vac-btn{display:grid;place-items:center;width:48px;height:48px;padding:0;border:0;border-radius:12px;background:var(--mi-surface);color:var(--mi-fg);cursor:pointer;transition:background .15s,opacity .15s}
+.mi-vac-btn:hover:not(:disabled){background:var(--mi-surface-2)}
+.mi-vac-btn:disabled{cursor:not-allowed;opacity:.4}
+.mi-vac-btn svg{width:24px;height:24px}
+.mi-vac-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:12px;max-width:100%}
+.mi-vac-chip{display:flex;align-items:center;gap:10px;height:48px;max-width:100%;padding:6px 10px;border:0;border-radius:12px;background:var(--mi-surface);color:var(--mi-fg);font:inherit;text-align:left;cursor:pointer;letter-spacing:.25px}
+.mi-vac-chip:hover{background:var(--mi-surface-2)}
+.mi-vac-chip-icon{display:flex}
+.mi-vac-chip-icon svg{width:20px;height:20px}
+.mi-vac-chip-text{display:flex;flex-direction:column;min-width:0}
+.mi-vac-chip-label{font-size:12px;letter-spacing:.4px;color:var(--mi-muted)}
+.mi-vac-chip-value{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mi-vacuum .mi-center{gap:16px}
+.mi-vacuum .mi-center[hidden],.mi-vac-in-areas .mi-attrs,.mi-vac-in-areas .mi-error:empty{display:none}
+.mi-vac-fan{position:relative;max-width:100%}
+.mi-vac-menu{position:absolute;left:0;bottom:calc(100% + 6px);z-index:3;min-width:200px;padding:6px;border-radius:16px;background:var(--mi-bg);background-image:linear-gradient(var(--mi-surface-2),var(--mi-surface-2));box-shadow:0 8px 24px #0007}
+.mi-vac-menu[hidden]{display:none}
+.mi-vac-menu .mi-list{max-height:240px}
+.mi-vac-areas{display:flex;flex-direction:column;gap:16px}
+.mi-vac-areas[hidden]{display:none}
+.mi-vac-areas-head{display:flex;align-items:center;gap:4px;margin-left:-12px}
+.mi-vac-areas-head h3{margin:0;font:500 18px Roboto,system-ui,sans-serif}
+.mi-vac-areas-body{display:flex;flex-direction:column;gap:16px}
+.mi-vac-section-name{margin-bottom:8px;color:var(--mi-muted);font-weight:500}
+.mi-vac-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.mi-vac-area{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:80px;padding:12px;overflow:hidden;border:1px solid var(--mi-line);border-radius:12px;background:transparent;color:var(--mi-fg);font:inherit;cursor:pointer}
+.mi-vac-area::before{content:"";position:absolute;inset:0;opacity:.2;transition:background .18s;pointer-events:none}
+.mi-vac-area:hover::before{background:var(--mi-muted)}
+.mi-vac-area[aria-pressed=true]::before{background:var(--mi-primary)}
+.mi-vac-area-icon{color:var(--mi-muted)}
+.mi-vac-area-icon svg{width:28px;height:28px}
+.mi-vac-area[aria-pressed=true] .mi-vac-area-icon{color:var(--mi-primary)}
+.mi-vac-area-name{text-align:center;line-height:1.25;word-break:break-word}
+.mi-vac-badge{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--mi-primary);color:#fff;font-size:11px;font-weight:500}
+.mi-vac-badge[hidden]{display:none}
+.mi-vac-hint{margin:0;text-align:center;font-size:12px;color:var(--mi-muted)}
+.mi-vac-footer{display:flex;justify-content:flex-end;padding-top:16px;border-top:1px solid var(--mi-line)}
+.mi-vac-footer .mi-pill:disabled{opacity:.4;cursor:not-allowed}
+.mi-vac-empty{display:flex;flex-direction:column;align-items:center;text-align:center;color:var(--mi-muted);padding:24px 8px}
+.mi-vac-empty svg{width:48px;height:48px}
+.mi-vac-empty-title{margin:12px 0 4px;color:var(--mi-fg);font-size:18px;font-weight:500}
+.mi-vac-empty p{margin:0}
+${VACUUM_STATUS_CSS}
 `;
 
 const svg = (name) =>
@@ -1504,6 +1559,305 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
     return () => {};
   }
 
+  /**
+   * Robot vacuum, laid out like Home Assistant's more-info-vacuum: big state
+   * with the time and battery, the animated status picture, a row of square
+   * command buttons, then Fan speed and "Cleaning · By area" chips. Clean by
+   * area opens a view of the areas mapped to the vacuum's segments.
+   */
+  function vacuumLayout(d, root) {
+    dialog.classList.add("mi-vacuum");
+    subtitle.hidden = true;
+    const main = h(doc, "div", "mi-center");
+    const head = h(
+      doc,
+      "div",
+      "mi-statehead mi-vac-head",
+      `<strong></strong><span class="mi-vac-since"></span><span class="mi-vac-battery" hidden></span>`,
+    );
+    const art = h(
+      doc,
+      "div",
+      "mi-vac-status",
+      `<div class="container idle">${VACUUM_STATUS_SVG}</div>`,
+    );
+    const row = h(doc, "div", "mi-vac-buttons");
+    const buttons = new Map();
+    for (const b of find(d, (c) => c.kind === "vacuum").buttons) {
+      const button = h(doc, "button", "mi-vac-btn", svg(b.icon));
+      button.type = "button";
+      button.onclick = () => {
+        const control = find(latest, (c) => c.kind === "vacuum");
+        const now = control.buttons.find((x) => x.key === b.key);
+        if (now && !now.disabled) call(latest, control, now.service);
+      };
+      buttons.set(b.key, button);
+      row.append(button);
+    }
+    const chips = h(doc, "div", "mi-vac-chips");
+    const vacuum = find(d, (c) => c.kind === "vacuum");
+    // Fan speed menu: a pop-up on its chip, like Home Assistant's select menu.
+    const panel = h(doc, "div", "mi-vac-menu");
+    panel.hidden = true;
+    panel.setAttribute("role", "listbox");
+    const list = h(doc, "ul", "mi-list");
+    panel.append(list);
+    const closeMenu = () => {
+      panel.hidden = true;
+      fanChip?.setAttribute("aria-expanded", "false");
+    };
+    dialog.addEventListener("click", (event) => {
+      if (!panel.hidden && !event.target.closest?.(".mi-vac-fan")) closeMenu();
+    });
+    let fanChip;
+    if (vacuum.fanSpeeds.length) {
+      fanChip = h(
+        doc,
+        "button",
+        "mi-vac-chip",
+        `<span class="mi-vac-chip-icon">${svg("fan")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Fan speed</span><span class="mi-vac-chip-value"></span></span>`,
+      );
+      fanChip.type = "button";
+      fanChip.setAttribute("aria-haspopup", "listbox");
+      fanChip.onclick = () => {
+        if (!panel.hidden) return closeMenu();
+        panel.hidden = false;
+        fanChip.setAttribute("aria-expanded", String(!panel.hidden));
+        if (panel.hidden) return;
+        const control = find(latest, (c) => c.kind === "vacuum");
+        list.replaceChildren();
+        for (const speed of control.fanSpeeds) {
+          const li = h(doc, "li");
+          const b = h(doc, "button");
+          b.type = "button";
+          b.setAttribute("role", "radio");
+          b.setAttribute("aria-checked", String(speed === control.fanSpeed));
+          b.textContent = cap(speed);
+          b.onclick = () => {
+            closeMenu();
+            call(latest, control, { fan_speed: speed });
+          };
+          li.append(b);
+          list.append(li);
+        }
+      };
+      const fan = h(doc, "div", "mi-vac-fan");
+      fan.append(fanChip, panel);
+      chips.append(fan);
+    }
+    if (vacuum.cleanArea) {
+      const areaChip = h(
+        doc,
+        "button",
+        "mi-vac-chip",
+        `<span class="mi-vac-chip-icon">${svg("area")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Cleaning</span><span class="mi-vac-chip-value">By area</span></span><span class="mi-vac-chip-icon">${svg("next")}</span>`,
+      );
+      areaChip.type = "button";
+      areaChip.onclick = () => openAreas();
+      chips.append(areaChip);
+    }
+    main.append(head, art, row);
+    if (chips.childElementCount) main.append(chips);
+    root.append(main);
+
+    // ---- clean by area (Home Assistant's clean-areas view) ----
+    const areasView = h(doc, "div", "mi-vac-areas");
+    areasView.hidden = true;
+    root.append(areasView);
+    let selected = [];
+    const closeAreas = () => {
+      areasView.hidden = true;
+      main.hidden = false;
+      dialog.classList.remove("mi-vac-in-areas");
+    };
+    async function openAreas() {
+      main.hidden = true;
+      areasView.hidden = false;
+      dialog.classList.add("mi-vac-in-areas");
+      selected = [];
+      areasView.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${svg("back")}</button><h3>Clean areas</h3></div><div class="mi-vac-areas-body"><p class="mi-vac-hint">Loading areas…</p></div>`;
+      areasView.querySelector("button").onclick = closeAreas;
+      const bodyEl = areasView.querySelector(".mi-vac-areas-body");
+      let mapped, areas, floors;
+      try {
+        const hass = getHass();
+        const [entry, areaList, floorList] = await Promise.all([
+          hass.callWS({
+            type: "config/entity_registry/get",
+            entity_id: entityId,
+          }),
+          hass.callWS({ type: "config/area_registry/list" }),
+          hass.callWS({ type: "config/floor_registry/list" }).catch(() => []),
+        ]);
+        mapped = new Set(
+          Object.keys(entry?.options?.vacuum?.area_mapping || {}),
+        );
+        areas = areaList.filter((a) => mapped.has(a.area_id));
+        floors = floorList;
+      } catch (error) {
+        bodyEl.innerHTML = `<p class="mi-error"></p>`;
+        bodyEl.firstChild.textContent =
+          error?.message || "Could not load the vacuum's areas.";
+        return;
+      }
+      if (!areas.length) {
+        bodyEl.innerHTML = `<div class="mi-vac-empty">${svg("area")}<p class="mi-vac-empty-title">No areas set up</p><p>Map this vacuum's rooms to Home Assistant areas in its entity settings, then clean them from here.</p></div>`;
+        return;
+      }
+      const sections = [];
+      for (const floor of [...floors].sort(
+        (a, b) => (a.level ?? 0) - (b.level ?? 0),
+      )) {
+        const inFloor = areas.filter((a) => a.floor_id === floor.floor_id);
+        if (inFloor.length) sections.push([floor.name, inFloor]);
+      }
+      const other = areas.filter(
+        (a) => !floors.some((f) => f.floor_id === a.floor_id),
+      );
+      if (other.length) sections.push(["Other areas", other]);
+      bodyEl.replaceChildren();
+      for (const [name, list] of sections) {
+        const section = h(doc, "div", "mi-vac-section");
+        if (sections.length > 1)
+          section.append(h(doc, "div", "mi-vac-section-name"));
+        if (sections.length > 1) section.firstChild.textContent = name;
+        const grid = h(doc, "div", "mi-vac-grid");
+        for (const area of list) {
+          const card = h(
+            doc,
+            "button",
+            "mi-vac-area",
+            `<span class="mi-vac-badge" hidden></span><span class="mi-vac-area-icon">${svg("area")}</span><span class="mi-vac-area-name"></span>`,
+          );
+          card.type = "button";
+          card.dataset.area = area.area_id;
+          card.querySelector(".mi-vac-area-name").textContent = area.name;
+          card.onclick = () => {
+            const at = selected.indexOf(area.area_id);
+            selected =
+              at >= 0
+                ? selected.filter((id) => id !== area.area_id)
+                : [...selected, area.area_id];
+            paint();
+          };
+          grid.append(card);
+        }
+        section.append(grid);
+        bodyEl.append(section);
+      }
+      bodyEl.append(
+        h(
+          doc,
+          "p",
+          "mi-vac-hint",
+          "The order in which areas are cleaned may not be supported by your vacuum.",
+        ),
+      );
+      const footer = h(doc, "div", "mi-vac-footer");
+      const start = h(doc, "button", "mi-pill");
+      start.type = "button";
+      start.onclick = async () => {
+        start.disabled = true;
+        const control = find(latest, (c) => c.kind === "vacuum");
+        if (await call(latest, control, { areas: selected })) closeAreas();
+        else paint();
+      };
+      footer.append(start);
+      areasView.append(footer);
+      const paint = () => {
+        for (const card of bodyEl.querySelectorAll(".mi-vac-area")) {
+          const at = selected.indexOf(card.dataset.area);
+          card.setAttribute("aria-pressed", String(at >= 0));
+          const badge = card.querySelector(".mi-vac-badge");
+          badge.hidden = at < 0;
+          badge.textContent = String(at + 1);
+        }
+        start.disabled = !selected.length;
+        start.textContent = `Start cleaning${selected.length ? ` (${selected.length})` : ""}`;
+      };
+      paint();
+    }
+
+    // ---- battery: the device's battery sensor, as Home Assistant finds it ----
+    let batteryIds = null;
+    getHass()
+      .callWS?.({ type: "config/entity_registry/list_for_display" })
+      .then((registry) => {
+        const entries = registry?.entities || [];
+        const device = entries.find((e) => e.ei === entityId)?.di;
+        if (!device) return;
+        const siblings = entries
+          .filter((e) => e.di === device)
+          .map((e) => e.ei);
+        const states = getHass().states || {};
+        const battery = siblings.find(
+          (id) =>
+            /^sensor\./.test(id) &&
+            states[id]?.attributes?.device_class === "battery" &&
+            !isNaN(Number(states[id].state)),
+        );
+        const charging = siblings.find(
+          (id) =>
+            /^binary_sensor\./.test(id) &&
+            states[id]?.attributes?.device_class === "battery_charging",
+        );
+        batteryIds = { battery, charging };
+        if (latest) sync(latest);
+      })
+      .catch(() => {});
+    const since = setInterval(() => {
+      if (!dialog.isConnected) return clearInterval(since);
+      const entity = getHass().states?.[entityId];
+      head.querySelector(".mi-vac-since").textContent = sinceText(
+        entity?.last_changed,
+      );
+    }, 5000);
+    let latest;
+    const COLOR = {
+      cleaning: "var(--state-vacuum-active-color,#009688)",
+      returning: "var(--state-vacuum-active-color,#009688)",
+      error: "var(--error-color,#db4437)",
+    };
+    const sync = (nd) => {
+      latest = nd;
+      const control = find(nd, (c) => c.kind === "vacuum");
+      if (!control) return;
+      const entity = getHass().states?.[entityId];
+      head.firstChild.textContent = control.status || cap(nd.state) || "";
+      head.querySelector(".mi-vac-since").textContent = nd.since || "";
+      const states = getHass().states || {};
+      const level = batteryIds?.battery
+        ? Number(states[batteryIds.battery]?.state)
+        : control.battery;
+      const charging = batteryIds?.charging
+        ? states[batteryIds.charging]?.state === "on"
+        : nd.state === "docked" && level < 100;
+      const batteryEl = head.querySelector(".mi-vac-battery");
+      batteryEl.hidden = !Number.isFinite(level);
+      if (Number.isFinite(level))
+        batteryEl.innerHTML = `<span>${Math.round(level)}%</span>${svg(charging ? "batterycharging" : "battery")}`;
+      const visual = vacuumVisualState(entity);
+      const container = art.firstChild;
+      container.className = `container ${visual}`;
+      container.style.setProperty(
+        "--vacuum-color",
+        COLOR[visual] || "var(--mi-muted)",
+      );
+      for (const b of control.buttons) {
+        const button = buttons.get(b.key);
+        if (!button) continue;
+        button.innerHTML = svg(b.icon);
+        button.disabled = b.disabled;
+        button.title = b.label;
+        button.setAttribute("aria-label", b.label);
+      }
+      if (fanChip)
+        fanChip.querySelector(".mi-vac-chip-value").textContent =
+          cap(control.fanSpeed) || "—";
+    };
+    return sync;
+  }
+
   function plainLayout(d, root, entity) {
     const center = h(doc, "div", "mi-center");
     const value = h(doc, "div", "mi-state");
@@ -1519,6 +1873,7 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
     light: lightLayout,
     cover: coverLayout,
     lock: lockLayout,
+    vacuum: vacuumLayout,
     climate: climateLayout,
     alarm_control_panel: alarmLayout,
     camera: cameraLayout,
@@ -1535,7 +1890,7 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
   let sync = () => {};
   function build(d) {
     runCleanups();
-    dialog.classList.remove("mi-wide");
+    dialog.classList.remove("mi-wide", "mi-vacuum", "mi-vac-in-areas");
     body.replaceChildren();
     errorEl = undefined;
     const root = h(doc, "div");

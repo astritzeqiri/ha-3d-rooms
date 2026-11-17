@@ -33,7 +33,7 @@ from .optimize import DECODABLE, SERVER_VERSION, VARIANTS, node_metadata, optimi
 MAX_UPLOAD = 100 * 1024 * 1024
 MAX_EXPANDED = 300 * 1024 * 1024
 ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,79}\Z")
-ENTITY = re.compile(r"(?:binary_sensor|climate|light|switch|cover|lock|number|input_number|button|input_button|script|scene)\.[a-z0-9_]+\Z")
+ENTITY = re.compile(r"(?:binary_sensor|climate|light|switch|cover|lock|vacuum|number|input_number|button|input_button|script|scene)\.[a-z0-9_]+\Z")
 # Device-marker icons: any HA icon name, mdi:door-open or a custom set's local:front-door.
 # Mirrors MARKER_ICON_PATTERN in rooms-app/shared/marker-icons.mjs.
 MARKER_ICON = re.compile(r"[a-z0-9][a-z0-9_-]{0,31}:[A-Za-z0-9][A-Za-z0-9_.-]{0,95}\Z")
@@ -45,6 +45,7 @@ CONTROL_CAPABILITIES = {
     "button": ("press", ("press",)),
     "climate": ("more_info", ("more_info",)),
     "lock": ("lock_unlock", ("lock_unlock",)),
+    "vacuum": ("start", ("start", "pause", "stop", "return_home", "locate")),
 }
 SAFE_FILE = re.compile(
     r"(?:manifest\.json|house-placement\.json|bindings\.json|scene\.glb|thumbnail\.(?:png|jpg|webp)|textures/[a-zA-Z0-9_./-]+)\Z"
@@ -154,7 +155,7 @@ def validate_manifest(m):
             or not c["label"].strip()
             or len(c["label"]) > 160
         ):
-            raise ValueError("Every control must be a labeled light, cover, number, button, climate or lock.")
+            raise ValueError("Every control must be a labeled light, cover, number, button, climate, lock or vacuum.")
         if not vector(c.get("position")):
             raise ValueError("Every control needs a position in meters.")
         if "intensity" in c and (
@@ -182,6 +183,15 @@ def validate_manifest(m):
                 or not c["min"] < c["max"] or c["step"] <= 0
                 or not c["min"] <= c["defaultValue"] <= c["max"] or c.get("unit") != "cm"):
                 raise ValueError("Numbers need nodes, a valid centimetre range, step and default value.")
+        # Robot vacuums: `position` is the dock on the floor, `facing` the
+        # horizontal direction the robot drives out of it.
+        if "facing" in c and (
+            c["type"] != "vacuum"
+            or not vector(c["facing"])
+            or c["facing"][1] != 0
+            or not math.isclose(math.hypot(*c["facing"]), 1, abs_tol=1e-3)
+        ):
+            raise ValueError("Vacuum dock facing must be a horizontal unit vector.")
         if c.get("motion") is not None and (c["type"] != "cover" or c["motion"] != "none" or c.get("nodeIds")):
             raise ValueError("Command-only covers must have no moving scene nodes.")
         if c.get("group") is not None and (not valid_id(c["group"]) or not any(item.get("id") == c["group"] and item.get("type") == "number" for item in controls)):
@@ -602,7 +612,15 @@ def validate_component(value, model_ids):
             **({"quality": value["quality"]} if "quality" in value else {}),
             **validate_background(value),
             **({"markers": validate_markers(value["markers"])} if "markers" in value else {}),
+            **({"floorPlan": validate_floor_plan(value["floorPlan"])} if value.get("floorPlan") is not None else {}),
             "layers": [clean_layer]}
+
+
+def validate_floor_plan(value):
+    """A viewer's Floor plan toggle on a saved view: the compass heading it looks down from."""
+    if not isinstance(value, dict) or set(value) != {"heading"} or not number(value["heading"]) or not 0 <= value["heading"] < 360:
+        raise ValueError("Floor plan heading must be between 0 and 360 degrees.")
+    return {"heading": float(value["heading"])}
 
 
 def validate_thumbnail_art(value):
@@ -723,7 +741,7 @@ def compatible_entity(control, entity_id):
     return (
         isinstance(entity_id, str)
         and bool(ENTITY.fullmatch(entity_id))
-        and (entity_id.split(".")[0] in ({"climate"} if control.get("type") == "climate" else {"lock"} if control.get("type") == "lock" else {"button", "input_button", "script", "scene"} if control.get("type") == "button" else {"number", "input_number"} if control.get("type") == "number" else ({"cover"} if control.get("motion") == "none" else {"cover", "binary_sensor"}) if control.get("type") == "cover" else {"light", "switch"}))
+        and (entity_id.split(".")[0] in ({"climate"} if control.get("type") == "climate" else {"lock"} if control.get("type") == "lock" else {"vacuum"} if control.get("type") == "vacuum" else {"button", "input_button", "script", "scene"} if control.get("type") == "button" else {"number", "input_number"} if control.get("type") == "number" else ({"cover"} if control.get("motion") == "none" else {"cover", "binary_sensor"}) if control.get("type") == "cover" else {"light", "switch"}))
     )
 
 
@@ -734,7 +752,7 @@ def validate_bindings(bindings, manifest):
         for key, value in bindings.items()
     ):
         raise ValueError(
-            "Bindings must connect declared controls to matching light, switch, cover, climate, lock or number entities."
+            "Bindings must connect declared controls to matching light, switch, cover, climate, lock, vacuum or number entities."
         )
     return dict(bindings)
 
@@ -1038,6 +1056,10 @@ class ModelStore:
     def put_component(self, value):
         component = validate_component(value, [m["id"] for m in [*self.models, *house_models(self.models)]])
         previous = self.components
+        # The editor does not show the viewers' Floor plan toggle; saving keeps it.
+        old = next((c for c in previous if c["id"] == component["id"]), None)
+        if isinstance(value, dict) and "floorPlan" not in value and old and "floorPlan" in old:
+            component["floorPlan"] = deepcopy(old["floorPlan"])
         self.components = [c for c in previous if c["id"] != component["id"]] + [component]
         try:
             self.save(self.models)
@@ -1045,6 +1067,25 @@ class ModelStore:
             self.components = previous
             raise
         return deepcopy(component)
+
+    def set_view_floor_plan(self, component_id, value):
+        """Turn a saved view's floor plan on (with its heading) or off (None)."""
+        previous = self.components
+        component = next((c for c in previous if c["id"] == component_id), None)
+        if component is None:
+            raise ValueError("Saved view not found.")
+        if component["layers"][0]["view"] == "floor":
+            raise ValueError("This view is already a floor plan.")
+        updated = {k: v for k, v in deepcopy(component).items() if k != "floorPlan"}
+        if value is not None:
+            updated["floorPlan"] = validate_floor_plan(value)
+        self.components = [updated if c is component else c for c in previous]
+        try:
+            self.save(self.models)
+        except Exception:
+            self.components = previous
+            raise
+        return {"id": component_id, "floorPlan": deepcopy(updated.get("floorPlan"))}
 
     def remove_component(self, component_id):
         previous = self.components

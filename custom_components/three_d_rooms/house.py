@@ -48,6 +48,11 @@ def house_key(value):
     return f"{h:016x}"
 
 
+def placed_direction(v,t):
+    """Rotate a direction by a placement transform, without moving it."""
+    return [t[i]*v[0]+t[4+i]*v[1]+t[8+i]*v[2] for i in range(3)]
+
+
 def placed_point(p,t):
     return [t[i]*p[0]+t[4+i]*p[1]+t[8+i]*p[2]+t[12+i] for i in range(3)]
 
@@ -77,7 +82,7 @@ def house_models(models):
                     p = placed_point(c["position"],t)
                     if floor and not floor["minY"] <= p[1] < floor["maxY"]:
                         continue
-                    controls.append({**{k: v for k, v in deepcopy(c).items() if k != "markerAnchor"},"id":key(c["id"]),"label":m["title"]+" · "+c["label"],"position":p,**({"markerPosition":placed_point(c["markerPosition"],t)} if "markerPosition" in c else {}),**({"lightGroup":key(c["lightGroup"]),"lightGroupLabel":m["title"]+" · "+c["lightGroupLabel"]} if c.get("lightGroup") else {}),"nodeIds":[node(n) for n in c.get("nodeIds",[])],**({"group":key(c["group"])} if c.get("group") else {}),"sourceModel":m["id"],"sourceControl":c["id"],"roomTitle":m["title"]})
+                    controls.append({**{k: v for k, v in deepcopy(c).items() if k != "markerAnchor"},"id":key(c["id"]),"label":m["title"]+" · "+c["label"],"position":p,**({"markerPosition":placed_point(c["markerPosition"],t)} if "markerPosition" in c else {}),**({"facing":placed_direction(c["facing"],t)} if "facing" in c else {}),**({"lightGroup":key(c["lightGroup"]),"lightGroupLabel":m["title"]+" · "+c["lightGroupLabel"]} if c.get("lightGroup") else {}),"nodeIds":[node(n) for n in c.get("nodeIds",[])],**({"group":key(c["group"])} if c.get("group") else {}),"sourceModel":m["id"],"sourceControl":c["id"],"roomTitle":m["title"]})
                 position_group_markers(controls)
                 model["controls"].extend(controls)
                 visible = {c["id"] for c in controls}
@@ -105,7 +110,7 @@ def house_models(models):
                         inward = [t[i]*w["inward"][0]+t[4+i]*w["inward"][1]+t[8+i]*w["inward"][2] for i in range(3)]
                         target["windows"].append({**deepcopy(w),"id":"w-"+house_key(m["id"]+"/"+w["id"]),"nodeId":node(w["nodeId"]),"position":p,"inward":inward,**({"coverId":key(w["coverId"])} if w.get("coverId") else {}),"sourceModel":m["id"]})
                 model["roomTitles"][m["id"]]=m["title"]
-                model["members"].append({"model":m["id"],**({"groupIcons":True} if m.get("groupIcons") else {}),"appearance":deepcopy(m.get("appearance",[])),"transform":t,"sceneRevision":m.get("sceneRevision"),"controlIds":{c["id"]:key(c["id"]) for c in m["controls"]},"nodeIds":{n:node(n) for c in m["controls"] for n in c.get("nodeIds",[])}})
+                model["members"].append({"model":m["id"],**({"groupIcons":True} if m.get("groupIcons") else {}),**({"areaId":m["areaId"]} if m.get("areaId") else {}),"appearance":deepcopy(m.get("appearance",[])),"transform":t,"sceneRevision":m.get("sceneRevision"),"controlIds":{c["id"]:key(c["id"]) for c in m["controls"]},"nodeIds":{n:node(n) for c in m["controls"] for n in c.get("nodeIds",[])}})
             if model.get("daylight") and not model["daylight"]["windows"]:
                 del model["daylight"]
             model["sceneRevision"] = house_key(json.dumps(model["members"],sort_keys=True)+json.dumps(floor,sort_keys=True))

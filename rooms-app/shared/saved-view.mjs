@@ -25,6 +25,8 @@ export function resolveSavedView(config, components) {
     show_title: saved.show_title ?? true,
     height: saved.height,
     ...(saved.quality ? { quality: saved.quality } : {}),
+    // The viewers' Floor plan toggle, saved on the view (absent while off).
+    ...(saved.floorPlan ? { floorPlan: structuredClone(saved.floorPlan) } : {}),
     ...(saved.markers !== undefined
       ? { markers: structuredClone(saved.markers) }
       : {}),

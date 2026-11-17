@@ -75,6 +75,7 @@ export function deviceGroup(control) {
       climate: "Climate",
       button: "Actions",
       lock: "Locks",
+      vacuum: "Cleaning",
     }[control.type] || "Lights"
   );
 }

@@ -472,7 +472,7 @@ var M = (e) => {
 			};
 		}
 	};
-}, N = 5e3, P = (t, n, r, i, a = { unsubGrace: !0 }) => {
+}, ee = 5e3, N = (t, n, r, i, a = { unsubGrace: !0 }) => {
 	if (t[n]) return t[n];
 	let o = 0, s, c, l = M(), u = () => {
 		if (!r) throw Error("Collection does not support refresh");
@@ -488,7 +488,7 @@ var M = (e) => {
 			e();
 		}, () => void 0), l.clearState(), t.removeEventListener("ready", d), t.removeEventListener("disconnected", h);
 	}, m = () => {
-		c = setTimeout(p, N);
+		c = setTimeout(p, ee);
 	}, h = () => {
 		c && (clearTimeout(c), p());
 	};
@@ -505,7 +505,7 @@ var M = (e) => {
 			};
 		}
 	}, t[n];
-}, ee = (e) => e.sendMessagePromise(r()), te = (e) => e.sendMessagePromise(i()), ne = (e, t, n, r, i, o) => e.sendMessagePromise(a(t, n, r, i, o));
+}, P = (e) => e.sendMessagePromise(r()), te = (e) => e.sendMessagePromise(i()), ne = (e, t, n, r, i, o) => e.sendMessagePromise(a(t, n, r, i, o));
 // node_modules/home-assistant-js-websocket/dist/entities.js
 function re(e, t, n) {
 	let r = n ? {} : Object.assign({}, e.state);
@@ -565,14 +565,14 @@ function ae(e, t) {
 	}
 }
 async function oe(e) {
-	let t = await ee(e), n = {};
+	let t = await P(e), n = {};
 	for (let e = 0; e < t.length; e++) {
 		let r = t[e];
 		n[r.entity_id] = r;
 	}
 	return n;
 }
-var se = (e, t) => e.subscribeEvents((e) => ae(t, e), "state_changed"), ce = (e) => d(e.haVersion, 2022, 4, 0) ? P(e, "_ent", void 0, ie) : P(e, "_ent", oe, se), le = (e, t) => ce(e).subscribe(t);
+var se = (e, t) => e.subscribeEvents((e) => ae(t, e), "state_changed"), ce = (e) => d(e.haVersion, 2022, 4, 0) ? N(e, "_ent", void 0, ie) : N(e, "_ent", oe, se), le = (e, t) => ce(e).subscribe(t);
 // node_modules/home-assistant-js-websocket/dist/index.js
 async function ue(e) {
 	let t = Object.assign({
@@ -1012,7 +1012,18 @@ var z = {
 	volumeHigh: "M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z",
 	volumeOff: "M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z",
 	cctv: "M6.03 12.03L8.03 15.5L5.5 18.68L2 12.62L6.03 12.03M17 18V15.29C17.88 14.9 18.5 14.03 18.5 13C18.5 12.43 18.3 11.9 17.97 11.5L19.94 10.35C20.95 9.76 21.3 8.47 20.71 7.46L19.33 5.06C18.74 4.05 17.45 3.7 16.44 4.28L8.31 9C7.36 9.53 7.03 10.75 7.58 11.71L9.08 14.31C9.63 15.26 10.86 15.59 11.81 15.04L13.69 13.96C13.94 14.55 14.41 15.03 15 15.29V18C15 19.1 15.9 20 17 20H22V18H17Z",
-	refresh: "M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
+	refresh: "M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z",
+	pause: "M14,19H18V5H14M6,19H10V5H6V19Z",
+	playpause: "M3,5V19L11,12M13,19H16V5H13M18,5V19H21V5",
+	dock: "M15 13L11 17V14H2V12H11V9L15 13M5 20V16H7V18H17V10.19L12 5.69L7.21 10H4.22L12 3L22 12H19V20H5Z",
+	locate: "M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z",
+	spot: "M22.08,11.04H20.08V4H13.05V2H11.04V4H4V11.04H2V13.05H4V20.08H11.04V22.08H13.05V20.08H20.08V13.05H22.08V11.04M18.07,18.07H13.05V16.06H11.04V18.07H6V13.05H8.03V11.04H6V6H11.04V8.03H13.05V6H18.07V11.04H16.06V13.05H18.07V18.07M13.05,12.05A1,1 0 0,1 12.05,13.05C11.5,13.05 11.04,12.6 11.04,12.05C11.04,11.5 11.5,11.04 12.05,11.04C12.6,11.04 13.05,11.5 13.05,12.05Z",
+	fan: "M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11M12.5,2C17,2 17.11,5.57 14.75,6.75C13.76,7.24 13.32,8.29 13.13,9.22C13.61,9.42 14.03,9.73 14.35,10.13C18.05,8.13 22.03,8.92 22.03,12.5C22.03,17 18.46,17.1 17.28,14.73C16.78,13.74 15.72,13.3 14.79,13.11C14.59,13.59 14.28,14 13.88,14.34C15.87,18.03 15.08,22 11.5,22C7,22 6.91,18.42 9.27,17.24C10.25,16.75 10.69,15.71 10.89,14.79C10.4,14.59 9.97,14.27 9.65,13.87C5.96,15.85 2,15.07 2,11.5C2,7 5.56,6.89 6.74,9.26C7.24,10.25 8.29,10.68 9.22,10.87C9.41,10.39 9.73,9.97 10.14,9.65C8.15,5.96 8.94,2 12.5,2Z",
+	area: "M20 2H4C2.9 2 2 2.9 2 4V20C2 21.11 2.9 22 4 22H20C21.11 22 22 21.11 22 20V4C22 2.9 21.11 2 20 2M4 6L6 4H10.9L4 10.9V6M4 13.7L13.7 4H18.6L4 18.6V13.7M20 18L18 20H13.1L20 13.1V18M20 10.3L10.3 20H5.4L20 5.4V10.3Z",
+	next: "M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z",
+	back: "M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z",
+	battery: "M16.67,4H15V2H9V4H7.33A1.33,1.33 0 0,0 6,5.33V20.67C6,21.4 6.6,22 7.33,22H16.67A1.33,1.33 0 0,0 18,20.67V5.33C18,4.6 17.4,4 16.67,4Z",
+	batterycharging: "M16.67,4H15V2H9V4H7.33A1.33,1.33 0 0,0 6,5.33V20.66C6,21.4 6.6,22 7.33,22H16.66C17.4,22 18,21.4 18,20.67V5.33C18,4.6 17.4,4 16.67,4M11,20V14.5H9L13,7V12.5H15"
 }, B = [
 	"hs",
 	"xy",
@@ -1287,6 +1298,7 @@ function Pe(e) {
 			label: "Unlock"
 		}]
 	});
+	else if (n === "vacuum") i.controls.push(Fe(e));
 	else if (n === "alarm_control_panel") {
 		let t = Number.isFinite(r.supported_features) ? r.supported_features : 3;
 		i.controls.push({
@@ -1388,7 +1400,75 @@ function Pe(e) {
 	});
 	return i;
 }
-function Fe(e, t, n) {
+var G = {
+	PAUSE: 4,
+	STOP: 8,
+	RETURN_HOME: 16,
+	FAN_SPEED: 32,
+	STATUS: 128,
+	LOCATE: 512,
+	CLEAN_SPOT: 1024,
+	STATE: 4096,
+	START: 8192,
+	CLEAN_AREA: 16384
+};
+function Fe(e) {
+	let t = e?.attributes || {}, n = e?.state, r = Number.isFinite(t.supported_features) ? t.supported_features : 0, i = (e) => (r & e) !== 0, a = n === "unavailable", o = n === "cleaning" || n === "on", s = !i(G.STATE) && !i(G.START), c = [];
+	if (i(G.START) || i(G.PAUSE)) {
+		let e = !s && o && i(G.PAUSE);
+		c.push(s && i(G.PAUSE) ? {
+			key: "start_pause",
+			service: "start_pause",
+			label: "Start/Pause",
+			icon: "playpause",
+			disabled: a
+		} : {
+			key: "start_pause",
+			service: o ? "pause" : "start",
+			label: e ? "Pause" : "Start",
+			icon: e ? "pause" : "play",
+			disabled: a
+		});
+	}
+	return i(G.STOP) && c.push({
+		key: "stop",
+		service: "stop",
+		label: "Stop",
+		icon: "stop",
+		disabled: a || [
+			"docked",
+			"off",
+			"idle"
+		].includes(n)
+	}), i(G.RETURN_HOME) && c.push({
+		key: "return_to_base",
+		service: "return_to_base",
+		label: "Return to dock",
+		icon: "dock",
+		disabled: a || n === "returning"
+	}), i(G.LOCATE) && c.push({
+		key: "locate",
+		service: "locate",
+		label: "Locate",
+		icon: "locate",
+		disabled: a
+	}), i(G.CLEAN_SPOT) && c.push({
+		key: "clean_spot",
+		service: "clean_spot",
+		label: "Clean spot",
+		icon: "spot",
+		disabled: a
+	}), {
+		kind: "vacuum",
+		buttons: c,
+		fanSpeeds: i(G.FAN_SPEED) && Array.isArray(t.fan_speed_list) ? t.fan_speed_list.filter((e) => typeof e == "string") : [],
+		fanSpeed: typeof t.fan_speed == "string" ? t.fan_speed : void 0,
+		cleanArea: i(G.CLEAN_AREA),
+		status: i(G.STATUS) && typeof t.status == "string" ? t.status : void 0,
+		battery: Number.isFinite(t.battery_level) ? t.battery_level : void 0
+	};
+}
+function Ie(e, t, n) {
 	let { domain: r, id: i } = e;
 	if (t.kind === "toggle") return [
 		r === "light" || r === "switch" ? r : "homeassistant",
@@ -1412,6 +1492,37 @@ function Fe(e, t, n) {
 		n,
 		{ entity_id: i }
 	];
+	if (t.kind === "vacuum") {
+		if (n?.fan_speed !== void 0) {
+			if (!t.fanSpeeds.includes(n.fan_speed)) throw Error("Unknown fan speed");
+			return [
+				"vacuum",
+				"set_fan_speed",
+				{
+					entity_id: i,
+					fan_speed: n.fan_speed
+				}
+			];
+		}
+		if (n?.areas) {
+			if (!t.cleanArea || !n.areas.length) throw Error("Choose at least one area");
+			return [
+				"vacuum",
+				"clean_area",
+				{
+					entity_id: i,
+					cleaning_area_id: [...n.areas]
+				}
+			];
+		}
+		let e = t.buttons.find((e) => e.service === n);
+		if (!e || e.disabled) throw Error("This vacuum cannot do that now");
+		return [
+			"vacuum",
+			n,
+			{ entity_id: i }
+		];
+	}
 	if (t.kind === "slider" || t.kind === "stepper" || t.kind === "select") return r === "light" ? t.key === "brightness" && !(n > 0) ? [
 		"light",
 		"turn_off",
@@ -1448,22 +1559,248 @@ function Fe(e, t, n) {
 	];
 	throw Error("Unknown control");
 }
-function G(e, t) {
+function K(e, t) {
 	let n = encodeURIComponent(e), r = t ? `?token=${encodeURIComponent(t)}` : "";
 	return {
 		still: `/api/camera_proxy/${n}${r}`,
 		mjpeg: `/api/camera_proxy_stream/${n}${r}`
 	};
 }
+// dashboard/vacuum-art.mjs
+var Le = "<svg viewBox=\"0 0 240 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"vacuum-svg\" ><circle cx=\"120\" cy=\"120\" r=\"110\" class=\"glow\" fill=\"var(--vacuum-color)\" opacity=\"0.06\" /><g class=\"vacuum-body-rotate\"><g class=\"vacuum-body\"><g class=\"brush brush-right\"><g class=\"brush-spokes\"><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"64\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"88\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"162\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"186\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /></g><circle cx=\"174\" cy=\"76\" r=\"2\" fill=\"var(--vacuum-color)\" opacity=\"0.5\" /></g><circle cx=\"120\" cy=\"120\" r=\"72\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /><circle cx=\"120\" cy=\"120\" r=\"66\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.2\" /><path d=\"M 60 94 A 68 68 0 0 1 180 94\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"3\" stroke-linecap=\"round\" class=\"bumper\" /><g class=\"nav-lines\" opacity=\"0.15\"><line x1=\"120\" y1=\"56\" x2=\"120\" y2=\"74\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"88\" y1=\"63\" x2=\"96\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"152\" y1=\"63\" x2=\"144\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /></g><circle cx=\"120\" cy=\"108\" r=\"14\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" class=\"lidar-housing\" /><circle cx=\"120\" cy=\"108\" r=\"9\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.25\" /><circle cx=\"120\" cy=\"140\" r=\"8\" fill=\"var(--vacuum-color)\" opacity=\"0.08\" class=\"power-ring\" /><circle cx=\"120\" cy=\"140\" r=\"4\" fill=\"var(--vacuum-color)\" opacity=\"0.25\" class=\"power-dot\" /></g></g><g class=\"particles\"><circle class=\"particle p1\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p2\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p3\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p4\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p5\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p6\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p7\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p8\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /></g><g class=\"dock-indicator\"><rect x=\"76\" y=\"188\" width=\"88\" height=\"28\" rx=\"8\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /></g><g class=\"return-path\"><polygon points=\"120,220 110,206 130,206\" fill=\"var(--vacuum-color)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" stroke-linejoin=\"round\" opacity=\"0.55\" /></g></svg>", Re = ".mi-vac-status{display: flex; align-items: center; justify-content: center;}.mi-vac-status .container{width: 200px; height: 200px; position: relative;}.mi-vac-status .vacuum-svg{width: 100%; height: 100%;}.mi-vac-status .particles,.mi-vac-status .dock-indicator,.mi-vac-status .return-path{opacity: 0; transition: opacity 400ms ease;}.mi-vac-status .cleaning .vacuum-body{animation: mi-vac-vacuum-wander 12s ease-in-out infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .brush-right .brush-spokes{animation: mi-vac-brush-spin 0.6s linear infinite; transform-origin: 174px 76px;}.mi-vac-status .cleaning .particles{opacity: 1;}.mi-vac-status .cleaning .particle{animation: mi-vac-particle-suck 2.4s ease-in infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .p1{animation-delay: 0s;}.mi-vac-status .cleaning .p2{animation-delay: -0.3s;}.mi-vac-status .cleaning .p3{animation-delay: -0.6s;}.mi-vac-status .cleaning .p4{animation-delay: -0.9s;}.mi-vac-status .cleaning .p5{animation-delay: -1.2s;}.mi-vac-status .cleaning .p6{animation-delay: -1.5s;}.mi-vac-status .cleaning .p7{animation-delay: -1.8s;}.mi-vac-status .cleaning .p8{animation-delay: -2.1s;}.mi-vac-status .cleaning .p1{--particle-x: -90px; --particle-y: -25px;}.mi-vac-status .cleaning .p2{--particle-x: 90px; --particle-y: 20px;}.mi-vac-status .cleaning .p3{--particle-x: -85px; --particle-y: 40px;}.mi-vac-status .cleaning .p4{--particle-x: 85px; --particle-y: -35px;}.mi-vac-status .cleaning .p5{--particle-x: -65px; --particle-y: 70px;}.mi-vac-status .cleaning .p6{--particle-x: 70px; --particle-y: -65px;}.mi-vac-status .cleaning .p7{--particle-x: -75px; --particle-y: -55px;}.mi-vac-status .cleaning .p8{--particle-x: 80px; --particle-y: 55px;}.mi-vac-status .cleaning .nav-lines{animation: mi-vac-nav-pulse 2s ease-in-out infinite;}.mi-vac-status .vacuum-body-rotate{transform-origin: 120px 120px; transform: rotate(0deg); transition: transform 600ms ease-in-out;}.mi-vac-status .returning .vacuum-body-rotate{transform: rotate(180deg);}.mi-vac-status .returning .vacuum-body{animation: mi-vac-returning-drift 3s ease-in-out infinite;}.mi-vac-status .returning .return-path{opacity: 1; animation: mi-vac-return-arrow 1.6s ease-in-out infinite; transform-origin: 120px 210px;}.mi-vac-status .returning .brush-right{opacity: 0.4;}.mi-vac-status .docked .dock-indicator{opacity: 1;}.mi-vac-status .docked .vacuum-body{opacity: 0.75;}.mi-vac-status .docked .glow{animation: mi-vac-docked-glow 4s ease-in-out infinite;}.mi-vac-status .docked .power-ring{animation: mi-vac-charge-pulse 2.5s ease-in-out infinite;}.mi-vac-status .docked .brush-right{opacity: 0.5;}.mi-vac-status .error .glow{animation: mi-vac-error-glow 1.8s ease-in-out infinite;}.mi-vac-status .idle .vacuum-body{opacity: 0.65;}.mi-vac-status .idle .brush-right{opacity: 0.4;}@keyframes mi-vac-vacuum-wander { 0% { transform: rotate(0deg) translate(0, 0); } 15% { transform: rotate(0deg) translate(0, -30px); } 25% { transform: rotate(0deg) translate(0, 0); } 32% { transform: rotate(-18deg) translate(0, 0); } 47% { transform: rotate(-18deg) translate(0, -28px); } 57% { transform: rotate(-18deg) translate(0, 0); } 63% { transform: rotate(12deg) translate(0, 0); } 78% { transform: rotate(12deg) translate(0, -25px); } 88% { transform: rotate(12deg) translate(0, 0); } 95% { transform: rotate(0deg) translate(0, 0); } 100% { transform: rotate(0deg) translate(0, 0); } }@keyframes mi-vac-brush-spin { to { transform: rotate(360deg); } }@keyframes mi-vac-particle-suck { 0% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1.2); } 25% { opacity: 0.8; } 80% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } 100% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } }@keyframes mi-vac-nav-pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.35; } }@keyframes mi-vac-returning-drift { 0%, 100% { transform: translateY(-6px); } 50% { transform: translateY(4px); } }@keyframes mi-vac-return-arrow { 0%, 100% { transform: translateY(-6px); opacity: 0.3; } 50% { transform: translateY(4px); opacity: 0.85; } }@keyframes mi-vac-docked-glow { 0%, 100% { opacity: 0.06; } 50% { opacity: 0.14; } }@keyframes mi-vac-charge-pulse { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.25; } }@keyframes mi-vac-error-glow { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.35; } }";
+function ze(e) {
+	let t = e?.state;
+	return t === "unavailable" ? "idle" : t === "error" ? "error" : t === "cleaning" || t === "on" ? "cleaning" : t === "returning" || t === "paused" || t === "docked" ? t : "idle";
+}
 // dashboard/more-info.mjs
-var Ie = "\ndialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f;--mi-surface:#ffffff14;--mi-surface-2:#ffffff24;--mi-primary:#03a9f4;--mi-ink:#fff;--mi-accent:var(--mi-primary);--mi-accent-ink:#fff;\n box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--mi-bg);color:var(--mi-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:mi-in .22s cubic-bezier(.2,.8,.2,1)}\n@media (prefers-color-scheme:light){dialog.mi{--mi-bg:#fff;--mi-fg:#212121;--mi-muted:#727272;--mi-line:#0000001f;--mi-surface:#0000000d;--mi-surface-2:#0000001a;--mi-ink:#212121;box-shadow:0 24px 64px #0004}}\ndialog.mi::backdrop{background:#000a}\n@media (prefers-color-scheme:light){dialog.mi::backdrop{background:#0006}}\n@keyframes mi-in{from{opacity:0;transform:translateY(20px) scale(.98)}}\n@media (prefers-reduced-motion:reduce){dialog.mi{animation:none}.mi *{transition:none!important;animation:none!important}}\n@media (max-width:600px){dialog.mi{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;animation-name:mi-up}@keyframes mi-up{from{transform:translateY(100%)}}}\n.mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}\n@media (max-width:600px){.mi-frame{max-height:94vh}}\n.mi-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}\n.mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}\n.mi-head h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-head p{margin:0;color:var(--mi-muted);font-size:13px}\n.mi-iconbtn{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;transition:background .15s}\n.mi-iconbtn:hover{background:var(--mi-surface)}\n.mi svg{width:24px;height:24px;fill:currentColor;display:block}\n.mi-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:8px 24px 24px}\n.mi-center{display:flex;flex-direction:column;align-items:center;gap:20px}\n.mi button:focus-visible,.mi [role=slider]:focus-visible{outline:2px solid var(--mi-primary);outline-offset:3px}\n/* sliders */\n.mi-slider{position:relative;overflow:hidden;background:var(--mi-surface);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}\n.mi-slider:hover{background:var(--mi-surface-2)}\n.mi-slider .mi-fill{position:absolute;background:var(--mi-accent);opacity:.92;transition:background .3s}\n.mi-slider.mi-dragging .mi-fill{transition:none}\n.mi-slider.mi-v{width:132px;height:min(300px,38vh);min-height:200px;border-radius:28px}\n.mi-v .mi-fill{left:0;right:0;bottom:0}\n.mi-v .mi-readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;color:var(--mi-accent-ink);text-shadow:0 1px 2px #0004}\n.mi-v .mi-big{font:500 34px/1.1 Roboto,system-ui,sans-serif}\n.mi-v .mi-small{font-size:14px;opacity:.85}\n.mi-slider.mi-h{width:100%;height:48px;border-radius:14px}\n.mi-h .mi-fill{left:0;top:0;bottom:0}\n.mi-h.mi-track{background-image:var(--mi-gradient);background-color:transparent}\n.mi-h.mi-track .mi-fill{display:none}\n.mi-h .mi-thumb{position:absolute;top:8px;bottom:8px;width:6px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 0 1.5px #0004;pointer-events:none}\n.mi-field{width:100%;display:grid;gap:8px}\n.mi-field>.mi-label{display:flex;justify-content:space-between;font-weight:500}\n.mi-field output{color:var(--mi-muted);font-weight:400}\n/* round buttons */\n.mi-row{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;width:100%}\n.mi-round{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;padding:0;color:inherit;font:inherit;font-size:12px;cursor:pointer;min-width:64px}\n.mi-round .mi-disc{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--mi-surface-2);transition:background .15s,color .15s}\n.mi-round:hover .mi-disc{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-round[aria-pressed=true] .mi-disc{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-round:disabled{opacity:.4;cursor:default}\n.mi-round>span:last-child{color:var(--mi-muted)}\n.mi-round[aria-pressed=true]>span:last-child{color:var(--mi-fg)}\n/* panels & lists */\n.mi-panel{width:100%;display:grid;gap:18px;padding:16px;border-radius:20px;background:var(--mi-surface)}\n.mi-panel[hidden]{display:none}\n.mi-list{display:grid;gap:2px;margin:0;padding:0;list-style:none;max-height:220px;overflow:auto}\n.mi-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}\n.mi-list button:hover{background:var(--mi-surface-2)}\n.mi-list button[aria-checked=true]{color:var(--mi-primary);font-weight:500}\n.mi-list button[aria-checked=true]::after{content:\"✓\"}\n/* big tall switch and lock */\n.mi-tall{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:132px;height:min(240px,32vh);min-height:170px;border:0;border-radius:28px;background:var(--mi-surface-2);color:var(--mi-muted);font:500 16px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}\n.mi-tall svg{width:44px;height:44px}\n.mi-tall[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-lock{display:grid;place-items:center;width:176px;height:176px;border:0;border-radius:50%;background:color-mix(in srgb,var(--mi-accent) 22%,transparent);color:var(--mi-accent);cursor:pointer;transition:background .2s,color .2s;box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--mi-accent) 55%,transparent)}\n.mi-lock svg{width:72px;height:72px}\n.mi-lock:disabled{opacity:.5;cursor:default}\n/* cover: big state, then a tall two-way switch or a position slider */\n.mi-statehead{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px 0 4px;text-align:center}\n.mi-statehead strong{font:400 40px/1.15 Roboto,system-ui,sans-serif;letter-spacing:-.5px}\n.mi-statehead span{color:var(--mi-muted);font-size:16px}\n.mi-cover-switch{position:relative;box-sizing:border-box;width:132px;height:min(330px,40vh);min-height:220px;padding:8px;border:0;border-radius:32px;background:var(--mi-surface-2);color:inherit;cursor:pointer;touch-action:none}\n.mi-cover-switch:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 10%)}\n.mi-cover-knob{position:absolute;left:8px;right:8px;bottom:calc(8px + (50% - 8px) * var(--mi-pos,0));height:calc(50% - 8px);display:grid;place-items:center;border-radius:24px;background:#9e9e9e;color:#fff;pointer-events:none;transition:bottom .25s cubic-bezier(.3,.7,.3,1),background .25s}\n.mi-cover-switch.mi-dragging .mi-cover-knob{transition:background .25s}\n.mi-cover-switch[aria-checked=true] .mi-cover-knob{background:var(--mi-accent)}\n.mi-cover-switch[data-moving=true]{background:color-mix(in srgb,var(--mi-accent) 28%,var(--mi-surface-2))}\n.mi-cover-switch[data-moving=true] .mi-cover-knob{background:var(--mi-accent);animation:mi-moving 1.2s ease-in-out infinite}\n@keyframes mi-moving{50%{opacity:.7}}\n.mi-cover-knob svg{width:30px;height:30px}\n.mi-cover-switch:disabled{opacity:.5;cursor:default}\n.mi-cover-buttons{display:flex;gap:0;padding:4px;border-radius:24px;background:var(--mi-surface)}\n.mi-cover-buttons .mi-iconbtn{width:64px;height:48px;border-radius:20px}\n.mi-cover-buttons .mi-iconbtn:hover{background:var(--mi-surface-2)}\n.mi-state{font:500 20px Roboto,system-ui,sans-serif}\n.mi-sub{color:var(--mi-muted);margin-top:-12px}\n/* climate */\n.mi-temp{display:flex;align-items:center;justify-content:center;gap:20px;width:100%}\n.mi-temp output{display:flex;flex-direction:column;align-items:center;min-width:140px;font:500 56px/1 Roboto,system-ui,sans-serif}\n.mi-temp output small{margin-top:8px;font:400 14px Roboto,system-ui,sans-serif;color:var(--mi-muted)}\n.mi-temp .mi-iconbtn{width:56px;height:56px;background:var(--mi-surface-2)}\n.mi-temp .mi-iconbtn:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-pill{min-height:48px;padding:0 28px;border:0;border-radius:24px;background:var(--mi-primary);color:#fff;font:500 15px Roboto,system-ui,sans-serif;cursor:pointer}\n.mi-pill:hover{filter:brightness(1.08)}\n/* climate dial */\n.mi-climate{gap:12px}\n.mi-current{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mi-muted)}\n.mi-current strong{color:var(--mi-fg);font:500 20px Roboto,system-ui,sans-serif}\n.mi-dial{position:relative;width:min(300px,100%);aspect-ratio:1;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;border-radius:50%}\n.mi-dial svg{width:100%;height:100%;overflow:visible}\n.mi-dial svg path{fill:none;stroke-width:20;stroke-linecap:round}\n.mi-arc-track{stroke:var(--mi-surface-2)}\n.mi-arc-fill{stroke:var(--mi-accent);transition:stroke .3s}\n.mi-cur{fill:var(--mi-muted)}\n.mi-handle{fill:#fff;stroke:var(--mi-bg);stroke-width:0;filter:drop-shadow(0 1px 3px #0006)}\n.mi-dial.mi-dragging .mi-handle{r:13}\n.mi-dial-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none}\n.mi-dial-state{font:400 18px Roboto,system-ui,sans-serif}\n.mi-dial-value{display:flex;align-items:flex-start;font:400 72px/1 Roboto,system-ui,sans-serif;letter-spacing:-1px}\n.mi-sup{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:6px 0 0 4px;font:400 22px/1 Roboto,system-ui,sans-serif;letter-spacing:0}\n.mi-dec{font-size:22px;color:var(--mi-fg)}\n.mi-dialbtns{display:flex;gap:36px;margin-top:-58px;position:relative}\n.mi-outline{display:grid;place-items:center;width:56px;height:56px;padding:0;border:1px solid var(--mi-muted);border-radius:50%;background:var(--mi-bg);color:var(--mi-fg);cursor:pointer}\n.mi-outline:hover{background:var(--mi-surface-2)}\n.mi-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px}\n.mi-tile{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 14px;border:0;border-radius:16px;background:var(--mi-surface);color:inherit;font:inherit;text-align:left;cursor:pointer;min-width:0}\n.mi-tile:hover{background:var(--mi-surface-2)}\n.mi-tile-icon svg{width:24px;height:24px}\n.mi-tile-text{display:flex;flex-direction:column;min-width:0}\n.mi-tile-label{color:var(--mi-muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n.mi-tile-value{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\n/* alarm panel: big state, a vertical mode picker and a code keypad */\n.mi-modes{display:flex;flex-direction:column;gap:6px;box-sizing:border-box;width:184px;padding:6px;border-radius:32px;background:var(--mi-surface)}\n.mi-mode{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:min(92px,13vh);flex:1;padding:8px;border:0;border-radius:26px;background:transparent;color:var(--mi-fg);font:500 15px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}\n.mi-mode:hover{background:var(--mi-surface-2)}\n.mi-mode[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}\n.mi-mode[data-busy=true]{animation:mi-moving 1.2s ease-in-out infinite}\n.mi-mode:disabled{cursor:default}\ndialog.mi.mi-code{width:min(360px,calc(100vw - 32px))}\n@media (max-width:600px){dialog.mi.mi-code{width:100vw}}\n.mi-code .mi-body{display:grid;justify-items:center;gap:16px;padding:8px 24px 28px}\n.mi-code-field{display:flex;align-items:center;box-sizing:border-box;width:100%;min-height:56px;border-radius:6px 6px 0 0;background:var(--mi-surface-2);border-bottom:1px solid var(--mi-muted)}\n.mi-code-field:focus-within{border-bottom:2px solid var(--mi-primary)}\n.mi-code-field input{flex:1;min-width:0;height:56px;padding:0 16px;border:0;background:transparent;color:inherit;font:400 18px Roboto,system-ui,sans-serif;letter-spacing:2px;outline:none}\n.mi-code-field input::placeholder{color:var(--mi-muted);letter-spacing:0;font-size:16px}\n.mi-keypad{display:grid;grid-template-columns:repeat(3,64px);gap:16px 28px;margin-top:8px}\n.mi-key{display:grid;place-items:center;width:64px;height:64px;padding:0;border:0;border-radius:50%;background:var(--mi-surface-2);color:var(--mi-fg);font:400 26px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .15s}\n.mi-key:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}\n.mi-key.mi-key-clear{color:var(--mi-muted)}\n.mi-key.mi-key-ok{background:color-mix(in srgb,#43a047 45%,var(--mi-surface-2));color:#8bd88f}\n.mi-key.mi-key-ok:hover{background:color-mix(in srgb,#43a047 60%,var(--mi-surface-2))}\n@media (prefers-color-scheme:light){.mi-key.mi-key-ok{color:#1b5e20}}\n.mi-key:disabled{opacity:.5;cursor:default}\n.mi-code .mi-pill{width:100%}\n/* camera: a wide dialog with the live picture */\ndialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}\n@media (max-width:600px){dialog.mi.mi-wide{width:100vw}}\n.mi-wide .mi-body{padding:0 0 16px}\n.mi-camera{position:relative;width:100%;aspect-ratio:16/9;max-height:calc(min(92vh,880px) - 140px);background:#000;overflow:hidden}\n.mi-camera>img,.mi-camera>video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}\n.mi-camera>img[hidden],.mi-camera>video[hidden]{display:none}\n.mi-camera-note{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;color:#fff;text-align:center;background:#0006}\n.mi-camera-note[hidden]{display:none}\n.mi-camera-note svg{width:40px;height:40px;opacity:.85}\n.mi-camera-bar{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:4px;padding:8px 10px;background:linear-gradient(transparent,#000a);color:#fff}\n.mi-camera-bar .mi-iconbtn{width:44px;height:44px;color:#fff}\n.mi-camera-bar .mi-iconbtn:hover{background:#ffffff26}\n.mi-camera-bar [hidden]{display:none}\n.mi-live{display:inline-flex;align-items:center;gap:6px;margin-right:auto;padding:3px 10px;border-radius:999px;background:#0008;font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}\n.mi-live::before{content:\"\";width:8px;height:8px;border-radius:50%;background:#f44336;animation:mi-moving 1.6s ease-in-out infinite}\n.mi-live[data-still=true]::before{background:#9e9e9e;animation:none}\n.mi-camera:fullscreen{max-height:none;aspect-ratio:auto}\n.mi-wide .mi-attrs{margin:16px 24px 0}\n.mi-wide .mi-error{margin:12px 24px 0}\n/* attributes */\n.mi-attrs{margin-top:24px;border-top:1px solid var(--mi-line);padding-top:4px}\n.mi-attrs summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-weight:500;cursor:pointer;list-style:none}\n.mi-attrs summary::-webkit-details-marker{display:none}\n.mi-attrs summary svg{transition:transform .2s}\n.mi-attrs[open] summary svg{transform:rotate(180deg)}\n.mi-attrs dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px 16px;margin:0 0 4px}\n.mi-attrs dt{color:var(--mi-muted)}\n.mi-attrs dd{margin:0;text-align:right;overflow-wrap:anywhere}\n.mi-error{margin:12px 0 0;color:#db4437;text-align:center}\n", K = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${z[e]}"/></svg>`, q = (e) => `rgb(${e.join(",")})`, Le = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", J = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), Y = {
+var Be = `
+dialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f;--mi-surface:#ffffff14;--mi-surface-2:#ffffff24;--mi-primary:#03a9f4;--mi-ink:#fff;--mi-accent:var(--mi-primary);--mi-accent-ink:#fff;
+ box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--mi-bg);color:var(--mi-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:mi-in .22s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-color-scheme:light){dialog.mi{--mi-bg:#fff;--mi-fg:#212121;--mi-muted:#727272;--mi-line:#0000001f;--mi-surface:#0000000d;--mi-surface-2:#0000001a;--mi-ink:#212121;box-shadow:0 24px 64px #0004}}
+dialog.mi::backdrop{background:#000a}
+@media (prefers-color-scheme:light){dialog.mi::backdrop{background:#0006}}
+@keyframes mi-in{from{opacity:0;transform:translateY(20px) scale(.98)}}
+@media (prefers-reduced-motion:reduce){dialog.mi{animation:none}.mi *{transition:none!important;animation:none!important}}
+@media (max-width:600px){dialog.mi{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;animation-name:mi-up}@keyframes mi-up{from{transform:translateY(100%)}}}
+.mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}
+@media (max-width:600px){.mi-frame{max-height:94vh}}
+.mi-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}
+.mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}
+.mi-head h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi-head p{margin:0;color:var(--mi-muted);font-size:13px}
+.mi-iconbtn{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;transition:background .15s}
+.mi-iconbtn:hover{background:var(--mi-surface)}
+.mi svg{width:24px;height:24px;fill:currentColor;display:block}
+.mi-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:8px 24px 24px}
+.mi-center{display:flex;flex-direction:column;align-items:center;gap:20px}
+.mi button:focus-visible,.mi [role=slider]:focus-visible{outline:2px solid var(--mi-primary);outline-offset:3px}
+/* sliders */
+.mi-slider{position:relative;overflow:hidden;background:var(--mi-surface);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}
+.mi-slider:hover{background:var(--mi-surface-2)}
+.mi-slider .mi-fill{position:absolute;background:var(--mi-accent);opacity:.92;transition:background .3s}
+.mi-slider.mi-dragging .mi-fill{transition:none}
+.mi-slider.mi-v{width:132px;height:min(300px,38vh);min-height:200px;border-radius:28px}
+.mi-v .mi-fill{left:0;right:0;bottom:0}
+.mi-v .mi-readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;color:var(--mi-accent-ink);text-shadow:0 1px 2px #0004}
+.mi-v .mi-big{font:500 34px/1.1 Roboto,system-ui,sans-serif}
+.mi-v .mi-small{font-size:14px;opacity:.85}
+.mi-slider.mi-h{width:100%;height:48px;border-radius:14px}
+.mi-h .mi-fill{left:0;top:0;bottom:0}
+.mi-h.mi-track{background-image:var(--mi-gradient);background-color:transparent}
+.mi-h.mi-track .mi-fill{display:none}
+.mi-h .mi-thumb{position:absolute;top:8px;bottom:8px;width:6px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 0 1.5px #0004;pointer-events:none}
+.mi-field{width:100%;display:grid;gap:8px}
+.mi-field>.mi-label{display:flex;justify-content:space-between;font-weight:500}
+.mi-field output{color:var(--mi-muted);font-weight:400}
+/* round buttons */
+.mi-row{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;width:100%}
+.mi-round{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;padding:0;color:inherit;font:inherit;font-size:12px;cursor:pointer;min-width:64px}
+.mi-round .mi-disc{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--mi-surface-2);transition:background .15s,color .15s}
+.mi-round:hover .mi-disc{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}
+.mi-round[aria-pressed=true] .mi-disc{background:var(--mi-accent);color:var(--mi-accent-ink)}
+.mi-round:disabled{opacity:.4;cursor:default}
+.mi-round>span:last-child{color:var(--mi-muted)}
+.mi-round[aria-pressed=true]>span:last-child{color:var(--mi-fg)}
+/* panels & lists */
+.mi-panel{width:100%;display:grid;gap:18px;padding:16px;border-radius:20px;background:var(--mi-surface)}
+.mi-panel[hidden]{display:none}
+.mi-list{display:grid;gap:2px;margin:0;padding:0;list-style:none;max-height:220px;overflow:auto}
+.mi-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.mi-list button:hover{background:var(--mi-surface-2)}
+.mi-list button[aria-checked=true]{color:var(--mi-primary);font-weight:500}
+.mi-list button[aria-checked=true]::after{content:"✓"}
+/* big tall switch and lock */
+.mi-tall{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:132px;height:min(240px,32vh);min-height:170px;border:0;border-radius:28px;background:var(--mi-surface-2);color:var(--mi-muted);font:500 16px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}
+.mi-tall svg{width:44px;height:44px}
+.mi-tall[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}
+.mi-lock{display:grid;place-items:center;width:176px;height:176px;border:0;border-radius:50%;background:color-mix(in srgb,var(--mi-accent) 22%,transparent);color:var(--mi-accent);cursor:pointer;transition:background .2s,color .2s;box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--mi-accent) 55%,transparent)}
+.mi-lock svg{width:72px;height:72px}
+.mi-lock:disabled{opacity:.5;cursor:default}
+/* cover: big state, then a tall two-way switch or a position slider */
+.mi-statehead{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px 0 4px;text-align:center}
+.mi-statehead strong{font:400 40px/1.15 Roboto,system-ui,sans-serif;letter-spacing:-.5px}
+.mi-statehead span{color:var(--mi-muted);font-size:16px}
+.mi-cover-switch{position:relative;box-sizing:border-box;width:132px;height:min(330px,40vh);min-height:220px;padding:8px;border:0;border-radius:32px;background:var(--mi-surface-2);color:inherit;cursor:pointer;touch-action:none}
+.mi-cover-switch:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 10%)}
+.mi-cover-knob{position:absolute;left:8px;right:8px;bottom:calc(8px + (50% - 8px) * var(--mi-pos,0));height:calc(50% - 8px);display:grid;place-items:center;border-radius:24px;background:#9e9e9e;color:#fff;pointer-events:none;transition:bottom .25s cubic-bezier(.3,.7,.3,1),background .25s}
+.mi-cover-switch.mi-dragging .mi-cover-knob{transition:background .25s}
+.mi-cover-switch[aria-checked=true] .mi-cover-knob{background:var(--mi-accent)}
+.mi-cover-switch[data-moving=true]{background:color-mix(in srgb,var(--mi-accent) 28%,var(--mi-surface-2))}
+.mi-cover-switch[data-moving=true] .mi-cover-knob{background:var(--mi-accent);animation:mi-moving 1.2s ease-in-out infinite}
+@keyframes mi-moving{50%{opacity:.7}}
+.mi-cover-knob svg{width:30px;height:30px}
+.mi-cover-switch:disabled{opacity:.5;cursor:default}
+.mi-cover-buttons{display:flex;gap:0;padding:4px;border-radius:24px;background:var(--mi-surface)}
+.mi-cover-buttons .mi-iconbtn{width:64px;height:48px;border-radius:20px}
+.mi-cover-buttons .mi-iconbtn:hover{background:var(--mi-surface-2)}
+.mi-state{font:500 20px Roboto,system-ui,sans-serif}
+.mi-sub{color:var(--mi-muted);margin-top:-12px}
+/* climate */
+.mi-temp{display:flex;align-items:center;justify-content:center;gap:20px;width:100%}
+.mi-temp output{display:flex;flex-direction:column;align-items:center;min-width:140px;font:500 56px/1 Roboto,system-ui,sans-serif}
+.mi-temp output small{margin-top:8px;font:400 14px Roboto,system-ui,sans-serif;color:var(--mi-muted)}
+.mi-temp .mi-iconbtn{width:56px;height:56px;background:var(--mi-surface-2)}
+.mi-temp .mi-iconbtn:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}
+.mi-pill{min-height:48px;padding:0 28px;border:0;border-radius:24px;background:var(--mi-primary);color:#fff;font:500 15px Roboto,system-ui,sans-serif;cursor:pointer}
+.mi-pill:hover{filter:brightness(1.08)}
+/* climate dial */
+.mi-climate{gap:12px}
+.mi-current{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mi-muted)}
+.mi-current strong{color:var(--mi-fg);font:500 20px Roboto,system-ui,sans-serif}
+.mi-dial{position:relative;width:min(300px,100%);aspect-ratio:1;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;border-radius:50%}
+.mi-dial svg{width:100%;height:100%;overflow:visible}
+.mi-dial svg path{fill:none;stroke-width:20;stroke-linecap:round}
+.mi-arc-track{stroke:var(--mi-surface-2)}
+.mi-arc-fill{stroke:var(--mi-accent);transition:stroke .3s}
+.mi-cur{fill:var(--mi-muted)}
+.mi-handle{fill:#fff;stroke:var(--mi-bg);stroke-width:0;filter:drop-shadow(0 1px 3px #0006)}
+.mi-dial.mi-dragging .mi-handle{r:13}
+.mi-dial-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none}
+.mi-dial-state{font:400 18px Roboto,system-ui,sans-serif}
+.mi-dial-value{display:flex;align-items:flex-start;font:400 72px/1 Roboto,system-ui,sans-serif;letter-spacing:-1px}
+.mi-sup{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:6px 0 0 4px;font:400 22px/1 Roboto,system-ui,sans-serif;letter-spacing:0}
+.mi-dec{font-size:22px;color:var(--mi-fg)}
+.mi-dialbtns{display:flex;gap:36px;margin-top:-58px;position:relative}
+.mi-outline{display:grid;place-items:center;width:56px;height:56px;padding:0;border:1px solid var(--mi-muted);border-radius:50%;background:var(--mi-bg);color:var(--mi-fg);cursor:pointer}
+.mi-outline:hover{background:var(--mi-surface-2)}
+.mi-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px}
+.mi-tile{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 14px;border:0;border-radius:16px;background:var(--mi-surface);color:inherit;font:inherit;text-align:left;cursor:pointer;min-width:0}
+.mi-tile:hover{background:var(--mi-surface-2)}
+.mi-tile-icon svg{width:24px;height:24px}
+.mi-tile-text{display:flex;flex-direction:column;min-width:0}
+.mi-tile-label{color:var(--mi-muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi-tile-value{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* alarm panel: big state, a vertical mode picker and a code keypad */
+.mi-modes{display:flex;flex-direction:column;gap:6px;box-sizing:border-box;width:184px;padding:6px;border-radius:32px;background:var(--mi-surface)}
+.mi-mode{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:min(92px,13vh);flex:1;padding:8px;border:0;border-radius:26px;background:transparent;color:var(--mi-fg);font:500 15px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .2s,color .2s}
+.mi-mode:hover{background:var(--mi-surface-2)}
+.mi-mode[aria-checked=true]{background:var(--mi-accent);color:var(--mi-accent-ink)}
+.mi-mode[data-busy=true]{animation:mi-moving 1.2s ease-in-out infinite}
+.mi-mode:disabled{cursor:default}
+dialog.mi.mi-code{width:min(360px,calc(100vw - 32px))}
+@media (max-width:600px){dialog.mi.mi-code{width:100vw}}
+.mi-code .mi-body{display:grid;justify-items:center;gap:16px;padding:8px 24px 28px}
+.mi-code-field{display:flex;align-items:center;box-sizing:border-box;width:100%;min-height:56px;border-radius:6px 6px 0 0;background:var(--mi-surface-2);border-bottom:1px solid var(--mi-muted)}
+.mi-code-field:focus-within{border-bottom:2px solid var(--mi-primary)}
+.mi-code-field input{flex:1;min-width:0;height:56px;padding:0 16px;border:0;background:transparent;color:inherit;font:400 18px Roboto,system-ui,sans-serif;letter-spacing:2px;outline:none}
+.mi-code-field input::placeholder{color:var(--mi-muted);letter-spacing:0;font-size:16px}
+.mi-keypad{display:grid;grid-template-columns:repeat(3,64px);gap:16px 28px;margin-top:8px}
+.mi-key{display:grid;place-items:center;width:64px;height:64px;padding:0;border:0;border-radius:50%;background:var(--mi-surface-2);color:var(--mi-fg);font:400 26px Roboto,system-ui,sans-serif;cursor:pointer;transition:background .15s}
+.mi-key:hover{background:color-mix(in srgb,var(--mi-surface-2) 70%,var(--mi-fg) 14%)}
+.mi-key.mi-key-clear{color:var(--mi-muted)}
+.mi-key.mi-key-ok{background:color-mix(in srgb,#43a047 45%,var(--mi-surface-2));color:#8bd88f}
+.mi-key.mi-key-ok:hover{background:color-mix(in srgb,#43a047 60%,var(--mi-surface-2))}
+@media (prefers-color-scheme:light){.mi-key.mi-key-ok{color:#1b5e20}}
+.mi-key:disabled{opacity:.5;cursor:default}
+.mi-code .mi-pill{width:100%}
+/* camera: a wide dialog with the live picture */
+dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
+@media (max-width:600px){dialog.mi.mi-wide{width:100vw}}
+.mi-wide .mi-body{padding:0 0 16px}
+.mi-camera{position:relative;width:100%;aspect-ratio:16/9;max-height:calc(min(92vh,880px) - 140px);background:#000;overflow:hidden}
+.mi-camera>img,.mi-camera>video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.mi-camera>img[hidden],.mi-camera>video[hidden]{display:none}
+.mi-camera-note{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;color:#fff;text-align:center;background:#0006}
+.mi-camera-note[hidden]{display:none}
+.mi-camera-note svg{width:40px;height:40px;opacity:.85}
+.mi-camera-bar{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:4px;padding:8px 10px;background:linear-gradient(transparent,#000a);color:#fff}
+.mi-camera-bar .mi-iconbtn{width:44px;height:44px;color:#fff}
+.mi-camera-bar .mi-iconbtn:hover{background:#ffffff26}
+.mi-camera-bar [hidden]{display:none}
+.mi-live{display:inline-flex;align-items:center;gap:6px;margin-right:auto;padding:3px 10px;border-radius:999px;background:#0008;font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.mi-live::before{content:"";width:8px;height:8px;border-radius:50%;background:#f44336;animation:mi-moving 1.6s ease-in-out infinite}
+.mi-live[data-still=true]::before{background:#9e9e9e;animation:none}
+.mi-camera:fullscreen{max-height:none;aspect-ratio:auto}
+.mi-wide .mi-attrs{margin:16px 24px 0}
+.mi-wide .mi-error{margin:12px 24px 0}
+/* attributes */
+.mi-attrs{margin-top:24px;border-top:1px solid var(--mi-line);padding-top:4px}
+.mi-attrs summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;font-weight:500;cursor:pointer;list-style:none}
+.mi-attrs summary::-webkit-details-marker{display:none}
+.mi-attrs summary svg{transition:transform .2s}
+.mi-attrs[open] summary svg{transform:rotate(180deg)}
+.mi-attrs dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:8px 16px;margin:0 0 4px}
+.mi-attrs dt{color:var(--mi-muted)}
+.mi-attrs dd{margin:0;text-align:right;overflow-wrap:anywhere}
+.mi-error{margin:12px 0 0;color:#db4437;text-align:center}
+
+/* robot vacuum, as Home Assistant's more-info-vacuum */
+.mi-vac-head{position:relative;width:100%}
+.mi-vac-head .mi-vac-battery{position:absolute;right:0;bottom:2px;display:inline-flex;align-items:center;gap:4px;color:var(--mi-muted);font-size:14px}
+.mi-vac-head .mi-vac-battery svg{width:18px;height:18px}
+.mi-vac-status{margin:0 0 4px}
+.mi-vac-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.mi-vac-btn{display:grid;place-items:center;width:48px;height:48px;padding:0;border:0;border-radius:12px;background:var(--mi-surface);color:var(--mi-fg);cursor:pointer;transition:background .15s,opacity .15s}
+.mi-vac-btn:hover:not(:disabled){background:var(--mi-surface-2)}
+.mi-vac-btn:disabled{cursor:not-allowed;opacity:.4}
+.mi-vac-btn svg{width:24px;height:24px}
+.mi-vac-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:12px;max-width:100%}
+.mi-vac-chip{display:flex;align-items:center;gap:10px;height:48px;max-width:100%;padding:6px 10px;border:0;border-radius:12px;background:var(--mi-surface);color:var(--mi-fg);font:inherit;text-align:left;cursor:pointer;letter-spacing:.25px}
+.mi-vac-chip:hover{background:var(--mi-surface-2)}
+.mi-vac-chip-icon{display:flex}
+.mi-vac-chip-icon svg{width:20px;height:20px}
+.mi-vac-chip-text{display:flex;flex-direction:column;min-width:0}
+.mi-vac-chip-label{font-size:12px;letter-spacing:.4px;color:var(--mi-muted)}
+.mi-vac-chip-value{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mi-vacuum .mi-center{gap:16px}
+.mi-vacuum .mi-center[hidden],.mi-vac-in-areas .mi-attrs,.mi-vac-in-areas .mi-error:empty{display:none}
+.mi-vac-fan{position:relative;max-width:100%}
+.mi-vac-menu{position:absolute;left:0;bottom:calc(100% + 6px);z-index:3;min-width:200px;padding:6px;border-radius:16px;background:var(--mi-bg);background-image:linear-gradient(var(--mi-surface-2),var(--mi-surface-2));box-shadow:0 8px 24px #0007}
+.mi-vac-menu[hidden]{display:none}
+.mi-vac-menu .mi-list{max-height:240px}
+.mi-vac-areas{display:flex;flex-direction:column;gap:16px}
+.mi-vac-areas[hidden]{display:none}
+.mi-vac-areas-head{display:flex;align-items:center;gap:4px;margin-left:-12px}
+.mi-vac-areas-head h3{margin:0;font:500 18px Roboto,system-ui,sans-serif}
+.mi-vac-areas-body{display:flex;flex-direction:column;gap:16px}
+.mi-vac-section-name{margin-bottom:8px;color:var(--mi-muted);font-weight:500}
+.mi-vac-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.mi-vac-area{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:80px;padding:12px;overflow:hidden;border:1px solid var(--mi-line);border-radius:12px;background:transparent;color:var(--mi-fg);font:inherit;cursor:pointer}
+.mi-vac-area::before{content:"";position:absolute;inset:0;opacity:.2;transition:background .18s;pointer-events:none}
+.mi-vac-area:hover::before{background:var(--mi-muted)}
+.mi-vac-area[aria-pressed=true]::before{background:var(--mi-primary)}
+.mi-vac-area-icon{color:var(--mi-muted)}
+.mi-vac-area-icon svg{width:28px;height:28px}
+.mi-vac-area[aria-pressed=true] .mi-vac-area-icon{color:var(--mi-primary)}
+.mi-vac-area-name{text-align:center;line-height:1.25;word-break:break-word}
+.mi-vac-badge{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--mi-primary);color:#fff;font-size:11px;font-weight:500}
+.mi-vac-badge[hidden]{display:none}
+.mi-vac-hint{margin:0;text-align:center;font-size:12px;color:var(--mi-muted)}
+.mi-vac-footer{display:flex;justify-content:flex-end;padding-top:16px;border-top:1px solid var(--mi-line)}
+.mi-vac-footer .mi-pill:disabled{opacity:.4;cursor:not-allowed}
+.mi-vac-empty{display:flex;flex-direction:column;align-items:center;text-align:center;color:var(--mi-muted);padding:24px 8px}
+.mi-vac-empty svg{width:48px;height:48px}
+.mi-vac-empty-title{margin:12px 0 4px;color:var(--mi-fg);font-size:18px;font-weight:500}
+.mi-vac-empty p{margin:0}
+${Re}
+`, q = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${z[e]}"/></svg>`, Ve = (e) => `rgb(${e.join(",")})`, He = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", J = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), Y = {
 	disarmed: "#9e9e9e",
 	armed: "#43a047",
 	arming: "#ff9800",
 	pending: "#ff9800",
 	disarming: "#ff9800",
 	triggered: "#e5533d"
-}, Re = (e) => Y[e] || (e?.startsWith("armed") ? Y.armed : Y.disarmed), ze = {
+}, Ue = (e) => Y[e] || (e?.startsWith("armed") ? Y.armed : Y.disarmed), We = {
 	heat: "#ff8100",
 	cool: "#2b9af9",
 	heat_cool: "#ffab00",
@@ -1531,20 +1868,20 @@ function Z(e, t) {
 	};
 }
 function Q(e, t, n, r, i) {
-	let a = X(e, "button", "mi-round", `<span class="mi-disc">${K(t)}</span><span>${n}</span>`);
+	let a = X(e, "button", "mi-round", `<span class="mi-disc">${q(t)}</span><span>${n}</span>`);
 	return a.type = "button", i !== void 0 && a.setAttribute("aria-pressed", String(i)), a.onclick = r, a;
 }
-function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
+function Ge({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 	let i = e.ownerDocument, a = X(i, "dialog", "mi");
 	a.setAttribute("aria-labelledby", "mi-title");
-	let o = X(i, "div", "mi-frame"), s = X(i, "div", "mi-head"), c = X(i, "button", "mi-iconbtn", K("close"));
+	let o = X(i, "div", "mi-frame"), s = X(i, "div", "mi-head"), c = X(i, "button", "mi-iconbtn", q("close"));
 	c.type = "button", c.setAttribute("aria-label", "Close");
 	let l = X(i, "div", "mi-titles"), u = X(i, "h2");
 	u.id = "mi-title";
 	let d = X(i, "p");
 	l.append(u, d), s.append(c, l);
 	let f = X(i, "div", "mi-body"), p = X(i, "style");
-	p.textContent = Ie, o.append(s, f), a.append(p, o), e.append(a);
+	p.textContent = Be, o.append(s, f), a.append(p, o), e.append(a);
 	let m = "", h, g = [], _ = () => {
 		for (let e of g.splice(0)) e();
 	}, v = (e) => {
@@ -1552,7 +1889,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 	}, y = async (e, n, i) => {
 		try {
 			v("");
-			let [r, a, o] = Fe(e, n, i);
+			let [r, a, o] = Ie(e, n, i);
 			return await t().callService(r, a, o), !0;
 		} catch (e) {
 			return v(e?.message || "The command failed."), r(e), !1;
@@ -1569,7 +1906,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			value: r.value,
 			format: r.format,
 			onCommit: (t) => y(e, r, t)
-		}), l.append(u.el)) : (u = X(i, "button", "mi-tall", `${K("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => y(e, n, u.getAttribute("aria-checked") !== "true"), l.append(u));
+		}), l.append(u.el)) : (u = X(i, "button", "mi-tall", `${q("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => y(e, n, u.getAttribute("aria-checked") !== "true"), l.append(u));
 		let d = X(i, "div", "mi-row"), f = Q(i, "power", "Power", () => {
 			let t = f.getAttribute("aria-pressed") === "true";
 			y(e, n, !t);
@@ -1606,7 +1943,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			});
 		}
 		if (s) {
-			let t = X(i, "output"), n = X(i, "output"), r = s.value[0], a = s.value[1], o = () => `linear-gradient(90deg,#fff,${q(Ee([r, 100]))})`, c = Z(i, {
+			let t = X(i, "output"), n = X(i, "output"), r = s.value[0], a = s.value[1], o = () => `linear-gradient(90deg,#fff,${Ve(Ee([r, 100]))})`, c = Z(i, {
 				orient: "h",
 				label: "Hue",
 				min: 0,
@@ -1658,7 +1995,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				193,
 				7
 			];
-			if (a.style.setProperty("--mi-accent", q(o)), a.style.setProperty("--mi-accent-ink", n ? Le(o) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), b(e, (e) => e.kind === "toggle"), r) {
+			if (a.style.setProperty("--mi-accent", Ve(o)), a.style.setProperty("--mi-accent-ink", n ? He(o) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), b(e, (e) => e.kind === "toggle"), r) {
 				let t = b(e, (e) => e.key === "brightness");
 				u.set(n ? t?.value ?? 0 : 0), u.el.querySelector(".mi-big").textContent = n ? r.format(t?.value ?? 0) : "Off", u.caption(n ? "On" : "");
 			} else u.setAttribute("aria-checked", String(n)), u.querySelector("span").textContent = n ? "On" : "Off";
@@ -1731,7 +2068,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		if (!c) {
 			v.className = "mi-cover-buttons";
 			for (let t of s?.buttons || []) {
-				let n = X(i, "button", "mi-iconbtn", K(x[t.service]));
+				let n = X(i, "button", "mi-iconbtn", q(x[t.service]));
 				n.type = "button", n.title = S[t.service], n.setAttribute("aria-label", S[t.service]), n.onclick = () => y(e, s, t.service), v.append(n);
 			}
 			l.append(v);
@@ -1745,7 +2082,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		return (e, t) => {
 			if (a.style.setProperty("--mi-accent", "#9c27b0"), u.firstChild.textContent = e.unavailable ? "Unavailable" : J(e.state), u.lastChild.textContent = e.since, p) {
 				let t = ["open", "opening"].includes(e.state), n = ["opening", "closing"].includes(e.state);
-				m !== null && (!n && t === m ? (m = null, clearTimeout(h)) : (n || (u.firstChild.textContent = m ? "Opening" : "Closing"), t = m, n = !0)), p.setAttribute("aria-checked", String(t)), g?.dragging || _(+!!t), p.dataset.moving = String(n), p.firstChild.innerHTML = K(Oe(e.deviceClass, t));
+				m !== null && (!n && t === m ? (m = null, clearTimeout(h)) : (n || (u.firstChild.textContent = m ? "Opening" : "Closing"), t = m, n = !0)), p.setAttribute("aria-checked", String(t)), g?.dragging || _(+!!t), p.dataset.moving = String(n), p.firstChild.innerHTML = q(Oe(e.deviceClass, t));
 			}
 			let n = b(e, (e) => e.key === "position");
 			f && n && (f.set(n.value), f.caption(J(e.state)));
@@ -1761,7 +2098,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				"unlocking",
 				"opening"
 			].includes(e.state), r = e.state === "jammed" || e.state === "unlocked" ? "#e5533d" : n ? "#ff9800" : "#43a047";
-			a.style.setProperty("--mi-accent", r), o.dataset.locked = String(t), o.disabled = n, o.innerHTML = K(t ? "lock" : "unlock"), o.setAttribute("aria-label", t ? "Locked. Press to unlock" : "Unlocked. Press to lock"), s.textContent = J(e.state);
+			a.style.setProperty("--mi-accent", r), o.dataset.locked = String(t), o.disabled = n, o.innerHTML = q(t ? "lock" : "unlock"), o.setAttribute("aria-label", t ? "Locked. Press to unlock" : "Unlocked. Press to lock"), s.textContent = J(e.state);
 		};
 	}
 	function w(e, n) {
@@ -1826,7 +2163,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				"plus",
 				"Raise target temperature"
 			]]) {
-				let a = X(i, "button", "mi-outline", K(t));
+				let a = X(i, "button", "mi-outline", q(t));
 				a.type = "button", a.setAttribute("aria-label", n), a.onclick = () => {
 					C(v(m + e * r.step)), T();
 				}, D.append(a);
@@ -1871,19 +2208,19 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		return o.length && s.append(p, m), n.append(s), (e, t) => {
 			x = e;
 			let n = t?.attributes || {};
-			a.style.setProperty("--mi-accent", ze[e.state] || "var(--mi-muted)"), l.hidden = !Number.isFinite(n.current_temperature), l.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${c()}</strong>`, d?.(e, t);
+			a.style.setProperty("--mi-accent", We[e.state] || "var(--mi-muted)"), l.hidden = !Number.isFinite(n.current_temperature), l.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${c()}</strong>`, d?.(e, t);
 			for (let t of e.controls.filter((e) => e.kind === "select")) {
 				let e = _.get(t.key);
 				if (!e) continue;
 				e.querySelector(".mi-tile-value").textContent = J(t.value) || "—";
 				let n = t.key === "hvac_mode" ? z[t.value] ? t.value : "power" : f[t.key];
-				e.querySelector(".mi-tile-icon").innerHTML = K(n);
+				e.querySelector(".mi-tile-icon").innerHTML = q(n);
 			}
 			S(e);
 		};
 	}
 	function T(e, t) {
-		let n = b(e, (e) => e.kind === "toggle"), r = b(e, (e) => e.key === "percentage"), o = X(i, "div", "mi-center"), s = X(i, "button", "mi-tall", `${K("power")}<span></span>`);
+		let n = b(e, (e) => e.kind === "toggle"), r = b(e, (e) => e.key === "percentage"), o = X(i, "div", "mi-center"), s = X(i, "button", "mi-tall", `${q("power")}<span></span>`);
 		s.type = "button", s.setAttribute("role", "switch"), s.onclick = () => y(e, n, s.getAttribute("aria-checked") !== "true"), o.append(s);
 		let c;
 		if (r) {
@@ -1911,7 +2248,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		let o = b(e, (e) => e.kind === "alarm"), s = X(i, "div", "mi-center"), c = X(i, "div", "mi-statehead", "<strong></strong><span></span>"), l = X(i, "div", "mi-modes");
 		l.setAttribute("role", "radiogroup"), l.setAttribute("aria-label", "Mode"), s.append(c, l), n.append(s), d.hidden = !0;
 		let u = null, f, p = async (n, r) => {
-			let [i, a, s] = Fe(e, o, {
+			let [i, a, s] = Ie(e, o, {
 				service: n,
 				code: r
 			});
@@ -1933,7 +2270,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			}
 		}, h = /* @__PURE__ */ new Map();
 		for (let e of o.modes) {
-			let t = X(i, "button", "mi-mode", `${K(e.icon)}<span>${e.label}</span>`);
+			let t = X(i, "button", "mi-mode", `${q(e.icon)}<span>${e.label}</span>`);
 			t.type = "button", t.setAttribute("role", "radio"), t.onclick = () => m(e), h.set(e.state, t), l.append(t);
 		}
 		let g = e.state, _ = () => {
@@ -1943,21 +2280,21 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				"pending",
 				"disarming"
 			].includes(g)));
-			a.style.setProperty("--mi-accent", Re(u && u !== g ? "arming" : g));
+			a.style.setProperty("--mi-accent", Ue(u && u !== g ? "arming" : g));
 		};
 		function y(e) {
 			let t = X(i, "dialog", "mi mi-code");
 			t.setAttribute("aria-labelledby", "mi-code-title");
-			let n = X(i, "div", "mi-frame"), s = X(i, "div", "mi-head"), c = X(i, "button", "mi-iconbtn", K("close"));
+			let n = X(i, "div", "mi-frame"), s = X(i, "div", "mi-head"), c = X(i, "button", "mi-iconbtn", q("close"));
 			c.type = "button", c.setAttribute("aria-label", "Close");
 			let l = X(i, "div", "mi-titles", `<h2 id="mi-code-title">${e.service === "alarm_disarm" ? "Disarm" : "Arm"}</h2>`);
 			s.append(c, l);
 			let d = X(i, "div", "mi-body"), m = X(i, "label", "mi-code-field"), h = X(i, "input");
 			h.type = "password", h.placeholder = "Code", h.autocomplete = "off", h.setAttribute("aria-label", "Code"), o.codeFormat === "number" && (h.inputMode = "numeric");
-			let g = X(i, "button", "mi-iconbtn", K("eye"));
+			let g = X(i, "button", "mi-iconbtn", q("eye"));
 			g.type = "button", g.setAttribute("aria-label", "Show code"), g.onclick = () => {
 				let e = h.type === "text";
-				h.type = e ? "password" : "text", g.innerHTML = K(e ? "eye" : "eyeOff"), g.setAttribute("aria-label", e ? "Show code" : "Hide code");
+				h.type = e ? "password" : "text", g.innerHTML = q(e ? "eye" : "eyeOff"), g.setAttribute("aria-label", e ? "Show code" : "Hide code");
 			}, m.append(h, g);
 			let v = X(i, "p", "mi-error");
 			v.hidden = !0, d.append(m);
@@ -1993,14 +2330,14 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 						h.value += e;
 					}, t.append(n);
 				}
-				let n = X(i, "button", "mi-key mi-key-clear", K("close"));
+				let n = X(i, "button", "mi-key mi-key-clear", q("close"));
 				n.type = "button", n.setAttribute("aria-label", "Clear"), n.onclick = () => {
 					h.value = "";
 				};
 				let r = X(i, "button", "mi-key", "0");
 				r.type = "button", r.onclick = () => {
 					h.value += "0";
-				}, y = X(i, "button", "mi-key mi-key-ok", K("check")), y.type = "button", y.setAttribute("aria-label", e.label), y.onclick = b, t.append(n, r, y), d.append(t);
+				}, y = X(i, "button", "mi-key mi-key-ok", q("check")), y.type = "button", y.setAttribute("aria-label", e.label), y.onclick = b, t.append(n, r, y), d.append(t);
 			} else y = X(i, "button", "mi-pill", e.service === "alarm_disarm" ? "Disarm" : `Arm ${e.label}`), y.type = "button", y.onclick = b, d.append(y);
 			d.append(v), h.addEventListener("keydown", (e) => {
 				e.key === "Enter" && (e.preventDefault(), b());
@@ -2020,16 +2357,16 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		s.alt = e.name, s.decoding = "async";
 		let c = X(i, "video");
 		c.muted = !0, c.autoplay = !0, c.playsInline = !0, c.setAttribute("playsinline", ""), c.hidden = !0;
-		let l = X(i, "div", "mi-camera-note", `${K("cctv")}<span>Connecting to the camera…</span>`), u = X(i, "div", "mi-camera-bar"), d = X(i, "span", "mi-live", "Live"), f = X(i, "button", "mi-iconbtn", K("volumeOff"));
+		let l = X(i, "div", "mi-camera-note", `${q("cctv")}<span>Connecting to the camera…</span>`), u = X(i, "div", "mi-camera-bar"), d = X(i, "span", "mi-live", "Live"), f = X(i, "button", "mi-iconbtn", q("volumeOff"));
 		f.type = "button", f.hidden = !0, f.setAttribute("aria-label", "Turn sound on"), f.onclick = () => {
-			c.muted = !c.muted, f.innerHTML = K(c.muted ? "volumeOff" : "volumeHigh"), f.setAttribute("aria-label", c.muted ? "Turn sound on" : "Turn sound off");
+			c.muted = !c.muted, f.innerHTML = q(c.muted ? "volumeOff" : "volumeHigh"), f.setAttribute("aria-label", c.muted ? "Turn sound on" : "Turn sound off");
 		};
-		let p = X(i, "button", "mi-iconbtn", K("refresh"));
+		let p = X(i, "button", "mi-iconbtn", q("refresh"));
 		p.type = "button", p.setAttribute("aria-label", "Reconnect"), p.onclick = () => E(!0);
-		let m = X(i, "button", "mi-iconbtn", K("fullscreen"));
+		let m = X(i, "button", "mi-iconbtn", q("fullscreen"));
 		m.type = "button", m.setAttribute("aria-label", "Full screen"), m.hidden = !o.requestFullscreen, m.onclick = () => i.fullscreenElement === o ? i.exitFullscreen?.() : o.requestFullscreen?.().catch(() => {});
 		let h = () => {
-			m.innerHTML = K(i.fullscreenElement === o ? "fullscreenExit" : "fullscreen");
+			m.innerHTML = q(i.fullscreenElement === o ? "fullscreenExit" : "fullscreen");
 		};
 		i.addEventListener("fullscreenchange", h), u.append(d, f, p, m), o.append(s, c, l, u), n.append(o);
 		let _ = r.token, v = !1, y = 0, x, S = (e) => {
@@ -2041,9 +2378,9 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 				y = 0, S("");
 			}, s.onerror = () => {
 				v || (y++, S(y > 3 ? "The camera is not answering. Try Reconnect." : "Reconnecting to the camera…"), y <= 3 && (x = setTimeout(() => {
-					s.src = G(e.id, _).mjpeg;
+					s.src = K(e.id, _).mjpeg;
 				}, 1500 * y)));
-			}, s.src = G(e.id, _).mjpeg;
+			}, s.src = K(e.id, _).mjpeg;
 		}, T = r.stream && !!c.canPlayType?.("application/vnd.apple.mpegurl");
 		async function E(n = !1) {
 			if (C(), v = !1, n && (y = 0), S("Connecting to the camera…"), T) try {
@@ -2053,7 +2390,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 					format: "hls"
 				});
 				if (v) return;
-				s.hidden = !0, c.poster = G(e.id, _).still, c.hidden = !1, f.hidden = !1, d.dataset.still = "false", c.onplaying = () => {
+				s.hidden = !0, c.poster = K(e.id, _).still, c.hidden = !1, f.hidden = !1, d.dataset.still = "false", c.onplaying = () => {
 					clearTimeout(x), S("");
 				}, c.onerror = () => !v && w(), c.src = n, c.play?.().catch(() => {}), x = setTimeout(() => {
 					!v && c.readyState < 2 && (c.removeAttribute("src"), w());
@@ -2076,17 +2413,159 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		}
 		return t.append(r), () => {};
 	}
-	function k(e, t, n) {
+	function k(e, r) {
+		a.classList.add("mi-vacuum"), d.hidden = !0;
+		let o = X(i, "div", "mi-center"), s = X(i, "div", "mi-statehead mi-vac-head", "<strong></strong><span class=\"mi-vac-since\"></span><span class=\"mi-vac-battery\" hidden></span>"), c = X(i, "div", "mi-vac-status", `<div class="container idle">${Le}</div>`), l = X(i, "div", "mi-vac-buttons"), u = /* @__PURE__ */ new Map();
+		for (let t of b(e, (e) => e.kind === "vacuum").buttons) {
+			let e = X(i, "button", "mi-vac-btn", q(t.icon));
+			e.type = "button", e.onclick = () => {
+				let e = b(E, (e) => e.kind === "vacuum"), n = e.buttons.find((e) => e.key === t.key);
+				n && !n.disabled && y(E, e, n.service);
+			}, u.set(t.key, e), l.append(e);
+		}
+		let f = X(i, "div", "mi-vac-chips"), p = b(e, (e) => e.kind === "vacuum"), m = X(i, "div", "mi-vac-menu");
+		m.hidden = !0, m.setAttribute("role", "listbox");
+		let h = X(i, "ul", "mi-list");
+		m.append(h);
+		let g = () => {
+			m.hidden = !0, _?.setAttribute("aria-expanded", "false");
+		};
+		a.addEventListener("click", (e) => {
+			!m.hidden && !e.target.closest?.(".mi-vac-fan") && g();
+		});
+		let _;
+		if (p.fanSpeeds.length) {
+			_ = X(i, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${q("fan")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Fan speed</span><span class="mi-vac-chip-value"></span></span>`), _.type = "button", _.setAttribute("aria-haspopup", "listbox"), _.onclick = () => {
+				if (!m.hidden) return g();
+				if (m.hidden = !1, _.setAttribute("aria-expanded", String(!m.hidden)), m.hidden) return;
+				let e = b(E, (e) => e.kind === "vacuum");
+				h.replaceChildren();
+				for (let t of e.fanSpeeds) {
+					let n = X(i, "li"), r = X(i, "button");
+					r.type = "button", r.setAttribute("role", "radio"), r.setAttribute("aria-checked", String(t === e.fanSpeed)), r.textContent = J(t), r.onclick = () => {
+						g(), y(E, e, { fan_speed: t });
+					}, n.append(r), h.append(n);
+				}
+			};
+			let e = X(i, "div", "mi-vac-fan");
+			e.append(_, m), f.append(e);
+		}
+		if (p.cleanArea) {
+			let e = X(i, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${q("area")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Cleaning</span><span class="mi-vac-chip-value">By area</span></span><span class="mi-vac-chip-icon">${q("next")}</span>`);
+			e.type = "button", e.onclick = () => C(), f.append(e);
+		}
+		o.append(s, c, l), f.childElementCount && o.append(f), r.append(o);
+		let v = X(i, "div", "mi-vac-areas");
+		v.hidden = !0, r.append(v);
+		let x = [], S = () => {
+			v.hidden = !0, o.hidden = !1, a.classList.remove("mi-vac-in-areas");
+		};
+		async function C() {
+			o.hidden = !0, v.hidden = !1, a.classList.add("mi-vac-in-areas"), x = [], v.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${q("back")}</button><h3>Clean areas</h3></div><div class="mi-vac-areas-body"><p class="mi-vac-hint">Loading areas…</p></div>`, v.querySelector("button").onclick = S;
+			let e = v.querySelector(".mi-vac-areas-body"), r, s, c;
+			try {
+				let e = t(), [i, a, o] = await Promise.all([
+					e.callWS({
+						type: "config/entity_registry/get",
+						entity_id: n
+					}),
+					e.callWS({ type: "config/area_registry/list" }),
+					e.callWS({ type: "config/floor_registry/list" }).catch(() => [])
+				]);
+				r = new Set(Object.keys(i?.options?.vacuum?.area_mapping || {})), s = a.filter((e) => r.has(e.area_id)), c = o;
+			} catch (t) {
+				e.innerHTML = "<p class=\"mi-error\"></p>", e.firstChild.textContent = t?.message || "Could not load the vacuum's areas.";
+				return;
+			}
+			if (!s.length) {
+				e.innerHTML = `<div class="mi-vac-empty">${q("area")}<p class="mi-vac-empty-title">No areas set up</p><p>Map this vacuum's rooms to Home Assistant areas in its entity settings, then clean them from here.</p></div>`;
+				return;
+			}
+			let l = [];
+			for (let e of [...c].sort((e, t) => (e.level ?? 0) - (t.level ?? 0))) {
+				let t = s.filter((t) => t.floor_id === e.floor_id);
+				t.length && l.push([e.name, t]);
+			}
+			let u = s.filter((e) => !c.some((t) => t.floor_id === e.floor_id));
+			u.length && l.push(["Other areas", u]), e.replaceChildren();
+			for (let [t, n] of l) {
+				let r = X(i, "div", "mi-vac-section");
+				l.length > 1 && r.append(X(i, "div", "mi-vac-section-name")), l.length > 1 && (r.firstChild.textContent = t);
+				let a = X(i, "div", "mi-vac-grid");
+				for (let e of n) {
+					let t = X(i, "button", "mi-vac-area", `<span class="mi-vac-badge" hidden></span><span class="mi-vac-area-icon">${q("area")}</span><span class="mi-vac-area-name"></span>`);
+					t.type = "button", t.dataset.area = e.area_id, t.querySelector(".mi-vac-area-name").textContent = e.name, t.onclick = () => {
+						x = x.indexOf(e.area_id) >= 0 ? x.filter((t) => t !== e.area_id) : [...x, e.area_id], p();
+					}, a.append(t);
+				}
+				r.append(a), e.append(r);
+			}
+			e.append(X(i, "p", "mi-vac-hint", "The order in which areas are cleaned may not be supported by your vacuum."));
+			let d = X(i, "div", "mi-vac-footer"), f = X(i, "button", "mi-pill");
+			f.type = "button", f.onclick = async () => {
+				f.disabled = !0;
+				let e = b(E, (e) => e.kind === "vacuum");
+				await y(E, e, { areas: x }) ? S() : p();
+			}, d.append(f), v.append(d);
+			let p = () => {
+				for (let t of e.querySelectorAll(".mi-vac-area")) {
+					let e = x.indexOf(t.dataset.area);
+					t.setAttribute("aria-pressed", String(e >= 0));
+					let n = t.querySelector(".mi-vac-badge");
+					n.hidden = e < 0, n.textContent = String(e + 1);
+				}
+				f.disabled = !x.length, f.textContent = `Start cleaning${x.length ? ` (${x.length})` : ""}`;
+			};
+			p();
+		}
+		let w = null;
+		t().callWS?.({ type: "config/entity_registry/list_for_display" }).then((e) => {
+			let r = e?.entities || [], i = r.find((e) => e.ei === n)?.di;
+			if (!i) return;
+			let a = r.filter((e) => e.di === i).map((e) => e.ei), o = t().states || {};
+			w = {
+				battery: a.find((e) => /^sensor\./.test(e) && o[e]?.attributes?.device_class === "battery" && !isNaN(Number(o[e].state))),
+				charging: a.find((e) => /^binary_sensor\./.test(e) && o[e]?.attributes?.device_class === "battery_charging")
+			}, E && O(E);
+		}).catch(() => {});
+		let T = setInterval(() => {
+			if (!a.isConnected) return clearInterval(T);
+			let e = t().states?.[n];
+			s.querySelector(".mi-vac-since").textContent = H(e?.last_changed);
+		}, 5e3), E, D = {
+			cleaning: "var(--state-vacuum-active-color,#009688)",
+			returning: "var(--state-vacuum-active-color,#009688)",
+			error: "var(--error-color,#db4437)"
+		}, O = (e) => {
+			E = e;
+			let r = b(e, (e) => e.kind === "vacuum");
+			if (!r) return;
+			let i = t().states?.[n];
+			s.firstChild.textContent = r.status || J(e.state) || "", s.querySelector(".mi-vac-since").textContent = e.since || "";
+			let a = t().states || {}, o = w?.battery ? Number(a[w.battery]?.state) : r.battery, l = w?.charging ? a[w.charging]?.state === "on" : e.state === "docked" && o < 100, d = s.querySelector(".mi-vac-battery");
+			d.hidden = !Number.isFinite(o), Number.isFinite(o) && (d.innerHTML = `<span>${Math.round(o)}%</span>${q(l ? "batterycharging" : "battery")}`);
+			let f = ze(i), p = c.firstChild;
+			p.className = `container ${f}`, p.style.setProperty("--vacuum-color", D[f] || "var(--mi-muted)");
+			for (let e of r.buttons) {
+				let t = u.get(e.key);
+				t && (t.innerHTML = q(e.icon), t.disabled = e.disabled, t.title = e.label, t.setAttribute("aria-label", e.label));
+			}
+			_ && (_.querySelector(".mi-vac-chip-value").textContent = J(r.fanSpeed) || "—");
+		};
+		return O;
+	}
+	function A(e, t, n) {
 		let r = X(i, "div", "mi-center"), a = X(i, "div", "mi-state");
 		return r.append(a), t.append(r), (e, t) => {
 			let n = t?.attributes?.unit_of_measurement;
 			a.textContent = `${J(e.state) ?? ""}${n ? ` ${n}` : ""}`;
 		};
 	}
-	let A = {
+	let j = {
 		light: x,
 		cover: S,
 		lock: C,
+		vacuum: k,
 		climate: w,
 		alarm_control_panel: E,
 		camera: D,
@@ -2098,12 +2577,12 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 		input_button: O,
 		scene: O,
 		script: O
-	}, j = () => {};
-	function M(e) {
-		_(), a.classList.remove("mi-wide"), f.replaceChildren(), h = void 0;
+	}, M = () => {};
+	function ee(e) {
+		_(), a.classList.remove("mi-wide", "mi-vacuum", "mi-vac-in-areas"), f.replaceChildren(), h = void 0;
 		let t = X(i, "div");
-		if (f.append(t), d.hidden = !1, j = (e.unavailable ? k : A[e.domain] || k)(e, t), e.attributes.length) {
-			let t = X(i, "details", "mi-attrs", `<summary><span>Attributes</span>${K("chevron")}</summary>`), n = X(i, "dl");
+		if (f.append(t), d.hidden = !1, M = (e.unavailable ? A : j[e.domain] || A)(e, t), e.attributes.length) {
+			let t = X(i, "details", "mi-attrs", `<summary><span>Attributes</span>${q("chevron")}</summary>`), n = X(i, "dl");
 			for (let [t, r] of e.attributes) n.append(X(i, "dt"), X(i, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
 			t.append(n), f.append(t);
 		}
@@ -2116,7 +2595,7 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 			r.domain,
 			...r.controls.map((e) => `${e.kind}:${e.key || ""}:${(e.options || []).join(",")}:${(e.buttons || e.modes || []).length}`)
 		].join("|");
-		i !== m && (m = i, M(r)), j(r, e);
+		i !== m && (m = i, ee(r)), M(r, e);
 	}
 	let P = () => {
 		a.open && a.close();
@@ -2132,16 +2611,16 @@ function Be({ host: e, getHass: t, entityId: n, onError: r = () => {} }) {
 	};
 }
 // dashboard/standalone-fit.mjs
-function Ve({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
+function Ke({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
 	if (!e || !(a > 0)) return n;
 	let o = n >= t ? Math.max(r, i) : Math.min(r, i);
 	return Math.abs(n + a - o) <= 2 ? n + a : n;
 }
-function He(e = window) {
+function qe(e = window) {
 	let t = e.document, n = t.createElement("div");
 	n.style.cssText = "position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none", t.documentElement.append(n);
 	let r = () => {
-		let r = Ve({
+		let r = Ke({
 			standalone: e.navigator.standalone === !0 || e.matchMedia?.("(display-mode: standalone)").matches === !0,
 			innerWidth: e.innerWidth,
 			innerHeight: e.innerHeight,
@@ -2154,11 +2633,11 @@ function He(e = window) {
 	return r(), e.addEventListener("resize", r), e.addEventListener("orientationchange", () => setTimeout(r, 250)), e.visualViewport?.addEventListener("resize", r), r;
 }
 // dashboard/standalone.js
-He();
-var $ = document.getElementById("status"), Ue = (e) => {
+qe();
+var $ = document.getElementById("status"), Je = (e) => {
 	$.hidden = !1, $.textContent = e;
 };
-async function We() {
+async function Ye() {
 	let e = document.body.dataset.view;
 	await customElements.whenDefined("three-d-rooms-card");
 	let t = await j({
@@ -2204,7 +2683,7 @@ async function We() {
 		}
 	}), d;
 	c.addEventListener("hass-more-info", (e) => {
-		d?.close(), d = Be({
+		d?.close(), d = Ge({
 			host: document.body,
 			getHass: () => u.build(),
 			entityId: e.detail.entityId,
@@ -2214,6 +2693,6 @@ async function We() {
 		u.setStates(t), e();
 	})), c.hass = u.build(), $.hidden = !0, document.body.append(c);
 }
-We().catch((e) => {
-	console.error(e), Ue(e?.message || "Could not connect to Home Assistant. Reload to try again.");
+Ye().catch((e) => {
+	console.error(e), Je(e?.message || "Could not connect to Home Assistant. Reload to try again.");
 });

@@ -554,6 +554,34 @@ class ComponentTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     models.validate_component({**self.component(), "quality": bad}, ["kitchen"])
 
+    def test_view_floor_plan_is_saved_on_the_view_and_kept_by_editor_saves(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = models.ModelStore(directory).open()
+            store.install(package())
+            store.put_component(self.component())
+            result = store.set_view_floor_plan("kitchen-view", {"heading": 179.43})
+            self.assertEqual(result["floorPlan"], {"heading": 179.43})
+            self.assertEqual(models.ModelStore(directory).open().components[0]["floorPlan"], {"heading": 179.43})
+            # The view editor has no floor plan field: saving the view keeps it.
+            store.put_component({**self.component(), "title": "Renamed"})
+            saved = models.ModelStore(directory).open().components[0]
+            self.assertEqual((saved["title"], saved["floorPlan"]), ("Renamed", {"heading": 179.43}))
+            # Import/export carries it, and null clears it.
+            self.assertEqual(models.validate_component({**self.component(), "floorPlan": {"heading": 0}}, ["kitchen"])["floorPlan"], {"heading": 0.0})
+            self.assertNotIn("floorPlan", models.validate_component({**self.component(), "floorPlan": None}, ["kitchen"]))
+            store.set_view_floor_plan("kitchen-view", None)
+            self.assertNotIn("floorPlan", models.ModelStore(directory).open().components[0])
+            for bad in ({"heading": 360}, {"heading": -1}, {"heading": "90"}, {"heading": 9, "x": 1}, [], True):
+                with self.assertRaises(ValueError, msg=bad):
+                    store.set_view_floor_plan("kitchen-view", bad)
+            with self.assertRaises(ValueError):
+                store.set_view_floor_plan("missing", {"heading": 0})
+            floor = self.component()
+            floor["layers"] = [{**floor["layers"][0], "view": "floor", "tilt": 0}]
+            store.put_component(floor)
+            with self.assertRaises(ValueError):
+                store.set_view_floor_plan("kitchen-view", {"heading": 0})
+
     def test_view_background_persists_and_rejects_unsafe_values(self):
         with tempfile.TemporaryDirectory() as directory:
             store = models.ModelStore(directory).open()

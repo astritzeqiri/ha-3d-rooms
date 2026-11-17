@@ -327,3 +327,91 @@ test("cameras get a live view; their access token is never listed", async () => 
     [],
   );
 });
+
+test("a vacuum gets Home Assistant's buttons, fan speed and clean by area", async () => {
+  const { describeEntity, controlCall, vacuumControl } =
+    await import("../dashboard/more-info-model.mjs");
+  const { vacuumVisualState, VACUUM_STATUS_SVG } =
+    await import("../dashboard/vacuum-art.mjs");
+  // Demo vacuum 0: every feature (32700 = all but turn on/off/send command…).
+  const all = 4 | 8 | 16 | 32 | 512 | 1024 | 4096 | 8192 | 16384;
+  const vac = (state, attributes = {}) => ({
+    entity_id: "vacuum.robot",
+    state,
+    attributes: {
+      supported_features: all,
+      fan_speed: "medium",
+      fan_speed_list: ["min", "medium", "max"],
+      ...attributes,
+    },
+  });
+  const control = (e) =>
+    describeEntity(e).controls.find((c) => c.kind === "vacuum");
+  const docked = control(vac("docked"));
+  assert.deepEqual(
+    docked.buttons.map((b) => [b.key, b.icon, b.disabled]),
+    [
+      ["start_pause", "play", false],
+      ["stop", "stop", true], // nothing to stop at the dock
+      ["return_to_base", "dock", false],
+      ["locate", "locate", false],
+      ["clean_spot", "spot", false],
+    ],
+  );
+  assert.deepEqual(docked.fanSpeeds, ["min", "medium", "max"]);
+  assert.equal(docked.cleanArea, true);
+  const cleaning = control(vac("cleaning"));
+  assert.deepEqual(
+    [
+      cleaning.buttons[0].service,
+      cleaning.buttons[0].icon,
+      cleaning.buttons[1].disabled,
+    ],
+    ["pause", "pause", false],
+  );
+  assert.equal(control(vac("returning")).buttons[2].disabled, true);
+  // Matter Roborock: start, pause, stop, return home, locate; no fan or areas.
+  const matter = control(
+    vac("docked", {
+      supported_features: 4 | 8 | 16 | 512 | 4096 | 8192,
+      fan_speed_list: undefined,
+    }),
+  );
+  assert.equal(matter.buttons.length, 4);
+  assert.deepEqual(matter.fanSpeeds, []);
+  assert.equal(matter.cleanArea, false);
+  // Legacy vacuums (no STATE or START) use start_pause.
+  assert.equal(
+    control(vac("idle", { supported_features: 4 })).buttons[0].service,
+    "start_pause",
+  );
+  // Status text replaces the state when the STATUS feature is set.
+  assert.equal(
+    control(
+      vac("cleaning", { supported_features: all | 128, status: "Mopping" }),
+    ).status,
+    "Mopping",
+  );
+  const d = describeEntity(vac("docked"));
+  assert.deepEqual(controlCall(d, docked, "start"), [
+    "vacuum",
+    "start",
+    { entity_id: "vacuum.robot" },
+  ]);
+  assert.throws(() => controlCall(d, docked, "stop"));
+  assert.deepEqual(controlCall(d, docked, { fan_speed: "max" }), [
+    "vacuum",
+    "set_fan_speed",
+    { entity_id: "vacuum.robot", fan_speed: "max" },
+  ]);
+  assert.throws(() => controlCall(d, docked, { fan_speed: "turbo" }));
+  assert.deepEqual(controlCall(d, docked, { areas: ["kitchen", "corridor"] }), [
+    "vacuum",
+    "clean_area",
+    { entity_id: "vacuum.robot", cleaning_area_id: ["kitchen", "corridor"] },
+  ]);
+  assert.throws(() => controlCall(d, docked, { areas: [] }));
+  assert.equal(vacuumVisualState(vac("on")), "cleaning");
+  assert.equal(vacuumVisualState(vac("unavailable")), "idle");
+  assert.match(VACUUM_STATUS_SVG, /dock-indicator/);
+});
