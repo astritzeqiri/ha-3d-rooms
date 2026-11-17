@@ -11,6 +11,7 @@ import {
   registryIcons,
 } from "./standalone-icons.mjs";
 import { openMoreInfo } from "./more-info.mjs";
+import { createEntityIconSource } from "../shared/ha-icons.mjs";
 import { fitPage } from "./standalone-fit.mjs";
 /**
  * Full-screen page for one saved dashboard view, with no Home Assistant
@@ -68,6 +69,7 @@ async function start() {
   defineStateIcon({
     resolver: createIconResolver({ loadModules }),
     registryIcon: registryIcons(registry),
+    iconFor: createEntityIconSource(connection, registry).iconFor,
   });
   const config = await getConfig(connection).catch(() => ({}));
   const card = document.createElement("three-d-rooms-card");

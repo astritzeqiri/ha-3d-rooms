@@ -55,4 +55,4 @@ Code: MIT (https://opensource.org/licenses/MIT)
 
 ## Home Assistant frontend
 
-The full-screen page's robot vacuum picture and its animations (`rooms-app/dashboard/vacuum-art.mjs`) are adapted from Home Assistant's `ha-state-control-vacuum-status` ([home-assistant/frontend](https://github.com/home-assistant/frontend), Apache License 2.0, Copyright Home Assistant contributors). The vacuum dialog's layout follows that project's `more-info-vacuum`.
+The full-screen page's robot vacuum picture and its animations (`rooms-app/dashboard/vacuum-art.mjs`) are adapted from Home Assistant's `ha-state-control-vacuum-status` ([home-assistant/frontend](https://github.com/home-assistant/frontend), Apache License 2.0, Copyright Home Assistant contributors). The vacuum dialog's layout follows that project's `more-info-vacuum`. The full-screen page's default-icon choice (`rooms-app/shared/ha-icons.mjs`) follows that project's `src/data/icons.ts`, `src/common/entity/state_icon.ts` and `src/components/ha-state-icon.ts`, including its domain fallback icon list.

@@ -1,3 +1,7 @@
+## 0.52.0
+
+- **Default icons on the full-screen page match Home Assistant's.** A device or entity without a chosen icon now shows exactly the icon Home Assistant's dashboards show for its state: the shade's open or closed shutter, a light's bulb or bulb-off, a fan's fan-off, an integration's own icons (a Roborock's mop mode, filter, …). The page asks Home Assistant for its icon tables (`frontend/get_icons`) and follows its frontend's order: the entity's own or registry icon, the integration's icon for the entity, the domain's icon by device class and state, then the domain's fallback. Before, it drew a generic glyph per device type, so shades and lights looked different from the dashboard and the view editor.
+
 ## 0.51.0
 
 - **The robot's map.** A robot vacuum can have its map picture (an `image` entity, such as a Roborock's "Map 0") connected in its own **Map** section on the device card, apart from the entity list; **Add all from this vacuum and its dock** connects it there. The vacuum dialog then has a **Map** button next to Fan speed and Cleaning: it opens the picture in the dialog, which reloads whenever the entity reports a new map, with when it last changed. An image entity in the entity list shows when its picture last changed instead of a raw timestamp.

@@ -920,11 +920,11 @@ function _e(e) {
 	for (let n of e?.entities || []) n.ei && typeof n.ic == "string" && t.set(n.ei, n.ic);
 	return (e) => t.get(e);
 }
-function ve({ resolver: e, registryIcon: t = () => void 0 }) {
+function ve({ resolver: e, registryIcon: t = () => void 0, iconFor: n }) {
 	if (customElements.get("ha-state-icon")) return;
-	class n extends HTMLElement {
+	class r extends HTMLElement {
 		constructor() {
-			super(), this.attachShadow({ mode: "open" }).innerHTML = "<style>:host{display:inline-flex}svg{display:block;width:100%;height:100%;fill:currentColor}svg[hidden],slot[hidden]{display:none}</style><slot></slot><svg hidden></svg>", this._svg = this.shadowRoot.querySelector("svg"), this._slot = this.shadowRoot.querySelector("slot"), this._token = 0;
+			super(), this.attachShadow({ mode: "open" }).innerHTML = "<style>:host{display:inline-flex}svg{display:block;width:100%;height:100%;fill:currentColor}svg[hidden],slot[hidden]{display:none}</style><slot></slot><svg hidden></svg>", this._svg = this.shadowRoot.querySelector("svg"), this._slot = this.shadowRoot.querySelector("slot"), this._token = 0, this._lookup = 0;
 		}
 		get icon() {
 			return this._icon;
@@ -942,20 +942,28 @@ function ve({ resolver: e, registryIcon: t = () => void 0 }) {
 			this._hass = e;
 		}
 		_sync() {
-			let n = this._icon || this._stateObj?.attributes?.icon || t(this._stateObj?.entity_id) || this.dataset.defaultIcon;
-			if (n === this._name) return;
-			this._name = n;
-			let r = ++this._token;
-			if (!n) return this._show(void 0);
-			e.resolve(n).then((e) => {
-				r === this._token && this._show(e);
+			let e = this._icon || this._stateObj?.attributes?.icon || t(this._stateObj?.entity_id);
+			if (!e && n && this._stateObj?.entity_id) {
+				let e = ++this._lookup;
+				n(this._stateObj).then((t) => {
+					e === this._lookup && this._draw(t || this.dataset.defaultIcon);
+				});
+			} else ++this._lookup, this._draw(e || this.dataset.defaultIcon);
+		}
+		_draw(t) {
+			if (t === this._name) return;
+			this._name = t;
+			let n = ++this._token;
+			if (!t) return this._show(void 0);
+			e.resolve(t).then((e) => {
+				n === this._token && this._show(e);
 			});
 		}
 		_show(e) {
 			this._svg.toggleAttribute("hidden", !e), this._slot.hidden = !!e, e && (this._svg.setAttribute("viewBox", e.viewBox), this._svg.innerHTML = e.html);
 		}
 	}
-	customElements.define("ha-state-icon", n);
+	customElements.define("ha-state-icon", r);
 }
 // dashboard/more-info-icons.mjs
 var ye = {
@@ -2957,17 +2965,133 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, extras: i
 		dialog: s
 	};
 }
+// shared/ha-icons.mjs
+var nt = {
+	ai_task: "mdi:star-four-points",
+	air_quality: "mdi:air-filter",
+	alert: "mdi:alert",
+	automation: "mdi:robot",
+	battery: "mdi:battery",
+	calendar: "mdi:calendar",
+	climate: "mdi:thermostat",
+	configurator: "mdi:cog",
+	conversation: "mdi:forum-outline",
+	counter: "mdi:counter",
+	date: "mdi:calendar",
+	datetime: "mdi:calendar-clock",
+	demo: "mdi:home-assistant",
+	device_tracker: "mdi:account",
+	door: "mdi:door-open",
+	garage_door: "mdi:garage-open",
+	gate: "mdi:gate",
+	google_assistant: "mdi:google-assistant",
+	group: "mdi:google-circles-communities",
+	homeassistant: "mdi:home-assistant",
+	homekit: "mdi:home-automation",
+	humidity: "mdi:water-percent",
+	illuminance: "mdi:brightness-6",
+	image_processing: "mdi:image-filter-frames",
+	image: "mdi:image",
+	infrared: "mdi:led-on",
+	input_boolean: "mdi:toggle-switch",
+	input_button: "mdi:button-pointer",
+	input_datetime: "mdi:calendar-clock",
+	input_number: "mdi:ray-vertex",
+	input_select: "mdi:format-list-bulleted",
+	input_text: "mdi:form-textbox",
+	lawn_mower: "mdi:robot-mower",
+	light: "mdi:lightbulb",
+	moisture: "mdi:water",
+	motion: "mdi:motion-sensor",
+	notify: "mdi:comment-alert",
+	number: "mdi:ray-vertex",
+	occupancy: "mdi:home-account",
+	persistent_notification: "mdi:bell",
+	person: "mdi:account",
+	plant: "mdi:flower",
+	power: "mdi:flash",
+	proximity: "mdi:apple-safari",
+	radio_frequency: "mdi:radio-tower",
+	remote: "mdi:remote",
+	scene: "mdi:palette",
+	schedule: "mdi:calendar-clock",
+	script: "mdi:script-text",
+	select: "mdi:format-list-bulleted",
+	sensor: "mdi:eye",
+	simple_alarm: "mdi:bell",
+	siren: "mdi:bullhorn",
+	stt: "mdi:microphone-message",
+	sun: "mdi:white-balance-sunny",
+	temperature: "mdi:thermometer",
+	text: "mdi:form-textbox",
+	time: "mdi:clock",
+	timer: "mdi:timer-outline",
+	template: "mdi:code-braces",
+	todo: "mdi:clipboard-list",
+	tts: "mdi:speaker-message",
+	vacuum: "mdi:robot-vacuum",
+	wake_word: "mdi:chat-sleep",
+	weather: "mdi:weather-partly-cloudy",
+	window: "mdi:window-closed",
+	zone: "mdi:map-marker-radius"
+};
+function rt(e, t) {
+	let n = Object.keys(t).map(Number).filter((e) => !Number.isNaN(e)).sort((e, t) => e - t);
+	if (!n.length || e < n[0]) return;
+	let r = n[0];
+	for (let t of n) e >= t && (r = t);
+	return t[String(r)];
+}
+function it(e, t) {
+	if (t) return e && t.state?.[e] ? t.state[e] : e !== void 0 && t.range && !Number.isNaN(Number(e)) ? rt(Number(e), t.range) ?? t.default : t.default;
+}
+function at(e, t) {
+	let n = e.entity_id.split(".")[0], r = e.attributes || {};
+	if (n === "sun") return t === "above_horizon" ? "mdi:white-balance-sunny" : "mdi:weather-night";
+	if (n === "update") return t === "on" ? r.in_progress ? "mdi:package-down" : "mdi:package-up" : "mdi:package";
+	if (n === "device_tracker") return t === "not_home" ? "mdi:account-arrow-right" : "mdi:account";
+	if (n === "input_datetime") {
+		if (!r.has_date) return "mdi:clock";
+		if (!r.has_time) return "mdi:calendar";
+	}
+}
+function ot(e, { entry: t, platform: n, component: r, state: i = e?.state } = {}) {
+	if (!e?.entity_id) return;
+	let a = e.entity_id.split(".")[0], o = e.attributes || {};
+	if (o.icon) return o.icon;
+	if (t?.ic) return t.ic;
+	let s;
+	return t?.tk && n && (s = it(i, n[a]?.[t.tk])), s ||= at(e, i), !s && r && (s = it(i, o.device_class && r[o.device_class] || r._)), s || nt[a] || "mdi:bookmark";
+}
+function st(e, t) {
+	let n = new Map((t?.entities || []).filter((e) => e.ei).map((e) => [e.ei, e])), r = (t, n) => e.sendMessagePromise({
+		type: "frontend/get_icons",
+		category: t,
+		...n ? { integration: n } : {}
+	}).then((e) => e?.resources || {}).catch(() => ({})), i, a = /* @__PURE__ */ new Map();
+	return { async iconFor(e) {
+		if (!e?.entity_id) return;
+		let t = n.get(e.entity_id), o = e.entity_id.split(".")[0];
+		i ||= r("entity_component"), t?.pl && t.tk && !a.has(t.pl) && a.set(t.pl, r("entity", t.pl).then((e) => e[t.pl]));
+		let [s, c] = await Promise.all([i.then((e) => e[o]), t?.pl ? a.get(t.pl) : void 0]);
+		return ot(e, {
+			entry: t,
+			platform: c,
+			component: s
+		});
+	} };
+}
 // dashboard/standalone-fit.mjs
-function nt({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
+function ct({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
 	if (!e || !(a > 0)) return n;
 	let o = n >= t ? Math.max(r, i) : Math.min(r, i);
 	return Math.abs(n + a - o) <= 2 ? n + a : n;
 }
-function rt(e = window) {
+function lt(e = window) {
 	let t = e.document, n = t.createElement("div");
 	n.style.cssText = "position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none", t.documentElement.append(n);
 	let r = () => {
-		let r = nt({
+		let r = ct({
 			standalone: e.navigator.standalone === !0 || e.matchMedia?.("(display-mode: standalone)").matches === !0,
 			innerWidth: e.innerWidth,
 			innerHeight: e.innerHeight,
@@ -2980,11 +3104,11 @@ function rt(e = window) {
 	return r(), e.addEventListener("resize", r), e.addEventListener("orientationchange", () => setTimeout(r, 250)), e.visualViewport?.addEventListener("resize", r), r;
 }
 // dashboard/standalone.js
-rt();
-var it = document.getElementById("status"), at = (e) => {
-	it.hidden = !1, it.textContent = e;
+lt();
+var ut = document.getElementById("status"), dt = (e) => {
+	ut.hidden = !1, ut.textContent = e;
 };
-async function ot() {
+async function ft() {
 	let e = document.body.dataset.view;
 	await customElements.whenDefined("three-d-rooms-card");
 	let t = await j({
@@ -3010,7 +3134,8 @@ async function ot() {
 	}, o = await r.sendMessagePromise({ type: "config/entity_registry/list_for_display" }).catch(() => null);
 	ve({
 		resolver: ge({ loadModules: a }),
-		registryIcon: _e(o)
+		registryIcon: _e(o),
+		iconFor: st(r, o).iconFor
 	});
 	let s = await I(r).catch(() => ({})), c = document.createElement("three-d-rooms-card"), l = new URL(location.href).searchParams.get("quality");
 	c.setConfig({
@@ -3038,8 +3163,8 @@ async function ot() {
 		});
 	}), r.addEventListener("ready", () => u.setConnected(!0)), r.addEventListener("disconnected", () => u.setConnected(!1)), await new Promise((e) => V(r, (t) => {
 		u.setStates(t), e();
-	})), c.hass = u.build(), it.hidden = !0, document.body.append(c);
+	})), c.hass = u.build(), ut.hidden = !0, document.body.append(c);
 }
-ot().catch((e) => {
-	console.error(e), at(e?.message || "Could not connect to Home Assistant. Reload to try again.");
+ft().catch((e) => {
+	console.error(e), dt(e?.message || "Could not connect to Home Assistant. Reload to try again.");
 });

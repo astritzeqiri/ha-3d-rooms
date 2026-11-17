@@ -62,7 +62,13 @@ export function registryIcons(list) {
  * `ha-state-icon` for the card: its own light-DOM glyph stays the fallback
  * (slotted); a resolved icon is drawn over it.
  */
-export function defineStateIcon({ resolver, registryIcon = () => undefined }) {
+export function defineStateIcon({
+  resolver,
+  registryIcon = () => undefined,
+  // Home Assistant's own icon for a state (shared/ha-icons.mjs), so a device
+  // left on its default icon looks as it does on a dashboard.
+  iconFor,
+}) {
   if (customElements.get("ha-state-icon")) return;
   class StateIcon extends HTMLElement {
     constructor() {
@@ -72,6 +78,7 @@ export function defineStateIcon({ resolver, registryIcon = () => undefined }) {
       this._svg = this.shadowRoot.querySelector("svg");
       this._slot = this.shadowRoot.querySelector("slot");
       this._token = 0;
+      this._lookup = 0;
     }
     get icon() {
       return this._icon;
@@ -91,12 +98,23 @@ export function defineStateIcon({ resolver, registryIcon = () => undefined }) {
       this._hass = value;
     }
     _sync() {
-      const name =
+      const chosen =
         this._icon ||
         this._stateObj?.attributes?.icon ||
-        registryIcon(this._stateObj?.entity_id) ||
-        // Extra entities of a view name a plain icon for their kind.
-        this.dataset.defaultIcon;
+        registryIcon(this._stateObj?.entity_id);
+      if (!chosen && iconFor && this._stateObj?.entity_id) {
+        const token = ++this._lookup;
+        iconFor(this._stateObj).then((name) => {
+          if (token === this._lookup)
+            this._draw(name || this.dataset.defaultIcon);
+        });
+        return;
+      }
+      ++this._lookup;
+      // Extra entities of a view name a plain icon for their kind.
+      this._draw(chosen || this.dataset.defaultIcon);
+    }
+    _draw(name) {
       if (name === this._name) return;
       this._name = name;
       const token = ++this._token;

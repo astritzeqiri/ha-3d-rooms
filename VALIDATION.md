@@ -1,3 +1,11 @@
+# 0.52.0 — Home Assistant's default icons on the full-screen page, 2026-11-17
+
+Released as 0.52.0, based on 0.51.0. The full-screen page's `ha-state-icon` (`dashboard/standalone-icons.mjs`) now resolves an unchosen icon with `shared/ha-icons.mjs`, a port of Home Assistant frontend 20261028.4's icon order using its `frontend/get_icons` tables and the entity registry's platform, translation key and icon (`dashboard/standalone.js`).
+
+- All frontend tests (new: `test/ha-icons.test.mjs`, the icon order, ranges, fallbacks and table loading) and host Python tests pass with native-only skips. Format check and build pass.
+- Shared local Home Assistant (Core 2026.11.0): for 15 entities across 12 domains (lights on and off, lock, window and garage covers, vacuum, sun, select, time, timestamp sensor, fan, climate, switch, number, button) the full-screen page resolves exactly the icon Home Assistant's own `ha-state-icon` shows; full-screen device markers left on Default show those icons. The release ZIP loads.
+- Not checked: the user's production shades and Roborock, Safari, a real phone, and HACS download of this version.
+
 # 0.51.0 — the robot vacuum's map, 2026-11-17
 
 Released as 0.51.0, based on 0.50.0. A robot vacuum's map picture: per-room `deviceMaps` (`validate_device_maps`, `set_device_map`, websocket operation `device-map` in `api.py`), served as control `map`; a Map section on the manager's vacuum device card (`web/main.js`), where "Add all from this vacuum and its dock" now connects an `image` entity; a Map button and view in the vacuum dialog (`dashboard/more-info.mjs`), refreshed when the image entity's state changes.
