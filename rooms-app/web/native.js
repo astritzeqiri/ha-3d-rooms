@@ -79,8 +79,10 @@ export async function connectNative() {
         path === "floors"
       )
         return bridge.request(path);
+      if (path === "device-entity-suggestions")
+        return bridge.request(path, JSON.parse(options.body || "{}"));
       const match = path.match(
-        /^models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|device-settings|device-visibility|device-marker|light-groups))?$/,
+        /^models\/([a-z0-9_-]+)(?:\/(bindings|command|daylight|room|device-settings|device-visibility|device-marker|device-entities|light-groups))?$/,
       );
       if (!match) throw new Error("Unknown room request.");
       return bridge.request(match[2] || "delete", {

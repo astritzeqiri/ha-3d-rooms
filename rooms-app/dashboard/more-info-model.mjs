@@ -569,3 +569,127 @@ export function cameraUrls(entityId, token) {
     mjpeg: `/api/camera_proxy_stream/${id}${query}`,
   };
 }
+
+const cap = (s) =>
+  typeof s === "string" && s
+    ? s[0].toUpperCase() + s.slice(1).replace(/_/g, " ")
+    : s;
+/** Seconds in one unit of a duration sensor. */
+const DURATION_UNITS = { ms: 0.001, s: 1, min: 60, h: 3600, d: 86400 };
+/** "149h 49m", "2m 16s", as Home Assistant shows durations. */
+export function formatDuration(value, unit) {
+  const seconds = Number(value) * (DURATION_UNITS[unit] ?? NaN);
+  if (!Number.isFinite(seconds)) return undefined;
+  const total = Math.round(Math.abs(seconds)),
+    h = Math.floor(total / 3600),
+    m = Math.floor((total % 3600) / 60),
+    s = total % 60;
+  const text = h ? `${h}h ${m}m` : m ? `${m}m ${s}s` : `${s}s`;
+  return seconds < 0 ? `-${text}` : text;
+}
+const BINARY_WORDS = {
+  battery_charging: ["Charging", "Not charging"],
+  connectivity: ["Connected", "Disconnected"],
+  door: ["Open", "Closed"],
+  moisture: ["Wet", "Dry"],
+  plug: ["Plugged in", "Unplugged"],
+  problem: ["Problem", "OK"],
+  running: ["Running", "Not running"],
+};
+const shortNumber = (value) => {
+  const n = Number(value);
+  return Number.isFinite(n) && String(value).includes(".")
+    ? String(Math.round(n * 100) / 100)
+    : String(value);
+};
+/**
+ * One row of a device's entity list, as Home Assistant's device page shows
+ * it: a control for what can be changed here, otherwise the formatted state.
+ * `prefix` (the device's name) is dropped from the start of the name.
+ */
+export function entityRow(entity, { prefix = "", now = Date.now() } = {}) {
+  const id = entity?.entity_id || "",
+    domain = id.split(".")[0],
+    a = entity?.attributes || {},
+    state = entity?.state;
+  let name = a.friendly_name || id;
+  if (
+    prefix &&
+    name.startsWith(`${prefix} `) &&
+    name.length > prefix.length + 1
+  )
+    name = name.slice(prefix.length + 1);
+  name = name.charAt(0).toUpperCase() + name.slice(1);
+  // "unknown" still takes a choice (a select that has not reported yet).
+  const unavailable = !entity || state === "unavailable";
+  const row = { id, domain, name, unavailable, kind: "value" };
+  if (unavailable)
+    return { ...row, value: entity ? "Unavailable" : "Not found" };
+  if (["switch", "input_boolean"].includes(domain))
+    return { ...row, kind: "toggle", on: state === "on" };
+  if (["select", "input_select"].includes(domain))
+    return {
+      ...row,
+      kind: "select",
+      value: state,
+      options: Array.isArray(a.options) ? a.options.map(String) : [],
+    };
+  if (["number", "input_number"].includes(domain)) {
+    const min = num(a.min) ?? 0,
+      max = num(a.max) ?? 100,
+      step = num(a.step) || 1;
+    return {
+      ...row,
+      kind: "number",
+      value: num(Number(state)),
+      min,
+      max,
+      step,
+      unit: a.unit_of_measurement || "",
+    };
+  }
+  if (["button", "input_button"].includes(domain))
+    return { ...row, kind: "button" };
+  if (["time", "input_datetime"].includes(domain) && /^\d\d:\d\d/.test(state))
+    return { ...row, kind: "time", value: state.slice(0, 5) };
+  let value = cap(state);
+  if (domain === "binary_sensor") {
+    const words = BINARY_WORDS[a.device_class];
+    value = words
+      ? words[state === "on" ? 0 : 1]
+      : state === "on"
+        ? "On"
+        : "Off";
+  } else if (a.device_class === "timestamp" && Date.parse(state))
+    value = sinceText(state, now) || value;
+  else if (a.device_class === "duration")
+    value = formatDuration(state, a.unit_of_measurement) ?? value;
+  else if (a.unit_of_measurement)
+    value = `${shortNumber(state)}${a.unit_of_measurement === "%" ? "" : " "}${a.unit_of_measurement}`;
+  else value = cap(shortNumber(state));
+  return { ...row, value };
+}
+/** The service call a row's change means, for `callService(domain, service, data)`. */
+export function entityRowCall(row, value) {
+  const target = { entity_id: row.id };
+  if (row.kind === "toggle")
+    return [row.domain, value ? "turn_on" : "turn_off", target];
+  if (row.kind === "select") {
+    if (!row.options.includes(value)) throw new Error("Unknown option");
+    return [row.domain, "select_option", { ...target, option: value }];
+  }
+  if (row.kind === "number") {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < row.min || n > row.max)
+      throw new Error("Value out of range");
+    return [row.domain, "set_value", { ...target, value: n }];
+  }
+  if (row.kind === "button") return [row.domain, "press", target];
+  if (row.kind === "time") {
+    if (!/^\d\d:\d\d$/.test(value)) throw new Error("Choose a time");
+    return row.domain === "time"
+      ? ["time", "set_value", { ...target, time: `${value}:00` }]
+      : ["input_datetime", "set_datetime", { ...target, time: `${value}:00` }];
+  }
+  throw new Error("This entity has no control here");
+}

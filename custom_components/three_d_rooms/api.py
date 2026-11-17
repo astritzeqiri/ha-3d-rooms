@@ -90,6 +90,44 @@ class RoomsRuntime:
             ],
         }
 
+    def device_entity_suggestions(self, entity_id):
+        """Entities of a vacuum's own device and of devices hanging off it (its dock).
+
+        Returned with their category, so the dialog can group them as Home
+        Assistant's device page does. Disabled entities are left out.
+        """
+        from homeassistant.helpers import device_registry, entity_registry
+        entities = entity_registry.async_get(self.hass)
+        devices = device_registry.async_get(self.hass)
+        entry = entities.async_get(entity_id) if isinstance(entity_id, str) else None
+        if entry is None or entry.device_id is None:
+            return {"devices": [], "entities": []}
+        device = devices.async_get(entry.device_id)
+        related = [device] if device else []
+        name = (device.name_by_user or device.name or "") if device else ""
+        for other in devices.devices.values():
+            if other.id == entry.device_id or other.disabled:
+                continue
+            other_name = other.name_by_user or other.name or ""
+            # A dock is its own device: linked through the vacuum, or one
+            # of the same integration entry named after it ("Saros 10R Dock").
+            if other.via_device_id == entry.device_id or (
+                name and other_name.startswith(name + " ")
+                and set(other.config_entries) & set(device.config_entries)
+            ):
+                related.append(other)
+        out = []
+        for dev in related:
+            for item in entity_registry.async_entries_for_device(entities, dev.id):
+                if item.disabled or item.entity_id == entity_id:
+                    continue
+                out.append({
+                    "entity_id": item.entity_id,
+                    "device": dev.name_by_user or dev.name,
+                    "category": item.entity_category.value if item.entity_category else None,
+                })
+        return {"devices": [d.name_by_user or d.name for d in related], "entities": out}
+
     async def request(self, operation, data, user_id, user=None):
         """`user` is the Home Assistant user; None means an internal caller."""
         if user is not None and not user.is_admin:
@@ -189,6 +227,17 @@ class RoomsRuntime:
         if operation == "device-marker":
             changes = {k: data[k] for k in ("position", "icon", "icon_off") if k in data}
             result = await self.work(self.store.set_device_marker, data.get("model"), data.get("controlId"), changes)
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
+        if operation == "device-entity-suggestions":
+            return self.device_entity_suggestions(data.get("entityId"))
+        if operation == "device-entities":
+            entities = data.get("entities")
+            if not isinstance(entities, list) or any(
+                not isinstance(e, str) or not self.hass.states.get(e) for e in entities
+            ):
+                raise ValueError("Choose existing Home Assistant entities.")
+            result = await self.work(self.store.set_device_entities, data.get("model"), data.get("controlId"), entities)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
         if operation == "device-settings":

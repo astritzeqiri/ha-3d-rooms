@@ -262,16 +262,74 @@ def validate_marker_default(value):
     return {k: (list(v) if k == "position" else v) for k, v in value.items()}
 
 
+# A device's extra entities (a robot vacuum's mop mode, dock state, …),
+# shown in its own dialog. Any entity domain; ids as Home Assistant writes them.
+ANY_ENTITY = re.compile(r"[a-z0-9_]+\.[a-z0-9_]+\Z")
+DEVICE_ENTITY_TYPES = ("vacuum",)
+MAX_DEVICE_ENTITIES = 48
+
+
+def validate_device_entities(value, controls):
+    """`{controlId: [entity ids]}` for devices that list extra entities."""
+    types = {c["id"]: c["type"] for c in controls}
+    if not isinstance(value, dict):
+        raise ValueError("Device entities must be an object.")
+    clean = {}
+    for control_id, entities in value.items():
+        if types.get(control_id) not in DEVICE_ENTITY_TYPES:
+            raise ValueError("Only robot vacuums can list extra entities.")
+        if (not isinstance(entities, list) or len(entities) > MAX_DEVICE_ENTITIES
+                or len(set(entities)) != len(entities)
+                or not all(isinstance(e, str) and len(e) <= 255 and ANY_ENTITY.fullmatch(e) for e in entities)):
+            raise ValueError(f"List up to {MAX_DEVICE_ENTITIES} different entity IDs.")
+        if entities:
+            clean[control_id] = list(entities)
+    return clean
+
+
+def stored_room_settings(stored, manifest):
+    """Room settings kept beside the model in the catalog, re-read on start.
+
+    Unreadable entries are dropped rather than failing the whole library.
+    """
+    out = {}
+    if stored.get("groupIcons") is True:
+        out["groupIcons"] = True
+    ids = {c["id"] for c in manifest["controls"]}
+    defaults = {}
+    for control_id, value in (stored.get("markerDefaults") or {}).items():
+        if control_id in ids:
+            try:
+                defaults[control_id] = validate_marker_default(value)
+            except ValueError:
+                pass
+    if defaults:
+        out["markerDefaults"] = defaults
+    entities = {}
+    for control_id, value in (stored.get("deviceEntities") or {}).items():
+        try:
+            entities.update(validate_device_entities({control_id: value}, manifest["controls"]))
+        except ValueError:
+            pass
+    if entities:
+        out["deviceEntities"] = entities
+    return out
+
+
 def apply_marker_defaults(model):
     """Serve each device's room icon: a moved anchor and a chosen default icon.
 
     Views still add their own offsets and icons on top. `markerAnchor` keeps
     the exported anchor so the manager can put a moved icon back.
     """
-    defaults = model.get("markerDefaults")
-    if not defaults:
+    defaults = model.get("markerDefaults") or {}
+    entities = model.get("deviceEntities") or {}
+    if not defaults and not entities:
         return model
     model = deepcopy(model)
+    for control in model["controls"]:
+        if entities.get(control["id"]):
+            control["entities"] = list(entities[control["id"]])
     for control in model["controls"]:
         value = defaults.get(control["id"])
         if not value:
@@ -298,6 +356,13 @@ def preserve_marker_defaults(previous, incoming):
         incoming["markerDefaults"] = kept
     else:
         incoming.pop("markerDefaults", None)
+    # Extra entities stay with a device that is still a robot vacuum.
+    vacuums = {c["id"] for c in incoming["controls"] if c["type"] in DEVICE_ENTITY_TYPES}
+    entities = {k: v for k, v in previous.get("deviceEntities", {}).items() if k in vacuums}
+    if entities:
+        incoming["deviceEntities"] = entities
+    else:
+        incoming.pop("deviceEntities", None)
 
 
 def preserve_device_visibility(previous, incoming):
@@ -842,6 +907,7 @@ class ModelStore:
                         "bindings": validate_bindings(model["bindings"], manifest),
                         "importedAt": model["importedAt"],
                         **({"areaId": model["areaId"]} if "areaId" in model else {}),
+                        **stored_room_settings(model, manifest),
                     }
                 )
             self.models = models
@@ -1042,6 +1108,21 @@ class ModelStore:
             "markerDefaults": deepcopy(model.get("markerDefaults", {})),
             "control": {k: deepcopy(control[k]) for k in ("markerPosition", "markerAnchor", "icon", "iconOff") if k in control},
         }
+
+    def set_device_entities(self, model_id, control_id, entities):
+        """The extra entities a robot vacuum's dialog lists, in order; [] clears them."""
+        models = deepcopy(self.models)
+        model = next((m for m in models if m["id"] == model_id), None)
+        if model is None:
+            raise ValueError("Choose a device in its source room.")
+        stored = {**model.get("deviceEntities", {}), control_id: entities}
+        clean = validate_device_entities(stored, model["controls"])
+        if clean:
+            model["deviceEntities"] = clean
+        else:
+            model.pop("deviceEntities", None)
+        self.save(models)
+        return {"entities": list(clean.get(control_id, []))}
 
     def set_device_settings(self, model_id, device_id, names):
         models = deepcopy(self.models)

@@ -579,6 +579,14 @@ function drawControls() {
   if (!selected) return;
   updateRoomSummary();
   const active = document.activeElement;
+  // A half-typed entity search survives live redraws.
+  const typing = active?.dataset?.veInput
+    ? {
+        id: active.dataset.veInput,
+        value: active.value,
+        at: active.selectionStart,
+      }
+    : null;
   const focusKind = [
     "deviceSettings",
     "deviceVisibility",
@@ -681,7 +689,7 @@ function drawControls() {
     }
     if (c.type === "vacuum") {
       const s = states.get(c.id);
-      return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${esc(c.label)}</span>${deviceSettingsButton(c)}</div><p>${esc(s.label || "Unknown")}${s.battery === undefined ? "" : ` · Battery ${s.battery}%`}</p>${vacuumButtons(c, s, !preview && s.unavailable ? "disabled" : "")}${!preview && native?.moreInfo ? `<button type="button" data-vacuum-info="${c.id}" ${s.unavailable ? "disabled" : ""}>Open Home Assistant vacuum controls</button>` : ""}${entityNote(c)}</article>`;
+      return `<article class="light-card" data-control="${c.id}"><div class="device-heading"><span class="light-label">${esc(c.label)}</span>${deviceSettingsButton(c)}</div><p>${esc(s.label || "Unknown")}${s.battery === undefined ? "" : ` · Battery ${s.battery}%`}</p>${vacuumButtons(c, s, !preview && s.unavailable ? "disabled" : "")}${entityNote(c)}${vacuumEntitiesHTML(c)}</article>`;
     }
     if (c.type === "button") {
       const s = states.get(c.id),
@@ -866,6 +874,16 @@ function drawControls() {
     document
       .querySelector(`[data-${focusKind}="${focusId}"]${focusExtra}`)
       ?.focus({ preventScroll: true });
+  if (typing) {
+    const input = document.querySelector(
+      `[data-ve-input="${CSS.escape(typing.id)}"]`,
+    );
+    if (input) {
+      input.value = typing.value;
+      input.focus({ preventScroll: true });
+      input.setSelectionRange?.(typing.at, typing.at);
+    }
+  }
 }
 async function command(id, on, settings = {}) {
   const model = selected,
@@ -957,6 +975,114 @@ async function moveVacuum(id, action) {
   } catch (error) {
     toast(error.message);
   }
+}
+/**
+ * A robot vacuum's extra entities (mop mode, dock, maintenance, …): shown
+ * in its own dialog on cards and the full-screen page, in this order.
+ */
+function vacuumEntitiesHTML(c) {
+  if (!native) return "";
+  const list = c.entities || [],
+    all = native.states?.() || status.entities || [],
+    find = (id) => all.find((e) => e.entity_id === id),
+    name = (e, id) => e?.attributes?.friendly_name || id;
+  const rows = list
+    .map((id, i) => {
+      const e = find(id);
+      return `<li class="ve-row"><span class="ve-text"><span class="ve-name">${esc(name(e, id))}</span><span class="ve-id">${esc(id)} · ${esc(e ? e.state : "not found")}</span></span><span class="ve-tools">${iconButton(`data-ve-move="${c.id}" data-entity="${esc(id)}" data-dir="-1" ${i ? "" : "disabled"}`, `Move ${esc(name(e, id))} up`, '<path d="m6 15 6-6 6 6"/>')}${iconButton(`data-ve-move="${c.id}" data-entity="${esc(id)}" data-dir="1" ${i < list.length - 1 ? "" : "disabled"}`, `Move ${esc(name(e, id))} down`, '<path d="m6 9 6 6 6-6"/>')}${iconButton(`data-ve-remove="${c.id}" data-entity="${esc(id)}"`, `Remove ${esc(name(e, id))}`, '<path d="M6 6l12 12M18 6 6 18"/>')}</span></li>`;
+    })
+    .join("");
+  const options = all
+    .filter(
+      (e) =>
+        !list.includes(e.entity_id) && e.entity_id !== selected.bindings[c.id],
+    )
+    .map(
+      (e) =>
+        `<option value="${esc(e.entity_id)}">${esc(name(e, e.entity_id))}</option>`,
+    )
+    .join("");
+  return `<section class="ve" aria-labelledby="ve-title-${c.id}"><h4 id="ve-title-${c.id}">Entities in the robot's dialog <span class="ve-count">${list.length}</span></h4><p class="muted">Tapping the robot on a card opens its own dialog with these entities: mop mode, dock, maintenance, anything you add.</p>${rows ? `<ol class="ve-list">${rows}</ol>` : ""}<div class="ve-add"><input type="search" list="ve-options-${c.id}" data-ve-input="${c.id}" placeholder="Search entities to add" aria-label="Entity to add"><datalist id="ve-options-${c.id}">${options}</datalist><button type="button" data-ve-add="${c.id}">Add</button></div>${selected.bindings[c.id] ? `<button type="button" class="ve-suggest" data-ve-suggest="${c.id}">Add all from this vacuum and its dock</button>` : ""}</section>`;
+}
+async function saveVacuumEntities(controlId, entities, message) {
+  const control = selected.controls.find((x) => x.id === controlId);
+  try {
+    const result = await api(`models/${selected.id}/device-entities`, {
+      method: "POST",
+      body: JSON.stringify({ controlId, entities }),
+    });
+    control.entities = result.entities;
+    drawControls();
+    if (message) toast(message);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+async function vacuumEntityAction(e) {
+  const add = e.target.closest("[data-ve-add]"),
+    move = e.target.closest("[data-ve-move]"),
+    remove = e.target.closest("[data-ve-remove]"),
+    suggest = e.target.closest("[data-ve-suggest]");
+  const id = (add || move || remove || suggest)?.dataset;
+  if (!id) return false;
+  const controlId = id.veAdd || id.veMove || id.veRemove || id.veSuggest;
+  // Start from the stored list: it may have changed in another tab.
+  const typed = add?.parentElement.querySelector("[data-ve-input]")?.value;
+  try {
+    await refreshDeviceVisibility();
+  } catch {
+    /* Keep the list shown. */
+  }
+  const control = selected.controls.find((x) => x.id === controlId),
+    list = [...(control?.entities || [])];
+  if (!control) return true;
+  if (add) {
+    const value = (typed || "").trim();
+    if (!value) return true;
+    if (list.includes(value)) {
+      toast("Already in the list.");
+      return true;
+    }
+    await saveVacuumEntities(controlId, [...list, value]);
+  } else if (move) {
+    const at = list.indexOf(id.entity),
+      to = at + Number(id.dir);
+    if (at < 0 || to < 0 || to >= list.length) return true;
+    [list[at], list[to]] = [list[to], list[at]];
+    await saveVacuumEntities(controlId, list);
+  } else if (remove) {
+    await saveVacuumEntities(
+      controlId,
+      list.filter((x) => x !== id.entity),
+    );
+  } else if (suggest) {
+    suggest.disabled = true;
+    try {
+      const found = await api("device-entity-suggestions", {
+        method: "POST",
+        body: JSON.stringify({ entityId: selected.bindings[controlId] }),
+      });
+      // Controls first, then settings, then diagnostics, as on the device page.
+      const order = { null: 0, config: 1, diagnostic: 2 };
+      const fresh = found.entities
+        .filter((x) => !list.includes(x.entity_id))
+        .sort((a, b) => order[a.category] - order[b.category])
+        .map((x) => x.entity_id)
+        .slice(0, 48 - list.length);
+      if (!fresh.length) toast("Nothing new to add from this vacuum.");
+      else
+        await saveVacuumEntities(
+          controlId,
+          [...list, ...fresh],
+          `Added ${fresh.length} ${fresh.length === 1 ? "entity" : "entities"} from ${found.devices.join(" and ")}`,
+        );
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      suggest.disabled = false;
+    }
+  }
+  return true;
 }
 const LOCK_PREVIEW = { unavailable: false, moving: false, needsCode: false };
 async function moveLock(id, action) {
@@ -1066,6 +1192,12 @@ async function moveCover(id, action, position) {
     toast(error.message);
   }
 }
+$("controls").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.dataset?.veInput) {
+    e.preventDefault();
+    e.target.parentElement.querySelector("[data-ve-add]")?.click();
+  }
+});
 $("controls").addEventListener("click", async (e) => {
   const section = e.target.closest("[data-section-toggle]");
   if (section) {
@@ -1139,9 +1271,7 @@ $("controls").addEventListener("click", async (e) => {
   if (lock) moveLock(lock.dataset.lock, lock.dataset.action);
   const vacuum = e.target.closest("[data-vacuum]");
   if (vacuum) moveVacuum(vacuum.dataset.vacuum, vacuum.dataset.action);
-  const vacuumInfo = e.target.closest("[data-vacuum-info]");
-  if (vacuumInfo)
-    native?.moreInfo?.(selected.bindings[vacuumInfo.dataset.vacuumInfo]);
+  if (await vacuumEntityAction(e)) return;
   const lockInfo = e.target.closest("[data-lock-info]");
   if (lockInfo)
     native?.moreInfo?.(selected.bindings[lockInfo.dataset.lockInfo]);
@@ -2646,7 +2776,13 @@ async function refreshDeviceVisibility() {
       // Room icons changed elsewhere (another tab or person).
       if (!updated) continue;
       const before = JSON.stringify(control.markerPosition);
-      for (const key of ["markerPosition", "markerAnchor", "icon", "iconOff"])
+      for (const key of [
+        "markerPosition",
+        "markerAnchor",
+        "icon",
+        "iconOff",
+        "entities",
+      ])
         if (key in updated) control[key] = updated[key];
         else delete control[key];
       if (

@@ -415,3 +415,92 @@ test("a vacuum gets Home Assistant's buttons, fan speed and clean by area", asyn
   assert.equal(vacuumVisualState(vac("unavailable")), "idle");
   assert.match(VACUUM_STATUS_SVG, /dock-indicator/);
 });
+
+test("a vacuum's extra entities become device-page rows with their own controls", async () => {
+  const { entityRow, entityRowCall, formatDuration } =
+    await import("../dashboard/more-info-model.mjs");
+  const row = (entity_id, state, attributes = {}) =>
+    entityRow(
+      {
+        entity_id,
+        state,
+        attributes: {
+          friendly_name: `Saros 10R ${attributes.name || "Thing"}`,
+          ...attributes,
+        },
+      },
+      { prefix: "Saros 10R", now: Date.parse("2026-11-17T12:00:00Z") },
+    );
+  const mode = row("select.saros_10r_cleaning_mode", "unknown", {
+    name: "Cleaning mode",
+    options: ["vacuum_only", "vacuum_and_mop", "mop_only"],
+  });
+  assert.equal(mode.name, "Cleaning mode");
+  assert.equal(mode.kind, "select");
+  assert.deepEqual(entityRowCall(mode, "mop_only"), [
+    "select",
+    "select_option",
+    { entity_id: "select.saros_10r_cleaning_mode", option: "mop_only" },
+  ]);
+  assert.throws(() => entityRowCall(mode, "turbo"));
+  const dnd = row("switch.saros_10r_do_not_disturb", "on");
+  assert.equal(dnd.on, true);
+  assert.deepEqual(entityRowCall(dnd, false)[1], "turn_off");
+  const begin = row("time.saros_10r_do_not_disturb_begin", "22:00:00");
+  assert.deepEqual(entityRowCall(begin, "23:30"), [
+    "time",
+    "set_value",
+    { entity_id: "time.saros_10r_do_not_disturb_begin", time: "23:30:00" },
+  ]);
+  const volume = row("number.saros_10r_volume", "90.0", {
+    min: 0,
+    max: 100,
+    step: 1,
+    unit_of_measurement: "%",
+  });
+  assert.equal(volume.value, 90);
+  assert.throws(() => entityRowCall(volume, 120));
+  assert.equal(
+    entityRowCall(row("button.dock_resolve", "unknown"))[1],
+    "press",
+  );
+  assert.equal(
+    row("sensor.f", "539400", {
+      device_class: "duration",
+      unit_of_measurement: "s",
+    }).value,
+    "149h 50m",
+  );
+  assert.equal(
+    row("sensor.t", "136", {
+      device_class: "duration",
+      unit_of_measurement: "s",
+    }).value,
+    "2m 16s",
+  );
+  assert.equal(
+    row("sensor.b", "96", { unit_of_measurement: "%" }).value,
+    "96%",
+  );
+  assert.equal(
+    row("sensor.a", "2.913", { unit_of_measurement: "m²" }).value,
+    "2.91 m²",
+  );
+  assert.match(
+    row("sensor.l", "2026-11-17T11:52:00Z", { device_class: "timestamp" })
+      .value,
+    /8 minutes ago/,
+  );
+  assert.equal(
+    row("binary_sensor.w", "on", { device_class: "connectivity" }).value,
+    "Connected",
+  );
+  assert.equal(
+    row("binary_sensor.p", "off", { device_class: "problem" }).value,
+    "OK",
+  );
+  assert.equal(row("sensor.s", "segment_cleaning").value, "Segment cleaning");
+  assert.equal(row("sensor.x", "unavailable").unavailable, true);
+  assert.equal(entityRow(undefined).value, "Not found");
+  assert.equal(formatDuration("1.5", "h"), "1h 30m");
+});

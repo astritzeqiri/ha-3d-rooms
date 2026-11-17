@@ -1,4 +1,4 @@
-import { D as e, G as t, M as n, V as r, _ as i, c as a, f as o, g as s, h as c, l, n as u, p as d, u as f, w as p, x as m } from "./three-d-rooms-room-focus-Sro7ndif.js";
+import { D as e, M as t, P as n, R as r, _ as i, c as a, f as o, g as s, h as c, l, n as u, p as d, u as f, w as p, x as m } from "./three-d-rooms-room-focus-Bwrg1ovT.js";
 // shared/number-motion.mjs
 function h(e, t) {
 	let n = e.userData.numberMotion;
@@ -12777,20 +12777,20 @@ var ld = class {
 	}
 }, ud = "\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    vUv = uv;\n    vec4 view = modelViewMatrix * vec4(position, 1.0);\n    vNormal = normalize(normalMatrix * normal);\n    vView = -view.xyz;\n    gl_Position = projectionMatrix * view;\n  }\n", dd = "\n  uniform vec3 uColor;\n  uniform float uTime;\n  uniform float uPhase;\n  uniform float uStrength;\n  uniform float uCore;\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    float facing = abs(dot(normalize(vNormal), normalize(vView)));\n    float softEdge = pow(facing, mix(2.6, 0.7, uCore));\n    float fade = smoothstep(0.0, 0.06, vUv.x)\n               * (1.0 - smoothstep(0.82, 1.0, vUv.x));\n    float phase = fract(vUv.x * 2.2 - uTime * 0.65 + uPhase);\n    float pulse = smoothstep(0.0, 0.15, phase)\n                * (1.0 - smoothstep(0.40, 0.92, phase));\n    float alpha = uStrength * softEdge * fade * (0.32 + 0.68 * pulse);\n    if (uCore < 0.0) {\n      float across = vUv.y * 2.0 - 1.0;\n      float edge = pow(max(0.0, 1.0 - across * across), 1.4);\n      float wave = pow(0.5 + 0.5 * cos((vUv.x + across * across * 0.10) * 21.0 - uTime * 3.2), 5.0);\n      alpha = uStrength * edge * fade * (0.14 + 0.86 * wave);\n    }\n    vec3 color = mix(uColor, vec3(1.0), clamp(uCore, 0.0, 1.0) * 0.14);\n    gl_FragColor = vec4(color, alpha);\n    #include <colorspace_fragment>\n  }\n";
 function fd(e, { reducedMotion: t = !1 } = {}) {
-	let n = e.userData.climateVisual;
-	if (!n || n.version !== 1 || !Array.isArray(n.outlet) || n.outlet.length !== 3 || !n.outlet.every((e) => Number.isFinite(e) && Math.abs(e) < 10) || !Number.isFinite(n.width) || n.width < .1 || n.width > 5) return null;
+	let r = e.userData.climateVisual;
+	if (!r || r.version !== 1 || !Array.isArray(r.outlet) || r.outlet.length !== 3 || !r.outlet.every((e) => Number.isFinite(e) && Math.abs(e) < 10) || !Number.isFinite(r.width) || r.width < .1 || r.width > 5) return null;
 	let i = new Vn();
-	i.name = "climate-airflow-runtime", i.userData.climateRuntime = !0, i.visible = !1, i.position.fromArray(n.outlet), e.add(i);
+	i.name = "climate-airflow-runtime", i.userData.climateRuntime = !0, i.visible = !1, i.position.fromArray(r.outlet), e.add(i);
 	let a = { value: 0 }, o = { value: new X() }, s = [];
 	for (let e = 0; e < 5; e++) {
-		let t = (e - 2) * n.width * .19, r = new Na([
+		let t = (e - 2) * r.width * .19, n = new Na([
 			new K(t, -.015, .025),
 			new K(t * 1.12, -.12, .4),
 			new K(t * 1.5, -.3, 1.05),
 			new K(t * 2.1, -.65, 1.8)
 		]);
 		for (let t of [!1, !0]) {
-			let c = new $a(r, 40, Wt.clamp(n.width * (t ? .012 : .044), t ? .005 : .02, t ? .014 : .045), 8, !1), l = new co({
+			let c = new $a(n, 40, Wt.clamp(r.width * (t ? .012 : .044), t ? .005 : .02, t ? .014 : .045), 8, !1), l = new co({
 				vertexShader: ud,
 				fragmentShader: dd,
 				uniforms: {
@@ -12817,12 +12817,12 @@ function fd(e, { reducedMotion: t = !1 } = {}) {
 		new K(0, -.65, 1.8)
 	]), l = [], u = [], d = [];
 	for (let e = 0; e <= 40; e++) {
-		let t = e / 40, r = c.getPoint(t), i = n.width * .45 * (1 + 1.5 * t);
-		for (let n = 0; n <= 16; n++) {
-			let a = n / 16;
-			if (l.push((a * 2 - 1) * i, r.y, r.z), u.push(t, a), e < 40 && n < 16) {
-				let t = e * 17 + n, r = t + 1, i = t + 16 + 1, a = i + 1;
-				d.push(t, i, r, r, i, a);
+		let t = e / 40, n = c.getPoint(t), i = r.width * .45 * (1 + 1.5 * t);
+		for (let r = 0; r <= 16; r++) {
+			let a = r / 16;
+			if (l.push((a * 2 - 1) * i, n.y, n.z), u.push(t, a), e < 40 && r < 16) {
+				let t = e * 17 + r, n = t + 1, i = t + 16 + 1, a = i + 1;
+				d.push(t, i, n, n, i, a);
 			}
 		}
 	}
@@ -12851,7 +12851,7 @@ function fd(e, { reducedMotion: t = !1 } = {}) {
 	e.traverse((e) => {
 		e.userData.climateIndicator && e.material?.isMeshStandardMaterial && h.push(e.material);
 	});
-	let g = e.getObjectByName("air-conditioner-lower-louver"), _ = g?.rotation.x ?? 0, v = r(), y = {};
+	let g = e.getObjectByName("air-conditioner-lower-louver"), _ = g?.rotation.x ?? 0, v = n(), y = {};
 	return {
 		group: i,
 		setReducedMotion(e) {
@@ -12866,7 +12866,7 @@ function fd(e, { reducedMotion: t = !1 } = {}) {
 			return v;
 		},
 		setState(e) {
-			y = e, v = r(e), i.visible = v.flow;
+			y = e, v = n(e), i.visible = v.flow;
 			let t = new X(v.color).getHSL({});
 			o.value.setHSL(t.h, Math.max(.85, t.s), .28);
 			for (let t of h) t.emissive.set(v.color), t.color.set(v.color), t.emissiveIntensity = e.on && !e.unavailable ? 1.1 : 0;
@@ -16174,14 +16174,14 @@ var Zp = class {
 		};
 	}
 };
-async function Qp(e, n, r) {
-	let i = async () => (await Jp(r).loadAsync(e)).scene;
-	if (!n) return {
+async function Qp(e, t, n) {
+	let i = async () => (await Jp(n).loadAsync(e)).scene;
+	if (!t) return {
 		scene: await i(),
 		hit: !1
 	};
-	let a = t.get(n.owner);
-	return a || t.set(n.owner, a = new Zp()), a.load(n.key, i);
+	let a = r.get(t.owner);
+	return a || r.set(t.owner, a = new Zp()), a.load(t.key, i);
 }
 // shared/light-effects.mjs
 var $p = {
@@ -16756,50 +16756,50 @@ var sm = class {
 	setStates(e) {
 		if (this.model) {
 			this.lastStates = e;
-			for (let [t, n] of this.fixtures) {
+			for (let [t, r] of this.fixtures) {
 				let i = e.get(t) || { on: !1 };
-				if (n.numberNodes.length) {
-					for (let e of n.numberNodes) h(e, i.value);
+				if (r.numberNodes.length) {
+					for (let e of r.numberNodes) h(e, i.value);
 					if (Number.isFinite(i.value)) {
-						let e = n.numberNodes[0].userData.numberMotion;
-						n.marker.position.y = n.markerRestY + (Math.max(e.min, Math.min(e.max, i.value)) - e.restValue) * e.metersPerUnit;
+						let e = r.numberNodes[0].userData.numberMotion;
+						r.marker.position.y = r.markerRestY + (Math.max(e.min, Math.min(e.max, i.value)) - e.restValue) * e.metersPerUnit;
 					}
-					n.marker.material.color.set(i.unavailable ? "#858b86" : "#c3dbab");
+					r.marker.material.color.set(i.unavailable ? "#858b86" : "#c3dbab");
 					continue;
 				}
-				if (n.type === "button") {
-					n.marker.material.color.set(i.unavailable ? "#858b86" : "#c3dbab");
+				if (r.type === "button") {
+					r.marker.material.color.set(i.unavailable ? "#858b86" : "#c3dbab");
 					continue;
 				}
-				if (n.type === "vacuum") {
-					n.vacuum?.setState(i), n.marker.material.color.set(i.unavailable ? "#858b86" : i.error ? "#d9654f" : "#c3dbab");
+				if (r.type === "vacuum") {
+					r.vacuum?.setState(i), r.marker.material.color.set(i.unavailable ? "#858b86" : i.error ? "#d9654f" : "#c3dbab");
 					continue;
 				}
-				if (n.type === "lock") {
-					for (let e of n.lockNodes) m(e, i.locked === !0);
-					n.marker.material.color.set(i.unavailable ? "#858b86" : i.jammed ? "#d9654f" : i.locked ? "#7fbf8a" : "#e2b45a");
+				if (r.type === "lock") {
+					for (let e of r.lockNodes) m(e, i.locked === !0);
+					r.marker.material.color.set(i.unavailable ? "#858b86" : i.jammed ? "#d9654f" : i.locked ? "#7fbf8a" : "#e2b45a");
 					continue;
 				}
-				if (n.type === "climate") {
-					let e = r(i);
-					n.marker.material.color.set(e.color);
-					for (let e of n.climateVisuals) e.setState(i);
-					n.climateVisuals.length || this.asset.traverse((n) => {
+				if (r.type === "climate") {
+					let e = n(i);
+					r.marker.material.color.set(e.color);
+					for (let e of r.climateVisuals) e.setState(i);
+					r.climateVisuals.length || this.asset.traverse((n) => {
 						n.userData.climateIndicator === t && n.material?.isMeshStandardMaterial && (n.material.emissive.set(e.color), n.material.emissiveIntensity = i.on && !i.unavailable ? 1 : 0);
 					});
 					continue;
 				}
-				if (n.type === "cover") {
-					for (let e of n.coverNodes) p(e, i.position ?? i.motionPosition);
-					n.marker.material.color.set(i.unavailable ? "#858b86" : "#c3dbab");
+				if (r.type === "cover") {
+					for (let e of r.coverNodes) p(e, i.position ?? i.motionPosition);
+					r.marker.material.color.set(i.unavailable ? "#858b86" : "#c3dbab");
 					continue;
 				}
-				let a = i.on ? (i.brightness ?? 255) / 255 : 0, o = i.rgb ? new X().setRGB(...i.rgb.map((e) => e / 255), tt) : n.light.color;
-				n.light.color.copy(o), n.light.intensity = n.base * a, n.lightBase = {
-					color: n.light.color.clone(),
+				let a = i.on ? (i.brightness ?? 255) / 255 : 0, o = i.rgb ? new X().setRGB(...i.rgb.map((e) => e / 255), tt) : r.light.color;
+				r.light.color.copy(o), r.light.intensity = r.base * a, r.lightBase = {
+					color: r.light.color.clone(),
 					amount: a
-				}, n.effectRun ||= am(), n.effectRun.report(i.effect, !!i.on && !i.unavailable, performance.now() / 1e3), n.marker.material.color.set(i.unavailable ? "#88908b" : i.on ? o : "#697b6d");
-				for (let [e, t] of n.mats) e.emissive.copy(o), e.emissiveIntensity = t * a;
+				}, r.effectRun ||= am(), r.effectRun.report(i.effect, !!i.on && !i.unavailable, performance.now() / 1e3), r.marker.material.color.set(i.unavailable ? "#88908b" : i.on ? o : "#697b6d");
+				for (let [e, t] of r.mats) e.emissive.copy(o), e.emissiveIntensity = t * a;
 			}
 			this.ambient.intensity = this.daylight ? .12 : this.options.mode === "dollhouse" ? this.model.ambient ?? .22 : Math.max(this.model.ambient ?? .22, .55);
 			for (let [e, t] of this.materials) e.color.copy(t).multiplyScalar(.5);
@@ -16858,10 +16858,10 @@ var sm = class {
 		return i ? i.point.toArray() : null;
 	}
 	coveredMarkers(e) {
-		let t = /* @__PURE__ */ new Set(), r = (this.asset?.children || []).filter((e) => e.userData.pickRoom && e.visible);
-		if (!this.model?.houseView || this.model.focusRoom || r.length < 2 || !e.length || !this.clipPlanes) return t;
+		let n = /* @__PURE__ */ new Set(), r = (this.asset?.children || []).filter((e) => e.userData.pickRoom && e.visible);
+		if (!this.model?.houseView || this.model.focusRoom || r.length < 2 || !e.length || !this.clipPlanes) return n;
 		let { clientWidth: i, clientHeight: a } = this.container;
-		if (!i || !a) return t;
+		if (!i || !a) return n;
 		let o = Math.max(1, Math.round(i >= a ? 384 : 384 * i / a)), s = Math.max(1, Math.round(i >= a ? 384 * a / i : 384));
 		this.coverTarget && this.coverTarget.width === o && this.coverTarget.height === s || (this.coverTarget?.dispose(), this.coverTarget = new dn(o, s, {
 			minFilter: C,
@@ -16902,7 +16902,7 @@ var sm = class {
 		let g = !!this.camera.isOrthographicCamera, _ = new K();
 		for (let { id: r, room: i, offset: a } of e) {
 			let e = this.fixtures.get(r), c = d.get(i);
-			if (!e || !c || (_.fromArray(n(e.marker.position.toArray(), a)).project(this.camera), Math.abs(_.x) > 1 || Math.abs(_.y) > 1 || _.z > 1)) continue;
+			if (!e || !c || (_.fromArray(t(e.marker.position.toArray(), a)).project(this.camera), Math.abs(_.x) > 1 || Math.abs(_.y) > 1 || _.z > 1)) continue;
 			let l = Math.min(o - 1, Math.max(0, Math.floor((_.x * .5 + .5) * o))), u = Math.min(s - 1, Math.max(0, Math.floor((_.y * .5 + .5) * s))), f = Bd(_.z, this.camera.near, this.camera.far, g), p = [];
 			for (let e = -1; e <= 1; e++) for (let t = -1; t <= 1; t++) {
 				let n = l + t, r = u + e;
@@ -16913,14 +16913,14 @@ var sm = class {
 					distance: Bd(a * 2 - 1, this.camera.near, this.camera.far, g)
 				});
 			}
-			Vd(p, c, f) && t.add(r);
+			Vd(p, c, f) && n.add(r);
 		}
-		return t;
+		return n;
 	}
-	fixtureScreenPosition(e, t) {
+	fixtureScreenPosition(e, n) {
 		let r = this.fixtures.get(e);
 		if (!r) return null;
-		let i = this.insideShownFloor(r.marker.position), a = new K().fromArray(n(r.marker.position.toArray(), t)).project(this.camera);
+		let i = this.insideShownFloor(r.marker.position), a = new K().fromArray(t(r.marker.position.toArray(), n)).project(this.camera);
 		return {
 			x: (a.x + 1) * this.container.clientWidth / 2,
 			y: (1 - a.y) * this.container.clientHeight / 2,

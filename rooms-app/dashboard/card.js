@@ -33,8 +33,35 @@ import {
 import { lockState } from "../shared/lock.mjs";
 import { vacuumRooms, vacuumState } from "../shared/vacuum.mjs";
 // Fallback robot-vacuum glyph for previews outside Home Assistant.
+// Material Design Icons mdi:robot-vacuum (Apache-2.0), Home Assistant's own.
 const VACUUM_ICON_PATH =
-  "M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm-5 4.5h10v2H7Zm5 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z";
+  "M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z";
+/**
+ * The marker's own glyph, inside its icon element: what the full-screen page
+ * shows when no icon is chosen for the current state (Home Assistant's
+ * dashboards draw their state icon over it). A chosen icon shows its curated
+ * path here while Home Assistant's icon loads.
+ */
+function markerGlyph(control, named) {
+  const inner = named
+    ? markerIconPath(named) || ""
+    : control.type === "climate"
+      ? AC_ICON_PATH
+      : control.type === "lock"
+        ? LOCK_ICON_PATH
+        : `<path d="${
+            control.type === "vacuum"
+              ? VACUUM_ICON_PATH
+              : control.type === "button"
+                ? "m8 4 12 8-12 8Z"
+                : control.type === "number"
+                  ? "M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"
+                  : control.type !== "light"
+                    ? "M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"
+                    : "M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"
+          }"/>`;
+  return `<svg viewBox="0 0 24 24">${inner}</svg>`;
+}
 import { subscribeUpdates } from "./updates.mjs";
 import {
   customEntityDefaultIcon,
@@ -467,6 +494,7 @@ export class ThreeDRoomsCard extends HTMLElement {
   }
   set hass(hass) {
     this._hass = hass;
+    this._robotDialog?.update();
     if (!this._config || !this.isConnected) return;
     if (this._reload || !this._view) {
       if (!this._loading) this._load();
@@ -533,6 +561,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     if (this._hass && this._config) this._load();
   }
   disconnectedCallback() {
+    this._robotDialog?.close();
     document.removeEventListener("pointerdown", this._outsidePanel, true);
     this._setReloadMenu(false);
     this._layout?.dispose();
@@ -1812,21 +1841,8 @@ export class ThreeDRoomsCard extends HTMLElement {
       if (customIcon) icon.icon = customIcon;
       icon.setAttribute("aria-hidden", "true");
       // Light-DOM fallback for previews outside HA; HA draws every mdi: name itself.
-      icon.innerHTML = customIcon
-        ? `<svg viewBox="0 0 24 24">${markerIconPath(customIcon) || ""}</svg>`
-        : control.type === "climate"
-          ? `<svg viewBox="0 0 24 24">${AC_ICON_PATH}</svg>`
-          : control.type === "lock"
-            ? `<svg viewBox="0 0 24 24">${LOCK_ICON_PATH}</svg>`
-            : control.type === "vacuum"
-              ? `<svg viewBox="0 0 24 24">${VACUUM_ICON_PATH}</svg>`
-              : control.type === "button"
-                ? '<svg viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></svg>'
-                : control.type === "number"
-                  ? '<svg viewBox="0 0 24 24"><path d="M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z"/></svg>'
-                  : control.type !== "light"
-                    ? '<svg viewBox="0 0 24 24"><path d="M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"/></svg>'
-                    : '<svg viewBox="0 0 24 24"><path d="M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z"/></svg>';
+      icon.innerHTML = markerGlyph(control, customIcon);
+      icon.dataset.glyph = customIcon || "";
       const badge = document.createElement("span");
       badge.className = "fixture-state";
       badge.setAttribute("aria-hidden", "true");
@@ -2908,6 +2924,10 @@ export class ThreeDRoomsCard extends HTMLElement {
       return;
     }
     const entityId = this._panelModel.bindings[id];
+    if (!this._preview && entityId && control.type === "vacuum") {
+      this._vacuumDialog(control, entityId);
+      return;
+    }
     if (!this._preview && entityId) {
       this.dispatchEvent(
         new CustomEvent("hass-more-info", {
@@ -3286,6 +3306,26 @@ export class ThreeDRoomsCard extends HTMLElement {
     this.shadowRoot.append(dialog);
     dialog.showModal();
   }
+  /**
+   * A robot vacuum always opens this card's own dialog, on dashboards and
+   * the full-screen page alike: Home Assistant's vacuum controls plus the
+   * extra entities chosen for it in 3D Rooms (mop mode, dock, maintenance).
+   */
+  async _vacuumDialog(control, entityId) {
+    const { openMoreInfo } = await import("./more-info.mjs");
+    this._robotDialog?.close();
+    const dialog = openMoreInfo({
+      host: this.shadowRoot,
+      getHass: () => this._hass,
+      entityId,
+      extras: (control.entities || []).filter((id) => id !== entityId),
+      onError: (error) => console.error(error),
+    });
+    this._robotDialog = dialog;
+    dialog.dialog.addEventListener("close", () => {
+      if (this._robotDialog === dialog) this._robotDialog = null;
+    });
+  }
   /** Preview (no Home Assistant): play the robot's states in the room. */
   _vacuumPreview(control) {
     this._dialog?.remove();
@@ -3461,6 +3501,12 @@ export class ThreeDRoomsCard extends HTMLElement {
           appearance.active,
         );
         if (icon.icon !== named) icon.icon = named;
+        // Keep the fallback glyph in step: a state left on Default must show
+        // the device's glyph even when the other state has its own icon.
+        if ((icon.dataset.glyph ?? "") !== (named || "")) {
+          icon.innerHTML = markerGlyph(control, named);
+          icon.dataset.glyph = named || "";
+        }
       }
       button.querySelector(".fixture-state").textContent = appearance.badge;
     }

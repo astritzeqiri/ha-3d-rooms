@@ -7,8 +7,11 @@ import {
   coverIcon,
   hsToRgb,
   sinceText,
+  entityRow,
+  entityRowCall,
 } from "./more-info-model.mjs";
 import { kelvinToRgb } from "../shared/light.mjs";
+import { customEntityDefaultIcon } from "../shared/custom-entities.mjs";
 import {
   VACUUM_STATUS_CSS,
   VACUUM_STATUS_SVG,
@@ -195,6 +198,33 @@ dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
 .mi-attrs dd{margin:0;text-align:right;overflow-wrap:anywhere}
 .mi-error{margin:12px 0 0;color:#db4437;text-align:center}
 
+/* a device's extra entities, as rows on Home Assistant's device page */
+.mi-extras{display:grid;gap:12px;width:100%;margin-top:8px}
+.mi-extras{gap:0;margin-top:16px;border-top:1px solid var(--mi-line)}
+.mi-extra-section{border-bottom:1px solid var(--mi-line)}
+.mi-extra-section summary{display:flex;align-items:center;gap:8px;min-height:48px;font-weight:500;cursor:pointer;list-style:none}
+.mi-extra-section summary::-webkit-details-marker{display:none}
+.mi-extra-section summary>span:first-child{flex:1}
+.mi-extra-count{min-width:22px;padding:0 7px;border-radius:11px;background:var(--mi-surface-2);color:var(--mi-muted);font-size:12px;line-height:20px;text-align:center}
+.mi-extra-section summary svg{transition:transform .2s}
+.mi-extra-section[open] summary svg{transform:rotate(180deg)}
+.mi-extra-section[open]{padding-bottom:8px}
+.mi-row{display:flex;align-items:center;gap:14px;min-height:48px}
+.mi-row-icon{flex-shrink:0;width:24px;height:24px;--mdc-icon-size:24px;color:var(--mi-muted)}
+.mi-row-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi-row[data-unavailable=true] .mi-row-name{color:var(--mi-muted)}
+.mi-row-ctl{display:flex;align-items:center;gap:8px;flex-shrink:0;max-width:55%}
+.mi-row-value{color:var(--mi-fg);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi-row-ctl .mi-row-value{color:var(--mi-muted)}
+.mi-row-ctl>.mi-row-value:only-child{color:var(--mi-fg)}
+.mi-row-select,.mi-row-time{min-height:40px;max-width:100%;padding:0 10px;border:0;border-radius:10px;background:var(--mi-surface-2);color:var(--mi-fg);font:inherit}
+.mi-row-range{width:120px;accent-color:var(--mi-primary)}
+.mi .mi-row-press{min-height:36px;padding:0 14px;border:0;border-radius:18px;background:transparent;color:var(--mi-primary);font:500 14px Roboto,system-ui,sans-serif;cursor:pointer}
+.mi-row-press:hover{background:var(--mi-surface-2)}
+.mi .mi-row-switch{position:relative;width:40px;height:24px;min-height:0;padding:0;border:0;border-radius:12px;background:var(--mi-surface-2);cursor:pointer}
+.mi-row-switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}
+.mi-row-switch[aria-checked=true]{background:var(--mi-primary)}
+.mi-row-switch[aria-checked=true]::after{left:19px}
 /* robot vacuum, as Home Assistant's more-info-vacuum */
 .mi-vac-head{position:relative;width:100%}
 .mi-vac-head .mi-vac-battery{position:absolute;right:0;bottom:2px;display:inline-flex;align-items:center;gap:4px;color:var(--mi-muted);font-size:14px}
@@ -420,7 +450,38 @@ function round(doc, icon, label, onClick, pressed) {
  * Opens the pop-up for one entity. `getHass()` returns the latest hass object;
  * call `update()` after state changes. Returns `{ update, close, dialog }`.
  */
-export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
+/**
+ * The icon Home Assistant would show for an entity row, for the full-screen
+ * page (its icon element knows only named icons): the shared per-type list,
+ * plus a few classes and kinds that list leaves out.
+ */
+function rowIcon(entity, row) {
+  const cls = entity?.attributes?.device_class;
+  return (
+    {
+      battery_charging: "mdi:battery-charging",
+      duration: "mdi:timer-outline",
+      connectivity: "mdi:check-network-outline",
+      problem: "mdi:alert-circle-outline",
+      area: "mdi:texture-box",
+      running: "mdi:play-circle-outline",
+    }[cls] ||
+    { time: "mdi:clock-outline", input_datetime: "mdi:clock-outline" }[
+      row?.domain
+    ] ||
+    customEntityDefaultIcon(row?.id, entity)
+  );
+}
+
+export function openMoreInfo({
+  host,
+  getHass,
+  entityId,
+  onError = () => {},
+  // A device's extra entities (a robot vacuum's mop mode, dock, …), listed
+  // under its controls in the order given.
+  extras = [],
+}) {
   const doc = host.ownerDocument;
   const dialog = h(doc, "dialog", "mi");
   dialog.setAttribute("aria-labelledby", "mi-title");
@@ -1659,6 +1720,165 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
     main.append(head, art, row);
     if (chips.childElementCount) main.append(chips);
     root.append(main);
+    // ---- the device's extra entities, grouped as on its device page ----
+    const extrasEl = h(doc, "div", "mi-extras");
+    let categories = {};
+    // Sections start folded, like Attributes; ones opened stay open.
+    const opened = new Set();
+    const rowEls = new Map();
+    const categoryOf = (id) =>
+      getHass().entities?.[id]?.entity_category ?? categories[id] ?? null;
+    const prefix = () =>
+      getHass().states?.[entityId]?.attributes?.friendly_name || "";
+    const sendRow = async (row, value) => {
+      try {
+        showError("");
+        const [domain, service, data] = entityRowCall(row, value);
+        await getHass().callService(domain, service, data);
+      } catch (error) {
+        showError(error?.message || "The command failed.");
+        onError(error);
+      }
+    };
+    function buildExtras() {
+      extrasEl.replaceChildren();
+      rowEls.clear();
+      if (!extras.length) return;
+      const groups = [
+        [null, "Controls"],
+        ["config", "Configuration"],
+        ["diagnostic", "Diagnostic"],
+      ];
+      for (const [category, label] of groups) {
+        const ids = extras.filter(
+          (id) => (categoryOf(id) || null) === category,
+        );
+        if (!ids.length) continue;
+        const section = h(
+          doc,
+          "details",
+          "mi-extra-section",
+          `<summary><span></span><span class="mi-extra-count">${ids.length}</span>${svg("chevron")}</summary>`,
+        );
+        section.querySelector("summary span").textContent = label;
+        section.open = opened.has(label);
+        section.addEventListener("toggle", () => {
+          if (section.open) opened.add(label);
+          else opened.delete(label);
+        });
+        for (const id of ids) {
+          const el = h(
+            doc,
+            "div",
+            "mi-row",
+            `<ha-state-icon class="mi-row-icon"></ha-state-icon><span class="mi-row-name"></span><span class="mi-row-ctl"></span>`,
+          );
+          section.append(el);
+          rowEls.set(id, { el, kind: null });
+        }
+        extrasEl.append(section);
+      }
+      syncExtras();
+    }
+    function syncExtras() {
+      const hass = getHass();
+      for (const [id, slot] of rowEls) {
+        const entity = hass.states?.[id],
+          row = entityRow(entity, { prefix: prefix() }),
+          { el } = slot,
+          icon = el.querySelector("ha-state-icon"),
+          ctl = el.querySelector(".mi-row-ctl");
+        icon.hass = hass;
+        // The full-screen page's icon element knows only named icons; give
+        // it the one Home Assistant uses for this kind of entity.
+        icon.dataset.defaultIcon = rowIcon(entity, row);
+        if (entity) icon.stateObj = entity;
+        el.querySelector(".mi-row-name").textContent = row.name;
+        el.dataset.unavailable = String(row.unavailable);
+        const kind = row.unavailable ? "value" : row.kind;
+        // Rebuild the control only when its kind changes, so a control in
+        // use (an open select, a dragged slider) is not replaced under the finger.
+        if (
+          slot.kind !== kind ||
+          (kind === "select" && slot.options !== row.options.join("|"))
+        ) {
+          slot.kind = kind;
+          slot.options = row.options?.join("|");
+          ctl.replaceChildren();
+          if (kind === "toggle") {
+            const b = h(doc, "button", "mi-row-switch");
+            b.type = "button";
+            b.setAttribute("role", "switch");
+            b.onclick = () => {
+              const current = entityRow(getHass().states?.[id]);
+              sendRow(current, !current.on);
+            };
+            ctl.append(b);
+          } else if (kind === "select") {
+            const select = h(doc, "select", "mi-row-select");
+            for (const option of row.options) {
+              const o = h(doc, "option");
+              o.value = option;
+              o.textContent = cap(option);
+              select.append(o);
+            }
+            select.onchange = () =>
+              sendRow(entityRow(getHass().states?.[id]), select.value);
+            ctl.append(select);
+          } else if (kind === "number") {
+            const range = h(doc, "input", "mi-row-range");
+            range.type = "range";
+            const out = h(doc, "output", "mi-row-value");
+            range.oninput = () => {
+              out.textContent = `${range.value}${row.unit === "%" ? "%" : row.unit ? ` ${row.unit}` : ""}`;
+            };
+            range.onchange = () =>
+              sendRow(entityRow(getHass().states?.[id]), range.value);
+            ctl.append(range, out);
+          } else if (kind === "button") {
+            const b = h(doc, "button", "mi-row-press", "Press");
+            b.type = "button";
+            b.onclick = () => sendRow(entityRow(getHass().states?.[id]));
+            ctl.append(b);
+          } else if (kind === "time") {
+            const input = h(doc, "input", "mi-row-time");
+            input.type = "time";
+            input.onchange = () =>
+              sendRow(entityRow(getHass().states?.[id]), input.value);
+            ctl.append(input);
+          } else ctl.append(h(doc, "span", "mi-row-value"));
+        }
+        const label = `${row.name}`;
+        if (kind === "toggle") {
+          const b = ctl.firstChild;
+          b.setAttribute("aria-checked", String(row.on));
+          b.setAttribute("aria-label", label);
+        } else if (kind === "select") {
+          const select = ctl.firstChild;
+          select.setAttribute("aria-label", label);
+          if (doc.activeElement !== select) {
+            // "unknown" shows as an empty choice, as Home Assistant does.
+            select.value = row.options.includes(row.value) ? row.value : "";
+            if (!row.options.includes(row.value)) select.selectedIndex = -1;
+          }
+        } else if (kind === "number") {
+          const [range, out] = ctl.children;
+          Object.assign(range, { min: row.min, max: row.max, step: row.step });
+          range.setAttribute("aria-label", label);
+          if (doc.activeElement !== range && row.value !== undefined)
+            range.value = row.value;
+          out.textContent = `${row.value ?? "—"}${row.unit === "%" ? "%" : row.unit ? ` ${row.unit}` : ""}`;
+        } else if (kind === "button") {
+          ctl.firstChild.setAttribute("aria-label", `Press ${label}`);
+        } else if (kind === "time") {
+          const input = ctl.firstChild;
+          input.setAttribute("aria-label", label);
+          if (doc.activeElement !== input) input.value = row.value;
+        } else ctl.firstChild.textContent = row.value;
+      }
+    }
+    if (extras.length) main.append(extrasEl);
+    buildExtras();
 
     // ---- clean by area (Home Assistant's clean-areas view) ----
     const areasView = h(doc, "div", "mi-vac-areas");
@@ -1784,6 +2004,15 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
       .callWS?.({ type: "config/entity_registry/list_for_display" })
       .then((registry) => {
         const entries = registry?.entities || [];
+        // Entity categories for grouping the extra entities (frontend
+        // pages already have them in hass.entities).
+        const names = registry?.entity_categories || {};
+        categories = Object.fromEntries(
+          entries
+            .filter((e) => e.ec !== undefined && names[e.ec])
+            .map((e) => [e.ei, names[e.ec]]),
+        );
+        if (extras.length) buildExtras();
         const device = entries.find((e) => e.ei === entityId)?.di;
         if (!device) return;
         const siblings = entries
@@ -1854,6 +2083,7 @@ export function openMoreInfo({ host, getHass, entityId, onError = () => {} }) {
       if (fanChip)
         fanChip.querySelector(".mi-vac-chip-value").textContent =
           cap(control.fanSpeed) || "—";
+      syncExtras();
     };
     return sync;
   }
