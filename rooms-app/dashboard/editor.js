@@ -61,6 +61,8 @@ export class ThreeDRoomsEditor extends HTMLElement {
     <label class="check"><input id="edit_button" type="checkbox">Show the Edit button to administrators (opens this view in the 3D Rooms editor)</label>
     <label class="check"><input id="light_panel" type="checkbox">Show the Lights button (each room's lights, with one switch per room)</label>
     <label class="check"><input id="shade_panel" type="checkbox">Show the Shades button (each room's shades, with one switch per room)</label>
+    <label class="check"><input id="summary" type="checkbox">Show the at-a-glance bar (lights on, doors open, locks, anything busy)</label>
+    <label class="check"><input id="spread_icons" type="checkbox">Move icons that overlap apart (a dot and line mark their real spot)</label>
     <label class="check" id="room-focus-setting" hidden><input id="room_focus" type="checkbox">Show a button in front of each room to view that room on its own</label>
     <label class="check" id="floor-selector-setting" hidden><input id="floor_selector" type="checkbox">Show floor switcher (whole house or one floor)</label>
     <label>Background<select id="background">${BACKGROUNDS.map((id) => `<option value="${id}">${BACKGROUND_LABELS[id]}</option>`).join("")}</select></label>
@@ -141,6 +143,13 @@ export class ThreeDRoomsEditor extends HTMLElement {
       else config.floor_plan_button = false;
       this._emit(config);
     };
+    for (const key of ["summary", "spread_icons"])
+      this._field(key).onchange = () => {
+        const config = { ...this._config };
+        if (this._field(key).checked) delete config[key];
+        else config[key] = false;
+        this._emit(config);
+      };
     this._field("shade_panel").onchange = () => {
       const config = { ...this._config };
       if (this._field("shade_panel").checked) delete config.shade_panel;
@@ -378,6 +387,8 @@ export class ThreeDRoomsEditor extends HTMLElement {
     this._field("light_panel").checked = this._config.light_panel !== false;
     this._field("edit_button").checked = this._config.edit_button !== false;
     this._field("shade_panel").checked = this._config.shade_panel !== false;
+    this._field("summary").checked = this._config.summary !== false;
+    this._field("spread_icons").checked = this._config.spread_icons !== false;
     const background = resolved.background || DEFAULT_BACKGROUND;
     this._field("background").value = background;
     this._field("background-image-setting").hidden = background !== "image";

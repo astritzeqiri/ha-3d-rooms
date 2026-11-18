@@ -1,3 +1,12 @@
+## 0.57.0
+
+- **The house no longer disappears.** Sometimes only the window panes and icons were drawn: after the card prepared the other floor and room views in the background, a light could be left casting a shadow that had not been drawn yet, and the graphics card then refused to draw every wall and floor. Shadows are now redrawn whenever a light is missing one. The number of shadow-casting lights also stays within what the graphics card can link (window daylight counts too), with fewer shadows as a fallback if a shader still fails.
+- **At-a-glance bar.** House and floor views show what's on at the top: lights on, doors and windows open, whether it is locked, and a robot or AC that is busy. A tap opens the Lights panel or that device. `summary: false` (or the editor's checkbox) hides it.
+- **Icons no longer sit on top of each other.** Icons that would overlap move apart a little, and a dot with a thin line marks where each really is; icons that don't touch never move. `spread_icons: false` turns this off.
+- **Holding an icon shows a ring** that fills until its details open, and the first few times you switch a light the undo message adds "Tip: hold an icon for its details". Tapping still switches.
+- **Room buttons no longer switch the room's lights when held** (use the Lights panel); a tap opens the room as before.
+- **Full-screen page icons:** cameras, alarms and other extra entities no longer stay a plain "i". Home Assistant's icon tables are now asked for one integration at a time, with a time limit.
+
 ## 0.56.0
 
 - **Swipe down to close works on every dialog on a phone**, including the desk's, and the nested code keypad. The desk dialog also opens without a focus ring on its close button.

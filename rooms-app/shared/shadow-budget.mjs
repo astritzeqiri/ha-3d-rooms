@@ -1,9 +1,26 @@
 /** Keep shadow samplers within the GPU's per-fragment texture limit.
  * Lights without a shadow map still illuminate the room and remain controllable.
  * `maxPasses` optionally limits shadow render passes for slower GPUs.
+ * `maxVaryings` (the GPU's MAX_VARYING_VECTORS) keeps the shaders linkable:
+ * every shadow-casting light adds one vec4 the vertex shader hands to the
+ * fragment shader, beside the material's own (one per texture map at worst).
+ * Over the limit the lit materials fail to link and walls and floors vanish,
+ * leaving only unlit window panes. `maxLights` caps the count outright.
  * Call once after adding the asset, fixture lights and daylight sources.
  */
-export function applyShadowBudget(scene, maxTextures, maxPasses = Infinity) {
+// Varyings every lit material uses besides its maps' UVs and the shadow
+// coordinates: view position, normal, tangent frame, world position, colour,
+// fog depth, clipping, plus what the browser's GL layer adds itself. Measured:
+// with 31 vectors and 4-map materials, 17 shadow lights draw and 19 draw
+// nothing, without any error. 12 keeps a margin for other drivers.
+const VARYING_RESERVE = 12;
+
+export function applyShadowBudget(
+  scene,
+  maxTextures,
+  maxPasses = Infinity,
+  { maxVaryings = Infinity, maxLights = Infinity } = {},
+) {
   let materialTextures = 0;
   const lights = [];
   scene.traverse((object) => {
@@ -20,7 +37,14 @@ export function applyShadowBudget(scene, maxTextures, maxPasses = Infinity) {
     }
   });
   // Leave room for renderer-provided environment/transmission textures.
-  const budget = Math.max(0, Math.floor(maxTextures) - materialTextures - 2);
+  const budget = Math.max(
+    0,
+    Math.min(
+      Math.floor(maxTextures) - materialTextures - 2,
+      Math.floor(maxVaryings) - VARYING_RESERVE - materialTextures,
+      maxLights,
+    ),
+  );
   // Window shadows prevent daylight leaking through walls; then prefer stronger fixtures.
   lights.sort(
     (a, b) =>

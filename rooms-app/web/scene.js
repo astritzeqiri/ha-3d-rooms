@@ -449,6 +449,17 @@ export class SceneView {
     this.renderSuspended = true;
     try {
       await this.compileShown();
+      // A GPU that cannot link this many shadow lights draws nothing lit
+      // (only window panes and icons): drop shadows until it links.
+      while (
+        generation === this.generation &&
+        this.shadowLights > 0 &&
+        this.hasBrokenShaders()
+      ) {
+        this.lowerShadowLimit(this.shadowLights);
+        this.applyHouseScope();
+        await this.compileShown();
+      }
     } finally {
       // A newer scene's compile owns the suspension now.
       if (this.compiling === compiling) {
@@ -470,6 +481,40 @@ export class SceneView {
       performance.now() - compiled,
     );
     return true;
+  }
+  /**
+   * True when a shown material's shader failed to link (it then draws
+   * nothing). Asking a program for its uniforms runs three's link check.
+   */
+  hasBrokenShaders() {
+    let broken = false;
+    this.scene.traverseVisible((object) => {
+      if (broken || !object.isMesh) return;
+      for (const material of Array.isArray(object.material)
+        ? object.material
+        : [object.material]) {
+        const program =
+          material && this.renderer.properties.get(material).currentProgram;
+        if (!program) continue;
+        try {
+          program.getUniforms();
+        } catch {
+          /* A lost context: nothing to check. */
+        }
+        if (program.diagnostics && !program.diagnostics.runnable) broken = true;
+      }
+    });
+    return broken;
+  }
+  /** Allow fewer shadow-casting lights than `failedAt` from now on. */
+  lowerShadowLimit(failedAt) {
+    const limit = Math.max(
+      0,
+      Math.min(failedAt - 2, Math.floor(failedAt * 0.75)),
+    );
+    this.shadowLimit = Math.min(this.shadowLimit ?? Infinity, limit);
+    if (this.renderer.domElement)
+      this.renderer.domElement.dataset.shadowLimit = this.shadowLimit;
   }
   /** Compile the shaders of what is shown; never rejects. */
   async compileShown() {
@@ -513,11 +558,17 @@ export class SceneView {
     this.daylight?.group.traverse((o) => {
       if (o.isSpotLight) o.castShadow = true;
     });
+    const gl = this.renderer.getContext?.();
     const shadows = applyShadowBudget(
       this.scene,
       this.renderer.capabilities.maxTextures,
       this.profile?.shadowPasses,
+      {
+        maxVaryings: gl?.getParameter(gl.MAX_VARYING_VECTORS) || Infinity,
+        maxLights: this.shadowLimit ?? Infinity,
+      },
     );
+    this.shadowLights = shadows.shadowLights;
     capShadowMapSize(this.scene, this.profile?.shadowMapSize);
     if (this.renderer.domElement)
       this.renderer.domElement.dataset.shadowLights = shadows.shadowLights;
@@ -833,13 +884,14 @@ export class SceneView {
     if (pending) return pending;
     const current = this.model,
       shadowsCurrent = this.shadowsCurrent;
-    let compiled;
+    let compiled, viewShadows;
     this.renderSuspended = true;
     try {
       // Show the view's lights and rooms for the length of the compile call
       // only; nothing is drawn in between.
       this.model = model;
       this.applyHouseScope();
+      viewShadows = this.shadowLights;
       // three compiles every material of the object it is given, shown or
       // not; hand it only what this view shows (lights come from the scene).
       const shown = {
@@ -862,6 +914,13 @@ export class SceneView {
       .then(() => {
         // The scene was replaced meanwhile: these shaders are not its own.
         if (views !== this.preparedViews) return false;
+        if (viewShadows > 0 && this.hasBrokenShaders()) {
+          // Too many shadow lights for this GPU in that view: lower the
+          // limit and prepare it again with fewer.
+          this.lowerShadowLimit(viewShadows);
+          views.delete(key);
+          return this.prepareHouseView(model);
+        }
         views.set(key, true);
         return true;
       });
@@ -1682,17 +1741,33 @@ export class SceneView {
       const lights = this.applyLightEffects(performance.now() / 1000);
       if (!lights && !effects.some((effect) => effect.animating)) {
         // The last effect just ended: draw the lights' plain look once.
-        this.renderer.shadowMap.needsUpdate ||= !this.shadowsCurrent;
+        this.renderer.shadowMap.needsUpdate ||= !this.shadowsReady();
         this.renderer.render(this.scene, this.camera);
         return;
       }
       for (const effect of effects) effect.update(time / 1000);
       // Climate effects cast no shadows; keep any pending shadow refresh.
-      this.renderer.shadowMap.needsUpdate ||= !this.shadowsCurrent;
+      this.renderer.shadowMap.needsUpdate ||= !this.shadowsReady();
       this.renderer.render(this.scene, this.camera);
       this.climateFrame = requestAnimationFrame(tick);
     };
     this.climateFrame = requestAnimationFrame(tick);
+  }
+  /**
+   * True when the last shadow maps can be reused: they are current and every
+   * shown light that casts a shadow has one. A light that starts casting
+   * without a map (a view prepared in the background, a new shadow budget)
+   * makes the GPU reject every draw that samples it, and the walls and floors
+   * vanish until shadows are drawn again.
+   */
+  shadowsReady() {
+    if (!this.shadowsCurrent) return false;
+    let ready = true;
+    this.scene.traverseVisible((object) => {
+      if (ready && object.isLight && object.castShadow && !object.shadow?.map)
+        ready = false;
+    });
+    return ready;
   }
   /** `cameraOnly` renders that follow camera movement reuse the last shadow maps. */
   render({ cameraOnly = false } = {}) {
@@ -1742,7 +1817,7 @@ export class SceneView {
         );
       });
     } else {
-      this.renderer.shadowMap.needsUpdate = !cameraOnly || !this.shadowsCurrent;
+      this.renderer.shadowMap.needsUpdate = !cameraOnly || !this.shadowsReady();
       this.renderer.render(this.scene, this.camera);
       this.shadowsCurrent = true;
     }

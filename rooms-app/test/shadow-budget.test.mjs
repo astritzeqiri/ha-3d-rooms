@@ -47,3 +47,31 @@ test("small rooms retain all shadows and limited GPUs remain within capacity", (
     assert.equal(result.shadowLights, Math.min(3, capacity - 2));
   }
 });
+
+test("shadow lights stay within the GPU's varying vectors so lit materials still link", () => {
+  const scene = new THREE.Scene();
+  const texture = new THREE.Texture();
+  scene.add(
+    new THREE.Mesh(
+      new THREE.BoxGeometry(),
+      new THREE.MeshPhysicalMaterial({ map: texture, normalMap: texture }),
+    ),
+  );
+  for (let i = 0; i < 26; i++) {
+    const light = i < 14 ? new THREE.PointLight() : new THREE.SpotLight();
+    light.castShadow = true;
+    scene.add(light);
+  }
+  // 32 texture units would allow 28; 31 varyings minus 8 reserved minus
+  // one per map leaves 17.
+  assert.equal(
+    applyShadowBudget(scene, 32, Infinity, { maxVaryings: 31 }).shadowLights,
+    17,
+  );
+  // A limit learned from a failed link wins.
+  assert.equal(
+    applyShadowBudget(scene, 32, Infinity, { maxVaryings: 31, maxLights: 9 })
+      .shadowLights,
+    9,
+  );
+});

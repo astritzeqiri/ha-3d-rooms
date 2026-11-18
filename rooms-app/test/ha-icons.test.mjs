@@ -102,16 +102,19 @@ test("Home Assistant's icon order: own icon, integration, code, domain, fallback
   assert.equal(FALLBACK_DOMAIN_ICONS.time, "mdi:clock");
 });
 
-test("icon tables are asked for once, and per integration only when needed", async () => {
+test("icon tables are asked for once per integration, only when needed", async () => {
   const asked = [];
   const connection = {
     sendMessagePromise: async (message) => {
-      asked.push(`${message.category}:${message.integration || ""}`);
+      asked.push(`${message.category}:${message.integration.join()}`);
+      const [name] = message.integration;
       return {
-        resources:
-          message.category === "entity_component"
-            ? COMPONENT
-            : { roborock: PLATFORM },
+        resources: {
+          [name]:
+            message.category === "entity_component"
+              ? COMPONENT[name]
+              : PLATFORM,
+        },
       };
     },
   };
@@ -132,5 +135,25 @@ test("icon tables are asked for once, and per integration only when needed", asy
     await source.iconFor(state("select.saros_10r_mop_mode", "deep")),
     "mdi:waves",
   );
-  assert.deepEqual(asked, ["entity_component:", "entity:roborock"]);
+  assert.deepEqual(asked, [
+    "entity_component:light",
+    "entity_component:select",
+    "entity:roborock",
+  ]);
+});
+
+test("an icon table that never arrives falls back to the built-in icons", async () => {
+  let pending;
+  const timers = {
+    setTimeout(fn) {
+      pending = fn;
+      return 1;
+    },
+    clearTimeout() {},
+  };
+  const connection = { sendMessagePromise: () => new Promise(() => {}) };
+  const source = createEntityIconSource(connection, null, { timers });
+  const icon = source.iconFor(state("camera.demo", "idle"));
+  pending();
+  assert.equal(await icon, pickEntityIcon(state("camera.demo", "idle")));
 });

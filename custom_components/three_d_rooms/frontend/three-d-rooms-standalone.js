@@ -3256,21 +3256,22 @@ function pt(e, { entry: t, platform: n, component: r, state: i = e?.state } = {}
 	let s;
 	return t?.tk && n && (s = dt(i, n[a]?.[t.tk])), s ||= ft(e, i), !s && r && (s = dt(i, o.device_class && r[o.device_class] || r._)), s || lt[a] || "mdi:bookmark";
 }
-function mt(e, t) {
-	let n = new Map((t?.entities || []).filter((e) => e.ei).map((e) => [e.ei, e])), r = (t, n) => e.sendMessagePromise({
-		type: "frontend/get_icons",
-		category: t,
-		...n ? { integration: n } : {}
-	}).then((e) => e?.resources || {}).catch(() => ({})), i, a = /* @__PURE__ */ new Map();
+function mt(e, t, { timeoutMs: n = 4e3, timers: r = globalThis } = {}) {
+	let i = new Map((t?.entities || []).filter((e) => e.ei).map((e) => [e.ei, e])), a = (t, i) => new Promise((a) => {
+		let o = r.setTimeout(() => a({}), n);
+		e.sendMessagePromise({
+			type: "frontend/get_icons",
+			category: t,
+			integration: [i]
+		}).then((e) => a(e?.resources?.[i] || {}), () => a({})).finally(() => r.clearTimeout(o));
+	}), o = /* @__PURE__ */ new Map(), s = /* @__PURE__ */ new Map(), c = (e, t, n) => (e.has(n) || e.set(n, a(t, n)), e.get(n));
 	return { async iconFor(e) {
 		if (!e?.entity_id) return;
-		let t = n.get(e.entity_id), o = e.entity_id.split(".")[0];
-		i ||= r("entity_component"), t?.pl && t.tk && !a.has(t.pl) && a.set(t.pl, r("entity", t.pl).then((e) => e[t.pl]));
-		let [s, c] = await Promise.all([i.then((e) => e[o]), t?.pl ? a.get(t.pl) : void 0]);
+		let t = i.get(e.entity_id), n = e.entity_id.split(".")[0], [r, a] = await Promise.all([c(o, "entity_component", n), t?.pl && t.tk ? c(s, "entity", t.pl) : void 0]);
 		return pt(e, {
 			entry: t,
-			platform: c,
-			component: s
+			platform: a,
+			component: r
 		});
 	} };
 }

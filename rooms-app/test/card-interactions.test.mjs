@@ -968,7 +968,7 @@ test("room buttons focus one room in place and go back to the house or floor", (
   assert.equal(card._roomTags.children.length, 0);
 });
 
-test("room buttons count the room's lights that are on and a long press switches them", async () => {
+test("room buttons count the room's lights that are on; a tap opens the room", async () => {
   const card = cardHarness();
   const calls = [];
   card._config = {};
@@ -1021,8 +1021,7 @@ test("room buttons count the room's lights that are on and a long press switches
     true,
     "no lights: no count",
   );
-  assert.match(office.title, /hold to switch its lights/);
-  assert.doesNotMatch(hall.title, /hold/);
+  assert.doesNotMatch(office.title, /hold/);
   // Hovering outlines the room.
   office.listeners.pointerenter({ pointerType: "mouse" });
   office.listeners.pointerenter({ pointerType: "touch" });
@@ -1031,29 +1030,12 @@ test("room buttons count the room's lights that are on and a long press switches
     ["outline", "office"],
     ["outline", null],
   ]);
-  // A short tap opens the room (here: nothing loaded, so it does nothing),
-  // holding switches the lights: one is on, so all turn off.
+  // A tap opens the room; there is no hold gesture (the Lights panel
+  // switches a room's lights).
   card._focusRoom = (room) => calls.push(["focus", room]);
   office.onclick();
   assert.deepEqual(calls.splice(0), [["focus", "office"]]);
-  office.listeners.pointerdown({ button: 0, clientX: 5, clientY: 5 });
-  assert.equal(office.dataset.pressing, "true");
-  assert.equal(typeof timers.fn, "function");
-  // Moving away cancels the hold.
-  office.listeners.pointermove({ clientX: 60, clientY: 5 });
-  assert.equal(timers.fn, null);
-  assert.equal(office.dataset.pressing, undefined);
-  office.listeners.pointerdown({ button: 0, clientX: 5, clientY: 5 });
-  timers.fn();
-  await new Promise((resolve) => setImmediate(resolve));
-  assert.deepEqual(calls.splice(0), [
-    ["light", "turn_off", { entity_id: ["light.a", "light.b"] }],
-  ]);
-  // The click that ends a hold does not also open the room.
-  office.onclick();
-  assert.deepEqual(calls, []);
-  office.onclick();
-  assert.deepEqual(calls, [["focus", "office"]]);
+  assert.equal(office.listeners.pointerdown, undefined);
 });
 
 test("in a room, previous and next go to the neighbouring rooms and wrap round", () => {

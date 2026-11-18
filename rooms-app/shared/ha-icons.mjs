@@ -154,35 +154,50 @@ export function pickEntityIcon(
  * Loads Home Assistant's icon tables over `connection` once (and each
  * integration's when first needed); `iconFor(stateObj)` resolves to a name.
  */
-export function createEntityIconSource(connection, registry) {
+export function createEntityIconSource(
+  connection,
+  registry,
+  { timeoutMs = 4000, timers = globalThis } = {},
+) {
   const entries = new Map(
     (registry?.entities || []).filter((e) => e.ei).map((e) => [e.ei, e]),
   );
+  // One integration per request: asking for every integration at once makes
+  // Home Assistant load all of their icon files first, which can take longer
+  // than anyone waits (the icons then stayed on their placeholder). A table
+  // that does not arrive in time counts as empty; the built-in icons draw.
   const ask = (category, integration) =>
-    connection
-      .sendMessagePromise({
-        type: "frontend/get_icons",
-        category,
-        ...(integration ? { integration } : {}),
-      })
-      .then((r) => r?.resources || {})
-      .catch(() => ({}));
-  let components;
-  const platforms = new Map();
+    new Promise((resolve) => {
+      const timer = timers.setTimeout(() => resolve({}), timeoutMs);
+      connection
+        .sendMessagePromise({
+          type: "frontend/get_icons",
+          category,
+          integration: [integration],
+        })
+        .then(
+          (r) => resolve(r?.resources?.[integration] || {}),
+          () => resolve({}),
+        )
+        .finally(() => timers.clearTimeout(timer));
+    });
+  const components = new Map(),
+    platforms = new Map();
+  const table = (cache, category, integration) => {
+    if (!cache.has(integration))
+      cache.set(integration, ask(category, integration));
+    return cache.get(integration);
+  };
   return {
     async iconFor(stateObj) {
       if (!stateObj?.entity_id) return undefined;
       const entry = entries.get(stateObj.entity_id),
         domain = stateObj.entity_id.split(".")[0];
-      components ||= ask("entity_component");
-      if (entry?.pl && entry.tk && !platforms.has(entry.pl))
-        platforms.set(
-          entry.pl,
-          ask("entity", entry.pl).then((r) => r[entry.pl]),
-        );
       const [component, platform] = await Promise.all([
-        components.then((r) => r[domain]),
-        entry?.pl ? platforms.get(entry.pl) : undefined,
+        table(components, "entity_component", domain),
+        entry?.pl && entry.tk
+          ? table(platforms, "entity", entry.pl)
+          : undefined,
       ]);
       return pickEntityIcon(stateObj, { entry, platform, component });
     },

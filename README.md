@@ -195,6 +195,8 @@ height: auto              # 180–1600, or auto to fill the screen
 | `camera_controls` | `false` hides Move camera and Reset view |
 | `floor_plan_button` | `false` hides the Floor plan button (it is never shown on views saved as a floor plan) |
 | `light_panel`, `shade_panel` | `false` hides the Lights or Shades panel |
+| `summary` | `false` hides the at-a-glance bar (lights on, doors and windows open, locks, a busy robot or AC) |
+| `spread_icons` | `false` keeps overlapping icons on top of each other instead of moving them apart |
 | `edit_button` | `false` hides the administrator Edit button |
 | `quality` | `auto` (default), `high` or `low` rendering quality |
 | `background`, `background_image`, `background_shadow` | Override the view’s background |
