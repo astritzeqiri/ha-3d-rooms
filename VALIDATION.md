@@ -1,3 +1,11 @@
+# 0.54.0 — vacuum activity pills, Home Assistant's dialog menu, hassfest fix, 2026-11-18
+
+Released as 0.54.0, based on 0.53.0. The vacuum dialog shows a pill under its status for each extra Controls entity that is on (`syncActive` in `dashboard/more-info.mjs`). 3D Rooms' own dialogs get Home Assistant's settings button and ⋮ menu for admins (Add to…, Device info, Related, Details; `openHaView` from `_vacuumDialog` in `dashboard/card.js`, else `/config/entities?more-info-entity-id=…&more-info-view=…` in a new tab). `manifest.json` lists `lovelace` in `after_dependencies`, which hassfest required since 0.53.0's Repairs check.
+
+- All frontend tests and host Python tests pass with native-only skips. Format check and build pass. hassfest (`ghcr.io/home-assistant/hassfest`, run locally under amd64 emulation): 0 invalid integrations, the existing CONFIG_SCHEMA warning only.
+- Shared local Home Assistant (Core 2026.11.0): pills shown for two stand-in dock switches at 375 px, side by side; in a dashboard, Related opened Home Assistant's dialog on its Related view for the vacuum and Device info navigated to its device page; on the full-screen page the menu works for the vacuum and a light, opening Device info and Related as Home Assistant URLs; `more-info-entity-id`/`more-info-view` links open Home Assistant's dialog on that view.
+- Not checked: the user's Roborock dock switches, the iPhone home-screen app opening a new tab, Safari, and HACS download of this version.
+
 # 0.53.0 — old card resources, tap safety, swipe to close, 2026-11-17
 
 Released as 0.53.0, based on 0.52.0. Repairs reports dashboard resources that load an old 3D Rooms card (`stale_card_resources` in `health.py`; issue `old_card_resource` with a fix flow that removes them, or `old_card_resource_yaml`, in `repairs.py`). The card toggles only lights on a tap; every other device opens its dialog (`_toggle` in `dashboard/card.js`), and warns in the console when an older card registered first. The dialog follows a downward drag on phones and closes on a long or quick pull (`dashboard/more-info.mjs`).

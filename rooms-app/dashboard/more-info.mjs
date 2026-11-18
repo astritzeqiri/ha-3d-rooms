@@ -48,6 +48,15 @@ dialog.mi:focus{outline:none}
 .mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}
 .mi-head h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mi-head p{margin:0;color:var(--mi-muted);font-size:13px}
+.mi-actions{position:relative;display:flex;flex-shrink:0}
+.mi-actions[hidden]{display:none}
+.mi-menu{position:absolute;top:calc(100% + 2px);right:0;z-index:5;min-width:180px;padding:6px 0;border-radius:12px;background:var(--mi-bg);background-image:linear-gradient(var(--mi-surface-2),var(--mi-surface-2));box-shadow:0 8px 24px #0007}
+.mi-menu[hidden]{display:none}
+.mi-menu button{display:flex;align-items:center;gap:14px;width:100%;min-height:44px;padding:0 16px;border:0;background:none;color:var(--mi-fg);font:inherit;font-size:15px;text-align:left;white-space:nowrap;cursor:pointer}
+.mi-menu button:hover,.mi-menu button:focus-visible{background:var(--mi-surface)}
+.mi-menu button[hidden]{display:none}
+.mi-menu svg{width:22px;height:22px;flex-shrink:0;color:var(--mi-muted)}
+.mi-menu hr{margin:6px 0;border:0;border-top:1px solid var(--mi-line)}
 .mi-iconbtn{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;transition:background .15s}
 .mi-iconbtn:hover{background:var(--mi-surface)}
 .mi svg{width:24px;height:24px;fill:currentColor;display:block}
@@ -236,6 +245,15 @@ dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
 .mi-vac-head .mi-vac-battery{position:absolute;right:0;bottom:2px;display:inline-flex;align-items:center;gap:4px;color:var(--mi-muted);font-size:14px}
 .mi-vac-head .mi-vac-battery svg{width:18px;height:18px}
 .mi-vac-status{margin:0 0 4px}
+.mi-vac-active{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:100%;margin-top:-4px}
+.mi-vac-active[hidden]{display:none}
+.mi-vac-pill{display:inline-flex;align-items:center;gap:5px;max-width:100%;height:26px;padding:0 9px 0 7px;border:0;border-radius:13px;background:color-mix(in srgb,var(--mi-primary) 18%,transparent);color:var(--mi-fg);font:500 11.5px Roboto,system-ui,sans-serif;letter-spacing:.2px;cursor:pointer}
+.mi-vac-pill:hover{background:color-mix(in srgb,var(--mi-primary) 28%,transparent)}
+.mi-vac-pill ha-state-icon{width:15px;height:15px;--mdc-icon-size:15px;color:var(--mi-primary)}
+.mi-vac-pill>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi-vac-pill i{flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--mi-primary);animation:mi-pulse 1.6s ease-in-out infinite}
+@keyframes mi-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+@media (prefers-reduced-motion:reduce){.mi-vac-pill i{animation:none}}
 .mi-vac-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
 .mi-vac-btn{display:grid;place-items:center;width:48px;height:48px;padding:0;border:0;border-radius:12px;background:var(--mi-surface);color:var(--mi-fg);cursor:pointer;transition:background .15s,opacity .15s}
 .mi-vac-btn:hover:not(:disabled){background:var(--mi-surface-2)}
@@ -486,6 +504,10 @@ export function openMoreInfo({
   getHass,
   entityId,
   onError = () => {},
+  // Opens one of Home Assistant's own dialog views ("settings", "related",
+  // "details", "add_to") for the entity. Given inside Home Assistant; on the
+  // full-screen page those open in Home Assistant in a new tab.
+  openHaView = null,
   // A device's extra entities (a robot vacuum's mop mode, dock, …), listed
   // under its controls in the order given.
   extras = [],
@@ -506,6 +528,100 @@ export function openMoreInfo({
   const subtitle = h(doc, "p");
   titles.append(title, subtitle);
   head.append(closeBtn, titles);
+  // Home Assistant's settings button and menu (admins only, as in its own
+  // dialog): Add to…, Device info, Related, Details.
+  const actions = h(doc, "div", "mi-actions");
+  actions.hidden = !getHass()?.user?.is_admin;
+  const settingsBtn = h(doc, "button", "mi-iconbtn", svg("cog"));
+  settingsBtn.type = "button";
+  settingsBtn.setAttribute("aria-label", "Settings");
+  settingsBtn.title = "Settings";
+  const menuBtn = h(doc, "button", "mi-iconbtn", svg("dots"));
+  menuBtn.type = "button";
+  menuBtn.setAttribute("aria-label", "Menu");
+  menuBtn.setAttribute("aria-haspopup", "menu");
+  menuBtn.setAttribute("aria-expanded", "false");
+  const menu = h(doc, "div", "mi-menu");
+  menu.setAttribute("role", "menu");
+  menu.hidden = true;
+  const menuItem = (icon, label, run) => {
+    const item = h(doc, "button", "", `${svg(icon)}<span></span>`);
+    item.type = "button";
+    item.setAttribute("role", "menuitem");
+    item.lastChild.textContent = label;
+    item.onclick = () => {
+      setMenu(false);
+      run();
+    };
+    return item;
+  };
+  const haUrl = (path) => new URL(path, doc.defaultView.location.origin).href;
+  const goTo = (path) => {
+    const win = doc.defaultView;
+    if (openHaView) {
+      // Home Assistant's own navigation, as its dialog does.
+      win.history.pushState(null, "", path);
+      win.dispatchEvent(
+        new CustomEvent("location-changed", { detail: { replace: false } }),
+      );
+      closeDialog();
+    } else win.open(haUrl(path), "_blank", "noopener");
+  };
+  const haView = (view) => {
+    if (openHaView) {
+      closeDialog();
+      openHaView(entityId, view);
+    } else
+      goTo(
+        `/config/entities?more-info-entity-id=${encodeURIComponent(entityId)}&more-info-view=${view}`,
+      );
+  };
+  let deviceId = null;
+  const deviceItem = menuItem("devices", "Device info", () => {
+    if (deviceId) goTo(`/config/devices/device/${deviceId}`);
+  });
+  deviceItem.hidden = true;
+  menu.append(
+    menuItem("addTo", "Add to…", () => haView("add_to")),
+    h(doc, "hr"),
+    deviceItem,
+    menuItem("related", "Related", () => haView("related")),
+    menuItem("details", "Details", () => haView("details")),
+  );
+  const setMenu = (open) => {
+    menu.hidden = !open;
+    menuBtn.setAttribute("aria-expanded", String(open));
+    if (open) menu.querySelector("button:not([hidden])")?.focus();
+  };
+  menuBtn.onclick = (event) => {
+    event.stopPropagation();
+    setMenu(menu.hidden);
+  };
+  settingsBtn.onclick = () => haView("settings");
+  actions.append(settingsBtn, menuBtn, menu);
+  head.append(actions);
+  if (!actions.hidden) {
+    // The entity's device, from the frontend's registry or Home Assistant's.
+    const known = getHass()?.entities?.[entityId];
+    Promise.resolve(
+      known ||
+        getHass()?.callWS?.({
+          type: "config/entity_registry/get",
+          entity_id: entityId,
+        }),
+    )
+      .then((entry) => {
+        deviceId = entry?.device_id || null;
+        if (!deviceId) return;
+        const device = getHass()?.devices?.[deviceId];
+        if (device?.entry_type === "service") {
+          deviceItem.querySelector("span").textContent = "Service info";
+          deviceItem.querySelector("svg").outerHTML = svg("service");
+        }
+        deviceItem.hidden = false;
+      })
+      .catch(() => {});
+  }
   const body = h(doc, "div", "mi-body");
   const style = h(doc, "style");
   style.textContent = STYLE;
@@ -1738,7 +1854,11 @@ export function openMoreInfo({
       areaChip.onclick = () => openAreas();
       chips.append(areaChip);
     }
-    main.append(head, art, row);
+    // Pills under the status for the robot's extra controls that are on
+    // (the dock washing or drying the mop, …); a tap shows the control.
+    const active = h(doc, "div", "mi-vac-active");
+    active.hidden = true;
+    main.append(head, active, art, row);
     if (chips.childElementCount) main.append(chips);
     root.append(main);
     // ---- the device's extra entities, grouped as on its device page ----
@@ -1801,7 +1921,51 @@ export function openMoreInfo({
       }
       syncExtras();
     }
+    function syncActive() {
+      const hass = getHass();
+      const on = extras.filter(
+        (id) =>
+          id !== map &&
+          !categoryOf(id) &&
+          /^(switch|input_boolean|binary_sensor|fan)\./.test(id) &&
+          hass.states?.[id]?.state === "on",
+      );
+      const key = on.join("|");
+      if (active.dataset.ids !== key) {
+        active.dataset.ids = key;
+        active.replaceChildren();
+        for (const id of on) {
+          const pill = h(
+            doc,
+            "button",
+            "mi-vac-pill",
+            `<ha-state-icon></ha-state-icon><span></span><i></i>`,
+          );
+          pill.type = "button";
+          pill.dataset.id = id;
+          pill.onclick = () => {
+            const el = rowEls.get(id)?.el;
+            const section = el?.closest("details");
+            if (section) section.open = true;
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          };
+          active.append(pill);
+        }
+      }
+      active.hidden = !on.length;
+      for (const pill of active.children) {
+        const entity = hass.states?.[pill.dataset.id],
+          row = entityRow(entity, { prefix: prefix() }),
+          icon = pill.querySelector("ha-state-icon");
+        icon.hass = hass;
+        icon.dataset.defaultIcon = rowIcon(entity, row);
+        if (entity) icon.stateObj = entity;
+        pill.querySelector("span").textContent = row.name;
+        pill.title = `${row.name}: on`;
+      }
+    }
     function syncExtras() {
+      syncActive();
       const hass = getHass();
       for (const [id, slot] of rowEls) {
         const entity = hass.states?.[id],
@@ -2244,6 +2408,16 @@ export function openMoreInfo({
     if (dialog.open) dialog.close();
   };
   closeBtn.onclick = closeDialog;
+  dialog.addEventListener("click", (event) => {
+    if (!menu.hidden && !event.target.closest?.(".mi-actions")) setMenu(false);
+  });
+  dialog.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) {
+      event.preventDefault();
+      setMenu(false);
+      menuBtn.focus();
+    }
+  });
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) closeDialog();
   });

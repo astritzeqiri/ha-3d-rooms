@@ -3320,6 +3320,18 @@ export class ThreeDRoomsCard extends HTMLElement {
         (id) => id !== entityId && id !== control.map,
       ),
       map: control.map || "",
+      // Inside Home Assistant its own dialog shows Settings, Related, …; the
+      // full-screen page has no such dialog and opens them in a new tab.
+      openHaView: this.hasAttribute("fill-page")
+        ? null
+        : (id, view) =>
+            this.dispatchEvent(
+              new CustomEvent("hass-more-info", {
+                detail: { entityId: id, view },
+                bubbles: true,
+                composed: true,
+              }),
+            ),
       onError: (error) => console.error(error),
     });
     this._robotDialog = dialog;

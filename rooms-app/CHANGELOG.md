@@ -1,3 +1,9 @@
+## 0.54.0
+
+- **What the robot's dock is doing, at a glance.** In the vacuum dialog, each extra control that is on (such as the dock washing or drying the mop) shows as a pill under the status, with a pulsing dot; a tap opens Controls at that switch.
+- **Home Assistant's settings button and menu in 3D Rooms' dialogs.** For admins, every dialog 3D Rooms opens itself (the robot vacuum's on dashboards, and every device's on the full-screen page) has a gear for the entity's settings and a ⋮ menu with Add to…, Device info, Related and Details, as in Home Assistant's own. On a dashboard they open Home Assistant's dialog on that view, or the device page; on the full-screen page they open in Home Assistant in a new tab.
+- **GitHub validation passes again.** The integration now lists Home Assistant's dashboards (`lovelace`) as an after-dependency, which the 0.53.0 Repairs check uses.
+
 ## 0.53.0
 
 - **Repairs finds an old 3D Rooms card on your dashboards.** A leftover dashboard resource (from the former HACS "Dashboard" install, `/hacsfiles/…/ha-3d-rooms.js`, or a `/local/` copy) loads an old card before the integration's own, so dashboards run that old version: no Floor plan or Edit buttons, and newer devices such as robot vacuums treated like lights. Home Assistant's **Repairs** now reports it and removes it on **Submit** (for resources kept in YAML it says what to remove). The browser console says so too.

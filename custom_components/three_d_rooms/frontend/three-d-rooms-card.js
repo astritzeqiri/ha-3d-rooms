@@ -2902,7 +2902,7 @@ var pt = /* @__PURE__ */ new Set([
 		n.oninput = r, r(), t.addEventListener("close", () => t.remove()), this.shadowRoot.append(t), t.showModal();
 	}
 	async _vacuumDialog(e, t) {
-		let { openMoreInfo: n } = await import("./three-d-rooms-more-info-BKn3uq5l.js");
+		let { openMoreInfo: n } = await import("./three-d-rooms-more-info-DCqeJtr2.js");
 		this._robotDialog?.close();
 		let r = n({
 			host: this.shadowRoot,
@@ -2910,6 +2910,14 @@ var pt = /* @__PURE__ */ new Set([
 			entityId: t,
 			extras: (e.entities || []).filter((n) => n !== t && n !== e.map),
 			map: e.map || "",
+			openHaView: this.hasAttribute("fill-page") ? null : (e, t) => this.dispatchEvent(new CustomEvent("hass-more-info", {
+				detail: {
+					entityId: e,
+					view: t
+				},
+				bubbles: !0,
+				composed: !0
+			})),
 			onError: (e) => console.error(e)
 		});
 		this._robotDialog = r, r.dialog.addEventListener("close", () => {
