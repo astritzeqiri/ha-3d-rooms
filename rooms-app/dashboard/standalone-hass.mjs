@@ -14,6 +14,9 @@ export function createStandaloneHass({
   origin,
   onChange,
   fetcher = (...args) => fetch(...args),
+  // Home Assistant's words for a state (`hass.formatEntityState`).
+  formatEntityState,
+  language,
 }) {
   let states = {};
   let connected = true;
@@ -24,6 +27,8 @@ export function createStandaloneHass({
     auth,
     connection,
     connected,
+    language,
+    ...(formatEntityState ? { formatEntityState } : {}),
     callWS: (message) => connection.sendMessagePromise(message),
     callService: (domain, service, data, target) =>
       callService(connection, domain, service, data, target),
@@ -42,6 +47,8 @@ export function createStandaloneHass({
       states = next;
       push();
     },
+    // New translations arrived: redraw with their words.
+    refresh: push,
     setConnected(value) {
       if (connected === value) return;
       connected = value;

@@ -1,15 +1,15 @@
 import { A as e, C as t, D as n, E as r, M as i, N as a, O as o, P as s, S as c, T as l, _ as u, a as d, b as f, d as p, i as m, j as h, m as g, o as _, r as ee, s as te, t as v, w as y, y as ne } from "./three-d-rooms-room-focus-DizMe7SG.js";
 import { a as re, c as ie, i as b, l as x, m as S, n as ae, o as C, p as w, r as oe, s as se, u as ce } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
-import { n as T, r as le, t as ue } from "./three-d-rooms-light-BnEuRadE.js";
+import { a as le, n as T, o as ue, r as de, s as fe, t as pe } from "./three-d-rooms-light-BzGWBUDK.js";
 // shared/scene-store.mjs
-var de = "three-d-rooms", E = "scenes", fe = 536870912, pe = 2e3;
-function me(e, t) {
+var me = "three-d-rooms", E = "scenes", he = 536870912, ge = 2e3;
+function _e(e, t) {
 	let n;
 	return Promise.race([e, new Promise((e, r) => {
 		n = setTimeout(() => r(/* @__PURE__ */ Error("Model storage timed out.")), t);
 	})]).finally(() => clearTimeout(n));
 }
-function he(e, t, n) {
+function ve(e, t, n) {
 	return `${e || "user"}:${t.id}:${n}`;
 }
 function D(e) {
@@ -17,10 +17,10 @@ function D(e) {
 		e.onsuccess = () => t(e.result), e.onerror = () => n(e.error);
 	});
 }
-function ge(e = globalThis.indexedDB) {
+function ye(e = globalThis.indexedDB) {
 	if (!e) return null;
 	let t, n = () => t ??= new Promise((n, r) => {
-		let i = e.open(de, 1);
+		let i = e.open(me, 1);
 		i.onupgradeneeded = () => i.result.createObjectStore(E), i.onsuccess = () => {
 			let e = i.result;
 			e.onversionchange = e.onclose = () => {
@@ -50,18 +50,18 @@ function ge(e = globalThis.indexedDB) {
 var O;
 function k() {
 	if (O === void 0) try {
-		O = ge();
+		O = ye();
 	} catch {
 		O = null;
 	}
 	return O;
 }
-async function _e(e, t, n = pe) {
+async function be(e, t, n = ge) {
 	let r = k();
 	if (!r) return null;
 	let i;
 	try {
-		i = await me(r.get(e), n);
+		i = await _e(r.get(e), n);
 	} catch {
 		return null;
 	}
@@ -72,7 +72,7 @@ async function _e(e, t, n = pe) {
 		usedAt: Date.now()
 	}).catch?.(() => {}), new Blob([a], { type: i.type || "model/gltf-binary" }));
 }
-async function ve(e, t, n, r = fe) {
+async function xe(e, t, n, r = he) {
 	let i = k();
 	if (!i || !n?.size || n.size > r) return !1;
 	try {
@@ -97,14 +97,14 @@ async function ve(e, t, n, r = fe) {
 	}
 }
 // shared/scene-download.mjs
-var A = /* @__PURE__ */ new WeakMap(), ye = 100663296, be = 6e5;
+var A = /* @__PURE__ */ new WeakMap(), Se = 100663296, Ce = 6e5;
 function j(e) {
 	return e.connection || e.auth || e;
 }
-function xe(e) {
+function we(e) {
 	A.delete(j(e));
 }
-async function Se(e, t) {
+async function Te(e, t) {
 	let n = e.body?.getReader?.();
 	if (!n) return e.blob();
 	let r = (t) => e.headers?.get?.(t), i = Number(r("content-length")), a = !r("content-encoding") && Number.isFinite(i) && i > 0 ? i : void 0, o = [], s = 0;
@@ -130,15 +130,15 @@ async function M(e, t, n = "original", r, { fresh: i = !1 } = {}) {
 	if (u) return o.delete(c), o.set(c, u), r && u.listeners && (u.listeners.add(r), u.progress && r(u.progress)), u.promise;
 	u = {
 		bytes: 0,
-		expires: l + be,
+		expires: l + Ce,
 		listeners: /* @__PURE__ */ new Set()
 	}, r && u.listeners.add(r);
 	let d = (e) => {
 		u.progress = e;
 		for (let t of u.listeners || []) t(e);
-	}, f = he(e.user?.id, t, n);
+	}, f = ve(e.user?.id, t, n);
 	return u.promise = (async () => {
-		let r = i ? null : await _e(f, s);
+		let r = i ? null : await be(f, s);
 		if (r) d({
 			loaded: r.size,
 			total: r.size
@@ -146,12 +146,12 @@ async function M(e, t, n = "original", r, { fresh: i = !1 } = {}) {
 		else {
 			let a = `/api/three_d_rooms/models/${encodeURIComponent(t.id)}/scene.glb?v=${encodeURIComponent(s)}&variant=${encodeURIComponent(n)}`, o = await (i ? e.fetchWithAuth(a, { cache: "reload" }) : e.fetchWithAuth(a));
 			if (!o.ok) throw Error("Could not download your room. Check your login and the 3D Rooms integration.");
-			r = await Se(o, d), ve(f, s, r);
+			r = await Te(o, d), xe(f, s, r);
 		}
 		u.listeners = null, u.bytes = r.size;
 		let a = [...o.values()].reduce((e, t) => e + t.bytes, 0);
 		for (let [e, t] of o) {
-			if (a <= ye) break;
+			if (a <= Se) break;
 			o.delete(e), a -= t.bytes;
 		}
 		return r;
@@ -160,7 +160,7 @@ async function M(e, t, n = "original", r, { fresh: i = !1 } = {}) {
 	}), o.set(c, u), u.promise;
 }
 // dashboard/layout.js
-var Ce = class {
+var Ee = class {
 	constructor(e) {
 		this.host = e, this.card = e.shadowRoot.querySelector("ha-card"), this.scene = e._container, this.style = document.createElement("style"), this.style.textContent = "ha-card[data-fill]{display:flex;flex-direction:column;box-sizing:border-box}ha-card[data-fill] .scene{flex:1;min-height:0;height:auto!important}ha-card[data-fill] .card-top{flex-shrink:0}ha-card[data-fill] .fixture-tray{flex-shrink:0;max-height:30%;overflow:auto;box-sizing:border-box}ha-card:fullscreen{width:100%;border:0;border-radius:0;padding-bottom:env(safe-area-inset-bottom)}.fullscreen-toggle svg{width:22px;height:22px}:host([fill-page]) ha-card{border-radius:0}:host([fill-page]) .card-top,:host([fill-page]) .panel-toggles,:host([fill-page]) .room-nav,:host([fill-page]) .light-panel{margin-top:calc(env(safe-area-inset-top,0px) + 16px)}:host([fill-page]) .panel-toggles,:host([fill-page]) .light-panel,:host([fill-page]) .card-controls{margin-left:env(safe-area-inset-left,0px)}:host([fill-page]) .card-top,:host([fill-page]) .card-controls{margin-right:env(safe-area-inset-right,0px)}:host([fill-page]) .light-panel{max-height:calc(100% - 150px - env(safe-area-inset-top,0px))}", e.shadowRoot.append(this.style), this.button = document.createElement("button"), this.button.className = "fullscreen-toggle", this.button.type = "button", this.button.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5\"/></svg>", this.button.hidden = !document.fullscreenEnabled || !this.card.requestFullscreen, this.button.onclick = async () => {
 			try {
@@ -198,7 +198,7 @@ var Ce = class {
 	"aurora",
 	"image",
 	"theme"
-], we = {
+], De = {
 	spotlight: "Spotlight · soft light behind the house",
 	classic: "Classic · flat dark",
 	grid: "Blueprint grid",
@@ -210,8 +210,8 @@ var Ce = class {
 	"background",
 	"background_image",
 	"background_shadow"
-], Te = (e) => e !== "classic";
-function Ee(e) {
+], Oe = (e) => e !== "classic";
+function ke(e) {
 	let { background: t, background_image: n, background_shadow: r } = e;
 	if (t !== void 0 && !N.includes(t)) throw Error(`Background must be one of ${N.join(", ")}.`);
 	if (r !== void 0 && typeof r != "boolean") throw Error("background_shadow must be true or false.");
@@ -228,10 +228,10 @@ function F(e) {
 function I(e) {
 	return e.view === "floor" ? !1 : (e.background || "spotlight") === "classic" ? e.background_shadow === !0 : e.background_shadow !== !1;
 }
-function De(e) {
+function Ae(e) {
 	return Number.isFinite(e) ? e >= 12 ? "day" : e >= 0 ? "golden" : e >= -8 ? "dusk" : "night" : "night";
 }
-function Oe(e, t) {
+function je(e, t) {
 	if (e === "day") return 45;
 	if (e === "night") return -30;
 	let n = Number(t?.attributes?.elevation);
@@ -280,7 +280,7 @@ var L = {
 		edge: "#10141d"
 	}
 };
-function ke(e, t, n) {
+function Me(e, t, n) {
 	let r = L[t] || L.night, i = R[t] || R.night, a = {
 		"--bd-sky-top": r.top,
 		"--bd-sky-mid": r.mid,
@@ -291,18 +291,18 @@ function ke(e, t, n) {
 	}, o = F(n);
 	return e === "image" && o && (a["--bd-image"] = `url(${JSON.stringify(o)})`), a;
 }
-function Ae(e, t, n) {
+function Ne(e, t, n) {
 	let r = t.background || "spotlight";
 	e.dataset.background = r, e.dataset.time = n;
 	for (let t of [...e.style]) t.startsWith("--bd-") && e.style.removeProperty(t);
-	for (let [i, a] of Object.entries(ke(r, n, t.background_image))) e.style.setProperty(i, a);
+	for (let [i, a] of Object.entries(Me(r, n, t.background_image))) e.style.setProperty(i, a);
 	r === "aurora" && !e.childElementCount ? e.append(...[
 		1,
 		2,
 		3
 	].map(() => e.ownerDocument.createElement("i"))) : r !== "aurora" && e.replaceChildren();
 }
-var je = "\n.backdrop{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;transition:background 1.2s ease}\n.backdrop[data-background=classic]{background:#242320}\n.backdrop[data-background=theme]{background:transparent}\n.backdrop[data-background=spotlight]{background:radial-gradient(ellipse 70% 62% at 50% 46%,var(--bd-spot-core) 0%,var(--bd-spot-edge) 100%)}\n.backdrop[data-background=sky]{background:linear-gradient(180deg,var(--bd-sky-top) 0%,var(--bd-sky-mid) 58%,var(--bd-sky-bottom) 100%)}\n.backdrop[data-background=sky]::before{content:\"\";position:absolute;inset:0;opacity:var(--bd-stars);transition:opacity 1.2s ease;background-image:radial-gradient(1.4px 1.4px at 12% 18%,#fff 50%,transparent),radial-gradient(1px 1px at 27% 8%,#fff 50%,transparent),radial-gradient(1.6px 1.6px at 41% 26%,#fff 50%,transparent),radial-gradient(1px 1px at 58% 12%,#fff 50%,transparent),radial-gradient(1.4px 1.4px at 73% 22%,#fff 50%,transparent),radial-gradient(1px 1px at 86% 9%,#fff 50%,transparent),radial-gradient(1.2px 1.2px at 94% 30%,#fff 50%,transparent),radial-gradient(1px 1px at 6% 42%,#fff 50%,transparent),radial-gradient(1.2px 1.2px at 66% 40%,#fff 50%,transparent),radial-gradient(1px 1px at 34% 46%,#fff 50%,transparent)}\n.backdrop[data-background=grid]{background:radial-gradient(ellipse 80% 70% at 50% 50%,#17304a 0%,#0b1624 100%)}\n.backdrop[data-background=grid]::before{content:\"\";position:absolute;left:-50%;right:-50%;top:38%;bottom:-60%;background-image:linear-gradient(rgba(120,180,255,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(120,180,255,.22) 1px,transparent 1px);background-size:48px 48px;transform:perspective(520px) rotateX(62deg);transform-origin:50% 0;-webkit-mask-image:radial-gradient(ellipse 50% 60% at 50% 30%,#000 0%,transparent 78%);mask-image:radial-gradient(ellipse 50% 60% at 50% 30%,#000 0%,transparent 78%)}\n.backdrop[data-background=aurora]{background:#0d1018}\n.backdrop[data-background=aurora] i{position:absolute;width:62%;aspect-ratio:1;border-radius:50%;filter:blur(70px);opacity:.55;animation:bd-drift 26s ease-in-out infinite alternate}\n.backdrop[data-background=aurora] i:nth-child(1){left:-12%;top:-20%;background:var(--primary-color,#03a9f4)}\n.backdrop[data-background=aurora] i:nth-child(2){right:-14%;top:10%;background:#7b4fd6;animation-duration:32s;animation-delay:-8s}\n.backdrop[data-background=aurora] i:nth-child(3){left:22%;bottom:-34%;background:#1fb89a;animation-duration:38s;animation-delay:-16s}\n.backdrop[data-background=image]{background:#14130f var(--bd-image) center/cover no-repeat}\n.backdrop[data-background=image]::after{content:\"\";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,.25),rgba(0,0,0,.6));backdrop-filter:blur(3px)}\n@keyframes bd-drift{to{transform:translate(14%,10%) scale(1.18)}}\n@media (prefers-reduced-motion:reduce){.backdrop[data-background=aurora] i{animation:none}}\n", z = [
+var Pe = "\n.backdrop{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;transition:background 1.2s ease}\n.backdrop[data-background=classic]{background:#242320}\n.backdrop[data-background=theme]{background:transparent}\n.backdrop[data-background=spotlight]{background:radial-gradient(ellipse 70% 62% at 50% 46%,var(--bd-spot-core) 0%,var(--bd-spot-edge) 100%)}\n.backdrop[data-background=sky]{background:linear-gradient(180deg,var(--bd-sky-top) 0%,var(--bd-sky-mid) 58%,var(--bd-sky-bottom) 100%)}\n.backdrop[data-background=sky]::before{content:\"\";position:absolute;inset:0;opacity:var(--bd-stars);transition:opacity 1.2s ease;background-image:radial-gradient(1.4px 1.4px at 12% 18%,#fff 50%,transparent),radial-gradient(1px 1px at 27% 8%,#fff 50%,transparent),radial-gradient(1.6px 1.6px at 41% 26%,#fff 50%,transparent),radial-gradient(1px 1px at 58% 12%,#fff 50%,transparent),radial-gradient(1.4px 1.4px at 73% 22%,#fff 50%,transparent),radial-gradient(1px 1px at 86% 9%,#fff 50%,transparent),radial-gradient(1.2px 1.2px at 94% 30%,#fff 50%,transparent),radial-gradient(1px 1px at 6% 42%,#fff 50%,transparent),radial-gradient(1.2px 1.2px at 66% 40%,#fff 50%,transparent),radial-gradient(1px 1px at 34% 46%,#fff 50%,transparent)}\n.backdrop[data-background=grid]{background:radial-gradient(ellipse 80% 70% at 50% 50%,#17304a 0%,#0b1624 100%)}\n.backdrop[data-background=grid]::before{content:\"\";position:absolute;left:-50%;right:-50%;top:38%;bottom:-60%;background-image:linear-gradient(rgba(120,180,255,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(120,180,255,.22) 1px,transparent 1px);background-size:48px 48px;transform:perspective(520px) rotateX(62deg);transform-origin:50% 0;-webkit-mask-image:radial-gradient(ellipse 50% 60% at 50% 30%,#000 0%,transparent 78%);mask-image:radial-gradient(ellipse 50% 60% at 50% 30%,#000 0%,transparent 78%)}\n.backdrop[data-background=aurora]{background:#0d1018}\n.backdrop[data-background=aurora] i{position:absolute;width:62%;aspect-ratio:1;border-radius:50%;filter:blur(70px);opacity:.55;animation:bd-drift 26s ease-in-out infinite alternate}\n.backdrop[data-background=aurora] i:nth-child(1){left:-12%;top:-20%;background:var(--primary-color,#03a9f4)}\n.backdrop[data-background=aurora] i:nth-child(2){right:-14%;top:10%;background:#7b4fd6;animation-duration:32s;animation-delay:-8s}\n.backdrop[data-background=aurora] i:nth-child(3){left:22%;bottom:-34%;background:#1fb89a;animation-duration:38s;animation-delay:-16s}\n.backdrop[data-background=image]{background:#14130f var(--bd-image) center/cover no-repeat}\n.backdrop[data-background=image]::after{content:\"\";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,.25),rgba(0,0,0,.6));backdrop-filter:blur(3px)}\n@keyframes bd-drift{to{transform:translate(14%,10%) scale(1.18)}}\n@media (prefers-reduced-motion:reduce){.backdrop[data-background=aurora] i{animation:none}}\n", z = [
 	"model",
 	"title",
 	"show_title",
@@ -332,7 +332,7 @@ function B(e, t) {
 	return (i.model !== r.model || i.view !== r.view) && delete i.camera, i.model !== r.model && delete i.markers, i;
 }
 // shared/load-progress.mjs
-function Me(e) {
+function Fe(e) {
 	let t = Math.max(1, e?.count || 1), n = Math.min(t - 1, Math.max(0, e?.index || 0)), r = Math.max(0, e?.loaded || 0), i = e?.total > 0 ? e.total : void 0, a = i ? Math.min(1, r / i) : 0, o = r / 1024 / 1024, s = o >= .1 ? ` · ${o.toFixed(+(o < 10))} MB` : "";
 	return {
 		value: t > 1 || i ? (n + a) / t : void 0,
@@ -352,12 +352,12 @@ function V(e) {
 		"settings"
 	].includes(t.get("tab")) && n.set("tab", t.get("tab")), ["floor", "front"].includes(t.get("view")) && n.set("view", t.get("view")), n;
 }
-function Ne(e, t = new URLSearchParams()) {
+function Ie(e, t = new URLSearchParams()) {
 	let n = new URLSearchParams(t), r = new URL(e).searchParams.get("v");
 	return r && /^[0-9A-Za-z.+-]{1,40}$/.test(r) && n.set("v", r), new URL(".", e).href + "index.html?" + n;
 }
 // shared/marker-groups.mjs
-function H(e, { open: t = /* @__PURE__ */ new Set(), overlap: n = .9 } = {}) {
+function Le(e, { open: t = /* @__PURE__ */ new Set(), overlap: n = .9 } = {}) {
 	let r = /* @__PURE__ */ new Map();
 	for (let t of e) t.room && (r.has(t.room) || r.set(t.room, []), r.get(t.room).push(t));
 	let i = [];
@@ -380,15 +380,15 @@ function H(e, { open: t = /* @__PURE__ */ new Set(), overlap: n = .9 } = {}) {
 	}
 	return i;
 }
-function Pe(e, t, n = .9) {
-	return H(e.filter((e) => e.room === t), { overlap: n }).length > 0;
+function Re(e, t, n = .9) {
+	return Le(e.filter((e) => e.room === t), { overlap: n }).length > 0;
 }
 // shared/action.mjs
-function U(e) {
+function H(e) {
 	return { unavailable: !e || !/^(button|input_button|script|scene)\./.test(e.entity_id) || e.state === "unavailable" };
 }
 // shared/number.mjs
-function Fe(e, t) {
+function ze(e, t) {
 	let n = typeof e?.state == "string" && e.state.trim() ? Number(e.state) : NaN, r = !e || !/^(number|input_number)\./.test(e.entity_id) || !Number.isFinite(n) || n < t.min || n > t.max || e.attributes?.unit_of_measurement && e.attributes.unit_of_measurement !== t.unit;
 	return {
 		value: r ? void 0 : n,
@@ -397,25 +397,25 @@ function Fe(e, t) {
 	};
 }
 // dashboard/desk-dialog.mjs
-var Ie = "\ndialog.dm{--dm-bg:var(--ha-card-background,var(--card-background-color,#1c1c1c));--dm-fg:var(--primary-text-color,#e1e1e1);--dm-muted:var(--secondary-text-color,#9b9b9b);--dm-line:var(--divider-color,#ffffff1f);--dm-surface:color-mix(in srgb,var(--dm-fg) 8%,transparent);--dm-surface-2:color-mix(in srgb,var(--dm-fg) 14%,transparent);--dm-accent:var(--primary-color,#03a9f4);--dm-accent-ink:var(--text-primary-color,#fff);\n box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-width:none;max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--dm-bg);color:var(--dm-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:dm-in .22s cubic-bezier(.2,.8,.2,1)}\n@media (prefers-color-scheme:light){dialog.dm{--dm-bg:var(--ha-card-background,var(--card-background-color,#fff));--dm-fg:var(--primary-text-color,#212121);--dm-muted:var(--secondary-text-color,#727272);--dm-line:var(--divider-color,#0000001f);box-shadow:0 24px 64px #0004}}\ndialog.dm::backdrop{background:#000a}\n@keyframes dm-in{from{opacity:0;transform:translateY(20px) scale(.98)}}\n@media (max-width:600px){dialog.dm{width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;padding-bottom:env(safe-area-inset-bottom);animation-name:dm-up}@keyframes dm-up{from{transform:translateY(100%)}}}\n@media (prefers-reduced-motion:reduce){dialog.dm{animation:none}.dm *{transition:none!important}}\n.dm form{display:flex;flex-direction:column;max-height:inherit;margin:0}\n.dm-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}\n.dm-titles{flex:1;min-width:0;padding-left:4px}\ndialog.dm h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\ndialog.dm p{margin:0;color:var(--dm-muted);font-size:13px;line-height:1.45}\ndialog.dm button{min-height:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;cursor:pointer}\ndialog.dm button:focus-visible,.dm-slider:focus-visible{outline:2px solid var(--dm-accent);outline-offset:3px}\n.dm-close{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;border-radius:50%!important;transition:background .15s}\n.dm-close:hover{background:var(--dm-surface)!important}\n.dm svg{width:24px;height:24px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}\n.dm-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:8px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:20px}\n.dm-slider{position:relative;width:132px;height:min(300px,38vh);min-height:200px;border-radius:28px;overflow:hidden;background:var(--dm-surface);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}\n.dm-slider:hover{background:var(--dm-surface-2)}\n.dm-slider[aria-disabled=true]{opacity:.5;cursor:default}\n.dm-fill{position:absolute;left:0;right:0;bottom:0;background:var(--dm-accent);opacity:.92;transition:height .2s}\n.dm-slider.dm-dragging .dm-fill{transition:none}\n.dm-readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;text-shadow:0 1px 2px #0004}\n.dm-big{font:500 34px/1.1 Roboto,system-ui,sans-serif}\n.dm-small{font-size:14px;opacity:.85}\n.dm-row{display:flex;justify-content:center;flex-wrap:wrap;gap:14px 10px;width:100%}\n.dm-round{display:flex!important;flex-direction:column;align-items:center;gap:6px;width:76px;font-size:12px!important}\n.dm-disc{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--dm-surface-2);transition:background .15s,color .15s}\n.dm-round:hover .dm-disc{background:color-mix(in srgb,var(--dm-surface-2) 70%,var(--dm-fg) 14%)}\n.dm-round:active .dm-disc{background:var(--dm-accent);color:var(--dm-accent-ink)}\n.dm-round:disabled{opacity:.4;cursor:default!important}\n.dm-round>span:last-child{max-width:100%;color:var(--dm-muted);text-align:center;overflow-wrap:anywhere;line-height:1.3}\n.dm-round ha-state-icon{--mdc-icon-size:24px;width:24px;height:24px;display:flex}\n.dm-section{width:100%;border-top:1px solid var(--dm-line);padding-top:16px;display:grid;gap:14px}\n.dm-section h3{margin:0;font-size:14px;font-weight:500}\n.dm-error:empty{display:none}\ndialog.dm .dm-error{color:var(--error-color,#db4437)}\n", Le = {
+var Be = "\ndialog.dm{--dm-bg:var(--ha-card-background,var(--card-background-color,#1c1c1c));--dm-fg:var(--primary-text-color,#e1e1e1);--dm-muted:var(--secondary-text-color,#9b9b9b);--dm-line:var(--divider-color,#ffffff1f);--dm-surface:color-mix(in srgb,var(--dm-fg) 8%,transparent);--dm-surface-2:color-mix(in srgb,var(--dm-fg) 14%,transparent);--dm-accent:var(--primary-color,#03a9f4);--dm-accent-ink:var(--text-primary-color,#fff);\n box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-width:none;max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--dm-bg);color:var(--dm-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:dm-in .22s cubic-bezier(.2,.8,.2,1)}\n@media (prefers-color-scheme:light){dialog.dm{--dm-bg:var(--ha-card-background,var(--card-background-color,#fff));--dm-fg:var(--primary-text-color,#212121);--dm-muted:var(--secondary-text-color,#727272);--dm-line:var(--divider-color,#0000001f);box-shadow:0 24px 64px #0004}}\ndialog.dm::backdrop{background:#000a}\n@keyframes dm-in{from{opacity:0;transform:translateY(20px) scale(.98)}}\n@media (max-width:600px){dialog.dm{width:100vw;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:94vh;padding-bottom:env(safe-area-inset-bottom);animation-name:dm-up}@keyframes dm-up{from{transform:translateY(100%)}}}\n@media (prefers-reduced-motion:reduce){dialog.dm{animation:none}.dm *{transition:none!important}}\n.dm form{display:flex;flex-direction:column;max-height:inherit;margin:0}\n.dm-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}\n.dm-titles{flex:1;min-width:0;padding-left:4px}\ndialog.dm h2{margin:0;font-weight:500;font-size:20px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}\ndialog.dm p{margin:0;color:var(--dm-muted);font-size:13px;line-height:1.45}\ndialog.dm button{min-height:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;cursor:pointer}\ndialog.dm button:focus-visible,.dm-slider:focus-visible{outline:2px solid var(--dm-accent);outline-offset:3px}\n.dm-close{display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;border-radius:50%!important;transition:background .15s}\n.dm-close:hover{background:var(--dm-surface)!important}\n.dm svg{width:24px;height:24px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}\n.dm-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:8px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:20px}\n.dm-slider{position:relative;width:132px;height:min(300px,38vh);min-height:200px;border-radius:28px;overflow:hidden;background:var(--dm-surface);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s}\n.dm-slider:hover{background:var(--dm-surface-2)}\n.dm-slider[aria-disabled=true]{opacity:.5;cursor:default}\n.dm-fill{position:absolute;left:0;right:0;bottom:0;background:var(--dm-accent);opacity:.92;transition:height .2s}\n.dm-slider.dm-dragging .dm-fill{transition:none}\n.dm-readout{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none;text-shadow:0 1px 2px #0004}\n.dm-big{font:500 34px/1.1 Roboto,system-ui,sans-serif}\n.dm-small{font-size:14px;opacity:.85}\n.dm-row{display:flex;justify-content:center;flex-wrap:wrap;gap:14px 10px;width:100%}\n.dm-round{display:flex!important;flex-direction:column;align-items:center;gap:6px;width:76px;font-size:12px!important}\n.dm-disc{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--dm-surface-2);transition:background .15s,color .15s}\n.dm-round:hover .dm-disc{background:color-mix(in srgb,var(--dm-surface-2) 70%,var(--dm-fg) 14%)}\n.dm-round:active .dm-disc{background:var(--dm-accent);color:var(--dm-accent-ink)}\n.dm-round:disabled{opacity:.4;cursor:default!important}\n.dm-round>span:last-child{max-width:100%;color:var(--dm-muted);text-align:center;overflow-wrap:anywhere;line-height:1.3}\n.dm-round ha-state-icon{--mdc-icon-size:24px;width:24px;height:24px;display:flex}\n.dm-section{width:100%;border-top:1px solid var(--dm-line);padding-top:16px;display:grid;gap:14px}\n.dm-section h3{margin:0;font-size:14px;font-weight:500}\n.dm-error:empty{display:none}\ndialog.dm .dm-error{color:var(--error-color,#db4437)}\n", Ve = {
 	close: "<path d=\"M6 6l12 12M18 6 6 18\"/>",
 	up: "<path d=\"M12 19V5M6 11l6-6 6 6\"/>",
 	stop: "<rect x=\"7\" y=\"7\" width=\"10\" height=\"10\" rx=\"1.5\" fill=\"currentColor\" stroke=\"none\"/>",
 	down: "<path d=\"M12 5v14M6 13l6 6 6-6\"/>"
-}, Re = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true">${Le[e]}</svg>`, W = (e, t, n) => `<button type="button" class="dm-round" data-action="${e}"><span class="dm-disc">${Re(n)}</span><span>${t}</span></button>`, ze = `<style>${Ie}</style><form method="dialog"><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${Re("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${W("open", "Up", "up")}${W("stop", "Stop", "stop")}${W("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
-function Be(e, { min: t, max: n, step: r }) {
+}, He = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true">${Ve[e]}</svg>`, U = (e, t, n) => `<button type="button" class="dm-round" data-action="${e}"><span class="dm-disc">${He(n)}</span><span>${t}</span></button>`, Ue = `<style>${Be}${le}.sheet-grab{color:var(--dm-muted)}</style><form method="dialog"><div class="sheet-grab" aria-hidden="true"></div><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${He("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${U("open", "Up", "up")}${U("stop", "Stop", "stop")}${U("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
+function We(e, { min: t, max: n, step: r }) {
 	let i = t + Math.round((Math.min(n, Math.max(t, e)) - t) / (r || 1)) * (r || 1);
 	return Number(Math.min(n, i).toFixed(6));
 }
-function Ve(e, t, n) {
+function Ge(e, t, n) {
 	let r = t.height ? 1 - (e - t.top) / t.height : 0;
-	return Be(n.min + r * (n.max - n.min), n);
+	return We(n.min + r * (n.max - n.min), n);
 }
-function He(e, { min: t, max: n }) {
+function Ke(e, { min: t, max: n }) {
 	return !Number.isFinite(e) || n <= t ? 0 : Math.min(1, Math.max(0, (e - t) / (n - t)));
 }
 // shared/marker.mjs
-function Ue(e, t, n, r = !1) {
+function qe(e, t, n, r = !1) {
 	if (e.type === "climate") {
 		let e = t ? i(t) : n?.mode ? n : i(void 0), r = h(e);
 		return {
@@ -515,21 +515,21 @@ function Ue(e, t, n, r = !1) {
 		tone: f ? a ? "open" : "light" : void 0,
 		...ee ? {
 			toneColor: `rgb(${_.map(Math.round).join(",")})`,
-			toneInk: We(_)
+			toneInk: Je(_)
 		} : {}
 	};
 }
-function We([e, t, n]) {
+function Je([e, t, n]) {
 	let r = (e) => e / 255 <= .03928 ? e / 255 / 12.92 : ((e / 255 + .055) / 1.055) ** 2.4;
 	return .2126 * r(e) + .7152 * r(t) + .0722 * r(n) > .4 ? "#1c1c1c" : "#fff";
 }
-function Ge(e, t) {
+function Ye(e, t) {
 	t?.tone ? e.dataset.tone = t.tone : delete e.dataset.tone;
 	for (let [n, r] of [["--tone", t?.tone && t.toneColor], ["--tone-ink", t?.tone && t.toneInk]]) r ? e.style?.setProperty?.(n, r) : e.style?.removeProperty?.(n);
 }
-var Ke = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", qe = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
+var Xe = "<path d=\"M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 8V7a3 3 0 0 1 6 0v3Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z\"/>", Ze = "<path fill-rule=\"evenodd\" d=\"M4 3h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v5h16V5H4Z\"/><path d=\"M5 7h14v2H5zm2 7h2v3a2 2 0 0 1-2 2H5v-2h2zm4 0h2v7h-2zm4 0h2v3h2v2h-2a2 2 0 0 1-2-2z\"/>";
 // dashboard/updates.mjs
-async function Je(e, t) {
+async function Qe(e, t) {
 	if (e.subscribeMessage) try {
 		return await e.subscribeMessage(() => t(), { type: "three_d_rooms/subscribe" });
 	} catch (e) {
@@ -538,7 +538,7 @@ async function Je(e, t) {
 	return e.subscribeEvents(() => t(), "three_d_rooms_updated");
 }
 // shared/upload.mjs
-function Ye(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
+function $e(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
 	return new Promise((s, c) => {
 		let l = o();
 		l.open(t, e);
@@ -555,13 +555,13 @@ function Ye(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = (
 		}, l.send(n);
 	});
 }
-async function Xe(e, t, n) {
+async function et(e, t, n) {
 	if (!(t === "/api/three_d_rooms/models" && n.method === "POST" || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+$/.test(t) && n.method === "PUT" || /^\/api\/three_d_rooms\/houses\/[a-z0-9_-]+$/.test(t) && ["POST", "PUT"].includes(n.method) || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+\/optimized\/(full|phone)$/.test(t) && n.method === "PUT")) throw Error("Unknown model upload.");
 	let r = t.includes("/optimized/"), i = n.headers?.["X-Rooms-Source-Revision"];
 	if (r && !/^[a-f0-9]{24}$/.test(i || "")) throw Error("Optimized scenes must name the upload they came from.");
 	let a = n.headers?.["X-Rooms-Matches"];
 	if (a !== void 0 && !/^[A-Za-z0-9_-]{1,6000}$/.test(a)) throw Error("Too many room and device choices to send at once.");
-	return e.auth.expired && await e.auth.refreshAccessToken(), Ye(t, {
+	return e.auth.expired && await e.auth.refreshAccessToken(), $e(t, {
 		...n,
 		headers: {
 			...n.headers?.["X-Rooms-Revision"] ? { "X-Rooms-Revision": n.headers["X-Rooms-Revision"] } : {},
@@ -573,23 +573,23 @@ async function Xe(e, t, n) {
 	});
 }
 // shared/entity-icon.mjs
-function Ze(e) {
+function tt(e) {
 	let t = e.querySelector?.("svg");
 	if (t) return t;
 	for (let t of e.querySelectorAll?.("*") || []) if (t.shadowRoot) {
-		let e = Ze(t.shadowRoot);
+		let e = tt(t.shadowRoot);
 		if (e) return e;
 	}
 	return null;
 }
-async function Qe(e, t, n, { frames: r = 120 } = {}) {
+async function nt(e, t, n, { frames: r = 120 } = {}) {
 	let i = e.ownerDocument;
 	if (!i.defaultView.customElements.get("ha-state-icon")) return null;
 	let a = i.createElement("ha-state-icon");
 	a.hass = t, a.stateObj = n, a.setAttribute("aria-hidden", "true"), a.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;width:24px;height:24px", e.append(a);
 	try {
 		for (let e = 0; e < r; e++) {
-			let e = a.shadowRoot && Ze(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
+			let e = a.shadowRoot && tt(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
 			if (t?.length) return {
 				viewBox: e.getAttribute("viewBox") || "0 0 24 24",
 				paths: t.map((e) => ({
@@ -607,7 +607,7 @@ async function Qe(e, t, n, { frames: r = 120 } = {}) {
 	}
 }
 // dashboard/preview.js
-function $e(e, t, n) {
+function rt(e, t, n) {
 	let r = document.createElement("dialog");
 	r.setAttribute("aria-labelledby", "dashboard-preview-title"), r.innerHTML = "<style>\n    dialog.dashboard-preview{box-sizing:border-box;width:min(960px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--divider-color,#777);border-radius:12px;background:var(--primary-background-color,#fafafa);color:var(--primary-text-color,#212121);font:14px/1.5 system-ui}\n    .dashboard-preview::backdrop{background:#0009}\n    .preview-toolbar{position:sticky;top:0;z-index:2;background:var(--primary-background-color,#fafafa);display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px;border-bottom:1px solid var(--divider-color,#777)}\n    .preview-toolbar h2{font-size:18px;margin:0;flex:1;min-width:160px}\n    .preview-actions{display:flex;align-items:center;gap:12px;margin-left:auto}\n    .preview-widths{display:flex;padding:3px;border:1px solid var(--divider-color,#ddd);border-radius:8px;background:var(--secondary-background-color,#eee)}\n    .preview-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:44px;padding:8px 12px;border:0;border-radius:5px;color:var(--secondary-text-color,#555);background:transparent;font:500 14px/20px system-ui;cursor:pointer;white-space:nowrap}\n    .preview-widths button[aria-pressed=\"true\"]{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff);box-shadow:0 1px 3px #0002}\n    .preview-toolbar button:hover{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff)}\n    .preview-toolbar .preview-close{width:44px;padding:10px;border-radius:50%}\n    .preview-toolbar svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}\n    @media(max-width:480px){.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{flex-basis:100%}.preview-actions{width:100%;justify-content:space-between}.preview-widths{flex:1}.preview-widths button{flex:1}}\n    .preview-toolbar :focus-visible{outline:2px solid var(--primary-color,#03a9f4);outline-offset:2px}\n    .preview-note{margin:0;padding:12px 16px;color:var(--secondary-text-color,#555)}\n    .preview-dashboard{padding:16px;background:var(--lovelace-background,var(--primary-background-color,#fafafa))}\n    .preview-card{width:100%;max-width:560px;margin:auto}\n    .preview-card[data-width=\"phone\"]{max-width:360px}\n    @media(max-width:600px){dialog.dashboard-preview{width:100vw;max-width:100vw;max-height:100dvh;margin:auto 0;border-radius:0;overflow:auto;overscroll-behavior:contain}.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{font-size:16px}.preview-note{font-size:13px;padding:12px}.preview-dashboard{padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}}\n  </style><div class=\"preview-toolbar\"><h2 id=\"dashboard-preview-title\">Dashboard preview</h2><div class=\"preview-actions\"><div class=\"preview-widths\" role=\"group\" aria-label=\"Preview card width\"><button type=\"button\" data-width=\"desktop\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 21h8M12 16v5\"/></svg>Desktop</button><button type=\"button\" data-width=\"phone\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></svg>Phone</button></div><button class=\"preview-close\" type=\"button\" aria-label=\"Close preview\" title=\"Close preview\" autofocus><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></div></div><p class=\"preview-note\">Your current changes, without saving. Device controls are live. The final card width depends on your dashboard layout.</p><div class=\"preview-dashboard\"><div class=\"preview-card\"></div></div>", r.className = "dashboard-preview";
 	let i = document.createElement("three-d-rooms-card");
@@ -638,7 +638,7 @@ function $e(e, t, n) {
 	};
 }
 // shared/dashboard-cards.mjs
-function et(e, t, n) {
+function it(e, t, n) {
 	let r = structuredClone(e), i = r?.views?.[t];
 	if (!i) throw Error("That dashboard view no longer exists.");
 	if (i.strategy) throw Error("That view is generated automatically; choose another.");
@@ -647,7 +647,7 @@ function et(e, t, n) {
 		cards: [n]
 	})) : (i.cards ||= [], i.cards.push(n)), r;
 }
-function tt(e) {
+function at(e) {
 	return !e || e.strategy || !Array.isArray(e.views) ? [] : e.views.map((e, t) => ({
 		index: t,
 		title: e.title || e.path || `View ${t + 1}`,
@@ -655,7 +655,7 @@ function tt(e) {
 		editable: !e.strategy
 	})).filter((e) => e.editable);
 }
-async function nt(e) {
+async function ot(e) {
 	let t = [{
 		url_path: null,
 		title: "Overview"
@@ -670,7 +670,7 @@ async function nt(e) {
 		} catch {
 			continue;
 		}
-		let i = tt(t);
+		let i = at(t);
 		i.length && n.push({
 			url_path: r.url_path,
 			title: r.title || r.url_path || "Dashboard",
@@ -679,7 +679,7 @@ async function nt(e) {
 	}
 	return n;
 }
-async function rt(e, t, n, r) {
+async function st(e, t, n, r) {
 	let i = t ? { url_path: t } : {}, a = await e.callWS({
 		type: "lovelace/config",
 		...i
@@ -687,11 +687,11 @@ async function rt(e, t, n, r) {
 	await e.callWS({
 		type: "lovelace/config/save",
 		...i,
-		config: et(a, n, r)
+		config: it(a, n, r)
 	});
 }
 // dashboard/panel.js
-var it = class extends HTMLElement {
+var ct = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block;height:100%;min-height:100vh}iframe{display:block;width:100%;height:100vh;border:0}</style><iframe title=\"3D Rooms model library\"></iframe>", this._frame = this.shadowRoot.querySelector("iframe"), this._frame.addEventListener("load", () => this._applyTheme()), this._iconCache = /* @__PURE__ */ new Map(), this._ready = (e) => {
 			if (e.source !== this._frame.contentWindow || e.origin !== location.origin || e.data?.type !== "three-d-rooms-ready") return;
@@ -705,7 +705,7 @@ var it = class extends HTMLElement {
 				},
 				preview: async (e) => {
 					this._preview?.close();
-					let t = $e(this.shadowRoot, e, this._hass);
+					let t = rt(this.shadowRoot, e, this._hass);
 					this._preview = t, await t.closed, this._preview === t && (this._preview = null);
 				},
 				navigate: (e) => {
@@ -720,8 +720,8 @@ var it = class extends HTMLElement {
 					for (let [n, r] of V(e)) t.searchParams.set(n, r);
 					history.replaceState(history.state, "", t);
 				},
-				dashboards: () => nt(this._hass),
-				addCard: (e, t, n) => rt(this._hass, e, t, n),
+				dashboards: () => ot(this._hass),
+				addCard: (e, t, n) => st(this._hass, e, t, n),
 				states: () => Object.values(this._hass?.states || {}),
 				request: (e, t = {}) => this._hass.callWS({
 					type: "three_d_rooms/request",
@@ -729,7 +729,7 @@ var it = class extends HTMLElement {
 					data: t
 				}),
 				asset: (e, t) => this._hass.fetchWithAuth(e, t),
-				upload: (e, t) => Xe(this._hass, e, t),
+				upload: (e, t) => et(this._hass, e, t),
 				scene: (e, t = "full") => M(this._hass, e, t),
 				entityIcon: (e) => {
 					let t = JSON.stringify([
@@ -738,7 +738,7 @@ var it = class extends HTMLElement {
 						e.attributes?.icon,
 						e.attributes?.device_class
 					]);
-					return this._iconCache.has(t) || (this._iconCache.set(t, Qe(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
+					return this._iconCache.has(t) || (this._iconCache.set(t, nt(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
 				},
 				subscribeModels: (e) => this._hass.connection.subscribeEvents(e, "three_d_rooms_updated"),
 				subscribe: (e) => (this._listener = e, this._publish(), () => {
@@ -767,15 +767,15 @@ var it = class extends HTMLElement {
 	connectedCallback() {
 		window.addEventListener("message", this._ready);
 		let e = V(location.search);
-		e.set("native", "1"), this._frame.src = Ne(import.meta.url, e);
+		e.set("native", "1"), this._frame.src = Ie(import.meta.url, e);
 	}
 	disconnectedCallback() {
 		this._preview?.close(), window.removeEventListener("message", this._ready), this._listener = null;
 	}
 };
-customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", it);
+customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", ct);
 // shared/house-floors.mjs
-function G(e, t) {
+function W(e, t) {
 	if (!t?.houseView || !Array.isArray(e)) return [];
 	let n = e.filter((e) => e?.houseView && e.houseId === t.houseId);
 	return n.length < 2 ? [] : n.map((e) => ({
@@ -784,11 +784,11 @@ function G(e, t) {
 		label: e.houseFloor?.name || "Whole house"
 	})).sort((e, t) => e.floorId === null ? -1 : +(t.floorId === null));
 }
-function K(e, t, n) {
-	return !n || n === t?.id ? t : G(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
+function lt(e, t, n) {
+	return !n || n === t?.id ? t : W(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
 }
-function at(e, t, n = !0) {
-	let r = n ? G(e, t) : [];
+function ut(e, t, n = !0) {
+	let r = n ? W(e, t) : [];
 	if (!r.length) return {
 		model: t,
 		floors: [],
@@ -802,7 +802,7 @@ function at(e, t, n = !0) {
 	};
 }
 // dashboard/editor.js
-var ot = {
+var dt = {
 	model: "Room",
 	title: "Title",
 	show_title: "Show title",
@@ -812,14 +812,14 @@ var ot = {
 	zoom: "Zoom",
 	height: "Height",
 	interactive: "Camera movement"
-}, st = {
+}, ft = {
 	show_title: !0,
 	height: 500,
 	view: "front",
 	heading: 0,
 	tilt: 28,
 	zoom: 1
-}, ct = class extends HTMLElement {
+}, pt = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>
       :host{display:block;container-type:inline-size;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}
@@ -853,7 +853,7 @@ var ot = {
     <label class="check"><input id="shade_panel" type="checkbox">Show the Shades button (each room's shades, with one switch per room)</label>
     <label class="check" id="room-focus-setting" hidden><input id="room_focus" type="checkbox">Show a button in front of each room to view that room on its own</label>
     <label class="check" id="floor-selector-setting" hidden><input id="floor_selector" type="checkbox">Show floor switcher (whole house or one floor)</label>
-    <label>Background<select id="background">${N.map((e) => `<option value="${e}">${we[e]}</option>`).join("")}</select></label>
+    <label>Background<select id="background">${N.map((e) => `<option value="${e}">${De[e]}</option>`).join("")}</select></label>
     <label id="background-image-setting" hidden>Background image address<input id="background_image" type="url" inputmode="url" maxlength="2000" placeholder="/local/backgrounds/garden.jpg"></label>
     <label class="check"><input id="background_shadow" type="checkbox">Soft shadow under the house</label>
     <label>Rendering quality<select id="quality">
@@ -887,7 +887,7 @@ var ot = {
 			let i = document.createElement("div");
 			i.className = "override-controls", i.id = `override-controls-${e}`, i.hidden = !0;
 			let a = document.createElement("button");
-			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${ot[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
+			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${dt[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
 		}
 		this._field("height-mode").onchange = () => {
 			this._field("height-mode").disabled || this._emit({
@@ -1001,19 +1001,19 @@ var ot = {
 			let t = !!this._config.saved_view, r = Object.hasOwn(this._config, e);
 			this._field(`reset-field-${e}`).hidden = !t || !r || !n || this._config[e] === n[e], this._field(`override-controls-${e}`).hidden = this._field(`reset-field-${e}`).hidden, this._field(e).disabled = !1;
 		}
-		for (let t of Object.keys(st).concat([
+		for (let t of Object.keys(ft).concat([
 			"model",
 			"title",
 			"interactive"
 		])) {
-			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : st[t]) ?? "";
+			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : ft[t]) ?? "";
 			t === "interactive" || t === "show_title" ? n.checked = !!a : n.value = a;
 		}
 		this._field("height-mode").value = e.height === "auto" ? "auto" : "fixed", this._field("height-mode").disabled = this._field("height").disabled, this._field("height").hidden = e.height === "auto";
 		let r = e.model, i = this._field("model");
 		r && ![...i.options].some((e) => e.value === r) && (i.add(new Option(`${r} (not in room library)`, r)), i.value = r);
 		let a = this._models?.find((e) => e.id === r);
-		this._field("floor-selector-setting").hidden = !G(this._models, a).length, this._field("room-focus-setting").hidden = !a?.houseView, this._field("room_focus").checked = this._config.room_focus !== !1, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("floor_plan_button").checked = this._config.floor_plan_button !== !1, this._field("floor-plan-button-setting").hidden = (e.view || "front") === "floor", this._field("light_panel").checked = this._config.light_panel !== !1, this._field("edit_button").checked = this._config.edit_button !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1;
+		this._field("floor-selector-setting").hidden = !W(this._models, a).length, this._field("room-focus-setting").hidden = !a?.houseView, this._field("room_focus").checked = this._config.room_focus !== !1, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("floor_plan_button").checked = this._config.floor_plan_button !== !1, this._field("floor-plan-button-setting").hidden = (e.view || "front") === "floor", this._field("light_panel").checked = this._config.light_panel !== !1, this._field("edit_button").checked = this._config.edit_button !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1;
 		let o = e.background || "spotlight";
 		this._field("background").value = o, this._field("background-image-setting").hidden = o !== "image", this._field("background_image").value = e.background_image || "", this._field("background_image").setCustomValidity(!e.background_image || F(e.background_image) ? "" : "Use an address starting with /, http:// or https://"), this._field("background_shadow").checked = I({
 			...e,
@@ -1141,9 +1141,9 @@ var ot = {
 		}));
 	}
 };
-customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", ct);
+customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", pt);
 // dashboard/transport.mjs
-async function lt(e, t, n, r = fetch) {
+async function mt(e, t, n, r = fetch) {
 	if (!t.preview_url && !t.addon) return {
 		preview: !1,
 		async load({ onProgress: n, onModel: r, fresh: i = !1 } = {}) {
@@ -1152,7 +1152,7 @@ async function lt(e, t, n, r = fetch) {
 				operation: "models"
 			}), o = a.find((e) => e.id === t.model);
 			if (!o) throw Error("Model not found. Upload it in the 3D Rooms sidebar first.");
-			let c = p(t.quality), { model: l, floors: u, views: d } = at(a, o, t.floor_selector !== !1);
+			let c = p(t.quality), { model: l, floors: u, views: d } = ut(a, o, t.floor_selector !== !1);
 			if (r?.({
 				model: l,
 				configured: o,
@@ -1253,7 +1253,7 @@ async function lt(e, t, n, r = fetch) {
 			if (!e.ok) throw Error("Could not read models. Open the 3D Rooms add-on and try again.");
 			let n = await e.json(), a = n.find((e) => e.id === t.model);
 			if (!a) throw Error("Model not found. Upload it in the 3D Rooms add-on first.");
-			let { model: o, floors: s, views: c } = at(n, a, t.floor_selector !== !1);
+			let { model: o, floors: s, views: c } = ut(n, a, t.floor_selector !== !1);
 			return o.members ? {
 				model: o,
 				configured: a,
@@ -1274,7 +1274,7 @@ async function lt(e, t, n, r = fetch) {
 	};
 }
 // shared/room-lights.mjs
-var q = {
+var G = {
 	light: {
 		entity: /^(light|switch)\.[a-z0-9_]+$/,
 		isOn: (e) => !!e.on,
@@ -1292,8 +1292,8 @@ var q = {
 		}
 	}
 };
-function ut(e, n = "light", r = () => !1) {
-	let { entity: i } = q[n], a = (e) => n === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && r(e), o = /* @__PURE__ */ new Map(), s = new Set((e?.controls || []).filter((e) => e.hidden && a(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
+function ht(e, n = "light", r = () => !1) {
+	let { entity: i } = G[n], a = (e) => n === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && r(e), o = /* @__PURE__ */ new Map(), s = new Set((e?.controls || []).filter((e) => e.hidden && a(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
 	for (let r of e?.controls || []) {
 		if (!a(r) || r.hidden || r.lightGroupPrimary === !1) continue;
 		let c = r.sourceModel || e.id, l = t(r.roomTitle || e.title || "Room");
@@ -1316,9 +1316,9 @@ function ut(e, n = "light", r = () => !1) {
 	}
 	return [...o.values()];
 }
-var J = (e) => ut(e, "light");
-function Y(e, t) {
-	let { isOn: n } = q[e.kind || "light"], r = 0, i = 0;
+var K = (e) => ht(e, "light");
+function q(e, t) {
+	let { isOn: n } = G[e.kind || "light"], r = 0, i = 0;
 	for (let a of e.lights) {
 		let e = t.get(a.id);
 		e && !e.unavailable && (i++, n(e) && r++);
@@ -1329,8 +1329,8 @@ function Y(e, t) {
 		total: e.lights.length
 	};
 }
-function dt(e, t, n = {}) {
-	let { services: r } = q[e.kind || "light"], i = Y(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
+function gt(e, t, n = {}) {
+	let { services: r } = G[e.kind || "light"], i = q(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
 	for (let t of e.entities) {
 		let e = n[t];
 		if (!e || ["unavailable", "unknown"].includes(e.state)) continue;
@@ -1346,7 +1346,7 @@ function dt(e, t, n = {}) {
 		])
 	};
 }
-function X(e) {
+function J(e) {
 	return {
 		id: "",
 		kind: e[0]?.kind || "light",
@@ -1355,7 +1355,7 @@ function X(e) {
 		entities: [...new Set(e.flatMap((e) => e.entities))]
 	};
 }
-function Z(e, t = {}) {
+function Y(e, t = {}) {
 	return e.map((e) => {
 		let n = t[e];
 		if (!n || ["unavailable", "unknown"].includes(n.state)) return null;
@@ -1367,7 +1367,7 @@ function Z(e, t = {}) {
 		};
 	}).filter(Boolean);
 }
-function ft(e) {
+function _t(e) {
 	let t = /* @__PURE__ */ new Map(), n = [];
 	for (let { entityId: r, state: i, position: a } of e) {
 		let e = r.split(".")[0];
@@ -1402,18 +1402,18 @@ function ft(e) {
 	return n;
 }
 // dashboard/card.js
-var pt = "M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z";
-function mt(e, t) {
-	return `<svg viewBox="0 0 24 24">${t ? w(t) || "" : e.type === "climate" ? qe : e.type === "lock" ? Ke : `<path d="${e.type === "vacuum" ? pt : e.type === "button" ? "m8 4 12 8-12 8Z" : e.type === "number" ? "M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z" : e.type === "light" ? "M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z" : "M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"}"/>`}</svg>`;
+var vt = "M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z";
+function yt(e, t) {
+	return `<svg viewBox="0 0 24 24">${t ? w(t) || "" : e.type === "climate" ? Ze : e.type === "lock" ? Xe : `<path d="${e.type === "vacuum" ? vt : e.type === "button" ? "m8 4 12 8-12 8Z" : e.type === "number" ? "M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z" : e.type === "light" ? "M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z" : "M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"}"/>`}</svg>`;
 }
-var ht = /* @__PURE__ */ new Set([
+var bt = /* @__PURE__ */ new Set([
 	"shade",
 	"blind",
 	"curtain",
 	"shutter",
 	"awning"
-]), gt, _t = () => gt ||= import("./three-d-rooms-scene-D9uOhKtw.js").catch((e) => {
-	throw gt = void 0, e;
+]), X, Z = () => X ||= import("./three-d-rooms-scene-D9uOhKtw.js").catch((e) => {
+	throw X = void 0, e;
 }), Q = {
 	auto: {
 		label: "Auto",
@@ -1430,7 +1430,7 @@ var ht = /* @__PURE__ */ new Set([
 		hint: "always night",
 		icon: "<path d=\"M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z\"/>"
 	}
-}, vt = (e, t = 1) => {
+}, xt = (e, t = 1) => {
 	let n = Object.keys(Q);
 	return n[(n.indexOf(e) + t + n.length) % n.length];
 }, $ = class extends HTMLElement {
@@ -1445,7 +1445,7 @@ var ht = /* @__PURE__ */ new Set([
 		};
 	}
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>:host{display:block;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}.switching{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;cursor:progress;background:color-mix(in srgb,var(--card-background-color,#101715) 40%,transparent);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px)}.switching-pill{display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:10px 18px 10px 14px;border-radius:999px;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#101715) 90%,transparent);box-shadow:0 2px 8px #0006;font:500 14px/1.3 system-ui}.switching-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spinner{flex-shrink:0;width:18px;height:18px;box-sizing:border-box;border:2px solid color-mix(in srgb,var(--primary-text-color,#edf2eb) 25%,transparent);border-top-color:var(--primary-color,#aacaab);border-radius:50%;will-change:transform;animation:switch-spin .8s linear infinite}@keyframes switch-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}ha-card{container:card-root/inline-size;display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;isolation:isolate;width:100%;height:500px;container:card-scene/inline-size}.scene canvas{display:block;width:100%;height:100%}${je}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border-color:color-mix(in srgb,var(--primary-text-color,#edf2eb) 45%,transparent);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid var(--divider-color,#536258);border-radius:var(--ha-dialog-border-radius,16px);padding:24px;background:var(--ha-card-background,var(--card-background-color,#202923));color:var(--primary-text-color,#edf2eb);font:14px system-ui;box-shadow:0 12px 40px #0005}dialog::backdrop{background:var(--mdc-dialog-scrim-color,#0008)}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:var(--secondary-text-color,#aebbb2);line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"],.camera-floor-plan[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}[data-tone="cleaning"]{--tone:var(--state-vacuum-active-color,#009688)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:auto;height:44px;min-height:44px;padding:0 14px 0 11px;font:500 14px system-ui;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{flex-shrink:0;width:20px;height:20px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel[data-kind="shade"] button[role="switch"][aria-checked="true"]{background:var(--state-cover-active-color,#9c27b0)}.light-panel[data-kind="shade"] .light-row[data-on="true"] ha-state-icon{color:var(--state-cover-active-color,#9c27b0)}.light-row{flex-wrap:wrap}.light-position{flex-shrink:0;margin-left:auto;padding-left:8px;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-dim{flex-basis:100%;box-sizing:border-box;width:auto;height:28px;margin:-4px 0 6px 34px;accent-color:var(--state-active-color,#ffd66b);cursor:pointer}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}.room-tags{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}.room-tags .room-tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--room-tag-size,30px)*.2);box-sizing:border-box;height:var(--room-tag-size,30px);min-height:var(--room-tag-size,30px);padding:0 calc(var(--room-tag-size,30px)*.37) 0 calc(var(--room-tag-size,30px)*.27);border-radius:calc(var(--room-tag-size,30px)/2);transform:translate(-50%,6px);white-space:nowrap;pointer-events:auto;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#202923) 92%,transparent);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006;font:500 calc(var(--room-tag-size,30px)*.4)/1 system-ui}.room-tags .room-tag::before{content:"";position:absolute;inset:-8px -4px}.room-tags .room-tag svg{width:calc(var(--room-tag-size,30px)*.47);height:calc(var(--room-tag-size,30px)*.47);flex-shrink:0;opacity:.8}.room-tags .room-tag[data-manual="true"]{transform:translate(-50%,-50%)}.room-tags .room-tag .room-tag-count{display:grid;place-items:center;min-width:calc(var(--room-tag-size,30px)*.6);height:calc(var(--room-tag-size,30px)*.6);padding:0 calc(var(--room-tag-size,30px)*.17);box-sizing:border-box;border-radius:calc(var(--room-tag-size,30px)*.3);background:var(--state-light-active-color,#ffc107);color:#1c1c1c;font-size:calc(var(--room-tag-size,30px)*.37);font-weight:600}.room-tags .room-tag[data-pressing="true"]{animation:room-tag-hold .55s linear forwards}@keyframes room-tag-hold{from{box-shadow:0 2px 8px #0006,inset 0 0 0 0 var(--state-light-active-color,#ffc107)}to{box-shadow:0 2px 8px #0006,inset 0 0 0 20px var(--state-light-active-color,#ffc107)}}@media(prefers-reduced-motion:reduce){.room-tags .room-tag[data-pressing="true"]{animation:none;border-color:var(--state-light-active-color,#ffc107)}}.room-tags .room-tag:hover{background:var(--card-background-color,#202923);border-color:var(--primary-color,#aacaab)}.room-nav{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px}.room-nav .room-step{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:0;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.room-nav .room-step svg{width:22px;height:22px}.room-back{display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;height:44px;min-height:44px;flex:0 0 auto;width:clamp(150px,calc(100cqw - 404px),260px);justify-content:center;padding:0 16px 0 10px;white-space:nowrap;color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab);box-shadow:0 2px 8px #0006;font:600 14px/1 system-ui}.room-back svg{width:20px;height:20px;flex-shrink:0}.room-back>span:not(.room-back-name){flex-shrink:0}.room-back .room-back-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.85;padding-left:8px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent)}.room-back .room-back-name:empty{display:none}@container card-root (max-width:520px){.card-controls{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px}.card-controls>button{width:44px;height:44px;min-height:44px;padding:10px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.card-controls>button::before,.light-panel-toggle::before{content:"";position:absolute;inset:-5px}.card-controls>button svg,.light-panel-toggle svg{width:20px;height:20px;opacity:.85}.panel-toggles{top:8px;left:8px;gap:6px}.floor-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.floor-switch button{height:36px;min-width:44px;padding:0 12px;font:500 14px system-ui}.card-top.card-top:has(header[hidden]){top:8px;right:8px}.daylight-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.daylight-switch button{width:40px;height:36px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{top:3px;left:3px;width:40px;height:36px}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}.light-panel{top:60px;left:8px;bottom:62px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 122px)}.room-nav{top:60px;gap:6px}.room-nav .room-step{width:44px;height:44px;min-height:44px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.room-nav .room-step::before{content:"";position:absolute;inset:-5px}.room-nav .room-step svg{width:22px;height:22px}.room-back{height:44px;min-height:44px;width:clamp(130px,calc(100cqw - 132px),200px);padding:0 12px 0 8px;font:600 12px/1 system-ui;box-shadow:0 1px 4px #0004}.room-back svg{width:16px;height:16px}}.reload-menu{position:absolute;bottom:calc(100% + 8px);z-index:4;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;width:min(250px,calc(100vw - 32px));padding:6px;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;pointer-events:auto}.reload-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;border:0;border-radius:8px;text-align:left;color:inherit;font:500 15px/1.25 system-ui}.reload-menu button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.reload-menu button:disabled{opacity:.5;cursor:wait}.reload-menu svg{flex-shrink:0;width:22px;height:22px}.reload-menu small{display:block;margin-top:2px;color:var(--secondary-text-color,#aebbb2);font:400 12px/1.3 system-ui}.model-refresh[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.undo-toast{position:absolute;left:50%;bottom:72px;z-index:6;transform:translateX(-50%);display:flex;align-items:center;gap:4px;box-sizing:border-box;max-width:calc(100% - 24px);padding:4px 4px 4px 16px;border-radius:10px;color:var(--card-background-color,#fff);background:var(--primary-text-color,#212121);box-shadow:0 4px 16px #0006;font:500 14px/1.3 system-ui;animation:undo-in .2s cubic-bezier(.2,.7,.2,1)}.undo-toast span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.undo-toast button{flex-shrink:0;min-height:40px;padding:0 14px;border:0;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}.undo-toast button:hover{background:color-mix(in srgb,currentColor 12%,transparent)}@keyframes undo-in{from{opacity:0;transform:translate(-50%,8px)}}@media(prefers-reduced-motion:reduce){.undo-toast{animation:none}}.fixture-access button{--activity:var(--info-color,#039be5)}.marker-activity,.marker-activity-tip{display:none}.fixture-access button[data-activity="true"]{border-color:var(--activity);animation:activity-ring 1.8s ease-out infinite}@keyframes activity-ring{0%{box-shadow:0 2px 8px #0006,0 0 0 0 color-mix(in srgb,var(--activity) 70%,transparent)}100%{box-shadow:0 2px 8px #0006,0 0 0 12px transparent}}.fixture-access button[data-activity="true"] .marker-activity{position:absolute;top:-6px;left:calc(100% - 12px);display:flex;align-items:center;justify-content:center;gap:2px;box-sizing:border-box;min-width:18px;height:18px;padding:0 3px;border-radius:9px;background:var(--activity);color:#fff;box-shadow:0 0 0 2px var(--card-background-color,#202923);font:700 10px/1 system-ui;pointer-events:none}.marker-activity ha-state-icon{display:flex;width:12px;height:12px;--mdc-icon-size:12px;--marker-glyph-size:12px;color:#fff}@media(hover:hover){.fixture-access button[data-activity="true"]:hover .marker-activity-tip,.fixture-access button[data-activity="true"]:focus-visible .marker-activity-tip{position:absolute;bottom:calc(100% + 10px);left:50%;z-index:3;display:flex;flex-direction:column;gap:4px;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:240px;padding:7px 10px;border-radius:8px;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);box-shadow:0 4px 12px #0007;color:var(--primary-text-color,#edf2eb);font:500 12px/1.3 system-ui;text-align:left;white-space:nowrap;pointer-events:none}}.marker-activity-tip span{display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis}.marker-activity-tip span::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;background:var(--activity);animation:activity-pulse 1.6s ease-in-out infinite}@keyframes activity-pulse{0%,100%{opacity:1}50%{opacity:.35}}@media(prefers-reduced-motion:reduce){.fixture-access button[data-activity="true"],.marker-activity-tip span::before{animation:none!important}}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="backdrop" aria-hidden="true"></div><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`, this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>:host{display:block;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}.switching{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;cursor:progress;background:color-mix(in srgb,var(--card-background-color,#101715) 40%,transparent);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px)}.switching-pill{display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:10px 18px 10px 14px;border-radius:999px;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#101715) 90%,transparent);box-shadow:0 2px 8px #0006;font:500 14px/1.3 system-ui}.switching-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spinner{flex-shrink:0;width:18px;height:18px;box-sizing:border-box;border:2px solid color-mix(in srgb,var(--primary-text-color,#edf2eb) 25%,transparent);border-top-color:var(--primary-color,#aacaab);border-radius:50%;will-change:transform;animation:switch-spin .8s linear infinite}@keyframes switch-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}ha-card{container:card-root/inline-size;display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;isolation:isolate;width:100%;height:500px;container:card-scene/inline-size}.scene canvas{display:block;width:100%;height:100%}${Pe}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border-color:color-mix(in srgb,var(--primary-text-color,#edf2eb) 45%,transparent);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid var(--divider-color,#536258);border-radius:var(--ha-dialog-border-radius,16px);padding:24px;background:var(--ha-card-background,var(--card-background-color,#202923));color:var(--primary-text-color,#edf2eb);font:14px system-ui;box-shadow:0 12px 40px #0005}dialog::backdrop{background:var(--mdc-dialog-scrim-color,#0008)}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:var(--secondary-text-color,#aebbb2);line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"],.camera-floor-plan[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}[data-tone="cleaning"]{--tone:var(--state-vacuum-active-color,#009688)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:auto;height:44px;min-height:44px;padding:0 14px 0 11px;font:500 14px system-ui;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{flex-shrink:0;width:20px;height:20px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel[data-kind="shade"] button[role="switch"][aria-checked="true"]{background:var(--state-cover-active-color,#9c27b0)}.light-panel[data-kind="shade"] .light-row[data-on="true"] ha-state-icon{color:var(--state-cover-active-color,#9c27b0)}.light-row{flex-wrap:wrap}.light-position{flex-shrink:0;margin-left:auto;padding-left:8px;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-dim{flex-basis:100%;box-sizing:border-box;width:auto;height:28px;margin:-4px 0 6px 34px;accent-color:var(--state-active-color,#ffd66b);cursor:pointer}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}.room-tags{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}.room-tags .room-tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--room-tag-size,30px)*.2);box-sizing:border-box;height:var(--room-tag-size,30px);min-height:var(--room-tag-size,30px);padding:0 calc(var(--room-tag-size,30px)*.37) 0 calc(var(--room-tag-size,30px)*.27);border-radius:calc(var(--room-tag-size,30px)/2);transform:translate(-50%,6px);white-space:nowrap;pointer-events:auto;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#202923) 92%,transparent);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006;font:500 calc(var(--room-tag-size,30px)*.4)/1 system-ui}.room-tags .room-tag::before{content:"";position:absolute;inset:-8px -4px}.room-tags .room-tag svg{width:calc(var(--room-tag-size,30px)*.47);height:calc(var(--room-tag-size,30px)*.47);flex-shrink:0;opacity:.8}.room-tags .room-tag[data-manual="true"]{transform:translate(-50%,-50%)}.room-tags .room-tag .room-tag-count{display:grid;place-items:center;min-width:calc(var(--room-tag-size,30px)*.6);height:calc(var(--room-tag-size,30px)*.6);padding:0 calc(var(--room-tag-size,30px)*.17);box-sizing:border-box;border-radius:calc(var(--room-tag-size,30px)*.3);background:var(--state-light-active-color,#ffc107);color:#1c1c1c;font-size:calc(var(--room-tag-size,30px)*.37);font-weight:600}.room-tags .room-tag[data-pressing="true"]{animation:room-tag-hold .55s linear forwards}@keyframes room-tag-hold{from{box-shadow:0 2px 8px #0006,inset 0 0 0 0 var(--state-light-active-color,#ffc107)}to{box-shadow:0 2px 8px #0006,inset 0 0 0 20px var(--state-light-active-color,#ffc107)}}@media(prefers-reduced-motion:reduce){.room-tags .room-tag[data-pressing="true"]{animation:none;border-color:var(--state-light-active-color,#ffc107)}}.room-tags .room-tag:hover{background:var(--card-background-color,#202923);border-color:var(--primary-color,#aacaab)}.room-nav{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px}.room-nav .room-step{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:0;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.room-nav .room-step svg{width:22px;height:22px}.room-back{display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;height:44px;min-height:44px;flex:0 0 auto;width:clamp(150px,calc(100cqw - 404px),260px);justify-content:center;padding:0 16px 0 10px;white-space:nowrap;color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab);box-shadow:0 2px 8px #0006;font:600 14px/1 system-ui}.room-back svg{width:20px;height:20px;flex-shrink:0}.room-back>span:not(.room-back-name){flex-shrink:0}.room-back .room-back-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.85;padding-left:8px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent)}.room-back .room-back-name:empty{display:none}@container card-root (max-width:520px){.card-controls{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px}.card-controls>button{width:44px;height:44px;min-height:44px;padding:10px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.card-controls>button::before,.light-panel-toggle::before{content:"";position:absolute;inset:-5px}.card-controls>button svg,.light-panel-toggle svg{width:20px;height:20px;opacity:.85}.panel-toggles{top:8px;left:8px;gap:6px}.floor-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.floor-switch button{height:36px;min-width:44px;padding:0 12px;font:500 14px system-ui}.card-top.card-top:has(header[hidden]){top:8px;right:8px}.daylight-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.daylight-switch button{width:40px;height:36px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{top:3px;left:3px;width:40px;height:36px}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}.light-panel{top:60px;left:8px;bottom:62px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 122px)}.room-nav{top:60px;gap:6px}.room-nav .room-step{width:44px;height:44px;min-height:44px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.room-nav .room-step::before{content:"";position:absolute;inset:-5px}.room-nav .room-step svg{width:22px;height:22px}.room-back{height:44px;min-height:44px;width:clamp(130px,calc(100cqw - 132px),200px);padding:0 12px 0 8px;font:600 12px/1 system-ui;box-shadow:0 1px 4px #0004}.room-back svg{width:16px;height:16px}}.reload-menu{position:absolute;bottom:calc(100% + 8px);z-index:4;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;width:min(250px,calc(100vw - 32px));padding:6px;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;pointer-events:auto}.reload-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;border:0;border-radius:8px;text-align:left;color:inherit;font:500 15px/1.25 system-ui}.reload-menu button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.reload-menu button:disabled{opacity:.5;cursor:wait}.reload-menu svg{flex-shrink:0;width:22px;height:22px}.reload-menu small{display:block;margin-top:2px;color:var(--secondary-text-color,#aebbb2);font:400 12px/1.3 system-ui}.model-refresh[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.undo-toast{position:absolute;left:50%;bottom:72px;z-index:6;transform:translateX(-50%);display:flex;align-items:center;gap:4px;box-sizing:border-box;max-width:calc(100% - 24px);padding:4px 4px 4px 16px;border-radius:10px;color:var(--card-background-color,#fff);background:var(--primary-text-color,#212121);box-shadow:0 4px 16px #0006;font:500 14px/1.3 system-ui;animation:undo-in .2s cubic-bezier(.2,.7,.2,1)}.undo-toast span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.undo-toast button{flex-shrink:0;min-height:40px;padding:0 14px;border:0;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}.undo-toast button:hover{background:color-mix(in srgb,currentColor 12%,transparent)}@keyframes undo-in{from{opacity:0;transform:translate(-50%,8px)}}@media(prefers-reduced-motion:reduce){.undo-toast{animation:none}}.fixture-access button{--activity:var(--info-color,#039be5)}.marker-activity,.marker-activity-tip{display:none}.fixture-access button[data-activity="true"]{border-color:var(--activity);animation:activity-ring 1.8s ease-out infinite}@keyframes activity-ring{0%{box-shadow:0 2px 8px #0006,0 0 0 0 color-mix(in srgb,var(--activity) 70%,transparent)}100%{box-shadow:0 2px 8px #0006,0 0 0 12px transparent}}.fixture-access button[data-activity="true"] .marker-activity{position:absolute;top:-6px;left:calc(100% - 12px);display:flex;align-items:center;justify-content:center;gap:2px;box-sizing:border-box;min-width:18px;height:18px;padding:0 3px;border-radius:9px;background:var(--activity);color:#fff;box-shadow:0 0 0 2px var(--card-background-color,#202923);font:700 10px/1 system-ui;pointer-events:none}.marker-activity ha-state-icon{display:flex;width:12px;height:12px;--mdc-icon-size:12px;--marker-glyph-size:12px;color:#fff}@media(hover:hover){.fixture-access button[data-activity="true"]:hover .marker-activity-tip,.fixture-access button[data-activity="true"]:focus-visible .marker-activity-tip{position:absolute;bottom:calc(100% + 10px);left:50%;z-index:3;display:flex;flex-direction:column;gap:4px;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:240px;padding:7px 10px;border-radius:8px;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);box-shadow:0 4px 12px #0007;color:var(--primary-text-color,#edf2eb);font:500 12px/1.3 system-ui;text-align:left;white-space:nowrap;pointer-events:none}}.marker-activity-tip span{display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis}.marker-activity-tip span::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;background:var(--activity);animation:activity-pulse 1.6s ease-in-out infinite}@keyframes activity-pulse{0%,100%{opacity:1}50%{opacity:.35}}@media(prefers-reduced-motion:reduce){.fixture-access button[data-activity="true"],.marker-activity-tip span::before{animation:none!important}}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="backdrop" aria-hidden="true"></div><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`, this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
 		let e = document.createElement("span");
 		e.className = "daylight-thumb", this._daylightSwitch.append(e);
 		for (let [e, { label: t, hint: n, icon: r }] of Object.entries(Q)) {
@@ -1461,7 +1461,7 @@ var ht = /* @__PURE__ */ new Set([
 			}[e.key];
 			if (!t) return;
 			e.preventDefault();
-			let n = vt(this._daylightSwitch.value, t);
+			let n = xt(this._daylightSwitch.value, t);
 			this._chooseDaylight(n), this._daylightSwitch.querySelector(`[data-mode="${n}"]`)?.focus();
 		}, this._showDaylightMode("auto"), this.shadowRoot.querySelector(".message button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "More"), this._refresh.setAttribute("aria-haspopup", "menu"), this._refresh.setAttribute("aria-expanded", "false"), this._refresh.title = "More: reload, edit", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><circle cx=\"5\" cy=\"12\" r=\"2\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/><circle cx=\"19\" cy=\"12\" r=\"2\"/></svg>", this._refresh.onclick = () => this._setReloadMenu(!this._reloadMenu), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._floorPlanButton = document.createElement("button"), this._floorPlanButton.type = "button", this._floorPlanButton.className = "camera-floor-plan", this._floorPlanButton.setAttribute("aria-label", "Floor plan"), this._floorPlanButton.setAttribute("aria-pressed", "false"), this._floorPlanButton.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 12h7M10 3v13M14 12h7M14 12v9\"/></svg>", this._floorPlanButton.hidden = !0, this._floorPlanButton.onclick = () => this._setFloorPlan(!this._floorPlan), this._editButton = document.createElement("button"), this._editButton.type = "button", this._editButton.className = "card-edit", this._editButton.hidden = !0, this._editButton.setAttribute("aria-label", "Edit in 3D Rooms"), this._editButton.title = "Edit in 3D Rooms — opens this view in the editor in a new tab", this._editButton.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z\"/></svg>", this._editButton.onclick = () => this._openEditor(), this._controls.append(this._refresh, this._resetCamera, this._moveCamera, this._floorPlanButton), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {}, this._panelIcons = {};
 		for (let [e, t, n, r] of [[
@@ -1503,7 +1503,7 @@ var ht = /* @__PURE__ */ new Set([
 		for (let e of ["tilt", "heading"]) if (t[e] !== void 0 && !Number.isFinite(t[e])) throw Error(`${e} must be a number.`);
 		if (t.tilt !== void 0 && (t.tilt < 0 || t.tilt > 180)) throw Error("Tilt must be between 0 and 180 degrees.");
 		if (t.view !== void 0 && !["front", "floor"].includes(t.view)) throw Error("Choose front or floor view.");
-		if (Ee(t), t.quality !== void 0 && !te.includes(t.quality)) throw Error("Quality must be auto, high or low.");
+		if (ke(t), t.quality !== void 0 && !te.includes(t.quality)) throw Error("Quality must be auto, high or low.");
 		for (let e of [
 			"floor_selector",
 			"camera_controls",
@@ -1550,13 +1550,13 @@ var ht = /* @__PURE__ */ new Set([
 		this._outsidePanel ??= (e) => {
 			let t = e.composedPath();
 			this._reloadMenu && !t.includes(this._reloadMenu) && !t.includes(this._refresh) && this._setReloadMenu(!1), this._lightPanel && (t.includes(this._lightPanel) || t.includes(this._panelToggles) || t.some((e) => e instanceof HTMLDialogElement) || this._setLightPanel(null));
-		}, document.addEventListener("pointerdown", this._outsidePanel, !0), this._layout = new Ce(this), this._applyHeight(), this.hasAttribute("fill-page") && (this._refresh.setAttribute("aria-label", "Reload"), this._refresh.setAttribute("aria-haspopup", "menu"), this._refresh.setAttribute("aria-expanded", "false"), this._refresh.title = "Reload the page or the room model"), this._hass && this._config && this._load();
+		}, document.addEventListener("pointerdown", this._outsidePanel, !0), this._layout = new Ee(this), this._applyHeight(), this.hasAttribute("fill-page") && (this._refresh.setAttribute("aria-label", "Reload"), this._refresh.setAttribute("aria-haspopup", "menu"), this._refresh.setAttribute("aria-expanded", "false"), this._refresh.title = "Reload the page or the room model"), this._hass && this._config && this._load();
 	}
 	disconnectedCallback() {
 		this._robotDialog?.close(), document.removeEventListener("pointerdown", this._outsidePanel, !0), this._setReloadMenu(!1), this._layout?.dispose(), this._layout = null, ++this._generation, clearInterval(this._keepalive), this._unsubModels?.(), this._unsubModels = null, this._unsubEffects?.(), this._unsubEffects = null, this._dialog?.remove(), clearTimeout(this._coverTimer), clearTimeout(this._warmTimer), this._switching = !1, this._switchOverlay.hidden = !0, this._view?.dispose(), this._view = null, this._loading = !1;
 	}
 	async _refreshModels() {
-		!this._loading && this._hass && (xe(this._hass), a(j(this._hass)), await this._load({ fresh: !0 }));
+		!this._loading && this._hass && (we(this._hass), a(j(this._hass)), await this._load({ fresh: !0 }));
 	}
 	_setReloadMenu(e) {
 		if (!e) {
@@ -1606,7 +1606,7 @@ var ht = /* @__PURE__ */ new Set([
 	async _load({ fresh: t = !1 } = {}) {
 		if (!this._config || !this._hass) return;
 		let n = ++this._generation;
-		_t().catch(() => {}), this._loading = !0, this._contextLost = !1, this._refresh.disabled = !this.hasAttribute("fill-page"), this._container.setAttribute("aria-busy", "true"), this._reload = !1, clearInterval(this._keepalive), (this._config.preview_url || this._config.addon) && (this._unsubModels?.(), this._unsubModels = null), this._changedDuringLoad = !1, this._message.hidden = !1, this._message.querySelector("span").textContent = "Downloading your room…", this._message.querySelector("button").hidden = !0, this._message.querySelector("button").textContent = "Retry";
+		Z().catch(() => {}), this._loading = !0, this._contextLost = !1, this._refresh.disabled = !this.hasAttribute("fill-page"), this._container.setAttribute("aria-busy", "true"), this._reload = !1, clearInterval(this._keepalive), (this._config.preview_url || this._config.addon) && (this._unsubModels?.(), this._unsubModels = null), this._changedDuringLoad = !1, this._message.hidden = !1, this._message.querySelector("span").textContent = "Downloading your room…", this._message.querySelector("button").hidden = !0, this._message.querySelector("button").textContent = "Retry";
 		let r = this._message.querySelector("progress");
 		r.hidden = !0, this._view || this._showLoadingPreview(this._cachedThumbnail());
 		let i = !1, a = !1;
@@ -1630,7 +1630,7 @@ var ht = /* @__PURE__ */ new Set([
 				this._message.querySelector("span").textContent = "Choose a room in the visual editor.";
 				return;
 			}
-			let a = await lt(this._hass, this._config, location.origin);
+			let a = await mt(this._hass, this._config, location.origin);
 			if (n !== this._generation) return;
 			a.session && (document.cookie = `ingress_session=${a.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`);
 			let { model: o, configured: s, floors: c, views: l, sceneURL: u, layers: d, release: f, assetCache: p } = await a.load({
@@ -1640,7 +1640,7 @@ var ht = /* @__PURE__ */ new Set([
 				},
 				onProgress: (e) => {
 					if (n !== this._generation) return;
-					let { value: t, text: i } = Me(e);
+					let { value: t, text: i } = Fe(e);
 					this._message.querySelector("span").textContent = i, r.hidden = t === void 0, t !== void 0 && (r.value = t);
 				}
 			});
@@ -1648,7 +1648,7 @@ var ht = /* @__PURE__ */ new Set([
 				f?.();
 				return;
 			}
-			let { SceneView: m } = await _t();
+			let { SceneView: m } = await Z();
 			if (n !== this._generation) {
 				f?.();
 				return;
@@ -1660,7 +1660,7 @@ var ht = /* @__PURE__ */ new Set([
 				cameraModel: this._config.model,
 				frameInset: () => this._toolbarInset(),
 				quality: this._config.quality,
-				transparent: Te(this._background()),
+				transparent: Oe(this._background()),
 				groundShadow: I(this._config),
 				onRender: () => this._positionButtons(),
 				onRoomDoubleTap: (e) => {
@@ -1684,9 +1684,9 @@ var ht = /* @__PURE__ */ new Set([
 			}
 			if (n !== this._generation) return;
 			this._views = l || [], this._floors = c || [];
-			let g = K(this._views, s || o, this._floor);
+			let g = lt(this._views, s || o, this._floor);
 			if (g !== o && !h.setHouseView(g) && (g = o), this._floor && g.id !== this._floor && (this._floor = null), this._model = g, this._earlyModel = null, this._focus = null, this._cameraMoved = !1, this._syncFloorSwitch(), this._syncCameraButtons(), this._previewStates = /* @__PURE__ */ new Map(), this._buildAccess(), this._syncRoomTags(), this._preview = a.preview, this._signature = null, this._states(), this._syncDaylightSwitch(), this._syncEditButton(), this._message.hidden = !0, this._hideLoadingPreview(), this._warmViews(), !this._preview && !this._config.addon && !this._unsubModels && this._hass.connection?.subscribeEvents) {
-				let e = await Je(this._hass.connection, () => this._modelsEvent());
+				let e = await Qe(this._hass.connection, () => this._modelsEvent());
 				!this.isConnected || this._unsubModels ? e() : this._unsubModels = e;
 			}
 			if (n !== this._generation) return;
@@ -1878,7 +1878,7 @@ var ht = /* @__PURE__ */ new Set([
 		this._positionRoomTags();
 	}
 	_roomLightsOf(e) {
-		return J(this._model).find((t) => t.id === e && t.lights.length);
+		return K(this._model).find((t) => t.id === e && t.lights.length);
 	}
 	_wireRoomTag(e, t) {
 		let n = null, r, i = !1, a = () => {
@@ -1907,9 +1907,9 @@ var ht = /* @__PURE__ */ new Set([
 	_syncRoomTagStates() {
 		let e = [...this._roomTags?.children || []];
 		if (!e.length) return;
-		let t = new Map(J(this._model).map((e) => [e.id, e])), n = this._lightStates || /* @__PURE__ */ new Map();
+		let t = new Map(K(this._model).map((e) => [e.id, e])), n = this._lightStates || /* @__PURE__ */ new Map();
 		for (let r of e) {
-			let e = t.get(r.dataset.room), i = e ? Y(e, n).on : 0, a = r.querySelector(".room-tag-count");
+			let e = t.get(r.dataset.room), i = e ? q(e, n).on : 0, a = r.querySelector(".room-tag-count");
 			r.dataset.active = String(i > 0), a && (a.hidden = i === 0, a.textContent = i, a.title = `${i} on`);
 		}
 	}
@@ -2075,8 +2075,8 @@ var ht = /* @__PURE__ */ new Set([
 	_applyBackdrop(e) {
 		let t = this.shadowRoot.querySelector(".backdrop");
 		if (!t || !this._config) return;
-		let n = De(Oe(this._model?.daylight?.mode, e ?? this._hass?.states?.[this._model?.daylight?.entity || "sun.sun"]));
-		Ae(t, this._config, n);
+		let n = Ae(je(this._model?.daylight?.mode, e ?? this._hass?.states?.[this._model?.daylight?.entity || "sun.sun"]));
+		Ne(t, this._config, n);
 	}
 	_syncDaylightSwitch() {
 		let e = this._model?.daylight;
@@ -2163,7 +2163,7 @@ var ht = /* @__PURE__ */ new Set([
 			let s = n(this._config.markers, r.id);
 			a.style.setProperty("--marker-size", s.size + "px"), a.setAttribute("aria-label", r.type === "light" ? `Toggle ${o}. Hold, or press Shift+Enter, for more info.` : `Control ${o}`), a.title = r.type === "light" ? `${o}: click to toggle, hold for more info` : `${o}: value controls`;
 			let l = S(s, r, !1), u = l || S(s, r, !0), d = document.createElement(r.type === "climate" && !u ? "span" : "ha-state-icon");
-			r.type === "climate" && !u && (d.className = "fixture-ac-icon"), l && (d.icon = l), d.setAttribute("aria-hidden", "true"), d.innerHTML = mt(r, l), d.dataset.glyph = l || "";
+			r.type === "climate" && !u && (d.className = "fixture-ac-icon"), l && (d.icon = l), d.setAttribute("aria-hidden", "true"), d.innerHTML = yt(r, l), d.dataset.glyph = l || "";
 			let f = document.createElement("span");
 			if (f.className = "fixture-state", f.setAttribute("aria-hidden", "true"), f.hidden = !s.show_label, a.append(d), s.placement === "tray") {
 				let e = document.createElement("span");
@@ -2288,7 +2288,7 @@ var ht = /* @__PURE__ */ new Set([
 		let t = this._knownShades();
 		if (t) return t.includes(e.id);
 		let n = this._hass?.states?.[this._panelModel?.bindings?.[e.id]];
-		return ht.has(n?.attributes?.device_class);
+		return bt.has(n?.attributes?.device_class);
 	}
 	_shadeKey(e = this._panelModel) {
 		return e?.id && `three-d-rooms:shades:${e.id}`;
@@ -2311,7 +2311,7 @@ var ht = /* @__PURE__ */ new Set([
 		return this._model || this._earlyModel;
 	}
 	_showEarlyPanels({ model: e, configured: t, views: n }) {
-		this._view || this._preview || !e?.controls || (this._earlyModel = K(n || [], t || e, this._floor), this._earlyStates(), this._buildLightPanel());
+		this._view || this._preview || !e?.controls || (this._earlyModel = lt(n || [], t || e, this._floor), this._earlyStates(), this._buildLightPanel());
 	}
 	_earlyStates() {
 		let e = this._earlyModel;
@@ -2345,8 +2345,8 @@ var ht = /* @__PURE__ */ new Set([
 	}
 	_buildLightPanel() {
 		if (this._panelRooms = {
-			light: this._config?.light_panel === !1 ? [] : J(this._panelModel),
-			shade: this._config?.shade_panel === !1 ? [] : ut(this._panelModel, "shade", (e) => this._isShade(e))
+			light: this._config?.light_panel === !1 ? [] : K(this._panelModel),
+			shade: this._config?.shade_panel === !1 ? [] : ht(this._panelModel, "shade", (e) => this._isShade(e))
 		}, this._view?.fixtures && this._model && !this._model.focusRoom && this._rememberShades(this._panelRooms.shade.flatMap((e) => e.lights.map((e) => e.id))), !this._preview) for (let e of Object.keys(this._panelRooms)) this._panelRooms[e] = this._panelRooms[e].map((e) => ({
 			...e,
 			lights: e.lights.filter((e) => e.entityId)
@@ -2411,7 +2411,7 @@ var ht = /* @__PURE__ */ new Set([
 		this._lightPanel = n, this._container.append(n), this._syncLightPanel();
 	}
 	_confirmAllLights() {
-		let { on: e, available: t } = Y(X(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
+		let { on: e, available: t } = q(J(this._rooms || []), this._lightStates || /* @__PURE__ */ new Map()), n = e === 0, r = this._panelWords(), i = (e) => e === 1 ? r.one : r.noun;
 		this._dialog?.remove();
 		let a = document.createElement("dialog");
 		return this._dialog = a, a.className = "confirm-all-lights", a.innerHTML = "<form method=\"dialog\"><h2></h2><p></p><div style=\"display:flex;gap:8px;justify-content:flex-end;margin-top:16px\"><button value=\"cancel\" autofocus>Cancel</button><button value=\"ok\" class=\"confirm\"></button></div></form>", a.querySelector("h2").textContent = `${n ? r.turnOn : r.turnOff} all ${r.noun}?`, a.querySelector("p").textContent = n ? `This will ${r.turnOn.toLowerCase()} ${t} ${i(t)} in ${this._rooms.length === 1 ? this._rooms[0].title : "every room shown"}. Hidden devices are not changed.` : `This will ${r.turnOff.toLowerCase()} the ${e} ${i(e)} that ${e === 1 ? "is" : "are"} ${r.on}. Hidden devices are not changed.`, a.querySelector(".confirm").textContent = n ? `${r.turnOn} all` : `${r.turnOff} all`, this.shadowRoot.append(a), new Promise((e) => {
@@ -2426,12 +2426,12 @@ var ht = /* @__PURE__ */ new Set([
 	_syncLightPanel(e = this._lightStates) {
 		let t = this._lightPanel;
 		if (!t || !e) return;
-		let n = this._panelWords(), r = q[this._panelKind || "light"].isOn, i = X(this._rooms), a = Y(i, e), o = t.querySelector("h2 [role=\"switch\"]");
+		let n = this._panelWords(), r = G[this._panelKind || "light"].isOn, i = J(this._rooms), a = q(i, e), o = t.querySelector("h2 [role=\"switch\"]");
 		t.querySelector("h2 .light-room-count").textContent = a.available ? `${a.on} ${n.on}` : "", o.setAttribute("aria-checked", String(a.on > 0)), o.disabled = !a.available || !this._preview && !i.entities.length, o.title = `${a.on ? n.turnOff : n.turnOn} all ${n.noun}`;
 		for (let i of this._rooms) {
 			let a = [...t.querySelectorAll("[data-room]")].find((e) => e.dataset.room === i.id);
 			if (!a) continue;
-			let o = Y(i, e);
+			let o = q(i, e);
 			a.querySelector(".light-room-count").textContent = o.available ? `${o.on} of ${o.available} ${n.on}` : i.entities.length || this._preview ? "Unavailable" : "Not connected";
 			let s = a.querySelector("[data-room-switch]");
 			s.setAttribute("aria-checked", String(o.on > 0)), s.disabled = !o.available || !this._preview && !i.entities.length, s.title = `${o.on ? n.turnOff : n.turnOn} all ${i.title} ${n.noun}`;
@@ -2456,14 +2456,14 @@ var ht = /* @__PURE__ */ new Set([
 		}
 	}
 	async _toggleShade(e) {
-		let t = this._lightStates || /* @__PURE__ */ new Map(), n = q.shade.isOn(t.get(e) || {}), r = this._panelModel;
+		let t = this._lightStates || /* @__PURE__ */ new Map(), n = G.shade.isOn(t.get(e) || {}), r = this._panelModel;
 		if (this._preview) {
 			this._previewStates.set(e, { position: n ? 0 : 100 }), this._states();
 			return;
 		}
 		let i = r.bindings[e], a = this._hass.states?.[i];
 		if (!i?.startsWith("cover.") || !a || ["unavailable", "unknown"].includes(a.state)) return;
-		let o = Z([i], this._hass.states);
+		let o = Y([i], this._hass.states);
 		try {
 			await this._hass.callService("cover", n ? "close_cover" : "open_cover", { entity_id: i }), this._offerUndo(() => `${c(r.controls.find((t) => t.id === e) || {}, "Shade")} ${n ? "closed" : "opened"}`, o);
 		} catch {
@@ -2498,7 +2498,7 @@ var ht = /* @__PURE__ */ new Set([
 			n.querySelector("button").onclick = async () => {
 				r();
 				try {
-					await Promise.all(ft(t).map((e) => this._hass.callService(...e)));
+					await Promise.all(_t(t).map((e) => this._hass.callService(...e)));
 				} catch {
 					this._panelFeedback("Could not undo. Try again.");
 				}
@@ -2513,11 +2513,11 @@ var ht = /* @__PURE__ */ new Set([
 		t.className = "fixture-feedback", t.setAttribute("role", "alert"), t.textContent = e, this._container.append(t), setTimeout(() => t.remove(), 5e3);
 	}
 	async _toggleRoomLights(e, t) {
-		let n = t || (e === "" ? this._rooms?.length && X(this._rooms) : this._rooms?.find((t) => t.id === e));
+		let n = t || (e === "" ? this._rooms?.length && J(this._rooms) : this._rooms?.find((t) => t.id === e));
 		if (!n || this._pendingRooms.has(e)) return;
 		let r = this._lightStates || /* @__PURE__ */ new Map(), i = this._panelWords(n.kind);
 		if (this._preview) {
-			let e = Y(n, r).on === 0;
+			let e = q(n, r).on === 0;
 			for (let t of n.lights) {
 				if (n.kind === "shade") {
 					this._previewStates.set(t.id, { position: e ? 100 : 0 });
@@ -2536,9 +2536,9 @@ var ht = /* @__PURE__ */ new Set([
 			this._states();
 			return;
 		}
-		let { calls: a, turnOn: o } = dt(n, r, this._hass.states);
+		let { calls: a, turnOn: o } = gt(n, r, this._hass.states);
 		if (!a.length) return;
-		let s = Z(a.flatMap(([, , e]) => e.entity_id), this._hass.states);
+		let s = Y(a.flatMap(([, , e]) => e.entity_id), this._hass.states);
 		this._pendingRooms.add(e);
 		let c = [...this._lightPanel?.querySelectorAll("[data-room-switch]") || []].find((t) => t.dataset.roomSwitch === e);
 		c?.setAttribute("aria-busy", "true"), this.shadowRoot.querySelector(".fixture-feedback")?.remove();
@@ -2604,11 +2604,11 @@ var ht = /* @__PURE__ */ new Set([
 		this._groupChips ||= /* @__PURE__ */ new Map();
 		let i = .9, a = new Set(this._model?.houseView && !this._model.focusRoom ? (this._model.members || []).filter((e) => e.groupIcons).map((e) => e.model) : []), o = a.size > 0;
 		e = e.filter((e) => a.has(e.room));
-		let s = this._openGroup, c = o ? H(e, {
+		let s = this._openGroup, c = o ? Le(e, {
 			open: new Set(s ? [s] : []),
 			overlap: i
 		}) : [];
-		s && !(o && Pe(e, s, i)) && (this._openGroup = null), this._groupOf = /* @__PURE__ */ new Map();
+		s && !(o && Re(e, s, i)) && (this._openGroup = null), this._groupOf = /* @__PURE__ */ new Map();
 		let l = /* @__PURE__ */ new Set();
 		for (let n of c) {
 			l.add(n.room);
@@ -2654,7 +2654,7 @@ var ht = /* @__PURE__ */ new Set([
 		this._pendingToggles.add(e);
 		let a = [...this.shadowRoot.querySelectorAll("[data-control]")].find((t) => t.dataset.control === e);
 		a?.setAttribute("aria-busy", "true"), this.shadowRoot.querySelector(".fixture-feedback")?.remove();
-		let o = Z([r], this._hass.states);
+		let o = Y([r], this._hass.states);
 		try {
 			let e = r.split(".")[0];
 			await this._hass.callService([
@@ -2676,7 +2676,7 @@ var ht = /* @__PURE__ */ new Set([
 			return;
 		}
 		let t = this._hass.states?.[this._model.bindings[e.id]];
-		if (!U(t).unavailable && (this._pendingPresets ||= /* @__PURE__ */ new Set(), !this._pendingPresets.has(e.id))) {
+		if (!H(t).unavailable && (this._pendingPresets ||= /* @__PURE__ */ new Set(), !this._pendingPresets.has(e.id))) {
 			this._pendingPresets.add(e.id);
 			try {
 				await this._hass.callWS({
@@ -2766,13 +2766,13 @@ var ht = /* @__PURE__ */ new Set([
 		}, l.oninput = () => {
 			a.rgb = T(l.value), d();
 		}, u.oninput = () => {
-			a.colorTempKelvin = Number(u.value), a.rgb = le(a.colorTempKelvin), l.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), d();
+			a.colorTempKelvin = Number(u.value), a.rgb = de(a.colorTempKelvin), l.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), d();
 		}, this._preview && d(), i.addEventListener("close", () => i.remove()), this.shadowRoot.append(i), i.showModal();
 	}
 	_deskDialog(e) {
 		this._dialog?.remove();
 		let t = document.createElement("dialog");
-		this._dialog = t, t.className = "dm", t.dataset.desk = e.id, t.innerHTML = ze, t.querySelector("h2").textContent = e.label;
+		this._dialog = t, t.className = "dm", t.dataset.desk = e.id, t.innerHTML = Ue, t.querySelector("h2").textContent = e.label;
 		let n = t.querySelector(".dm-macros");
 		for (let [t, r] of e.macros.entries()) {
 			let e = document.createElement("button");
@@ -2786,7 +2786,7 @@ var ht = /* @__PURE__ */ new Set([
 		r.onpointerdown = (e) => {
 			if (r.getAttribute("aria-disabled") === "true" || !a()) return;
 			e.preventDefault(), r.setPointerCapture(e.pointerId), r.classList.add("dm-dragging"), t._deskDragging = !0;
-			let n = (e) => Ve(e.clientY, r.getBoundingClientRect(), a());
+			let n = (e) => Ge(e.clientY, r.getBoundingClientRect(), a());
 			t._deskValue = n(e), o(t._deskValue), r.onpointermove = (e) => {
 				t._deskValue = n(e), o(t._deskValue);
 			}, r.onpointerup = r.onpointercancel = (e) => {
@@ -2803,20 +2803,20 @@ var ht = /* @__PURE__ */ new Set([
 				PageUp: c,
 				PageDown: -c
 			}[e.key], u = e.key === "Home" ? n.min : e.key === "End" ? n.max : l === void 0 ? void 0 : (t._deskValue ?? n.min) + l;
-			u !== void 0 && (e.preventDefault(), t._deskDragging = !0, t._deskValue = Be(u, n), o(t._deskValue), clearTimeout(i), i = setTimeout(() => {
+			u !== void 0 && (e.preventDefault(), t._deskDragging = !0, t._deskValue = We(u, n), o(t._deskValue), clearTimeout(i), i = setTimeout(() => {
 				t._deskDragging = !1, s(t._deskValue);
 			}, 500));
 		}, t.addEventListener("click", (e) => {
 			e.target === t && t.close();
 		}), t.addEventListener("close", () => {
 			clearTimeout(i), t.remove();
-		}), this.shadowRoot.append(t), this._updateDeskDialog(), t.showModal();
+		}), ue(t, { top: ".sheet-grab, .dm-head" }), this.shadowRoot.append(t), this._updateDeskDialog(), t.showModal(), fe(t);
 	}
 	_showDeskHeight(e) {
 		let t = this._dialog, n = t?._deskRange;
 		if (!n) return;
 		let r = Number.isFinite(e);
-		t.querySelector(".dm-fill").style.height = He(e, n) * 100 + "%", t.querySelector(".dm-big").textContent = r ? `${e} ${n.unit}` : "—";
+		t.querySelector(".dm-fill").style.height = Ke(e, n) * 100 + "%", t.querySelector(".dm-big").textContent = r ? `${e} ${n.unit}` : "—";
 		let i = t.querySelector(".dm-slider");
 		i.setAttribute("aria-valuemin", n.min), i.setAttribute("aria-valuemax", n.max), r ? (i.setAttribute("aria-valuenow", e), i.setAttribute("aria-valuetext", `${e} ${n.unit}`)) : i.removeAttribute("aria-valuenow");
 	}
@@ -2849,7 +2849,7 @@ var ht = /* @__PURE__ */ new Set([
 		if (!e?.dataset?.desk) return;
 		let t = this._model.devices?.find((t) => t.id === e.dataset.desk);
 		if (!t) return;
-		let n = this._model.controls.find((e) => e.id === t.height), r = this._hass.states?.[this._model.bindings[n.id]], i = this._preview ? this._previewStates.get(n.id) || { value: n.defaultValue } : Fe(r, n);
+		let n = this._model.controls.find((e) => e.id === t.height), r = this._hass.states?.[this._model.bindings[n.id]], i = this._preview ? this._previewStates.get(n.id) || { value: n.defaultValue } : ze(r, n);
 		e._deskRange = {
 			min: Math.max(n.min, r?.attributes?.min ?? n.min),
 			max: Math.min(n.max, r?.attributes?.max ?? n.max),
@@ -2870,7 +2870,7 @@ var ht = /* @__PURE__ */ new Set([
 				entity_id: "button.preview",
 				state: "unknown",
 				attributes: { icon: "mdi:gesture-tap-button" }
-			}, n.disabled = !this._preview && U(r).unavailable;
+			}, n.disabled = !this._preview && H(r).unavailable;
 		}
 	}
 	_numberPreview(e) {
@@ -2943,7 +2943,7 @@ var ht = /* @__PURE__ */ new Set([
 		})), e.removeAttribute("title"), e.setAttribute("aria-label", `${e.getAttribute("aria-label")}. ${c.join(", ")}`);
 	}
 	async _vacuumDialog(e, t) {
-		let { openMoreInfo: n } = await import("./three-d-rooms-more-info-BYeGHrDV.js");
+		let { openMoreInfo: n } = await import("./three-d-rooms-more-info-BjUJow3T.js");
 		this._robotDialog?.close();
 		let r = n({
 			host: this.shadowRoot,
@@ -3003,7 +3003,7 @@ var ht = /* @__PURE__ */ new Set([
 				locked: !0,
 				label: "Locked",
 				unavailable: !1
-			} : u(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : U(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : Fe(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : f(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
+			} : u(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : H(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : ze(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : f(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
 				on: !0,
 				brightness: 255,
 				rgb: T(t.color || "#fff0d4")
@@ -3011,20 +3011,20 @@ var ht = /* @__PURE__ */ new Set([
 				on: n?.state === "on",
 				unavailable: !n || ["unavailable", "unknown"].includes(n.state),
 				brightness: n?.attributes?.brightness ?? 255,
-				...ue(n, t.color)
+				...pe(n, t.color)
 			});
 		}
 		this._updateDeskDialog(), this._lightStates = e, this._syncLightPanel(e), this._syncRoomTagStates(), this._customEntityStates();
 		for (let t of this.shadowRoot.querySelectorAll("[data-control]")) {
-			let r = t.dataset.control, i = this._model.controls.find((e) => e.id === r), a = this._hass.states?.[this._model.bindings[r]], o = Ue(i, a, e.get(r), this._preview);
-			t.dataset.active = String(o.active), t.dataset.moving = String(o.moving), t.dataset.unavailable = String(o.unavailable), Ge(t, o);
+			let r = t.dataset.control, i = this._model.controls.find((e) => e.id === r), a = this._hass.states?.[this._model.bindings[r]], o = qe(i, a, e.get(r), this._preview);
+			t.dataset.active = String(o.active), t.dataset.moving = String(o.moving), t.dataset.unavailable = String(o.unavailable), Ye(t, o);
 			let s = y(this._model, r)?.label || c(i);
 			t.title = `${s}: ${o.description}`, t.setAttribute("aria-label", `${i.type === "light" ? "Toggle" : "Control"} ${s}, ${o.description}${i.type === "light" ? ". Hold, or press Shift+Enter, for more info." : ""}`), t.setAttribute("aria-disabled", String(o.unavailable)), i.type === "light" ? t.setAttribute("aria-pressed", String(o.active)) : t.removeAttribute("aria-pressed");
 			let l = t.querySelector("ha-state-icon");
 			if (l) {
 				l.hass = this._hass, l.stateObj = o.stateObj;
 				let e = S(n(this._config.markers, r), i, o.active);
-				l.icon !== e && (l.icon = e), (l.dataset.glyph ?? "") !== (e || "") && (l.innerHTML = mt(i, e), l.dataset.glyph = e || "");
+				l.icon !== e && (l.icon = e), (l.dataset.glyph ?? "") !== (e || "") && (l.innerHTML = yt(i, e), l.dataset.glyph = e || "");
 			}
 			t.querySelector(".fixture-state").textContent = o.badge, i.type === "vacuum" && this._vacuumActivity(t, i);
 		}

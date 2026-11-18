@@ -1,3 +1,4 @@
+import { SHEET_DRAG_CSS } from "./sheet-drag.mjs";
 /**
  * The adjustable desk's pop-up, laid out like Home Assistant's more-info
  * dialogs: a header with close, the desk's name and height, a large vertical
@@ -57,7 +58,7 @@ const svg = (name) =>
 const round = (action, label, icon) =>
   `<button type="button" class="dm-round" data-action="${action}"><span class="dm-disc">${svg(icon)}</span><span>${label}</span></button>`;
 
-export const DESK_HTML = `<style>${DESK_STYLE}</style><form method="dialog"><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${svg("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${round("open", "Up", "up")}${round("stop", "Stop", "stop")}${round("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
+export const DESK_HTML = `<style>${DESK_STYLE}${SHEET_DRAG_CSS}.sheet-grab{color:var(--dm-muted)}</style><form method="dialog"><div class="sheet-grab" aria-hidden="true"></div><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${svg("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${round("open", "Up", "up")}${round("stop", "Stop", "stop")}${round("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
 
 /** Snap a value to the slider's range and step. */
 export function snapHeight(value, { min, max, step }) {

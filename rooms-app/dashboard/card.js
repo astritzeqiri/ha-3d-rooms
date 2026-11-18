@@ -63,6 +63,7 @@ function markerGlyph(control, named) {
   return `<svg viewBox="0 0 24 24">${inner}</svg>`;
 }
 import { subscribeUpdates } from "./updates.mjs";
+import { enableSheetDrag, focusSheet } from "./sheet-drag.mjs";
 import {
   customEntityDefaultIcon,
   customEntitySettings,
@@ -3133,9 +3134,12 @@ export class ThreeDRoomsCard extends HTMLElement {
       clearTimeout(keyTimer);
       dialog.remove();
     });
+    // Phones: drag the sheet down to dismiss it, like the other dialogs.
+    enableSheetDrag(dialog, { top: ".sheet-grab, .dm-head" });
     this.shadowRoot.append(dialog);
     this._updateDeskDialog();
     dialog.showModal();
+    focusSheet(dialog);
   }
   _showDeskHeight(value) {
     const dialog = this._dialog,

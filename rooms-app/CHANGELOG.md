@@ -1,3 +1,8 @@
+## 0.56.0
+
+- **Swipe down to close works on every dialog on a phone**, including the desk's, and the nested code keypad. The desk dialog also opens without a focus ring on its close button.
+- **States read as Home Assistant words them.** 3D Rooms' dialogs show a door or window sensor as Open/Closed (not On/Off), motion as Detected/Clear, and so on for every device class and integration, the same words Home Assistant's own dialogs use. Inside Home Assistant they come from its frontend; the full-screen page loads Home Assistant's translations in your language.
+
 ## 0.55.0
 
 - **The robot's icon on the room shows when its dock is busy.** While one of the vacuum's extra on/off controls is on (the dock washing or drying the mop, …), its icon gets a pulsing blue ring and a badge with the icon of each control that is running, the same icons as in its dialog. On a computer, hovering the icon lists what is running; phones show only the badge and ring. Configuration and diagnostic entities don't count, as for the dialog's pills.

@@ -1,3 +1,11 @@
+# 0.56.0 — swipe to close on every dialog, Home Assistant's state words, 2026-11-18
+
+Released as 0.56.0, based on 0.55.0. Swipe-to-dismiss moved into `dashboard/sheet-drag.mjs` (`enableSheetDrag`, `sheetGrab`, `focusSheet`, `SHEET_DRAG_CSS`), used by the device dialog, its nested code keypad sheet and the desk dialog (`_deskDialog` in `dashboard/card.js`, `DESK_HTML`). State words follow Home Assistant: `hass.formatEntityState` inside Home Assistant; on the full-screen page `shared/ha-state-text.mjs` (`createStateTextSource` over `frontend/get_translations`, `pickStateText`, `pageLanguage`) gives the standalone `hass` the same function (`dashboard/standalone-hass.mjs`, `dashboard/standalone.js`). Used for the dialog's header, big state and extra-entity rows (non-numeric states).
+
+- All frontend tests (new: `test/ha-state-text.test.mjs`) and host Python tests pass with native-only skips. Format check and build pass; hassfest reports 0 invalid integrations.
+- Shared local Home Assistant (Core 2026.11.0), full-screen page at 375×812 with CDP touch input: desk, vacuum and light dialogs sprang back after a 60 px pull and closed after 320 px; no focus ring on open. A stand-in `binary_sensor` with device class door read "Closed" and then "Open" in the header and big state. The release ZIP loads.
+- Not checked: the user's IKEA door sensor, a language other than English, the lock keypad sheet's swipe, a real phone, Safari, and HACS download of this version.
+
 # 0.55.0 — the robot's icon shows when its dock is busy, 2026-11-18
 
 Released as 0.55.0, based on 0.54.0. `vacuumActivity` (`shared/vacuum.mjs`) picks a robot's extra on/off controls that are on (not configuration or diagnostic; categories from `hass.entities` or, on the full-screen page, `list_for_display`), used by the dialog's pills and the card's `_vacuumActivity` (`dashboard/card.js`): a pulsing ring, a badge with one icon per running control (`entityRowIcon`, moved to `shared/custom-entities.mjs` and shared with the dialog rows) and, with a hover-capable pointer only, a card listing them.

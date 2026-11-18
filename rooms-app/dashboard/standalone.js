@@ -12,6 +12,10 @@ import {
 } from "./standalone-icons.mjs";
 import { openMoreInfo } from "./more-info.mjs";
 import { createEntityIconSource } from "../shared/ha-icons.mjs";
+import {
+  createStateTextSource,
+  pageLanguage,
+} from "../shared/ha-state-text.mjs";
 import { fitPage } from "./standalone-fit.mjs";
 /**
  * Full-screen page for one saved dashboard view, with no Home Assistant
@@ -85,11 +89,19 @@ async function start() {
   });
   // Sized by the page and kept clear of the iPhone status bar and notch.
   card.setAttribute("fill-page", "");
+  // State words as Home Assistant shows them (a door: Open/Closed).
+  const language = pageLanguage(localStorage, config, navigator.language);
+  let refreshWords = () => {};
+  const stateText = createStateTextSource(connection, registry, language, () =>
+    refreshWords(),
+  );
   const standalone = createStandaloneHass({
     auth,
     connection,
     user,
     config,
+    language,
+    formatEntityState: (stateObj, state) => stateText.format(stateObj, state),
     origin: location.origin,
     onChange: (hass) => {
       card.hass = hass;
@@ -108,6 +120,7 @@ async function start() {
       onError: (error) => console.error(error),
     });
   });
+  refreshWords = standalone.refresh;
   connection.addEventListener("ready", () => standalone.setConnected(true));
   connection.addEventListener("disconnected", () =>
     standalone.setConnected(false),

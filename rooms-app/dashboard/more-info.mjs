@@ -1,4 +1,5 @@
 import { ICONS } from "./more-info-icons.mjs";
+import { SHEET_DRAG_CSS, enableSheetDrag, sheetGrab } from "./sheet-drag.mjs";
 import {
   describeEntity,
   controlCall,
@@ -40,10 +41,9 @@ dialog.mi::backdrop{background:#000a}
 .mi-frame{display:flex;flex-direction:column;max-height:min(92vh,880px)}
 @media (max-width:600px){.mi-frame{max-height:94vh}}
 /* phones: a grab handle; the sheet follows a downward drag and is dismissed */
-.mi-grab{display:none}
-@media (max-width:600px){.mi-grab{display:block;flex-shrink:0;width:36px;height:4px;margin:8px auto 0;border-radius:2px;background:var(--mi-muted);opacity:.5}.mi-head{padding-top:4px}}
-dialog.mi.mi-dragging{transition:none!important}
-dialog.mi.mi-settling{transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+${SHEET_DRAG_CSS}
+.sheet-grab{color:var(--mi-muted)}
+@media (max-width:600px){.mi-head{padding-top:4px}}
 dialog.mi:focus{outline:none}
 .mi-head{display:flex;align-items:center;gap:4px;padding:12px 16px 4px 12px;flex-shrink:0}
 .mi-head .mi-titles{flex:1;min-width:0;padding-left:4px}
@@ -641,6 +641,14 @@ export function openMoreInfo({
     }
   };
   const find = (d, pred) => d.controls.find(pred);
+  // Home Assistant's words for the dialog's state (a door: Open/Closed, not
+  // On/Off), from its frontend or the full-screen page's own tables.
+  const stateText = (state) => {
+    const hass = getHass();
+    const entity = hass?.states?.[entityId];
+    if (!entity || !hass.formatEntityState) return null;
+    return hass.formatEntityState(entity, state) || null;
+  };
 
   // ---- layouts -----------------------------------------------------------
   function lightLayout(d, root) {
@@ -1004,7 +1012,7 @@ export function openMoreInfo({
       dialog.style.setProperty("--mi-accent", "#9c27b0");
       head.firstChild.textContent = nd.unavailable
         ? "Unavailable"
-        : cap(nd.state);
+        : (stateText() ?? cap(nd.state));
       head.lastChild.textContent = nd.since;
       if (knob) {
         let open = ["open", "opening"].includes(nd.state),
@@ -1030,7 +1038,7 @@ export function openMoreInfo({
       const c = find(nd, (x) => x.key === "position");
       if (slider && c) {
         slider.set(c.value);
-        slider.caption(cap(nd.state));
+        slider.caption(stateText() ?? cap(nd.state));
       }
     };
   }
@@ -1062,7 +1070,7 @@ export function openMoreInfo({
         "aria-label",
         locked ? "Locked. Press to unlock" : "Unlocked. Press to lock",
       );
-      state.textContent = cap(nd.state);
+      state.textContent = stateText() ?? cap(nd.state);
     };
   }
 
@@ -1545,9 +1553,10 @@ export function openMoreInfo({
         event.stopPropagation();
         sheet.remove();
       });
-      frame.append(top, inner);
+      frame.append(sheetGrab(doc), top, inner);
       sheet.append(frame);
       dialog.append(sheet);
+      enableSheetDrag(sheet, { top: ".sheet-grab, .mi-head" });
       sheet.showModal();
       input.focus();
     }
@@ -1559,7 +1568,7 @@ export function openMoreInfo({
         busy = null;
         clearTimeout(busyTimer);
       }
-      head.firstChild.textContent = cap(nd.state);
+      head.firstChild.textContent = stateText() ?? cap(nd.state);
       head.lastChild.textContent = nd.since || "";
       paint();
     };
@@ -2039,7 +2048,27 @@ export function openMoreInfo({
           const input = ctl.firstChild;
           input.setAttribute("aria-label", label);
           if (doc.activeElement !== input) input.value = row.value;
-        } else ctl.firstChild.textContent = row.value;
+        } else {
+          // Words as Home Assistant shows them (Open/Closed, Detected/Clear);
+          // our own text for numbers, times and durations.
+          const plain =
+            entity &&
+            !row.unavailable &&
+            isNaN(Number(entity.state)) &&
+            !["timestamp", "date"].includes(entity.attributes?.device_class) &&
+            [
+              "binary_sensor",
+              "sensor",
+              "input_text",
+              "sun",
+              "person",
+              "device_tracker",
+              "event",
+              "update",
+            ].includes(row.domain);
+          ctl.firstChild.textContent =
+            (plain && hass.formatEntityState?.(entity)) || row.value;
+        }
       }
     }
     if (extras.length) main.append(extrasEl);
@@ -2263,7 +2292,8 @@ export function openMoreInfo({
       const control = find(nd, (c) => c.kind === "vacuum");
       if (!control) return;
       const entity = getHass().states?.[entityId];
-      head.firstChild.textContent = control.status || cap(nd.state) || "";
+      head.firstChild.textContent =
+        control.status || stateText() || cap(nd.state) || "";
       head.querySelector(".mi-vac-since").textContent = nd.since || "";
       const states = getHass().states || {};
       const level = batteryIds?.battery
@@ -2307,7 +2337,8 @@ export function openMoreInfo({
     root.append(center);
     return (nd, e) => {
       const unit = e?.attributes?.unit_of_measurement;
-      value.textContent = `${cap(nd.state) ?? ""}${unit ? ` ${unit}` : ""}`;
+      value.textContent =
+        stateText() ?? `${cap(nd.state) ?? ""}${unit ? ` ${unit}` : ""}`;
     };
   }
 
@@ -2366,7 +2397,7 @@ export function openMoreInfo({
     title.textContent = d.name;
     subtitle.textContent = d.unavailable
       ? "Unavailable"
-      : [cap(d.state), d.changed && `changed ${d.changed}`]
+      : [stateText() ?? cap(d.state), d.changed && `changed ${d.changed}`]
           .filter(Boolean)
           .join(" · ");
     const next = [
@@ -2406,76 +2437,12 @@ export function openMoreInfo({
     dialog.remove();
   });
   // ---- phones: drag the sheet down to dismiss it ----
-  const grab = h(doc, "div", "mi-grab");
-  grab.setAttribute("aria-hidden", "true");
-  frame.prepend(grab);
-  const win = doc.defaultView;
-  const isSheet = () => win?.matchMedia?.("(max-width:600px)").matches;
-  // Controls that use a vertical drag themselves keep it.
-  const OWN_DRAG =
-    "input, select, textarea, .mi-slider, .mi-dial, .mi-cover-switch, .mi-mode, [role=slider]";
-  let drag = null;
-  const place = (dy) =>
-    dialog.style.setProperty("transform", dy ? `translateY(${dy}px)` : "");
-  dialog.addEventListener(
-    "touchstart",
-    (event) => {
-      if (!isSheet() || event.touches.length !== 1) return (drag = null);
-      if (event.target.closest?.(OWN_DRAG)) return (drag = null);
-      const touch = event.touches[0];
-      drag = {
-        y: touch.clientY,
-        t: performance.now(),
-        dy: 0,
-        active: false,
-        // From the handle or the header, or the content scrolled to its top.
-        fromTop: !!event.target.closest?.(".mi-grab, .mi-head"),
-      };
-    },
-    { passive: true },
-  );
-  dialog.addEventListener(
-    "touchmove",
-    (event) => {
-      if (!drag) return;
-      const dy = event.touches[0].clientY - drag.y;
-      if (!drag.active) {
-        if (dy < -6) return (drag = null); // scrolling up the content
-        if (dy < 8 || !(drag.fromTop || body.scrollTop <= 0)) return;
-        drag.active = true;
-        drag.y += dy; // follow from here, no jump
-        drag.t = performance.now();
-        dialog.classList.add("mi-dragging");
-        return;
-      }
-      event.preventDefault();
-      drag.dy = Math.max(0, dy);
-      place(drag.dy);
-    },
-    { passive: false },
-  );
-  const release = () => {
-    const done = drag;
-    drag = null;
-    if (!done?.active) return;
-    dialog.classList.remove("mi-dragging");
-    const speed = done.dy / Math.max(1, performance.now() - done.t);
-    const reduced = win?.matchMedia?.(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (done.dy > Math.min(140, dialog.offsetHeight * 0.25) || speed > 0.8) {
-      if (reduced) return closeDialog();
-      dialog.classList.add("mi-settling");
-      place(dialog.offsetHeight);
-      setTimeout(closeDialog, 220);
-      return;
-    }
-    dialog.classList.add("mi-settling");
-    place(0);
-    setTimeout(() => dialog.classList.remove("mi-settling"), 240);
-  };
-  dialog.addEventListener("touchend", release);
-  dialog.addEventListener("touchcancel", release);
+  frame.prepend(sheetGrab(doc));
+  enableSheetDrag(dialog, {
+    close: closeDialog,
+    top: ".sheet-grab, .mi-head",
+    ownDrag: ".mi-slider, .mi-dial, .mi-cover-switch, .mi-mode",
+  });
 
   update();
   dialog.showModal();
