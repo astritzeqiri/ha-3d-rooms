@@ -1077,8 +1077,18 @@ export class SceneView {
         this.model?.id === this.options.cameraModel;
     // A room may ask for its own angle when opened on its own.
     const frame = focused ? this.model.focusFrame : undefined;
-    const f =
-      this.options.camera && !focused && savedFor
+    // A framing saved on this device (Adjust view) wins over everything,
+    // for the view, 3D or plan, and screen shape it was saved for.
+    const plan = this.options.mode === "floor",
+      own = this.options.deviceCamera?.(this.model, width / height, plan),
+      mine = own && plan === (own.projection === "orthographic") ? own : null;
+    const f = mine
+      ? restoreCameraView(mine, {
+          aspect: width / height,
+          min: this.bounds.min.toArray(),
+          max: this.bounds.max.toArray(),
+        })
+      : this.options.camera && !focused && savedFor
         ? restoreCameraView(this.options.camera, {
             aspect: width / height,
             min: this.bounds.min.toArray(),

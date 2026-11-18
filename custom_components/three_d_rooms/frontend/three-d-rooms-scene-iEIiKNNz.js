@@ -16704,7 +16704,11 @@ var cm = class {
 		if (!this.bounds) return;
 		let { width: e, height: t } = this.container.getBoundingClientRect();
 		if (!e || !t) return;
-		let n = Math.max(0, Math.min(t * .3, this.options.frameInset?.() || 0)), a = t - n, o = !!this.model?.focusRoom, s = !this.options.cameraModel || this.model?.id === this.options.cameraModel, c = o ? this.model.focusFrame : void 0, u = this.options.camera && !o && s ? l(this.options.camera, {
+		let n = Math.max(0, Math.min(t * .3, this.options.frameInset?.() || 0)), a = t - n, o = !!this.model?.focusRoom, s = !this.options.cameraModel || this.model?.id === this.options.cameraModel, c = o ? this.model.focusFrame : void 0, u = this.options.mode === "floor", d = this.options.deviceCamera?.(this.model, e / a, u), f = d && u === (d.projection === "orthographic") ? d : null, p = f ? l(f, {
+			aspect: e / a,
+			min: this.bounds.min.toArray(),
+			max: this.bounds.max.toArray()
+		}) : this.options.camera && !o && s ? l(this.options.camera, {
 			aspect: e / a,
 			min: this.bounds.min.toArray(),
 			max: this.bounds.max.toArray(),
@@ -16714,14 +16718,14 @@ var cm = class {
 		}) : (this.options.mode === "front" ? r : i)(this.bounds.min.toArray(), this.bounds.max.toArray(), e / a, c?.tilt ?? this.options.tilt ?? (this.options.mode === "front" ? 28 : 0), c?.heading ?? this.options.heading ?? 0);
 		Object.assign(this.camera, {
 			aspect: e / a,
-			left: u.left,
-			right: u.right,
-			top: u.top,
-			bottom: u.bottom,
-			near: u.near,
-			far: u.far,
-			zoom: u.zoom ?? (o ? 1 : this.options.zoom) ?? 1
-		}), this.camera.isPerspectiveCamera && u.fov && (this.camera.fov = u.fov), this.camera.position.fromArray(u.position), this.camera.up.fromArray(u.up), this.orbit.target.fromArray(u.target), this.camera.lookAt(this.orbit.target), n ? this.camera.setViewOffset(e, a, 0, 0, e, t) : this.camera.clearViewOffset(), this.camera.updateProjectionMatrix();
+			left: p.left,
+			right: p.right,
+			top: p.top,
+			bottom: p.bottom,
+			near: p.near,
+			far: p.far,
+			zoom: p.zoom ?? (o ? 1 : this.options.zoom) ?? 1
+		}), this.camera.isPerspectiveCamera && p.fov && (this.camera.fov = p.fov), this.camera.position.fromArray(p.position), this.camera.up.fromArray(p.up), this.orbit.target.fromArray(p.target), this.camera.lookAt(this.orbit.target), n ? this.camera.setViewOffset(e, a, 0, 0, e, t) : this.camera.clearViewOffset(), this.camera.updateProjectionMatrix();
 	}
 	insideShownFloor(e) {
 		return (this.clipPlanes || []).every((t) => t.distanceToPoint(e) > (t.normal.y > 0 ? .1 : -.25));

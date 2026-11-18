@@ -172,6 +172,7 @@ On the card:
 - **Lights and Shades panels** (top left) list each room’s lights or shades with one switch per room and a confirmed **All** switch. Hidden devices are never switched.
 - **House and floor cards** have floor buttons (All, then each floor). A room hidden behind others gets a button that shows it on its own; double-tap a room to open it, use the arrows or Left/Right for the next room, and the House button or Escape to return. Hold a room button to switch that room’s lights.
 - **Toolbar** — Floor plan (switch between the saved 3D camera and a top-down floor plan in the same orientation; the choice is saved on the view for everyone, like the time of day), Move camera, Reset view, Reload models, fullscreen, and (for administrators) an Edit button that opens the view in the editor in a new tab.
+- **Adjust view** (⋯ menu) — turn, zoom and move the house and save that framing on this device only (this browser or the iOS app), per view, floor plan or 3D, and portrait or landscape. "Use the view's framing" forgets it.
 - **Time of day** — an Auto / Day / Night switch for daylight-ready rooms.
 - A progress bar and the view’s own picture show while a large room downloads.
 

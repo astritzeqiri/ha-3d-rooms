@@ -1,3 +1,11 @@
+# 0.58.0 — Adjust view, saved on this device, 2026-11-18
+
+Released as 0.58.0, based on 0.57.1. New `shared/device-camera.mjs` (`deviceCameraKey`, `readDeviceCamera`, `writeDeviceCamera`; keys `three-d-rooms:device-camera:<card>:<view[:room]>:<3d|plan>:<portrait|landscape>` in local storage). `SceneView.fitFloor` (`web/scene.js`) asks `options.deviceCamera(model, aspect, plan)` first and restores it with `restoreCameraView`; the card passes it (`_deviceCameraKey`). The ⋯ menu's Adjust view (`_startAdjust`, `_endAdjust`, `:host([adjusting])`) frees the camera, hides icons and toolbars, and saves `captureView().camera`; Escape cancels; Use the view's framing forgets it.
+
+- All frontend tests (new: `device-camera`, Adjust view card flow) and host Python tests pass with native-only skips. Format check and build pass; hassfest reports 0 invalid integrations.
+- Shared local Home Assistant (Core 2026.11.0), full-screen page at 390 px: ⋯ → Adjust view, turned/zoomed/moved the house, Save showed "View saved on this device"; after a reload the camera came back to the same position and zoom; the First floor kept its own framing; no page errors. The test framing was removed. The release ZIP loads.
+- Not checked: real touch gestures in the iOS app or on a phone, Safari, and HACS download of this version.
+
 # 0.57.1 — the at-a-glance bar clears the iPhone notch, 2026-11-18
 
 Released as 0.57.1, based on 0.57.0. On the full-screen page (and the iOS app) the bar gets the same `env(safe-area-inset-top)` margin as the other top controls (`dashboard/layout.js`); `_placeSummary` drops that margin when it moves the bar below the buttons, since their bottom already includes it.

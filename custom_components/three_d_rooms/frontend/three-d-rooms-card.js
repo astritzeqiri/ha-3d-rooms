@@ -1,27 +1,27 @@
 import { A as e, C as t, D as n, E as r, M as i, N as a, O as o, P as s, S as c, T as l, _ as u, a as d, b as f, d as p, i as m, j as h, m as g, o as _, r as v, s as ee, t as y, w as b, y as te } from "./three-d-rooms-room-focus-DizMe7SG.js";
-import { a as ne, c as re, i as x, l as ie, m as S, n as ae, o as C, p as w, r as oe, s as se, u as ce } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
-import { a as le, n as T, o as ue, r as de, s as fe, t as pe } from "./three-d-rooms-light-BzGWBUDK.js";
+import { a as ne, c as re, i as x, l as S, m as C, n as ie, o as w, p as T, r as ae, s as oe, u as se } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
+import { a as ce, n as E, o as le, r as ue, s as de, t as fe } from "./three-d-rooms-light-BzGWBUDK.js";
 // shared/scene-store.mjs
-var me = "three-d-rooms", E = "scenes", he = 536870912, ge = 2e3;
-function _e(e, t) {
+var pe = "three-d-rooms", D = "scenes", me = 536870912, he = 2e3;
+function ge(e, t) {
 	let n;
 	return Promise.race([e, new Promise((e, r) => {
 		n = setTimeout(() => r(/* @__PURE__ */ Error("Model storage timed out.")), t);
 	})]).finally(() => clearTimeout(n));
 }
-function ve(e, t, n) {
+function _e(e, t, n) {
 	return `${e || "user"}:${t.id}:${n}`;
 }
-function D(e) {
+function O(e) {
 	return new Promise((t, n) => {
 		e.onsuccess = () => t(e.result), e.onerror = () => n(e.error);
 	});
 }
-function ye(e = globalThis.indexedDB) {
+function ve(e = globalThis.indexedDB) {
 	if (!e) return null;
 	let t, n = () => t ??= new Promise((n, r) => {
-		let i = e.open(me, 1);
-		i.onupgradeneeded = () => i.result.createObjectStore(E), i.onsuccess = () => {
+		let i = e.open(pe, 1);
+		i.onupgradeneeded = () => i.result.createObjectStore(D), i.onsuccess = () => {
 			let e = i.result;
 			e.onversionchange = e.onclose = () => {
 				e.close(), t = null;
@@ -30,38 +30,38 @@ function ye(e = globalThis.indexedDB) {
 	}).catch((e) => {
 		throw t = null, e;
 	}), r = async (e, t) => {
-		let r = (await n()).transaction(E, e), i = new Promise((e, t) => {
+		let r = (await n()).transaction(D, e), i = new Promise((e, t) => {
 			r.oncomplete = e, r.onerror = r.onabort = () => t(r.error);
-		}), a = await t(r.objectStore(E));
+		}), a = await t(r.objectStore(D));
 		return await i, a;
 	};
 	return {
-		get: (e) => r("readonly", (t) => D(t.get(e))),
+		get: (e) => r("readonly", (t) => O(t.get(e))),
 		put: (e, t) => r("readwrite", (n) => n.put(t, e)),
 		delete: (e) => r("readwrite", (t) => t.delete(e)),
 		async entries() {
 			return r("readonly", async (e) => {
-				let [t, n] = await Promise.all([D(e.getAllKeys()), D(e.getAll())]);
+				let [t, n] = await Promise.all([O(e.getAllKeys()), O(e.getAll())]);
 				return t.map((e, t) => [e, n[t]]);
 			});
 		}
 	};
 }
-var O;
-function k() {
-	if (O === void 0) try {
-		O = ye();
+var k;
+function A() {
+	if (k === void 0) try {
+		k = ve();
 	} catch {
-		O = null;
+		k = null;
 	}
-	return O;
+	return k;
 }
-async function be(e, t, n = ge) {
-	let r = k();
+async function ye(e, t, n = he) {
+	let r = A();
 	if (!r) return null;
 	let i;
 	try {
-		i = await _e(r.get(e), n);
+		i = await ge(r.get(e), n);
 	} catch {
 		return null;
 	}
@@ -72,8 +72,8 @@ async function be(e, t, n = ge) {
 		usedAt: Date.now()
 	}).catch?.(() => {}), new Blob([a], { type: i.type || "model/gltf-binary" }));
 }
-async function xe(e, t, n, r = he) {
-	let i = k();
+async function be(e, t, n, r = me) {
+	let i = A();
 	if (!i || !n?.size || n.size > r) return !1;
 	try {
 		globalThis.navigator?.storage?.persist?.().catch?.(() => {});
@@ -97,14 +97,14 @@ async function xe(e, t, n, r = he) {
 	}
 }
 // shared/scene-download.mjs
-var A = /* @__PURE__ */ new WeakMap(), Se = 100663296, Ce = 6e5;
-function j(e) {
+var j = /* @__PURE__ */ new WeakMap(), xe = 100663296, Se = 6e5;
+function M(e) {
 	return e.connection || e.auth || e;
 }
-function we(e) {
-	A.delete(j(e));
+function Ce(e) {
+	j.delete(M(e));
 }
-async function Te(e, t) {
+async function we(e, t) {
 	let n = e.body?.getReader?.();
 	if (!n) return e.blob();
 	let r = (t) => e.headers?.get?.(t), i = Number(r("content-length")), a = !r("content-encoding") && Number.isFinite(i) && i > 0 ? i : void 0, o = [], s = 0;
@@ -121,24 +121,24 @@ async function Te(e, t) {
 	}
 	return new Blob(o, { type: r("content-type") || "model/gltf-binary" });
 }
-async function M(e, t, n = "original", r, { fresh: i = !1 } = {}) {
-	let a = j(e), o = A.get(a);
-	o || A.set(a, o = /* @__PURE__ */ new Map());
+async function N(e, t, n = "original", r, { fresh: i = !1 } = {}) {
+	let a = M(e), o = j.get(a);
+	o || j.set(a, o = /* @__PURE__ */ new Map());
 	let s = t.sceneRevision || t.importedAt || "legacy", c = `${t.id}:${s}:${n}`, l = Date.now();
 	for (let [e, t] of o) t.expires < l && o.delete(e);
 	let u = o.get(c);
 	if (u) return o.delete(c), o.set(c, u), r && u.listeners && (u.listeners.add(r), u.progress && r(u.progress)), u.promise;
 	u = {
 		bytes: 0,
-		expires: l + Ce,
+		expires: l + Se,
 		listeners: /* @__PURE__ */ new Set()
 	}, r && u.listeners.add(r);
 	let d = (e) => {
 		u.progress = e;
 		for (let t of u.listeners || []) t(e);
-	}, f = ve(e.user?.id, t, n);
+	}, f = _e(e.user?.id, t, n);
 	return u.promise = (async () => {
-		let r = i ? null : await be(f, s);
+		let r = i ? null : await ye(f, s);
 		if (r) d({
 			loaded: r.size,
 			total: r.size
@@ -146,12 +146,12 @@ async function M(e, t, n = "original", r, { fresh: i = !1 } = {}) {
 		else {
 			let a = `/api/three_d_rooms/models/${encodeURIComponent(t.id)}/scene.glb?v=${encodeURIComponent(s)}&variant=${encodeURIComponent(n)}`, o = await (i ? e.fetchWithAuth(a, { cache: "reload" }) : e.fetchWithAuth(a));
 			if (!o.ok) throw Error("Could not download your room. Check your login and the 3D Rooms integration.");
-			r = await Te(o, d), xe(f, s, r);
+			r = await we(o, d), be(f, s, r);
 		}
 		u.listeners = null, u.bytes = r.size;
 		let a = [...o.values()].reduce((e, t) => e + t.bytes, 0);
 		for (let [e, t] of o) {
-			if (a <= Se) break;
+			if (a <= xe) break;
 			o.delete(e), a -= t.bytes;
 		}
 		return r;
@@ -160,7 +160,7 @@ async function M(e, t, n = "original", r, { fresh: i = !1 } = {}) {
 	}), o.set(c, u), u.promise;
 }
 // dashboard/layout.js
-var Ee = class {
+var Te = class {
 	constructor(e) {
 		this.host = e, this.card = e.shadowRoot.querySelector("ha-card"), this.scene = e._container, this.style = document.createElement("style"), this.style.textContent = "ha-card[data-fill]{display:flex;flex-direction:column;box-sizing:border-box}ha-card[data-fill] .scene{flex:1;min-height:0;height:auto!important}ha-card[data-fill] .card-top{flex-shrink:0}ha-card[data-fill] .fixture-tray{flex-shrink:0;max-height:30%;overflow:auto;box-sizing:border-box}ha-card:fullscreen{width:100%;border:0;border-radius:0;padding-bottom:env(safe-area-inset-bottom)}.fullscreen-toggle svg{width:22px;height:22px}:host([fill-page]) ha-card{border-radius:0}:host([fill-page]) .card-top,:host([fill-page]) .panel-toggles,:host([fill-page]) .room-nav,:host([fill-page]) .house-summary,:host([fill-page]) .light-panel{margin-top:calc(env(safe-area-inset-top,0px) + 16px)}:host([fill-page]) .panel-toggles,:host([fill-page]) .light-panel,:host([fill-page]) .card-controls{margin-left:env(safe-area-inset-left,0px)}:host([fill-page]) .card-top,:host([fill-page]) .card-controls{margin-right:env(safe-area-inset-right,0px)}:host([fill-page]) .light-panel{max-height:calc(100% - 150px - env(safe-area-inset-top,0px))}", e.shadowRoot.append(this.style), this.button = document.createElement("button"), this.button.className = "fullscreen-toggle", this.button.type = "button", this.button.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5\"/></svg>", this.button.hidden = !document.fullscreenEnabled || !this.card.requestFullscreen, this.button.onclick = async () => {
 			try {
@@ -190,7 +190,7 @@ var Ee = class {
 	dispose() {
 		cancelAnimationFrame(this.frame), this.observer.disconnect(), window.removeEventListener("resize", this.schedule), window.visualViewport?.removeEventListener("resize", this.schedule), document.removeEventListener("fullscreenchange", this.changed), this.button.remove(), this.style.remove();
 	}
-}, N = [
+}, P = [
 	"spotlight",
 	"classic",
 	"grid",
@@ -198,7 +198,7 @@ var Ee = class {
 	"aurora",
 	"image",
 	"theme"
-], De = {
+], Ee = {
 	spotlight: "Spotlight · soft light behind the house",
 	classic: "Classic · flat dark",
 	grid: "Blueprint grid",
@@ -206,38 +206,38 @@ var Ee = class {
 	aurora: "Aurora · slow ambient colour",
 	image: "Custom image",
 	theme: "Home Assistant theme"
-}, P = [
+}, F = [
 	"background",
 	"background_image",
 	"background_shadow"
-], Oe = (e) => e !== "classic";
-function ke(e) {
+], De = (e) => e !== "classic";
+function Oe(e) {
 	let { background: t, background_image: n, background_shadow: r } = e;
-	if (t !== void 0 && !N.includes(t)) throw Error(`Background must be one of ${N.join(", ")}.`);
+	if (t !== void 0 && !P.includes(t)) throw Error(`Background must be one of ${P.join(", ")}.`);
 	if (r !== void 0 && typeof r != "boolean") throw Error("background_shadow must be true or false.");
 	if (n !== void 0) {
 		if (typeof n != "string" || n.length > 2e3) throw Error("Background image must be a web address.");
-		if (n && !F(n)) throw Error("Background image must start with /, http:// or https://.");
+		if (n && !I(n)) throw Error("Background image must start with /, http:// or https://.");
 	}
 	if (t === "image" && !n) throw Error("Choose a background image address.");
 }
-function F(e) {
+function I(e) {
 	let t = String(e || "").trim();
 	return /\s/.test(t) ? "" : /^\/(?!\/)/.test(t) || /^https?:\/\//i.test(t) ? t : "";
 }
-function I(e) {
+function L(e) {
 	return e.view === "floor" ? !1 : (e.background || "spotlight") === "classic" ? e.background_shadow === !0 : e.background_shadow !== !1;
 }
-function Ae(e) {
+function ke(e) {
 	return Number.isFinite(e) ? e >= 12 ? "day" : e >= 0 ? "golden" : e >= -8 ? "dusk" : "night" : "night";
 }
-function je(e, t) {
+function Ae(e, t) {
 	if (e === "day") return 45;
 	if (e === "night") return -30;
 	let n = Number(t?.attributes?.elevation);
 	return Number.isFinite(n) ? n : t?.state === "above_horizon" ? 30 : -30;
 }
-var L = {
+var je = {
 	day: {
 		top: "#4f93d6",
 		mid: "#8fc3ee",
@@ -281,14 +281,14 @@ var L = {
 	}
 };
 function Ne(e, t, n) {
-	let r = L[t] || L.night, i = Me[t] || Me.night, a = {
+	let r = je[t] || je.night, i = Me[t] || Me.night, a = {
 		"--bd-sky-top": r.top,
 		"--bd-sky-mid": r.mid,
 		"--bd-sky-bottom": r.bottom,
 		"--bd-stars": String(r.stars),
 		"--bd-spot-core": i.core,
 		"--bd-spot-edge": i.edge
-	}, o = F(n);
+	}, o = I(n);
 	return e === "image" && o && (a["--bd-image"] = `url(${JSON.stringify(o)})`), a;
 }
 function Pe(e, t, n) {
@@ -325,7 +325,7 @@ function z(e, t) {
 		...n.quality ? { quality: n.quality } : {},
 		...n.floorPlan ? { floorPlan: structuredClone(n.floorPlan) } : {},
 		...n.markers === void 0 ? {} : { markers: structuredClone(n.markers) },
-		...Object.fromEntries(P.filter((e) => n[e] !== void 0).map((e) => [e, n[e]])),
+		...Object.fromEntries(F.filter((e) => n[e] !== void 0).map((e) => [e, n[e]])),
 		interactive: !1,
 		...e
 	};
@@ -402,7 +402,7 @@ var Ve = "\ndialog.dm{--dm-bg:var(--ha-card-background,var(--card-background-col
 	up: "<path d=\"M12 19V5M6 11l6-6 6 6\"/>",
 	stop: "<rect x=\"7\" y=\"7\" width=\"10\" height=\"10\" rx=\"1.5\" fill=\"currentColor\" stroke=\"none\"/>",
 	down: "<path d=\"M12 5v14M6 13l6 6 6-6\"/>"
-}, Ue = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true">${He[e]}</svg>`, H = (e, t, n) => `<button type="button" class="dm-round" data-action="${e}"><span class="dm-disc">${Ue(n)}</span><span>${t}</span></button>`, We = `<style>${Ve}${le}.sheet-grab{color:var(--dm-muted)}</style><form method="dialog"><div class="sheet-grab" aria-hidden="true"></div><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${Ue("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${H("open", "Up", "up")}${H("stop", "Stop", "stop")}${H("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
+}, Ue = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true">${He[e]}</svg>`, H = (e, t, n) => `<button type="button" class="dm-round" data-action="${e}"><span class="dm-disc">${Ue(n)}</span><span>${t}</span></button>`, We = `<style>${Ve}${ce}.sheet-grab{color:var(--dm-muted)}</style><form method="dialog"><div class="sheet-grab" aria-hidden="true"></div><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${Ue("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${H("open", "Up", "up")}${H("stop", "Stop", "stop")}${H("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
 function Ge(e, { min: t, max: n, step: r }) {
 	let i = t + Math.round((Math.min(n, Math.max(t, e)) - t) / (r || 1)) * (r || 1);
 	return Number(Math.min(n, i).toFixed(6));
@@ -657,8 +657,29 @@ function dt(e, t = {}) {
 		ids: f.map((e) => e.id)
 	}), n;
 }
+// shared/device-camera.mjs
+var ft = "three-d-rooms:device-camera:";
+function pt({ card: e, view: t, plan: n = !1, aspect: r = 1 }) {
+	return !e || !t ? null : `${ft}${e}:${t}:${n ? "plan" : "3d"}:${r < 1 ? "portrait" : "landscape"}`;
+}
+function mt(e, t) {
+	if (t) try {
+		let n = e?.getItem(t);
+		return n ? g(JSON.parse(n)) : void 0;
+	} catch {
+		return;
+	}
+}
+function ht(e, t, n) {
+	if (!t || !e) return !1;
+	try {
+		return n ? e.setItem(t, JSON.stringify(g(n))) : e.removeItem(t), !0;
+	} catch {
+		return !1;
+	}
+}
 // shared/upload.mjs
-function ft(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
+function gt(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = () => {}, onUploaded: a = () => {}, createXHR: o = () => new XMLHttpRequest() }) {
 	return new Promise((s, c) => {
 		let l = o();
 		l.open(t, e);
@@ -675,13 +696,13 @@ function ft(e, { method: t = "POST", file: n, headers: r = {}, onProgress: i = (
 		}, l.send(n);
 	});
 }
-async function pt(e, t, n) {
+async function _t(e, t, n) {
 	if (!(t === "/api/three_d_rooms/models" && n.method === "POST" || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+$/.test(t) && n.method === "PUT" || /^\/api\/three_d_rooms\/houses\/[a-z0-9_-]+$/.test(t) && ["POST", "PUT"].includes(n.method) || /^\/api\/three_d_rooms\/models\/[a-z0-9_-]+\/optimized\/(full|phone)$/.test(t) && n.method === "PUT")) throw Error("Unknown model upload.");
 	let r = t.includes("/optimized/"), i = n.headers?.["X-Rooms-Source-Revision"];
 	if (r && !/^[a-f0-9]{24}$/.test(i || "")) throw Error("Optimized scenes must name the upload they came from.");
 	let a = n.headers?.["X-Rooms-Matches"];
 	if (a !== void 0 && !/^[A-Za-z0-9_-]{1,6000}$/.test(a)) throw Error("Too many room and device choices to send at once.");
-	return e.auth.expired && await e.auth.refreshAccessToken(), ft(t, {
+	return e.auth.expired && await e.auth.refreshAccessToken(), gt(t, {
 		...n,
 		headers: {
 			...n.headers?.["X-Rooms-Revision"] ? { "X-Rooms-Revision": n.headers["X-Rooms-Revision"] } : {},
@@ -693,23 +714,23 @@ async function pt(e, t, n) {
 	});
 }
 // shared/entity-icon.mjs
-function mt(e) {
+function vt(e) {
 	let t = e.querySelector?.("svg");
 	if (t) return t;
 	for (let t of e.querySelectorAll?.("*") || []) if (t.shadowRoot) {
-		let e = mt(t.shadowRoot);
+		let e = vt(t.shadowRoot);
 		if (e) return e;
 	}
 	return null;
 }
-async function ht(e, t, n, { frames: r = 120 } = {}) {
+async function yt(e, t, n, { frames: r = 120 } = {}) {
 	let i = e.ownerDocument;
 	if (!i.defaultView.customElements.get("ha-state-icon")) return null;
 	let a = i.createElement("ha-state-icon");
 	a.hass = t, a.stateObj = n, a.setAttribute("aria-hidden", "true"), a.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;width:24px;height:24px", e.append(a);
 	try {
 		for (let e = 0; e < r; e++) {
-			let e = a.shadowRoot && mt(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
+			let e = a.shadowRoot && vt(a.shadowRoot), t = e && [...e.querySelectorAll("path")];
 			if (t?.length) return {
 				viewBox: e.getAttribute("viewBox") || "0 0 24 24",
 				paths: t.map((e) => ({
@@ -727,7 +748,7 @@ async function ht(e, t, n, { frames: r = 120 } = {}) {
 	}
 }
 // dashboard/preview.js
-function gt(e, t, n) {
+function bt(e, t, n) {
 	let r = document.createElement("dialog");
 	r.setAttribute("aria-labelledby", "dashboard-preview-title"), r.innerHTML = "<style>\n    dialog.dashboard-preview{box-sizing:border-box;width:min(960px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--divider-color,#777);border-radius:12px;background:var(--primary-background-color,#fafafa);color:var(--primary-text-color,#212121);font:14px/1.5 system-ui}\n    .dashboard-preview::backdrop{background:#0009}\n    .preview-toolbar{position:sticky;top:0;z-index:2;background:var(--primary-background-color,#fafafa);display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:16px;border-bottom:1px solid var(--divider-color,#777)}\n    .preview-toolbar h2{font-size:18px;margin:0;flex:1;min-width:160px}\n    .preview-actions{display:flex;align-items:center;gap:12px;margin-left:auto}\n    .preview-widths{display:flex;padding:3px;border:1px solid var(--divider-color,#ddd);border-radius:8px;background:var(--secondary-background-color,#eee)}\n    .preview-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;min-height:44px;padding:8px 12px;border:0;border-radius:5px;color:var(--secondary-text-color,#555);background:transparent;font:500 14px/20px system-ui;cursor:pointer;white-space:nowrap}\n    .preview-widths button[aria-pressed=\"true\"]{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff);box-shadow:0 1px 3px #0002}\n    .preview-toolbar button:hover{color:var(--primary-text-color,#212121);background:var(--card-background-color,#fff)}\n    .preview-toolbar .preview-close{width:44px;padding:10px;border-radius:50%}\n    .preview-toolbar svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}\n    @media(max-width:480px){.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{flex-basis:100%}.preview-actions{width:100%;justify-content:space-between}.preview-widths{flex:1}.preview-widths button{flex:1}}\n    .preview-toolbar :focus-visible{outline:2px solid var(--primary-color,#03a9f4);outline-offset:2px}\n    .preview-note{margin:0;padding:12px 16px;color:var(--secondary-text-color,#555)}\n    .preview-dashboard{padding:16px;background:var(--lovelace-background,var(--primary-background-color,#fafafa))}\n    .preview-card{width:100%;max-width:560px;margin:auto}\n    .preview-card[data-width=\"phone\"]{max-width:360px}\n    @media(max-width:600px){dialog.dashboard-preview{width:100vw;max-width:100vw;max-height:100dvh;margin:auto 0;border-radius:0;overflow:auto;overscroll-behavior:contain}.preview-toolbar{gap:8px;padding:12px}.preview-toolbar h2{font-size:16px}.preview-note{font-size:13px;padding:12px}.preview-dashboard{padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}}\n  </style><div class=\"preview-toolbar\"><h2 id=\"dashboard-preview-title\">Dashboard preview</h2><div class=\"preview-actions\"><div class=\"preview-widths\" role=\"group\" aria-label=\"Preview card width\"><button type=\"button\" data-width=\"desktop\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 21h8M12 16v5\"/></svg>Desktop</button><button type=\"button\" data-width=\"phone\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"6\" y=\"2\" width=\"12\" height=\"20\" rx=\"2\"/><path d=\"M11 18h2\"/></svg>Phone</button></div><button class=\"preview-close\" type=\"button\" aria-label=\"Close preview\" title=\"Close preview\" autofocus><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m6 6 12 12M18 6 6 18\"/></svg></button></div></div><p class=\"preview-note\">Your current changes, without saving. Device controls are live. The final card width depends on your dashboard layout.</p><div class=\"preview-dashboard\"><div class=\"preview-card\"></div></div>", r.className = "dashboard-preview";
 	let i = document.createElement("three-d-rooms-card");
@@ -738,7 +759,7 @@ function gt(e, t, n) {
 		show_title: t.show_title ?? !0,
 		height: t.height === "auto" ? 600 : t.height,
 		markers: t.markers,
-		...Object.fromEntries(P.filter((e) => t[e] !== void 0).map((e) => [e, t[e]]))
+		...Object.fromEntries(F.filter((e) => t[e] !== void 0).map((e) => [e, t[e]]))
 	}), i.hass = n, r.querySelector(".preview-card").append(i);
 	for (let e of r.querySelectorAll(".preview-widths button")) e.onclick = () => {
 		r.querySelector(".preview-card").dataset.width = e.dataset.width;
@@ -758,7 +779,7 @@ function gt(e, t, n) {
 	};
 }
 // shared/dashboard-cards.mjs
-function _t(e, t, n) {
+function xt(e, t, n) {
 	let r = structuredClone(e), i = r?.views?.[t];
 	if (!i) throw Error("That dashboard view no longer exists.");
 	if (i.strategy) throw Error("That view is generated automatically; choose another.");
@@ -767,7 +788,7 @@ function _t(e, t, n) {
 		cards: [n]
 	})) : (i.cards ||= [], i.cards.push(n)), r;
 }
-function vt(e) {
+function St(e) {
 	return !e || e.strategy || !Array.isArray(e.views) ? [] : e.views.map((e, t) => ({
 		index: t,
 		title: e.title || e.path || `View ${t + 1}`,
@@ -775,7 +796,7 @@ function vt(e) {
 		editable: !e.strategy
 	})).filter((e) => e.editable);
 }
-async function yt(e) {
+async function Ct(e) {
 	let t = [{
 		url_path: null,
 		title: "Overview"
@@ -790,7 +811,7 @@ async function yt(e) {
 		} catch {
 			continue;
 		}
-		let i = vt(t);
+		let i = St(t);
 		i.length && n.push({
 			url_path: r.url_path,
 			title: r.title || r.url_path || "Dashboard",
@@ -799,7 +820,7 @@ async function yt(e) {
 	}
 	return n;
 }
-async function bt(e, t, n, r) {
+async function wt(e, t, n, r) {
 	let i = t ? { url_path: t } : {}, a = await e.callWS({
 		type: "lovelace/config",
 		...i
@@ -807,11 +828,11 @@ async function bt(e, t, n, r) {
 	await e.callWS({
 		type: "lovelace/config/save",
 		...i,
-		config: _t(a, n, r)
+		config: xt(a, n, r)
 	});
 }
 // dashboard/panel.js
-var xt = class extends HTMLElement {
+var Tt = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = "<style>:host{display:block;height:100%;min-height:100vh}iframe{display:block;width:100%;height:100vh;border:0}</style><iframe title=\"3D Rooms model library\"></iframe>", this._frame = this.shadowRoot.querySelector("iframe"), this._frame.addEventListener("load", () => this._applyTheme()), this._iconCache = /* @__PURE__ */ new Map(), this._ready = (e) => {
 			if (e.source !== this._frame.contentWindow || e.origin !== location.origin || e.data?.type !== "three-d-rooms-ready") return;
@@ -825,7 +846,7 @@ var xt = class extends HTMLElement {
 				},
 				preview: async (e) => {
 					this._preview?.close();
-					let t = gt(this.shadowRoot, e, this._hass);
+					let t = bt(this.shadowRoot, e, this._hass);
 					this._preview = t, await t.closed, this._preview === t && (this._preview = null);
 				},
 				navigate: (e) => {
@@ -840,8 +861,8 @@ var xt = class extends HTMLElement {
 					for (let [n, r] of B(e)) t.searchParams.set(n, r);
 					history.replaceState(history.state, "", t);
 				},
-				dashboards: () => yt(this._hass),
-				addCard: (e, t, n) => bt(this._hass, e, t, n),
+				dashboards: () => Ct(this._hass),
+				addCard: (e, t, n) => wt(this._hass, e, t, n),
 				states: () => Object.values(this._hass?.states || {}),
 				request: (e, t = {}) => this._hass.callWS({
 					type: "three_d_rooms/request",
@@ -849,8 +870,8 @@ var xt = class extends HTMLElement {
 					data: t
 				}),
 				asset: (e, t) => this._hass.fetchWithAuth(e, t),
-				upload: (e, t) => pt(this._hass, e, t),
-				scene: (e, t = "full") => M(this._hass, e, t),
+				upload: (e, t) => _t(this._hass, e, t),
+				scene: (e, t = "full") => N(this._hass, e, t),
 				entityIcon: (e) => {
 					let t = JSON.stringify([
 						e.entity_id,
@@ -858,7 +879,7 @@ var xt = class extends HTMLElement {
 						e.attributes?.icon,
 						e.attributes?.device_class
 					]);
-					return this._iconCache.has(t) || (this._iconCache.set(t, ht(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
+					return this._iconCache.has(t) || (this._iconCache.set(t, yt(this.shadowRoot, this._hass, e)), this._iconCache.size > 32 && this._iconCache.delete(this._iconCache.keys().next().value)), this._iconCache.get(t);
 				},
 				subscribeModels: (e) => this._hass.connection.subscribeEvents(e, "three_d_rooms_updated"),
 				subscribe: (e) => (this._listener = e, this._publish(), () => {
@@ -893,7 +914,7 @@ var xt = class extends HTMLElement {
 		this._preview?.close(), window.removeEventListener("message", this._ready), this._listener = null;
 	}
 };
-customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", xt);
+customElements.get("three-d-rooms-panel") || customElements.define("three-d-rooms-panel", Tt);
 // shared/house-floors.mjs
 function G(e, t) {
 	if (!t?.houseView || !Array.isArray(e)) return [];
@@ -904,10 +925,10 @@ function G(e, t) {
 		label: e.houseFloor?.name || "Whole house"
 	})).sort((e, t) => e.floorId === null ? -1 : +(t.floorId === null));
 }
-function St(e, t, n) {
+function Et(e, t, n) {
 	return !n || n === t?.id ? t : G(e, t).some((e) => e.id === n) && e.find((e) => e.id === n) || t;
 }
-function Ct(e, t, n = !0) {
+function Dt(e, t, n = !0) {
 	let r = n ? G(e, t) : [];
 	if (!r.length) return {
 		model: t,
@@ -922,7 +943,7 @@ function Ct(e, t, n = !0) {
 	};
 }
 // dashboard/editor.js
-var wt = {
+var Ot = {
 	model: "Room",
 	title: "Title",
 	show_title: "Show title",
@@ -932,14 +953,14 @@ var wt = {
 	zoom: "Zoom",
 	height: "Height",
 	interactive: "Camera movement"
-}, Tt = {
+}, kt = {
 	show_title: !0,
 	height: 500,
 	view: "front",
 	heading: 0,
 	tilt: 28,
 	zoom: 1
-}, Et = class extends HTMLElement {
+}, At = class extends HTMLElement {
 	constructor() {
 		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>
       :host{display:block;container-type:inline-size;color:var(--primary-text-color);font:14px/1.5 var(--paper-font-body1_-_font-family,system-ui)}
@@ -975,7 +996,7 @@ var wt = {
     <label class="check"><input id="spread_icons" type="checkbox">Move icons that overlap apart (a dot and line mark their real spot)</label>
     <label class="check" id="room-focus-setting" hidden><input id="room_focus" type="checkbox">Show a button in front of each room to view that room on its own</label>
     <label class="check" id="floor-selector-setting" hidden><input id="floor_selector" type="checkbox">Show floor switcher (whole house or one floor)</label>
-    <label>Background<select id="background">${N.map((e) => `<option value="${e}">${De[e]}</option>`).join("")}</select></label>
+    <label>Background<select id="background">${P.map((e) => `<option value="${e}">${Ee[e]}</option>`).join("")}</select></label>
     <label id="background-image-setting" hidden>Background image address<input id="background_image" type="url" inputmode="url" maxlength="2000" placeholder="/local/backgrounds/garden.jpg"></label>
     <label class="check"><input id="background_shadow" type="checkbox">Soft shadow under the house</label>
     <label>Rendering quality<select id="quality">
@@ -1009,7 +1030,7 @@ var wt = {
 			let i = document.createElement("div");
 			i.className = "override-controls", i.id = `override-controls-${e}`, i.hidden = !0;
 			let a = document.createElement("button");
-			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${wt[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
+			a.type = "button", a.id = `reset-field-${e}`, a.className = "reset-field", a.innerHTML = "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 10a8 8 0 1 1 1 8M4 4v6h6\"/></svg><span>Reset</span>", a.title = "Use saved view value", a.hidden = !0, a.setAttribute("aria-label", `Reset ${Ot[e]} to saved view`), a.addEventListener("click", () => this._resetField(e)), i.append(a), r.append(n, i);
 		}
 		this._field("height-mode").onchange = () => {
 			this._field("height-mode").disabled || this._emit({
@@ -1104,7 +1125,7 @@ var wt = {
 			n = z({ saved_view: e }, this._components);
 		} catch {}
 		let r = t("background").value, i = t("background_image").value.trim(), a = t("background_shadow").checked;
-		r === (n.background || "spotlight") ? delete e.background : e.background = r, r === "image" && i && i !== n.background_image ? e.background_image = i : delete e.background_image, a === I({
+		r === (n.background || "spotlight") ? delete e.background : e.background = r, r === "image" && i && i !== n.background_image ? e.background_image = i : delete e.background_image, a === L({
 			background: r,
 			background_shadow: n.background_shadow,
 			view: "front"
@@ -1128,12 +1149,12 @@ var wt = {
 			let t = !!this._config.saved_view, r = Object.hasOwn(this._config, e);
 			this._field(`reset-field-${e}`).hidden = !t || !r || !n || this._config[e] === n[e], this._field(`override-controls-${e}`).hidden = this._field(`reset-field-${e}`).hidden, this._field(e).disabled = !1;
 		}
-		for (let t of Object.keys(Tt).concat([
+		for (let t of Object.keys(kt).concat([
 			"model",
 			"title",
 			"interactive"
 		])) {
-			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : Tt[t]) ?? "";
+			let n = this._field(t), r = e.camera, i = t === "zoom" ? r?.referenceZoom : r?.[t], a = e[t] ?? i ?? (t === "tilt" && e.view === "floor" ? 0 : kt[t]) ?? "";
 			t === "interactive" || t === "show_title" ? n.checked = !!a : n.value = a;
 		}
 		this._field("height-mode").value = e.height === "auto" ? "auto" : "fixed", this._field("height-mode").disabled = this._field("height").disabled, this._field("height").hidden = e.height === "auto";
@@ -1142,7 +1163,7 @@ var wt = {
 		let a = this._models?.find((e) => e.id === r);
 		this._field("floor-selector-setting").hidden = !G(this._models, a).length, this._field("room-focus-setting").hidden = !a?.houseView, this._field("room_focus").checked = this._config.room_focus !== !1, this._field("floor_selector").checked = this._config.floor_selector !== !1, this._field("camera_controls").checked = this._config.camera_controls !== !1, this._field("floor_plan_button").checked = this._config.floor_plan_button !== !1, this._field("floor-plan-button-setting").hidden = (e.view || "front") === "floor", this._field("light_panel").checked = this._config.light_panel !== !1, this._field("edit_button").checked = this._config.edit_button !== !1, this._field("shade_panel").checked = this._config.shade_panel !== !1, this._field("summary").checked = this._config.summary !== !1, this._field("spread_icons").checked = this._config.spread_icons !== !1;
 		let o = e.background || "spotlight";
-		this._field("background").value = o, this._field("background-image-setting").hidden = o !== "image", this._field("background_image").value = e.background_image || "", this._field("background_image").setCustomValidity(!e.background_image || F(e.background_image) ? "" : "Use an address starting with /, http:// or https://"), this._field("background_shadow").checked = I({
+		this._field("background").value = o, this._field("background-image-setting").hidden = o !== "image", this._field("background_image").value = e.background_image || "", this._field("background_image").setCustomValidity(!e.background_image || I(e.background_image) ? "" : "Use an address starting with /, http:// or https://"), this._field("background_shadow").checked = L({
 			...e,
 			view: "front"
 		}), this._field("quality").value = this._config.quality || "auto";
@@ -1268,9 +1289,9 @@ var wt = {
 		}));
 	}
 };
-customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", Et);
+customElements.get("three-d-rooms-editor") || customElements.define("three-d-rooms-editor", At);
 // dashboard/transport.mjs
-async function Dt(e, t, n, r = fetch) {
+async function jt(e, t, n, r = fetch) {
 	if (!t.preview_url && !t.addon) return {
 		preview: !1,
 		async load({ onProgress: n, onModel: r, fresh: i = !1 } = {}) {
@@ -1279,7 +1300,7 @@ async function Dt(e, t, n, r = fetch) {
 				operation: "models"
 			}), o = a.find((e) => e.id === t.model);
 			if (!o) throw Error("Model not found. Upload it in the 3D Rooms sidebar first.");
-			let c = p(t.quality), { model: l, floors: u, views: d } = Ct(a, o, t.floor_selector !== !1);
+			let c = p(t.quality), { model: l, floors: u, views: d } = Dt(a, o, t.floor_selector !== !1);
 			if (r?.({
 				model: l,
 				configured: o,
@@ -1298,10 +1319,10 @@ async function Dt(e, t, n, r = fetch) {
 						d?.({ loaded: 0 }), t.push({
 							...o,
 							assetCache: {
-								owner: j(e),
+								owner: M(e),
 								key: s(u, c)
 							},
-							url: URL.createObjectURL(await M(e, u, c, d, { fresh: i }))
+							url: URL.createObjectURL(await N(e, u, c, d, { fresh: i }))
 						});
 					}
 					return {
@@ -1316,7 +1337,7 @@ async function Dt(e, t, n, r = fetch) {
 					throw t.forEach((e) => URL.revokeObjectURL(e.url)), e;
 				}
 			}
-			let f = URL.createObjectURL(await M(e, l, c, n && ((e) => n({
+			let f = URL.createObjectURL(await N(e, l, c, n && ((e) => n({
 				...e,
 				index: 0,
 				count: 1
@@ -1328,7 +1349,7 @@ async function Dt(e, t, n, r = fetch) {
 				views: d,
 				sceneURL: f,
 				assetCache: {
-					owner: j(e),
+					owner: M(e),
 					key: s(l, c)
 				},
 				release: () => URL.revokeObjectURL(f)
@@ -1380,7 +1401,7 @@ async function Dt(e, t, n, r = fetch) {
 			if (!e.ok) throw Error("Could not read models. Open the 3D Rooms add-on and try again.");
 			let n = await e.json(), a = n.find((e) => e.id === t.model);
 			if (!a) throw Error("Model not found. Upload it in the 3D Rooms add-on first.");
-			let { model: o, floors: s, views: c } = Ct(n, a, t.floor_selector !== !1);
+			let { model: o, floors: s, views: c } = Dt(n, a, t.floor_selector !== !1);
 			return o.members ? {
 				model: o,
 				configured: a,
@@ -1419,7 +1440,7 @@ var K = {
 		}
 	}
 };
-function Ot(e, n = "light", r = () => !1) {
+function Mt(e, n = "light", r = () => !1) {
 	let { entity: i } = K[n], a = (e) => n === "light" ? e.type === "light" : e.type === "cover" && e.motion !== "none" && r(e), o = /* @__PURE__ */ new Map(), s = new Set((e?.controls || []).filter((e) => e.hidden && a(e)).map((t) => e.bindings?.[t.id]).filter(Boolean));
 	for (let r of e?.controls || []) {
 		if (!a(r) || r.hidden || r.lightGroupPrimary === !1) continue;
@@ -1443,7 +1464,7 @@ function Ot(e, n = "light", r = () => !1) {
 	}
 	return [...o.values()];
 }
-var q = (e) => Ot(e, "light");
+var q = (e) => Mt(e, "light");
 function J(e, t) {
 	let { isOn: n } = K[e.kind || "light"], r = 0, i = 0;
 	for (let a of e.lights) {
@@ -1456,7 +1477,7 @@ function J(e, t) {
 		total: e.lights.length
 	};
 }
-function kt(e, t, n = {}) {
+function Nt(e, t, n = {}) {
 	let { services: r } = K[e.kind || "light"], i = J(e, t).on === 0, a = i ? r.on : r.off, o = /* @__PURE__ */ new Map();
 	for (let t of e.entities) {
 		let e = n[t];
@@ -1494,7 +1515,7 @@ function X(e, t = {}) {
 		};
 	}).filter(Boolean);
 }
-function At(e) {
+function Pt(e) {
 	let t = /* @__PURE__ */ new Map(), n = [];
 	for (let { entityId: r, state: i, position: a } of e) {
 		let e = r.split(".")[0];
@@ -1529,24 +1550,24 @@ function At(e) {
 	return n;
 }
 // dashboard/card.js
-var jt = "M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z";
-function Mt(e, t) {
-	return `<svg viewBox="0 0 24 24">${t ? w(t) || "" : e.type === "climate" ? Qe : e.type === "lock" ? Ze : `<path d="${e.type === "vacuum" ? jt : e.type === "button" ? "m8 4 12 8-12 8Z" : e.type === "number" ? "M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z" : e.type === "light" ? "M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z" : "M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"}"/>`}</svg>`;
+var Z = "M12,2C14.65,2 17.19,3.06 19.07,4.93L17.65,6.35C16.15,4.85 14.12,4 12,4C9.88,4 7.84,4.84 6.35,6.35L4.93,4.93C6.81,3.06 9.35,2 12,2M3.66,6.5L5.11,7.94C4.39,9.17 4,10.57 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,10.57 19.61,9.17 18.88,7.94L20.34,6.5C21.42,8.12 22,10.04 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12C2,10.04 2.58,8.12 3.66,6.5M12,6A6,6 0 0,1 18,12C18,13.59 17.37,15.12 16.24,16.24L14.83,14.83C14.08,15.58 13.06,16 12,16C10.94,16 9.92,15.58 9.17,14.83L7.76,16.24C6.63,15.12 6,13.59 6,12A6,6 0 0,1 12,6M12,8A1,1 0 0,0 11,9A1,1 0 0,0 12,10A1,1 0 0,0 13,9A1,1 0 0,0 12,8Z";
+function Ft(e, t) {
+	return `<svg viewBox="0 0 24 24">${t ? T(t) || "" : e.type === "climate" ? Qe : e.type === "lock" ? Ze : `<path d="${e.type === "vacuum" ? Z : e.type === "button" ? "m8 4 12 8-12 8Z" : e.type === "number" ? "M3 7h18v3H3zm2 3h2v11H5zm12 0h2v11h-2z" : e.type === "light" ? "M9 21h6v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Zm2.85 11.1-.85.6V16h-4v-2.3l-.85-.6a5 5 0 1 1 5.7 0Z" : "M3 3h18v2H3zm1 4h16v2H4zm0 4h16v2H4zm0 4h16v2H4zm7 4h2v3h-2z"}"/>`}</svg>`;
 }
-var Nt = /* @__PURE__ */ new Set([
+var It = /* @__PURE__ */ new Set([
 	"shade",
 	"blind",
 	"curtain",
 	"shutter",
 	"awning"
-]), Pt, Z = () => Pt ||= import("./three-d-rooms-scene-Ctc1Zep1.js").catch((e) => {
-	throw Pt = void 0, e;
-}), Ft = {
+]), Lt, Rt = () => Lt ||= import("./three-d-rooms-scene-iEIiKNNz.js").catch((e) => {
+	throw Lt = void 0, e;
+}), zt = {
 	light: "mdi:lightbulb",
 	opening: "mdi:door-open",
 	lock: "mdi:lock",
 	climate: "mdi:air-conditioner"
-}, It = (e) => e.kind === "vacuum" ? `<path d="${jt}"/>` : w(e.kind === "lock" && e.tone === "unlocked" ? "mdi:lock-open-variant" : Ft[e.kind]), Q = {
+}, Bt = (e) => e.kind === "vacuum" ? `<path d="${Z}"/>` : T(e.kind === "lock" && e.tone === "unlocked" ? "mdi:lock-open-variant" : zt[e.kind]), Q = {
 	auto: {
 		label: "Auto",
 		hint: "follow the sun",
@@ -1562,7 +1583,7 @@ var Nt = /* @__PURE__ */ new Set([
 		hint: "always night",
 		icon: "<path d=\"M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z\"/>"
 	}
-}, Lt = (e, t = 1) => {
+}, Vt = (e, t = 1) => {
 	let n = Object.keys(Q);
 	return n[(n.indexOf(e) + t + n.length) % n.length];
 }, $ = class extends HTMLElement {
@@ -1577,7 +1598,7 @@ var Nt = /* @__PURE__ */ new Set([
 		};
 	}
 	constructor() {
-		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>:host{display:block;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}.switching{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;cursor:progress;background:color-mix(in srgb,var(--card-background-color,#101715) 40%,transparent);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px)}.switching-pill{display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:10px 18px 10px 14px;border-radius:999px;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#101715) 90%,transparent);box-shadow:0 2px 8px #0006;font:500 14px/1.3 system-ui}.switching-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spinner{flex-shrink:0;width:18px;height:18px;box-sizing:border-box;border:2px solid color-mix(in srgb,var(--primary-text-color,#edf2eb) 25%,transparent);border-top-color:var(--primary-color,#aacaab);border-radius:50%;will-change:transform;animation:switch-spin .8s linear infinite}@keyframes switch-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}ha-card{container:card-root/inline-size;display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;isolation:isolate;width:100%;height:500px;container:card-scene/inline-size}.scene canvas{display:block;width:100%;height:100%}${Fe}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border-color:color-mix(in srgb,var(--primary-text-color,#edf2eb) 45%,transparent);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid var(--divider-color,#536258);border-radius:var(--ha-dialog-border-radius,16px);padding:24px;background:var(--ha-card-background,var(--card-background-color,#202923));color:var(--primary-text-color,#edf2eb);font:14px system-ui;box-shadow:0 12px 40px #0005}dialog::backdrop{background:var(--mdc-dialog-scrim-color,#0008)}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:var(--secondary-text-color,#aebbb2);line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"],.camera-floor-plan[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}[data-tone="cleaning"]{--tone:var(--state-vacuum-active-color,#009688)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:auto;height:44px;min-height:44px;padding:0 14px 0 11px;font:500 14px system-ui;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{flex-shrink:0;width:20px;height:20px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel[data-kind="shade"] button[role="switch"][aria-checked="true"]{background:var(--state-cover-active-color,#9c27b0)}.light-panel[data-kind="shade"] .light-row[data-on="true"] ha-state-icon{color:var(--state-cover-active-color,#9c27b0)}.light-row{flex-wrap:wrap}.light-position{flex-shrink:0;margin-left:auto;padding-left:8px;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-dim{flex-basis:100%;box-sizing:border-box;width:auto;height:28px;margin:-4px 0 6px 34px;accent-color:var(--state-active-color,#ffd66b);cursor:pointer}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}.room-tags{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}.room-tags .room-tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--room-tag-size,30px)*.2);box-sizing:border-box;height:var(--room-tag-size,30px);min-height:var(--room-tag-size,30px);padding:0 calc(var(--room-tag-size,30px)*.37) 0 calc(var(--room-tag-size,30px)*.27);border-radius:calc(var(--room-tag-size,30px)/2);transform:translate(-50%,6px);white-space:nowrap;pointer-events:auto;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#202923) 92%,transparent);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006;font:500 calc(var(--room-tag-size,30px)*.4)/1 system-ui}.room-tags .room-tag::before{content:"";position:absolute;inset:-8px -4px}.room-tags .room-tag svg{width:calc(var(--room-tag-size,30px)*.47);height:calc(var(--room-tag-size,30px)*.47);flex-shrink:0;opacity:.8}.room-tags .room-tag[data-manual="true"]{transform:translate(-50%,-50%)}.room-tags .room-tag .room-tag-count{display:grid;place-items:center;min-width:calc(var(--room-tag-size,30px)*.6);height:calc(var(--room-tag-size,30px)*.6);padding:0 calc(var(--room-tag-size,30px)*.17);box-sizing:border-box;border-radius:calc(var(--room-tag-size,30px)*.3);background:var(--state-light-active-color,#ffc107);color:#1c1c1c;font-size:calc(var(--room-tag-size,30px)*.37);font-weight:600}.room-tags .room-tag:hover{background:var(--card-background-color,#202923);border-color:var(--primary-color,#aacaab)}.room-nav{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px}.room-nav .room-step{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:0;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.room-nav .room-step svg{width:22px;height:22px}.room-back{display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;height:44px;min-height:44px;flex:0 0 auto;width:clamp(150px,calc(100cqw - 404px),260px);justify-content:center;padding:0 16px 0 10px;white-space:nowrap;color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab);box-shadow:0 2px 8px #0006;font:600 14px/1 system-ui}.room-back svg{width:20px;height:20px;flex-shrink:0}.room-back>span:not(.room-back-name){flex-shrink:0}.room-back .room-back-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.85;padding-left:8px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent)}.room-back .room-back-name:empty{display:none}@container card-root (max-width:520px){.card-controls{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px}.card-controls>button{width:44px;height:44px;min-height:44px;padding:10px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.card-controls>button::before,.light-panel-toggle::before{content:"";position:absolute;inset:-5px}.card-controls>button svg,.light-panel-toggle svg{width:20px;height:20px;opacity:.85}.panel-toggles{top:8px;left:8px;gap:6px}.floor-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.floor-switch button{height:36px;min-width:44px;padding:0 12px;font:500 14px system-ui}.card-top.card-top:has(header[hidden]){top:8px;right:8px}.daylight-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.daylight-switch button{width:40px;height:36px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{top:3px;left:3px;width:40px;height:36px}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}.light-panel{top:60px;left:8px;bottom:62px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 122px)}.room-nav{top:60px;gap:6px}.room-nav .room-step{width:44px;height:44px;min-height:44px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.room-nav .room-step::before{content:"";position:absolute;inset:-5px}.room-nav .room-step svg{width:22px;height:22px}.room-back{height:44px;min-height:44px;width:clamp(130px,calc(100cqw - 132px),200px);padding:0 12px 0 8px;font:600 12px/1 system-ui;box-shadow:0 1px 4px #0004}.room-back svg{width:16px;height:16px}}.reload-menu{position:absolute;bottom:calc(100% + 8px);z-index:4;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;width:min(250px,calc(100vw - 32px));padding:6px;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;pointer-events:auto}.reload-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;border:0;border-radius:8px;text-align:left;color:inherit;font:500 15px/1.25 system-ui}.reload-menu button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.reload-menu button:disabled{opacity:.5;cursor:wait}.reload-menu svg{flex-shrink:0;width:22px;height:22px}.reload-menu small{display:block;margin-top:2px;color:var(--secondary-text-color,#aebbb2);font:400 12px/1.3 system-ui}.model-refresh[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.undo-toast{position:absolute;left:50%;bottom:72px;z-index:6;transform:translateX(-50%);display:flex;align-items:center;gap:4px;box-sizing:border-box;max-width:calc(100% - 24px);padding:4px 4px 4px 16px;border-radius:10px;color:var(--card-background-color,#fff);background:var(--primary-text-color,#212121);box-shadow:0 4px 16px #0006;font:500 14px/1.3 system-ui;animation:undo-in .2s cubic-bezier(.2,.7,.2,1)}.undo-toast span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.undo-toast button{flex-shrink:0;min-height:40px;padding:0 14px;border:0;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}.undo-toast button:hover{background:color-mix(in srgb,currentColor 12%,transparent)}@keyframes undo-in{from{opacity:0;transform:translate(-50%,8px)}}@media(prefers-reduced-motion:reduce){.undo-toast{animation:none}}.fixture-access button{--activity:var(--info-color,#039be5)}.marker-activity,.marker-activity-tip{display:none}.fixture-access button[data-activity="true"]{border-color:var(--activity);animation:activity-ring 1.8s ease-out infinite}@keyframes activity-ring{0%{box-shadow:0 2px 8px #0006,0 0 0 0 color-mix(in srgb,var(--activity) 70%,transparent)}100%{box-shadow:0 2px 8px #0006,0 0 0 12px transparent}}.fixture-access button[data-activity="true"] .marker-activity{position:absolute;top:-6px;left:calc(100% - 12px);display:flex;align-items:center;justify-content:center;gap:2px;box-sizing:border-box;min-width:18px;height:18px;padding:0 3px;border-radius:9px;background:var(--activity);color:#fff;box-shadow:0 0 0 2px var(--card-background-color,#202923);font:700 10px/1 system-ui;pointer-events:none}.marker-activity ha-state-icon{display:flex;width:12px;height:12px;--mdc-icon-size:12px;--marker-glyph-size:12px;color:#fff}@media(hover:hover){.fixture-access button[data-activity="true"]:hover .marker-activity-tip,.fixture-access button[data-activity="true"]:focus-visible .marker-activity-tip{position:absolute;bottom:calc(100% + 10px);left:50%;z-index:3;display:flex;flex-direction:column;gap:4px;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:240px;padding:7px 10px;border-radius:8px;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);box-shadow:0 4px 12px #0007;color:var(--primary-text-color,#edf2eb);font:500 12px/1.3 system-ui;text-align:left;white-space:nowrap;pointer-events:none}}.marker-activity-tip span{display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis}.marker-activity-tip span::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;background:var(--activity);animation:activity-pulse 1.6s ease-in-out infinite}@keyframes activity-pulse{0%,100%{opacity:1}50%{opacity:.35}}@media(prefers-reduced-motion:reduce){.fixture-access button[data-activity="true"],.marker-activity-tip span::before{animation:none!important}}.fixture-access button[data-holding="true"]::after{content:"";position:absolute;inset:-5px;border-radius:50%;pointer-events:none;background:conic-gradient(var(--primary-color,#aacaab) calc(var(--hold,0)*1turn),transparent 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));animation:hold-fill var(--hold-ms,350ms) linear forwards}@property --hold{syntax:"<number>";inherits:false;initial-value:0}@keyframes hold-fill{to{--hold:1}}.undo-toast[data-tip] span{white-space:normal}.undo-tip{display:block;margin-top:2px;font:400 12px/1.3 system-ui;opacity:.75}@media(prefers-reduced-motion:reduce){.fixture-access button[data-holding="true"]::after{animation:none;--hold:1}}.icon-leaders{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}.icon-leaders line{stroke:var(--primary-text-color,#edf2eb);stroke-opacity:.8;stroke-width:1.5}.icon-leaders circle{fill:var(--primary-text-color,#edf2eb);stroke:#0009;stroke-width:1}.house-summary{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;gap:2px;box-sizing:border-box;max-width:calc(100% - 24px);height:44px;padding:3px;overflow-x:auto;scrollbar-width:none;border-radius:22px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006}.house-summary::-webkit-scrollbar{display:none}.house-summary button{display:inline-flex;flex-shrink:0;align-items:center;gap:6px;height:36px;min-height:0;padding:0 12px 0 10px;border:0;border-radius:18px;font:500 13px/1 system-ui;white-space:nowrap;color:inherit}.house-summary button:hover{background:color-mix(in srgb,currentColor 10%,transparent)}.house-summary svg{flex-shrink:0;width:18px;height:18px;fill:currentColor;opacity:.7}.house-summary button[data-tone] svg{fill:var(--tone);opacity:1}.house-summary[data-below]{left:12px;right:12px;transform:none;max-width:none;width:fit-content;margin:0 auto;height:auto;flex-wrap:wrap;justify-content:center;border-radius:16px}@container card-root (max-width:520px){.house-summary[data-below]{left:8px;right:8px}.house-summary button{height:30px;padding:0 9px 0 7px;font-size:12.5px;gap:5px}.house-summary svg{width:16px;height:16px}}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="backdrop" aria-hidden="true"></div><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`, this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
+		super(), this.attachShadow({ mode: "open" }), this.shadowRoot.innerHTML = `<style>:host{display:block;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input,textarea{-webkit-user-select:text;user-select:text}.switching{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;cursor:progress;background:color-mix(in srgb,var(--card-background-color,#101715) 40%,transparent);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px)}.switching-pill{display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:10px 18px 10px 14px;border-radius:999px;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#101715) 90%,transparent);box-shadow:0 2px 8px #0006;font:500 14px/1.3 system-ui}.switching-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spinner{flex-shrink:0;width:18px;height:18px;box-sizing:border-box;border:2px solid color-mix(in srgb,var(--primary-text-color,#edf2eb) 25%,transparent);border-top-color:var(--primary-color,#aacaab);border-radius:50%;will-change:transform;animation:switch-spin .8s linear infinite}@keyframes switch-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}ha-card{container:card-root/inline-size;display:block;position:relative;overflow:hidden;background:var(--ha-card-background,var(--card-background-color,#101715));border-radius:var(--ha-card-border-radius,12px)}header{padding:16px 20px 0;font:500 18px system-ui;color:var(--primary-text-color,#edf2eb)}.scene{position:relative;isolation:isolate;width:100%;height:500px;container:card-scene/inline-size}.scene canvas{display:block;width:100%;height:100%}${Fe}.message{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:16px;color:var(--primary-text-color,#edf2eb);font:14px/1.5 system-ui;background:var(--card-background-color,#101715);z-index:1}.loading-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transition:opacity .3s ease-out}.loading-preview.fading{opacity:0}.message.over-preview{background:color-mix(in srgb,var(--card-background-color,#101715) 45%,transparent);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}.message.over-preview>span{padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--card-background-color,#101715) 80%,transparent)}@media(prefers-reduced-motion:reduce){.loading-preview{transition:none}}.message progress{appearance:none;-webkit-appearance:none;width:min(220px,70%);height:4px;border:0;border-radius:2px;overflow:hidden;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 18%,transparent);color:var(--primary-color,#aacaab)}.message progress::-webkit-progress-bar{background:transparent}.message progress::-webkit-progress-value{background:var(--primary-color,#aacaab);border-radius:2px;transition:width .2s}.message progress::-moz-progress-bar{background:var(--primary-color,#aacaab);border-radius:2px}button{font:inherit;min-height:44px;padding:10px 18px;border:1px solid var(--divider-color,#536258);border-radius:8px;background:transparent;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--primary-color,#aacaab)}.fixture-access{position:absolute;inset:0;pointer-events:none}.fixture-access button{position:absolute;box-sizing:border-box;width:var(--marker-size,32px);height:var(--marker-size,32px);min-height:var(--marker-size,32px);padding:6px;border-radius:50%;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border-color:color-mix(in srgb,var(--primary-text-color,#edf2eb) 45%,transparent);pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0006}.fixture-access button::before{content:"";position:absolute;inset:-6px;border-radius:50%}.fixture-access button[aria-pressed="true"]{color:#ffd66b;border-color:#ffd66b}.fixture-access button[aria-disabled="true"]{opacity:.55}.fixture-access button svg{width:18px;height:18px;fill:currentColor}.fixture-feedback{position:absolute;bottom:12px;left:12px;right:12px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);padding:8px;border-radius:8px;pointer-events:none}.fixture-access ha-state-icon{display:block;width:18px;height:18px;--mdc-icon-size:18px;color:inherit}.fixture-access button[data-active="true"]{color:var(--primary-text-color,#edf2eb);border-color:var(--state-active-color,#ffd66b);background:color-mix(in srgb,var(--state-active-color,#ffd66b) 18%,var(--card-background-color,#202923))}.fixture-access button[data-unavailable="true"]{opacity:.65;color:var(--disabled-text-color,#9aa29e);border-style:dashed}.fixture-state{position:absolute;top:calc(var(--marker-size,32px) - 6px);left:50%;transform:translateX(-50%);padding:1px 4px;min-width:20px;white-space:nowrap;border:1px solid var(--divider-color,#536258);border-radius:6px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);font:600 10px/14px system-ui;pointer-events:none}.fixture-access button[data-moving="true"] .fixture-state{color:var(--primary-color,#aacaab)}dialog{box-sizing:border-box;width:min(360px,calc(100vw - 32px));border:1px solid var(--divider-color,#536258);border-radius:var(--ha-dialog-border-radius,16px);padding:24px;background:var(--ha-card-background,var(--card-background-color,#202923));color:var(--primary-text-color,#edf2eb);font:14px system-ui;box-shadow:0 12px 40px #0005}dialog::backdrop{background:var(--mdc-dialog-scrim-color,#0008)}dialog h2{font-size:20px;margin:0 0 8px}dialog p{color:var(--secondary-text-color,#aebbb2);line-height:1.5}dialog label{display:grid;gap:8px;margin:18px 0}dialog .confirm{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715);border-color:var(--primary-color,#aacaab)}dialog input{width:100%;min-height:32px;box-sizing:border-box}dialog .close{margin-top:12px}.daylight-switch{position:absolute;top:12px;right:12px;z-index:1;box-sizing:border-box;display:inline-flex;height:44px;padding:3px;color:var(--primary-text-color,#edf2eb);background-color:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.daylight-switch button{position:relative;z-index:1;display:grid;place-items:center;width:40px;height:36px;min-height:0;padding:0;border:0;border-radius:6px;color:inherit;transition:color .2s}.daylight-switch button[aria-checked="true"]{color:var(--text-primary-color,#101715)}.daylight-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:1px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{position:absolute;top:3px;left:3px;width:40px;height:36px;border-radius:6px;background:var(--primary-color,#aacaab);transition:transform .22s cubic-bezier(.3,.7,.3,1)}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}@media(prefers-reduced-motion:reduce){.daylight-thumb,.daylight-switch button{transition:none}}[hidden]{display:none!important}.card-top{display:none;align-items:center;gap:12px;min-width:0;box-sizing:border-box}.card-top:has(header:not([hidden])),.card-top:has(.daylight-switch:not([hidden])){display:flex;padding:12px 16px}.card-top header{padding:0;flex:1;min-width:0;overflow-wrap:anywhere;font-size:16px;line-height:1.4}.card-top .daylight-switch{position:relative;top:auto;right:auto;flex-shrink:0;margin-left:auto;box-shadow:none}.card-top.card-top:has(header[hidden]){position:absolute;top:12px;right:12px;z-index:1;padding:0}.fixture-access button{min-width:var(--marker-size,32px);min-height:var(--marker-size,32px);width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-access button::before{inset:min(-4px,calc((var(--marker-size,32px) - 46px)/2))}.fixture-state{top:calc(var(--marker-size,32px) - 6px);font-size:11px;line-height:16px}.fixture-tray{display:flex;flex-direction:column;gap:8px;padding:12px}.fixture-tray:empty{display:none}.fixture-tray button{display:flex;align-items:center;gap:12px;min-height:44px;text-align:left;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923)}.fixture-tray ha-state-icon{width:var(--marker-size,32px);height:var(--marker-size,32px);--mdc-icon-size:var(--marker-size,32px)}.fixture-tray ha-state-icon svg{width:100%;height:100%;fill:currentColor}.fixture-tray .fixture-state{position:static;transform:none;margin-left:auto;font:inherit;white-space:nowrap}.fixture-name{flex:1}.fixture-tray button[data-unavailable="true"]{opacity:.65}.fixture-tray button[data-active="true"] ha-state-icon{color:var(--state-active-color,#ffd66b)}.fixture-access button{display:grid;place-items:center;padding:0;--marker-glyph-size:clamp(12px,calc(var(--marker-size,32px) - 14px),24px)}.fixture-access ha-state-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size);--mdc-icon-size:var(--marker-glyph-size)}.fixture-access button svg{display:block;width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-access .fixture-state{top:calc(var(--marker-size,32px) - 2px);font-size:clamp(9px,calc(var(--marker-size,32px) - 15px),11px);line-height:14px}.fixture-access ha-state-icon,.fixture-tray ha-state-icon{display:flex;align-items:center;justify-content:center;line-height:0;font-size:0;flex-shrink:0}.fixture-ac-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:0}.fixture-access .fixture-ac-icon{width:var(--marker-glyph-size);height:var(--marker-glyph-size)}.fixture-tray .fixture-ac-icon{width:var(--marker-size,32px);height:var(--marker-size,32px)}.fixture-ac-icon svg{display:block;width:100%;height:100%;fill:currentColor}.fixture-tray button[data-active="true"] .fixture-ac-icon{color:var(--state-active-color,#ffd66b)}.card-controls{position:absolute;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:2;display:flex;flex-direction:row-reverse;flex-wrap:wrap-reverse;align-items:center;gap:8px;pointer-events:none}.card-controls>*{pointer-events:auto;flex-shrink:0}.card-controls>button{display:grid;place-items:center;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:10px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.card-controls>button svg{width:22px;height:22px}.model-refresh:disabled{opacity:.5;cursor:wait}.camera-move[aria-pressed="true"],.camera-floor-plan[aria-pressed="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.floor-switch{display:flex;gap:2px;box-sizing:border-box;height:44px;max-width:100%;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);border-radius:8px;box-shadow:0 2px 8px #0006}.floor-switch button{flex-shrink:0;height:36px;min-height:0;min-width:44px;padding:0 12px;border:0;border-radius:6px;font:500 14px system-ui;white-space:nowrap;color:var(--primary-text-color,#edf2eb)}.floor-switch button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 10%,transparent)}.floor-switch button[aria-pressed="true"]{background:var(--primary-color,#aacaab);color:var(--text-primary-color,#101715)}.floor-switch button:focus-visible{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.panel-toggles{position:absolute;top:12px;left:12px;z-index:3;display:flex;gap:8px}[data-tone="locked"]{--tone:var(--state-lock-locked-color,#43a047)}[data-tone="unlocked"]{--tone:var(--state-lock-unlocked-color,#e5533d)}[data-tone="jammed"]{--tone:var(--state-lock-jammed-color,#e5533d)}[data-tone="moving"]{--tone:var(--state-lock-locking-color,#ff9800)}[data-tone="light"]{--tone:var(--state-light-active-color,#ffc107);--tone-ink:#1c1c1c}[data-tone="open"]{--tone:var(--state-cover-active-color,#9c27b0)}[data-tone="cool"]{--tone:var(--state-climate-cool-color,#2196f3)}[data-tone="heat"]{--tone:var(--state-climate-heat-color,#ff5722)}[data-tone="dry"]{--tone:var(--state-climate-dry-color,#ff9800)}[data-tone="fan_only"]{--tone:var(--state-climate-fan_only-color,#00bcd4)}[data-tone="auto"]{--tone:var(--state-climate-auto-color,#4caf50)}[data-tone="cleaning"]{--tone:var(--state-vacuum-active-color,#009688)}.fixture-access button[data-tone]{color:var(--tone-ink,#fff);border-color:var(--tone);background:var(--tone)}.fixture-tray button[data-tone] ha-state-icon,.fixture-tray button[data-tone] .fixture-ac-icon{color:var(--tone)}.fixture-tray button[data-tone] .fixture-state{color:var(--tone);border-color:var(--tone)}.light-panel-toggle{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;width:auto;height:44px;min-height:44px;padding:0 14px 0 11px;font:500 14px system-ui;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.light-panel-toggle svg{flex-shrink:0;width:20px;height:20px}.light-panel-toggle[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.light-panel{position:absolute;top:64px;left:12px;bottom:68px;z-index:3;display:flex;flex-direction:column;box-sizing:border-box;width:min(300px,calc(100% - 24px));max-height:calc(100% - 132px);height:fit-content;overflow:hidden;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;font:14px/1.4 system-ui}.light-panel>h2{display:flex;align-items:center;gap:8px;margin:0;padding:10px 8px 10px 14px;font:600 15px system-ui;border-bottom:1px solid var(--divider-color,#536258)}.light-panel>h2>span:first-child{flex:1}.light-panel>h2 .light-room-count{font-weight:400}.light-panel>h2 [role="switch"]{margin-right:2px}.light-panel .panel-close{min-height:36px;width:36px;padding:0;border:0;font-size:20px;line-height:1}.light-rooms{overflow-y:auto;overscroll-behavior:contain;padding:4px 0}.light-room+.light-room{border-top:1px solid color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.light-room-head,.light-row{display:flex;align-items:center;gap:6px;padding:0 10px 0 4px}.light-room-head>button:first-child,.light-row>button:first-child{display:flex;flex:1;align-items:center;gap:8px;min-width:0;min-height:44px;padding:4px 6px;border:0;border-radius:8px;text-align:left}.light-room-head>button:first-child:hover,.light-row>button:first-child:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.light-room-title{flex:1;min-width:0;font-weight:600;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.3}.light-room-count{flex-shrink:0;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-chevron{flex-shrink:0;width:16px;transition:transform .15s}.light-room-head>button[aria-expanded="true"] .light-chevron{transform:rotate(90deg)}.light-list{margin:0 0 6px;padding:0;list-style:none}.light-row{padding-left:22px}.light-row>button:first-child{min-height:40px}.light-row ha-state-icon,.light-row .light-glyph{display:flex;flex-shrink:0;width:20px;height:20px;--mdc-icon-size:20px;color:var(--secondary-text-color,#aebbb2)}.light-row .light-glyph svg{width:100%;height:100%;fill:currentColor}.light-row[data-on="true"] ha-state-icon,.light-row[data-on="true"] .light-glyph{color:var(--state-active-color,#ffd66b)}.light-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.light-row[data-unavailable="true"] .light-name{color:var(--disabled-text-color,#9aa29e)}.light-panel button[role="switch"]{position:relative;flex-shrink:0;width:40px;min-height:24px;height:24px;padding:0;border-radius:12px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 35%,transparent);border:0}.light-panel button[role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0006;transition:left .15s}.light-panel button[role="switch"][aria-checked="true"]{background:var(--state-active-color,#ffd66b)}.light-panel[data-kind="shade"] button[role="switch"][aria-checked="true"]{background:var(--state-cover-active-color,#9c27b0)}.light-panel[data-kind="shade"] .light-row[data-on="true"] ha-state-icon{color:var(--state-cover-active-color,#9c27b0)}.light-row{flex-wrap:wrap}.light-position{flex-shrink:0;margin-left:auto;padding-left:8px;color:var(--secondary-text-color,#aebbb2);font-size:12px}.light-dim{flex-basis:100%;box-sizing:border-box;width:auto;height:28px;margin:-4px 0 6px 34px;accent-color:var(--state-active-color,#ffd66b);cursor:pointer}.light-panel button[role="switch"][aria-checked="true"]::after{left:19px}.light-panel button[role="switch"]:disabled{opacity:.4;cursor:default}.light-panel button[role="switch"][aria-busy="true"]{opacity:.7;cursor:progress}.fixture-access button[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px;z-index:1}.fixture-access .room-group{position:absolute;display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;width:auto;min-width:0;height:34px;min-height:34px;padding:0 6px 0 10px;border-radius:17px;background:var(--card-background-color,#202923);color:var(--primary-text-color,#edf2eb);border:1px solid var(--divider-color,#536258);font:600 13px/1 system-ui;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 2px 8px #0006;z-index:2}.fixture-access .room-group::before{content:"";position:absolute;inset:-5px;border-radius:22px}.fixture-access .room-group .group-count{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 14%,transparent);font-size:12px}.fixture-access .room-group[data-active="true"] .group-count{background:var(--state-light-active-color,#ffc107);color:#1c1c1c}.fixture-access .room-group[data-highlight="true"]{outline:3px solid var(--primary-color,#aacaab);outline-offset:2px}.room-tags{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}.room-tags .room-tag{position:absolute;display:inline-flex;align-items:center;gap:calc(var(--room-tag-size,30px)*.2);box-sizing:border-box;height:var(--room-tag-size,30px);min-height:var(--room-tag-size,30px);padding:0 calc(var(--room-tag-size,30px)*.37) 0 calc(var(--room-tag-size,30px)*.27);border-radius:calc(var(--room-tag-size,30px)/2);transform:translate(-50%,6px);white-space:nowrap;pointer-events:auto;color:var(--primary-text-color,#edf2eb);background:color-mix(in srgb,var(--card-background-color,#202923) 92%,transparent);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006;font:500 calc(var(--room-tag-size,30px)*.4)/1 system-ui}.room-tags .room-tag::before{content:"";position:absolute;inset:-8px -4px}.room-tags .room-tag svg{width:calc(var(--room-tag-size,30px)*.47);height:calc(var(--room-tag-size,30px)*.47);flex-shrink:0;opacity:.8}.room-tags .room-tag[data-manual="true"]{transform:translate(-50%,-50%)}.room-tags .room-tag .room-tag-count{display:grid;place-items:center;min-width:calc(var(--room-tag-size,30px)*.6);height:calc(var(--room-tag-size,30px)*.6);padding:0 calc(var(--room-tag-size,30px)*.17);box-sizing:border-box;border-radius:calc(var(--room-tag-size,30px)*.3);background:var(--state-light-active-color,#ffc107);color:#1c1c1c;font-size:calc(var(--room-tag-size,30px)*.37);font-weight:600}.room-tags .room-tag:hover{background:var(--card-background-color,#202923);border-color:var(--primary-color,#aacaab)}.room-nav{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px}.room-nav .room-step{display:grid;place-items:center;flex-shrink:0;box-sizing:border-box;width:44px;height:44px;min-height:44px;padding:0;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);box-shadow:0 2px 8px #0006}.room-nav .room-step svg{width:22px;height:22px}.room-back{display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;height:44px;min-height:44px;flex:0 0 auto;width:clamp(150px,calc(100cqw - 404px),260px);justify-content:center;padding:0 16px 0 10px;white-space:nowrap;color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab);box-shadow:0 2px 8px #0006;font:600 14px/1 system-ui}.room-back svg{width:20px;height:20px;flex-shrink:0}.room-back>span:not(.room-back-name){flex-shrink:0}.room-back .room-back-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:400;opacity:.85;padding-left:8px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent)}.room-back .room-back-name:empty{display:none}@container card-root (max-width:520px){.card-controls{right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));gap:6px}.card-controls>button{width:44px;height:44px;min-height:44px;padding:10px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.card-controls>button::before,.light-panel-toggle::before{content:"";position:absolute;inset:-5px}.card-controls>button svg,.light-panel-toggle svg{width:20px;height:20px;opacity:.85}.panel-toggles{top:8px;left:8px;gap:6px}.floor-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.floor-switch button{height:36px;min-width:44px;padding:0 12px;font:500 14px system-ui}.card-top.card-top:has(header[hidden]){top:8px;right:8px}.daylight-switch{height:44px;padding:3px;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.daylight-switch button{width:40px;height:36px}.daylight-switch svg{width:20px;height:20px}.daylight-thumb{top:3px;left:3px;width:40px;height:36px}.daylight-switch[data-mode="day"] .daylight-thumb{transform:translateX(40px)}.daylight-switch[data-mode="night"] .daylight-thumb{transform:translateX(80px)}.light-panel{top:60px;left:8px;bottom:62px;width:min(300px,calc(100% - 16px));max-height:calc(100% - 122px)}.room-nav{top:60px;gap:6px}.room-nav .room-step{width:44px;height:44px;min-height:44px;position:relative;background:color-mix(in srgb,var(--card-background-color,#202923) 88%,transparent);box-shadow:0 1px 4px #0004;border-color:color-mix(in srgb,var(--divider-color,#536258) 60%,transparent)}.room-nav .room-step::before{content:"";position:absolute;inset:-5px}.room-nav .room-step svg{width:22px;height:22px}.room-back{height:44px;min-height:44px;width:clamp(130px,calc(100cqw - 132px),200px);padding:0 12px 0 8px;font:600 12px/1 system-ui;box-shadow:0 1px 4px #0004}.room-back svg{width:16px;height:16px}}.reload-menu{position:absolute;bottom:calc(100% + 8px);z-index:4;display:flex;flex-direction:column;gap:2px;box-sizing:border-box;width:min(250px,calc(100vw - 32px));padding:6px;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--divider-color,#536258);border-radius:12px;box-shadow:0 4px 16px #0008;pointer-events:auto}.reload-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;border:0;border-radius:8px;text-align:left;color:inherit;font:500 15px/1.25 system-ui}.reload-menu button:hover{background:color-mix(in srgb,var(--primary-text-color,#edf2eb) 8%,transparent)}.reload-menu button:disabled{opacity:.5;cursor:wait}.reload-menu svg{flex-shrink:0;width:22px;height:22px}.reload-menu small{display:block;margin-top:2px;color:var(--secondary-text-color,#aebbb2);font:400 12px/1.3 system-ui}.model-refresh[aria-expanded="true"]{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.undo-toast{position:absolute;left:50%;bottom:72px;z-index:6;transform:translateX(-50%);display:flex;align-items:center;gap:4px;box-sizing:border-box;max-width:calc(100% - 24px);padding:4px 4px 4px 16px;border-radius:10px;color:var(--card-background-color,#fff);background:var(--primary-text-color,#212121);box-shadow:0 4px 16px #0006;font:500 14px/1.3 system-ui;animation:undo-in .2s cubic-bezier(.2,.7,.2,1)}.undo-toast span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.undo-toast button{flex-shrink:0;min-height:40px;padding:0 14px;border:0;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px}.undo-toast button:hover{background:color-mix(in srgb,currentColor 12%,transparent)}@keyframes undo-in{from{opacity:0;transform:translate(-50%,8px)}}@media(prefers-reduced-motion:reduce){.undo-toast{animation:none}}.fixture-access button{--activity:var(--info-color,#039be5)}.marker-activity,.marker-activity-tip{display:none}.fixture-access button[data-activity="true"]{border-color:var(--activity);animation:activity-ring 1.8s ease-out infinite}@keyframes activity-ring{0%{box-shadow:0 2px 8px #0006,0 0 0 0 color-mix(in srgb,var(--activity) 70%,transparent)}100%{box-shadow:0 2px 8px #0006,0 0 0 12px transparent}}.fixture-access button[data-activity="true"] .marker-activity{position:absolute;top:-6px;left:calc(100% - 12px);display:flex;align-items:center;justify-content:center;gap:2px;box-sizing:border-box;min-width:18px;height:18px;padding:0 3px;border-radius:9px;background:var(--activity);color:#fff;box-shadow:0 0 0 2px var(--card-background-color,#202923);font:700 10px/1 system-ui;pointer-events:none}.marker-activity ha-state-icon{display:flex;width:12px;height:12px;--mdc-icon-size:12px;--marker-glyph-size:12px;color:#fff}@media(hover:hover){.fixture-access button[data-activity="true"]:hover .marker-activity-tip,.fixture-access button[data-activity="true"]:focus-visible .marker-activity-tip{position:absolute;bottom:calc(100% + 10px);left:50%;z-index:3;display:flex;flex-direction:column;gap:4px;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:240px;padding:7px 10px;border-radius:8px;background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);box-shadow:0 4px 12px #0007;color:var(--primary-text-color,#edf2eb);font:500 12px/1.3 system-ui;text-align:left;white-space:nowrap;pointer-events:none}}.marker-activity-tip span{display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis}.marker-activity-tip span::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;background:var(--activity);animation:activity-pulse 1.6s ease-in-out infinite}@keyframes activity-pulse{0%,100%{opacity:1}50%{opacity:.35}}@media(prefers-reduced-motion:reduce){.fixture-access button[data-activity="true"],.marker-activity-tip span::before{animation:none!important}}.fixture-access button[data-holding="true"]::after{content:"";position:absolute;inset:-5px;border-radius:50%;pointer-events:none;background:conic-gradient(var(--primary-color,#aacaab) calc(var(--hold,0)*1turn),transparent 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));animation:hold-fill var(--hold-ms,350ms) linear forwards}@property --hold{syntax:"<number>";inherits:false;initial-value:0}@keyframes hold-fill{to{--hold:1}}.undo-toast[data-tip] span{white-space:normal}.undo-tip{display:block;margin-top:2px;font:400 12px/1.3 system-ui;opacity:.75}@media(prefers-reduced-motion:reduce){.fixture-access button[data-holding="true"]::after{animation:none;--hold:1}}.icon-leaders{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}.icon-leaders line{stroke:var(--primary-text-color,#edf2eb);stroke-opacity:.8;stroke-width:1.5}.icon-leaders circle{fill:var(--primary-text-color,#edf2eb);stroke:#0009;stroke-width:1}.house-summary{position:absolute;top:12px;left:50%;z-index:3;transform:translateX(-50%);display:flex;align-items:center;gap:2px;box-sizing:border-box;max-width:calc(100% - 24px);height:44px;padding:3px;overflow-x:auto;scrollbar-width:none;border-radius:22px;color:var(--primary-text-color,#edf2eb);background:var(--card-background-color,#202923);border:1px solid var(--divider-color,#536258);box-shadow:0 2px 8px #0006}.house-summary::-webkit-scrollbar{display:none}.house-summary button{display:inline-flex;flex-shrink:0;align-items:center;gap:6px;height:36px;min-height:0;padding:0 12px 0 10px;border:0;border-radius:18px;font:500 13px/1 system-ui;white-space:nowrap;color:inherit}.house-summary button:hover{background:color-mix(in srgb,currentColor 10%,transparent)}.house-summary svg{flex-shrink:0;width:18px;height:18px;fill:currentColor;opacity:.7}.house-summary button[data-tone] svg{fill:var(--tone);opacity:1}.house-summary[data-below]{left:12px;right:12px;transform:none;max-width:none;width:fit-content;margin:0 auto;height:auto;flex-wrap:wrap;justify-content:center;border-radius:16px}@container card-root (max-width:520px){.house-summary[data-below]{left:8px;right:8px}.house-summary button{height:30px;padding:0 9px 0 7px;font-size:12.5px;gap:5px}.house-summary svg{width:16px;height:16px}}:host([adjusting]) .fixture-access,:host([adjusting]) .room-tags,:host([adjusting]) .house-summary,:host([adjusting]) .panel-toggles,:host([adjusting]) .card-controls,:host([adjusting]) .room-nav,:host([adjusting]) .daylight-switch,:host([adjusting]) .light-panel{display:none!important}:host([adjusting]) .scene{outline:2px solid var(--primary-color,#aacaab);outline-offset:-2px}.adjust-bar{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));z-index:6;transform:translateX(-50%);display:flex;flex-direction:column;gap:10px;box-sizing:border-box;width:min(560px,calc(100% - 24px));padding:12px;border-radius:14px;color:var(--primary-text-color,#edf2eb);background:var(--ha-card-background,var(--card-background-color,#202923));border:1px solid var(--divider-color,#536258);box-shadow:0 4px 16px #0008;font:14px/1.35 system-ui}.adjust-bar p{display:flex;flex-direction:column;gap:2px;margin:0;text-align:center}.adjust-bar p span{color:var(--secondary-text-color,#aebbb2);font-size:13px}.adjust-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}.adjust-actions button{flex:1 1 auto;min-height:44px;padding:0 14px;font:500 14px system-ui;white-space:nowrap}.adjust-actions .primary{color:var(--text-primary-color,#101715);background:var(--primary-color,#aacaab);border-color:var(--primary-color,#aacaab)}.notice-toast{padding:12px 16px}</style><ha-card><div class="card-top"><header hidden></header><div class="daylight-switch" role="radiogroup" aria-label="Time of day" hidden></div></div><div class="scene"><div class="backdrop" aria-hidden="true"></div><div class="message" role="status"><span>Connecting to 3D Rooms…</span><progress max="1" aria-label="Download progress" hidden></progress><button hidden>Retry</button></div></div></ha-card>`, this._container = this.shadowRoot.querySelector(".scene"), this._message = this.shadowRoot.querySelector(".message"), this._daylightSwitch = this.shadowRoot.querySelector(".daylight-switch");
 		let e = document.createElement("span");
 		e.className = "daylight-thumb", this._daylightSwitch.append(e);
 		for (let [e, { label: t, hint: n, icon: r }] of Object.entries(Q)) {
@@ -1593,7 +1614,7 @@ var Nt = /* @__PURE__ */ new Set([
 			}[e.key];
 			if (!t) return;
 			e.preventDefault();
-			let n = Lt(this._daylightSwitch.value, t);
+			let n = Vt(this._daylightSwitch.value, t);
 			this._chooseDaylight(n), this._daylightSwitch.querySelector(`[data-mode="${n}"]`)?.focus();
 		}, this._showDaylightMode("auto"), this.shadowRoot.querySelector(".message button").onclick = () => this._load(), this._controls = document.createElement("div"), this._controls.className = "card-controls", this._container.append(this._controls), this._refresh = document.createElement("button"), this._refresh.type = "button", this._refresh.className = "model-refresh", this._refresh.setAttribute("aria-label", "More"), this._refresh.setAttribute("aria-haspopup", "menu"), this._refresh.setAttribute("aria-expanded", "false"), this._refresh.title = "More: reload, edit", this._refresh.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><circle cx=\"5\" cy=\"12\" r=\"2\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/><circle cx=\"19\" cy=\"12\" r=\"2\"/></svg>", this._refresh.onclick = () => this._setReloadMenu(!this._reloadMenu), this._resetCamera = document.createElement("button"), this._resetCamera.type = "button", this._resetCamera.className = "camera-reset", this._resetCamera.setAttribute("aria-label", "Reset view"), this._resetCamera.title = "Reset view to the card framing", this._resetCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-6h4v6h4.5V9.5\"/></svg>", this._resetCamera.hidden = !0, this._resetCamera.onclick = () => this._resetView(), this._moveCamera = document.createElement("button"), this._moveCamera.type = "button", this._moveCamera.className = "camera-move", this._moveCamera.setAttribute("aria-label", "Move camera"), this._moveCamera.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5\"/></svg>", this._moveCamera.hidden = !0, this._moveCamera.onclick = () => this._setCameraMovement(!this._cameraFree), this._floorPlanButton = document.createElement("button"), this._floorPlanButton.type = "button", this._floorPlanButton.className = "camera-floor-plan", this._floorPlanButton.setAttribute("aria-label", "Floor plan"), this._floorPlanButton.setAttribute("aria-pressed", "false"), this._floorPlanButton.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 12h7M10 3v13M14 12h7M14 12v9\"/></svg>", this._floorPlanButton.hidden = !0, this._floorPlanButton.onclick = () => this._setFloorPlan(!this._floorPlan), this._editButton = document.createElement("button"), this._editButton.type = "button", this._editButton.className = "card-edit", this._editButton.hidden = !0, this._editButton.setAttribute("aria-label", "Edit in 3D Rooms"), this._editButton.title = "Edit in 3D Rooms — opens this view in the editor in a new tab", this._editButton.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z\"/></svg>", this._editButton.onclick = () => this._openEditor(), this._controls.append(this._refresh, this._resetCamera, this._moveCamera, this._floorPlanButton), this._panelToggles = document.createElement("div"), this._panelToggles.className = "panel-toggles", this._panelButtons = {}, this._panelIcons = {};
 		for (let [e, t, n, r] of [[
@@ -1617,7 +1638,8 @@ var Nt = /* @__PURE__ */ new Set([
 			light: [],
 			shade: []
 		}, this._expandedRooms = /* @__PURE__ */ new Set(), this._pendingRooms = /* @__PURE__ */ new Set(), this._floorSwitch = document.createElement("div"), this._floorSwitch.className = "floor-switch", this._floorSwitch.setAttribute("role", "group"), this._floorSwitch.setAttribute("aria-label", "Floor"), this._floorSwitch.hidden = !0, this._controls.append(this._floorSwitch), this._floors = [], this._views = [], this._floor = null, this._generation = 0, this._groupChips = /* @__PURE__ */ new Map(), this._openGroup = null, this._groupOf = /* @__PURE__ */ new Map(), this.shadowRoot.addEventListener("keydown", (e) => {
-			if (e.key === "Escape" && this._focus && !this._openGroup && !e.composedPath().some((e) => e?.tagName === "DIALOG" || e?.classList?.contains("light-panel"))) this._exitRoom();
+			if (e.key === "Escape" && this._adjusting) this._endAdjust("cancel");
+			else if (e.key === "Escape" && this._focus && !this._openGroup && !e.composedPath().some((e) => e?.tagName === "DIALOG" || e?.classList?.contains("light-panel"))) this._exitRoom();
 			else if (this._focus && (e.key === "ArrowLeft" || e.key === "ArrowRight") && !e.composedPath().some((e) => e?.tagName === "DIALOG" || e?.tagName === "INPUT" || e?.tagName === "SELECT" || e?.classList?.contains("light-panel"))) e.preventDefault(), this._stepRoom(e.key === "ArrowLeft" ? -1 : 1);
 			else if (e.key === "Escape" && this._openGroup) {
 				let e = this._openGroup;
@@ -1635,7 +1657,7 @@ var Nt = /* @__PURE__ */ new Set([
 		for (let e of ["tilt", "heading"]) if (t[e] !== void 0 && !Number.isFinite(t[e])) throw Error(`${e} must be a number.`);
 		if (t.tilt !== void 0 && (t.tilt < 0 || t.tilt > 180)) throw Error("Tilt must be between 0 and 180 degrees.");
 		if (t.view !== void 0 && !["front", "floor"].includes(t.view)) throw Error("Choose front or floor view.");
-		if (ke(t), t.quality !== void 0 && !ee.includes(t.quality)) throw Error("Quality must be auto, high or low.");
+		if (Oe(t), t.quality !== void 0 && !ee.includes(t.quality)) throw Error("Quality must be auto, high or low.");
 		for (let e of [
 			"floor_selector",
 			"camera_controls",
@@ -1684,13 +1706,13 @@ var Nt = /* @__PURE__ */ new Set([
 		this._outsidePanel ??= (e) => {
 			let t = e.composedPath();
 			this._reloadMenu && !t.includes(this._reloadMenu) && !t.includes(this._refresh) && this._setReloadMenu(!1), this._lightPanel && (t.includes(this._lightPanel) || t.includes(this._panelToggles) || t.some((e) => e instanceof HTMLDialogElement) || this._setLightPanel(null));
-		}, document.addEventListener("pointerdown", this._outsidePanel, !0), this._layout = new Ee(this), this._applyHeight(), this.hasAttribute("fill-page") && (this._refresh.setAttribute("aria-label", "Reload"), this._refresh.setAttribute("aria-haspopup", "menu"), this._refresh.setAttribute("aria-expanded", "false"), this._refresh.title = "Reload the page or the room model"), this._hass && this._config && this._load();
+		}, document.addEventListener("pointerdown", this._outsidePanel, !0), this._layout = new Te(this), this._applyHeight(), this.hasAttribute("fill-page") && (this._refresh.setAttribute("aria-label", "Reload"), this._refresh.setAttribute("aria-haspopup", "menu"), this._refresh.setAttribute("aria-expanded", "false"), this._refresh.title = "Reload the page or the room model"), this._hass && this._config && this._load();
 	}
 	disconnectedCallback() {
 		this._robotDialog?.close(), document.removeEventListener("pointerdown", this._outsidePanel, !0), this._setReloadMenu(!1), this._layout?.dispose(), this._layout = null, ++this._generation, clearInterval(this._keepalive), this._unsubModels?.(), this._unsubModels = null, this._unsubEffects?.(), this._unsubEffects = null, this._dialog?.remove(), clearTimeout(this._coverTimer), clearTimeout(this._warmTimer), this._switching = !1, this._switchOverlay.hidden = !0, this._view?.dispose(), this._view = null, this._loading = !1;
 	}
 	async _refreshModels() {
-		!this._loading && this._hass && (we(this._hass), a(j(this._hass)), await this._load({ fresh: !0 }));
+		!this._loading && this._hass && (Ce(this._hass), a(M(this._hass)), await this._load({ fresh: !0 }));
 	}
 	_setReloadMenu(e) {
 		if (!e) {
@@ -1716,6 +1738,13 @@ var Nt = /* @__PURE__ */ new Set([
 				"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 3 8 4.5v9L12 21l-8-4.5v-9Z\"/><path d=\"M12 12v9M12 12l8-4.5M12 12 4 7.5\"/></svg>",
 				() => this._refreshModels()
 			],
+			...this._view?.model && !this._preview ? [[
+				"adjust-view",
+				"Adjust view",
+				"Move, zoom and tilt the house, and keep it on this device",
+				"<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20\"/></svg>",
+				() => this._startAdjust()
+			]] : [],
 			...this._editButton.hidden ? [] : [[
 				"edit-view",
 				"Edit in 3D Rooms",
@@ -1740,7 +1769,7 @@ var Nt = /* @__PURE__ */ new Set([
 	async _load({ fresh: t = !1 } = {}) {
 		if (!this._config || !this._hass) return;
 		let n = ++this._generation;
-		Z().catch(() => {}), this._loading = !0, this._contextLost = !1, this._refresh.disabled = !this.hasAttribute("fill-page"), this._container.setAttribute("aria-busy", "true"), this._reload = !1, clearInterval(this._keepalive), (this._config.preview_url || this._config.addon) && (this._unsubModels?.(), this._unsubModels = null), this._changedDuringLoad = !1, this._message.hidden = !1, this._message.querySelector("span").textContent = "Downloading your room…", this._message.querySelector("button").hidden = !0, this._message.querySelector("button").textContent = "Retry";
+		Rt().catch(() => {}), this._loading = !0, this._contextLost = !1, this._refresh.disabled = !this.hasAttribute("fill-page"), this._container.setAttribute("aria-busy", "true"), this._reload = !1, clearInterval(this._keepalive), (this._config.preview_url || this._config.addon) && (this._unsubModels?.(), this._unsubModels = null), this._changedDuringLoad = !1, this._message.hidden = !1, this._message.querySelector("span").textContent = "Downloading your room…", this._message.querySelector("button").hidden = !0, this._message.querySelector("button").textContent = "Retry";
 		let r = this._message.querySelector("progress");
 		r.hidden = !0, this._view || this._showLoadingPreview(this._cachedThumbnail());
 		let i = !1, a = !1;
@@ -1764,7 +1793,7 @@ var Nt = /* @__PURE__ */ new Set([
 				this._message.querySelector("span").textContent = "Choose a room in the visual editor.";
 				return;
 			}
-			let a = await Dt(this._hass, this._config, location.origin);
+			let a = await jt(this._hass, this._config, location.origin);
 			if (n !== this._generation) return;
 			a.session && (document.cookie = `ingress_session=${a.session};path=/api/hassio_ingress/;SameSite=Strict${location.protocol === "https:" ? ";Secure" : ""}`);
 			let { model: o, configured: s, floors: c, views: l, sceneURL: u, layers: d, release: f, assetCache: p } = await a.load({
@@ -1782,7 +1811,7 @@ var Nt = /* @__PURE__ */ new Set([
 				f?.();
 				return;
 			}
-			let { SceneView: m } = await Z();
+			let { SceneView: m } = await Rt();
 			if (n !== this._generation) {
 				f?.();
 				return;
@@ -1792,10 +1821,11 @@ var Nt = /* @__PURE__ */ new Set([
 				interactive: this._cameraFree,
 				...this._cameraOptions(),
 				cameraModel: this._config.model,
+				deviceCamera: (e, t, n) => mt(globalThis.localStorage, this._deviceCameraKey(e, t, n)),
 				frameInset: () => this._toolbarInset(),
 				quality: this._config.quality,
-				transparent: Oe(this._background()),
-				groundShadow: I(this._config),
+				transparent: De(this._background()),
+				groundShadow: L(this._config),
 				onRender: () => this._positionButtons(),
 				onRoomDoubleTap: (e) => {
 					this._config?.room_focus !== !1 && this._focusRoom(e);
@@ -1818,7 +1848,7 @@ var Nt = /* @__PURE__ */ new Set([
 			}
 			if (n !== this._generation) return;
 			this._views = l || [], this._floors = c || [];
-			let g = St(this._views, s || o, this._floor);
+			let g = Et(this._views, s || o, this._floor);
 			if (g !== o && !h.setHouseView(g) && (g = o), this._floor && g.id !== this._floor && (this._floor = null), this._model = g, this._earlyModel = null, this._focus = null, this._cameraMoved = !1, this._syncFloorSwitch(), this._syncCameraButtons(), this._previewStates = /* @__PURE__ */ new Map(), this._buildAccess(), this._syncRoomTags(), this._preview = a.preview, this._signature = null, this._states(), this._syncDaylightSwitch(), this._syncEditButton(), this._message.hidden = !0, this._hideLoadingPreview(), this._warmViews(), !this._preview && !this._config.addon && !this._unsubModels && this._hass.connection?.subscribeEvents) {
 				let e = await $e(this._hass.connection, () => this._modelsEvent());
 				!this.isConnected || this._unsubModels ? e() : this._unsubModels = e;
@@ -1890,7 +1920,7 @@ var Nt = /* @__PURE__ */ new Set([
 	}
 	_vacuumAreasCalled(e) {
 		if (e?.domain !== "vacuum" || e.service !== "clean_area" || !this._model || !this._view) return;
-		let t = e.service_data || {}, n = [t.entity_id].flat().filter(Boolean), r = [t.cleaning_area_id].flat().filter(Boolean), i = oe(this._model, r);
+		let t = e.service_data || {}, n = [t.entity_id].flat().filter(Boolean), r = [t.cleaning_area_id].flat().filter(Boolean), i = ae(this._model, r);
 		for (let e of this._model.controls) e.type === "vacuum" && n.includes(this._model.bindings?.[e.id]) && this._view.setVacuumRooms(e.id, i);
 	}
 	_modelsEvent() {
@@ -2180,6 +2210,41 @@ var Nt = /* @__PURE__ */ new Set([
 		}
 		this._syncCameraButtons();
 	}
+	_deviceCameraKey(e = this._view?.model, t, n) {
+		let r = this._sourceConfig || {}, i = this._container?.getBoundingClientRect?.();
+		return pt({
+			card: r.saved_view || r.model,
+			view: e && `${e.id}${e.focusRoom ? `:${e.focusRoom}` : ""}`,
+			plan: n ?? this._view?.options?.mode === "floor",
+			aspect: t ?? (i?.width || 1) / Math.max(i?.height || 1, 1)
+		});
+	}
+	_hasDeviceCamera() {
+		return !!mt(globalThis.localStorage, this._deviceCameraKey());
+	}
+	_startAdjust() {
+		if (!this._view?.model || this._adjusting) return;
+		this._adjusting = { wasFree: !!this._cameraFree }, this._setReloadMenu(!1), this._setLightPanel?.(null), this._view.setInteractive(!0), this.toggleAttribute("adjusting", !0);
+		let e = document.createElement("div");
+		e.className = "adjust-bar", e.setAttribute("role", "toolbar"), e.setAttribute("aria-label", "Adjust view"), e.innerHTML = `<p><strong>Adjust view</strong><span>${globalThis.matchMedia?.("(pointer: coarse)").matches ? "Drag to turn · pinch to zoom · two fingers to move" : "Drag to turn · scroll to zoom · right-drag to move"}</span></p><div class="adjust-actions"><button type="button" data-adjust="cancel">Cancel</button><button type="button" data-adjust="forget">Use the view's framing</button><button type="button" data-adjust="save" class="primary">Save for this device</button></div>`, e.querySelector("[data-adjust=\"forget\"]").hidden = !this._hasDeviceCamera();
+		for (let t of e.querySelectorAll("[data-adjust]")) t.onclick = () => this._endAdjust(t.dataset.adjust);
+		this._container.append(e), this._adjustBar = e, e.querySelector(".primary").focus({ preventScroll: !0 });
+	}
+	_endAdjust(e = "cancel") {
+		if (!this._adjusting) return;
+		let { wasFree: t } = this._adjusting, n = this._deviceCameraKey(), r;
+		if (e === "save") {
+			let e = this._view?.captureView?.()?.camera;
+			r = ht(globalThis.localStorage, n, e) ? "View saved on this device" : "Could not save the view on this device";
+		} else e === "forget" && (ht(globalThis.localStorage, n, void 0), r = "Back to the view's framing");
+		this._adjusting = null, this._adjustBar?.remove(), this._adjustBar = null, this.toggleAttribute("adjusting", !1), this._view?.setInteractive(t), e !== "save" && this._view?.reset(), this._cameraMoved = !1, this._syncCameraButtons(), this._positionButtons?.(), r && this._notice(r);
+	}
+	_notice(e) {
+		if (!this._container) return;
+		clearTimeout(this._noticeTimer), this._noticeToast?.remove();
+		let t = document.createElement("div");
+		t.className = "undo-toast notice-toast", t.setAttribute("role", "status"), t.innerHTML = "<span></span>", t.querySelector("span").textContent = e, this._container.append(t), this._noticeToast = t, this._noticeTimer = setTimeout(() => t.remove(), 3e3);
+	}
 	_setCameraMovement(e) {
 		this._cameraFree = !!e, this._cameraTouched = !0, this._view?.setInteractive(this._cameraFree), this._syncCameraButtons();
 	}
@@ -2192,7 +2257,7 @@ var Nt = /* @__PURE__ */ new Set([
 	_applyBackdrop(e) {
 		let t = this.shadowRoot.querySelector(".backdrop");
 		if (!t || !this._config) return;
-		let n = Ae(je(this._model?.daylight?.mode, e ?? this._hass?.states?.[this._model?.daylight?.entity || "sun.sun"]));
+		let n = ke(Ae(this._model?.daylight?.mode, e ?? this._hass?.states?.[this._model?.daylight?.entity || "sun.sun"]));
 		Pe(t, this._config, n);
 	}
 	_syncDaylightSwitch() {
@@ -2279,8 +2344,8 @@ var Nt = /* @__PURE__ */ new Set([
 			a.dataset.control = r.id;
 			let s = n(this._config.markers, r.id);
 			a.style.setProperty("--marker-size", s.size + "px"), a.setAttribute("aria-label", r.type === "light" ? `Toggle ${o}. Hold, or press Shift+Enter, for more info.` : `Control ${o}`), a.title = r.type === "light" ? `${o}: click to toggle, hold for more info` : `${o}: value controls`;
-			let l = S(s, r, !1), u = l || S(s, r, !0), d = document.createElement(r.type === "climate" && !u ? "span" : "ha-state-icon");
-			r.type === "climate" && !u && (d.className = "fixture-ac-icon"), l && (d.icon = l), d.setAttribute("aria-hidden", "true"), d.innerHTML = Mt(r, l), d.dataset.glyph = l || "";
+			let l = C(s, r, !1), u = l || C(s, r, !0), d = document.createElement(r.type === "climate" && !u ? "span" : "ha-state-icon");
+			r.type === "climate" && !u && (d.className = "fixture-ac-icon"), l && (d.icon = l), d.setAttribute("aria-hidden", "true"), d.innerHTML = Ft(r, l), d.dataset.glyph = l || "";
 			let f = document.createElement("span");
 			if (f.className = "fixture-state", f.setAttribute("aria-hidden", "true"), f.hidden = !s.show_label, a.append(d), s.placement === "tray") {
 				let e = document.createElement("span");
@@ -2309,14 +2374,14 @@ var Nt = /* @__PURE__ */ new Set([
 	_buildCustomEntities(e) {
 		let t = Object.entries(this._config?.markers?._entities || {});
 		for (let [n, r] of t) {
-			let t = C(r, this._config?.markers?._defaults);
+			let t = w(r, this._config?.markers?._defaults);
 			if (!t.visible) continue;
 			let i = document.createElement("button");
 			i.type = "button", i.dataset.custom = n, i.hidden = !0, i.style.setProperty("--marker-size", t.size + "px");
 			let a = document.createElement("ha-state-icon");
 			a.setAttribute("aria-hidden", "true");
-			let o = S(t, {}, !1);
-			o && (a.icon = o), a.innerHTML = `<svg viewBox="0 0 24 24">${o && w(o) || "<path d=\"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm-2 5h3v6h1.5v2h-5v-2H11v-4h-1Z\"/>"}</svg>`;
+			let o = C(t, {}, !1);
+			o && (a.icon = o), a.innerHTML = `<svg viewBox="0 0 24 24">${o && T(o) || "<path d=\"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm-2 5h3v6h1.5v2h-5v-2H11v-4h-1Z\"/>"}</svg>`;
 			let s = document.createElement("span");
 			s.className = "fixture-state", s.setAttribute("aria-hidden", "true"), s.hidden = !t.show_state, i.append(a, s);
 			let c, l, u = !1, d = () => {
@@ -2347,7 +2412,7 @@ var Nt = /* @__PURE__ */ new Set([
 	async _tapCustom(e) {
 		let t = this._config?.markers?._entities?.[e];
 		if (!t || this._preview) return;
-		let n = ie(t.entity), r = this._hass?.states?.[t.entity];
+		let n = S(t.entity), r = this._hass?.states?.[t.entity];
 		if (!n || !r) {
 			this._moreInfo(t.entity);
 			return;
@@ -2370,8 +2435,8 @@ var Nt = /* @__PURE__ */ new Set([
 		for (let a of this.shadowRoot.querySelectorAll("[data-custom]")) {
 			let o = n[a.dataset.custom];
 			if (!o) continue;
-			let s = C(o, this._config?.markers?._defaults), c = this._view?.screenPoint?.(s.position);
-			if (a.hidden = !c?.visible || !se(s, i), a.hidden) continue;
+			let s = w(o, this._config?.markers?._defaults), c = this._view?.screenPoint?.(s.position);
+			if (a.hidden = !c?.visible || !oe(s, i), a.hidden) continue;
 			let l = r(c, {
 				size: s.size,
 				show_label: s.show_state
@@ -2389,12 +2454,12 @@ var Nt = /* @__PURE__ */ new Set([
 				unavailable: !1,
 				badge: "",
 				description: r.entity
-			} : re(i, t), o = r.name || i?.attributes?.friendly_name || r.entity, s = ie(r.entity);
+			} : re(i, t), o = r.name || i?.attributes?.friendly_name || r.entity, s = S(r.entity);
 			n.dataset.active = String(a.active), n.dataset.unavailable = String(a.unavailable), n.title = `${o}: ${a.description}${s ? " · hold for more info" : ""}`, n.setAttribute("aria-label", `${o}, ${a.description}${s ? ". Tap to switch, hold for more info." : ". Opens more info."}`);
 			let c = n.querySelector("ha-state-icon");
 			if (c && (c.dataset.defaultIcon = ne(r.entity, i)), c && i) {
 				c.hass = this._hass, c.stateObj = i;
-				let e = S(r, {}, a.active);
+				let e = C(r, {}, a.active);
 				c.icon !== e && (c.icon = e);
 			}
 			n.querySelector(".fixture-state").textContent = a.badge;
@@ -2405,7 +2470,7 @@ var Nt = /* @__PURE__ */ new Set([
 		let t = this._knownShades();
 		if (t) return t.includes(e.id);
 		let n = this._hass?.states?.[this._panelModel?.bindings?.[e.id]];
-		return Nt.has(n?.attributes?.device_class);
+		return It.has(n?.attributes?.device_class);
 	}
 	_shadeKey(e = this._panelModel) {
 		return e?.id && `three-d-rooms:shades:${e.id}`;
@@ -2428,7 +2493,7 @@ var Nt = /* @__PURE__ */ new Set([
 		return this._model || this._earlyModel;
 	}
 	_showEarlyPanels({ model: e, configured: t, views: n }) {
-		this._view || this._preview || !e?.controls || (this._earlyModel = St(n || [], t || e, this._floor), this._earlyStates(), this._buildLightPanel());
+		this._view || this._preview || !e?.controls || (this._earlyModel = Et(n || [], t || e, this._floor), this._earlyStates(), this._buildLightPanel());
 	}
 	_earlyStates() {
 		let e = this._earlyModel;
@@ -2463,7 +2528,7 @@ var Nt = /* @__PURE__ */ new Set([
 	_buildLightPanel() {
 		if (this._panelRooms = {
 			light: this._config?.light_panel === !1 ? [] : q(this._panelModel),
-			shade: this._config?.shade_panel === !1 ? [] : Ot(this._panelModel, "shade", (e) => this._isShade(e))
+			shade: this._config?.shade_panel === !1 ? [] : Mt(this._panelModel, "shade", (e) => this._isShade(e))
 		}, this._view?.fixtures && this._model && !this._model.focusRoom && this._rememberShades(this._panelRooms.shade.flatMap((e) => e.lights.map((e) => e.id))), !this._preview) for (let e of Object.keys(this._panelRooms)) this._panelRooms[e] = this._panelRooms[e].map((e) => ({
 			...e,
 			lights: e.lights.filter((e) => e.entityId)
@@ -2618,7 +2683,7 @@ var Nt = /* @__PURE__ */ new Set([
 			r.querySelector("button").onclick = async () => {
 				i();
 				try {
-					await Promise.all(At(t).map((e) => this._hass.callService(...e)));
+					await Promise.all(Pt(t).map((e) => this._hass.callService(...e)));
 				} catch {
 					this._panelFeedback("Could not undo. Try again.");
 				}
@@ -2646,7 +2711,7 @@ var Nt = /* @__PURE__ */ new Set([
 				let r = this._model.controls.find((e) => e.id === t.id), i = this._previewStates.get(t.id) || {
 					on: !0,
 					brightness: 255,
-					rgb: T(r?.color || "#fff0d4")
+					rgb: E(r?.color || "#fff0d4")
 				};
 				this._previewStates.set(t.id, {
 					...i,
@@ -2656,7 +2721,7 @@ var Nt = /* @__PURE__ */ new Set([
 			this._states();
 			return;
 		}
-		let { calls: a, turnOn: o } = kt(n, r, this._hass.states);
+		let { calls: a, turnOn: o } = Nt(n, r, this._hass.states);
 		if (!a.length) return;
 		let s = X(a.flatMap(([, , e]) => e.entity_id), this._hass.states);
 		this._pendingRooms.add(e);
@@ -2761,7 +2826,7 @@ var Nt = /* @__PURE__ */ new Set([
 		if (e.dataset.key === n) return this._placeSummary();
 		e.dataset.key = n, e.replaceChildren(...t.map((e) => {
 			let t = document.createElement("button");
-			t.type = "button", t.dataset.kind = e.kind, e.tone && (t.dataset.tone = e.tone), t.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${It(e)}</svg><span></span>`, t.querySelector("span").textContent = e.text;
+			t.type = "button", t.dataset.kind = e.kind, e.tone && (t.dataset.tone = e.tone), t.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${Bt(e)}</svg><span></span>`, t.querySelector("span").textContent = e.text;
 			let n = e.kind === "light";
 			return t.title = n ? "Show the lights of each room" : e.ids.length === 1 ? "Open its details" : e.text, t.onclick = () => {
 				n ? this._panelButtons?.light?.hidden || this._setLightPanel("light") : e.ids.length === 1 && this._pick(e.ids[0]);
@@ -2809,7 +2874,7 @@ var Nt = /* @__PURE__ */ new Set([
 			let t = this._previewStates.get(e) || {
 				on: !0,
 				brightness: 255,
-				rgb: T(n.color || "#fff0d4")
+				rgb: E(n.color || "#fff0d4")
 			};
 			this._previewStates.set(e, {
 				...t,
@@ -2923,7 +2988,7 @@ var Nt = /* @__PURE__ */ new Set([
 		let a = { ...this._previewStates.get(e) || {
 			on: !0,
 			brightness: 255,
-			rgb: T(t.color || "#fff0d4")
+			rgb: E(t.color || "#fff0d4")
 		} }, o = i.querySelector("[role=\"switch\"]"), s = i.querySelector("[type=\"range\"]"), l = i.querySelector("[type=\"color\"]"), u = i.querySelectorAll("[type=\"range\"]")[1], d = () => {
 			o.textContent = a.on ? "On" : "Off", o.setAttribute("aria-checked", String(a.on)), o.setAttribute("aria-label", "Light power"), this._previewStates.set(e, { ...a }), this._states();
 		};
@@ -2932,9 +2997,9 @@ var Nt = /* @__PURE__ */ new Set([
 		}, s.oninput = () => {
 			a.brightness = Number(s.value), d();
 		}, l.oninput = () => {
-			a.rgb = T(l.value), d();
+			a.rgb = E(l.value), d();
 		}, u.oninput = () => {
-			a.colorTempKelvin = Number(u.value), a.rgb = de(a.colorTempKelvin), l.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), d();
+			a.colorTempKelvin = Number(u.value), a.rgb = ue(a.colorTempKelvin), l.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), d();
 		}, this._preview && d(), i.addEventListener("close", () => i.remove()), this.shadowRoot.append(i), i.showModal();
 	}
 	_deskDialog(e) {
@@ -2978,7 +3043,7 @@ var Nt = /* @__PURE__ */ new Set([
 			e.target === t && t.close();
 		}), t.addEventListener("close", () => {
 			clearTimeout(i), t.remove();
-		}), ue(t, { top: ".sheet-grab, .dm-head" }), this.shadowRoot.append(t), this._updateDeskDialog(), t.showModal(), fe(t);
+		}), le(t, { top: ".sheet-grab, .dm-head" }), this.shadowRoot.append(t), this._updateDeskDialog(), t.showModal(), de(t);
 	}
 	_showDeskHeight(e) {
 		let t = this._dialog, n = t?._deskRange;
@@ -3079,7 +3144,7 @@ var Nt = /* @__PURE__ */ new Set([
 			let t = e?.entity_categories || {};
 			this._entityCategories = Object.fromEntries((e?.entities || []).filter((e) => e.ec !== void 0 && t[e.ec]).map((e) => [e.ei, t[e.ec]])), this._states();
 		}).catch(() => {}));
-		let i = ae(t.entities, n.states, (e) => n.entities?.[e]?.entity_category ?? this._entityCategories?.[e] ?? null, [r, t.map]);
+		let i = ie(t.entities, n.states, (e) => n.entities?.[e]?.entity_category ?? this._entityCategories?.[e] ?? null, [r, t.map]);
 		if (!i.length) {
 			delete e.dataset.activity;
 			return;
@@ -3099,7 +3164,7 @@ var Nt = /* @__PURE__ */ new Set([
 		}
 		i.forEach((e, t) => {
 			let r = n.states[e];
-			o[t].hass = n, o[t].dataset.defaultIcon = ce(r), o[t].stateObj = r;
+			o[t].hass = n, o[t].dataset.defaultIcon = se(r), o[t].stateObj = r;
 		});
 		let s = n.states[r]?.attributes?.friendly_name || "", c = i.map((e) => {
 			let t = n.states[e]?.attributes?.friendly_name || e;
@@ -3174,12 +3239,12 @@ var Nt = /* @__PURE__ */ new Set([
 			} : u(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : V(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : Be(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : f(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
 				on: !0,
 				brightness: 255,
-				rgb: T(t.color || "#fff0d4")
+				rgb: E(t.color || "#fff0d4")
 			} : {
 				on: n?.state === "on",
 				unavailable: !n || ["unavailable", "unknown"].includes(n.state),
 				brightness: n?.attributes?.brightness ?? 255,
-				...pe(n, t.color)
+				...fe(n, t.color)
 			});
 		}
 		this._updateDeskDialog(), this._lightStates = e, this._syncLightPanel(e), this._syncRoomTagStates(), this._customEntityStates(), this._syncSummary();
@@ -3191,8 +3256,8 @@ var Nt = /* @__PURE__ */ new Set([
 			let l = t.querySelector("ha-state-icon");
 			if (l) {
 				l.hass = this._hass, l.stateObj = o.stateObj;
-				let e = S(n(this._config.markers, r), i, o.active);
-				l.icon !== e && (l.icon = e), (l.dataset.glyph ?? "") !== (e || "") && (l.innerHTML = Mt(i, e), l.dataset.glyph = e || "");
+				let e = C(n(this._config.markers, r), i, o.active);
+				l.icon !== e && (l.icon = e), (l.dataset.glyph ?? "") !== (e || "") && (l.innerHTML = Ft(i, e), l.dataset.glyph = e || "");
 			}
 			t.querySelector(".fixture-state").textContent = o.badge, i.type === "vacuum" && this._vacuumActivity(t, i);
 		}

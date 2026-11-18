@@ -23,6 +23,11 @@ import {
   roomFocusView,
   spreadButtons,
 } from "../shared/room-focus.mjs";
+import {
+  deviceCameraKey,
+  readDeviceCamera,
+  writeDeviceCamera,
+} from "../shared/device-camera.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
@@ -73,8 +78,13 @@ function cardHarness() {
         focus() {},
         querySelector(selector) {
           this.found ||= {};
-          return (this.found[selector] ||= { textContent: "", hidden: true });
+          return (this.found[selector] ||= {
+            textContent: "",
+            hidden: true,
+            focus() {},
+          });
         },
+        querySelectorAll: () => [],
       }),
     },
     hexToRgb: () => [255, 240, 212],
@@ -113,7 +123,12 @@ function cardHarness() {
     roomButtonShows,
     spreadButtons,
     roomFocusView,
+    deviceCameraKey,
+    readDeviceCamera,
+    writeDeviceCamera,
+    globalThis: undefined,
   });
+  context.globalThis = context;
   vm.runInContext(source, context);
   const card = Object.create(Card.prototype);
   card._model = {
@@ -1306,4 +1321,67 @@ test("a tap on any device other than a light opens it instead of toggling", asyn
   await card._toggle("future");
   assert.deepEqual(picked, ["robot", "future"]);
   assert.deepEqual(calls, []);
+});
+
+test("Adjust view saves the framing on this device, per view and screen shape, and can forget it", () => {
+  globalThis.__floorPlanStore = new Map();
+  globalThis.__floorPlanBlocked = false;
+  const card = cardHarness();
+  const camera = {
+    projection: "perspective",
+    position: [4, 5, 6],
+    target: [0, 1, 0],
+    up: [0, 1, 0],
+    aspect: 0.5,
+    zoom: 1.2,
+    referenceZoom: 1,
+    heading: 30,
+    tilt: 40,
+    fov: 45,
+  };
+  const calls = [];
+  card._sourceConfig = { saved_view: "v1" };
+  card._container = {
+    getBoundingClientRect: () => ({ width: 390, height: 844 }),
+    append() {},
+  };
+  card._view = {
+    model: { id: "h-home" },
+    options: { mode: "front" },
+    captureView: () => ({ camera }),
+    setInteractive: (on) => calls.push(["interactive", on]),
+    reset: () => calls.push(["reset"]),
+  };
+  card._cameraFree = false;
+  card._setReloadMenu = () => {};
+  card._setLightPanel = () => {};
+  card._syncCameraButtons = () => {};
+  card.toggleAttribute = (name, on) => calls.push([name, on]);
+  card._startAdjust();
+  assert.deepEqual(calls.splice(0), [
+    ["interactive", true],
+    ["adjusting", true],
+  ]);
+  card._endAdjust("save");
+  const key = "three-d-rooms:device-camera:v1:h-home:3d:portrait";
+  assert.deepEqual(JSON.parse(globalThis.__floorPlanStore.get(key)), camera);
+  // Saving keeps the camera where it is and locks it again as before.
+  assert.deepEqual(calls.splice(0), [
+    ["adjusting", false],
+    ["interactive", false],
+  ]);
+  // The scene asks for it by view, screen shape and 3D/plan.
+  assert.equal(
+    card._deviceCameraKey({ id: "h-home", focusRoom: "office" }, 1.5, false),
+    "three-d-rooms:device-camera:v1:h-home:office:3d:landscape",
+  );
+  card._startAdjust();
+  card._endAdjust("forget");
+  assert.equal(globalThis.__floorPlanStore.has(key), false);
+  assert.deepEqual(calls.splice(-1), [["reset"]]);
+  // Cancel leaves storage alone and goes back to the saved framing.
+  globalThis.__floorPlanStore.set(key, JSON.stringify(camera));
+  card._startAdjust();
+  card._endAdjust("cancel");
+  assert.ok(globalThis.__floorPlanStore.has(key));
 });

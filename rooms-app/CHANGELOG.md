@@ -1,3 +1,7 @@
+## 0.58.0
+
+- **Adjust view, saved on this device.** In the ⋯ menu, Adjust view lets you turn, zoom and move the house (drag to turn, pinch or scroll to zoom, two fingers or right-drag to move) and Save for this device. The framing is kept in this browser or the iOS app, separately for each view (whole house, each floor, a room on its own), the 3D view or floor plan, and portrait or landscape; other devices and Home Assistant are unchanged. "Use the view's framing" forgets it; Reset view goes back to it.
+
 ## 0.57.1
 
 - **The at-a-glance bar stays clear of the iPhone's notch and Dynamic Island** on the full-screen page and the iOS app, like the buttons around it.
