@@ -1,3 +1,11 @@
+# 0.57.1 — the at-a-glance bar clears the iPhone notch, 2026-11-18
+
+Released as 0.57.1, based on 0.57.0. On the full-screen page (and the iOS app) the bar gets the same `env(safe-area-inset-top)` margin as the other top controls (`dashboard/layout.js`); `_placeSummary` drops that margin when it moves the bar below the buttons, since their bottom already includes it.
+
+- All frontend tests and host Python tests pass with native-only skips. Format check and build pass; hassfest reports 0 invalid integrations.
+- Shared local Home Assistant (Core 2026.11.0), full-screen page at 430 and 390 px with the safe-area inset replaced by 59 px: the bar sits 8 px below the Lights/Shades buttons. The release ZIP loads.
+- Not checked: the iOS app itself, a real iPhone.
+
 # 0.57.0 — the house no longer disappears, at-a-glance bar, spread-out icons, 2026-11-18
 
 Released as 0.57.0, based on 0.56.0. Missing walls: after `prepareHouseView` (the card warming other views) a light could be left casting a shadow without a shadow map; with `shadowMap.autoUpdate` off, camera-only renders then sampled it and the GPU rejected every lit draw ("Mismatch between texture format and sampler type"). `SceneView.shadowsReady()` (`web/scene.js`) now forces a shadow pass whenever a shown caster has no map. `applyShadowBudget` (`shared/shadow-budget.mjs`) also keeps shadow lights within `MAX_VARYING_VECTORS` (12 reserved plus one per texture map), and `prepareAsset`/`prepareHouseView` lower the limit if a shown material still fails to link (`hasBrokenShaders`, `lowerShadowLimit`). New `shared/house-summary.mjs` (`houseSummary`) for the card's at-a-glance bar (`_syncSummary`, `_placeSummary`; `summary: false`), `shared/spread-icons.mjs` (`spreadIcons`) for `_spreadIcons` with dot-and-line leaders (`spread_icons: false`), `dashboard/hold-hint.mjs` (hold ring, three-time tip). Room buttons lose their long press. `createEntityIconSource` (`shared/ha-icons.mjs`) asks `frontend/get_icons` per integration with a 4 s limit: the all-integrations request could hang, leaving full-screen icons on their "i" placeholder.

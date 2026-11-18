@@ -2785,6 +2785,7 @@ export class ThreeDRoomsCard extends HTMLElement {
     if (!bar || bar.hidden || !this._container) return;
     delete bar.dataset.below;
     bar.style.top = "";
+    bar.style.marginTop = "";
     const box = bar.getBoundingClientRect(),
       host = this._container.getBoundingClientRect();
     let below = 0;
@@ -2809,6 +2810,8 @@ export class ThreeDRoomsCard extends HTMLElement {
     }
     if (!below) return;
     bar.dataset.below = "";
+    // `below` already includes the notch space the buttons keep clear of.
+    bar.style.marginTop = "0px";
     bar.style.top = `${Math.round(below + 8)}px`;
   }
   /**

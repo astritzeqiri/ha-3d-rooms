@@ -1,3 +1,7 @@
+## 0.57.1
+
+- **The at-a-glance bar stays clear of the iPhone's notch and Dynamic Island** on the full-screen page and the iOS app, like the buttons around it.
+
 ## 0.57.0
 
 - **The house no longer disappears.** Sometimes only the window panes and icons were drawn: after the card prepared the other floor and room views in the background, a light could be left casting a shadow that had not been drawn yet, and the graphics card then refused to draw every wall and floor. Shadows are now redrawn whenever a light is missing one. The number of shadow-casting lights also stays within what the graphics card can link (window daylight counts too), with fewer shadows as a fallback if a shader still fails.
