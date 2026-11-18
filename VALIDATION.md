@@ -1,3 +1,11 @@
+# 0.55.0 — the robot's icon shows when its dock is busy, 2026-11-18
+
+Released as 0.55.0, based on 0.54.0. `vacuumActivity` (`shared/vacuum.mjs`) picks a robot's extra on/off controls that are on (not configuration or diagnostic; categories from `hass.entities` or, on the full-screen page, `list_for_display`), used by the dialog's pills and the card's `_vacuumActivity` (`dashboard/card.js`): a pulsing ring, a badge with one icon per running control (`entityRowIcon`, moved to `shared/custom-entities.mjs` and shared with the dialog rows) and, with a hover-capable pointer only, a card listing them.
+
+- All frontend tests (new: `vacuumActivity`) and host Python tests pass with native-only skips. Format check and build pass; hassfest reports 0 invalid integrations.
+- Shared local Home Assistant (Core 2026.11.0), full-screen page with three stand-in dock switches: badge and ring with one, two and three running, the badge grows to the right; hover card lists them; the dialog's pills show the same icons; the release ZIP loads.
+- Not checked: the user's Roborock dock switches and their integration icons, a dashboard card inside Home Assistant, a real phone, Safari, and HACS download of this version.
+
 # 0.54.0 — vacuum activity pills, Home Assistant's dialog menu, hassfest fix, 2026-11-18
 
 Released as 0.54.0, based on 0.53.0. The vacuum dialog shows a pill under its status for each extra Controls entity that is on (`syncActive` in `dashboard/more-info.mjs`). 3D Rooms' own dialogs get Home Assistant's settings button and ⋮ menu for admins (Add to…, Device info, Related, Details; `openHaView` from `_vacuumDialog` in `dashboard/card.js`, else `/config/entities?more-info-entity-id=…&more-info-view=…` in a new tab). `manifest.json` lists `lovelace` in `after_dependencies`, which hassfest required since 0.53.0's Repairs check.

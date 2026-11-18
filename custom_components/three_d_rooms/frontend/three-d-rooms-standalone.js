@@ -1718,8 +1718,39 @@ function Be(e, t) {
 	}
 	throw Error("This entity has no control here");
 }
+Object.values({
+	start: {
+		service: "start",
+		feature: 8192,
+		capability: "start"
+	},
+	pause: {
+		service: "pause",
+		feature: 4,
+		capability: "pause"
+	},
+	stop: {
+		service: "stop",
+		feature: 8,
+		capability: "stop"
+	},
+	return_to_base: {
+		service: "return_to_base",
+		feature: 16,
+		capability: "return_home"
+	},
+	locate: {
+		service: "locate",
+		feature: 512,
+		capability: "locate"
+	}
+}).map((e) => e.capability);
+var Ve = /^(switch|input_boolean|binary_sensor|fan)\./;
+function He(e = [], t = {}, n = () => null, r = []) {
+	return e.filter((e) => !r.includes(e) && Ve.test(e) && !n(e) && t?.[e]?.state === "on");
+}
 // shared/custom-entities.mjs
-var Ve = {
+var Ue = {
 	temperature: "mdi:thermometer",
 	humidity: "mdi:water-percent",
 	timestamp: "mdi:clock-outline",
@@ -1737,7 +1768,7 @@ var Ve = {
 	occupancy: "mdi:home-account",
 	moisture: "mdi:water",
 	smoke: "mdi:smoke-detector"
-}, He = {
+}, We = {
 	sensor: "mdi:eye",
 	binary_sensor: "mdi:checkbox-blank-circle-outline",
 	switch: "mdi:toggle-switch-variant",
@@ -1769,18 +1800,32 @@ var Ve = {
 	siren: "mdi:bullhorn",
 	update: "mdi:package-up"
 };
-function Ue(e, t) {
+function Ge(e, t) {
 	let n = String(e || "").split(".")[0];
-	return Ve[t?.attributes?.device_class] || He[n] || "mdi:information-outline";
+	return Ue[t?.attributes?.device_class] || We[n] || "mdi:information-outline";
+}
+function Ke(e) {
+	let t = e?.entity_id || "";
+	return {
+		battery_charging: "mdi:battery-charging",
+		duration: "mdi:timer-outline",
+		connectivity: "mdi:check-network-outline",
+		problem: "mdi:alert-circle-outline",
+		area: "mdi:texture-box",
+		running: "mdi:play-circle-outline"
+	}[e?.attributes?.device_class] || {
+		time: "mdi:clock-outline",
+		input_datetime: "mdi:clock-outline"
+	}[t.split(".")[0]] || Ge(t, e);
 }
 // dashboard/vacuum-art.mjs
-var We = "<svg viewBox=\"0 0 240 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"vacuum-svg\" ><circle cx=\"120\" cy=\"120\" r=\"110\" class=\"glow\" fill=\"var(--vacuum-color)\" opacity=\"0.06\" /><g class=\"vacuum-body-rotate\"><g class=\"vacuum-body\"><g class=\"brush brush-right\"><g class=\"brush-spokes\"><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"64\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"88\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"162\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"186\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /></g><circle cx=\"174\" cy=\"76\" r=\"2\" fill=\"var(--vacuum-color)\" opacity=\"0.5\" /></g><circle cx=\"120\" cy=\"120\" r=\"72\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /><circle cx=\"120\" cy=\"120\" r=\"66\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.2\" /><path d=\"M 60 94 A 68 68 0 0 1 180 94\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"3\" stroke-linecap=\"round\" class=\"bumper\" /><g class=\"nav-lines\" opacity=\"0.15\"><line x1=\"120\" y1=\"56\" x2=\"120\" y2=\"74\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"88\" y1=\"63\" x2=\"96\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"152\" y1=\"63\" x2=\"144\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /></g><circle cx=\"120\" cy=\"108\" r=\"14\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" class=\"lidar-housing\" /><circle cx=\"120\" cy=\"108\" r=\"9\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.25\" /><circle cx=\"120\" cy=\"140\" r=\"8\" fill=\"var(--vacuum-color)\" opacity=\"0.08\" class=\"power-ring\" /><circle cx=\"120\" cy=\"140\" r=\"4\" fill=\"var(--vacuum-color)\" opacity=\"0.25\" class=\"power-dot\" /></g></g><g class=\"particles\"><circle class=\"particle p1\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p2\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p3\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p4\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p5\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p6\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p7\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p8\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /></g><g class=\"dock-indicator\"><rect x=\"76\" y=\"188\" width=\"88\" height=\"28\" rx=\"8\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /></g><g class=\"return-path\"><polygon points=\"120,220 110,206 130,206\" fill=\"var(--vacuum-color)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" stroke-linejoin=\"round\" opacity=\"0.55\" /></g></svg>", Ge = ".mi-vac-status{display: flex; align-items: center; justify-content: center;}.mi-vac-status .container{width: 200px; height: 200px; position: relative;}.mi-vac-status .vacuum-svg{width: 100%; height: 100%;}.mi-vac-status .particles,.mi-vac-status .dock-indicator,.mi-vac-status .return-path{opacity: 0; transition: opacity 400ms ease;}.mi-vac-status .cleaning .vacuum-body{animation: mi-vac-vacuum-wander 12s ease-in-out infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .brush-right .brush-spokes{animation: mi-vac-brush-spin 0.6s linear infinite; transform-origin: 174px 76px;}.mi-vac-status .cleaning .particles{opacity: 1;}.mi-vac-status .cleaning .particle{animation: mi-vac-particle-suck 2.4s ease-in infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .p1{animation-delay: 0s;}.mi-vac-status .cleaning .p2{animation-delay: -0.3s;}.mi-vac-status .cleaning .p3{animation-delay: -0.6s;}.mi-vac-status .cleaning .p4{animation-delay: -0.9s;}.mi-vac-status .cleaning .p5{animation-delay: -1.2s;}.mi-vac-status .cleaning .p6{animation-delay: -1.5s;}.mi-vac-status .cleaning .p7{animation-delay: -1.8s;}.mi-vac-status .cleaning .p8{animation-delay: -2.1s;}.mi-vac-status .cleaning .p1{--particle-x: -90px; --particle-y: -25px;}.mi-vac-status .cleaning .p2{--particle-x: 90px; --particle-y: 20px;}.mi-vac-status .cleaning .p3{--particle-x: -85px; --particle-y: 40px;}.mi-vac-status .cleaning .p4{--particle-x: 85px; --particle-y: -35px;}.mi-vac-status .cleaning .p5{--particle-x: -65px; --particle-y: 70px;}.mi-vac-status .cleaning .p6{--particle-x: 70px; --particle-y: -65px;}.mi-vac-status .cleaning .p7{--particle-x: -75px; --particle-y: -55px;}.mi-vac-status .cleaning .p8{--particle-x: 80px; --particle-y: 55px;}.mi-vac-status .cleaning .nav-lines{animation: mi-vac-nav-pulse 2s ease-in-out infinite;}.mi-vac-status .vacuum-body-rotate{transform-origin: 120px 120px; transform: rotate(0deg); transition: transform 600ms ease-in-out;}.mi-vac-status .returning .vacuum-body-rotate{transform: rotate(180deg);}.mi-vac-status .returning .vacuum-body{animation: mi-vac-returning-drift 3s ease-in-out infinite;}.mi-vac-status .returning .return-path{opacity: 1; animation: mi-vac-return-arrow 1.6s ease-in-out infinite; transform-origin: 120px 210px;}.mi-vac-status .returning .brush-right{opacity: 0.4;}.mi-vac-status .docked .dock-indicator{opacity: 1;}.mi-vac-status .docked .vacuum-body{opacity: 0.75;}.mi-vac-status .docked .glow{animation: mi-vac-docked-glow 4s ease-in-out infinite;}.mi-vac-status .docked .power-ring{animation: mi-vac-charge-pulse 2.5s ease-in-out infinite;}.mi-vac-status .docked .brush-right{opacity: 0.5;}.mi-vac-status .error .glow{animation: mi-vac-error-glow 1.8s ease-in-out infinite;}.mi-vac-status .idle .vacuum-body{opacity: 0.65;}.mi-vac-status .idle .brush-right{opacity: 0.4;}@keyframes mi-vac-vacuum-wander { 0% { transform: rotate(0deg) translate(0, 0); } 15% { transform: rotate(0deg) translate(0, -30px); } 25% { transform: rotate(0deg) translate(0, 0); } 32% { transform: rotate(-18deg) translate(0, 0); } 47% { transform: rotate(-18deg) translate(0, -28px); } 57% { transform: rotate(-18deg) translate(0, 0); } 63% { transform: rotate(12deg) translate(0, 0); } 78% { transform: rotate(12deg) translate(0, -25px); } 88% { transform: rotate(12deg) translate(0, 0); } 95% { transform: rotate(0deg) translate(0, 0); } 100% { transform: rotate(0deg) translate(0, 0); } }@keyframes mi-vac-brush-spin { to { transform: rotate(360deg); } }@keyframes mi-vac-particle-suck { 0% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1.2); } 25% { opacity: 0.8; } 80% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } 100% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } }@keyframes mi-vac-nav-pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.35; } }@keyframes mi-vac-returning-drift { 0%, 100% { transform: translateY(-6px); } 50% { transform: translateY(4px); } }@keyframes mi-vac-return-arrow { 0%, 100% { transform: translateY(-6px); opacity: 0.3; } 50% { transform: translateY(4px); opacity: 0.85; } }@keyframes mi-vac-docked-glow { 0%, 100% { opacity: 0.06; } 50% { opacity: 0.14; } }@keyframes mi-vac-charge-pulse { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.25; } }@keyframes mi-vac-error-glow { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.35; } }";
-function Ke(e) {
+var qe = "<svg viewBox=\"0 0 240 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"vacuum-svg\" ><circle cx=\"120\" cy=\"120\" r=\"110\" class=\"glow\" fill=\"var(--vacuum-color)\" opacity=\"0.06\" /><g class=\"vacuum-body-rotate\"><g class=\"vacuum-body\"><g class=\"brush brush-right\"><g class=\"brush-spokes\"><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"64\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"88\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"162\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"186\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /></g><circle cx=\"174\" cy=\"76\" r=\"2\" fill=\"var(--vacuum-color)\" opacity=\"0.5\" /></g><circle cx=\"120\" cy=\"120\" r=\"72\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /><circle cx=\"120\" cy=\"120\" r=\"66\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.2\" /><path d=\"M 60 94 A 68 68 0 0 1 180 94\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"3\" stroke-linecap=\"round\" class=\"bumper\" /><g class=\"nav-lines\" opacity=\"0.15\"><line x1=\"120\" y1=\"56\" x2=\"120\" y2=\"74\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"88\" y1=\"63\" x2=\"96\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"152\" y1=\"63\" x2=\"144\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /></g><circle cx=\"120\" cy=\"108\" r=\"14\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" class=\"lidar-housing\" /><circle cx=\"120\" cy=\"108\" r=\"9\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.25\" /><circle cx=\"120\" cy=\"140\" r=\"8\" fill=\"var(--vacuum-color)\" opacity=\"0.08\" class=\"power-ring\" /><circle cx=\"120\" cy=\"140\" r=\"4\" fill=\"var(--vacuum-color)\" opacity=\"0.25\" class=\"power-dot\" /></g></g><g class=\"particles\"><circle class=\"particle p1\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p2\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p3\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p4\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p5\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p6\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p7\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p8\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /></g><g class=\"dock-indicator\"><rect x=\"76\" y=\"188\" width=\"88\" height=\"28\" rx=\"8\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /></g><g class=\"return-path\"><polygon points=\"120,220 110,206 130,206\" fill=\"var(--vacuum-color)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" stroke-linejoin=\"round\" opacity=\"0.55\" /></g></svg>", Je = ".mi-vac-status{display: flex; align-items: center; justify-content: center;}.mi-vac-status .container{width: 200px; height: 200px; position: relative;}.mi-vac-status .vacuum-svg{width: 100%; height: 100%;}.mi-vac-status .particles,.mi-vac-status .dock-indicator,.mi-vac-status .return-path{opacity: 0; transition: opacity 400ms ease;}.mi-vac-status .cleaning .vacuum-body{animation: mi-vac-vacuum-wander 12s ease-in-out infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .brush-right .brush-spokes{animation: mi-vac-brush-spin 0.6s linear infinite; transform-origin: 174px 76px;}.mi-vac-status .cleaning .particles{opacity: 1;}.mi-vac-status .cleaning .particle{animation: mi-vac-particle-suck 2.4s ease-in infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .p1{animation-delay: 0s;}.mi-vac-status .cleaning .p2{animation-delay: -0.3s;}.mi-vac-status .cleaning .p3{animation-delay: -0.6s;}.mi-vac-status .cleaning .p4{animation-delay: -0.9s;}.mi-vac-status .cleaning .p5{animation-delay: -1.2s;}.mi-vac-status .cleaning .p6{animation-delay: -1.5s;}.mi-vac-status .cleaning .p7{animation-delay: -1.8s;}.mi-vac-status .cleaning .p8{animation-delay: -2.1s;}.mi-vac-status .cleaning .p1{--particle-x: -90px; --particle-y: -25px;}.mi-vac-status .cleaning .p2{--particle-x: 90px; --particle-y: 20px;}.mi-vac-status .cleaning .p3{--particle-x: -85px; --particle-y: 40px;}.mi-vac-status .cleaning .p4{--particle-x: 85px; --particle-y: -35px;}.mi-vac-status .cleaning .p5{--particle-x: -65px; --particle-y: 70px;}.mi-vac-status .cleaning .p6{--particle-x: 70px; --particle-y: -65px;}.mi-vac-status .cleaning .p7{--particle-x: -75px; --particle-y: -55px;}.mi-vac-status .cleaning .p8{--particle-x: 80px; --particle-y: 55px;}.mi-vac-status .cleaning .nav-lines{animation: mi-vac-nav-pulse 2s ease-in-out infinite;}.mi-vac-status .vacuum-body-rotate{transform-origin: 120px 120px; transform: rotate(0deg); transition: transform 600ms ease-in-out;}.mi-vac-status .returning .vacuum-body-rotate{transform: rotate(180deg);}.mi-vac-status .returning .vacuum-body{animation: mi-vac-returning-drift 3s ease-in-out infinite;}.mi-vac-status .returning .return-path{opacity: 1; animation: mi-vac-return-arrow 1.6s ease-in-out infinite; transform-origin: 120px 210px;}.mi-vac-status .returning .brush-right{opacity: 0.4;}.mi-vac-status .docked .dock-indicator{opacity: 1;}.mi-vac-status .docked .vacuum-body{opacity: 0.75;}.mi-vac-status .docked .glow{animation: mi-vac-docked-glow 4s ease-in-out infinite;}.mi-vac-status .docked .power-ring{animation: mi-vac-charge-pulse 2.5s ease-in-out infinite;}.mi-vac-status .docked .brush-right{opacity: 0.5;}.mi-vac-status .error .glow{animation: mi-vac-error-glow 1.8s ease-in-out infinite;}.mi-vac-status .idle .vacuum-body{opacity: 0.65;}.mi-vac-status .idle .brush-right{opacity: 0.4;}@keyframes mi-vac-vacuum-wander { 0% { transform: rotate(0deg) translate(0, 0); } 15% { transform: rotate(0deg) translate(0, -30px); } 25% { transform: rotate(0deg) translate(0, 0); } 32% { transform: rotate(-18deg) translate(0, 0); } 47% { transform: rotate(-18deg) translate(0, -28px); } 57% { transform: rotate(-18deg) translate(0, 0); } 63% { transform: rotate(12deg) translate(0, 0); } 78% { transform: rotate(12deg) translate(0, -25px); } 88% { transform: rotate(12deg) translate(0, 0); } 95% { transform: rotate(0deg) translate(0, 0); } 100% { transform: rotate(0deg) translate(0, 0); } }@keyframes mi-vac-brush-spin { to { transform: rotate(360deg); } }@keyframes mi-vac-particle-suck { 0% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1.2); } 25% { opacity: 0.8; } 80% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } 100% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } }@keyframes mi-vac-nav-pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.35; } }@keyframes mi-vac-returning-drift { 0%, 100% { transform: translateY(-6px); } 50% { transform: translateY(4px); } }@keyframes mi-vac-return-arrow { 0%, 100% { transform: translateY(-6px); opacity: 0.3; } 50% { transform: translateY(4px); opacity: 0.85; } }@keyframes mi-vac-docked-glow { 0%, 100% { opacity: 0.06; } 50% { opacity: 0.14; } }@keyframes mi-vac-charge-pulse { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.25; } }@keyframes mi-vac-error-glow { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.35; } }";
+function Ye(e) {
 	let t = e?.state;
 	return t === "unavailable" ? "idle" : t === "error" ? "error" : t === "cleaning" || t === "on" ? "cleaning" : t === "returning" || t === "paused" || t === "docked" ? t : "idle";
 }
 // dashboard/more-info.mjs
-var qe = `
+var Xe = `
 dialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f;--mi-surface:#ffffff14;--mi-surface-2:#ffffff24;--mi-primary:#03a9f4;--mi-ink:#fff;--mi-accent:var(--mi-primary);--mi-accent-ink:#fff;
  box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--mi-bg);color:var(--mi-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:mi-in .22s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-color-scheme:light){dialog.mi{--mi-bg:#fff;--mi-fg:#212121;--mi-muted:#727272;--mi-line:#0000001f;--mi-surface:#0000000d;--mi-surface-2:#0000001a;--mi-ink:#212121;box-shadow:0 24px 64px #0004}}
@@ -2052,15 +2097,15 @@ dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
 .mi-vac-empty svg{width:48px;height:48px}
 .mi-vac-empty-title{margin:12px 0 4px;color:var(--mi-fg);font-size:18px;font-weight:500}
 .mi-vac-empty p{margin:0}
-${Ge}
-`, X = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${_e[e]}"/></svg>`, Je = (e) => `rgb(${e.join(",")})`, Ye = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", Z = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), Xe = {
+${Je}
+`, X = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${_e[e]}"/></svg>`, Ze = (e) => `rgb(${e.join(",")})`, Qe = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", Z = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), $e = {
 	disarmed: "#9e9e9e",
 	armed: "#43a047",
 	arming: "#ff9800",
 	pending: "#ff9800",
 	disarming: "#ff9800",
 	triggered: "#e5533d"
-}, Ze = (e) => Xe[e] || (e?.startsWith("armed") ? Xe.armed : Xe.disarmed), Qe = {
+}, et = (e) => $e[e] || (e?.startsWith("armed") ? $e.armed : $e.disarmed), tt = {
 	heat: "#ff8100",
 	cool: "#2b9af9",
 	heat_cool: "#ffab00",
@@ -2127,24 +2172,12 @@ function $(e, t) {
 		}
 	};
 }
-function $e(e, t, n, r, i) {
+function nt(e, t, n, r, i) {
 	let a = Q(e, "button", "mi-round", `<span class="mi-disc">${X(t)}</span><span>${n}</span>`);
 	return a.type = "button", i !== void 0 && a.setAttribute("aria-pressed", String(i)), a.onclick = r, a;
 }
-function et(e, t) {
-	return {
-		battery_charging: "mdi:battery-charging",
-		duration: "mdi:timer-outline",
-		connectivity: "mdi:check-network-outline",
-		problem: "mdi:alert-circle-outline",
-		area: "mdi:texture-box",
-		running: "mdi:play-circle-outline"
-	}[e?.attributes?.device_class] || {
-		time: "mdi:clock-outline",
-		input_datetime: "mdi:clock-outline"
-	}[t?.domain] || Ue(t?.id, e);
-}
-function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaView: i = null, extras: a = [], map: o = "" }) {
+var rt = (e) => Ke(e);
+function it({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaView: i = null, extras: a = [], map: o = "" }) {
 	let s = e.ownerDocument, c = Q(s, "dialog", "mi");
 	c.setAttribute("aria-labelledby", "mi-title");
 	let l = Q(s, "div", "mi-frame"), u = Q(s, "div", "mi-head"), d = Q(s, "button", "mi-iconbtn", X("close"));
@@ -2190,7 +2223,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 		}).catch(() => {});
 	}
 	let E = Q(s, "div", "mi-body"), D = Q(s, "style");
-	D.textContent = qe, l.append(u, E), c.append(D, l), e.append(c);
+	D.textContent = Xe, l.append(u, E), c.append(D, l), e.append(c);
 	let O = "", k, ee = [], A = () => {
 		for (let e of ee.splice(0)) e();
 	}, j = (e) => {
@@ -2216,7 +2249,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 			format: r.format,
 			onCommit: (t) => M(e, r, t)
 		}), l.append(u.el)) : (u = Q(s, "button", "mi-tall", `${X("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => M(e, n, u.getAttribute("aria-checked") !== "true"), l.append(u));
-		let d = Q(s, "div", "mi-row"), f = $e(s, "power", "Power", () => {
+		let d = Q(s, "div", "mi-row"), f = nt(s, "power", "Power", () => {
 			let t = f.getAttribute("aria-pressed") === "true";
 			M(e, n, !t);
 		}, !1);
@@ -2227,7 +2260,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 				p[t].hidden = !n, m[t].setAttribute("aria-pressed", String(n));
 			}
 		}, g = (e, t, n, r) => {
-			m[e] = $e(s, t, n, () => h(e), !1), p[e] = r, r.hidden = !0, d.append(m[e]);
+			m[e] = nt(s, t, n, () => h(e), !1), p[e] = r, r.hidden = !0, d.append(m[e]);
 		}, _ = [];
 		if (i) {
 			let t = Q(s, "output"), n = Q(s, "div", "mi-field"), r = Q(s, "div", "mi-label", "<span>Colour temperature</span>");
@@ -2252,7 +2285,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 			});
 		}
 		if (a) {
-			let t = Q(s, "output"), n = Q(s, "output"), r = a.value[0], i = a.value[1], o = () => `linear-gradient(90deg,#fff,${Je(Se([r, 100]))})`, c = $(s, {
+			let t = Q(s, "output"), n = Q(s, "output"), r = a.value[0], i = a.value[1], o = () => `linear-gradient(90deg,#fff,${Ze(Se([r, 100]))})`, c = $(s, {
 				orient: "h",
 				label: "Hue",
 				min: 0,
@@ -2304,7 +2337,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 				193,
 				7
 			];
-			if (c.style.setProperty("--mi-accent", Je(a)), c.style.setProperty("--mi-accent-ink", n ? Ye(a) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), N(e, (e) => e.kind === "toggle"), r) {
+			if (c.style.setProperty("--mi-accent", Ze(a)), c.style.setProperty("--mi-accent-ink", n ? Qe(a) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), N(e, (e) => e.kind === "toggle"), r) {
 				let t = N(e, (e) => e.key === "brightness");
 				u.set(n ? t?.value ?? 0 : 0), u.el.querySelector(".mi-big").textContent = n ? r.format(t?.value ?? 0) : "Off", u.caption(n ? "On" : "");
 			} else u.setAttribute("aria-checked", String(n)), u.querySelector("span").textContent = n ? "On" : "Off";
@@ -2517,7 +2550,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 		return i.length && a.append(p, m), n.append(a), (e, t) => {
 			y = e;
 			let n = t?.attributes || {};
-			c.style.setProperty("--mi-accent", Qe[e.state] || "var(--mi-muted)"), l.hidden = !Number.isFinite(n.current_temperature), l.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${o()}</strong>`, d?.(e, t);
+			c.style.setProperty("--mi-accent", tt[e.state] || "var(--mi-muted)"), l.hidden = !Number.isFinite(n.current_temperature), l.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${o()}</strong>`, d?.(e, t);
 			for (let t of e.controls.filter((e) => e.kind === "select")) {
 				let e = _.get(t.key);
 				if (!e) continue;
@@ -2589,7 +2622,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 				"pending",
 				"disarming"
 			].includes(g)));
-			c.style.setProperty("--mi-accent", Ze(u && u !== g ? "arming" : g));
+			c.style.setProperty("--mi-accent", et(u && u !== g ? "arming" : g));
 		};
 		function v(e) {
 			let t = Q(s, "dialog", "mi mi-code");
@@ -2724,7 +2757,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 	}
 	function ne(e, i) {
 		c.classList.add("mi-vacuum"), m.hidden = !0;
-		let l = Q(s, "div", "mi-center"), u = Q(s, "div", "mi-statehead mi-vac-head", "<strong></strong><span class=\"mi-vac-since\"></span><span class=\"mi-vac-battery\" hidden></span>"), d = Q(s, "div", "mi-vac-status", `<div class="container idle">${We}</div>`), f = Q(s, "div", "mi-vac-buttons"), p = /* @__PURE__ */ new Map();
+		let l = Q(s, "div", "mi-center"), u = Q(s, "div", "mi-statehead mi-vac-head", "<strong></strong><span class=\"mi-vac-since\"></span><span class=\"mi-vac-battery\" hidden></span>"), d = Q(s, "div", "mi-vac-status", `<div class="container idle">${qe}</div>`), f = Q(s, "div", "mi-vac-buttons"), p = /* @__PURE__ */ new Map();
 		for (let t of N(e, (e) => e.kind === "vacuum").buttons) {
 			let e = Q(s, "button", "mi-vac-btn", X(t.icon));
 			e.type = "button", e.onclick = () => {
@@ -2804,7 +2837,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 			}
 		}
 		function ee() {
-			let e = t(), n = a.filter((t) => t !== o && !E(t) && /^(switch|input_boolean|binary_sensor|fan)\./.test(t) && e.states?.[t]?.state === "on"), r = n.join("|");
+			let e = t(), n = He(a, e.states, E, [o]), r = n.join("|");
 			if (x.dataset.ids !== r) {
 				x.dataset.ids = r, x.replaceChildren();
 				for (let e of n) {
@@ -2821,7 +2854,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 			x.hidden = !n.length;
 			for (let t of x.children) {
 				let n = e.states?.[t.dataset.id], r = Y(n, { prefix: D() }), i = t.querySelector("ha-state-icon");
-				i.hass = e, i.dataset.defaultIcon = et(n, r), n && (i.stateObj = n), t.querySelector("span").textContent = r.name, t.title = `${r.name}: on`;
+				i.hass = e, i.dataset.defaultIcon = rt(n, r), n && (i.stateObj = n), t.querySelector("span").textContent = r.name, t.title = `${r.name}: on`;
 			}
 		}
 		function A() {
@@ -2829,7 +2862,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 			let e = t();
 			for (let [n, r] of T) {
 				let i = e.states?.[n], a = Y(i, { prefix: D() }), { el: o } = r, c = o.querySelector("ha-state-icon"), l = o.querySelector(".mi-row-ctl");
-				c.hass = e, c.dataset.defaultIcon = et(i, a), i && (c.stateObj = i), o.querySelector(".mi-row-name").textContent = a.name, o.dataset.unavailable = String(a.unavailable);
+				c.hass = e, c.dataset.defaultIcon = rt(i, a), i && (c.stateObj = i), o.querySelector(".mi-row-name").textContent = a.name, o.dataset.unavailable = String(a.unavailable);
 				let u = a.unavailable ? "value" : a.kind;
 				if (r.kind !== u || u === "select" && r.options !== a.options.join("|")) {
 					if (r.kind = u, r.options = a.options?.join("|"), l.replaceChildren(), u === "toggle") {
@@ -2989,7 +3022,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 			u.firstChild.textContent = r.status || Z(e.state) || "", u.querySelector(".mi-vac-since").textContent = e.since || "";
 			let a = t().states || {}, o = V?.battery ? Number(a[V.battery]?.state) : r.battery, s = V?.charging ? a[V.charging]?.state === "on" : e.state === "docked" && o < 100, c = u.querySelector(".mi-vac-battery");
 			c.hidden = !Number.isFinite(o), Number.isFinite(o) && (c.innerHTML = `<span>${Math.round(o)}%</span>${X(s ? "batterycharging" : "battery")}`);
-			let l = Ke(i), f = d.firstChild;
+			let l = Ye(i), f = d.firstChild;
 			f.className = `container ${l}`, f.style.setProperty("--vacuum-color", ie[l] || "var(--mi-muted)");
 			for (let e of r.buttons) {
 				let t = p.get(e.key);
@@ -3093,7 +3126,7 @@ function tt({ host: e, getHass: t, entityId: n, onError: r = () => {}, openHaVie
 	};
 }
 // shared/ha-icons.mjs
-var nt = {
+var at = {
 	ai_task: "mdi:star-four-points",
 	air_quality: "mdi:air-filter",
 	alert: "mdi:alert",
@@ -3162,17 +3195,17 @@ var nt = {
 	window: "mdi:window-closed",
 	zone: "mdi:map-marker-radius"
 };
-function rt(e, t) {
+function ot(e, t) {
 	let n = Object.keys(t).map(Number).filter((e) => !Number.isNaN(e)).sort((e, t) => e - t);
 	if (!n.length || e < n[0]) return;
 	let r = n[0];
 	for (let t of n) e >= t && (r = t);
 	return t[String(r)];
 }
-function it(e, t) {
-	if (t) return e && t.state?.[e] ? t.state[e] : e !== void 0 && t.range && !Number.isNaN(Number(e)) ? rt(Number(e), t.range) ?? t.default : t.default;
+function st(e, t) {
+	if (t) return e && t.state?.[e] ? t.state[e] : e !== void 0 && t.range && !Number.isNaN(Number(e)) ? ot(Number(e), t.range) ?? t.default : t.default;
 }
-function at(e, t) {
+function ct(e, t) {
 	let n = e.entity_id.split(".")[0], r = e.attributes || {};
 	if (n === "sun") return t === "above_horizon" ? "mdi:white-balance-sunny" : "mdi:weather-night";
 	if (n === "update") return t === "on" ? r.in_progress ? "mdi:package-down" : "mdi:package-up" : "mdi:package";
@@ -3182,15 +3215,15 @@ function at(e, t) {
 		if (!r.has_time) return "mdi:calendar";
 	}
 }
-function ot(e, { entry: t, platform: n, component: r, state: i = e?.state } = {}) {
+function lt(e, { entry: t, platform: n, component: r, state: i = e?.state } = {}) {
 	if (!e?.entity_id) return;
 	let a = e.entity_id.split(".")[0], o = e.attributes || {};
 	if (o.icon) return o.icon;
 	if (t?.ic) return t.ic;
 	let s;
-	return t?.tk && n && (s = it(i, n[a]?.[t.tk])), s ||= at(e, i), !s && r && (s = it(i, o.device_class && r[o.device_class] || r._)), s || nt[a] || "mdi:bookmark";
+	return t?.tk && n && (s = st(i, n[a]?.[t.tk])), s ||= ct(e, i), !s && r && (s = st(i, o.device_class && r[o.device_class] || r._)), s || at[a] || "mdi:bookmark";
 }
-function st(e, t) {
+function ut(e, t) {
 	let n = new Map((t?.entities || []).filter((e) => e.ei).map((e) => [e.ei, e])), r = (t, n) => e.sendMessagePromise({
 		type: "frontend/get_icons",
 		category: t,
@@ -3201,7 +3234,7 @@ function st(e, t) {
 		let t = n.get(e.entity_id), o = e.entity_id.split(".")[0];
 		i ||= r("entity_component"), t?.pl && t.tk && !a.has(t.pl) && a.set(t.pl, r("entity", t.pl).then((e) => e[t.pl]));
 		let [s, c] = await Promise.all([i.then((e) => e[o]), t?.pl ? a.get(t.pl) : void 0]);
-		return ot(e, {
+		return lt(e, {
 			entry: t,
 			platform: c,
 			component: s
@@ -3209,16 +3242,16 @@ function st(e, t) {
 	} };
 }
 // dashboard/standalone-fit.mjs
-function ct({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
+function dt({ standalone: e, innerWidth: t, innerHeight: n, screenWidth: r, screenHeight: i, insetTop: a }) {
 	if (!e || !(a > 0)) return n;
 	let o = n >= t ? Math.max(r, i) : Math.min(r, i);
 	return Math.abs(n + a - o) <= 2 ? n + a : n;
 }
-function lt(e = window) {
+function ft(e = window) {
 	let t = e.document, n = t.createElement("div");
 	n.style.cssText = "position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none", t.documentElement.append(n);
 	let r = () => {
-		let r = ct({
+		let r = dt({
 			standalone: e.navigator.standalone === !0 || e.matchMedia?.("(display-mode: standalone)").matches === !0,
 			innerWidth: e.innerWidth,
 			innerHeight: e.innerHeight,
@@ -3231,11 +3264,11 @@ function lt(e = window) {
 	return r(), e.addEventListener("resize", r), e.addEventListener("orientationchange", () => setTimeout(r, 250)), e.visualViewport?.addEventListener("resize", r), r;
 }
 // dashboard/standalone.js
-lt();
-var ut = document.getElementById("status"), dt = (e) => {
-	ut.hidden = !1, ut.textContent = e;
+ft();
+var pt = document.getElementById("status"), mt = (e) => {
+	pt.hidden = !1, pt.textContent = e;
 };
-async function ft() {
+async function ht() {
 	let e = document.body.dataset.view;
 	await customElements.whenDefined("three-d-rooms-card");
 	let t = await A({
@@ -3262,7 +3295,7 @@ async function ft() {
 	ge({
 		resolver: me({ loadModules: a }),
 		registryIcon: he(o),
-		iconFor: st(r, o).iconFor
+		iconFor: ut(r, o).iconFor
 	});
 	let s = await F(r).catch(() => ({})), c = document.createElement("three-d-rooms-card"), l = new URL(location.href).searchParams.get("quality");
 	c.setConfig({
@@ -3282,7 +3315,7 @@ async function ft() {
 		}
 	}), d;
 	c.addEventListener("hass-more-info", (e) => {
-		d?.close(), d = tt({
+		d?.close(), d = it({
 			host: document.body,
 			getHass: () => u.build(),
 			entityId: e.detail.entityId,
@@ -3290,8 +3323,8 @@ async function ft() {
 		});
 	}), r.addEventListener("ready", () => u.setConnected(!0)), r.addEventListener("disconnected", () => u.setConnected(!1)), await new Promise((e) => V(r, (t) => {
 		u.setStates(t), e();
-	})), c.hass = u.build(), ut.hidden = !0, document.body.append(c);
+	})), c.hass = u.build(), pt.hidden = !0, document.body.append(c);
 }
-ft().catch((e) => {
-	console.error(e), dt(e?.message || "Could not connect to Home Assistant. Reload to try again.");
+ht().catch((e) => {
+	console.error(e), mt(e?.message || "Could not connect to Home Assistant. Reload to try again.");
 });

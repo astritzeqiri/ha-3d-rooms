@@ -341,3 +341,27 @@ export function customEntityStateWords(entityId, stateObj) {
     return ["Open", "Closed"];
   return ["On", "Off"];
 }
+
+/**
+ * The icon 3D Rooms' dialogs give an entity's row when Home Assistant's own
+ * icon element is missing (the full-screen page): a few device classes and
+ * domains first, then the extra-entity default.
+ */
+export function entityRowIcon(entity) {
+  const id = entity?.entity_id || "";
+  const cls = entity?.attributes?.device_class;
+  return (
+    {
+      battery_charging: "mdi:battery-charging",
+      duration: "mdi:timer-outline",
+      connectivity: "mdi:check-network-outline",
+      problem: "mdi:alert-circle-outline",
+      area: "mdi:texture-box",
+      running: "mdi:play-circle-outline",
+    }[cls] ||
+    { time: "mdi:clock-outline", input_datetime: "mdi:clock-outline" }[
+      id.split(".")[0]
+    ] ||
+    customEntityDefaultIcon(id, entity)
+  );
+}

@@ -11,7 +11,8 @@ import {
   entityRowCall,
 } from "./more-info-model.mjs";
 import { kelvinToRgb } from "../shared/light.mjs";
-import { customEntityDefaultIcon } from "../shared/custom-entities.mjs";
+import { vacuumActivity } from "../shared/vacuum.mjs";
+import { entityRowIcon } from "../shared/custom-entities.mjs";
 import {
   VACUUM_STATUS_CSS,
   VACUUM_STATUS_SVG,
@@ -481,23 +482,8 @@ function round(doc, icon, label, onClick, pressed) {
  * page (its icon element knows only named icons): the shared per-type list,
  * plus a few classes and kinds that list leaves out.
  */
-function rowIcon(entity, row) {
-  const cls = entity?.attributes?.device_class;
-  return (
-    {
-      battery_charging: "mdi:battery-charging",
-      duration: "mdi:timer-outline",
-      connectivity: "mdi:check-network-outline",
-      problem: "mdi:alert-circle-outline",
-      area: "mdi:texture-box",
-      running: "mdi:play-circle-outline",
-    }[cls] ||
-    { time: "mdi:clock-outline", input_datetime: "mdi:clock-outline" }[
-      row?.domain
-    ] ||
-    customEntityDefaultIcon(row?.id, entity)
-  );
-}
+// The icon a dialog row shows for an entity (also the robot's activity badge).
+const rowIcon = (entity) => entityRowIcon(entity);
 
 export function openMoreInfo({
   host,
@@ -1923,13 +1909,7 @@ export function openMoreInfo({
     }
     function syncActive() {
       const hass = getHass();
-      const on = extras.filter(
-        (id) =>
-          id !== map &&
-          !categoryOf(id) &&
-          /^(switch|input_boolean|binary_sensor|fan)\./.test(id) &&
-          hass.states?.[id]?.state === "on",
-      );
+      const on = vacuumActivity(extras, hass.states, categoryOf, [map]);
       const key = on.join("|");
       if (active.dataset.ids !== key) {
         active.dataset.ids = key;

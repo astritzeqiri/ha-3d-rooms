@@ -1,7 +1,7 @@
-import { t as e } from "./three-d-rooms-custom-entities-BULVonyW.js";
-import { i as t, r as n } from "./three-d-rooms-light-BnEuRadE.js";
+import { n as e, u as t } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
+import { i as n, r } from "./three-d-rooms-light-BnEuRadE.js";
 // dashboard/more-info-icons.mjs
-var r = {
+var i = {
 	cog: "M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10M10,22C9.75,22 9.54,21.82 9.5,21.58L9.13,18.93C8.5,18.68 7.96,18.34 7.44,17.94L4.95,18.95C4.73,19.03 4.46,18.95 4.34,18.73L2.34,15.27C2.21,15.05 2.27,14.78 2.46,14.63L4.57,12.97L4.5,12L4.57,11L2.46,9.37C2.27,9.22 2.21,8.95 2.34,8.73L4.34,5.27C4.46,5.05 4.73,4.96 4.95,5.05L7.44,6.05C7.96,5.66 8.5,5.32 9.13,5.07L9.5,2.42C9.54,2.18 9.75,2 10,2H14C14.25,2 14.46,2.18 14.5,2.42L14.87,5.07C15.5,5.32 16.04,5.66 16.56,6.05L19.05,5.05C19.27,4.96 19.54,5.05 19.66,5.27L21.66,8.73C21.79,8.95 21.73,9.22 21.54,9.37L19.43,11L19.5,12L19.43,13L21.54,14.63C21.73,14.78 21.79,15.05 21.66,15.27L19.66,18.73C19.54,18.95 19.27,19.04 19.05,18.95L16.56,17.95C16.04,18.34 15.5,18.68 14.87,18.93L14.5,21.58C14.46,21.82 14.25,22 14,22H10M11.25,4L10.88,6.61C9.68,6.86 8.62,7.5 7.85,8.39L5.44,7.35L4.69,8.65L6.8,10.2C6.4,11.37 6.4,12.64 6.8,13.8L4.68,15.36L5.43,16.66L7.86,15.62C8.63,16.5 9.68,17.14 10.87,17.38L11.24,20H12.76L13.13,17.39C14.32,17.14 15.37,16.5 16.14,15.62L18.57,16.66L19.32,15.36L17.2,13.81C17.6,12.64 17.6,11.37 17.2,10.2L19.31,8.65L18.56,7.35L16.15,8.39C15.38,7.5 14.32,6.86 13.12,6.62L12.75,4H11.25Z",
 	dots: "M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z",
 	devices: "M3 6H21V4H3C1.9 4 1 4.9 1 6V18C1 19.1 1.9 20 3 20H7V18H3V6M13 12H9V13.78C8.39 14.33 8 15.11 8 16C8 16.89 8.39 17.67 9 18.22V20H13V18.22C13.61 17.67 14 16.88 14 16S13.61 14.33 13 13.78V12M11 17.5C10.17 17.5 9.5 16.83 9.5 16S10.17 14.5 11 14.5 12.5 15.17 12.5 16 11.83 17.5 11 17.5M22 8H16C15.5 8 15 8.5 15 9V19C15 19.5 15.5 20 16 20H22C22.5 20 23 19.5 23 19V9C23 8.5 22.5 8 22 8M21 18H17V10H21V18Z",
@@ -77,11 +77,11 @@ var r = {
 	map: "M20.5,3L20.34,3.03L15,5.1L9,3L3.36,4.9C3.15,4.97 3,5.15 3,5.38V20.5A0.5,0.5 0 0,0 3.5,21L3.66,20.97L9,18.9L15,21L20.64,19.1C20.85,19.03 21,18.85 21,18.62V3.5A0.5,0.5 0 0,0 20.5,3M10,5.47L14,6.87V18.53L10,17.13V5.47M5,6.46L8,5.45V17.15L5,18.31V6.46M19,17.54L16,18.55V6.86L19,5.7V17.54Z"
 };
 // dashboard/more-info-model.mjs
-function i([e, t, n]) {
+function a([e, t, n]) {
 	let r = Math.max(e, t, n), i = r - Math.min(e, t, n), a = 0;
 	return i && (a = r === e ? (t - n) / i % 6 : r === t ? (n - e) / i + 2 : (e - t) / i + 4, a *= 60, a < 0 && (a += 360)), [Math.round(a), Math.round(r ? i / r * 100 : 0)];
 }
-function a([e, t], n = 1) {
+function o([e, t], n = 1) {
 	let r = t / 100 * n, i = r * (1 - Math.abs(e / 60 % 2 - 1)), a = n - r, [o, s, c] = e < 60 ? [
 		r,
 		i,
@@ -113,7 +113,7 @@ function a([e, t], n = 1) {
 		c
 	].map((e) => Math.round((e + a) * 255));
 }
-function o(e, t = Date.now()) {
+function s(e, t = Date.now()) {
 	let n = Date.parse(e);
 	if (!Number.isFinite(n)) return "";
 	let r = Math.round((n - t) / 1e3);
@@ -126,7 +126,7 @@ function o(e, t = Date.now()) {
 	]) if (Math.abs(r) >= t) return i.format(Math.round(r / t), e);
 	return "just now";
 }
-function s(e, t = Date.now()) {
+function c(e, t = Date.now()) {
 	let n = Date.parse(e);
 	if (!Number.isFinite(n)) return "";
 	let r = Math.round((n - t) / 1e3), i = new Intl.RelativeTimeFormat(void 0, { numeric: "auto" });
@@ -137,7 +137,7 @@ function s(e, t = Date.now()) {
 	]) if (Math.abs(r) >= t) return i.format(Math.round(r / t), e);
 	return Math.abs(r) < 2 ? "just now" : i.format(r, "second");
 }
-function c(e, t) {
+function l(e, t) {
 	let n = ["garage", "gate"].includes(e) ? "garage" : e === "door" ? "door" : [
 		"blind",
 		"shade",
@@ -145,7 +145,7 @@ function c(e, t) {
 	].includes(e) ? "blinds" : "shutter";
 	return n === "door" ? t ? "doorOpen" : "doorClosed" : t ? `${n}Open` : n === "blinds" ? "blindsClosed" : n;
 }
-var l = /* @__PURE__ */ new Set([
+var u = /* @__PURE__ */ new Set([
 	"friendly_name",
 	"icon",
 	"entity_picture",
@@ -164,13 +164,13 @@ var l = /* @__PURE__ */ new Set([
 	"access_token",
 	"frontend_stream_type"
 ]);
-function u(e = {}) {
-	return Object.entries(e).filter(([e, t]) => !l.has(e) && t !== null && t !== "").slice(0, 14).map(([e, t]) => {
+function d(e = {}) {
+	return Object.entries(e).filter(([e, t]) => !u.has(e) && t !== null && t !== "").slice(0, 14).map(([e, t]) => {
 		let n = e.replace(/_/g, " ").replace(/^./, (e) => e.toUpperCase()), r = Array.isArray(t) && t.every((e) => typeof e != "object") ? t.join(", ") : typeof t == "object" ? JSON.stringify(t) : String(t);
 		return [n, r.length > 120 ? r.slice(0, 117) + "…" : r];
 	});
 }
-var d = [
+var f = [
 	{
 		state: "armed_home",
 		service: "alarm_arm_home",
@@ -214,67 +214,67 @@ var d = [
 		feature: 0
 	}
 ];
-function f(e, t) {
+function p(e, t) {
 	return e?.codeFormat ? t === "alarm_disarm" || e.codeArmRequired : !1;
 }
-function p(e) {
+function m(e) {
 	let t = e?.state, n = e?.attributes || {};
-	if (d.some((e) => e.state === t)) return t;
+	if (f.some((e) => e.state === t)) return t;
 	let r = n.next_state || n.arm_mode;
-	return d.some((e) => e.state === r) ? r : void 0;
+	return f.some((e) => e.state === r) ? r : void 0;
 }
-var m = (e) => Number.isFinite(e) ? e : void 0, h = /* @__PURE__ */ new Set(["unavailable", "unknown"]);
-function g(e) {
-	let r = e?.entity_id || "", a = r.split(".")[0], c = e?.attributes || {}, l = {
-		id: r,
-		domain: a,
-		name: c.friendly_name || r,
+var h = (e) => Number.isFinite(e) ? e : void 0, g = /* @__PURE__ */ new Set(["unavailable", "unknown"]);
+function _(e) {
+	let t = e?.entity_id || "", i = t.split(".")[0], o = e?.attributes || {}, l = {
+		id: t,
+		domain: i,
+		name: o.friendly_name || t,
 		state: e?.state,
-		unavailable: !e || h.has(e.state),
-		changed: o(e?.last_changed),
-		since: s(e?.last_changed),
-		deviceClass: c.device_class,
-		attributes: u(c),
+		unavailable: !e || g.has(e.state),
+		changed: s(e?.last_changed),
+		since: c(e?.last_changed),
+		deviceClass: o.device_class,
+		attributes: d(o),
 		controls: []
 	};
 	if (l.unavailable) return l;
-	if (a === "light") {
-		let r = t(e);
+	if (i === "light") {
+		let t = n(e);
 		l.controls.push({
 			kind: "toggle",
 			on: e.state === "on"
-		}), r.brightness && l.controls.push({
+		}), t.brightness && l.controls.push({
 			kind: "slider",
 			key: "brightness",
 			label: "Brightness",
 			min: 0,
 			max: 255,
 			step: 1,
-			value: e.state === "on" ? m(c.brightness) ?? 0 : 0,
+			value: e.state === "on" ? h(o.brightness) ?? 0 : 0,
 			format: (e) => e > 0 ? `${Math.max(1, Math.round(e / 255 * 100))}%` : "Off"
-		}), r.temperature && l.controls.push({
+		}), t.temperature && l.controls.push({
 			kind: "slider",
 			key: "color_temp_kelvin",
 			label: "Colour temperature",
-			min: r.minKelvin,
-			max: r.maxKelvin,
+			min: t.minKelvin,
+			max: t.maxKelvin,
 			step: 50,
-			value: m(c.color_temp_kelvin) ?? r.minKelvin,
+			value: h(o.color_temp_kelvin) ?? t.minKelvin,
 			format: (e) => `${Math.round(e)} K`
-		}), r.color && l.controls.push({
+		}), t.color && l.controls.push({
 			kind: "color",
 			key: "hs_color",
 			label: "Colour",
-			value: Array.isArray(c.hs_color) ? [c.hs_color[0], c.hs_color[1]] : i(Array.isArray(c.rgb_color) ? c.rgb_color : n(m(c.color_temp_kelvin) ?? 3e3))
-		}), r.effects.length && l.controls.push({
+			value: Array.isArray(o.hs_color) ? [o.hs_color[0], o.hs_color[1]] : a(Array.isArray(o.rgb_color) ? o.rgb_color : r(h(o.color_temp_kelvin) ?? 3e3))
+		}), t.effects.length && l.controls.push({
 			kind: "select",
 			key: "effect",
 			label: "Effect",
-			options: r.effects,
-			value: c.effect ?? ""
+			options: t.effects,
+			value: o.effect ?? ""
 		});
-	} else if (a === "cover") {
-		let e = c.supported_features || 0, t = [
+	} else if (i === "cover") {
+		let e = o.supported_features || 0, t = [
 			[
 				1,
 				"open_cover",
@@ -305,10 +305,10 @@ function g(e) {
 			min: 0,
 			max: 100,
 			step: 1,
-			value: m(c.current_position) ?? 0,
+			value: h(o.current_position) ?? 0,
 			format: (e) => `${Math.round(e)}%`
 		});
-	} else if (a === "lock") l.controls.push({
+	} else if (i === "lock") l.controls.push({
 		kind: "buttons",
 		buttons: [{
 			service: "lock",
@@ -318,38 +318,38 @@ function g(e) {
 			label: "Unlock"
 		}]
 	});
-	else if (a === "vacuum") l.controls.push(v(e));
-	else if (a === "alarm_control_panel") {
-		let t = Number.isFinite(c.supported_features) ? c.supported_features : 3;
+	else if (i === "vacuum") l.controls.push(y(e));
+	else if (i === "alarm_control_panel") {
+		let t = Number.isFinite(o.supported_features) ? o.supported_features : 3;
 		l.controls.push({
 			kind: "alarm",
-			modes: d.filter((e) => !e.feature || t & e.feature),
-			codeFormat: c.code_format === "number" || c.code_format === "text" ? c.code_format : null,
-			codeArmRequired: c.code_arm_required !== !1,
-			mode: p(e)
+			modes: f.filter((e) => !e.feature || t & e.feature),
+			codeFormat: o.code_format === "number" || o.code_format === "text" ? o.code_format : null,
+			codeArmRequired: o.code_arm_required !== !1,
+			mode: m(e)
 		});
-	} else if (a === "camera") l.controls.push({
+	} else if (i === "camera") l.controls.push({
 		kind: "camera",
-		stream: !!((c.supported_features || 0) & 2),
-		token: typeof c.access_token == "string" ? c.access_token : ""
+		stream: !!((o.supported_features || 0) & 2),
+		token: typeof o.access_token == "string" ? o.access_token : ""
 	});
-	else if (a === "climate") {
-		m(c.temperature) !== void 0 && l.controls.push({
+	else if (i === "climate") {
+		h(o.temperature) !== void 0 && l.controls.push({
 			kind: "stepper",
 			key: "temperature",
 			service: "set_temperature",
 			label: "Target temperature",
-			min: m(c.min_temp) ?? 7,
-			max: m(c.max_temp) ?? 35,
-			step: m(c.target_temp_step) ?? .5,
-			value: c.temperature,
+			min: h(o.min_temp) ?? 7,
+			max: h(o.max_temp) ?? 35,
+			step: h(o.target_temp_step) ?? .5,
+			value: o.temperature,
 			unit: "°"
-		}), Array.isArray(c.hvac_modes) && c.hvac_modes.length && l.controls.push({
+		}), Array.isArray(o.hvac_modes) && o.hvac_modes.length && l.controls.push({
 			kind: "select",
 			key: "hvac_mode",
 			service: "set_hvac_mode",
 			label: "Mode",
-			options: c.hvac_modes,
+			options: o.hvac_modes,
 			value: e.state,
 			required: !0
 		});
@@ -378,13 +378,13 @@ function g(e) {
 				"set_preset_mode",
 				"Preset"
 			]
-		]) Array.isArray(c[e]) && c[e].length && l.controls.push({
+		]) Array.isArray(o[e]) && o[e].length && l.controls.push({
 			kind: "select",
 			key: t,
 			service: n,
 			label: r,
-			options: c[e],
-			value: c[t] ?? "",
+			options: o[e],
+			value: o[t] ?? "",
 			required: !0
 		});
 	} else [
@@ -392,35 +392,35 @@ function g(e) {
 		"input_boolean",
 		"fan",
 		"automation"
-	].includes(a) ? (l.controls.push({
+	].includes(i) ? (l.controls.push({
 		kind: "toggle",
 		on: e.state === "on"
-	}), a === "fan" && (c.supported_features || 0) & 1 && l.controls.push({
+	}), i === "fan" && (o.supported_features || 0) & 1 && l.controls.push({
 		kind: "slider",
 		key: "percentage",
 		service: "set_percentage",
 		label: "Speed",
 		min: 0,
 		max: 100,
-		step: m(c.percentage_step) ?? 1,
-		value: m(c.percentage) ?? 0,
+		step: h(o.percentage_step) ?? 1,
+		value: h(o.percentage) ?? 0,
 		format: (e) => `${Math.round(e)}%`
-	})) : ["button", "input_button"].includes(a) ? l.controls.push({
+	})) : ["button", "input_button"].includes(i) ? l.controls.push({
 		kind: "buttons",
 		buttons: [{
 			service: "press",
 			label: "Press"
 		}]
-	}) : (a === "scene" || a === "script") && l.controls.push({
+	}) : (i === "scene" || i === "script") && l.controls.push({
 		kind: "buttons",
 		buttons: [{
 			service: "turn_on",
-			label: a === "scene" ? "Activate" : "Run"
+			label: i === "scene" ? "Activate" : "Run"
 		}]
 	});
 	return l;
 }
-var _ = {
+var v = {
 	PAUSE: 4,
 	STOP: 8,
 	RETURN_HOME: 16,
@@ -432,11 +432,11 @@ var _ = {
 	START: 8192,
 	CLEAN_AREA: 16384
 };
-function v(e) {
-	let t = e?.attributes || {}, n = e?.state, r = Number.isFinite(t.supported_features) ? t.supported_features : 0, i = (e) => (r & e) !== 0, a = n === "unavailable", o = n === "cleaning" || n === "on", s = !i(_.STATE) && !i(_.START), c = [];
-	if (i(_.START) || i(_.PAUSE)) {
-		let e = !s && o && i(_.PAUSE);
-		c.push(s && i(_.PAUSE) ? {
+function y(e) {
+	let t = e?.attributes || {}, n = e?.state, r = Number.isFinite(t.supported_features) ? t.supported_features : 0, i = (e) => (r & e) !== 0, a = n === "unavailable", o = n === "cleaning" || n === "on", s = !i(v.STATE) && !i(v.START), c = [];
+	if (i(v.START) || i(v.PAUSE)) {
+		let e = !s && o && i(v.PAUSE);
+		c.push(s && i(v.PAUSE) ? {
 			key: "start_pause",
 			service: "start_pause",
 			label: "Start/Pause",
@@ -450,7 +450,7 @@ function v(e) {
 			disabled: a
 		});
 	}
-	return i(_.STOP) && c.push({
+	return i(v.STOP) && c.push({
 		key: "stop",
 		service: "stop",
 		label: "Stop",
@@ -460,19 +460,19 @@ function v(e) {
 			"off",
 			"idle"
 		].includes(n)
-	}), i(_.RETURN_HOME) && c.push({
+	}), i(v.RETURN_HOME) && c.push({
 		key: "return_to_base",
 		service: "return_to_base",
 		label: "Return to dock",
 		icon: "dock",
 		disabled: a || n === "returning"
-	}), i(_.LOCATE) && c.push({
+	}), i(v.LOCATE) && c.push({
 		key: "locate",
 		service: "locate",
 		label: "Locate",
 		icon: "locate",
 		disabled: a
-	}), i(_.CLEAN_SPOT) && c.push({
+	}), i(v.CLEAN_SPOT) && c.push({
 		key: "clean_spot",
 		service: "clean_spot",
 		label: "Clean spot",
@@ -481,14 +481,14 @@ function v(e) {
 	}), {
 		kind: "vacuum",
 		buttons: c,
-		fanSpeeds: i(_.FAN_SPEED) && Array.isArray(t.fan_speed_list) ? t.fan_speed_list.filter((e) => typeof e == "string") : [],
+		fanSpeeds: i(v.FAN_SPEED) && Array.isArray(t.fan_speed_list) ? t.fan_speed_list.filter((e) => typeof e == "string") : [],
 		fanSpeed: typeof t.fan_speed == "string" ? t.fan_speed : void 0,
-		cleanArea: i(_.CLEAN_AREA),
-		status: i(_.STATUS) && typeof t.status == "string" ? t.status : void 0,
+		cleanArea: i(v.CLEAN_AREA),
+		status: i(v.STATUS) && typeof t.status == "string" ? t.status : void 0,
 		battery: Number.isFinite(t.battery_level) ? t.battery_level : void 0
 	};
 }
-function y(e, t, n) {
+function b(e, t, n) {
 	let { domain: r, id: i } = e;
 	if (t.kind === "toggle") return [
 		r === "light" || r === "switch" ? r : "homeassistant",
@@ -579,27 +579,27 @@ function y(e, t, n) {
 	];
 	throw Error("Unknown control");
 }
-function b(e, t) {
+function x(e, t) {
 	let n = encodeURIComponent(e), r = t ? `?token=${encodeURIComponent(t)}` : "";
 	return {
 		still: `/api/camera_proxy/${n}${r}`,
 		mjpeg: `/api/camera_proxy_stream/${n}${r}`
 	};
 }
-var x = (e) => typeof e == "string" && e ? e[0].toUpperCase() + e.slice(1).replace(/_/g, " ") : e, S = {
+var S = (e) => typeof e == "string" && e ? e[0].toUpperCase() + e.slice(1).replace(/_/g, " ") : e, C = {
 	ms: .001,
 	s: 1,
 	min: 60,
 	h: 3600,
 	d: 86400
 };
-function C(e, t) {
-	let n = Number(e) * (S[t] ?? NaN);
+function w(e, t) {
+	let n = Number(e) * (C[t] ?? NaN);
 	if (!Number.isFinite(n)) return;
 	let r = Math.round(Math.abs(n)), i = Math.floor(r / 3600), a = Math.floor(r % 3600 / 60), o = r % 60, s = i ? `${i}h ${a}m` : a ? `${a}m ${o}s` : `${o}s`;
 	return n < 0 ? `-${s}` : s;
 }
-var w = {
+var T = {
 	battery_charging: ["Charging", "Not charging"],
 	connectivity: ["Connected", "Disconnected"],
 	door: ["Open", "Closed"],
@@ -607,17 +607,17 @@ var w = {
 	plug: ["Plugged in", "Unplugged"],
 	problem: ["Problem", "OK"],
 	running: ["Running", "Not running"]
-}, T = (e) => {
+}, E = (e) => {
 	let t = Number(e);
 	return Number.isFinite(t) && String(e).includes(".") ? String(Math.round(t * 100) / 100) : String(e);
 };
-function E(e, { prefix: t = "", now: n = Date.now() } = {}) {
-	let r = e?.entity_id || "", i = r.split(".")[0], a = e?.attributes || {}, o = e?.state, c = a.friendly_name || r;
-	t && c.startsWith(`${t} `) && c.length > t.length + 1 && (c = c.slice(t.length + 1)), c = c.charAt(0).toUpperCase() + c.slice(1);
+function D(e, { prefix: t = "", now: n = Date.now() } = {}) {
+	let r = e?.entity_id || "", i = r.split(".")[0], a = e?.attributes || {}, o = e?.state, s = a.friendly_name || r;
+	t && s.startsWith(`${t} `) && s.length > t.length + 1 && (s = s.slice(t.length + 1)), s = s.charAt(0).toUpperCase() + s.slice(1);
 	let l = !e || o === "unavailable", u = {
 		id: r,
 		domain: i,
-		name: c,
+		name: s,
 		unavailable: l,
 		kind: "value"
 	};
@@ -637,11 +637,11 @@ function E(e, { prefix: t = "", now: n = Date.now() } = {}) {
 		options: Array.isArray(a.options) ? a.options.map(String) : []
 	};
 	if (["number", "input_number"].includes(i)) {
-		let e = m(a.min) ?? 0, t = m(a.max) ?? 100, n = m(a.step) || 1;
+		let e = h(a.min) ?? 0, t = h(a.max) ?? 100, n = h(a.step) || 1;
 		return {
 			...u,
 			kind: "number",
-			value: m(Number(o)),
+			value: h(Number(o)),
 			min: e,
 			max: t,
 			step: n,
@@ -657,11 +657,11 @@ function E(e, { prefix: t = "", now: n = Date.now() } = {}) {
 		kind: "time",
 		value: o.slice(0, 5)
 	};
-	let d = x(o);
+	let d = S(o);
 	if (i === "binary_sensor") {
-		let e = w[a.device_class];
+		let e = T[a.device_class];
 		d = e ? e[o === "on" ? 0 : 1] : o === "on" ? "On" : "Off";
-	} else d = (a.device_class === "timestamp" || i === "image") && Date.parse(o) ? s(o, n) || d : a.device_class === "duration" ? C(o, a.unit_of_measurement) ?? d : a.unit_of_measurement ? `${T(o)}${a.unit_of_measurement === "%" ? "" : " "}${a.unit_of_measurement}` : x(T(o));
+	} else d = (a.device_class === "timestamp" || i === "image") && Date.parse(o) ? c(o, n) || d : a.device_class === "duration" ? w(o, a.unit_of_measurement) ?? d : a.unit_of_measurement ? `${E(o)}${a.unit_of_measurement === "%" ? "" : " "}${a.unit_of_measurement}` : S(E(o));
 	return {
 		...u,
 		value: d
@@ -723,13 +723,13 @@ function ee(e, t) {
 	throw Error("This entity has no control here");
 }
 // dashboard/vacuum-art.mjs
-var te = "<svg viewBox=\"0 0 240 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"vacuum-svg\" ><circle cx=\"120\" cy=\"120\" r=\"110\" class=\"glow\" fill=\"var(--vacuum-color)\" opacity=\"0.06\" /><g class=\"vacuum-body-rotate\"><g class=\"vacuum-body\"><g class=\"brush brush-right\"><g class=\"brush-spokes\"><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"64\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"88\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"162\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"186\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /></g><circle cx=\"174\" cy=\"76\" r=\"2\" fill=\"var(--vacuum-color)\" opacity=\"0.5\" /></g><circle cx=\"120\" cy=\"120\" r=\"72\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /><circle cx=\"120\" cy=\"120\" r=\"66\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.2\" /><path d=\"M 60 94 A 68 68 0 0 1 180 94\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"3\" stroke-linecap=\"round\" class=\"bumper\" /><g class=\"nav-lines\" opacity=\"0.15\"><line x1=\"120\" y1=\"56\" x2=\"120\" y2=\"74\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"88\" y1=\"63\" x2=\"96\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"152\" y1=\"63\" x2=\"144\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /></g><circle cx=\"120\" cy=\"108\" r=\"14\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" class=\"lidar-housing\" /><circle cx=\"120\" cy=\"108\" r=\"9\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.25\" /><circle cx=\"120\" cy=\"140\" r=\"8\" fill=\"var(--vacuum-color)\" opacity=\"0.08\" class=\"power-ring\" /><circle cx=\"120\" cy=\"140\" r=\"4\" fill=\"var(--vacuum-color)\" opacity=\"0.25\" class=\"power-dot\" /></g></g><g class=\"particles\"><circle class=\"particle p1\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p2\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p3\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p4\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p5\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p6\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p7\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p8\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /></g><g class=\"dock-indicator\"><rect x=\"76\" y=\"188\" width=\"88\" height=\"28\" rx=\"8\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /></g><g class=\"return-path\"><polygon points=\"120,220 110,206 130,206\" fill=\"var(--vacuum-color)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" stroke-linejoin=\"round\" opacity=\"0.55\" /></g></svg>", D = ".mi-vac-status{display: flex; align-items: center; justify-content: center;}.mi-vac-status .container{width: 200px; height: 200px; position: relative;}.mi-vac-status .vacuum-svg{width: 100%; height: 100%;}.mi-vac-status .particles,.mi-vac-status .dock-indicator,.mi-vac-status .return-path{opacity: 0; transition: opacity 400ms ease;}.mi-vac-status .cleaning .vacuum-body{animation: mi-vac-vacuum-wander 12s ease-in-out infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .brush-right .brush-spokes{animation: mi-vac-brush-spin 0.6s linear infinite; transform-origin: 174px 76px;}.mi-vac-status .cleaning .particles{opacity: 1;}.mi-vac-status .cleaning .particle{animation: mi-vac-particle-suck 2.4s ease-in infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .p1{animation-delay: 0s;}.mi-vac-status .cleaning .p2{animation-delay: -0.3s;}.mi-vac-status .cleaning .p3{animation-delay: -0.6s;}.mi-vac-status .cleaning .p4{animation-delay: -0.9s;}.mi-vac-status .cleaning .p5{animation-delay: -1.2s;}.mi-vac-status .cleaning .p6{animation-delay: -1.5s;}.mi-vac-status .cleaning .p7{animation-delay: -1.8s;}.mi-vac-status .cleaning .p8{animation-delay: -2.1s;}.mi-vac-status .cleaning .p1{--particle-x: -90px; --particle-y: -25px;}.mi-vac-status .cleaning .p2{--particle-x: 90px; --particle-y: 20px;}.mi-vac-status .cleaning .p3{--particle-x: -85px; --particle-y: 40px;}.mi-vac-status .cleaning .p4{--particle-x: 85px; --particle-y: -35px;}.mi-vac-status .cleaning .p5{--particle-x: -65px; --particle-y: 70px;}.mi-vac-status .cleaning .p6{--particle-x: 70px; --particle-y: -65px;}.mi-vac-status .cleaning .p7{--particle-x: -75px; --particle-y: -55px;}.mi-vac-status .cleaning .p8{--particle-x: 80px; --particle-y: 55px;}.mi-vac-status .cleaning .nav-lines{animation: mi-vac-nav-pulse 2s ease-in-out infinite;}.mi-vac-status .vacuum-body-rotate{transform-origin: 120px 120px; transform: rotate(0deg); transition: transform 600ms ease-in-out;}.mi-vac-status .returning .vacuum-body-rotate{transform: rotate(180deg);}.mi-vac-status .returning .vacuum-body{animation: mi-vac-returning-drift 3s ease-in-out infinite;}.mi-vac-status .returning .return-path{opacity: 1; animation: mi-vac-return-arrow 1.6s ease-in-out infinite; transform-origin: 120px 210px;}.mi-vac-status .returning .brush-right{opacity: 0.4;}.mi-vac-status .docked .dock-indicator{opacity: 1;}.mi-vac-status .docked .vacuum-body{opacity: 0.75;}.mi-vac-status .docked .glow{animation: mi-vac-docked-glow 4s ease-in-out infinite;}.mi-vac-status .docked .power-ring{animation: mi-vac-charge-pulse 2.5s ease-in-out infinite;}.mi-vac-status .docked .brush-right{opacity: 0.5;}.mi-vac-status .error .glow{animation: mi-vac-error-glow 1.8s ease-in-out infinite;}.mi-vac-status .idle .vacuum-body{opacity: 0.65;}.mi-vac-status .idle .brush-right{opacity: 0.4;}@keyframes mi-vac-vacuum-wander { 0% { transform: rotate(0deg) translate(0, 0); } 15% { transform: rotate(0deg) translate(0, -30px); } 25% { transform: rotate(0deg) translate(0, 0); } 32% { transform: rotate(-18deg) translate(0, 0); } 47% { transform: rotate(-18deg) translate(0, -28px); } 57% { transform: rotate(-18deg) translate(0, 0); } 63% { transform: rotate(12deg) translate(0, 0); } 78% { transform: rotate(12deg) translate(0, -25px); } 88% { transform: rotate(12deg) translate(0, 0); } 95% { transform: rotate(0deg) translate(0, 0); } 100% { transform: rotate(0deg) translate(0, 0); } }@keyframes mi-vac-brush-spin { to { transform: rotate(360deg); } }@keyframes mi-vac-particle-suck { 0% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1.2); } 25% { opacity: 0.8; } 80% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } 100% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } }@keyframes mi-vac-nav-pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.35; } }@keyframes mi-vac-returning-drift { 0%, 100% { transform: translateY(-6px); } 50% { transform: translateY(4px); } }@keyframes mi-vac-return-arrow { 0%, 100% { transform: translateY(-6px); opacity: 0.3; } 50% { transform: translateY(4px); opacity: 0.85; } }@keyframes mi-vac-docked-glow { 0%, 100% { opacity: 0.06; } 50% { opacity: 0.14; } }@keyframes mi-vac-charge-pulse { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.25; } }@keyframes mi-vac-error-glow { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.35; } }";
+var te = "<svg viewBox=\"0 0 240 240\" xmlns=\"http://www.w3.org/2000/svg\" class=\"vacuum-svg\" ><circle cx=\"120\" cy=\"120\" r=\"110\" class=\"glow\" fill=\"var(--vacuum-color)\" opacity=\"0.06\" /><g class=\"vacuum-body-rotate\"><g class=\"vacuum-body\"><g class=\"brush brush-right\"><g class=\"brush-spokes\"><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"64\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"174\" y2=\"88\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"162\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /><line x1=\"174\" y1=\"76\" x2=\"186\" y2=\"76\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.2\" stroke-linecap=\"round\" opacity=\"0.5\" /></g><circle cx=\"174\" cy=\"76\" r=\"2\" fill=\"var(--vacuum-color)\" opacity=\"0.5\" /></g><circle cx=\"120\" cy=\"120\" r=\"72\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /><circle cx=\"120\" cy=\"120\" r=\"66\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.2\" /><path d=\"M 60 94 A 68 68 0 0 1 180 94\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"3\" stroke-linecap=\"round\" class=\"bumper\" /><g class=\"nav-lines\" opacity=\"0.15\"><line x1=\"120\" y1=\"56\" x2=\"120\" y2=\"74\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"88\" y1=\"63\" x2=\"96\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /><line x1=\"152\" y1=\"63\" x2=\"144\" y2=\"78\" stroke=\"var(--vacuum-color)\" stroke-width=\"1.5\" /></g><circle cx=\"120\" cy=\"108\" r=\"14\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" class=\"lidar-housing\" /><circle cx=\"120\" cy=\"108\" r=\"9\" fill=\"none\" stroke=\"var(--vacuum-color)\" stroke-width=\"0.8\" opacity=\"0.25\" /><circle cx=\"120\" cy=\"140\" r=\"8\" fill=\"var(--vacuum-color)\" opacity=\"0.08\" class=\"power-ring\" /><circle cx=\"120\" cy=\"140\" r=\"4\" fill=\"var(--vacuum-color)\" opacity=\"0.25\" class=\"power-dot\" /></g></g><g class=\"particles\"><circle class=\"particle p1\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p2\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p3\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p4\" cx=\"120\" cy=\"120\" r=\"2\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p5\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p6\" cx=\"120\" cy=\"120\" r=\"1.5\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p7\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /><circle class=\"particle p8\" cx=\"120\" cy=\"120\" r=\"1\" fill=\"var(--vacuum-color)\" /></g><g class=\"dock-indicator\"><rect x=\"76\" y=\"188\" width=\"88\" height=\"28\" rx=\"8\" fill=\"var(--mi-bg)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" /></g><g class=\"return-path\"><polygon points=\"120,220 110,206 130,206\" fill=\"var(--vacuum-color)\" stroke=\"var(--vacuum-color)\" stroke-width=\"2\" stroke-linejoin=\"round\" opacity=\"0.55\" /></g></svg>", O = ".mi-vac-status{display: flex; align-items: center; justify-content: center;}.mi-vac-status .container{width: 200px; height: 200px; position: relative;}.mi-vac-status .vacuum-svg{width: 100%; height: 100%;}.mi-vac-status .particles,.mi-vac-status .dock-indicator,.mi-vac-status .return-path{opacity: 0; transition: opacity 400ms ease;}.mi-vac-status .cleaning .vacuum-body{animation: mi-vac-vacuum-wander 12s ease-in-out infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .brush-right .brush-spokes{animation: mi-vac-brush-spin 0.6s linear infinite; transform-origin: 174px 76px;}.mi-vac-status .cleaning .particles{opacity: 1;}.mi-vac-status .cleaning .particle{animation: mi-vac-particle-suck 2.4s ease-in infinite; transform-origin: 120px 120px;}.mi-vac-status .cleaning .p1{animation-delay: 0s;}.mi-vac-status .cleaning .p2{animation-delay: -0.3s;}.mi-vac-status .cleaning .p3{animation-delay: -0.6s;}.mi-vac-status .cleaning .p4{animation-delay: -0.9s;}.mi-vac-status .cleaning .p5{animation-delay: -1.2s;}.mi-vac-status .cleaning .p6{animation-delay: -1.5s;}.mi-vac-status .cleaning .p7{animation-delay: -1.8s;}.mi-vac-status .cleaning .p8{animation-delay: -2.1s;}.mi-vac-status .cleaning .p1{--particle-x: -90px; --particle-y: -25px;}.mi-vac-status .cleaning .p2{--particle-x: 90px; --particle-y: 20px;}.mi-vac-status .cleaning .p3{--particle-x: -85px; --particle-y: 40px;}.mi-vac-status .cleaning .p4{--particle-x: 85px; --particle-y: -35px;}.mi-vac-status .cleaning .p5{--particle-x: -65px; --particle-y: 70px;}.mi-vac-status .cleaning .p6{--particle-x: 70px; --particle-y: -65px;}.mi-vac-status .cleaning .p7{--particle-x: -75px; --particle-y: -55px;}.mi-vac-status .cleaning .p8{--particle-x: 80px; --particle-y: 55px;}.mi-vac-status .cleaning .nav-lines{animation: mi-vac-nav-pulse 2s ease-in-out infinite;}.mi-vac-status .vacuum-body-rotate{transform-origin: 120px 120px; transform: rotate(0deg); transition: transform 600ms ease-in-out;}.mi-vac-status .returning .vacuum-body-rotate{transform: rotate(180deg);}.mi-vac-status .returning .vacuum-body{animation: mi-vac-returning-drift 3s ease-in-out infinite;}.mi-vac-status .returning .return-path{opacity: 1; animation: mi-vac-return-arrow 1.6s ease-in-out infinite; transform-origin: 120px 210px;}.mi-vac-status .returning .brush-right{opacity: 0.4;}.mi-vac-status .docked .dock-indicator{opacity: 1;}.mi-vac-status .docked .vacuum-body{opacity: 0.75;}.mi-vac-status .docked .glow{animation: mi-vac-docked-glow 4s ease-in-out infinite;}.mi-vac-status .docked .power-ring{animation: mi-vac-charge-pulse 2.5s ease-in-out infinite;}.mi-vac-status .docked .brush-right{opacity: 0.5;}.mi-vac-status .error .glow{animation: mi-vac-error-glow 1.8s ease-in-out infinite;}.mi-vac-status .idle .vacuum-body{opacity: 0.65;}.mi-vac-status .idle .brush-right{opacity: 0.4;}@keyframes mi-vac-vacuum-wander { 0% { transform: rotate(0deg) translate(0, 0); } 15% { transform: rotate(0deg) translate(0, -30px); } 25% { transform: rotate(0deg) translate(0, 0); } 32% { transform: rotate(-18deg) translate(0, 0); } 47% { transform: rotate(-18deg) translate(0, -28px); } 57% { transform: rotate(-18deg) translate(0, 0); } 63% { transform: rotate(12deg) translate(0, 0); } 78% { transform: rotate(12deg) translate(0, -25px); } 88% { transform: rotate(12deg) translate(0, 0); } 95% { transform: rotate(0deg) translate(0, 0); } 100% { transform: rotate(0deg) translate(0, 0); } }@keyframes mi-vac-brush-spin { to { transform: rotate(360deg); } }@keyframes mi-vac-particle-suck { 0% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1.2); } 25% { opacity: 0.8; } 80% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } 100% { opacity: 0; transform: translate( calc(var(--particle-x) * 0.82), calc(var(--particle-y) * 0.82) ) scale(0.6); } }@keyframes mi-vac-nav-pulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.35; } }@keyframes mi-vac-returning-drift { 0%, 100% { transform: translateY(-6px); } 50% { transform: translateY(4px); } }@keyframes mi-vac-return-arrow { 0%, 100% { transform: translateY(-6px); opacity: 0.3; } 50% { transform: translateY(4px); opacity: 0.85; } }@keyframes mi-vac-docked-glow { 0%, 100% { opacity: 0.06; } 50% { opacity: 0.14; } }@keyframes mi-vac-charge-pulse { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.25; } }@keyframes mi-vac-error-glow { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.35; } }";
 function ne(e) {
 	let t = e?.state;
 	return t === "unavailable" ? "idle" : t === "error" ? "error" : t === "cleaning" || t === "on" ? "cleaning" : t === "returning" || t === "paused" || t === "docked" ? t : "idle";
 }
 // dashboard/more-info.mjs
-var O = `
+var re = `
 dialog.mi{--mi-bg:#1c1c1c;--mi-fg:#e1e1e1;--mi-muted:#9b9b9b;--mi-line:#ffffff1f;--mi-surface:#ffffff14;--mi-surface-2:#ffffff24;--mi-primary:#03a9f4;--mi-ink:#fff;--mi-accent:var(--mi-primary);--mi-accent-ink:#fff;
  box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-height:min(92vh,880px);margin:auto;padding:0;overflow:hidden;border:0;border-radius:28px;background:var(--mi-bg);color:var(--mi-fg);font:400 14px/1.45 Roboto,system-ui,sans-serif;box-shadow:0 24px 64px #0009;animation:mi-in .22s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-color-scheme:light){dialog.mi{--mi-bg:#fff;--mi-fg:#212121;--mi-muted:#727272;--mi-line:#0000001f;--mi-surface:#0000000d;--mi-surface-2:#0000001a;--mi-ink:#212121;box-shadow:0 24px 64px #0004}}
@@ -1001,15 +1001,15 @@ dialog.mi.mi-wide{width:min(1040px,calc(100vw - 32px))}
 .mi-vac-empty svg{width:48px;height:48px}
 .mi-vac-empty-title{margin:12px 0 4px;color:var(--mi-fg);font-size:18px;font-weight:500}
 .mi-vac-empty p{margin:0}
-${D}
-`, k = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${r[e]}"/></svg>`, A = (e) => `rgb(${e.join(",")})`, j = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", M = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), N = {
+${O}
+`, k = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${i[e]}"/></svg>`, A = (e) => `rgb(${e.join(",")})`, j = ([e, t, n]) => (.299 * e + .587 * t + .114 * n) / 255 > .62 ? "#1c1c1c" : "#fff", M = (e) => e && e[0].toUpperCase() + e.slice(1).replace(/_/g, " "), N = {
 	disarmed: "#9e9e9e",
 	armed: "#43a047",
 	arming: "#ff9800",
 	pending: "#ff9800",
 	disarming: "#ff9800",
 	triggered: "#e5533d"
-}, re = (e) => N[e] || (e?.startsWith("armed") ? N.armed : N.disarmed), ie = {
+}, ie = (e) => N[e] || (e?.startsWith("armed") ? N.armed : N.disarmed), ae = {
 	heat: "#ff8100",
 	cool: "#2b9af9",
 	heat_cool: "#ffab00",
@@ -1080,82 +1080,70 @@ function I(e, t, n, r, i) {
 	let a = P(e, "button", "mi-round", `<span class="mi-disc">${k(t)}</span><span>${n}</span>`);
 	return a.type = "button", i !== void 0 && a.setAttribute("aria-pressed", String(i)), a.onclick = r, a;
 }
-function ae(t, n) {
-	return {
-		battery_charging: "mdi:battery-charging",
-		duration: "mdi:timer-outline",
-		connectivity: "mdi:check-network-outline",
-		problem: "mdi:alert-circle-outline",
-		area: "mdi:texture-box",
-		running: "mdi:play-circle-outline"
-	}[t?.attributes?.device_class] || {
-		time: "mdi:clock-outline",
-		input_datetime: "mdi:clock-outline"
-	}[n?.domain] || e(n?.id, t);
-}
-function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView: l = null, extras: u = [], map: d = "" }) {
-	let p = e.ownerDocument, m = P(p, "dialog", "mi");
-	m.setAttribute("aria-labelledby", "mi-title");
-	let h = P(p, "div", "mi-frame"), _ = P(p, "div", "mi-head"), v = P(p, "button", "mi-iconbtn", k("close"));
-	v.type = "button", v.setAttribute("aria-label", "Close");
-	let x = P(p, "div", "mi-titles"), S = P(p, "h2");
-	S.id = "mi-title";
-	let C = P(p, "p");
-	x.append(S, C), _.append(v, x);
-	let w = P(p, "div", "mi-actions");
-	w.hidden = !t()?.user?.is_admin;
-	let T = P(p, "button", "mi-iconbtn", k("cog"));
-	T.type = "button", T.setAttribute("aria-label", "Settings"), T.title = "Settings";
-	let D = P(p, "button", "mi-iconbtn", k("dots"));
-	D.type = "button", D.setAttribute("aria-label", "Menu"), D.setAttribute("aria-haspopup", "menu"), D.setAttribute("aria-expanded", "false");
-	let N = P(p, "div", "mi-menu");
+var oe = (e) => t(e);
+function L({ host: t, getHass: n, entityId: a, onError: s = () => {}, openHaView: u = null, extras: d = [], map: f = "" }) {
+	let m = t.ownerDocument, h = P(m, "dialog", "mi");
+	h.setAttribute("aria-labelledby", "mi-title");
+	let g = P(m, "div", "mi-frame"), v = P(m, "div", "mi-head"), y = P(m, "button", "mi-iconbtn", k("close"));
+	y.type = "button", y.setAttribute("aria-label", "Close");
+	let S = P(m, "div", "mi-titles"), C = P(m, "h2");
+	C.id = "mi-title";
+	let w = P(m, "p");
+	S.append(C, w), v.append(y, S);
+	let T = P(m, "div", "mi-actions");
+	T.hidden = !n()?.user?.is_admin;
+	let E = P(m, "button", "mi-iconbtn", k("cog"));
+	E.type = "button", E.setAttribute("aria-label", "Settings"), E.title = "Settings";
+	let O = P(m, "button", "mi-iconbtn", k("dots"));
+	O.type = "button", O.setAttribute("aria-label", "Menu"), O.setAttribute("aria-haspopup", "menu"), O.setAttribute("aria-expanded", "false");
+	let N = P(m, "div", "mi-menu");
 	N.setAttribute("role", "menu"), N.hidden = !0;
 	let L = (e, t, n) => {
-		let r = P(p, "button", "", `${k(e)}<span></span>`);
+		let r = P(m, "button", "", `${k(e)}<span></span>`);
 		return r.type = "button", r.setAttribute("role", "menuitem"), r.lastChild.textContent = t, r.onclick = () => {
 			V(!1), n();
 		}, r;
-	}, oe = (e) => new URL(e, p.defaultView.location.origin).href, se = (e) => {
-		let t = p.defaultView;
-		l ? (t.history.pushState(null, "", e), t.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: !1 } })), Q()) : t.open(oe(e), "_blank", "noopener");
+	}, se = (e) => new URL(e, m.defaultView.location.origin).href, ce = (e) => {
+		let t = m.defaultView;
+		u ? (t.history.pushState(null, "", e), t.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: !1 } })), Q()) : t.open(se(e), "_blank", "noopener");
 	}, R = (e) => {
-		l ? (Q(), l(i, e)) : se(`/config/entities?more-info-entity-id=${encodeURIComponent(i)}&more-info-view=${e}`);
+		u ? (Q(), u(a, e)) : ce(`/config/entities?more-info-entity-id=${encodeURIComponent(a)}&more-info-view=${e}`);
 	}, z = null, B = L("devices", "Device info", () => {
-		z && se(`/config/devices/device/${z}`);
+		z && ce(`/config/devices/device/${z}`);
 	});
-	B.hidden = !0, N.append(L("addTo", "Add to…", () => R("add_to")), P(p, "hr"), B, L("related", "Related", () => R("related")), L("details", "Details", () => R("details")));
+	B.hidden = !0, N.append(L("addTo", "Add to…", () => R("add_to")), P(m, "hr"), B, L("related", "Related", () => R("related")), L("details", "Details", () => R("details")));
 	let V = (e) => {
-		N.hidden = !e, D.setAttribute("aria-expanded", String(e)), e && N.querySelector("button:not([hidden])")?.focus();
+		N.hidden = !e, O.setAttribute("aria-expanded", String(e)), e && N.querySelector("button:not([hidden])")?.focus();
 	};
-	if (D.onclick = (e) => {
+	if (O.onclick = (e) => {
 		e.stopPropagation(), V(N.hidden);
-	}, T.onclick = () => R("settings"), w.append(T, D, N), _.append(w), !w.hidden) {
-		let e = t()?.entities?.[i];
-		Promise.resolve(e || t()?.callWS?.({
+	}, E.onclick = () => R("settings"), T.append(E, O, N), v.append(T), !T.hidden) {
+		let e = n()?.entities?.[a];
+		Promise.resolve(e || n()?.callWS?.({
 			type: "config/entity_registry/get",
-			entity_id: i
+			entity_id: a
 		})).then((e) => {
-			z = e?.device_id || null, z && (t()?.devices?.[z]?.entry_type === "service" && (B.querySelector("span").textContent = "Service info", B.querySelector("svg").outerHTML = k("service")), B.hidden = !1);
+			z = e?.device_id || null, z && (n()?.devices?.[z]?.entry_type === "service" && (B.querySelector("span").textContent = "Service info", B.querySelector("svg").outerHTML = k("service")), B.hidden = !1);
 		}).catch(() => {});
 	}
-	let H = P(p, "div", "mi-body"), ce = P(p, "style");
-	ce.textContent = O, h.append(_, H), m.append(ce, h), e.append(m);
-	let U = "", W, G = [], le = () => {
+	let H = P(m, "div", "mi-body"), le = P(m, "style");
+	le.textContent = re, g.append(v, H), h.append(le, g), t.append(h);
+	let U = "", W, G = [], ue = () => {
 		for (let e of G.splice(0)) e();
 	}, K = (e) => {
-		W ||= H.appendChild(P(p, "p", "mi-error")), W.textContent = e || "", W.hidden = !e;
-	}, q = async (e, n, r) => {
+		W ||= H.appendChild(P(m, "p", "mi-error")), W.textContent = e || "", W.hidden = !e;
+	}, q = async (e, t, r) => {
 		try {
 			K("");
-			let [i, a, o] = y(e, n, r);
-			return await t().callService(i, a, o), !0;
+			let [i, a, o] = b(e, t, r);
+			return await n().callService(i, a, o), !0;
 		} catch (e) {
-			return K(e?.message || "The command failed."), o(e), !1;
+			return K(e?.message || "The command failed."), s(e), !1;
 		}
 	}, J = (e, t) => e.controls.find(t);
-	function ue(e, t) {
-		let r = J(e, (e) => e.kind === "toggle"), i = J(e, (e) => e.key === "brightness"), o = J(e, (e) => e.key === "color_temp_kelvin"), s = J(e, (e) => e.kind === "color"), c = J(e, (e) => e.key === "effect"), l = P(p, "div", "mi-center"), u;
-		i ? (u = F(p, {
+	function de(e, t) {
+		let n = J(e, (e) => e.kind === "toggle"), i = J(e, (e) => e.key === "brightness"), a = J(e, (e) => e.key === "color_temp_kelvin"), s = J(e, (e) => e.kind === "color"), c = J(e, (e) => e.key === "effect"), l = P(m, "div", "mi-center"), u;
+		i ? (u = F(m, {
 			orient: "v",
 			label: "Brightness",
 			min: i.min,
@@ -1164,44 +1152,44 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 			value: i.value,
 			format: i.format,
 			onCommit: (t) => q(e, i, t)
-		}), l.append(u.el)) : (u = P(p, "button", "mi-tall", `${k("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => q(e, r, u.getAttribute("aria-checked") !== "true"), l.append(u));
-		let d = P(p, "div", "mi-row"), f = I(p, "power", "Power", () => {
+		}), l.append(u.el)) : (u = P(m, "button", "mi-tall", `${k("bulb")}<span></span>`), u.type = "button", u.setAttribute("role", "switch"), u.onclick = () => q(e, n, u.getAttribute("aria-checked") !== "true"), l.append(u));
+		let d = P(m, "div", "mi-row"), f = I(m, "power", "Power", () => {
 			let t = f.getAttribute("aria-pressed") === "true";
-			q(e, r, !t);
+			q(e, n, !t);
 		}, !1);
 		d.append(f);
-		let h = {}, g = {}, _ = (e) => {
-			for (let t of Object.keys(h)) {
-				let n = t === e && h[t].hidden;
-				h[t].hidden = !n, g[t].setAttribute("aria-pressed", String(n));
+		let p = {}, g = {}, _ = (e) => {
+			for (let t of Object.keys(p)) {
+				let n = t === e && p[t].hidden;
+				p[t].hidden = !n, g[t].setAttribute("aria-pressed", String(n));
 			}
 		}, v = (e, t, n, r) => {
-			g[e] = I(p, t, n, () => _(e), !1), h[e] = r, r.hidden = !0, d.append(g[e]);
+			g[e] = I(m, t, n, () => _(e), !1), p[e] = r, r.hidden = !0, d.append(g[e]);
 		}, y = [];
-		if (o) {
-			let t = P(p, "output"), n = P(p, "div", "mi-field"), r = P(p, "div", "mi-label", "<span>Colour temperature</span>");
+		if (a) {
+			let t = P(m, "output"), n = P(m, "div", "mi-field"), r = P(m, "div", "mi-label", "<span>Colour temperature</span>");
 			r.append(t);
-			let i = F(p, {
+			let i = F(m, {
 				orient: "h",
 				label: "Colour temperature",
-				min: o.min,
-				max: o.max,
+				min: a.min,
+				max: a.max,
 				step: 50,
-				value: o.value,
+				value: a.value,
 				gradient: "linear-gradient(90deg,#ffa93d,#ffe3b8 40%,#f4f6ff 65%,#a8c8ff)",
 				format: (e) => `${Math.round(e)} K`,
 				onInput: (e) => t.textContent = `${Math.round(e)} K`,
-				onCommit: (t) => q(e, o, t)
+				onCommit: (t) => q(e, a, t)
 			});
 			n.append(r, i.el);
-			let a = P(p, "div", "mi-panel");
-			a.append(n), v("temp", "thermo", "Temperature", a), y.push((e) => {
+			let o = P(m, "div", "mi-panel");
+			o.append(n), v("temp", "thermo", "Temperature", o), y.push((e) => {
 				let n = J(e, (e) => e.key === "color_temp_kelvin");
 				n && (i.set(n.value), t.textContent = `${Math.round(n.value)} K`);
 			});
 		}
 		if (s) {
-			let t = P(p, "output"), n = P(p, "output"), r = s.value[0], i = s.value[1], o = () => `linear-gradient(90deg,#fff,${A(a([r, 100]))})`, c = F(p, {
+			let t = P(m, "output"), n = P(m, "output"), r = s.value[0], i = s.value[1], a = () => `linear-gradient(90deg,#fff,${A(o([r, 100]))})`, c = F(m, {
 				orient: "h",
 				label: "Hue",
 				min: 0,
@@ -1210,75 +1198,75 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 				value: r,
 				gradient: "linear-gradient(90deg,#f00,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,#f00)",
 				onInput: (e) => {
-					r = e, t.textContent = `${e}°`, l.el.style.setProperty("--mi-gradient", o());
+					r = e, t.textContent = `${e}°`, l.el.style.setProperty("--mi-gradient", a());
 				},
 				onCommit: () => q(e, s, [r, i])
-			}), l = F(p, {
+			}), l = F(m, {
 				orient: "h",
 				label: "Saturation",
 				min: 0,
 				max: 100,
 				step: 1,
 				value: i,
-				gradient: o(),
+				gradient: a(),
 				onInput: (e) => {
 					i = e, n.textContent = `${e}%`;
 				},
 				onCommit: () => q(e, s, [r, i])
-			}), u = P(p, "div", "mi-field"), d = P(p, "div", "mi-field"), f = P(p, "div", "mi-label", "<span>Hue</span>"), m = P(p, "div", "mi-label", "<span>Saturation</span>");
-			f.append(t), m.append(n), u.append(f, c.el), d.append(m, l.el), t.textContent = `${r}°`, n.textContent = `${i}%`;
-			let h = P(p, "div", "mi-panel");
+			}), u = P(m, "div", "mi-field"), d = P(m, "div", "mi-field"), f = P(m, "div", "mi-label", "<span>Hue</span>"), p = P(m, "div", "mi-label", "<span>Saturation</span>");
+			f.append(t), p.append(n), u.append(f, c.el), d.append(p, l.el), t.textContent = `${r}°`, n.textContent = `${i}%`;
+			let h = P(m, "div", "mi-panel");
 			h.append(u, d), v("color", "palette", "Colour", h), y.push((e) => {
-				let a = J(e, (e) => e.kind === "color");
-				!a || c.dragging || l.dragging || ([r, i] = a.value, c.set(r), l.set(i), t.textContent = `${r}°`, n.textContent = `${i}%`, l.el.style.setProperty("--mi-gradient", o()));
+				let o = J(e, (e) => e.kind === "color");
+				!o || c.dragging || l.dragging || ([r, i] = o.value, c.set(r), l.set(i), t.textContent = `${r}°`, n.textContent = `${i}%`, l.el.style.setProperty("--mi-gradient", a()));
 			});
 		}
 		let b = [];
 		if (c) {
-			let t = P(p, "ul", "mi-list");
+			let t = P(m, "ul", "mi-list");
 			t.setAttribute("role", "radiogroup");
 			for (let n of ["", ...c.options]) {
-				let r = P(p, "li"), i = P(p, "button");
+				let r = P(m, "li"), i = P(m, "button");
 				i.type = "button", i.setAttribute("role", "radio"), i.textContent = n || "None", i.dataset.value = n, i.onclick = () => q(e, c, n), r.append(i), t.append(r), b.push(i);
 			}
-			let n = P(p, "div", "mi-panel");
+			let n = P(m, "div", "mi-panel");
 			n.append(t), v("effect", "effects", "Effect", n), y.push((e) => {
 				let t = J(e, (e) => e.key === "effect");
 				for (let e of b) e.setAttribute("aria-checked", String(e.dataset.value === (t?.value || "")));
 			});
 		}
-		return l.append(d, ...Object.values(h)), t.append(l), (e, t) => {
-			let r = e.state === "on", a = t?.attributes || {}, o = Array.isArray(a.rgb_color) ? a.rgb_color : a.color_temp_kelvin ? n(a.color_temp_kelvin) : [
+		return l.append(d, ...Object.values(p)), t.append(l), (e, t) => {
+			let n = e.state === "on", a = t?.attributes || {}, o = Array.isArray(a.rgb_color) ? a.rgb_color : a.color_temp_kelvin ? r(a.color_temp_kelvin) : [
 				255,
 				193,
 				7
 			];
-			if (m.style.setProperty("--mi-accent", A(o)), m.style.setProperty("--mi-accent-ink", r ? j(o) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(r)), J(e, (e) => e.kind === "toggle"), i) {
+			if (h.style.setProperty("--mi-accent", A(o)), h.style.setProperty("--mi-accent-ink", n ? j(o) : "var(--mi-fg)"), f.setAttribute("aria-pressed", String(n)), J(e, (e) => e.kind === "toggle"), i) {
 				let t = J(e, (e) => e.key === "brightness");
-				u.set(r ? t?.value ?? 0 : 0), u.el.querySelector(".mi-big").textContent = r ? i.format(t?.value ?? 0) : "Off", u.caption(r ? "On" : "");
-			} else u.setAttribute("aria-checked", String(r)), u.querySelector("span").textContent = r ? "On" : "Off";
+				u.set(n ? t?.value ?? 0 : 0), u.el.querySelector(".mi-big").textContent = n ? i.format(t?.value ?? 0) : "Off", u.caption(n ? "On" : "");
+			} else u.setAttribute("aria-checked", String(n)), u.querySelector("span").textContent = n ? "On" : "Off";
 			for (let t of y) t(e);
 		};
 	}
-	function de(e, n) {
-		let r = J(e, (e) => e.key === "position"), a = J(e, (e) => e.kind === "buttons"), o = !!J(e, (e) => e.kind === "cover-toggle"), l = P(p, "div", "mi-center"), u = P(p, "div", "mi-statehead", "<strong></strong><span></span>");
-		l.append(u), C.hidden = !0;
-		let d, f, h = null, g, _ = null, v = (e) => f?.style.setProperty("--mi-pos", String(e));
+	function fe(e, t) {
+		let r = J(e, (e) => e.key === "position"), i = J(e, (e) => e.kind === "buttons"), o = !!J(e, (e) => e.kind === "cover-toggle"), s = P(m, "div", "mi-center"), u = P(m, "div", "mi-statehead", "<strong></strong><span></span>");
+		s.append(u), w.hidden = !0;
+		let d, f, p = null, g, _ = null, v = (e) => f?.style.setProperty("--mi-pos", String(e));
 		if (o) {
-			f = P(p, "button", "mi-cover-switch", "<span class=\"mi-cover-knob\"></span>"), f.type = "button", f.setAttribute("role", "switch"), f.setAttribute("aria-label", e.name);
-			let n = () => f.getAttribute("aria-checked") === "true", r = async (n) => {
-				let r = t().states?.[i], o = ["open", "closed"].includes(r?.state);
-				h = n, clearTimeout(g), o && r.state === "open" === n ? h = null : g = setTimeout(() => {
-					h = null, Z();
-				}, 6e4), Z(), h !== null && (await q(e, a, n ? "open_cover" : "close_cover") || (h = null, Z()));
+			f = P(m, "button", "mi-cover-switch", "<span class=\"mi-cover-knob\"></span>"), f.type = "button", f.setAttribute("role", "switch"), f.setAttribute("aria-label", e.name);
+			let t = () => f.getAttribute("aria-checked") === "true", r = async (t) => {
+				let r = n().states?.[a], o = ["open", "closed"].includes(r?.state);
+				p = t, clearTimeout(g), o && r.state === "open" === t ? p = null : g = setTimeout(() => {
+					p = null, Z();
+				}, 6e4), Z(), p !== null && (await q(e, i, t ? "open_cover" : "close_cover") || (p = null, Z()));
 			};
 			f.addEventListener("pointerdown", (e) => {
 				if (!(e.button !== 0 || f.disabled)) {
 					_ = {
 						id: e.pointerId,
 						y: e.clientY,
-						from: +!!n(),
-						pos: +!!n(),
+						from: +!!t(),
+						pos: +!!t(),
 						dragging: !1
 					};
 					try {
@@ -1295,16 +1283,16 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 			});
 			let o = (e) => {
 				if (!_ || e.pointerId !== _.id) return;
-				let { dragging: t, pos: i, from: a } = _;
-				_ = null, f.classList.remove("mi-dragging"), e.type === "pointercancel" ? v(a) : r(t ? i >= .5 : !n());
+				let { dragging: n, pos: i, from: a } = _;
+				_ = null, f.classList.remove("mi-dragging"), e.type === "pointercancel" ? v(a) : r(n ? i >= .5 : !t());
 			};
 			f.addEventListener("pointerup", o), f.addEventListener("pointercancel", o), f.onclick = (e) => {
-				e.detail === 0 && r(!n());
+				e.detail === 0 && r(!t());
 			}, f.onkeydown = (e) => {
 				(e.key === "ArrowUp" || e.key === "ArrowDown") && (e.preventDefault(), r(e.key === "ArrowUp"));
-			}, l.append(f);
+			}, s.append(f);
 		}
-		r && (d = F(p, {
+		r && (d = F(m, {
 			orient: "v",
 			label: "Position",
 			min: 0,
@@ -1313,8 +1301,8 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 			value: r.value,
 			format: (e) => `${Math.round(e)}%`,
 			onCommit: (t) => q(e, r, t)
-		}), l.append(d.el));
-		let y = P(p, "div", "mi-row"), b = {
+		}), s.append(d.el));
+		let y = P(m, "div", "mi-row"), b = {
 			open_cover: "up",
 			stop_cover: "stop",
 			close_cover: "down"
@@ -1325,45 +1313,45 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 		};
 		if (!o) {
 			y.className = "mi-cover-buttons";
-			for (let t of a?.buttons || []) {
-				let n = P(p, "button", "mi-iconbtn", k(b[t.service]));
-				n.type = "button", n.title = x[t.service], n.setAttribute("aria-label", x[t.service]), n.onclick = () => q(e, a, t.service), y.append(n);
+			for (let t of i?.buttons || []) {
+				let n = P(m, "button", "mi-iconbtn", k(b[t.service]));
+				n.type = "button", n.title = x[t.service], n.setAttribute("aria-label", x[t.service]), n.onclick = () => q(e, i, t.service), y.append(n);
 			}
-			l.append(y);
+			s.append(y);
 		}
-		n.append(l);
+		t.append(s);
 		let S = setInterval(() => {
-			if (!m.isConnected) return clearInterval(S);
-			let e = t().states?.[i];
-			u.lastChild.textContent = s(e?.last_changed);
+			if (!h.isConnected) return clearInterval(S);
+			let e = n().states?.[a];
+			u.lastChild.textContent = c(e?.last_changed);
 		}, 5e3);
 		return (e, t) => {
-			if (m.style.setProperty("--mi-accent", "#9c27b0"), u.firstChild.textContent = e.unavailable ? "Unavailable" : M(e.state), u.lastChild.textContent = e.since, f) {
+			if (h.style.setProperty("--mi-accent", "#9c27b0"), u.firstChild.textContent = e.unavailable ? "Unavailable" : M(e.state), u.lastChild.textContent = e.since, f) {
 				let t = ["open", "opening"].includes(e.state), n = ["opening", "closing"].includes(e.state);
-				h !== null && (!n && t === h ? (h = null, clearTimeout(g)) : (n || (u.firstChild.textContent = h ? "Opening" : "Closing"), t = h, n = !0)), f.setAttribute("aria-checked", String(t)), _?.dragging || v(+!!t), f.dataset.moving = String(n), f.firstChild.innerHTML = k(c(e.deviceClass, t));
+				p !== null && (!n && t === p ? (p = null, clearTimeout(g)) : (n || (u.firstChild.textContent = p ? "Opening" : "Closing"), t = p, n = !0)), f.setAttribute("aria-checked", String(t)), _?.dragging || v(+!!t), f.dataset.moving = String(n), f.firstChild.innerHTML = k(l(e.deviceClass, t));
 			}
 			let n = J(e, (e) => e.key === "position");
 			d && n && (d.set(n.value), d.caption(M(e.state)));
 		};
 	}
-	function fe(e, t) {
-		let n = J(e, (e) => e.kind === "buttons"), r = P(p, "div", "mi-center"), i = P(p, "button", "mi-lock");
+	function pe(e, t) {
+		let n = J(e, (e) => e.kind === "buttons"), r = P(m, "div", "mi-center"), i = P(m, "button", "mi-lock");
 		i.type = "button";
-		let a = P(p, "div", "mi-state");
+		let a = P(m, "div", "mi-state");
 		return i.onclick = () => q(e, n, i.dataset.locked === "true" ? "unlock" : "lock"), r.append(i, a), t.append(r), (e) => {
 			let t = e.state === "locked", n = [
 				"locking",
 				"unlocking",
 				"opening"
 			].includes(e.state), r = e.state === "jammed" || e.state === "unlocked" ? "#e5533d" : n ? "#ff9800" : "#43a047";
-			m.style.setProperty("--mi-accent", r), i.dataset.locked = String(t), i.disabled = n, i.innerHTML = k(t ? "lock" : "unlock"), i.setAttribute("aria-label", t ? "Locked. Press to unlock" : "Unlocked. Press to lock"), a.textContent = M(e.state);
+			h.style.setProperty("--mi-accent", r), i.dataset.locked = String(t), i.disabled = n, i.innerHTML = k(t ? "lock" : "unlock"), i.setAttribute("aria-label", t ? "Locked. Press to unlock" : "Unlocked. Press to lock"), a.textContent = M(e.state);
 		};
 	}
-	function pe(e, n) {
-		let i = J(e, (e) => e.kind === "stepper"), a = e.controls.filter((e) => e.kind === "select"), o = P(p, "div", "mi-center mi-climate"), s = () => t().config?.unit_system?.temperature || "°C", c = P(p, "div", "mi-current");
+	function me(e, t) {
+		let r = J(e, (e) => e.kind === "stepper"), a = e.controls.filter((e) => e.kind === "select"), o = P(m, "div", "mi-center mi-climate"), s = () => n().config?.unit_system?.temperature || "°C", c = P(m, "div", "mi-current");
 		o.append(c);
 		let l, u;
-		if (i) {
+		if (r) {
 			let t = (e) => {
 				let t = e * Math.PI / 180;
 				return [110 + 92 * Math.cos(t), 110 + 92 * Math.sin(t)];
@@ -1372,25 +1360,25 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 				let [r, i] = t(e), [a, o] = t(n);
 				return `M${r.toFixed(2)} ${i.toFixed(2)}A92 92 0 ${+(n - e > 180)} 1 ${a.toFixed(2)} ${o.toFixed(2)}`;
 			};
-			l = P(p, "div", "mi-dial", `<svg viewBox="0 0 220 220" aria-hidden="true"><path class="mi-arc-track" d="${n(135, 405)}"/><path class="mi-arc-fill"/><circle class="mi-cur" r="3.5"/><circle class="mi-handle" r="11"/></svg><div class="mi-dial-text"><span class="mi-dial-state"></span><span class="mi-dial-value"><span class="mi-int"></span><span class="mi-sup"><span class="mi-unit"></span><span class="mi-dec"></span></span></span></div>`), l.setAttribute("role", "slider"), l.tabIndex = 0, l.setAttribute("aria-label", "Target temperature"), l.setAttribute("aria-valuemin", i.min), l.setAttribute("aria-valuemax", i.max);
-			let r = l.querySelector(".mi-arc-fill"), a = l.querySelector(".mi-handle"), c = l.querySelector(".mi-cur"), d = i.max - i.min, f = (e) => 135 + Math.min(1, Math.max(0, (e - i.min) / d)) * 270, m = i.value, h = !1, g = e.state, _, v = (e) => {
-				let t = Math.round((e - i.min) / i.step) * i.step;
-				return Math.min(i.max, Math.max(i.min, Math.round((i.min + t) * 100) / 100));
+			l = P(m, "div", "mi-dial", `<svg viewBox="0 0 220 220" aria-hidden="true"><path class="mi-arc-track" d="${n(135, 405)}"/><path class="mi-arc-fill"/><circle class="mi-cur" r="3.5"/><circle class="mi-handle" r="11"/></svg><div class="mi-dial-text"><span class="mi-dial-state"></span><span class="mi-dial-value"><span class="mi-int"></span><span class="mi-sup"><span class="mi-unit"></span><span class="mi-dec"></span></span></span></div>`), l.setAttribute("role", "slider"), l.tabIndex = 0, l.setAttribute("aria-label", "Target temperature"), l.setAttribute("aria-valuemin", r.min), l.setAttribute("aria-valuemax", r.max);
+			let i = l.querySelector(".mi-arc-fill"), a = l.querySelector(".mi-handle"), c = l.querySelector(".mi-cur"), d = r.max - r.min, f = (e) => 135 + Math.min(1, Math.max(0, (e - r.min) / d)) * 270, p = r.value, h = !1, g = e.state, _, v = (e) => {
+				let t = Math.round((e - r.min) / r.step) * r.step;
+				return Math.min(r.max, Math.max(r.min, Math.round((r.min + t) * 100) / 100));
 			}, y = () => {
-				let e = f(m);
-				r.setAttribute("d", g === "off" ? "" : g === "cool" ? n(e, 405) : n(135, e));
+				let e = f(p);
+				i.setAttribute("d", g === "off" ? "" : g === "cool" ? n(e, 405) : n(135, e));
 				let [o, u] = t(e);
 				if (a.setAttribute("cx", o), a.setAttribute("cy", u), Number.isFinite(_)) {
 					let [e, n] = t(f(_));
 					c.setAttribute("cx", e), c.setAttribute("cy", n), c.removeAttribute("hidden");
 				} else c.setAttribute("hidden", "");
-				let d = i.step < 1;
-				l.querySelector(".mi-int").textContent = Math.trunc(m), l.querySelector(".mi-unit").textContent = s(), l.querySelector(".mi-dec").textContent = d ? (m % 1).toFixed(1).slice(1) : "", l.setAttribute("aria-valuenow", m), l.setAttribute("aria-valuetext", `${m} ${s()}`);
+				let d = r.step < 1;
+				l.querySelector(".mi-int").textContent = Math.trunc(p), l.querySelector(".mi-unit").textContent = s(), l.querySelector(".mi-dec").textContent = d ? (p % 1).toFixed(1).slice(1) : "", l.setAttribute("aria-valuenow", p), l.setAttribute("aria-valuetext", `${p} ${s()}`);
 			}, b = (e) => {
-				let t = l.querySelector("svg").getBoundingClientRect(), n = e.clientX - (t.left + t.width / 2), r = e.clientY - (t.top + t.height / 2), a = (Math.atan2(r, n) * 180 / Math.PI - 135 + 720) % 360;
-				return a > 270 && (a = a > 315 ? 0 : 270), v(i.min + a / 270 * d);
+				let t = l.querySelector("svg").getBoundingClientRect(), n = e.clientX - (t.left + t.width / 2), i = e.clientY - (t.top + t.height / 2), a = (Math.atan2(i, n) * 180 / Math.PI - 135 + 720) % 360;
+				return a > 270 && (a = a > 315 ? 0 : 270), v(r.min + a / 270 * d);
 			}, x = (e) => {
-				m = e, y();
+				p = e, y();
 			};
 			l.addEventListener("pointerdown", (e) => {
 				e.button === 0 && (h = !0, l.classList.add("mi-dragging"), l.setPointerCapture(e.pointerId), x(b(e)));
@@ -1398,9 +1386,9 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 				h && x(b(e));
 			});
 			let S, C = () => {
-				clearTimeout(S), S = setTimeout(() => q(e, i, m), 500);
+				clearTimeout(S), S = setTimeout(() => q(e, r, p), 500);
 			}, w = () => {
-				h && (h = !1, l.classList.remove("mi-dragging"), q(e, i, m));
+				h && (h = !1, l.classList.remove("mi-dragging"), q(e, r, p));
 			};
 			l.addEventListener("pointerup", w), l.addEventListener("pointercancel", w), l.addEventListener("keydown", (e) => {
 				let t = {
@@ -1409,9 +1397,9 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 					ArrowLeft: -1,
 					ArrowDown: -1
 				}[e.key];
-				t !== void 0 && (e.preventDefault(), x(v(m + t * i.step)), C());
+				t !== void 0 && (e.preventDefault(), x(v(p + t * r.step)), C());
 			});
-			let T = P(p, "div", "mi-dialbtns");
+			let T = P(m, "div", "mi-dialbtns");
 			for (let [e, t, n] of [[
 				-1,
 				"minus",
@@ -1421,14 +1409,14 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 				"plus",
 				"Raise target temperature"
 			]]) {
-				let r = P(p, "button", "mi-outline", k(t));
-				r.type = "button", r.setAttribute("aria-label", n), r.onclick = () => {
-					x(v(m + e * i.step)), C();
-				}, T.append(r);
+				let i = P(m, "button", "mi-outline", k(t));
+				i.type = "button", i.setAttribute("aria-label", n), i.onclick = () => {
+					x(v(p + e * r.step)), C();
+				}, T.append(i);
 			}
 			o.append(l, T), u = (e, t) => {
 				let n = J(e, (e) => e.kind === "stepper");
-				g = e.state, _ = t?.attributes?.current_temperature, n && !h && (m = n.value);
+				g = e.state, _ = t?.attributes?.current_temperature, n && !h && (p = n.value);
 				let r = t?.attributes?.hvac_action;
 				l.querySelector(".mi-dial-state").textContent = e.state === "off" ? "Off" : M(r || e.state), y();
 			};
@@ -1439,51 +1427,51 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 			swing_mode: "swing",
 			swing_horizontal_mode: "swingh",
 			preset_mode: "preset"
-		}, f = P(p, "div", "mi-tiles"), h = P(p, "div", "mi-panel");
-		h.hidden = !0;
-		let g = P(p, "ul", "mi-list");
-		g.setAttribute("role", "radiogroup"), h.append(g);
+		}, f = P(m, "div", "mi-tiles"), p = P(m, "div", "mi-panel");
+		p.hidden = !0;
+		let g = P(m, "ul", "mi-list");
+		g.setAttribute("role", "radiogroup"), p.append(g);
 		let _, v = /* @__PURE__ */ new Map(), y = (t) => {
-			if (_ === t.key) _ = void 0, h.hidden = !0;
+			if (_ === t.key) _ = void 0, p.hidden = !0;
 			else {
 				_ = t.key, g.replaceChildren();
 				for (let n of t.options) {
-					let r = P(p, "li"), i = P(p, "button");
+					let r = P(m, "li"), i = P(m, "button");
 					i.type = "button", i.setAttribute("role", "radio"), i.dataset.value = n, i.textContent = M(n), i.onclick = () => {
-						q(e, t, n), _ = void 0, h.hidden = !0;
+						q(e, t, n), _ = void 0, p.hidden = !0;
 					}, r.append(i), g.append(r);
 				}
-				h.hidden = !1, x(b);
+				p.hidden = !1, x(b);
 			}
 		}, b, x = (e) => {
 			let t = e && J(e, (e) => e.key === _);
 			for (let e of g.querySelectorAll("button")) e.setAttribute("aria-checked", String(e.dataset.value === t?.value));
 		};
 		for (let e of a) {
-			let t = P(p, "button", "mi-tile", "<span class=\"mi-tile-icon\"></span><span class=\"mi-tile-text\"><span class=\"mi-tile-label\"></span><span class=\"mi-tile-value\"></span></span>");
+			let t = P(m, "button", "mi-tile", "<span class=\"mi-tile-icon\"></span><span class=\"mi-tile-text\"><span class=\"mi-tile-label\"></span><span class=\"mi-tile-value\"></span></span>");
 			t.type = "button", t.querySelector(".mi-tile-label").textContent = e.label, t.onclick = () => y(e), f.append(t), v.set(e.key, t);
 		}
-		return a.length && o.append(f, h), n.append(o), (e, t) => {
+		return a.length && o.append(f, p), t.append(o), (e, t) => {
 			b = e;
 			let n = t?.attributes || {};
-			m.style.setProperty("--mi-accent", ie[e.state] || "var(--mi-muted)"), c.hidden = !Number.isFinite(n.current_temperature), c.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${s()}</strong>`, u?.(e, t);
+			h.style.setProperty("--mi-accent", ae[e.state] || "var(--mi-muted)"), c.hidden = !Number.isFinite(n.current_temperature), c.innerHTML = `<span>Current temperature</span><strong>${n.current_temperature} ${s()}</strong>`, u?.(e, t);
 			for (let t of e.controls.filter((e) => e.kind === "select")) {
 				let e = v.get(t.key);
 				if (!e) continue;
 				e.querySelector(".mi-tile-value").textContent = M(t.value) || "—";
-				let n = t.key === "hvac_mode" ? r[t.value] ? t.value : "power" : d[t.key];
+				let n = t.key === "hvac_mode" ? i[t.value] ? t.value : "power" : d[t.key];
 				e.querySelector(".mi-tile-icon").innerHTML = k(n);
 			}
 			x(e);
 		};
 	}
 	function Y(e, t) {
-		let n = J(e, (e) => e.kind === "toggle"), r = J(e, (e) => e.key === "percentage"), i = P(p, "div", "mi-center"), a = P(p, "button", "mi-tall", `${k("power")}<span></span>`);
+		let n = J(e, (e) => e.kind === "toggle"), r = J(e, (e) => e.key === "percentage"), i = P(m, "div", "mi-center"), a = P(m, "button", "mi-tall", `${k("power")}<span></span>`);
 		a.type = "button", a.setAttribute("role", "switch"), a.onclick = () => q(e, n, a.getAttribute("aria-checked") !== "true"), i.append(a);
 		let o;
 		if (r) {
-			let t = P(p, "output"), n = P(p, "div", "mi-field"), a = P(p, "div", "mi-label", "<span>Speed</span>");
-			a.append(t), o = F(p, {
+			let t = P(m, "output"), n = P(m, "div", "mi-field"), a = P(m, "div", "mi-label", "<span>Speed</span>");
+			a.append(t), o = F(m, {
 				orient: "h",
 				label: "Speed",
 				min: 0,
@@ -1497,81 +1485,81 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 		}
 		return t.append(i), (e) => {
 			let t = e.state === "on";
-			m.style.setProperty("--mi-accent", "var(--mi-primary)"), a.setAttribute("aria-checked", String(t)), a.querySelector("span").textContent = t ? "On" : "Off";
+			h.style.setProperty("--mi-accent", "var(--mi-primary)"), a.setAttribute("aria-checked", String(t)), a.querySelector("span").textContent = t ? "On" : "Off";
 			let n = J(e, (e) => e.key === "percentage");
 			o && n && o.set(n.value);
 		};
 	}
-	function me(e, n) {
-		let r = J(e, (e) => e.kind === "alarm"), i = P(p, "div", "mi-center"), a = P(p, "div", "mi-statehead", "<strong></strong><span></span>"), s = P(p, "div", "mi-modes");
-		s.setAttribute("role", "radiogroup"), s.setAttribute("aria-label", "Mode"), i.append(a, s), n.append(i), C.hidden = !0;
-		let c = null, l, u = async (n, i) => {
-			let [a, o, s] = y(e, r, {
-				service: n,
+	function he(e, t) {
+		let r = J(e, (e) => e.kind === "alarm"), i = P(m, "div", "mi-center"), a = P(m, "div", "mi-statehead", "<strong></strong><span></span>"), o = P(m, "div", "mi-modes");
+		o.setAttribute("role", "radiogroup"), o.setAttribute("aria-label", "Mode"), i.append(a, o), t.append(i), w.hidden = !0;
+		let c = null, l, u = async (t, i) => {
+			let [a, o, s] = b(e, r, {
+				service: t,
 				code: i
 			});
-			await t().callService(a, o, s);
+			await n().callService(a, o, s);
 		}, d = async (e) => {
 			if (e.state !== r.mode || c) {
-				if (f(r, e.service)) v(e);
+				if (p(r, e.service)) v(e);
 				else {
 					c = e.state, _();
 					try {
 						K(""), await u(e.service);
 					} catch (e) {
-						c = null, _(), K(e?.message || "The command failed."), o(e);
+						c = null, _(), K(e?.message || "The command failed."), s(e);
 					}
 					clearTimeout(l), l = setTimeout(() => {
 						c = null, _();
 					}, 4e3);
 				}
 			}
-		}, h = /* @__PURE__ */ new Map();
+		}, f = /* @__PURE__ */ new Map();
 		for (let e of r.modes) {
-			let t = P(p, "button", "mi-mode", `${k(e.icon)}<span>${e.label}</span>`);
-			t.type = "button", t.setAttribute("role", "radio"), t.onclick = () => d(e), h.set(e.state, t), s.append(t);
+			let t = P(m, "button", "mi-mode", `${k(e.icon)}<span>${e.label}</span>`);
+			t.type = "button", t.setAttribute("role", "radio"), t.onclick = () => d(e), f.set(e.state, t), o.append(t);
 		}
 		let g = e.state, _ = () => {
 			let e = c || r.mode;
-			for (let [t, n] of h) n.setAttribute("aria-checked", String(t === e)), n.dataset.busy = String(t === e && (t === c || [
+			for (let [t, n] of f) n.setAttribute("aria-checked", String(t === e)), n.dataset.busy = String(t === e && (t === c || [
 				"arming",
 				"pending",
 				"disarming"
 			].includes(g)));
-			m.style.setProperty("--mi-accent", re(c && c !== g ? "arming" : g));
+			h.style.setProperty("--mi-accent", ie(c && c !== g ? "arming" : g));
 		};
 		function v(e) {
-			let t = P(p, "dialog", "mi mi-code");
+			let t = P(m, "dialog", "mi mi-code");
 			t.setAttribute("aria-labelledby", "mi-code-title");
-			let n = P(p, "div", "mi-frame"), i = P(p, "div", "mi-head"), a = P(p, "button", "mi-iconbtn", k("close"));
+			let n = P(m, "div", "mi-frame"), i = P(m, "div", "mi-head"), a = P(m, "button", "mi-iconbtn", k("close"));
 			a.type = "button", a.setAttribute("aria-label", "Close");
-			let s = P(p, "div", "mi-titles", `<h2 id="mi-code-title">${e.service === "alarm_disarm" ? "Disarm" : "Arm"}</h2>`);
-			i.append(a, s);
-			let d = P(p, "div", "mi-body"), f = P(p, "label", "mi-code-field"), h = P(p, "input");
-			h.type = "password", h.placeholder = "Code", h.autocomplete = "off", h.setAttribute("aria-label", "Code"), r.codeFormat === "number" && (h.inputMode = "numeric");
-			let g = P(p, "button", "mi-iconbtn", k("eye"));
+			let o = P(m, "div", "mi-titles", `<h2 id="mi-code-title">${e.service === "alarm_disarm" ? "Disarm" : "Arm"}</h2>`);
+			i.append(a, o);
+			let d = P(m, "div", "mi-body"), f = P(m, "label", "mi-code-field"), p = P(m, "input");
+			p.type = "password", p.placeholder = "Code", p.autocomplete = "off", p.setAttribute("aria-label", "Code"), r.codeFormat === "number" && (p.inputMode = "numeric");
+			let g = P(m, "button", "mi-iconbtn", k("eye"));
 			g.type = "button", g.setAttribute("aria-label", "Show code"), g.onclick = () => {
-				let e = h.type === "text";
-				h.type = e ? "password" : "text", g.innerHTML = k(e ? "eye" : "eyeOff"), g.setAttribute("aria-label", e ? "Show code" : "Hide code");
-			}, f.append(h, g);
-			let v = P(p, "p", "mi-error");
+				let e = p.type === "text";
+				p.type = e ? "password" : "text", g.innerHTML = k(e ? "eye" : "eyeOff"), g.setAttribute("aria-label", e ? "Show code" : "Hide code");
+			}, f.append(p, g);
+			let v = P(m, "p", "mi-error");
 			v.hidden = !0, d.append(f);
 			let y, b = async () => {
-				if (h.value && !y?.disabled) {
+				if (p.value && !y?.disabled) {
 					y && (y.disabled = !0), v.hidden = !0;
 					try {
-						await u(e.service, h.value), c = e.state, _(), clearTimeout(l), l = setTimeout(() => {
+						await u(e.service, p.value), c = e.state, _(), clearTimeout(l), l = setTimeout(() => {
 							c = null, _();
 						}, 4e3), t.close();
 					} catch (e) {
-						h.value = "", v.textContent = e?.message || "The code was not accepted.", v.hidden = !1, o(e), h.focus();
+						p.value = "", v.textContent = e?.message || "The code was not accepted.", v.hidden = !1, s(e), p.focus();
 					} finally {
 						y && (y.disabled = !1);
 					}
 				}
 			};
 			if (r.codeFormat === "number") {
-				let t = P(p, "div", "mi-keypad");
+				let t = P(m, "div", "mi-keypad");
 				for (let e of [
 					"1",
 					"2",
@@ -1583,74 +1571,74 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 					"8",
 					"9"
 				]) {
-					let n = P(p, "button", "mi-key", e);
+					let n = P(m, "button", "mi-key", e);
 					n.type = "button", n.onclick = () => {
-						h.value += e;
+						p.value += e;
 					}, t.append(n);
 				}
-				let n = P(p, "button", "mi-key mi-key-clear", k("close"));
+				let n = P(m, "button", "mi-key mi-key-clear", k("close"));
 				n.type = "button", n.setAttribute("aria-label", "Clear"), n.onclick = () => {
-					h.value = "";
+					p.value = "";
 				};
-				let r = P(p, "button", "mi-key", "0");
+				let r = P(m, "button", "mi-key", "0");
 				r.type = "button", r.onclick = () => {
-					h.value += "0";
-				}, y = P(p, "button", "mi-key mi-key-ok", k("check")), y.type = "button", y.setAttribute("aria-label", e.label), y.onclick = b, t.append(n, r, y), d.append(t);
-			} else y = P(p, "button", "mi-pill", e.service === "alarm_disarm" ? "Disarm" : `Arm ${e.label}`), y.type = "button", y.onclick = b, d.append(y);
-			d.append(v), h.addEventListener("keydown", (e) => {
+					p.value += "0";
+				}, y = P(m, "button", "mi-key mi-key-ok", k("check")), y.type = "button", y.setAttribute("aria-label", e.label), y.onclick = b, t.append(n, r, y), d.append(t);
+			} else y = P(m, "button", "mi-pill", e.service === "alarm_disarm" ? "Disarm" : `Arm ${e.label}`), y.type = "button", y.onclick = b, d.append(y);
+			d.append(v), p.addEventListener("keydown", (e) => {
 				e.key === "Enter" && (e.preventDefault(), b());
 			}), a.onclick = () => t.close(), t.addEventListener("click", (e) => {
 				e.stopPropagation(), e.target === t && t.close();
 			}), t.addEventListener("close", (e) => {
 				e.stopPropagation(), t.remove();
-			}), n.append(i, d), t.append(n), m.append(t), t.showModal(), h.focus();
+			}), n.append(i, d), t.append(n), h.append(t), t.showModal(), p.focus();
 		}
 		return (e) => {
 			r = J(e, (e) => e.kind === "alarm") || r, g = e.state, c && r.mode === c && (c = null, clearTimeout(l)), a.firstChild.textContent = M(e.state), a.lastChild.textContent = e.since || "", _();
 		};
 	}
-	function he(e, n) {
-		m.classList.add("mi-wide");
-		let r = J(e, (e) => e.kind === "camera"), i = P(p, "div", "mi-camera"), a = P(p, "img");
+	function ge(e, t) {
+		h.classList.add("mi-wide");
+		let r = J(e, (e) => e.kind === "camera"), i = P(m, "div", "mi-camera"), a = P(m, "img");
 		a.alt = e.name, a.decoding = "async";
-		let o = P(p, "video");
+		let o = P(m, "video");
 		o.muted = !0, o.autoplay = !0, o.playsInline = !0, o.setAttribute("playsinline", ""), o.hidden = !0;
-		let s = P(p, "div", "mi-camera-note", `${k("cctv")}<span>Connecting to the camera…</span>`), c = P(p, "div", "mi-camera-bar"), l = P(p, "span", "mi-live", "Live"), u = P(p, "button", "mi-iconbtn", k("volumeOff"));
+		let s = P(m, "div", "mi-camera-note", `${k("cctv")}<span>Connecting to the camera…</span>`), c = P(m, "div", "mi-camera-bar"), l = P(m, "span", "mi-live", "Live"), u = P(m, "button", "mi-iconbtn", k("volumeOff"));
 		u.type = "button", u.hidden = !0, u.setAttribute("aria-label", "Turn sound on"), u.onclick = () => {
 			o.muted = !o.muted, u.innerHTML = k(o.muted ? "volumeOff" : "volumeHigh"), u.setAttribute("aria-label", o.muted ? "Turn sound on" : "Turn sound off");
 		};
-		let d = P(p, "button", "mi-iconbtn", k("refresh"));
+		let d = P(m, "button", "mi-iconbtn", k("refresh"));
 		d.type = "button", d.setAttribute("aria-label", "Reconnect"), d.onclick = () => T(!0);
-		let f = P(p, "button", "mi-iconbtn", k("fullscreen"));
-		f.type = "button", f.setAttribute("aria-label", "Full screen"), f.hidden = !i.requestFullscreen, f.onclick = () => p.fullscreenElement === i ? p.exitFullscreen?.() : i.requestFullscreen?.().catch(() => {});
-		let h = () => {
-			f.innerHTML = k(p.fullscreenElement === i ? "fullscreenExit" : "fullscreen");
+		let f = P(m, "button", "mi-iconbtn", k("fullscreen"));
+		f.type = "button", f.setAttribute("aria-label", "Full screen"), f.hidden = !i.requestFullscreen, f.onclick = () => m.fullscreenElement === i ? m.exitFullscreen?.() : i.requestFullscreen?.().catch(() => {});
+		let p = () => {
+			f.innerHTML = k(m.fullscreenElement === i ? "fullscreenExit" : "fullscreen");
 		};
-		p.addEventListener("fullscreenchange", h), c.append(l, u, d, f), i.append(a, o, s, c), n.append(i);
-		let g = r.token, _ = !1, v = 0, y, x = (e) => {
+		m.addEventListener("fullscreenchange", p), c.append(l, u, d, f), i.append(a, o, s, c), t.append(i);
+		let g = r.token, _ = !1, v = 0, y, b = (e) => {
 			s.hidden = !e, e && (s.querySelector("span").textContent = e);
 		}, S = () => {
 			clearTimeout(y), a.removeAttribute("src"), o.pause(), o.removeAttribute("src"), o.load?.();
 		}, C = () => {
 			o.hidden = !0, u.hidden = !0, a.hidden = !1, l.dataset.still = "false", a.onload = () => {
-				v = 0, x("");
+				v = 0, b("");
 			}, a.onerror = () => {
-				_ || (v++, x(v > 3 ? "The camera is not answering. Try Reconnect." : "Reconnecting to the camera…"), v <= 3 && (y = setTimeout(() => {
-					a.src = b(e.id, g).mjpeg;
+				_ || (v++, b(v > 3 ? "The camera is not answering. Try Reconnect." : "Reconnecting to the camera…"), v <= 3 && (y = setTimeout(() => {
+					a.src = x(e.id, g).mjpeg;
 				}, 1500 * v)));
-			}, a.src = b(e.id, g).mjpeg;
+			}, a.src = x(e.id, g).mjpeg;
 		}, w = r.stream && !!o.canPlayType?.("application/vnd.apple.mpegurl");
-		async function T(n = !1) {
-			if (S(), _ = !1, n && (v = 0), x("Connecting to the camera…"), w) try {
-				let { url: n } = await t().callWS({
+		async function T(t = !1) {
+			if (S(), _ = !1, t && (v = 0), b("Connecting to the camera…"), w) try {
+				let { url: t } = await n().callWS({
 					type: "camera/stream",
 					entity_id: e.id,
 					format: "hls"
 				});
 				if (_) return;
-				a.hidden = !0, o.poster = b(e.id, g).still, o.hidden = !1, u.hidden = !1, l.dataset.still = "false", o.onplaying = () => {
-					clearTimeout(y), x("");
-				}, o.onerror = () => !_ && C(), o.src = n, o.play?.().catch(() => {}), y = setTimeout(() => {
+				a.hidden = !0, o.poster = x(e.id, g).still, o.hidden = !1, u.hidden = !1, l.dataset.still = "false", o.onplaying = () => {
+					clearTimeout(y), b("");
+				}, o.onerror = () => !_ && C(), o.src = t, o.play?.().catch(() => {}), y = setTimeout(() => {
 					!_ && o.readyState < 2 && (o.removeAttribute("src"), C());
 				}, 1e4);
 				return;
@@ -1658,156 +1646,156 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 			C();
 		}
 		return T(), G.push(() => {
-			_ = !0, S(), p.removeEventListener("fullscreenchange", h), p.fullscreenElement === i && p.exitFullscreen?.();
+			_ = !0, S(), m.removeEventListener("fullscreenchange", p), m.fullscreenElement === i && m.exitFullscreen?.();
 		}), (e) => {
 			g = J(e, (e) => e.kind === "camera")?.token || g;
 		};
 	}
 	function X(e, t) {
-		let n = J(e, (e) => e.kind === "buttons"), r = P(p, "div", "mi-center");
+		let n = J(e, (e) => e.kind === "buttons"), r = P(m, "div", "mi-center");
 		for (let t of n.buttons) {
-			let i = P(p, "button", "mi-pill", t.label);
+			let i = P(m, "button", "mi-pill", t.label);
 			i.type = "button", i.onclick = () => q(e, n, t.service), r.append(i);
 		}
 		return t.append(r), () => {};
 	}
-	function ge(e, n) {
-		m.classList.add("mi-vacuum"), C.hidden = !0;
-		let r = P(p, "div", "mi-center"), a = P(p, "div", "mi-statehead mi-vac-head", "<strong></strong><span class=\"mi-vac-since\"></span><span class=\"mi-vac-battery\" hidden></span>"), c = P(p, "div", "mi-vac-status", `<div class="container idle">${te}</div>`), l = P(p, "div", "mi-vac-buttons"), f = /* @__PURE__ */ new Map();
-		for (let t of J(e, (e) => e.kind === "vacuum").buttons) {
-			let e = P(p, "button", "mi-vac-btn", k(t.icon));
-			e.type = "button", e.onclick = () => {
-				let e = J(U, (e) => e.kind === "vacuum"), n = e.buttons.find((e) => e.key === t.key);
-				n && !n.disabled && q(U, e, n.service);
-			}, f.set(t.key, e), l.append(e);
+	function _e(t, r) {
+		h.classList.add("mi-vacuum"), w.hidden = !0;
+		let i = P(m, "div", "mi-center"), o = P(m, "div", "mi-statehead mi-vac-head", "<strong></strong><span class=\"mi-vac-since\"></span><span class=\"mi-vac-battery\" hidden></span>"), l = P(m, "div", "mi-vac-status", `<div class="container idle">${te}</div>`), u = P(m, "div", "mi-vac-buttons"), p = /* @__PURE__ */ new Map();
+		for (let e of J(t, (e) => e.kind === "vacuum").buttons) {
+			let t = P(m, "button", "mi-vac-btn", k(e.icon));
+			t.type = "button", t.onclick = () => {
+				let t = J(U, (e) => e.kind === "vacuum"), n = t.buttons.find((t) => t.key === e.key);
+				n && !n.disabled && q(U, t, n.service);
+			}, p.set(e.key, t), u.append(t);
 		}
-		let h = P(p, "div", "mi-vac-chips"), g = J(e, (e) => e.kind === "vacuum"), _ = P(p, "div", "mi-vac-menu");
-		_.hidden = !0, _.setAttribute("role", "listbox");
-		let v = P(p, "ul", "mi-list");
-		_.append(v);
-		let y = () => {
-			_.hidden = !0, b?.setAttribute("aria-expanded", "false");
+		let g = P(m, "div", "mi-vac-chips"), _ = J(t, (e) => e.kind === "vacuum"), v = P(m, "div", "mi-vac-menu");
+		v.hidden = !0, v.setAttribute("role", "listbox");
+		let y = P(m, "ul", "mi-list");
+		v.append(y);
+		let b = () => {
+			v.hidden = !0, x?.setAttribute("aria-expanded", "false");
 		};
-		m.addEventListener("click", (e) => {
-			!_.hidden && !e.target.closest?.(".mi-vac-fan") && y();
+		h.addEventListener("click", (e) => {
+			!v.hidden && !e.target.closest?.(".mi-vac-fan") && b();
 		});
-		let b;
-		if (g.fanSpeeds.length) {
-			b = P(p, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("fan")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Fan speed</span><span class="mi-vac-chip-value"></span></span>`), b.type = "button", b.setAttribute("aria-haspopup", "listbox"), b.onclick = () => {
-				if (!_.hidden) return y();
-				if (_.hidden = !1, b.setAttribute("aria-expanded", String(!_.hidden)), _.hidden) return;
+		let x;
+		if (_.fanSpeeds.length) {
+			x = P(m, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("fan")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Fan speed</span><span class="mi-vac-chip-value"></span></span>`), x.type = "button", x.setAttribute("aria-haspopup", "listbox"), x.onclick = () => {
+				if (!v.hidden) return b();
+				if (v.hidden = !1, x.setAttribute("aria-expanded", String(!v.hidden)), v.hidden) return;
 				let e = J(U, (e) => e.kind === "vacuum");
-				v.replaceChildren();
+				y.replaceChildren();
 				for (let t of e.fanSpeeds) {
-					let n = P(p, "li"), r = P(p, "button");
+					let n = P(m, "li"), r = P(m, "button");
 					r.type = "button", r.setAttribute("role", "radio"), r.setAttribute("aria-checked", String(t === e.fanSpeed)), r.textContent = M(t), r.onclick = () => {
-						y(), q(U, e, { fan_speed: t });
-					}, n.append(r), v.append(n);
+						b(), q(U, e, { fan_speed: t });
+					}, n.append(r), y.append(n);
 				}
 			};
-			let e = P(p, "div", "mi-vac-fan");
-			e.append(b, _), h.append(e);
+			let e = P(m, "div", "mi-vac-fan");
+			e.append(x, v), g.append(e);
 		}
-		if (d) {
-			let e = P(p, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("map")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Map</span><span class="mi-vac-chip-value">Show map</span></span><span class="mi-vac-chip-icon">${k("next")}</span>`);
-			e.type = "button", e.onclick = () => se(), h.append(e);
+		if (f) {
+			let e = P(m, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("map")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Map</span><span class="mi-vac-chip-value">Show map</span></span><span class="mi-vac-chip-icon">${k("next")}</span>`);
+			e.type = "button", e.onclick = () => ce(), g.append(e);
 		}
-		if (g.cleanArea) {
-			let e = P(p, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("area")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Cleaning</span><span class="mi-vac-chip-value">By area</span></span><span class="mi-vac-chip-icon">${k("next")}</span>`);
-			e.type = "button", e.onclick = () => V(), h.append(e);
+		if (_.cleanArea) {
+			let e = P(m, "button", "mi-vac-chip", `<span class="mi-vac-chip-icon">${k("area")}</span><span class="mi-vac-chip-text"><span class="mi-vac-chip-label">Cleaning</span><span class="mi-vac-chip-value">By area</span></span><span class="mi-vac-chip-icon">${k("next")}</span>`);
+			e.type = "button", e.onclick = () => V(), g.append(e);
 		}
-		let x = P(p, "div", "mi-vac-active");
-		x.hidden = !0, r.append(a, x, c, l), h.childElementCount && r.append(h), n.append(r);
-		let S = P(p, "div", "mi-extras"), w = {}, T = /* @__PURE__ */ new Set(), D = /* @__PURE__ */ new Map(), O = (e) => t().entities?.[e]?.entity_category ?? w[e] ?? null, A = () => t().states?.[i]?.attributes?.friendly_name || "", j = async (e, n) => {
+		let S = P(m, "div", "mi-vac-active");
+		S.hidden = !0, i.append(o, S, l, u), g.childElementCount && i.append(g), r.append(i);
+		let C = P(m, "div", "mi-extras"), T = {}, E = /* @__PURE__ */ new Set(), O = /* @__PURE__ */ new Map(), re = (e) => n().entities?.[e]?.entity_category ?? T[e] ?? null, A = () => n().states?.[a]?.attributes?.friendly_name || "", j = async (e, t) => {
 			try {
 				K("");
-				let [r, i, a] = ee(e, n);
-				await t().callService(r, i, a);
+				let [r, i, a] = ee(e, t);
+				await n().callService(r, i, a);
 			} catch (e) {
-				K(e?.message || "The command failed."), o(e);
+				K(e?.message || "The command failed."), s(e);
 			}
 		};
 		function N() {
-			if (S.replaceChildren(), D.clear(), u.length) {
+			if (C.replaceChildren(), O.clear(), d.length) {
 				for (let [e, t] of [
 					[null, "Controls"],
 					["config", "Configuration"],
 					["diagnostic", "Diagnostic"]
 				]) {
-					let n = u.filter((t) => (O(t) || null) === e);
+					let n = d.filter((t) => (re(t) || null) === e);
 					if (!n.length) continue;
-					let r = P(p, "details", "mi-extra-section", `<summary><span></span><span class="mi-extra-count">${n.length}</span>${k("chevron")}</summary>`);
-					r.querySelector("summary span").textContent = t, r.open = T.has(t), r.addEventListener("toggle", () => {
-						r.open ? T.add(t) : T.delete(t);
+					let r = P(m, "details", "mi-extra-section", `<summary><span></span><span class="mi-extra-count">${n.length}</span>${k("chevron")}</summary>`);
+					r.querySelector("summary span").textContent = t, r.open = E.has(t), r.addEventListener("toggle", () => {
+						r.open ? E.add(t) : E.delete(t);
 					});
 					for (let e of n) {
-						let t = P(p, "div", "mi-row", "<ha-state-icon class=\"mi-row-icon\"></ha-state-icon><span class=\"mi-row-name\"></span><span class=\"mi-row-ctl\"></span>");
-						r.append(t), D.set(e, {
+						let t = P(m, "div", "mi-row", "<ha-state-icon class=\"mi-row-icon\"></ha-state-icon><span class=\"mi-row-name\"></span><span class=\"mi-row-ctl\"></span>");
+						r.append(t), O.set(e, {
 							el: t,
 							kind: null
 						});
 					}
-					S.append(r);
+					C.append(r);
 				}
-				ie();
+				ae();
 			}
 		}
-		function re() {
-			let e = t(), n = u.filter((t) => t !== d && !O(t) && /^(switch|input_boolean|binary_sensor|fan)\./.test(t) && e.states?.[t]?.state === "on"), r = n.join("|");
-			if (x.dataset.ids !== r) {
-				x.dataset.ids = r, x.replaceChildren();
-				for (let e of n) {
-					let t = P(p, "button", "mi-vac-pill", "<ha-state-icon></ha-state-icon><span></span><i></i>");
+		function ie() {
+			let t = n(), r = e(d, t.states, re, [f]), i = r.join("|");
+			if (S.dataset.ids !== i) {
+				S.dataset.ids = i, S.replaceChildren();
+				for (let e of r) {
+					let t = P(m, "button", "mi-vac-pill", "<ha-state-icon></ha-state-icon><span></span><i></i>");
 					t.type = "button", t.dataset.id = e, t.onclick = () => {
-						let t = D.get(e)?.el, n = t?.closest("details");
+						let t = O.get(e)?.el, n = t?.closest("details");
 						n && (n.open = !0), t?.scrollIntoView({
 							behavior: "smooth",
 							block: "center"
 						});
-					}, x.append(t);
+					}, S.append(t);
 				}
 			}
-			x.hidden = !n.length;
-			for (let t of x.children) {
-				let n = e.states?.[t.dataset.id], r = E(n, { prefix: A() }), i = t.querySelector("ha-state-icon");
-				i.hass = e, i.dataset.defaultIcon = ae(n, r), n && (i.stateObj = n), t.querySelector("span").textContent = r.name, t.title = `${r.name}: on`;
+			S.hidden = !r.length;
+			for (let e of S.children) {
+				let n = t.states?.[e.dataset.id], r = D(n, { prefix: A() }), i = e.querySelector("ha-state-icon");
+				i.hass = t, i.dataset.defaultIcon = oe(n, r), n && (i.stateObj = n), e.querySelector("span").textContent = r.name, e.title = `${r.name}: on`;
 			}
 		}
-		function ie() {
-			re();
-			let e = t();
-			for (let [n, r] of D) {
-				let i = e.states?.[n], a = E(i, { prefix: A() }), { el: o } = r, s = o.querySelector("ha-state-icon"), c = o.querySelector(".mi-row-ctl");
-				s.hass = e, s.dataset.defaultIcon = ae(i, a), i && (s.stateObj = i), o.querySelector(".mi-row-name").textContent = a.name, o.dataset.unavailable = String(a.unavailable);
+		function ae() {
+			ie();
+			let e = n();
+			for (let [t, r] of O) {
+				let i = e.states?.[t], a = D(i, { prefix: A() }), { el: o } = r, s = o.querySelector("ha-state-icon"), c = o.querySelector(".mi-row-ctl");
+				s.hass = e, s.dataset.defaultIcon = oe(i, a), i && (s.stateObj = i), o.querySelector(".mi-row-name").textContent = a.name, o.dataset.unavailable = String(a.unavailable);
 				let l = a.unavailable ? "value" : a.kind;
 				if (r.kind !== l || l === "select" && r.options !== a.options.join("|")) {
 					if (r.kind = l, r.options = a.options?.join("|"), c.replaceChildren(), l === "toggle") {
-						let e = P(p, "button", "mi-row-switch");
+						let e = P(m, "button", "mi-row-switch");
 						e.type = "button", e.setAttribute("role", "switch"), e.onclick = () => {
-							let e = E(t().states?.[n]);
+							let e = D(n().states?.[t]);
 							j(e, !e.on);
 						}, c.append(e);
 					} else if (l === "select") {
-						let e = P(p, "select", "mi-row-select");
+						let e = P(m, "select", "mi-row-select");
 						for (let t of a.options) {
-							let n = P(p, "option");
+							let n = P(m, "option");
 							n.value = t, n.textContent = M(t), e.append(n);
 						}
-						e.onchange = () => j(E(t().states?.[n]), e.value), c.append(e);
+						e.onchange = () => j(D(n().states?.[t]), e.value), c.append(e);
 					} else if (l === "number") {
-						let e = P(p, "input", "mi-row-range");
+						let e = P(m, "input", "mi-row-range");
 						e.type = "range";
-						let r = P(p, "output", "mi-row-value");
+						let r = P(m, "output", "mi-row-value");
 						e.oninput = () => {
 							r.textContent = `${e.value}${a.unit === "%" ? "%" : a.unit ? ` ${a.unit}` : ""}`;
-						}, e.onchange = () => j(E(t().states?.[n]), e.value), c.append(e, r);
+						}, e.onchange = () => j(D(n().states?.[t]), e.value), c.append(e, r);
 					} else if (l === "button") {
-						let e = P(p, "button", "mi-row-press", "Press");
-						e.type = "button", e.onclick = () => j(E(t().states?.[n])), c.append(e);
+						let e = P(m, "button", "mi-row-press", "Press");
+						e.type = "button", e.onclick = () => j(D(n().states?.[t])), c.append(e);
 					} else if (l === "time") {
-						let e = P(p, "input", "mi-row-time");
-						e.type = "time", e.onchange = () => j(E(t().states?.[n]), e.value), c.append(e);
-					} else c.append(P(p, "span", "mi-row-value"));
+						let e = P(m, "input", "mi-row-time");
+						e.type = "time", e.onchange = () => j(D(n().states?.[t]), e.value), c.append(e);
+					} else c.append(P(m, "span", "mi-row-value"));
 				}
 				let u = `${a.name}`;
 				if (l === "toggle") {
@@ -1815,85 +1803,85 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 					e.setAttribute("aria-checked", String(a.on)), e.setAttribute("aria-label", u);
 				} else if (l === "select") {
 					let e = c.firstChild;
-					e.setAttribute("aria-label", u), p.activeElement !== e && (e.value = a.options.includes(a.value) ? a.value : "", a.options.includes(a.value) || (e.selectedIndex = -1));
+					e.setAttribute("aria-label", u), m.activeElement !== e && (e.value = a.options.includes(a.value) ? a.value : "", a.options.includes(a.value) || (e.selectedIndex = -1));
 				} else if (l === "number") {
 					let [e, t] = c.children;
 					Object.assign(e, {
 						min: a.min,
 						max: a.max,
 						step: a.step
-					}), e.setAttribute("aria-label", u), p.activeElement !== e && a.value !== void 0 && (e.value = a.value), t.textContent = `${a.value ?? "—"}${a.unit === "%" ? "%" : a.unit ? ` ${a.unit}` : ""}`;
+					}), e.setAttribute("aria-label", u), m.activeElement !== e && a.value !== void 0 && (e.value = a.value), t.textContent = `${a.value ?? "—"}${a.unit === "%" ? "%" : a.unit ? ` ${a.unit}` : ""}`;
 				} else if (l === "button") c.firstChild.setAttribute("aria-label", `Press ${u}`);
 				else if (l === "time") {
 					let e = c.firstChild;
-					e.setAttribute("aria-label", u), p.activeElement !== e && (e.value = a.value);
+					e.setAttribute("aria-label", u), m.activeElement !== e && (e.value = a.value);
 				} else c.firstChild.textContent = a.value;
 			}
 		}
-		u.length && r.append(S), N();
-		let F = P(p, "div", "mi-vac-areas mi-vac-map");
-		F.hidden = !0, n.append(F);
+		d.length && i.append(C), N();
+		let F = P(m, "div", "mi-vac-areas mi-vac-map");
+		F.hidden = !0, r.append(F);
 		let I = "", L = () => {
-			let e = t().states?.[d], n = e?.attributes?.entity_picture;
-			return n ? `${n}${n.includes("?") ? "&" : "?"}t=${encodeURIComponent(e.state)}` : "";
+			let e = n().states?.[f], t = e?.attributes?.entity_picture;
+			return t ? `${t}${t.includes("?") ? "&" : "?"}t=${encodeURIComponent(e.state)}` : "";
 		};
-		function oe() {
-			if (F.hidden) return;
-			let e = L(), n = F.querySelector("img"), r = F.querySelector(".mi-vac-hint"), i = t().states?.[d];
-			r.textContent = i ? e ? `Updated ${s(i.state) || s(i.last_changed) || ""}` : "No map picture yet." : "The map entity was not found.", n.hidden = !e, e && e !== I && (I = e, n.src = e);
-		}
 		function se() {
-			r.hidden = !0, R.hidden = !0, F.hidden = !1, m.classList.add("mi-vac-in-areas"), F.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${k("back")}</button><h3>Map</h3></div><img class="mi-vac-map-img" alt="" hidden><p class="mi-vac-hint"></p>`, F.querySelector("img").alt = `${A() || "Vacuum"} map`, F.querySelector("button").onclick = () => {
-				F.hidden = !0, r.hidden = !1, I = "", m.classList.remove("mi-vac-in-areas");
-			}, I = "", oe();
+			if (F.hidden) return;
+			let e = L(), t = F.querySelector("img"), r = F.querySelector(".mi-vac-hint"), i = n().states?.[f];
+			r.textContent = i ? e ? `Updated ${c(i.state) || c(i.last_changed) || ""}` : "No map picture yet." : "The map entity was not found.", t.hidden = !e, e && e !== I && (I = e, t.src = e);
 		}
-		let R = P(p, "div", "mi-vac-areas");
-		R.hidden = !0, n.append(R);
+		function ce() {
+			i.hidden = !0, R.hidden = !0, F.hidden = !1, h.classList.add("mi-vac-in-areas"), F.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${k("back")}</button><h3>Map</h3></div><img class="mi-vac-map-img" alt="" hidden><p class="mi-vac-hint"></p>`, F.querySelector("img").alt = `${A() || "Vacuum"} map`, F.querySelector("button").onclick = () => {
+				F.hidden = !0, i.hidden = !1, I = "", h.classList.remove("mi-vac-in-areas");
+			}, I = "", se();
+		}
+		let R = P(m, "div", "mi-vac-areas");
+		R.hidden = !0, r.append(R);
 		let z = [], B = () => {
-			R.hidden = !0, r.hidden = !1, m.classList.remove("mi-vac-in-areas");
+			R.hidden = !0, i.hidden = !1, h.classList.remove("mi-vac-in-areas");
 		};
 		async function V() {
-			r.hidden = !0, R.hidden = !1, m.classList.add("mi-vac-in-areas"), z = [], R.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${k("back")}</button><h3>Clean areas</h3></div><div class="mi-vac-areas-body"><p class="mi-vac-hint">Loading areas…</p></div>`, R.querySelector("button").onclick = B;
-			let e = R.querySelector(".mi-vac-areas-body"), n, a, o;
+			i.hidden = !0, R.hidden = !1, h.classList.add("mi-vac-in-areas"), z = [], R.innerHTML = `<div class="mi-vac-areas-head"><button type="button" class="mi-iconbtn" aria-label="Back">${k("back")}</button><h3>Clean areas</h3></div><div class="mi-vac-areas-body"><p class="mi-vac-hint">Loading areas…</p></div>`, R.querySelector("button").onclick = B;
+			let e = R.querySelector(".mi-vac-areas-body"), t, r, o;
 			try {
-				let e = t(), [r, s, c] = await Promise.all([
+				let e = n(), [i, s, c] = await Promise.all([
 					e.callWS({
 						type: "config/entity_registry/get",
-						entity_id: i
+						entity_id: a
 					}),
 					e.callWS({ type: "config/area_registry/list" }),
 					e.callWS({ type: "config/floor_registry/list" }).catch(() => [])
 				]);
-				n = new Set(Object.keys(r?.options?.vacuum?.area_mapping || {})), a = s.filter((e) => n.has(e.area_id)), o = c;
+				t = new Set(Object.keys(i?.options?.vacuum?.area_mapping || {})), r = s.filter((e) => t.has(e.area_id)), o = c;
 			} catch (t) {
 				e.innerHTML = "<p class=\"mi-error\"></p>", e.firstChild.textContent = t?.message || "Could not load the vacuum's areas.";
 				return;
 			}
-			if (!a.length) {
+			if (!r.length) {
 				e.innerHTML = `<div class="mi-vac-empty">${k("area")}<p class="mi-vac-empty-title">No areas set up</p><p>Map this vacuum's rooms to Home Assistant areas in its entity settings, then clean them from here.</p></div>`;
 				return;
 			}
 			let s = [];
 			for (let e of [...o].sort((e, t) => (e.level ?? 0) - (t.level ?? 0))) {
-				let t = a.filter((t) => t.floor_id === e.floor_id);
+				let t = r.filter((t) => t.floor_id === e.floor_id);
 				t.length && s.push([e.name, t]);
 			}
-			let c = a.filter((e) => !o.some((t) => t.floor_id === e.floor_id));
+			let c = r.filter((e) => !o.some((t) => t.floor_id === e.floor_id));
 			c.length && s.push(["Other areas", c]), e.replaceChildren();
 			for (let [t, n] of s) {
-				let r = P(p, "div", "mi-vac-section");
-				s.length > 1 && r.append(P(p, "div", "mi-vac-section-name")), s.length > 1 && (r.firstChild.textContent = t);
-				let i = P(p, "div", "mi-vac-grid");
+				let r = P(m, "div", "mi-vac-section");
+				s.length > 1 && r.append(P(m, "div", "mi-vac-section-name")), s.length > 1 && (r.firstChild.textContent = t);
+				let i = P(m, "div", "mi-vac-grid");
 				for (let e of n) {
-					let t = P(p, "button", "mi-vac-area", `<span class="mi-vac-badge" hidden></span><span class="mi-vac-area-icon">${k("area")}</span><span class="mi-vac-area-name"></span>`);
+					let t = P(m, "button", "mi-vac-area", `<span class="mi-vac-badge" hidden></span><span class="mi-vac-area-icon">${k("area")}</span><span class="mi-vac-area-name"></span>`);
 					t.type = "button", t.dataset.area = e.area_id, t.querySelector(".mi-vac-area-name").textContent = e.name, t.onclick = () => {
 						z = z.indexOf(e.area_id) >= 0 ? z.filter((t) => t !== e.area_id) : [...z, e.area_id], d();
 					}, i.append(t);
 				}
 				r.append(i), e.append(r);
 			}
-			e.append(P(p, "p", "mi-vac-hint", "The order in which areas are cleaned may not be supported by your vacuum."));
-			let l = P(p, "div", "mi-vac-footer"), u = P(p, "button", "mi-pill");
+			e.append(P(m, "p", "mi-vac-hint", "The order in which areas are cleaned may not be supported by your vacuum."));
+			let l = P(m, "div", "mi-vac-footer"), u = P(m, "button", "mi-pill");
 			u.type = "button", u.onclick = async () => {
 				u.disabled = !0;
 				let e = J(U, (e) => e.kind === "vacuum");
@@ -1911,58 +1899,58 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 			d();
 		}
 		let H = null;
-		t().callWS?.({ type: "config/entity_registry/list_for_display" }).then((e) => {
-			let n = e?.entities || [], r = e?.entity_categories || {};
-			w = Object.fromEntries(n.filter((e) => e.ec !== void 0 && r[e.ec]).map((e) => [e.ei, r[e.ec]])), u.length && N();
-			let a = n.find((e) => e.ei === i)?.di;
-			if (!a) return;
-			let o = n.filter((e) => e.di === a).map((e) => e.ei), s = t().states || {};
+		n().callWS?.({ type: "config/entity_registry/list_for_display" }).then((e) => {
+			let t = e?.entities || [], r = e?.entity_categories || {};
+			T = Object.fromEntries(t.filter((e) => e.ec !== void 0 && r[e.ec]).map((e) => [e.ei, r[e.ec]])), d.length && N();
+			let i = t.find((e) => e.ei === a)?.di;
+			if (!i) return;
+			let o = t.filter((e) => e.di === i).map((e) => e.ei), s = n().states || {};
 			H = {
 				battery: o.find((e) => /^sensor\./.test(e) && s[e]?.attributes?.device_class === "battery" && !isNaN(Number(s[e].state))),
 				charging: o.find((e) => /^binary_sensor\./.test(e) && s[e]?.attributes?.device_class === "battery_charging")
 			}, U && G(U);
 		}).catch(() => {});
-		let ce = setInterval(() => {
-			if (!m.isConnected) return clearInterval(ce);
-			let e = t().states?.[i];
-			a.querySelector(".mi-vac-since").textContent = s(e?.last_changed);
+		let le = setInterval(() => {
+			if (!h.isConnected) return clearInterval(le);
+			let e = n().states?.[a];
+			o.querySelector(".mi-vac-since").textContent = c(e?.last_changed);
 		}, 5e3), U, W = {
 			cleaning: "var(--state-vacuum-active-color,#009688)",
 			returning: "var(--state-vacuum-active-color,#009688)",
 			error: "var(--error-color,#db4437)"
 		}, G = (e) => {
 			U = e;
-			let n = J(e, (e) => e.kind === "vacuum");
-			if (!n) return;
-			let r = t().states?.[i];
-			a.firstChild.textContent = n.status || M(e.state) || "", a.querySelector(".mi-vac-since").textContent = e.since || "";
-			let o = t().states || {}, s = H?.battery ? Number(o[H.battery]?.state) : n.battery, l = H?.charging ? o[H.charging]?.state === "on" : e.state === "docked" && s < 100, u = a.querySelector(".mi-vac-battery");
-			u.hidden = !Number.isFinite(s), Number.isFinite(s) && (u.innerHTML = `<span>${Math.round(s)}%</span>${k(l ? "batterycharging" : "battery")}`);
-			let d = ne(r), p = c.firstChild;
-			p.className = `container ${d}`, p.style.setProperty("--vacuum-color", W[d] || "var(--mi-muted)");
-			for (let e of n.buttons) {
-				let t = f.get(e.key);
+			let t = J(e, (e) => e.kind === "vacuum");
+			if (!t) return;
+			let r = n().states?.[a];
+			o.firstChild.textContent = t.status || M(e.state) || "", o.querySelector(".mi-vac-since").textContent = e.since || "";
+			let i = n().states || {}, s = H?.battery ? Number(i[H.battery]?.state) : t.battery, c = H?.charging ? i[H.charging]?.state === "on" : e.state === "docked" && s < 100, u = o.querySelector(".mi-vac-battery");
+			u.hidden = !Number.isFinite(s), Number.isFinite(s) && (u.innerHTML = `<span>${Math.round(s)}%</span>${k(c ? "batterycharging" : "battery")}`);
+			let d = ne(r), f = l.firstChild;
+			f.className = `container ${d}`, f.style.setProperty("--vacuum-color", W[d] || "var(--mi-muted)");
+			for (let e of t.buttons) {
+				let t = p.get(e.key);
 				t && (t.innerHTML = k(e.icon), t.disabled = e.disabled, t.title = e.label, t.setAttribute("aria-label", e.label));
 			}
-			b && (b.querySelector(".mi-vac-chip-value").textContent = M(n.fanSpeed) || "—"), ie(), oe();
+			x && (x.querySelector(".mi-vac-chip-value").textContent = M(t.fanSpeed) || "—"), ae(), se();
 		};
 		return G;
 	}
-	function _e(e, t, n) {
-		let r = P(p, "div", "mi-center"), i = P(p, "div", "mi-state");
+	function ve(e, t, n) {
+		let r = P(m, "div", "mi-center"), i = P(m, "div", "mi-state");
 		return r.append(i), t.append(r), (e, t) => {
 			let n = t?.attributes?.unit_of_measurement;
 			i.textContent = `${M(e.state) ?? ""}${n ? ` ${n}` : ""}`;
 		};
 	}
-	let ve = {
-		light: ue,
-		cover: de,
-		lock: fe,
-		vacuum: ge,
-		climate: pe,
-		alarm_control_panel: me,
-		camera: he,
+	let ye = {
+		light: de,
+		cover: fe,
+		lock: pe,
+		vacuum: _e,
+		climate: me,
+		alarm_control_panel: he,
+		camera: ge,
 		switch: Y,
 		input_boolean: Y,
 		fan: Y,
@@ -1971,43 +1959,43 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 		input_button: X,
 		scene: X,
 		script: X
-	}, ye = () => {};
-	function be(e) {
-		le(), m.classList.remove("mi-wide", "mi-vacuum", "mi-vac-in-areas"), H.replaceChildren(), W = void 0;
-		let t = P(p, "div");
-		if (H.append(t), C.hidden = !1, ye = (e.unavailable ? _e : ve[e.domain] || _e)(e, t), e.attributes.length) {
-			let t = P(p, "details", "mi-attrs", `<summary><span>Attributes</span>${k("chevron")}</summary>`), n = P(p, "dl");
-			for (let [t, r] of e.attributes) n.append(P(p, "dt"), P(p, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
+	}, be = () => {};
+	function xe(e) {
+		ue(), h.classList.remove("mi-wide", "mi-vacuum", "mi-vac-in-areas"), H.replaceChildren(), W = void 0;
+		let t = P(m, "div");
+		if (H.append(t), w.hidden = !1, be = (e.unavailable ? ve : ye[e.domain] || ve)(e, t), e.attributes.length) {
+			let t = P(m, "details", "mi-attrs", `<summary><span>Attributes</span>${k("chevron")}</summary>`), n = P(m, "dl");
+			for (let [t, r] of e.attributes) n.append(P(m, "dt"), P(m, "dd")), n.lastChild.previousSibling.textContent = t, n.lastChild.textContent = r;
 			t.append(n), H.append(t);
 		}
 	}
 	function Z() {
-		let e = t().states?.[i], n = g(e);
-		S.textContent = n.name, C.textContent = n.unavailable ? "Unavailable" : [M(n.state), n.changed && `changed ${n.changed}`].filter(Boolean).join(" · ");
+		let e = n().states?.[a], t = _(e);
+		C.textContent = t.name, w.textContent = t.unavailable ? "Unavailable" : [M(t.state), t.changed && `changed ${t.changed}`].filter(Boolean).join(" · ");
 		let r = [
-			n.unavailable,
-			n.domain,
-			...n.controls.map((e) => `${e.kind}:${e.key || ""}:${(e.options || []).join(",")}:${(e.buttons || e.modes || []).length}`)
+			t.unavailable,
+			t.domain,
+			...t.controls.map((e) => `${e.kind}:${e.key || ""}:${(e.options || []).join(",")}:${(e.buttons || e.modes || []).length}`)
 		].join("|");
-		r !== U && (U = r, be(n)), ye(n, e);
+		r !== U && (U = r, xe(t)), be(t, e);
 	}
 	let Q = () => {
-		m.open && m.close();
+		h.open && h.close();
 	};
-	v.onclick = Q, m.addEventListener("click", (e) => {
+	y.onclick = Q, h.addEventListener("click", (e) => {
 		!N.hidden && !e.target.closest?.(".mi-actions") && V(!1);
-	}), m.addEventListener("keydown", (e) => {
-		e.key === "Escape" && !N.hidden && (e.preventDefault(), V(!1), D.focus());
-	}), m.addEventListener("click", (e) => {
-		e.target === m && Q();
-	}), m.addEventListener("close", () => {
-		le(), m.remove();
+	}), h.addEventListener("keydown", (e) => {
+		e.key === "Escape" && !N.hidden && (e.preventDefault(), V(!1), O.focus());
+	}), h.addEventListener("click", (e) => {
+		e.target === h && Q();
+	}), h.addEventListener("close", () => {
+		ue(), h.remove();
 	});
-	let xe = P(p, "div", "mi-grab");
-	xe.setAttribute("aria-hidden", "true"), h.prepend(xe);
-	let Se = p.defaultView, Ce = () => Se?.matchMedia?.("(max-width:600px)").matches, $ = null, we = (e) => m.style.setProperty("transform", e ? `translateY(${e}px)` : "");
-	m.addEventListener("touchstart", (e) => {
-		if (!Ce() || e.touches.length !== 1 || e.target.closest?.("input, select, textarea, .mi-slider, .mi-dial, .mi-cover-switch, .mi-mode, [role=slider]")) return $ = null;
+	let Se = P(m, "div", "mi-grab");
+	Se.setAttribute("aria-hidden", "true"), g.prepend(Se);
+	let Ce = m.defaultView, we = () => Ce?.matchMedia?.("(max-width:600px)").matches, $ = null, Te = (e) => h.style.setProperty("transform", e ? `translateY(${e}px)` : "");
+	h.addEventListener("touchstart", (e) => {
+		if (!we() || e.touches.length !== 1 || e.target.closest?.("input, select, textarea, .mi-slider, .mi-dial, .mi-cover-switch, .mi-mode, [role=slider]")) return $ = null;
 		$ = {
 			y: e.touches[0].clientY,
 			t: performance.now(),
@@ -2015,30 +2003,30 @@ function L({ host: e, getHass: t, entityId: i, onError: o = () => {}, openHaView
 			active: !1,
 			fromTop: !!e.target.closest?.(".mi-grab, .mi-head")
 		};
-	}, { passive: !0 }), m.addEventListener("touchmove", (e) => {
+	}, { passive: !0 }), h.addEventListener("touchmove", (e) => {
 		if (!$) return;
 		let t = e.touches[0].clientY - $.y;
-		if ($.active) e.preventDefault(), $.dy = Math.max(0, t), we($.dy);
+		if ($.active) e.preventDefault(), $.dy = Math.max(0, t), Te($.dy);
 		else {
 			if (t < -6) return $ = null;
 			if (t < 8 || !($.fromTop || H.scrollTop <= 0)) return;
-			$.active = !0, $.y += t, $.t = performance.now(), m.classList.add("mi-dragging");
+			$.active = !0, $.y += t, $.t = performance.now(), h.classList.add("mi-dragging");
 		}
 	}, { passive: !1 });
-	let Te = () => {
+	let Ee = () => {
 		let e = $;
 		if ($ = null, !e?.active) return;
-		m.classList.remove("mi-dragging");
-		let t = e.dy / Math.max(1, performance.now() - e.t), n = Se?.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-		if (e.dy > Math.min(140, m.offsetHeight * .25) || t > .8) {
+		h.classList.remove("mi-dragging");
+		let t = e.dy / Math.max(1, performance.now() - e.t), n = Ce?.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+		if (e.dy > Math.min(140, h.offsetHeight * .25) || t > .8) {
 			if (n) return Q();
-			m.classList.add("mi-settling"), we(m.offsetHeight), setTimeout(Q, 220);
-		} else m.classList.add("mi-settling"), we(0), setTimeout(() => m.classList.remove("mi-settling"), 240);
+			h.classList.add("mi-settling"), Te(h.offsetHeight), setTimeout(Q, 220);
+		} else h.classList.add("mi-settling"), Te(0), setTimeout(() => h.classList.remove("mi-settling"), 240);
 	};
-	return m.addEventListener("touchend", Te), m.addEventListener("touchcancel", Te), Z(), m.showModal(), m.tabIndex = -1, m.focus({ preventScroll: !0 }), {
+	return h.addEventListener("touchend", Ee), h.addEventListener("touchcancel", Ee), Z(), h.showModal(), h.tabIndex = -1, h.focus({ preventScroll: !0 }), {
 		update: Z,
 		close: Q,
-		dialog: m
+		dialog: h
 	};
 }
 export { L as openMoreInfo };

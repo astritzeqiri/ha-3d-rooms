@@ -1,4 +1,4 @@
-import { o as e, s as t } from "./three-d-rooms-custom-entities-BULVonyW.js";
+import { d as e, f as t } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
 // shared/scene-sessions.mjs
 var n = /* @__PURE__ */ new WeakMap();
 function r(e) {
@@ -282,77 +282,8 @@ function T(e, t) {
 		e.quaternion.copy(c), e.quaternion.multiply(new c.constructor(r * s, i * s, a * s, Math.cos(o))), e.updateMatrix?.();
 	});
 }
-// shared/vacuum.mjs
-var E = {
-	cleaning: "Cleaning",
-	docked: "Docked",
-	idle: "Idle",
-	paused: "Paused",
-	returning: "Returning",
-	error: "Error"
-};
-Object.values({
-	start: {
-		service: "start",
-		feature: 8192,
-		capability: "start"
-	},
-	pause: {
-		service: "pause",
-		feature: 4,
-		capability: "pause"
-	},
-	stop: {
-		service: "stop",
-		feature: 8,
-		capability: "stop"
-	},
-	return_to_base: {
-		service: "return_to_base",
-		feature: 16,
-		capability: "return_home"
-	},
-	locate: {
-		service: "locate",
-		feature: 512,
-		capability: "locate"
-	}
-}).map((e) => e.capability);
-function D(e) {
-	let t = e?.state, n = !e || !/^vacuum\./.test(e.entity_id || "") || !(t in E), r = e?.attributes?.battery_level;
-	return {
-		state: n ? void 0 : t,
-		label: n ? "Unavailable" : E[t],
-		cleaning: t === "cleaning",
-		returning: t === "returning",
-		docked: t === "docked",
-		paused: t === "paused",
-		error: t === "error",
-		active: t === "cleaning" || t === "returning",
-		battery: Number.isFinite(r) ? r : void 0,
-		features: Number.isFinite(e?.attributes?.supported_features) ? e.attributes.supported_features : 0,
-		unavailable: n
-	};
-}
-function O(e) {
-	let [t = 0, , n = 1] = e?.facing || [], r = Math.hypot(t, n);
-	return r > 1e-6 ? [
-		t / r,
-		0,
-		n / r
-	] : [
-		0,
-		0,
-		1
-	];
-}
-function k(e, t = []) {
-	let n = e?.members?.length ? e.members.map((e) => [e.model, e.areaId]) : [[e?.id, e?.areaId]], r = [];
-	for (let e of t) for (let [t, i] of n) e && i === e && t && !r.includes(t) && r.push(t);
-	return r;
-}
 // shared/floor-view.mjs
-function A(e, t, n, r = 0, i = 0) {
+function E(e, t, n, r = 0, i = 0) {
 	if (![
 		...e,
 		...t,
@@ -385,8 +316,8 @@ function A(e, t, n, r = 0, i = 0) {
 		far: h + m * 4 + 100
 	};
 }
-function j(e, t, n, r = 28, i = 0) {
-	let a = A(e, t, n, r, i), o = Math.max(0, Math.min(180, r)) * Math.PI / 180, s = i * Math.PI / 180, c = [
+function D(e, t, n, r = 28, i = 0) {
+	let a = E(e, t, n, r, i), o = Math.max(0, Math.min(180, r)) * Math.PI / 180, s = i * Math.PI / 180, c = [
 		Math.sin(o) * Math.sin(s),
 		Math.cos(o),
 		Math.sin(o) * Math.cos(s)
@@ -407,10 +338,10 @@ function j(e, t, n, r = 28, i = 0) {
 	};
 }
 // shared/camera-view.mjs
-var M = (e, t) => Math.hypot(...e.map((e, n) => e - t[n])), N = (e) => Number(e.toFixed(2)), P = (e) => e * 180 / Math.PI;
-function F(e) {
+var O = (e, t) => Math.hypot(...e.map((e, n) => e - t[n])), k = (e) => Number(e.toFixed(2)), A = (e) => e * 180 / Math.PI;
+function j(e) {
 	let t = (e) => Array.isArray(e) && e.length === 3 && e.every((e) => Number.isFinite(e) && Math.abs(e) < 1e4), n = (e) => Number.isFinite(e) && e > 0 && e <= 1e4;
-	if (!e || !t(e.position) || !t(e.target) || !t(e.up) || Math.hypot(...e.up) < 1e-8 || M(e.position, e.target) < 1e-8 || !n(e.aspect) || !n(e.zoom) || !n(e.referenceZoom) || !Number.isFinite(e.heading) || e.heading < 0 || e.heading >= 360 || !Number.isFinite(e.tilt) || e.tilt < 0 || e.tilt > 180 || !["perspective", "orthographic"].includes(e.projection)) throw Error("Invalid saved camera view.");
+	if (!e || !t(e.position) || !t(e.target) || !t(e.up) || Math.hypot(...e.up) < 1e-8 || O(e.position, e.target) < 1e-8 || !n(e.aspect) || !n(e.zoom) || !n(e.referenceZoom) || !Number.isFinite(e.heading) || e.heading < 0 || e.heading >= 360 || !Number.isFinite(e.tilt) || e.tilt < 0 || e.tilt > 180 || !["perspective", "orthographic"].includes(e.projection)) throw Error("Invalid saved camera view.");
 	if (e.projection === "perspective" && (!Number.isFinite(e.fov) || e.fov < 1 || e.fov > 179)) throw Error("Invalid saved camera field of view.");
 	if (e.projection === "orthographic" && !n(e.halfHeight)) throw Error("Invalid saved floor view.");
 	return {
@@ -426,16 +357,16 @@ function F(e) {
 		...e.projection === "perspective" ? { fov: e.fov } : { halfHeight: e.halfHeight }
 	};
 }
-function I({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, halfHeight: o, min: s, max: c }) {
-	let l = e.map((e, n) => e - t[n]), u = Math.hypot(...l), d = Math.hypot(l[0], l[2]) / u < 1e-8 && Math.hypot(n[0], n[2]) > 1e-8, f = l[1] >= 0 ? -1 : 1, p = N((P(d ? Math.atan2(f * n[0], f * n[2]) : Math.atan2(l[0], l[2])) + 360) % 360) % 360, m = N(P(Math.acos(Math.max(-1, Math.min(1, l[1] / u))))), h = o === void 0 ? "front" : "floor", g = (h === "floor" ? A : j)(s, c, r, m, p), _;
-	_ = h === "floor" ? i * g.top / o : i * M(g.position, g.target) / u * Math.tan(g.fov * Math.PI / 360) / Math.tan(a * Math.PI / 360);
+function M({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, halfHeight: o, min: s, max: c }) {
+	let l = e.map((e, n) => e - t[n]), u = Math.hypot(...l), d = Math.hypot(l[0], l[2]) / u < 1e-8 && Math.hypot(n[0], n[2]) > 1e-8, f = l[1] >= 0 ? -1 : 1, p = k((A(d ? Math.atan2(f * n[0], f * n[2]) : Math.atan2(l[0], l[2])) + 360) % 360) % 360, m = k(A(Math.acos(Math.max(-1, Math.min(1, l[1] / u))))), h = o === void 0 ? "front" : "floor", g = (h === "floor" ? E : D)(s, c, r, m, p), _;
+	_ = h === "floor" ? i * g.top / o : i * O(g.position, g.target) / u * Math.tan(g.fov * Math.PI / 360) / Math.tan(a * Math.PI / 360);
 	let v = Number(Math.max(.01, Math.min(100, _)).toFixed(4));
 	return {
 		view: h,
 		heading: p,
 		tilt: m,
 		zoom: v,
-		camera: F({
+		camera: j({
 			projection: h === "floor" ? "orthographic" : "perspective",
 			position: [...e],
 			target: [...t],
@@ -449,7 +380,7 @@ function I({ position: e, target: t, up: n, aspect: r, zoom: i = 1, fov: a, half
 		})
 	};
 }
-function L(e, t, n, r, i, a) {
+function N(e, t, n, r, i, a) {
 	if (!Number.isFinite(r) || r <= 0) throw Error("Invalid camera aspect ratio.");
 	let o = Math.min(1, r / e.aspect);
 	if (!i || !a) return o;
@@ -469,10 +400,10 @@ function L(e, t, n, r, i, a) {
 	let h = Math.max(m, p / e.aspect), g = Math.max(m, p / r);
 	return g > 0 ? h / g : o;
 }
-function R(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.tilt, zoom: o = e.referenceZoom }) {
-	let s = F(e), c = [...s.position], l = [...s.up];
+function P(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.tilt, zoom: o = e.referenceZoom }) {
+	let s = j(e), c = [...s.position], l = [...s.up];
 	if (Math.abs(i - s.heading) > 1e-6 || Math.abs(a - s.tilt) > 1e-6) {
-		let e = i * Math.PI / 180, t = a * Math.PI / 180, n = M(s.position, s.target), r = [
+		let e = i * Math.PI / 180, t = a * Math.PI / 180, n = O(s.position, s.target), r = [
 			Math.sin(t) * Math.sin(e),
 			Math.cos(t),
 			Math.sin(t) * Math.cos(e)
@@ -488,7 +419,7 @@ function R(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.t
 		target: [...s.target],
 		up: l,
 		aspect: t,
-		zoom: s.zoom * o / s.referenceZoom * L(s, c, l, t, n, r),
+		zoom: s.zoom * o / s.referenceZoom * N(s, c, l, t, n, r),
 		...s.projection === "perspective" ? { fov: s.fov } : {
 			left: -s.halfHeight * t,
 			right: s.halfHeight * t,
@@ -496,21 +427,21 @@ function R(e, { aspect: t, min: n, max: r, heading: i = e.heading, tilt: a = e.t
 			bottom: -s.halfHeight
 		},
 		near: .05,
-		far: M(c, s.target) + 1e3
+		far: O(c, s.target) + 1e3
 	};
 }
 // shared/render-profile.mjs
-var z = [
+var F = [
 	"auto",
 	"high",
 	"low"
 ];
-function B(e = globalThis) {
+function I(e = globalThis) {
 	if (e.navigator?.userAgentData?.mobile) return !0;
 	let t = (t) => !!e.matchMedia?.(t)?.matches;
 	return t("(pointer: coarse)") && !t("(any-pointer: fine)");
 }
-function V({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {}) {
+function L({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {}) {
 	let r = Number.isFinite(n) && n > 0 ? n : 1, i = e === "low" || e !== "high" && t;
 	return i ? {
 		low: i,
@@ -526,14 +457,14 @@ function V({ quality: e = "auto", mobile: t = !1, devicePixelRatio: n = 1 } = {}
 		shadowMapSize: Infinity
 	};
 }
-function H(e = "auto", t = globalThis) {
-	return V({
+function R(e = "auto", t = globalThis) {
+	return L({
 		quality: e,
-		mobile: B(t),
+		mobile: I(t),
 		devicePixelRatio: t.devicePixelRatio
 	}).low ? "phone" : "full";
 }
-function U(e, t) {
+function z(e, t) {
 	Number.isFinite(t) && e.traverse((e) => {
 		let n = e.isLight && e.shadow;
 		if (!n?.mapSize) return;
@@ -542,36 +473,36 @@ function U(e, t) {
 	});
 }
 // shared/room-focus.mjs
-function W(e, t) {
+function B(e, t) {
 	return e?.roomTitles?.[t] || e?.controls?.find((e) => e.sourceModel === t)?.roomTitle || "Room";
 }
-function G(e) {
+function V(e) {
 	return !e?.houseView || e.focusRoom || (e.members?.length || 0) < 2 ? [] : e.members.map((t) => ({
 		room: t.model,
-		title: v(W(e, t.model))
+		title: v(B(e, t.model))
 	}));
 }
-function K(e, t) {
+function H(e, t) {
 	let n = e?.members?.find((e) => e.model === t);
-	return !n || !G(e).length ? null : {
+	return !n || !V(e).length ? null : {
 		...e,
-		title: W(e, t),
+		title: B(e, t),
 		members: [n],
 		controls: e.controls.filter((e) => e.sourceModel === t),
 		houseFloor: null,
 		focusRoom: t
 	};
 }
-function q(e) {
+function U(e) {
 	let t = null;
 	for (let n of e) (!t || n.y > t.y) && (t = n);
 	return t;
 }
-var J = .6, Y = .7;
-function X(e, t, n = !1) {
-	return e === "always" || e !== "never" && t < (n ? Y : J);
+var W = .6, G = .7;
+function K(e, t, n = !1) {
+	return e === "always" || e !== "never" && t < (n ? G : W);
 }
-function Z(e, t = 4) {
+function q(e, t = 4) {
 	let n = [], r = e.map((e) => e.y), i = e.map((e, t) => t).sort((t, n) => Number(!!e[n].fixed) - Number(!!e[t].fixed) || e[t].y - e[n].y);
 	for (let a of i) {
 		let i = e[a], o = i.y;
@@ -589,4 +520,4 @@ function Z(e, t = 4) {
 	}
 	return r;
 }
-export { f as A, x as C, g as D, v as E, a as F, r as I, i as L, p as M, c as N, _ as O, o as P, n as R, b as S, y as T, O as _, W as a, w as b, U as c, H as d, I as f, j as g, A as h, K as i, h as j, m as k, B as l, F as m, q as n, Z as o, R as p, X as r, z as s, G as t, V as u, k as v, S as w, T as x, D as y };
+export { c as A, v as C, f as D, m as E, n as F, a as M, r as N, h as O, i as P, y as S, _ as T, w as _, B as a, x as b, z as c, R as d, M as f, D as g, E as h, H as i, o as j, p as k, I as l, j as m, U as n, q as o, P as p, K as r, F as s, V as t, L as u, T as v, g as w, S as x, b as y };

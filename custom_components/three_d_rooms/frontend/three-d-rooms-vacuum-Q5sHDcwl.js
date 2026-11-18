@@ -423,4 +423,91 @@ function x(e, t) {
 	let n = String(e || "").split(".")[0];
 	return y[t?.attributes?.device_class] || b[n] || "mdi:information-outline";
 }
-export { m as a, a as c, _ as i, o as l, d as n, u as o, v as r, i as s, x as t };
+function S(e) {
+	let t = e?.entity_id || "";
+	return {
+		battery_charging: "mdi:battery-charging",
+		duration: "mdi:timer-outline",
+		connectivity: "mdi:check-network-outline",
+		problem: "mdi:alert-circle-outline",
+		area: "mdi:texture-box",
+		running: "mdi:play-circle-outline"
+	}[e?.attributes?.device_class] || {
+		time: "mdi:clock-outline",
+		input_datetime: "mdi:clock-outline"
+	}[t.split(".")[0]] || x(t, e);
+}
+// shared/vacuum.mjs
+var C = {
+	cleaning: "Cleaning",
+	docked: "Docked",
+	idle: "Idle",
+	paused: "Paused",
+	returning: "Returning",
+	error: "Error"
+};
+Object.values({
+	start: {
+		service: "start",
+		feature: 8192,
+		capability: "start"
+	},
+	pause: {
+		service: "pause",
+		feature: 4,
+		capability: "pause"
+	},
+	stop: {
+		service: "stop",
+		feature: 8,
+		capability: "stop"
+	},
+	return_to_base: {
+		service: "return_to_base",
+		feature: 16,
+		capability: "return_home"
+	},
+	locate: {
+		service: "locate",
+		feature: 512,
+		capability: "locate"
+	}
+}).map((e) => e.capability);
+function w(e) {
+	let t = e?.state, n = !e || !/^vacuum\./.test(e.entity_id || "") || !(t in C), r = e?.attributes?.battery_level;
+	return {
+		state: n ? void 0 : t,
+		label: n ? "Unavailable" : C[t],
+		cleaning: t === "cleaning",
+		returning: t === "returning",
+		docked: t === "docked",
+		paused: t === "paused",
+		error: t === "error",
+		active: t === "cleaning" || t === "returning",
+		battery: Number.isFinite(r) ? r : void 0,
+		features: Number.isFinite(e?.attributes?.supported_features) ? e.attributes.supported_features : 0,
+		unavailable: n
+	};
+}
+function T(e) {
+	let [t = 0, , n = 1] = e?.facing || [], r = Math.hypot(t, n);
+	return r > 1e-6 ? [
+		t / r,
+		0,
+		n / r
+	] : [
+		0,
+		0,
+		1
+	];
+}
+function E(e, t = []) {
+	let n = e?.members?.length ? e.members.map((e) => [e.model, e.areaId]) : [[e?.id, e?.areaId]], r = [];
+	for (let e of t) for (let [t, i] of n) e && i === e && t && !r.includes(t) && r.push(t);
+	return r;
+}
+var D = /^(switch|input_boolean|binary_sensor|fan)\./;
+function O(e = [], t = {}, n = () => null, r = []) {
+	return e.filter((e) => !r.includes(e) && D.test(e) && !n(e) && t?.[e]?.state === "on");
+}
+export { x as a, _ as c, u as d, i as f, w as i, m as l, o as m, O as n, d as o, a as p, E as r, v as s, T as t, S as u };

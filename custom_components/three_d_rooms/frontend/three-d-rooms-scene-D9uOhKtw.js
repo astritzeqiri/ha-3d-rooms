@@ -1,4 +1,5 @@
-import { D as e, M as t, P as n, R as r, _ as i, c as a, f as o, g as s, h as c, l, n as u, p as d, u as f, w as p, x as m } from "./three-d-rooms-room-focus-Bwrg1ovT.js";
+import { F as e, c as t, f as n, g as r, h as i, j as a, k as o, l as s, n as c, p as l, u, v as d, w as f, x as p } from "./three-d-rooms-room-focus-DizMe7SG.js";
+import { t as m } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
 // shared/number-motion.mjs
 function h(e, t) {
 	let n = e.userData.numberMotion;
@@ -12777,24 +12778,24 @@ var ld = class {
 	}
 }, ud = "\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    vUv = uv;\n    vec4 view = modelViewMatrix * vec4(position, 1.0);\n    vNormal = normalize(normalMatrix * normal);\n    vView = -view.xyz;\n    gl_Position = projectionMatrix * view;\n  }\n", dd = "\n  uniform vec3 uColor;\n  uniform float uTime;\n  uniform float uPhase;\n  uniform float uStrength;\n  uniform float uCore;\n  varying vec2 vUv;\n  varying vec3 vNormal;\n  varying vec3 vView;\n  void main() {\n    float facing = abs(dot(normalize(vNormal), normalize(vView)));\n    float softEdge = pow(facing, mix(2.6, 0.7, uCore));\n    float fade = smoothstep(0.0, 0.06, vUv.x)\n               * (1.0 - smoothstep(0.82, 1.0, vUv.x));\n    float phase = fract(vUv.x * 2.2 - uTime * 0.65 + uPhase);\n    float pulse = smoothstep(0.0, 0.15, phase)\n                * (1.0 - smoothstep(0.40, 0.92, phase));\n    float alpha = uStrength * softEdge * fade * (0.32 + 0.68 * pulse);\n    if (uCore < 0.0) {\n      float across = vUv.y * 2.0 - 1.0;\n      float edge = pow(max(0.0, 1.0 - across * across), 1.4);\n      float wave = pow(0.5 + 0.5 * cos((vUv.x + across * across * 0.10) * 21.0 - uTime * 3.2), 5.0);\n      alpha = uStrength * edge * fade * (0.14 + 0.86 * wave);\n    }\n    vec3 color = mix(uColor, vec3(1.0), clamp(uCore, 0.0, 1.0) * 0.14);\n    gl_FragColor = vec4(color, alpha);\n    #include <colorspace_fragment>\n  }\n";
 function fd(e, { reducedMotion: t = !1 } = {}) {
-	let r = e.userData.climateVisual;
-	if (!r || r.version !== 1 || !Array.isArray(r.outlet) || r.outlet.length !== 3 || !r.outlet.every((e) => Number.isFinite(e) && Math.abs(e) < 10) || !Number.isFinite(r.width) || r.width < .1 || r.width > 5) return null;
-	let i = new Vn();
-	i.name = "climate-airflow-runtime", i.userData.climateRuntime = !0, i.visible = !1, i.position.fromArray(r.outlet), e.add(i);
-	let a = { value: 0 }, o = { value: new X() }, s = [];
+	let n = e.userData.climateVisual;
+	if (!n || n.version !== 1 || !Array.isArray(n.outlet) || n.outlet.length !== 3 || !n.outlet.every((e) => Number.isFinite(e) && Math.abs(e) < 10) || !Number.isFinite(n.width) || n.width < .1 || n.width > 5) return null;
+	let r = new Vn();
+	r.name = "climate-airflow-runtime", r.userData.climateRuntime = !0, r.visible = !1, r.position.fromArray(n.outlet), e.add(r);
+	let i = { value: 0 }, o = { value: new X() }, s = [];
 	for (let e = 0; e < 5; e++) {
-		let t = (e - 2) * r.width * .19, n = new Na([
+		let t = (e - 2) * n.width * .19, a = new Na([
 			new K(t, -.015, .025),
 			new K(t * 1.12, -.12, .4),
 			new K(t * 1.5, -.3, 1.05),
 			new K(t * 2.1, -.65, 1.8)
 		]);
 		for (let t of [!1, !0]) {
-			let c = new $a(n, 40, Wt.clamp(r.width * (t ? .012 : .044), t ? .005 : .02, t ? .014 : .045), 8, !1), l = new co({
+			let c = new $a(a, 40, Wt.clamp(n.width * (t ? .012 : .044), t ? .005 : .02, t ? .014 : .045), 8, !1), l = new co({
 				vertexShader: ud,
 				fragmentShader: dd,
 				uniforms: {
-					uTime: a,
+					uTime: i,
 					uColor: o,
 					uPhase: { value: e * .13 },
 					uStrength: { value: t ? .82 : .18 },
@@ -12804,7 +12805,7 @@ function fd(e, { reducedMotion: t = !1 } = {}) {
 				depthWrite: !1,
 				toneMapped: !1
 			}), u = new gi(c, l);
-			u.name = t ? "climate-flow-core" : "climate-flow-halo", u.raycast = () => {}, u.renderOrder = t ? 3 : 2, i.add(u), s.push({
+			u.name = t ? "climate-flow-core" : "climate-flow-halo", u.raycast = () => {}, u.renderOrder = t ? 3 : 2, r.add(u), s.push({
 				geometry: c,
 				material: l
 			});
@@ -12817,12 +12818,12 @@ function fd(e, { reducedMotion: t = !1 } = {}) {
 		new K(0, -.65, 1.8)
 	]), l = [], u = [], d = [];
 	for (let e = 0; e <= 40; e++) {
-		let t = e / 40, n = c.getPoint(t), i = r.width * .45 * (1 + 1.5 * t);
-		for (let r = 0; r <= 16; r++) {
-			let a = r / 16;
-			if (l.push((a * 2 - 1) * i, n.y, n.z), u.push(t, a), e < 40 && r < 16) {
-				let t = e * 17 + r, n = t + 1, i = t + 16 + 1, a = i + 1;
-				d.push(t, i, n, n, i, a);
+		let t = e / 40, r = c.getPoint(t), i = n.width * .45 * (1 + 1.5 * t);
+		for (let n = 0; n <= 16; n++) {
+			let a = n / 16;
+			if (l.push((a * 2 - 1) * i, r.y, r.z), u.push(t, a), e < 40 && n < 16) {
+				let t = e * 17 + n, r = t + 1, i = t + 16 + 1, a = i + 1;
+				d.push(t, i, r, r, i, a);
 			}
 		}
 	}
@@ -12832,7 +12833,7 @@ function fd(e, { reducedMotion: t = !1 } = {}) {
 		vertexShader: ud,
 		fragmentShader: dd,
 		uniforms: {
-			uTime: a,
+			uTime: i,
 			uColor: o,
 			uPhase: { value: 0 },
 			uStrength: { value: .72 },
@@ -12843,7 +12844,7 @@ function fd(e, { reducedMotion: t = !1 } = {}) {
 		toneMapped: !1,
 		side: 2
 	}), m = new gi(f, p);
-	m.name = "climate-flow-plume", m.raycast = () => {}, m.renderOrder = 1, i.add(m), s.push({
+	m.name = "climate-flow-plume", m.raycast = () => {}, m.renderOrder = 1, r.add(m), s.push({
 		geometry: f,
 		material: p
 	});
@@ -12851,35 +12852,35 @@ function fd(e, { reducedMotion: t = !1 } = {}) {
 	e.traverse((e) => {
 		e.userData.climateIndicator && e.material?.isMeshStandardMaterial && h.push(e.material);
 	});
-	let g = e.getObjectByName("air-conditioner-lower-louver"), _ = g?.rotation.x ?? 0, v = n(), y = {};
+	let g = e.getObjectByName("air-conditioner-lower-louver"), _ = g?.rotation.x ?? 0, v = a(), y = {};
 	return {
-		group: i,
+		group: r,
 		setReducedMotion(e) {
 			t = e;
 		},
 		get animating() {
 			if (!v.flow || t) return !1;
-			for (let e = i; e; e = e.parent) if (!e.visible) return !1;
+			for (let e = r; e; e = e.parent) if (!e.visible) return !1;
 			return !0;
 		},
 		get appearance() {
 			return v;
 		},
 		setState(e) {
-			y = e, v = n(e), i.visible = v.flow;
+			y = e, v = a(e), r.visible = v.flow;
 			let t = new X(v.color).getHSL({});
 			o.value.setHSL(t.h, Math.max(.85, t.s), .28);
 			for (let t of h) t.emissive.set(v.color), t.color.set(v.color), t.emissiveIntensity = e.on && !e.unavailable ? 1.1 : 0;
 			g && !e.unavailable && (g.rotation.x = _ + (v.open ? -.36 : 0));
 		},
 		update(e) {
-			v.flow && (a.value = t ? 0 : e * v.speed, g && /^(on|auto|vertical|both)$/i.test(y.swingMode || "") && (g.rotation.x = _ - .36 + (t ? 0 : Math.sin(a.value * .8) * .07)));
+			v.flow && (i.value = t ? 0 : e * v.speed, g && /^(on|auto|vertical|both)$/i.test(y.swingMode || "") && (g.rotation.x = _ - .36 + (t ? 0 : Math.sin(i.value * .8) * .07)));
 		},
 		dispose() {
 			v = {
 				...v,
 				flow: !1
-			}, e.remove(i);
+			}, e.remove(r);
 			for (let { geometry: e, material: t } of s) e.dispose(), t.dispose();
 			g && (g.rotation.x = _);
 		}
@@ -12929,8 +12930,8 @@ function kd(e) {
 	};
 }
 var Ad = (e) => Math.atan2(Math.sin(e), Math.cos(e)), jd = (e, t) => Math.atan2(t.x - e.x, t.z - e.z);
-function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = () => null, roomCenter: a = () => null, reducedMotion: o = !1, random: s = Math.random } = {}) {
-	let c = new K(...i(e)), l = new K(...e.position), u = Math.atan2(c.x, c.z), d = l.clone().addScaledVector(c, yd), f = l.clone().addScaledVector(c, bd), p = {
+function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = () => null, roomCenter: i = () => null, reducedMotion: a = !1, random: o = Math.random } = {}) {
+	let s = new K(...m(e)), c = new K(...e.position), l = Math.atan2(s.x, s.z), u = c.clone().addScaledVector(s, yd), d = c.clone().addScaledVector(s, bd), f = {
 		gloss: new uo({
 			color: "#111214",
 			roughness: .12,
@@ -12953,9 +12954,9 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 			emissive: Ed.docked,
 			emissiveIntensity: 1.4
 		})
-	}, m = Od(p);
-	m.position.copy(l), m.rotation.y = u;
-	let { robot: h, brush: g } = kd(p), _ = d.clone(), v = u, y = "parked", b = "docked", x = 0, S = 0, C = 0, w = 1, T, E = [], D = 0, O = null, k = Infinity, A = null, j = [], M = [], ee = () => {
+	}, p = Od(f);
+	p.position.copy(c), p.rotation.y = l;
+	let { robot: h, brush: g } = kd(f), _ = u.clone(), v = l, y = "parked", b = "docked", x = 0, S = 0, C = 0, w = 1, T, E = [], D = 0, O = null, k = Infinity, A = null, j = [], M = [], ee = () => {
 		h.position.copy(_), h.rotation.y = v;
 	};
 	ee();
@@ -12967,7 +12968,7 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 			pd * .8,
 			-.175 * .8
 		]) {
-			let a = _.clone().addScaledVector(n, i).setY(l.y + vd);
+			let a = _.clone().addScaledVector(n, i).setY(c.y + vd);
 			r = Math.min(r, t(a, e, 3) - pd - _d);
 		}
 		for (let t of [
@@ -12985,15 +12986,15 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 		return Math.max(0, r);
 	}
 	function P(e, t) {
-		return O ? r(e, l.y, t) === O : n(e, l.y, t);
+		return O ? r(e, c.y, t) === O : n(e, c.y, t);
 	}
-	let ne = /* @__PURE__ */ new Map(), re = (e, t) => new K(l.x + e * Sd, l.y, l.z + t * Sd);
+	let ne = /* @__PURE__ */ new Map(), re = (e, t) => new K(c.x + e * Sd, c.y, c.z + t * Sd);
 	function ie(e, r) {
 		let i = `${e},${r}`;
 		if (ne.has(i)) return ne.get(i);
-		let a = re(e, r), o = n(a.x, l.y, a.z);
+		let a = re(e, r), o = n(a.x, c.y, a.z);
 		if (o) {
-			let e = a.clone().setY(l.y + vd);
+			let e = a.clone().setY(c.y + vd);
 			for (let [n, r] of [
 				[1, 0],
 				[-1, 0],
@@ -13015,26 +13016,26 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 			0,
 			pd * .85,
 			-.14875
-		] : [0]) if (t(e.clone().addScaledVector(s, n).setY(l.y + vd), a, o + .05) < o + (n ? 0 : .02)) return !1;
+		] : [0]) if (t(e.clone().addScaledVector(s, n).setY(c.y + vd), a, o + .05) < o + (n ? 0 : .02)) return !1;
 		for (let t = .3; t < o; t += .3) {
 			let r = e.clone().addScaledVector(a, t);
-			if (!n(r.x, l.y, r.z)) return !1;
+			if (!n(r.x, c.y, r.z)) return !1;
 		}
 		return !0;
 	}
 	function* F(e, t) {
-		let n = a(t), i = Math.round((e.x - l.x) / Sd), o = Math.round((e.z - l.z) / Sd), s = (e, t) => n ? re(e, t).distanceTo(new K(n[0], l.y, n[2])) : 0, c = /* @__PURE__ */ new Map([[`${i},${o}`, null]]), u = /* @__PURE__ */ new Map([[`${i},${o}`, 0]]), d = [[
-			s(i, o),
-			i,
+		let n = i(t), a = Math.round((e.x - c.x) / Sd), o = Math.round((e.z - c.z) / Sd), s = (e, t) => n ? re(e, t).distanceTo(new K(n[0], c.y, n[2])) : 0, l = /* @__PURE__ */ new Map([[`${a},${o}`, null]]), u = /* @__PURE__ */ new Map([[`${a},${o}`, 0]]), d = [[
+			s(a, o),
+			a,
 			o
 		]], f = 0;
 		for (; d.length && f < wd;) {
 			let n = 0;
 			for (let e = 1; e < d.length; e++) d[e][0] < d[n][0] && (n = e);
-			let [, a, p] = d.splice(n, 1)[0], m = re(a, p), h = `${a},${p}`;
-			if ((a !== i || p !== o) && r(m.x, l.y, m.z) === t) {
+			let [, i, p] = d.splice(n, 1)[0], m = re(i, p), h = `${i},${p}`;
+			if ((i !== a || p !== o) && r(m.x, c.y, m.z) === t) {
 				let t = [];
-				for (let e = h; e; e = c.get(e)) {
+				for (let e = h; e; e = l.get(e)) {
 					let [n, r] = e.split(",").map(Number);
 					t.unshift(re(n, r));
 				}
@@ -13042,9 +13043,9 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 			}
 			for (let e = -1; e <= 1; e++) for (let t = -1; t <= 1; t++) {
 				if (!e && !t) continue;
-				let n = a + e, r = p + t, i = `${n},${r}`, o = Math.hypot(e, t) * Sd, l = u.get(h) + o;
-				u.has(i) && u.get(i) <= l || ie(n, r) && ae(m, re(n, r), !1) && (u.set(i, l), c.set(i, h), d.push([
-					l + s(n, r),
+				let n = i + e, r = p + t, a = `${n},${r}`, o = Math.hypot(e, t) * Sd, c = u.get(h) + o;
+				u.has(a) && u.get(a) <= c || ie(n, r) && ae(m, re(n, r), !1) && (u.set(a, c), l.set(a, h), d.push([
+					c + s(n, r),
 					n,
 					r
 				]));
@@ -13065,7 +13066,7 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 	function I(e) {
 		for (A = null, j = []; D < E.length;) {
 			let t = E[D];
-			if (r(_.x, l.y, _.z) === t) {
+			if (r(_.x, c.y, _.z) === t) {
 				O = t, k = D < E.length - 1 ? (e ?? 0) + Td : Infinity, C = 0, y = "wander";
 				return;
 			}
@@ -13075,7 +13076,7 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 		C = 0, y = "wander";
 	}
 	function L() {
-		let e = Math.PI / 2 * (1 + s()) * (s() < .5 ? -1 : 1);
+		let e = Math.PI / 2 * (1 + o()) * (o() < .5 ? -1 : 1);
 		x = Ad(v + e), y = "turning";
 	}
 	function se() {
@@ -13106,16 +13107,16 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 			"paused",
 			"idle",
 			"error"
-		].includes(b) ? (_.copy(f).addScaledVector(c, .35), y = "still") : (_.copy(d), y = "parked"), v = u;
+		].includes(b) ? (_.copy(d).addScaledVector(s, .35), y = "still") : (_.copy(u), y = "parked"), v = l;
 	};
 	return {
-		objects: [m, h],
+		objects: [p, h],
 		sensors: {
 			sense: t,
 			floorAt: n,
 			roomAt: r
 		},
-		dock: m,
+		dock: p,
 		robot: h,
 		get mode() {
 			return y;
@@ -13124,7 +13125,7 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 			return O;
 		},
 		setRooms(e = []) {
-			E = [...e], D = 0, O = null, k = Infinity, !(o || b !== "cleaning") && [
+			E = [...e], D = 0, O = null, k = Infinity, !(a || b !== "cleaning") && [
 				"wander",
 				"turning",
 				"still",
@@ -13136,7 +13137,7 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 			return _.toArray();
 		},
 		get animating() {
-			return !o && ([
+			return !a && ([
 				"leaving",
 				"wander",
 				"turning",
@@ -13148,15 +13149,15 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 		},
 		setState(e = {}) {
 			let t = e.unavailable ? "unavailable" : e.state || "unavailable";
-			p.led.emissive.set(Ed[t] || "#000000"), p.led.emissiveIntensity = Ed[t] ? 1.4 : 0;
+			f.led.emissive.set(Ed[t] || "#000000"), f.led.emissiveIntensity = Ed[t] ? 1.4 : 0;
 			let n = b;
-			if (b = t, o) {
+			if (b = t, a) {
 				fe(), ee();
 				return;
 			}
 			if (t === n) return;
 			let r = y !== "parked";
-			t === "cleaning" ? y === "parked" ? (M.length = 0, M.push(f.clone()), w = 1, y = "leaving") : (y === "still" || y === "homing" || y === "docking") && (w = 1, C = 0, E.length && !O ? I(T) : y = "wander") : t === "returning" ? (de(), r && ue()) : t === "docked" ? (de(), r && ue(!0)) : r && ![
+			t === "cleaning" ? y === "parked" ? (M.length = 0, M.push(d.clone()), w = 1, y = "leaving") : (y === "still" || y === "homing" || y === "docking") && (w = 1, C = 0, E.length && !O ? I(T) : y = "wander") : t === "returning" ? (de(), r && ue()) : t === "docked" ? (de(), r && ue(!0)) : r && ![
 				"homing",
 				"docking",
 				"planning",
@@ -13165,28 +13166,28 @@ function Md(e, { sense: t = () => Infinity, floorAt: n = () => !0, roomAt: r = (
 		},
 		update(e) {
 			let t = T === void 0 ? 0 : Math.min(.1, Math.max(0, e - T));
-			if (T = e, !o && t) {
+			if (T = e, !a && t) {
 				if (b === "cleaning" && y !== "parked" && (g.rotation.y -= 14 * t), !(["planning", "travel"].includes(y) && b !== "cleaning")) {
-					if (y === "leaving") le(f, t) && (C = 0, E.length ? I(e) : y = "wander");
+					if (y === "leaving") le(d, t) && (C = 0, E.length ? I(e) : y = "wander");
 					else if (y === "planning") {
 						let t = A.next();
 						t.done && (t.value?.length ? (j = t.value, y = "travel") : (D++, I(e)));
-					} else if (y === "travel") le(j[0], t) ? (j.shift(), se(), j.length || I(e)) : _.distanceTo(M.at(-1) || f) >= xd && se();
+					} else if (y === "travel") le(j[0], t) ? (j.shift(), se(), j.length || I(e)) : _.distanceTo(M.at(-1) || d) >= xd && se();
 					else if (y === "wander" && O && e >= k) D++, I(e);
 					else if (y === "wander") {
 						if (C <= .001 && (C = N()), C <= .001) ++S > 40 ? ue() : L();
 						else {
 							let e = Math.min(C, hd * t);
-							_.addScaledVector(te(), e), C -= e, S = 0, C > .6 && (C = .6), _.distanceTo(M.at(-1) || f) >= xd && se();
+							_.addScaledVector(te(), e), C -= e, S = 0, C > .6 && (C = .6), _.distanceTo(M.at(-1) || d) >= xd && se();
 						}
-					} else y === "turning" ? ce(x, t) && (C = N(), y = C > .05 ? "wander" : "turning", y === "turning" && (++S > 40 ? ue() : L())) : y === "homing" ? le(M.at(-1) || f, t) && (M.length ? M.pop() : y = "docking") : y === "docking" && ce(u, t) && le(d, t, !0) && (v = u, w = 1, y = "parked");
+					} else y === "turning" ? ce(x, t) && (C = N(), y = C > .05 ? "wander" : "turning", y === "turning" && (++S > 40 ? ue() : L())) : y === "homing" ? le(M.at(-1) || d, t) && (M.length ? M.pop() : y = "docking") : y === "docking" && ce(l, t) && le(u, t, !0) && (v = l, w = 1, y = "parked");
 				}
 				ee();
 			}
 		},
 		dispose() {
-			for (let e of [m, h]) e.parent?.remove(e), e.traverse((e) => e.geometry?.dispose());
-			for (let e of Object.values(p)) e.dispose();
+			for (let e of [p, h]) e.parent?.remove(e), e.traverse((e) => e.geometry?.dispose());
+			for (let e of Object.values(f)) e.dispose();
 		}
 	};
 }
@@ -16174,14 +16175,14 @@ var Zp = class {
 		};
 	}
 };
-async function Qp(e, t, n) {
-	let i = async () => (await Jp(n).loadAsync(e)).scene;
-	if (!t) return {
+async function Qp(t, n, r) {
+	let i = async () => (await Jp(r).loadAsync(t)).scene;
+	if (!n) return {
 		scene: await i(),
 		hit: !1
 	};
-	let a = r.get(t.owner);
-	return a || r.set(t.owner, a = new Zp()), a.load(t.key, i);
+	let a = e.get(n.owner);
+	return a || e.set(n.owner, a = new Zp()), a.load(n.key, i);
 }
 // shared/light-effects.mjs
 var $p = {
@@ -16302,9 +16303,9 @@ var sm = class {
 			markers: !0,
 			interactive: !0,
 			...n
-		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.effectColor = new X(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = f({
+		}, this.container = e, this.onPick = t, this.materials = [], this.fixtures = /* @__PURE__ */ new Map(), this.effectColor = new X(), this.generation = 0, this.climateFrame = 0, this.visibilityChanged = () => this.syncClimateAnimation(), document.addEventListener("visibilitychange", this.visibilityChanged), this.profile = u({
 			quality: this.options.quality,
-			mobile: l(),
+			mobile: s(),
 			devicePixelRatio: globalThis.devicePixelRatio
 		}), this.renderer = new ld({
 			antialias: this.profile.antialias,
@@ -16379,76 +16380,76 @@ var sm = class {
 			throw this.disposeScene(i), e;
 		}
 	}
-	async prepareAsset(t, n, r) {
-		let i = this.generation;
-		this.shadowsCurrent = !1, this.preparedViews = /* @__PURE__ */ new Map(), this.clearClimateVisuals(), this.disposeScene(this.scene), this.scene.clear(), this.groundShadow = null, this.groundBox = null, this.roomHighlight = null, this.model = t, this.asset = n, this.scene.add(this.asset), this.materials = [], this.nodes = /* @__PURE__ */ new Map(), this.asset.traverse((e) => {
+	async prepareAsset(e, t, n) {
+		let r = this.generation;
+		this.shadowsCurrent = !1, this.preparedViews = /* @__PURE__ */ new Map(), this.clearClimateVisuals(), this.disposeScene(this.scene), this.scene.clear(), this.groundShadow = null, this.groundBox = null, this.roomHighlight = null, this.model = e, this.asset = t, this.scene.add(this.asset), this.materials = [], this.nodes = /* @__PURE__ */ new Map(), this.asset.traverse((e) => {
 			if (e.userData.controlId && this.nodes.set(e.userData.controlId, e), e.isMesh) {
 				e.castShadow = !e.userData.daylightWindowId, e.receiveShadow = !0, e.material = Array.isArray(e.material) ? e.material.map((e) => e.clone()) : e.material.clone();
 				for (let t of Array.isArray(e.material) ? e.material : [e.material]) t.isMeshBasicMaterial && this.materials.push([t, t.color.clone()]);
 			}
-		}), this.ambient = new Zo("#e5e8ee", "#8c8378", t.ambient ?? .22), this.scene.add(this.ambient), this.fill = new _s(16777215, .25), this.scene.add(this.fill), this.fixtures = /* @__PURE__ */ new Map();
-		for (let n of t.controls) {
-			let r = new ps(n.color || "#fff0d4", n.type === "light" ? n.intensity ?? 12 : 0, 20, 2);
-			r.position.fromArray(n.position), r.castShadow = n.type === "light", r.shadow.mapSize.set(512, 512), r.shadow.bias = -.001, r.shadow.normalBias = .02, n.type === "light" && this.scene.add(r);
-			let i = new gi(new Qa(.065, 12, 8), new ii({
+		}), this.ambient = new Zo("#e5e8ee", "#8c8378", e.ambient ?? .22), this.scene.add(this.ambient), this.fill = new _s(16777215, .25), this.scene.add(this.fill), this.fixtures = /* @__PURE__ */ new Map();
+		for (let t of e.controls) {
+			let n = new ps(t.color || "#fff0d4", t.type === "light" ? t.intensity ?? 12 : 0, 20, 2);
+			n.position.fromArray(t.position), n.castShadow = t.type === "light", n.shadow.mapSize.set(512, 512), n.shadow.bias = -.001, n.shadow.normalBias = .02, t.type === "light" && this.scene.add(n);
+			let r = new gi(new Qa(.065, 12, 8), new ii({
 				color: "#c3dbab",
 				depthTest: !1
-			})), a = e(t, n.id), o = a && a.height !== n.id || n.lightGroupPrimary === !1;
-			i.visible = !n.hidden && !o && n.lightGroupPrimary !== !1 && this.options.markers && (this.options.mode !== "floor" || !!this.options.floorMarkers), i.position.fromArray(n.markerPosition || n.position), i.userData.pickControl = n.id, i.renderOrder = 10, this.scene.add(i);
-			let s = [];
-			for (let e of n.nodeIds || []) {
-				let t = this.nodes.get(e);
-				t && t.traverse((e) => {
-					e.userData.pickControl = n.id;
-					for (let t of Array.isArray(e.material) ? e.material : [e.material]) t?.isMeshStandardMaterial && s.push([t, t.emissiveIntensity]);
+			})), i = f(e, t.id), a = i && i.height !== t.id || t.lightGroupPrimary === !1;
+			r.visible = !t.hidden && !a && t.lightGroupPrimary !== !1 && this.options.markers && (this.options.mode !== "floor" || !!this.options.floorMarkers), r.position.fromArray(t.markerPosition || t.position), r.userData.pickControl = t.id, r.renderOrder = 10, this.scene.add(r);
+			let o = [];
+			for (let e of t.nodeIds || []) {
+				let n = this.nodes.get(e);
+				n && n.traverse((e) => {
+					e.userData.pickControl = t.id;
+					for (let t of Array.isArray(e.material) ? e.material : [e.material]) t?.isMeshStandardMaterial && o.push([t, t.emissiveIntensity]);
 				});
 			}
-			let c = n.type === "cover" ? (n.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
-			for (let e of c) p(e, n.defaultPosition ?? 0);
-			let l = n.type === "number" ? (n.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
-			for (let e of l) h(e, n.defaultValue);
-			if (l.length) {
-				let e = l[0].userData.numberMotion;
-				i.position.y = n.position[1] + (n.defaultValue - e.restValue) * e.metersPerUnit;
+			let s = t.type === "cover" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
+			for (let e of s) p(e, t.defaultPosition ?? 0);
+			let c = t.type === "number" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [];
+			for (let e of c) h(e, t.defaultValue);
+			if (c.length) {
+				let e = c[0].userData.numberMotion;
+				r.position.y = t.position[1] + (t.defaultValue - e.restValue) * e.metersPerUnit;
 			}
-			let u = n.type === "climate" ? (n.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((e) => fd(e, { reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches })).filter(Boolean) : [], d = n.type === "lock" ? (n.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [], f = n.type === "vacuum" ? this.createVacuum(n, i) : void 0;
-			this.fixtures.set(n.id, {
-				vacuum: f,
-				lockNodes: d,
-				climateVisuals: u,
-				numberNodes: l,
-				markerRestY: n.position[1],
-				type: n.type,
-				companion: o,
-				light: r,
-				marker: i,
-				mats: s,
-				coverNodes: c,
-				base: n.intensity ?? 12
+			let l = t.type === "climate" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((e) => fd(e, { reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches })).filter(Boolean) : [], u = t.type === "lock" ? (t.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean) : [], d = t.type === "vacuum" ? this.createVacuum(t, r) : void 0;
+			this.fixtures.set(t.id, {
+				vacuum: d,
+				lockNodes: u,
+				climateVisuals: l,
+				numberNodes: c,
+				markerRestY: t.position[1],
+				type: t.type,
+				companion: a,
+				light: n,
+				marker: r,
+				mats: o,
+				coverNodes: s,
+				base: t.intensity ?? 12
 			});
 		}
-		let a = (e) => {
+		let i = (e) => {
 			let t = 0;
 			for (let n = e.parent; n; n = n.parent) t++;
 			return t;
 		};
-		t.controls.flatMap((e) => (e.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((t) => [e.id, t])).sort((e, t) => a(e[1]) - a(t[1])).forEach(([e, t]) => t.traverse((t) => {
+		e.controls.flatMap((e) => (e.nodeIds || []).map((e) => this.nodes.get(e)).filter(Boolean).map((t) => [e.id, t])).sort((e, t) => i(e[1]) - i(t[1])).forEach(([e, t]) => t.traverse((t) => {
 			t.userData.pickControl = e;
-		})), this.daylight = t.daylight ? Pd(t.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = t.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
-		let { center: o, size: s } = this.applyHouseScope();
-		this.defaultTarget = t.camera?.target || o.toArray(), this.defaultPosition = t.camera?.position || o.clone().add(new K(s * .7, s * .65, s * .7)).toArray();
-		let c = performance.now();
-		this.renderer.domElement.dataset.prepareMs = Math.round(c - r);
-		let l = this.compiling = {};
+		})), this.daylight = e.daylight ? Pd(e.daylight) : null, this.daylight && this.scene.add(this.daylight.group), this.daylightMode = e.daylight?.mode ?? "night", this.sunEntity = void 0, this.lastStates = /* @__PURE__ */ new Map();
+		let { center: a, size: o } = this.applyHouseScope();
+		this.defaultTarget = e.camera?.target || a.toArray(), this.defaultPosition = e.camera?.position || a.clone().add(new K(o * .7, o * .65, o * .7)).toArray();
+		let s = performance.now();
+		this.renderer.domElement.dataset.prepareMs = Math.round(s - n);
+		let c = this.compiling = {};
 		this.renderSuspended = !0;
 		try {
 			await this.compileShown();
 		} finally {
-			this.compiling === l && (this.compiling = null, this.renderSuspended = !1);
+			this.compiling === c && (this.compiling = null, this.renderSuspended = !1);
 		}
-		if (i !== this.generation) return !1;
-		let u = performance.now();
-		return this.renderer.domElement.dataset.compileMs = Math.round(u - c), this.deferShadows = !0, this.setView(this.options.mode), this.renderer.domElement.dataset.firstRenderMs = Math.round(performance.now() - u), !0;
+		if (r !== this.generation) return !1;
+		let l = performance.now();
+		return this.renderer.domElement.dataset.compileMs = Math.round(l - s), this.deferShadows = !0, this.setView(this.options.mode), this.renderer.domElement.dataset.firstRenderMs = Math.round(performance.now() - l), !0;
 	}
 	async compileShown() {
 		if (!this.contextLost) try {
@@ -16459,26 +16460,26 @@ var sm = class {
 		} catch {}
 	}
 	applyHouseScope() {
-		let e = this.model, t = e.houseFloor, n = e.members ? this.asset.children.filter((e) => e.userData.pickRoom) : [], r = new Set((e.members || []).map((e) => e.model));
-		for (let e of n) e.visible = r.has(e.userData.pickRoom);
-		let i = new Set(e.controls.map((e) => e.id));
-		for (let [e, t] of this.fixtures) t.outOfScope = !i.has(e), t.light.visible = !t.outOfScope, t.light.castShadow = t.type === "light" && !t.outOfScope, t.outOfScope && (t.marker.visible = !1);
-		this.daylight?.setScope(e.members ? [...r] : null), this.daylight?.group.traverse((e) => {
+		let e = this.model, n = e.houseFloor, r = e.members ? this.asset.children.filter((e) => e.userData.pickRoom) : [], i = new Set((e.members || []).map((e) => e.model));
+		for (let e of r) e.visible = i.has(e.userData.pickRoom);
+		let a = new Set(e.controls.map((e) => e.id));
+		for (let [e, t] of this.fixtures) t.outOfScope = !a.has(e), t.light.visible = !t.outOfScope, t.light.castShadow = t.type === "light" && !t.outOfScope, t.outOfScope && (t.marker.visible = !1);
+		this.daylight?.setScope(e.members ? [...i] : null), this.daylight?.group.traverse((e) => {
 			e.isSpotLight && (e.castShadow = !0);
 		});
 		let o = g(this.scene, this.renderer.capabilities.maxTextures, this.profile?.shadowPasses);
-		a(this.scene, this.profile?.shadowMapSize), this.renderer.domElement && (this.renderer.domElement.dataset.shadowLights = o.shadowLights), this.asset.updateMatrixWorld(!0);
+		t(this.scene, this.profile?.shadowMapSize), this.renderer.domElement && (this.renderer.domElement.dataset.shadowLights = o.shadowLights), this.asset.updateMatrixWorld(!0);
 		let s = new ur();
-		for (let e of n.length ? n.filter((e) => e.visible) : [this.asset]) s.expandByObject(e);
+		for (let e of r.length ? r.filter((e) => e.visible) : [this.asset]) s.expandByObject(e);
 		s.isEmpty() && s.setFromObject(this.asset);
 		let c = s.getCenter(new K()), l = s.getSize(new K()).length();
-		t && (s.min.y = Math.max(s.min.y, t.minY), s.max.y = Math.min(s.max.y, t.maxY), s.max.y < s.min.y && (s.max.y = s.min.y + .1)), this.updateGroundShadow(s);
-		let u = !!t || !!e.houseView;
+		n && (s.min.y = Math.max(s.min.y, n.minY), s.max.y = Math.min(s.max.y, n.maxY), s.max.y < s.min.y && (s.max.y = s.min.y + .1)), this.updateGroundShadow(s);
+		let u = !!n || !!e.houseView;
 		this.renderer.localClippingEnabled = u;
-		let d = u ? [new Xr(new K(0, 1, 0), -(t?.minY ?? -1e5)), new Xr(new K(0, -1, 0), t?.maxY ?? 1e5)] : [];
+		let d = u ? [new Xr(new K(0, 1, 0), -(n?.minY ?? -1e5)), new Xr(new K(0, -1, 0), n?.maxY ?? 1e5)] : [];
 		if (this.asset.traverse((e) => {
 			for (let t of Array.isArray(e.material) ? e.material : [e.material]) t && ((t.clippingPlanes?.length || 0) !== d.length && (t.needsUpdate = !0), t.clippingPlanes = d, t.clipShadows = !0);
-		}), this.bounds = s, this.clipPlanes = d, this.roomBoxes = /* @__PURE__ */ new Map(), e.members) for (let e of n) e.visible && this.roomBoxes.set(e.userData.pickRoom, new ur().expandByObject(e));
+		}), this.bounds = s, this.clipPlanes = d, this.roomBoxes = /* @__PURE__ */ new Map(), e.members) for (let e of r) e.visible && this.roomBoxes.set(e.userData.pickRoom, new ur().expandByObject(e));
 		return {
 			center: c,
 			size: l
@@ -16543,12 +16544,12 @@ var sm = class {
 			x: (i.x + 1) * n / 2,
 			y: (1 - i.y) * r / 2,
 			visible: i.z >= -1 && i.z <= 1 && Math.abs(i.x) <= 1 && Math.abs(i.y) <= 1
-		}), o = new Rs(), s = new G(), c = new K(), l = (e, i) => {
+		}), o = new Rs(), s = new G(), l = new K(), u = (e, i) => {
 			s.set(e / n * 2 - 1, 1 - i / r * 2), o.setFromCamera(s, this.camera);
-			let a = null, l = Infinity;
-			for (let [e, n] of t) if (o.ray.intersectBox(n, c)) {
-				let t = c.distanceToSquared(o.ray.origin);
-				t < l && (l = t, a = e);
+			let a = null, c = Infinity;
+			for (let [e, n] of t) if (o.ray.intersectBox(n, l)) {
+				let t = l.distanceToSquared(o.ray.origin);
+				t < c && (c = t, a = e);
 			}
 			return a;
 		}, d = (e, t) => {
@@ -16561,11 +16562,11 @@ var sm = class {
 				].map((n) => (e >> n & 1 ? t.max : t.min).getComponent(n)));
 				i.push(n.x), s.push(n.y);
 			}
-			let c = Math.max(0, Math.min(...i)), u = Math.min(n, Math.max(...i)), d = Math.max(0, Math.min(...s)), f = Math.min(r, Math.max(...s));
-			if (u <= c || f <= d) return 1;
+			let c = Math.max(0, Math.min(...i)), l = Math.min(n, Math.max(...i)), d = Math.max(0, Math.min(...s)), f = Math.min(r, Math.max(...s));
+			if (l <= c || f <= d) return 1;
 			let p = 0, m = 0;
 			for (let n = 0; n < 8; n++) for (let r = 0; r < 8; r++) {
-				let i = c + (n + .5) * (u - c) / 8, a = d + (r + .5) * (f - d) / 8, s = l(i, a);
+				let i = c + (n + .5) * (l - c) / 8, a = d + (r + .5) * (f - d) / 8, s = u(i, a);
 				s === e && p++, (s === e || o.ray.intersectsBox(t)) && m++;
 			}
 			return m ? p / m : 1;
@@ -16575,7 +16576,7 @@ var sm = class {
 			if (r) i = a(r);
 			else {
 				let e = (n.min.x + n.max.x) / 2, t = (n.min.z + n.max.z) / 2, r = n.min.y;
-				i = u([
+				i = c([
 					[
 						e,
 						r,
@@ -16681,30 +16682,30 @@ var sm = class {
 		if (!this.bounds) return;
 		let { width: e, height: t } = this.container.getBoundingClientRect();
 		if (!e || !t) return;
-		let n = Math.max(0, Math.min(t * .3, this.options.frameInset?.() || 0)), r = t - n, i = !!this.model?.focusRoom, a = !this.options.cameraModel || this.model?.id === this.options.cameraModel, o = i ? this.model.focusFrame : void 0, l = this.options.camera && !i && a ? d(this.options.camera, {
-			aspect: e / r,
+		let n = Math.max(0, Math.min(t * .3, this.options.frameInset?.() || 0)), a = t - n, o = !!this.model?.focusRoom, s = !this.options.cameraModel || this.model?.id === this.options.cameraModel, c = o ? this.model.focusFrame : void 0, u = this.options.camera && !o && s ? l(this.options.camera, {
+			aspect: e / a,
 			min: this.bounds.min.toArray(),
 			max: this.bounds.max.toArray(),
 			heading: this.options.heading,
 			tilt: this.options.tilt,
 			zoom: this.options.zoom
-		}) : (this.options.mode === "front" ? s : c)(this.bounds.min.toArray(), this.bounds.max.toArray(), e / r, o?.tilt ?? this.options.tilt ?? (this.options.mode === "front" ? 28 : 0), o?.heading ?? this.options.heading ?? 0);
+		}) : (this.options.mode === "front" ? r : i)(this.bounds.min.toArray(), this.bounds.max.toArray(), e / a, c?.tilt ?? this.options.tilt ?? (this.options.mode === "front" ? 28 : 0), c?.heading ?? this.options.heading ?? 0);
 		Object.assign(this.camera, {
-			aspect: e / r,
-			left: l.left,
-			right: l.right,
-			top: l.top,
-			bottom: l.bottom,
-			near: l.near,
-			far: l.far,
-			zoom: l.zoom ?? (i ? 1 : this.options.zoom) ?? 1
-		}), this.camera.isPerspectiveCamera && l.fov && (this.camera.fov = l.fov), this.camera.position.fromArray(l.position), this.camera.up.fromArray(l.up), this.orbit.target.fromArray(l.target), this.camera.lookAt(this.orbit.target), n ? this.camera.setViewOffset(e, r, 0, 0, e, t) : this.camera.clearViewOffset(), this.camera.updateProjectionMatrix();
+			aspect: e / a,
+			left: u.left,
+			right: u.right,
+			top: u.top,
+			bottom: u.bottom,
+			near: u.near,
+			far: u.far,
+			zoom: u.zoom ?? (o ? 1 : this.options.zoom) ?? 1
+		}), this.camera.isPerspectiveCamera && u.fov && (this.camera.fov = u.fov), this.camera.position.fromArray(u.position), this.camera.up.fromArray(u.up), this.orbit.target.fromArray(u.target), this.camera.lookAt(this.orbit.target), n ? this.camera.setViewOffset(e, a, 0, 0, e, t) : this.camera.clearViewOffset(), this.camera.updateProjectionMatrix();
 	}
 	insideShownFloor(e) {
 		return (this.clipPlanes || []).every((t) => t.distanceToPoint(e) > (t.normal.y > 0 ? .1 : -.25));
 	}
 	captureView() {
-		return !this.model || !this.bounds ? null : o({
+		return !this.model || !this.bounds ? null : n({
 			position: this.camera.position.toArray(),
 			target: this.orbit.target.toArray(),
 			up: this.camera.up.toArray(),
@@ -16756,50 +16757,50 @@ var sm = class {
 	setStates(e) {
 		if (this.model) {
 			this.lastStates = e;
-			for (let [t, r] of this.fixtures) {
-				let i = e.get(t) || { on: !1 };
-				if (r.numberNodes.length) {
-					for (let e of r.numberNodes) h(e, i.value);
-					if (Number.isFinite(i.value)) {
-						let e = r.numberNodes[0].userData.numberMotion;
-						r.marker.position.y = r.markerRestY + (Math.max(e.min, Math.min(e.max, i.value)) - e.restValue) * e.metersPerUnit;
+			for (let [t, n] of this.fixtures) {
+				let r = e.get(t) || { on: !1 };
+				if (n.numberNodes.length) {
+					for (let e of n.numberNodes) h(e, r.value);
+					if (Number.isFinite(r.value)) {
+						let e = n.numberNodes[0].userData.numberMotion;
+						n.marker.position.y = n.markerRestY + (Math.max(e.min, Math.min(e.max, r.value)) - e.restValue) * e.metersPerUnit;
 					}
-					r.marker.material.color.set(i.unavailable ? "#858b86" : "#c3dbab");
+					n.marker.material.color.set(r.unavailable ? "#858b86" : "#c3dbab");
 					continue;
 				}
-				if (r.type === "button") {
-					r.marker.material.color.set(i.unavailable ? "#858b86" : "#c3dbab");
+				if (n.type === "button") {
+					n.marker.material.color.set(r.unavailable ? "#858b86" : "#c3dbab");
 					continue;
 				}
-				if (r.type === "vacuum") {
-					r.vacuum?.setState(i), r.marker.material.color.set(i.unavailable ? "#858b86" : i.error ? "#d9654f" : "#c3dbab");
+				if (n.type === "vacuum") {
+					n.vacuum?.setState(r), n.marker.material.color.set(r.unavailable ? "#858b86" : r.error ? "#d9654f" : "#c3dbab");
 					continue;
 				}
-				if (r.type === "lock") {
-					for (let e of r.lockNodes) m(e, i.locked === !0);
-					r.marker.material.color.set(i.unavailable ? "#858b86" : i.jammed ? "#d9654f" : i.locked ? "#7fbf8a" : "#e2b45a");
+				if (n.type === "lock") {
+					for (let e of n.lockNodes) d(e, r.locked === !0);
+					n.marker.material.color.set(r.unavailable ? "#858b86" : r.jammed ? "#d9654f" : r.locked ? "#7fbf8a" : "#e2b45a");
 					continue;
 				}
-				if (r.type === "climate") {
-					let e = n(i);
-					r.marker.material.color.set(e.color);
-					for (let e of r.climateVisuals) e.setState(i);
-					r.climateVisuals.length || this.asset.traverse((n) => {
-						n.userData.climateIndicator === t && n.material?.isMeshStandardMaterial && (n.material.emissive.set(e.color), n.material.emissiveIntensity = i.on && !i.unavailable ? 1 : 0);
+				if (n.type === "climate") {
+					let e = a(r);
+					n.marker.material.color.set(e.color);
+					for (let e of n.climateVisuals) e.setState(r);
+					n.climateVisuals.length || this.asset.traverse((n) => {
+						n.userData.climateIndicator === t && n.material?.isMeshStandardMaterial && (n.material.emissive.set(e.color), n.material.emissiveIntensity = r.on && !r.unavailable ? 1 : 0);
 					});
 					continue;
 				}
-				if (r.type === "cover") {
-					for (let e of r.coverNodes) p(e, i.position ?? i.motionPosition);
-					r.marker.material.color.set(i.unavailable ? "#858b86" : "#c3dbab");
+				if (n.type === "cover") {
+					for (let e of n.coverNodes) p(e, r.position ?? r.motionPosition);
+					n.marker.material.color.set(r.unavailable ? "#858b86" : "#c3dbab");
 					continue;
 				}
-				let a = i.on ? (i.brightness ?? 255) / 255 : 0, o = i.rgb ? new X().setRGB(...i.rgb.map((e) => e / 255), tt) : r.light.color;
-				r.light.color.copy(o), r.light.intensity = r.base * a, r.lightBase = {
-					color: r.light.color.clone(),
-					amount: a
-				}, r.effectRun ||= am(), r.effectRun.report(i.effect, !!i.on && !i.unavailable, performance.now() / 1e3), r.marker.material.color.set(i.unavailable ? "#88908b" : i.on ? o : "#697b6d");
-				for (let [e, t] of r.mats) e.emissive.copy(o), e.emissiveIntensity = t * a;
+				let i = r.on ? (r.brightness ?? 255) / 255 : 0, o = r.rgb ? new X().setRGB(...r.rgb.map((e) => e / 255), tt) : n.light.color;
+				n.light.color.copy(o), n.light.intensity = n.base * i, n.lightBase = {
+					color: n.light.color.clone(),
+					amount: i
+				}, n.effectRun ||= am(), n.effectRun.report(r.effect, !!r.on && !r.unavailable, performance.now() / 1e3), n.marker.material.color.set(r.unavailable ? "#88908b" : r.on ? o : "#697b6d");
+				for (let [e, t] of n.mats) e.emissive.copy(o), e.emissiveIntensity = t * i;
 			}
 			this.ambient.intensity = this.daylight ? .12 : this.options.mode === "dollhouse" ? this.model.ambient ?? .22 : Math.max(this.model.ambient ?? .22, .55);
 			for (let [e, t] of this.materials) e.color.copy(t).multiplyScalar(.5);
@@ -16858,12 +16859,12 @@ var sm = class {
 		return i ? i.point.toArray() : null;
 	}
 	coveredMarkers(e) {
-		let n = /* @__PURE__ */ new Set(), r = (this.asset?.children || []).filter((e) => e.userData.pickRoom && e.visible);
-		if (!this.model?.houseView || this.model.focusRoom || r.length < 2 || !e.length || !this.clipPlanes) return n;
-		let { clientWidth: i, clientHeight: a } = this.container;
-		if (!i || !a) return n;
-		let o = Math.max(1, Math.round(i >= a ? 384 : 384 * i / a)), s = Math.max(1, Math.round(i >= a ? 384 * a / i : 384));
-		this.coverTarget && this.coverTarget.width === o && this.coverTarget.height === s || (this.coverTarget?.dispose(), this.coverTarget = new dn(o, s, {
+		let t = /* @__PURE__ */ new Set(), n = (this.asset?.children || []).filter((e) => e.userData.pickRoom && e.visible);
+		if (!this.model?.houseView || this.model.focusRoom || n.length < 2 || !e.length || !this.clipPlanes) return t;
+		let { clientWidth: r, clientHeight: i } = this.container;
+		if (!r || !i) return t;
+		let a = Math.max(1, Math.round(r >= i ? 384 : 384 * r / i)), s = Math.max(1, Math.round(r >= i ? 384 * i / r : 384));
+		this.coverTarget && this.coverTarget.width === a && this.coverTarget.height === s || (this.coverTarget?.dispose(), this.coverTarget = new dn(a, s, {
 			minFilter: C,
 			magFilter: C,
 			depthBuffer: !0
@@ -16875,12 +16876,12 @@ var sm = class {
 			clipping: !0,
 			side: 2,
 			blending: 0
-		}), l = [], u = [], d = new Map(r.map((e, t) => [e.userData.pickRoom, t + 1])), f = (e) => {
+		}), l = [], u = [], d = new Map(n.map((e, t) => [e.userData.pickRoom, t + 1])), f = (e) => {
 			u.push([e, e.visible]), e.visible = !1;
 		};
 		for (let e of this.scene.children) e !== this.asset && f(e);
-		for (let e of this.asset.children) r.includes(e) || f(e);
-		r.forEach((e, t) => {
+		for (let e of this.asset.children) n.includes(e) || f(e);
+		n.forEach((e, t) => {
 			let n = c(t + 1);
 			n.clippingPlanes = this.clipPlanes, e.traverseVisible((e) => {
 				e.isMesh && ((Array.isArray(e.material) ? e.material : [e.material]).some((e) => e?.transparent && e.opacity < .95) ? f(e) : (l.push([e, e.material]), e.material = Array.isArray(e.material) ? e.material.map(() => n) : n));
@@ -16891,40 +16892,40 @@ var sm = class {
 			color: p.getClearColor(new X()),
 			alpha: p.getClearAlpha(),
 			background: this.scene.background
-		}, h = new Uint8Array(o * s * 4);
+		}, h = new Uint8Array(a * s * 4);
 		try {
-			this.scene.background = null, p.setClearColor(0, 0), p.setRenderTarget(this.coverTarget), p.clear(), p.render(this.scene, this.camera), p.readRenderTargetPixels(this.coverTarget, 0, 0, o, s, h);
+			this.scene.background = null, p.setClearColor(0, 0), p.setRenderTarget(this.coverTarget), p.clear(), p.render(this.scene, this.camera), p.readRenderTargetPixels(this.coverTarget, 0, 0, a, s, h);
 		} finally {
 			p.setRenderTarget(m.target), p.setClearColor(m.color, m.alpha), this.scene.background = m.background;
 			for (let [e, t] of l) e.material = t;
 			for (let [e, t] of u) e.visible = t;
 		}
 		let g = !!this.camera.isOrthographicCamera, _ = new K();
-		for (let { id: r, room: i, offset: a } of e) {
-			let e = this.fixtures.get(r), c = d.get(i);
-			if (!e || !c || (_.fromArray(t(e.marker.position.toArray(), a)).project(this.camera), Math.abs(_.x) > 1 || Math.abs(_.y) > 1 || _.z > 1)) continue;
-			let l = Math.min(o - 1, Math.max(0, Math.floor((_.x * .5 + .5) * o))), u = Math.min(s - 1, Math.max(0, Math.floor((_.y * .5 + .5) * s))), f = Bd(_.z, this.camera.near, this.camera.far, g), p = [];
+		for (let { id: n, room: r, offset: i } of e) {
+			let e = this.fixtures.get(n), c = d.get(r);
+			if (!e || !c || (_.fromArray(o(e.marker.position.toArray(), i)).project(this.camera), Math.abs(_.x) > 1 || Math.abs(_.y) > 1 || _.z > 1)) continue;
+			let l = Math.min(a - 1, Math.max(0, Math.floor((_.x * .5 + .5) * a))), u = Math.min(s - 1, Math.max(0, Math.floor((_.y * .5 + .5) * s))), f = Bd(_.z, this.camera.near, this.camera.far, g), p = [];
 			for (let e = -1; e <= 1; e++) for (let t = -1; t <= 1; t++) {
 				let n = l + t, r = u + e;
-				if (n < 0 || r < 0 || n >= o || r >= s) continue;
-				let i = (r * o + n) * 4, a = zd(h[i + 1], h[i + 2], h[i + 3]);
+				if (n < 0 || r < 0 || n >= a || r >= s) continue;
+				let i = (r * a + n) * 4, o = zd(h[i + 1], h[i + 2], h[i + 3]);
 				p.push({
 					room: h[i],
-					distance: Bd(a * 2 - 1, this.camera.near, this.camera.far, g)
+					distance: Bd(o * 2 - 1, this.camera.near, this.camera.far, g)
 				});
 			}
-			Vd(p, c, f) && n.add(r);
+			Vd(p, c, f) && t.add(n);
 		}
-		return n;
+		return t;
 	}
-	fixtureScreenPosition(e, n) {
-		let r = this.fixtures.get(e);
-		if (!r) return null;
-		let i = this.insideShownFloor(r.marker.position), a = new K().fromArray(t(r.marker.position.toArray(), n)).project(this.camera);
+	fixtureScreenPosition(e, t) {
+		let n = this.fixtures.get(e);
+		if (!n) return null;
+		let r = this.insideShownFloor(n.marker.position), i = new K().fromArray(o(n.marker.position.toArray(), t)).project(this.camera);
 		return {
-			x: (a.x + 1) * this.container.clientWidth / 2,
-			y: (1 - a.y) * this.container.clientHeight / 2,
-			visible: i && a.z >= -1 && a.z <= 1 && Math.abs(a.x) <= 1 && Math.abs(a.y) <= 1
+			x: (i.x + 1) * this.container.clientWidth / 2,
+			y: (1 - i.y) * this.container.clientHeight / 2,
+			visible: r && i.z >= -1 && i.z <= 1 && Math.abs(i.x) <= 1 && Math.abs(i.y) <= 1
 		};
 	}
 	createVacuum(e, t) {

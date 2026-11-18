@@ -91,3 +91,24 @@ export function vacuumRooms(model, areaIds = []) {
         out.push(room);
   return out;
 }
+
+const ACTIVITY_DOMAINS = /^(switch|input_boolean|binary_sensor|fan)\./;
+/**
+ * A robot's extra entities that show something going on: on/off controls
+ * (not configuration or diagnostic ones) that are on, such as the dock
+ * washing or drying the mop. `categoryOf(id)` gives an entity's category.
+ */
+export function vacuumActivity(
+  ids = [],
+  states = {},
+  categoryOf = () => null,
+  skip = [],
+) {
+  return ids.filter(
+    (id) =>
+      !skip.includes(id) &&
+      ACTIVITY_DOMAINS.test(id) &&
+      !categoryOf(id) &&
+      states?.[id]?.state === "on",
+  );
+}

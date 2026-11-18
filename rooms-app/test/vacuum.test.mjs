@@ -331,3 +331,21 @@ test("clean_area areas map to the linked 3D rooms, in the chosen order", async (
   );
   assert.deepEqual(vacuumRooms({ id: "room-bed" }, ["bedroom"]), []);
 });
+
+test("vacuum activity lists the extra on/off controls that are on", async () => {
+  const { vacuumActivity } = await import("../shared/vacuum.mjs");
+  const states = {
+    "switch.dock_mop_washing": { state: "on" },
+    "switch.dock_mop_drying": { state: "off" },
+    "switch.child_lock": { state: "on" },
+    "binary_sensor.dock_drying": { state: "on" },
+    "select.mop_mode": { state: "on" },
+    "vacuum.robot": { state: "on" },
+  };
+  const category = (id) => (id === "switch.child_lock" ? "config" : null);
+  assert.deepEqual(
+    vacuumActivity(Object.keys(states), states, category, ["vacuum.robot"]),
+    ["switch.dock_mop_washing", "binary_sensor.dock_drying"],
+  );
+  assert.deepEqual(vacuumActivity(undefined, states), []);
+});

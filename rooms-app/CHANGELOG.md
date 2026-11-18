@@ -1,3 +1,7 @@
+## 0.55.0
+
+- **The robot's icon on the room shows when its dock is busy.** While one of the vacuum's extra on/off controls is on (the dock washing or drying the mop, …), its icon gets a pulsing blue ring and a badge with the icon of each control that is running, the same icons as in its dialog. On a computer, hovering the icon lists what is running; phones show only the badge and ring. Configuration and diagnostic entities don't count, as for the dialog's pills.
+
 ## 0.54.0
 
 - **What the robot's dock is doing, at a glance.** In the vacuum dialog, each extra control that is on (such as the dock washing or drying the mop) shows as a pill under the status, with a pulsing dot; a tap opens Controls at that switch.
