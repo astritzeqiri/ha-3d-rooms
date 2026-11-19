@@ -2945,7 +2945,7 @@ export class ThreeDRoomsCard extends HTMLElement {
       !this._model ||
       !this._hass
         ? []
-        : houseSummary(this._model, this._hass.states);
+        : houseSummary(this._model, this._hass.states, this._summaryExtras());
     bar.hidden = !chips.length;
     const key = JSON.stringify(chips);
     if (bar.dataset.key === key) return this._placeSummary();
@@ -2968,12 +2968,25 @@ export class ThreeDRoomsCard extends HTMLElement {
           if (lights) {
             if (!this._panelButtons?.light?.hidden)
               this._setLightPanel("light");
-          } else if (chip.ids.length === 1) this._pick(chip.ids[0]);
+          } else if (chip.ids[0]?.startsWith("entity:"))
+            this._moreInfo(chip.ids[0].slice(7));
+          else if (chip.ids.length === 1) this._pick(chip.ids[0]);
         };
         return button;
       }),
     );
     this._placeSummary();
+  }
+  /** The view's extra entities shown in the current house, floor or room. */
+  _summaryExtras() {
+    const entities = this._config?.markers?._entities || {},
+      shownRooms = this._model?.houseView ? this._view?.roomBoxes : null;
+    return Object.values(entities).filter((raw) =>
+      customEntityShown(
+        customEntitySettings(raw, this._config?.markers?._defaults),
+        shownRooms,
+      ),
+    );
   }
   /**
    * House and floor views: a room whose icons overlap shows one chip; the

@@ -1,3 +1,11 @@
+# 0.58.1 — extra entities count in the at-a-glance bar, 2026-11-19
+
+Released as 0.58.1, based on 0.58.0. `houseSummary(model, states, extras)` (`shared/house-summary.mjs`) also reads the view's extra entities (`markers._entities`, filtered by `customEntityShown` in the card's `_summaryExtras`) as controls with id `entity:<entity_id>`, skipping entities already bound to a house device and ones without a state; extra covers and binary sensors count as openings only by device class (`garage_door` added). A chip about one extra entity opens Home Assistant's more-info (`_moreInfo`).
+
+- All frontend tests (new: extra entities in `house-summary`) and host Python tests pass with native-only skips. Format check and build pass; hassfest reports 0 invalid integrations.
+- Shared local Home Assistant (Core 2026.11.0) runs this build; the release ZIP loads.
+- Not checked: the bar on screen with the garage open (the browser pane was signed out), the iOS app, and HACS download of this version.
+
 # 0.58.0 — Adjust view, saved on this device, 2026-11-18
 
 Released as 0.58.0, based on 0.57.1. New `shared/device-camera.mjs` (`deviceCameraKey`, `readDeviceCamera`, `writeDeviceCamera`; keys `three-d-rooms:device-camera:<card>:<view[:room]>:<3d|plan>:<portrait|landscape>` in local storage). `SceneView.fitFloor` (`web/scene.js`) asks `options.deviceCamera(model, aspect, plan)` first and restores it with `restoreCameraView`; the card passes it (`_deviceCameraKey`). The ⋯ menu's Adjust view (`_startAdjust`, `_endAdjust`, `:host([adjusting])`) frees the camera, hides icons and toolbars, and saves `captureView().camera`; Escape cancels; Use the view's framing forgets it.

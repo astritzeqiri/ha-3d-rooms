@@ -4,6 +4,7 @@ const OPENING_CLASSES = new Set([
   "door",
   "window",
   "garage",
+  "garage_door",
   "gate",
   "opening",
 ]);
@@ -43,12 +44,29 @@ const short = (c, fallback) => deviceLabel(c, fallback).split(" · ").pop();
  *
  * Chip: `{ kind, text, tone, ids }`; `ids` are the controls it is about.
  */
-export function houseSummary(model, states = {}) {
+export function houseSummary(model, states = {}, extras = []) {
   const chips = [];
-  const shown = (model?.controls || []).filter(
-    (c) => !c.hidden && c.lightGroupPrimary !== false,
-  );
-  const entity = (c) => states[model.bindings?.[c.id]];
+  const bound = new Set(Object.values(model?.bindings || {}));
+  // Extra entities placed on the view count too (a garage opener, a front
+  // door lock), unless a device of the house is already that entity. They
+  // read as controls whose id is `entity:<entity_id>`.
+  const extraControls = extras
+    .filter((x) => x?.entity && !bound.has(x.entity) && states[x.entity])
+    .filter((x, i, all) => all.findIndex((y) => y.entity === x.entity) === i)
+    .map((x) => ({
+      id: `entity:${x.entity}`,
+      type: x.entity.split(".")[0],
+      name: x.name || states[x.entity].attributes?.friendly_name,
+      entity: x.entity,
+    }));
+  const shown = [
+    ...(model?.controls || []).filter(
+      (c) => !c.hidden && c.lightGroupPrimary !== false,
+    ),
+    ...extraControls,
+  ];
+  const entityId = (c) => c.entity || model.bindings?.[c.id];
+  const entity = (c) => states[entityId(c)];
   const usable = (c) =>
     entity(c) && !["unavailable", "unknown"].includes(entity(c).state);
 
@@ -65,10 +83,13 @@ export function houseSummary(model, states = {}) {
     });
 
   const openings = shown.filter((c) => {
-      if (c.type !== "cover" || !usable(c)) return false;
+      if (!["cover", "binary_sensor"].includes(c.type) || !usable(c))
+        return false;
       const e = entity(c);
+      // A house cover bound to a contact sensor is a door or window; an
+      // extra sensor only when Home Assistant says it is one.
       return (
-        model.bindings[c.id].startsWith("binary_sensor.") ||
+        (!c.entity && entityId(c)?.startsWith("binary_sensor.")) ||
         OPENING_CLASSES.has(e.attributes?.device_class)
       );
     }),

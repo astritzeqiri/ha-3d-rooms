@@ -1,27 +1,27 @@
 import { A as e, C as t, D as n, E as r, M as i, N as a, O as o, P as s, S as c, T as l, _ as u, a as d, b as f, d as p, i as m, j as h, m as g, o as _, r as v, s as ee, t as y, w as b, y as te } from "./three-d-rooms-room-focus-DizMe7SG.js";
-import { a as ne, c as re, i as x, l as S, m as C, n as ie, o as w, p as T, r as ae, s as oe, u as se } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
-import { a as ce, n as E, o as le, r as ue, s as de, t as fe } from "./three-d-rooms-light-BzGWBUDK.js";
+import { a as ne, c as re, i as x, l as S, m as C, n as ie, o as w, p as T, r as ae, s as E, u as oe } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
+import { a as se, n as D, o as ce, r as le, s as ue, t as de } from "./three-d-rooms-light-BzGWBUDK.js";
 // shared/scene-store.mjs
-var pe = "three-d-rooms", D = "scenes", me = 536870912, he = 2e3;
-function ge(e, t) {
+var fe = "three-d-rooms", O = "scenes", pe = 536870912, me = 2e3;
+function he(e, t) {
 	let n;
 	return Promise.race([e, new Promise((e, r) => {
 		n = setTimeout(() => r(/* @__PURE__ */ Error("Model storage timed out.")), t);
 	})]).finally(() => clearTimeout(n));
 }
-function _e(e, t, n) {
+function ge(e, t, n) {
 	return `${e || "user"}:${t.id}:${n}`;
 }
-function O(e) {
+function k(e) {
 	return new Promise((t, n) => {
 		e.onsuccess = () => t(e.result), e.onerror = () => n(e.error);
 	});
 }
-function ve(e = globalThis.indexedDB) {
+function _e(e = globalThis.indexedDB) {
 	if (!e) return null;
 	let t, n = () => t ??= new Promise((n, r) => {
-		let i = e.open(pe, 1);
-		i.onupgradeneeded = () => i.result.createObjectStore(D), i.onsuccess = () => {
+		let i = e.open(fe, 1);
+		i.onupgradeneeded = () => i.result.createObjectStore(O), i.onsuccess = () => {
 			let e = i.result;
 			e.onversionchange = e.onclose = () => {
 				e.close(), t = null;
@@ -30,38 +30,38 @@ function ve(e = globalThis.indexedDB) {
 	}).catch((e) => {
 		throw t = null, e;
 	}), r = async (e, t) => {
-		let r = (await n()).transaction(D, e), i = new Promise((e, t) => {
+		let r = (await n()).transaction(O, e), i = new Promise((e, t) => {
 			r.oncomplete = e, r.onerror = r.onabort = () => t(r.error);
-		}), a = await t(r.objectStore(D));
+		}), a = await t(r.objectStore(O));
 		return await i, a;
 	};
 	return {
-		get: (e) => r("readonly", (t) => O(t.get(e))),
+		get: (e) => r("readonly", (t) => k(t.get(e))),
 		put: (e, t) => r("readwrite", (n) => n.put(t, e)),
 		delete: (e) => r("readwrite", (t) => t.delete(e)),
 		async entries() {
 			return r("readonly", async (e) => {
-				let [t, n] = await Promise.all([O(e.getAllKeys()), O(e.getAll())]);
+				let [t, n] = await Promise.all([k(e.getAllKeys()), k(e.getAll())]);
 				return t.map((e, t) => [e, n[t]]);
 			});
 		}
 	};
 }
-var k;
-function A() {
-	if (k === void 0) try {
-		k = ve();
+var A;
+function ve() {
+	if (A === void 0) try {
+		A = _e();
 	} catch {
-		k = null;
+		A = null;
 	}
-	return k;
+	return A;
 }
-async function ye(e, t, n = he) {
-	let r = A();
+async function ye(e, t, n = me) {
+	let r = ve();
 	if (!r) return null;
 	let i;
 	try {
-		i = await ge(r.get(e), n);
+		i = await he(r.get(e), n);
 	} catch {
 		return null;
 	}
@@ -72,8 +72,8 @@ async function ye(e, t, n = he) {
 		usedAt: Date.now()
 	}).catch?.(() => {}), new Blob([a], { type: i.type || "model/gltf-binary" }));
 }
-async function be(e, t, n, r = me) {
-	let i = A();
+async function be(e, t, n, r = pe) {
+	let i = ve();
 	if (!i || !n?.size || n.size > r) return !1;
 	try {
 		globalThis.navigator?.storage?.persist?.().catch?.(() => {});
@@ -136,7 +136,7 @@ async function N(e, t, n = "original", r, { fresh: i = !1 } = {}) {
 	let d = (e) => {
 		u.progress = e;
 		for (let t of u.listeners || []) t(e);
-	}, f = _e(e.user?.id, t, n);
+	}, f = ge(e.user?.id, t, n);
 	return u.promise = (async () => {
 		let r = i ? null : await ye(f, s);
 		if (r) d({
@@ -402,7 +402,7 @@ var Ve = "\ndialog.dm{--dm-bg:var(--ha-card-background,var(--card-background-col
 	up: "<path d=\"M12 19V5M6 11l6-6 6 6\"/>",
 	stop: "<rect x=\"7\" y=\"7\" width=\"10\" height=\"10\" rx=\"1.5\" fill=\"currentColor\" stroke=\"none\"/>",
 	down: "<path d=\"M12 5v14M6 13l6 6 6-6\"/>"
-}, Ue = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true">${He[e]}</svg>`, H = (e, t, n) => `<button type="button" class="dm-round" data-action="${e}"><span class="dm-disc">${Ue(n)}</span><span>${t}</span></button>`, We = `<style>${Ve}${ce}.sheet-grab{color:var(--dm-muted)}</style><form method="dialog"><div class="sheet-grab" aria-hidden="true"></div><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${Ue("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${H("open", "Up", "up")}${H("stop", "Stop", "stop")}${H("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
+}, Ue = (e) => `<svg viewBox="0 0 24 24" aria-hidden="true">${He[e]}</svg>`, H = (e, t, n) => `<button type="button" class="dm-round" data-action="${e}"><span class="dm-disc">${Ue(n)}</span><span>${t}</span></button>`, We = `<style>${Ve}${se}.sheet-grab{color:var(--dm-muted)}</style><form method="dialog"><div class="sheet-grab" aria-hidden="true"></div><div class="dm-head"><button class="dm-close" value="close" aria-label="Close">${Ue("close")}</button><div class="dm-titles"><h2></h2><p data-desk-status></p></div></div><div class="dm-body"><div class="dm-slider" role="slider" tabindex="0" aria-label="Desk height" aria-orientation="vertical"><div class="dm-fill"></div><div class="dm-readout"><span class="dm-big"></span><span class="dm-small">Height</span></div></div><div class="dm-row">${H("open", "Up", "up")}${H("stop", "Stop", "stop")}${H("close", "Down", "down")}</div><div class="dm-section" data-desk-macros-section><h3>Macros</h3><div class="dm-row dm-macros"></div></div><p class="dm-error" data-desk-error role="alert"></p><p>Set entities and macro names in 3D Rooms → Devices → Desk settings.</p></div></form>`;
 function Ge(e, { min: t, max: n, step: r }) {
 	let i = t + Math.round((Math.min(n, Math.max(t, e)) - t) / (r || 1)) * (r || 1);
 	return Number(Math.min(n, i).toFixed(6));
@@ -590,6 +590,7 @@ var at = /* @__PURE__ */ new Set([
 	"door",
 	"window",
 	"garage",
+	"garage_door",
 	"gate",
 	"opening"
 ]), ot = /* @__PURE__ */ new Set([
@@ -614,48 +615,53 @@ var at = /* @__PURE__ */ new Set([
 	heat_cool: "Climate on",
 	auto: "Climate on"
 }, W = (e, t, n) => `${e} ${e === 1 ? t : n}`, ut = (e, t) => c(e, t).split(" · ").pop();
-function dt(e, t = {}) {
-	let n = [], r = (e?.controls || []).filter((e) => !e.hidden && e.lightGroupPrimary !== !1), i = (n) => t[e.bindings?.[n.id]], a = (e) => i(e) && !["unavailable", "unknown"].includes(i(e).state), o = r.filter((e) => e.type === "light" && a(e)), s = o.filter((e) => i(e).state === "on");
-	o.length && n.push({
+function dt(e, t = {}, n = []) {
+	let r = [], i = new Set(Object.values(e?.bindings || {})), a = n.filter((e) => e?.entity && !i.has(e.entity) && t[e.entity]).filter((e, t, n) => n.findIndex((t) => t.entity === e.entity) === t).map((e) => ({
+		id: `entity:${e.entity}`,
+		type: e.entity.split(".")[0],
+		name: e.name || t[e.entity].attributes?.friendly_name,
+		entity: e.entity
+	})), o = [...(e?.controls || []).filter((e) => !e.hidden && e.lightGroupPrimary !== !1), ...a], s = (t) => t.entity || e.bindings?.[t.id], c = (e) => t[s(e)], l = (e) => c(e) && !["unavailable", "unknown"].includes(c(e).state), u = o.filter((e) => e.type === "light" && l(e)), d = u.filter((e) => c(e).state === "on");
+	u.length && r.push({
 		kind: "light",
-		text: s.length ? W(s.length, "light on", "lights on") : "Lights off",
-		tone: s.length ? "light" : "",
-		ids: s.map((e) => e.id)
+		text: d.length ? W(d.length, "light on", "lights on") : "Lights off",
+		tone: d.length ? "light" : "",
+		ids: d.map((e) => e.id)
 	});
-	let c = r.filter((t) => {
-		if (t.type !== "cover" || !a(t)) return !1;
-		let n = i(t);
-		return e.bindings[t.id].startsWith("binary_sensor.") || at.has(n.attributes?.device_class);
-	}), l = c.filter((e) => ot.has(i(e).state));
-	c.length && n.push({
+	let f = o.filter((e) => {
+		if (!["cover", "binary_sensor"].includes(e.type) || !l(e)) return !1;
+		let t = c(e);
+		return !e.entity && s(e)?.startsWith("binary_sensor.") || at.has(t.attributes?.device_class);
+	}), p = f.filter((e) => ot.has(c(e).state));
+	f.length && r.push({
 		kind: "opening",
-		text: l.length === 1 ? `${ut(l[0], "Door")} open` : l.length ? W(l.length, "door or window open", "doors & windows open") : "Doors & windows closed",
-		tone: l.length ? "open" : "",
-		ids: l.map((e) => e.id)
+		text: p.length === 1 ? `${ut(p[0], "Door")} open` : p.length ? W(p.length, "door or window open", "doors & windows open") : "Doors & windows closed",
+		tone: p.length ? "open" : "",
+		ids: p.map((e) => e.id)
 	});
-	let u = r.filter((e) => e.type === "lock" && a(e)), d = u.filter((e) => st.has(i(e).state));
-	u.length && n.push({
+	let m = o.filter((e) => e.type === "lock" && l(e)), h = m.filter((e) => st.has(c(e).state));
+	m.length && r.push({
 		kind: "lock",
-		text: d.length ? d.length === 1 ? `${ut(d[0], "Lock")} ${i(d[0]).state === "jammed" ? "jammed" : "unlocked"}` : W(d.length, "lock open", "locks open") : "Locked",
-		tone: d.length ? "unlocked" : "locked",
-		ids: (d.length ? d : u).map((e) => e.id)
+		text: h.length ? h.length === 1 ? `${ut(h[0], "Lock")} ${c(h[0]).state === "jammed" ? "jammed" : "unlocked"}` : W(h.length, "lock open", "locks open") : "Locked",
+		tone: h.length ? "unlocked" : "locked",
+		ids: (h.length ? h : m).map((e) => e.id)
 	});
-	for (let e of r.filter((e) => e.type === "vacuum" && a(e))) {
-		let t = ct[i(e).state];
-		t && n.push({
+	for (let e of o.filter((e) => e.type === "vacuum" && l(e))) {
+		let t = ct[c(e).state];
+		t && r.push({
 			kind: "vacuum",
 			text: `Vacuum ${t}`,
-			tone: i(e).state === "error" ? "unlocked" : "cleaning",
+			tone: c(e).state === "error" ? "unlocked" : "cleaning",
 			ids: [e.id]
 		});
 	}
-	let f = r.filter((e) => e.type === "climate" && a(e) && lt[i(e).state]);
-	return f.length && n.push({
+	let g = o.filter((e) => e.type === "climate" && l(e) && lt[c(e).state]);
+	return g.length && r.push({
 		kind: "climate",
-		text: f.length === 1 ? lt[i(f[0]).state] : W(f.length, "climate device on", "climate devices on"),
-		tone: f.length === 1 ? i(f[0]).state : "auto",
-		ids: f.map((e) => e.id)
-	}), n;
+		text: g.length === 1 ? lt[c(g[0]).state] : W(g.length, "climate device on", "climate devices on"),
+		tone: g.length === 1 ? c(g[0]).state : "auto",
+		ids: g.map((e) => e.id)
+	}), r;
 }
 // shared/device-camera.mjs
 var ft = "three-d-rooms:device-camera:";
@@ -2436,7 +2442,7 @@ var It = /* @__PURE__ */ new Set([
 			let o = n[a.dataset.custom];
 			if (!o) continue;
 			let s = w(o, this._config?.markers?._defaults), c = this._view?.screenPoint?.(s.position);
-			if (a.hidden = !c?.visible || !oe(s, i), a.hidden) continue;
+			if (a.hidden = !c?.visible || !E(s, i), a.hidden) continue;
 			let l = r(c, {
 				size: s.size,
 				show_label: s.show_state
@@ -2711,7 +2717,7 @@ var It = /* @__PURE__ */ new Set([
 				let r = this._model.controls.find((e) => e.id === t.id), i = this._previewStates.get(t.id) || {
 					on: !0,
 					brightness: 255,
-					rgb: E(r?.color || "#fff0d4")
+					rgb: D(r?.color || "#fff0d4")
 				};
 				this._previewStates.set(t.id, {
 					...i,
@@ -2820,7 +2826,7 @@ var It = /* @__PURE__ */ new Set([
 	_syncSummary() {
 		let e = this._summary;
 		if (!e) return;
-		let t = this._config?.summary === !1 || this._preview || this._focus || !this._model || !this._hass ? [] : dt(this._model, this._hass.states);
+		let t = this._config?.summary === !1 || this._preview || this._focus || !this._model || !this._hass ? [] : dt(this._model, this._hass.states, this._summaryExtras());
 		e.hidden = !t.length;
 		let n = JSON.stringify(t);
 		if (e.dataset.key === n) return this._placeSummary();
@@ -2829,9 +2835,13 @@ var It = /* @__PURE__ */ new Set([
 			t.type = "button", t.dataset.kind = e.kind, e.tone && (t.dataset.tone = e.tone), t.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${Bt(e)}</svg><span></span>`, t.querySelector("span").textContent = e.text;
 			let n = e.kind === "light";
 			return t.title = n ? "Show the lights of each room" : e.ids.length === 1 ? "Open its details" : e.text, t.onclick = () => {
-				n ? this._panelButtons?.light?.hidden || this._setLightPanel("light") : e.ids.length === 1 && this._pick(e.ids[0]);
+				n ? this._panelButtons?.light?.hidden || this._setLightPanel("light") : e.ids[0]?.startsWith("entity:") ? this._moreInfo(e.ids[0].slice(7)) : e.ids.length === 1 && this._pick(e.ids[0]);
 			}, t;
 		})), this._placeSummary();
+	}
+	_summaryExtras() {
+		let e = this._config?.markers?._entities || {}, t = this._model?.houseView ? this._view?.roomBoxes : null;
+		return Object.values(e).filter((e) => E(w(e, this._config?.markers?._defaults), t));
 	}
 	_groupIcons(e, n, r) {
 		this._groupChips ||= /* @__PURE__ */ new Map();
@@ -2874,7 +2884,7 @@ var It = /* @__PURE__ */ new Set([
 			let t = this._previewStates.get(e) || {
 				on: !0,
 				brightness: 255,
-				rgb: E(n.color || "#fff0d4")
+				rgb: D(n.color || "#fff0d4")
 			};
 			this._previewStates.set(e, {
 				...t,
@@ -2988,7 +2998,7 @@ var It = /* @__PURE__ */ new Set([
 		let a = { ...this._previewStates.get(e) || {
 			on: !0,
 			brightness: 255,
-			rgb: E(t.color || "#fff0d4")
+			rgb: D(t.color || "#fff0d4")
 		} }, o = i.querySelector("[role=\"switch\"]"), s = i.querySelector("[type=\"range\"]"), l = i.querySelector("[type=\"color\"]"), u = i.querySelectorAll("[type=\"range\"]")[1], d = () => {
 			o.textContent = a.on ? "On" : "Off", o.setAttribute("aria-checked", String(a.on)), o.setAttribute("aria-label", "Light power"), this._previewStates.set(e, { ...a }), this._states();
 		};
@@ -2997,9 +3007,9 @@ var It = /* @__PURE__ */ new Set([
 		}, s.oninput = () => {
 			a.brightness = Number(s.value), d();
 		}, l.oninput = () => {
-			a.rgb = E(l.value), d();
+			a.rgb = D(l.value), d();
 		}, u.oninput = () => {
-			a.colorTempKelvin = Number(u.value), a.rgb = ue(a.colorTempKelvin), l.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), d();
+			a.colorTempKelvin = Number(u.value), a.rgb = le(a.colorTempKelvin), l.value = "#" + a.rgb.map((e) => e.toString(16).padStart(2, "0")).join(""), d();
 		}, this._preview && d(), i.addEventListener("close", () => i.remove()), this.shadowRoot.append(i), i.showModal();
 	}
 	_deskDialog(e) {
@@ -3043,7 +3053,7 @@ var It = /* @__PURE__ */ new Set([
 			e.target === t && t.close();
 		}), t.addEventListener("close", () => {
 			clearTimeout(i), t.remove();
-		}), le(t, { top: ".sheet-grab, .dm-head" }), this.shadowRoot.append(t), this._updateDeskDialog(), t.showModal(), de(t);
+		}), ce(t, { top: ".sheet-grab, .dm-head" }), this.shadowRoot.append(t), this._updateDeskDialog(), t.showModal(), ue(t);
 	}
 	_showDeskHeight(e) {
 		let t = this._dialog, n = t?._deskRange;
@@ -3164,7 +3174,7 @@ var It = /* @__PURE__ */ new Set([
 		}
 		i.forEach((e, t) => {
 			let r = n.states[e];
-			o[t].hass = n, o[t].dataset.defaultIcon = se(r), o[t].stateObj = r;
+			o[t].hass = n, o[t].dataset.defaultIcon = oe(r), o[t].stateObj = r;
 		});
 		let s = n.states[r]?.attributes?.friendly_name || "", c = i.map((e) => {
 			let t = n.states[e]?.attributes?.friendly_name || e;
@@ -3239,12 +3249,12 @@ var It = /* @__PURE__ */ new Set([
 			} : u(n)) : t.type === "button" ? e.set(t.id, this._preview ? { unavailable: !1 } : V(n)) : t.type === "number" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { value: t.defaultValue } : Be(n, t)) : t.type === "cover" ? e.set(t.id, this._preview ? this._previewStates?.get(t.id) || { position: t.defaultPosition ?? 0 } : f(n)) : e.set(t.id, this._preview ? this._previewStates?.get(t.id) || {
 				on: !0,
 				brightness: 255,
-				rgb: E(t.color || "#fff0d4")
+				rgb: D(t.color || "#fff0d4")
 			} : {
 				on: n?.state === "on",
 				unavailable: !n || ["unavailable", "unknown"].includes(n.state),
 				brightness: n?.attributes?.brightness ?? 255,
-				...fe(n, t.color)
+				...de(n, t.color)
 			});
 		}
 		this._updateDeskDialog(), this._lightStates = e, this._syncLightPanel(e), this._syncRoomTagStates(), this._customEntityStates(), this._syncSummary();

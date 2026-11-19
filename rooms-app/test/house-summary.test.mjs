@@ -101,3 +101,40 @@ test("several open, unavailable devices skipped, nothing shown for an empty view
   );
   assert.deepEqual(houseSummary({ controls: [], bindings: {} }, {}), []);
 });
+
+test("extra entities on the view count: an open garage is not 'closed'", () => {
+  const all = states({
+    "cover.garage": {
+      state: "open",
+      attributes: { device_class: "garage", friendly_name: "Garage opener" },
+    },
+    "binary_sensor.side": {
+      state: "off",
+      attributes: { device_class: "garage_door" },
+    },
+    "binary_sensor.motion": {
+      state: "on",
+      attributes: { device_class: "motion" },
+    },
+    "cover.blind": { state: "open", attributes: { device_class: "blind" } },
+  });
+  const extras = [
+    { entity: "cover.garage" },
+    { entity: "binary_sensor.side", name: "Side door" },
+    { entity: "binary_sensor.motion" },
+    { entity: "cover.blind" },
+    { entity: "lock.front" }, // already a device of the house: counted once
+    { entity: "cover.gone" }, // no state: ignored
+  ];
+  const chips = houseSummary(model, all, extras);
+  const opening = chips.find((c) => c.kind === "opening");
+  assert.equal(opening.text, "Garage opener open");
+  assert.deepEqual(opening.ids, ["entity:cover.garage"]);
+  assert.equal(chips.find((c) => c.kind === "lock").ids.length, 1);
+
+  all["binary_sensor.side"].state = "on";
+  assert.equal(
+    houseSummary(model, all, extras).find((c) => c.kind === "opening").text,
+    "2 doors & windows open",
+  );
+});

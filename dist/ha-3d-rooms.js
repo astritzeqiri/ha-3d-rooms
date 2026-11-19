@@ -1480,6 +1480,7 @@ var Gt = /* @__PURE__ */ new Set([
 	"door",
 	"window",
 	"garage",
+	"garage_door",
 	"gate",
 	"opening"
 ]), Kt = /* @__PURE__ */ new Set([
@@ -1504,48 +1505,53 @@ var Gt = /* @__PURE__ */ new Set([
 	heat_cool: "Climate on",
 	auto: "Climate on"
 }, Xt = (e, t, n) => `${e} ${e === 1 ? t : n}`, Zt = (e, t) => Ge(e, t).split(" · ").pop();
-function Qt(e, t = {}) {
-	let n = [], r = (e?.controls || []).filter((e) => !e.hidden && e.lightGroupPrimary !== !1), i = (n) => t[e.bindings?.[n.id]], a = (e) => i(e) && !["unavailable", "unknown"].includes(i(e).state), o = r.filter((e) => e.type === "light" && a(e)), s = o.filter((e) => i(e).state === "on");
-	o.length && n.push({
+function Qt(e, t = {}, n = []) {
+	let r = [], i = new Set(Object.values(e?.bindings || {})), a = n.filter((e) => e?.entity && !i.has(e.entity) && t[e.entity]).filter((e, t, n) => n.findIndex((t) => t.entity === e.entity) === t).map((e) => ({
+		id: `entity:${e.entity}`,
+		type: e.entity.split(".")[0],
+		name: e.name || t[e.entity].attributes?.friendly_name,
+		entity: e.entity
+	})), o = [...(e?.controls || []).filter((e) => !e.hidden && e.lightGroupPrimary !== !1), ...a], s = (t) => t.entity || e.bindings?.[t.id], c = (e) => t[s(e)], l = (e) => c(e) && !["unavailable", "unknown"].includes(c(e).state), u = o.filter((e) => e.type === "light" && l(e)), d = u.filter((e) => c(e).state === "on");
+	u.length && r.push({
 		kind: "light",
-		text: s.length ? Xt(s.length, "light on", "lights on") : "Lights off",
-		tone: s.length ? "light" : "",
-		ids: s.map((e) => e.id)
+		text: d.length ? Xt(d.length, "light on", "lights on") : "Lights off",
+		tone: d.length ? "light" : "",
+		ids: d.map((e) => e.id)
 	});
-	let c = r.filter((t) => {
-		if (t.type !== "cover" || !a(t)) return !1;
-		let n = i(t);
-		return e.bindings[t.id].startsWith("binary_sensor.") || Gt.has(n.attributes?.device_class);
-	}), l = c.filter((e) => Kt.has(i(e).state));
-	c.length && n.push({
+	let f = o.filter((e) => {
+		if (!["cover", "binary_sensor"].includes(e.type) || !l(e)) return !1;
+		let t = c(e);
+		return !e.entity && s(e)?.startsWith("binary_sensor.") || Gt.has(t.attributes?.device_class);
+	}), p = f.filter((e) => Kt.has(c(e).state));
+	f.length && r.push({
 		kind: "opening",
-		text: l.length === 1 ? `${Zt(l[0], "Door")} open` : l.length ? Xt(l.length, "door or window open", "doors & windows open") : "Doors & windows closed",
-		tone: l.length ? "open" : "",
-		ids: l.map((e) => e.id)
+		text: p.length === 1 ? `${Zt(p[0], "Door")} open` : p.length ? Xt(p.length, "door or window open", "doors & windows open") : "Doors & windows closed",
+		tone: p.length ? "open" : "",
+		ids: p.map((e) => e.id)
 	});
-	let u = r.filter((e) => e.type === "lock" && a(e)), d = u.filter((e) => qt.has(i(e).state));
-	u.length && n.push({
+	let m = o.filter((e) => e.type === "lock" && l(e)), h = m.filter((e) => qt.has(c(e).state));
+	m.length && r.push({
 		kind: "lock",
-		text: d.length ? d.length === 1 ? `${Zt(d[0], "Lock")} ${i(d[0]).state === "jammed" ? "jammed" : "unlocked"}` : Xt(d.length, "lock open", "locks open") : "Locked",
-		tone: d.length ? "unlocked" : "locked",
-		ids: (d.length ? d : u).map((e) => e.id)
+		text: h.length ? h.length === 1 ? `${Zt(h[0], "Lock")} ${c(h[0]).state === "jammed" ? "jammed" : "unlocked"}` : Xt(h.length, "lock open", "locks open") : "Locked",
+		tone: h.length ? "unlocked" : "locked",
+		ids: (h.length ? h : m).map((e) => e.id)
 	});
-	for (let e of r.filter((e) => e.type === "vacuum" && a(e))) {
-		let t = Jt[i(e).state];
-		t && n.push({
+	for (let e of o.filter((e) => e.type === "vacuum" && l(e))) {
+		let t = Jt[c(e).state];
+		t && r.push({
 			kind: "vacuum",
 			text: `Vacuum ${t}`,
-			tone: i(e).state === "error" ? "unlocked" : "cleaning",
+			tone: c(e).state === "error" ? "unlocked" : "cleaning",
 			ids: [e.id]
 		});
 	}
-	let f = r.filter((e) => e.type === "climate" && a(e) && Yt[i(e).state]);
-	return f.length && n.push({
+	let g = o.filter((e) => e.type === "climate" && l(e) && Yt[c(e).state]);
+	return g.length && r.push({
 		kind: "climate",
-		text: f.length === 1 ? Yt[i(f[0]).state] : Xt(f.length, "climate device on", "climate devices on"),
-		tone: f.length === 1 ? i(f[0]).state : "auto",
-		ids: f.map((e) => e.id)
-	}), n;
+		text: g.length === 1 ? Yt[c(g[0]).state] : Xt(g.length, "climate device on", "climate devices on"),
+		tone: g.length === 1 ? c(g[0]).state : "auto",
+		ids: g.map((e) => e.id)
+	}), r;
 }
 // shared/floor-view.mjs
 function $t(e, t, n, r = 0, i = 0) {
@@ -23082,7 +23088,7 @@ var oy = /* @__PURE__ */ new Set([
 	_syncSummary() {
 		let e = this._summary;
 		if (!e) return;
-		let t = this._config?.summary === !1 || this._preview || this._focus || !this._model || !this._hass ? [] : Qt(this._model, this._hass.states);
+		let t = this._config?.summary === !1 || this._preview || this._focus || !this._model || !this._hass ? [] : Qt(this._model, this._hass.states, this._summaryExtras());
 		e.hidden = !t.length;
 		let n = JSON.stringify(t);
 		if (e.dataset.key === n) return this._placeSummary();
@@ -23091,9 +23097,13 @@ var oy = /* @__PURE__ */ new Set([
 			t.type = "button", t.dataset.kind = e.kind, e.tone && (t.dataset.tone = e.tone), t.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${uy(e)}</svg><span></span>`, t.querySelector("span").textContent = e.text;
 			let n = e.kind === "light";
 			return t.title = n ? "Show the lights of each room" : e.ids.length === 1 ? "Open its details" : e.text, t.onclick = () => {
-				n ? this._panelButtons?.light?.hidden || this._setLightPanel("light") : e.ids.length === 1 && this._pick(e.ids[0]);
+				n ? this._panelButtons?.light?.hidden || this._setLightPanel("light") : e.ids[0]?.startsWith("entity:") ? this._moreInfo(e.ids[0].slice(7)) : e.ids.length === 1 && this._pick(e.ids[0]);
 			}, t;
 		})), this._placeSummary();
+	}
+	_summaryExtras() {
+		let e = this._config?.markers?._entities || {}, t = this._model?.houseView ? this._view?.roomBoxes : null;
+		return Object.values(e).filter((e) => ce(ae(e, this._config?.markers?._defaults), t));
 	}
 	_groupIcons(e, t, n) {
 		this._groupChips ||= /* @__PURE__ */ new Map();
