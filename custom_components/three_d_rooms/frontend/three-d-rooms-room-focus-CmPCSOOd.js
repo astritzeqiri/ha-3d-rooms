@@ -1,4 +1,4 @@
-import { d as e, f as t } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
+import { m as e, p as t } from "./three-d-rooms-vacuum-DvAkyrf8.js";
 // shared/scene-sessions.mjs
 var n = /* @__PURE__ */ new WeakMap();
 function r(e) {
@@ -89,8 +89,8 @@ function c(n) {
 		let e = d(a);
 		Object.keys(e).length && (r._rooms = e);
 	} else if (i === "_entities") {
-		let t = e(a);
-		Object.keys(t).length && (r._entities = t);
+		let e = t(a);
+		Object.keys(e).length && (r._entities = e);
 	} else {
 		if (i !== "_defaults" && !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(i) || ["constructor", "prototype"].includes(i) || !a || typeof a != "object" || Array.isArray(a) || Object.keys(a).some((e) => ![
 			"visible",
@@ -103,7 +103,7 @@ function c(n) {
 		].includes(e))) throw Error("Invalid device-marker settings.");
 		if (i === "_defaults" && a.offset !== void 0) throw Error("View defaults cannot contain a position offset.");
 		if (i === "_defaults" && (a.icon !== void 0 || a.icon_off !== void 0)) throw Error("Choose icons per device, not as a view default.");
-		for (let e of ["icon", "icon_off"]) if (a[e] !== void 0 && !t(a[e])) throw Error("Choose a Home Assistant icon such as mdi:door or local:front-door.");
+		for (let t of ["icon", "icon_off"]) if (a[t] !== void 0 && !e(a[t])) throw Error("Choose a Home Assistant icon such as mdi:door or local:front-door.");
 		for (let e of ["visible", "show_label"]) if (a[e] !== void 0 && typeof a[e] != "boolean") throw Error("Marker visibility and labels must be true or false.");
 		if (a.size !== void 0 && (!Number.isInteger(a.size) || a.size < 24 || a.size > 64)) throw Error("Marker size must be 24–64 pixels.");
 		if (a.placement !== void 0 && !["room", "tray"].includes(a.placement)) throw Error("Choose room or tray for a device control.");

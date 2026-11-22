@@ -1017,7 +1017,22 @@ function vacuumEntitiesHTML(c) {
             "",
           )}</select><button type="button" data-ve-map-set="${c.id}" ${images.length ? "" : "disabled"}>Connect</button></div>`
   }</section>`;
-  return `${mapHTML}<section class="ve" aria-labelledby="ve-title-${c.id}"><h4 id="ve-title-${c.id}">Entities in the robot's dialog <span class="ve-count">${list.length}</span></h4><p class="muted">Tapping the robot on a card opens its own dialog with these entities: mop mode, dock, maintenance, anything you add.</p>${rows ? `<ol class="ve-list">${rows}</ol>` : ""}<div class="ve-add"><input type="search" list="ve-options-${c.id}" data-ve-input="${c.id}" placeholder="Search entities to add" aria-label="Entity to add"><datalist id="ve-options-${c.id}">${options}</datalist><button type="button" data-ve-add="${c.id}">Add</button></div>${selected.bindings[c.id] ? `<button type="button" class="ve-suggest" data-ve-suggest="${c.id}">Add all from this vacuum and its dock</button>` : ""}</section>`;
+  // The sensor naming the room the robot is in: the 3D robot follows it.
+  const sensors = all.filter((e) => e.entity_id.startsWith("sensor."));
+  const roomEntity = c.currentRoom && find(c.currentRoom);
+  const roomHTML = `<section class="ve ve-map" aria-labelledby="ve-room-${c.id}"><h4 id="ve-room-${c.id}">Current room</h4><p class="muted">The sensor naming the room the robot is in (such as a Roborock's "Current room"). While it cleans, the robot on cards drives to the 3D room linked to that room's area.</p>${
+    c.currentRoom
+      ? `<div class="ve-row"><span class="ve-text"><span class="ve-name">${esc(name(roomEntity, c.currentRoom))}</span><span class="ve-id">${esc(c.currentRoom)} · ${esc(roomEntity ? roomEntity.state : "not found")}</span></span><span class="ve-tools">${iconButton(`data-ve-room="${c.id}" data-entity=""`, "Remove the current room sensor", '<path d="M6 6l12 12M18 6 6 18"/>')}</span></div>`
+      : `<div class="ve-add"><input type="search" list="ve-room-options-${c.id}" data-ve-room-input="${c.id}" placeholder="Search sensors" aria-label="Current room sensor"><datalist id="ve-room-options-${c.id}">${sensors
+          .map(
+            (e) =>
+              `<option value="${esc(e.entity_id)}">${esc(name(e, e.entity_id))}</option>`,
+          )
+          .join(
+            "",
+          )}</datalist><button type="button" data-ve-room-set="${c.id}">Connect</button></div>`
+  }</section>`;
+  return `${mapHTML}${roomHTML}<section class="ve" aria-labelledby="ve-title-${c.id}"><h4 id="ve-title-${c.id}">Entities in the robot's dialog <span class="ve-count">${list.length}</span></h4><p class="muted">Tapping the robot on a card opens its own dialog with these entities: mop mode, dock, maintenance, anything you add.</p>${rows ? `<ol class="ve-list">${rows}</ol>` : ""}<div class="ve-add"><input type="search" list="ve-options-${c.id}" data-ve-input="${c.id}" placeholder="Search entities to add" aria-label="Entity to add"><datalist id="ve-options-${c.id}">${options}</datalist><button type="button" data-ve-add="${c.id}">Add</button></div>${selected.bindings[c.id] ? `<button type="button" class="ve-suggest" data-ve-suggest="${c.id}">Add all from this vacuum and its dock</button>` : ""}</section>`;
 }
 async function saveVacuumEntities(controlId, entities, message) {
   const control = selected.controls.find((x) => x.id === controlId);
@@ -1042,7 +1057,40 @@ async function setVacuumMap(controlId, entityId) {
   if (result.map) control.map = result.map;
   else delete control.map;
 }
+async function setVacuumRoom(controlId, entityId) {
+  const control = selected.controls.find((x) => x.id === controlId);
+  const result = await api(`models/${selected.id}/device-room`, {
+    method: "POST",
+    body: JSON.stringify({ controlId, entityId }),
+  });
+  if (result.currentRoom) control.currentRoom = result.currentRoom;
+  else delete control.currentRoom;
+}
+/** A vacuum's "Current room" sensor among its device's entities. */
+function currentRoomSensor(entities) {
+  return entities.find((x) =>
+    /^sensor\.[a-z0-9_]*current_room(_\d+)?$/.test(x.entity_id),
+  );
+}
 async function vacuumEntityAction(e) {
+  const roomButton = e.target.closest("[data-ve-room], [data-ve-room-set]");
+  if (roomButton) {
+    const controlId = roomButton.dataset.veRoom || roomButton.dataset.veRoomSet;
+    const value = roomButton.dataset.veRoomSet
+      ? roomButton.parentElement
+          .querySelector("[data-ve-room-input]")
+          ?.value.trim()
+      : "";
+    if (roomButton.dataset.veRoomSet && !value) return true;
+    try {
+      await setVacuumRoom(controlId, value);
+      drawControls();
+      toast(value ? "Current room connected" : "Current room removed");
+    } catch (error) {
+      toast(error.message);
+    }
+    return true;
+  }
   const mapButton = e.target.closest("[data-ve-map], [data-ve-map-set]");
   if (mapButton) {
     const controlId = mapButton.dataset.veMap || mapButton.dataset.veMapSet;
@@ -1108,11 +1156,18 @@ async function vacuumEntityAction(e) {
       const image = found.entities.find((x) =>
         x.entity_id.startsWith("image."),
       );
-      let mapped = false;
+      const connected = [];
       if (image && !control.map) {
         await setVacuumMap(controlId, image.entity_id);
-        mapped = true;
+        connected.push("map");
       }
+      const roomSensor = currentRoomSensor(found.entities);
+      if (roomSensor && !control.currentRoom) {
+        await setVacuumRoom(controlId, roomSensor.entity_id);
+        connected.push("current room");
+      }
+      const mapped = connected.length > 0,
+        what = `the ${connected.join(" and ")}`;
       const fresh = found.entities
         .filter((x) => !x.entity_id.startsWith("image."))
         .filter((x) => !list.includes(x.entity_id))
@@ -1122,13 +1177,13 @@ async function vacuumEntityAction(e) {
       if (!fresh.length) {
         if (mapped) drawControls();
         toast(
-          mapped ? "Map connected" : "Nothing new to add from this vacuum.",
+          mapped ? `Connected ${what}` : "Nothing new to add from this vacuum.",
         );
       } else
         await saveVacuumEntities(
           controlId,
           [...list, ...fresh],
-          `Added ${fresh.length} ${fresh.length === 1 ? "entity" : "entities"}${mapped ? " and the map" : ""} from ${found.devices.join(" and ")}`,
+          `Added ${fresh.length} ${fresh.length === 1 ? "entity" : "entities"}${mapped ? ` and connected ${what}` : ""} from ${found.devices.join(" and ")}`,
         );
     } catch (error) {
       toast(error.message);

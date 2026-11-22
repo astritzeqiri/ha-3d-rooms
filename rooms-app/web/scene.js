@@ -1672,6 +1672,18 @@ export class SceneView {
     this.syncClimateAnimation();
     return true;
   }
+  /** The drawn robot of a vacuum control, if it has one. */
+  vacuumVisual(id) {
+    return this.fixtures?.get(id)?.vacuum ?? null;
+  }
+  /** A vacuum's robot is cleaning a room this view does not show: hide it. */
+  setVacuumAway(id, away) {
+    const vacuum = this.fixtures?.get(id)?.vacuum;
+    if (!vacuum) return false;
+    vacuum.setAway(away);
+    this.syncClimateAnimation();
+    return true;
+  }
   clearClimateVisuals() {
     if (this.climateFrame) cancelAnimationFrame(this.climateFrame);
     this.climateFrame = 0;

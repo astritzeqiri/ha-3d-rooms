@@ -1,3 +1,7 @@
+## 0.59.0
+
+- **The robot follows its current room.** Connect the vacuum's "Current room" sensor in its device settings (Add all from this vacuum and its dock does it for you). While it cleans, the robot on cards drives to the 3D room of the area that room is mapped to in Home Assistant, along a route through the house, and moves on when the robot does. Cleaning a room the card does not show, it steps out of view until it is back or heads home.
+
 ## 0.58.1
 
 - **The at-a-glance bar counts extra entities.** A garage, door, window or lock added to the view as an extra entity now shows in the bar, so an open garage no longer reads "Doors & windows closed". A tap opens its details. Garage door sensors count as openings too.

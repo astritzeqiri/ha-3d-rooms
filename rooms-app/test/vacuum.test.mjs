@@ -349,3 +349,96 @@ test("vacuum activity lists the extra on/off controls that are on", async () => 
   );
   assert.deepEqual(vacuumActivity(undefined, states), []);
 });
+
+test("current room: names resolve to areas through the vacuum's mapping", async () => {
+  const { currentRoomArea, currentRoomName, vacuumRoomFor } =
+    await import("../shared/vacuum.mjs");
+  assert.equal(currentRoomName({ state: "Corridor" }), "Corridor");
+  for (const state of ["unknown", "unavailable", "", undefined])
+    assert.equal(currentRoomName({ state }), null);
+  const registry = {
+    segments: [
+      { id: "0_16", name: "Corridor", group: "Map 0" },
+      { id: "0_17", name: "Bedroom 2", group: "Map 0" },
+    ],
+    mapping: { hallway: ["0_16"], guest_room: ["0_17"] },
+    areas: [
+      { area_id: "hallway", name: "Hallway", aliases: [] },
+      { area_id: "guest_room", name: "Guest room", aliases: [] },
+      { area_id: "kitchen", name: "Kitchen", aliases: ["Cooking"] },
+    ],
+  };
+  // The vacuum's own room-to-area mapping wins over names.
+  assert.equal(currentRoomArea("Corridor", registry), "hallway");
+  assert.equal(currentRoomArea("bedroom 2", registry), "guest_room");
+  // Unmapped: an area with that name or alias.
+  assert.equal(currentRoomArea("Kitchen", registry), "kitchen");
+  assert.equal(currentRoomArea("cooking", registry), "kitchen");
+  assert.equal(currentRoomArea("Garage", registry), null);
+
+  const house = {
+    members: [
+      { model: "room-hall", areaId: "hallway" },
+      { model: "room-guest", areaId: "guest_room" },
+      { model: "room-office" },
+    ],
+    roomTitles: { "room-office": "Office" },
+  };
+  assert.deepEqual(vacuumRoomFor(house, "Corridor", registry), {
+    room: "room-hall",
+  });
+  // No area: a 3D room titled like the robot's room.
+  assert.deepEqual(vacuumRoomFor(house, "office", {}), { room: "room-office" });
+  // A known area this view does not show: the robot is away.
+  assert.deepEqual(vacuumRoomFor(house, "Kitchen", registry), { away: true });
+  // Nothing matches: no opinion, the robot roams as before.
+  assert.equal(vacuumRoomFor(house, "Garage", registry), null);
+  assert.equal(vacuumRoomFor(house, null, registry), null);
+  const single = { id: "room-hall", areaId: "hallway", title: "Hall" };
+  assert.deepEqual(vacuumRoomFor(single, "Corridor", registry), {
+    room: "room-hall",
+  });
+  assert.deepEqual(vacuumRoomFor(single, "Bedroom 2", registry), {
+    away: true,
+  });
+});
+
+test("current room: a new room mid-clean is driven to, never jumped to", () => {
+  const world = twoRooms();
+  const visual = createVacuumVisual(c, world);
+  visual.setRooms(["A"]);
+  visual.setState(vacuumState(entity("cleaning")));
+  let t = run(visual, 20);
+  assert.equal(visual.room, "A");
+  // The sensor now says B: the robot drives there through the doorway.
+  visual.setRooms(["B"]);
+  let [px, , pz] = visual.position,
+    arrived;
+  for (const end = t + 120; t < end; t += 1 / 30) {
+    visual.update(t);
+    const [x, , z] = visual.position;
+    // At most one frame's driving (0.28 m/s at 1/30 s) between frames.
+    assert.ok(Math.hypot(x - px, z - pz) < 0.02, `jumped at ${x}, ${z}`);
+    assert.ok(world.floorAt(x, 0, z), `off the floor at ${x}, ${z}`);
+    [px, pz] = [x, z];
+    if (visual.room === "B") {
+      arrived = t;
+      break;
+    }
+  }
+  assert.ok(arrived !== undefined, `never reached room B (${visual.mode})`);
+});
+
+test("current room: away hides the robot until it heads home", () => {
+  const visual = createVacuumVisual(c, twoRooms());
+  visual.setState(vacuumState(entity("cleaning")));
+  visual.setAway(true);
+  assert.equal(visual.robot.visible, false);
+  assert.equal(visual.dock.visible, true);
+  visual.setState(vacuumState(entity("returning")));
+  assert.equal(visual.robot.visible, true);
+  visual.setState(vacuumState(entity("cleaning")));
+  assert.equal(visual.robot.visible, false);
+  visual.setAway(false);
+  assert.equal(visual.robot.visible, true);
+});

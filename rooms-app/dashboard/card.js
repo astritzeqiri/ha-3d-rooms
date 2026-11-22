@@ -31,7 +31,13 @@ import {
   LOCK_ICON_PATH,
 } from "../shared/marker.mjs";
 import { lockState } from "../shared/lock.mjs";
-import { vacuumActivity, vacuumRooms, vacuumState } from "../shared/vacuum.mjs";
+import {
+  currentRoomName,
+  vacuumActivity,
+  vacuumRoomFor,
+  vacuumRooms,
+  vacuumState,
+} from "../shared/vacuum.mjs";
 // Fallback robot-vacuum glyph for previews outside Home Assistant.
 // Material Design Icons mdi:robot-vacuum (Apache-2.0), Home Assistant's own.
 const VACUUM_ICON_PATH =
@@ -3896,11 +3902,87 @@ export class ThreeDRoomsCard extends HTMLElement {
       sun?.state,
       sun?.attributes?.elevation,
     ]);
-    if (signature === this._signature) return;
-    this._signature = signature;
-    this._applyBackdrop(sun);
-    this._view.setStates(states);
-    this._view.setDaylight?.(this._model.daylight?.mode ?? "night", sun);
+    if (signature !== this._signature) {
+      this._signature = signature;
+      this._applyBackdrop(sun);
+      this._view.setStates(states);
+      this._view.setDaylight?.(this._model.daylight?.mode ?? "night", sun);
+    }
+    this._syncVacuumRooms(states);
+  }
+  /**
+   * A robot with a current-room sensor drives to the 3D room it reports (the
+   * room's Home Assistant area, through the vacuum's own room-to-area
+   * mapping, or a matching name). It keeps the last room while the sensor
+   * says nothing, and hides while it cleans a room this view does not show.
+   */
+  _syncVacuumRooms(states) {
+    if (this._preview || !this._view?.vacuumVisual) return;
+    this._vacuumLive ||= new WeakMap();
+    this._vacuumNames ||= new Map();
+    for (const control of this._model.controls) {
+      if (control.type !== "vacuum" || !control.currentRoom) continue;
+      const visual = this._view.vacuumVisual(control.id),
+        entityId = this._model.bindings?.[control.id];
+      if (!visual || !entityId) continue;
+      const name =
+        currentRoomName(this._hass.states?.[control.currentRoom]) ??
+        this._vacuumNames.get(control.currentRoom) ??
+        null;
+      if (name) this._vacuumNames.set(control.currentRoom, name);
+      const registry = this._vacuumRegistry(entityId, name);
+      const where = vacuumRoomFor(this._model, name, registry || {}),
+        status = states.get(control.id)?.state,
+        out = !["docked", "returning"].includes(status),
+        key = JSON.stringify([where, status, !!registry]);
+      if (this._vacuumLive.get(visual) === key) continue;
+      this._vacuumLive.set(visual, key);
+      this._view.setVacuumAway(control.id, out && !!where?.away);
+      // Home or on its way there: the robot finds its own way back.
+      if (out && where?.room && visual.room !== where.room)
+        this._view.setVacuumRooms(control.id, [where.room]);
+    }
+  }
+  /**
+   * What Home Assistant knows about a vacuum's rooms: its segments, their
+   * areas and all areas. Fetched once and again (at most each minute) when
+   * a room name is not found in it. Undefined until loaded.
+   */
+  _vacuumRegistry(entityId, name) {
+    this._vacuumRegistries ||= new Map();
+    const cached = this._vacuumRegistries.get(entityId);
+    const known =
+      cached?.data &&
+      (!name ||
+        cached.data.segments.some((s) => s?.name === name) ||
+        cached.data.areas.some((a) => a?.name === name));
+    if (
+      !this._hass?.callWS ||
+      cached?.pending ||
+      (cached && (known || Date.now() - cached.at < 60000))
+    )
+      return cached?.data;
+    const entry = { ...cached, pending: true, at: Date.now() };
+    this._vacuumRegistries.set(entityId, entry);
+    Promise.all([
+      this._hass
+        .callWS({ type: "config/entity_registry/get", entity_id: entityId })
+        .catch(() => null),
+      this._hass.callWS({ type: "config/area_registry/list" }).catch(() => []),
+    ]).then(([reg, areas]) => {
+      const options = reg?.options?.vacuum || {};
+      entry.data = {
+        segments: Array.isArray(options.last_seen_segments)
+          ? options.last_seen_segments
+          : [],
+        mapping: options.area_mapping || {},
+        areas: Array.isArray(areas) ? areas : [],
+      };
+      entry.pending = false;
+      entry.at = Date.now();
+      if (this.isConnected && this._model && this._view) this._states();
+    });
+    return cached?.data;
   }
 }
 if (!customElements.get("three-d-rooms-card"))

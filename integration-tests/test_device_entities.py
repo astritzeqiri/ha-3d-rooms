@@ -82,6 +82,27 @@ class DeviceEntitiesTests(unittest.TestCase):
         self.assertNotIn("map", self.served()["robot"])
         self.assertNotIn("deviceMaps", self.store.models[0])
 
+    def test_vacuum_current_room_is_one_sensor_kept_on_restart_and_replace(self):
+        self.assertEqual(self.store.set_device_room(self.model, "robot", "sensor.saros_10r_current_room"),
+                         {"currentRoom": "sensor.saros_10r_current_room"})
+        self.assertEqual(self.served()["robot"]["currentRoom"], "sensor.saros_10r_current_room")
+        for bad in ("image.saros_10r_map_0", "select.room", ["sensor.a"], "Sensor.Room"):
+            with self.assertRaises(ValueError):
+                self.store.set_device_room(self.model, "robot", bad)
+        light = next(c["id"] for c in self.store.models[0]["controls"] if c["type"] == "light")
+        with self.assertRaises(ValueError):
+            self.store.set_device_room(self.model, light, "sensor.saros_10r_current_room")
+        reopened = models.ModelStore(self.dir.name).open()
+        self.assertEqual(self.served(reopened)["robot"]["currentRoom"], "sensor.saros_10r_current_room")
+        self.store.replace(self.model, with_vacuum())
+        self.assertEqual(self.served()["robot"]["currentRoom"], "sensor.saros_10r_current_room")
+        self.store.set_device_room(self.model, "robot", "")
+        self.assertNotIn("currentRoom", self.served()["robot"])
+        self.assertNotIn("deviceRooms", self.store.models[0])
+        self.store.set_device_room(self.model, "robot", "sensor.saros_10r_current_room")
+        self.store.replace(self.model, package())  # vacuum removed: sensor dropped
+        self.assertNotIn("deviceRooms", self.store.models[0])
+
 
 if __name__ == "__main__":
     unittest.main()

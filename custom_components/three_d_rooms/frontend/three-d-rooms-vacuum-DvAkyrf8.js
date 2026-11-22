@@ -510,4 +510,31 @@ var D = /^(switch|input_boolean|binary_sensor|fan)\./;
 function O(e = [], t = {}, n = () => null, r = []) {
 	return e.filter((e) => !r.includes(e) && D.test(e) && !n(e) && t?.[e]?.state === "on");
 }
-export { x as a, _ as c, u as d, i as f, w as i, m as l, o as m, O as n, d as o, a as p, E as r, v as s, T as t, S as u };
+var k = (e, t) => typeof e == "string" && typeof t == "string" && e.trim().toLocaleLowerCase() === t.trim().toLocaleLowerCase();
+function A(e) {
+	let t = e?.state;
+	return typeof t == "string" && t.trim() && ![
+		"unknown",
+		"unavailable",
+		"none"
+	].includes(t) ? t : null;
+}
+function j(e, t = {}) {
+	if (!e) return null;
+	let { segments: n = [], mapping: r = {}, areas: i = [] } = t, a = n.filter((t) => k(t?.name, e)).map((e) => e.id);
+	if (a.length) {
+		for (let [e, t] of Object.entries(r || {})) if ([t].flat().some((e) => a.includes(e))) return e;
+	}
+	return i.find((t) => k(t?.name, e) || (t?.aliases || []).some((t) => k(t, e)))?.area_id ?? null;
+}
+function M(e, t, n = {}) {
+	if (!e || !t) return null;
+	let r = j(t, n);
+	if (r) {
+		let [t] = E(e, [r]);
+		if (t) return { room: t };
+	}
+	let i = (e.members?.length ? e.members.map((t) => [t.model, e.roomTitles?.[t.model] || e.controls?.find((e) => e.sourceModel === t.model)?.roomTitle]) : [[e.id, e.title]]).find(([e, n]) => e && k(n, t));
+	return i ? { room: i[0] } : r ? { away: !0 } : null;
+}
+export { E as a, d as c, m as d, S as f, o as g, a as h, M as i, v as l, i as m, T as n, w as o, u as p, O as r, x as s, A as t, _ as u };

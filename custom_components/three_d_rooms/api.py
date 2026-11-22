@@ -236,6 +236,13 @@ class RoomsRuntime:
             result = await self.work(self.store.set_device_map, data.get("model"), data.get("controlId"), entity_id)
             self.hass.bus.async_fire("three_d_rooms_updated")
             return result
+        if operation == "device-room":
+            entity_id = data.get("entityId", "")
+            if entity_id and (not isinstance(entity_id, str) or not self.hass.states.get(entity_id)):
+                raise ValueError("Choose an existing sensor for the current room.")
+            result = await self.work(self.store.set_device_room, data.get("model"), data.get("controlId"), entity_id)
+            self.hass.bus.async_fire("three_d_rooms_updated")
+            return result
         if operation == "device-entity-suggestions":
             return self.device_entity_suggestions(data.get("entityId"))
         if operation == "device-entities":

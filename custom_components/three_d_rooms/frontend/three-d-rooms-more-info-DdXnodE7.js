@@ -1,4 +1,4 @@
-import { n as e, u as t } from "./three-d-rooms-vacuum-Q5sHDcwl.js";
+import { f as e, r as t } from "./three-d-rooms-vacuum-DvAkyrf8.js";
 import { a as n, c as r, i, o as a, r as o } from "./three-d-rooms-light-BzGWBUDK.js";
 // dashboard/more-info-icons.mjs
 var s = {
@@ -1079,9 +1079,9 @@ function se(e, t, n, r, i) {
 	let a = I(e, "button", "mi-round", `<span class="mi-disc">${M(t)}</span><span>${n}</span>`);
 	return a.type = "button", i !== void 0 && a.setAttribute("aria-pressed", String(i)), a.onclick = r, a;
 }
-var ce = (e) => t(e);
-function R({ host: t, getHass: n, entityId: i, onError: c = () => {}, openHaView: u = null, extras: p = [], map: m = "" }) {
-	let h = t.ownerDocument, _ = I(h, "dialog", "mi");
+var ce = (t) => e(t);
+function R({ host: e, getHass: n, entityId: i, onError: c = () => {}, openHaView: u = null, extras: p = [], map: m = "" }) {
+	let h = e.ownerDocument, _ = I(h, "dialog", "mi");
 	_.setAttribute("aria-labelledby", "mi-title");
 	let v = I(h, "div", "mi-frame"), y = I(h, "div", "mi-head"), x = I(h, "button", "mi-iconbtn", M("close"));
 	x.type = "button", x.setAttribute("aria-label", "Close");
@@ -1126,7 +1126,7 @@ function R({ host: t, getHass: n, entityId: i, onError: c = () => {}, openHaView
 		}).catch(() => {});
 	}
 	let W = I(h, "div", "mi-body"), le = I(h, "style");
-	le.textContent = re, v.append(y, W), _.append(le, v), t.append(_);
+	le.textContent = re, v.append(y, W), _.append(le, v), e.append(_);
 	let G = "", K, ue = [], de = () => {
 		for (let e of ue.splice(0)) e();
 	}, q = (e) => {
@@ -1661,17 +1661,17 @@ function R({ host: t, getHass: n, entityId: i, onError: c = () => {}, openHaView
 		}
 		return t.append(r), () => {};
 	}
-	function ye(t, r) {
+	function ye(e, r) {
 		_.classList.add("mi-vacuum"), E.hidden = !0;
 		let a = I(h, "div", "mi-center"), o = I(h, "div", "mi-statehead mi-vac-head", "<strong></strong><span class=\"mi-vac-since\"></span><span class=\"mi-vac-battery\" hidden></span>"), s = I(h, "div", "mi-vac-status", `<div class="container idle">${te}</div>`), l = I(h, "div", "mi-vac-buttons"), u = /* @__PURE__ */ new Map();
-		for (let e of Y(t, (e) => e.kind === "vacuum").buttons) {
-			let t = I(h, "button", "mi-vac-btn", M(e.icon));
-			t.type = "button", t.onclick = () => {
-				let t = Y(W, (e) => e.kind === "vacuum"), n = t.buttons.find((t) => t.key === e.key);
-				n && !n.disabled && J(W, t, n.service);
-			}, u.set(e.key, t), l.append(t);
+		for (let t of Y(e, (e) => e.kind === "vacuum").buttons) {
+			let e = I(h, "button", "mi-vac-btn", M(t.icon));
+			e.type = "button", e.onclick = () => {
+				let e = Y(W, (e) => e.kind === "vacuum"), n = e.buttons.find((e) => e.key === t.key);
+				n && !n.disabled && J(W, e, n.service);
+			}, u.set(t.key, e), l.append(e);
 		}
-		let f = I(h, "div", "mi-vac-chips"), g = Y(t, (e) => e.kind === "vacuum"), v = I(h, "div", "mi-vac-menu");
+		let f = I(h, "div", "mi-vac-chips"), g = Y(e, (e) => e.kind === "vacuum"), v = I(h, "div", "mi-vac-menu");
 		v.hidden = !0, v.setAttribute("role", "listbox");
 		let y = I(h, "ul", "mi-list");
 		v.append(y);
@@ -1743,7 +1743,7 @@ function R({ host: t, getHass: n, entityId: i, onError: c = () => {}, openHaView
 			}
 		}
 		function ie() {
-			let t = n(), r = e(p, t.states, O, [m]), i = r.join("|");
+			let e = n(), r = t(p, e.states, O, [m]), i = r.join("|");
 			if (S.dataset.ids !== i) {
 				S.dataset.ids = i, S.replaceChildren();
 				for (let e of r) {
@@ -1758,9 +1758,9 @@ function R({ host: t, getHass: n, entityId: i, onError: c = () => {}, openHaView
 				}
 			}
 			S.hidden = !r.length;
-			for (let e of S.children) {
-				let n = t.states?.[e.dataset.id], r = A(n, { prefix: k() }), i = e.querySelector("ha-state-icon");
-				i.hass = t, i.dataset.defaultIcon = ce(n, r), n && (i.stateObj = n), e.querySelector("span").textContent = r.name, e.title = `${r.name}: on`;
+			for (let t of S.children) {
+				let n = e.states?.[t.dataset.id], r = A(n, { prefix: k() }), i = t.querySelector("ha-state-icon");
+				i.hass = e, i.dataset.defaultIcon = ce(n, r), n && (i.stateObj = n), t.querySelector("span").textContent = r.name, t.title = `${r.name}: on`;
 			}
 		}
 		function ae() {

@@ -191,8 +191,14 @@ export function createVacuumVisual(
     inRoom = null,
     leaveAt = Infinity,
     planner = null,
-    route = [];
+    route = [],
+    // Cleaning a room this view does not show (from a current-room sensor):
+    // the robot is hidden until it is back or heads home.
+    away = false;
   const trail = [];
+  const showRobot = () => {
+    robot.visible = !away || status === "returning" || status === "docked";
+  };
   const place = () => {
     robot.position.copy(pos);
     robot.rotation.y = heading;
@@ -466,12 +472,21 @@ export function createVacuumVisual(
           (status === "cleaning" && mode !== "parked"))
       );
     },
+    /** The robot is cleaning a room outside this view: hide it (or show it again). */
+    setAway(value) {
+      away = !!value;
+      showRobot();
+    },
+    get away() {
+      return away;
+    },
     setState(s = {}) {
       const next = s.unavailable ? "unavailable" : s.state || "unavailable";
       materials.led.emissive.set(LED[next] || "#000000");
       materials.led.emissiveIntensity = LED[next] ? 1.4 : 0;
       const before = status;
       status = next;
+      showRobot();
       if (reducedMotion) {
         posed();
         place();

@@ -112,3 +112,63 @@ export function vacuumActivity(
       states?.[id]?.state === "on",
   );
 }
+
+const sameName = (a, b) =>
+  typeof a === "string" &&
+  typeof b === "string" &&
+  a.trim().toLocaleLowerCase() === b.trim().toLocaleLowerCase();
+/** A current-room sensor's room name; null while it reports no room. */
+export function currentRoomName(entity) {
+  const state = entity?.state;
+  return typeof state === "string" &&
+    state.trim() &&
+    !["unknown", "unavailable", "none"].includes(state)
+    ? state
+    : null;
+}
+/**
+ * The Home Assistant area of the room a robot reports it is in (by name).
+ * `registry` is what Home Assistant knows about the vacuum: `segments`, its
+ * rooms (`{ id, name }`, from the entity's `last_seen_segments`), `mapping`,
+ * the areas its rooms are cleaned as (`{ areaId: [segment ids] }`), and
+ * `areas`, all areas (`{ area_id, name, aliases }`). The vacuum's own
+ * mapping wins; otherwise an area with the room's name or alias.
+ */
+export function currentRoomArea(name, registry = {}) {
+  if (!name) return null;
+  const { segments = [], mapping = {}, areas = [] } = registry;
+  const ids = segments.filter((s) => sameName(s?.name, name)).map((s) => s.id);
+  if (ids.length)
+    for (const [area, list] of Object.entries(mapping || {}))
+      if ([list].flat().some((id) => ids.includes(id))) return area;
+  const area = areas.find(
+    (a) =>
+      sameName(a?.name, name) ||
+      (a?.aliases || []).some((x) => sameName(x, name)),
+  );
+  return area?.area_id ?? null;
+}
+/**
+ * Where the robot is, for a room or house view: `{ room }` with the 3D room
+ * it is in, `{ away: true }` when that room is known but not in this view,
+ * or null when the name matches nothing (the robot then roams as before).
+ * A 3D room whose title is the room's name counts when no area matches.
+ */
+export function vacuumRoomFor(model, name, registry = {}) {
+  if (!model || !name) return null;
+  const area = currentRoomArea(name, registry);
+  if (area) {
+    const [room] = vacuumRooms(model, [area]);
+    if (room) return { room };
+  }
+  const titled = model.members?.length
+    ? model.members.map((m) => [
+        m.model,
+        model.roomTitles?.[m.model] ||
+          model.controls?.find((c) => c.sourceModel === m.model)?.roomTitle,
+      ])
+    : [[model.id, model.title]];
+  const match = titled.find(([room, title]) => room && sameName(title, name));
+  if (match) return { room: match[0] };
+  return area ? { away: true } : null;
+}
